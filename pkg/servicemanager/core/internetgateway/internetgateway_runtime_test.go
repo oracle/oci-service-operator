@@ -341,6 +341,53 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 	assert.Equal(t, "", resource.Status.RouteTableId)
 }
 
+func TestCreateOrUpdate_UpdateFailureAfterLiveGetKeepsClearedOptionalStatusFields(t *testing.T) {
+	getCalls := 0
+	manager := newInternetGatewayTestManager(&fakeInternetGatewayOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetInternetGatewayRequest) (coresdk.GetInternetGatewayResponse, error) {
+			getCalls++
+			current := makeSDKInternetGateway("ocid1.internetgateway.oc1..existing", "test-internet-gateway", coresdk.InternetGatewayLifecycleStateAvailable)
+			current.DisplayName = nil
+			current.DefinedTags = nil
+			current.FreeformTags = nil
+			current.IsEnabled = nil
+			current.TimeCreated = nil
+			current.RouteTableId = nil
+			return coresdk.GetInternetGatewayResponse{InternetGateway: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateInternetGatewayRequest) (coresdk.UpdateInternetGatewayResponse, error) {
+			return coresdk.UpdateInternetGatewayResponse{}, fakeInternetGatewayServiceError{
+				statusCode: 409,
+				code:       errorutil.IncorrectState,
+				message:    "update failed",
+			}
+		},
+	})
+
+	resource := makeSpecInternetGateway()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.internetgateway.oc1..existing")
+	resource.Spec.DisplayName = "new-name"
+	resource.Status.DisplayName = "stale-name"
+	resource.Status.DefinedTags = map[string]shared.MapValue{"Operations": {"CostCenter": "42"}}
+	resource.Status.FreeformTags = map[string]string{"env": "stale"}
+	resource.Status.IsEnabled = true
+	resource.Status.TimeCreated = "2026-04-01T00:00:00Z"
+	resource.Status.RouteTableId = "ocid1.routetable.oc1..stale"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, "", resource.Status.DisplayName)
+	assert.Nil(t, resource.Status.DefinedTags)
+	assert.Nil(t, resource.Status.FreeformTags)
+	assert.False(t, resource.Status.IsEnabled)
+	assert.Equal(t, "", resource.Status.TimeCreated)
+	assert.Equal(t, "", resource.Status.RouteTableId)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+}
+
 func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	var captured coresdk.UpdateInternetGatewayRequest
 	manager := newInternetGatewayTestManager(&fakeInternetGatewayOCIClient{

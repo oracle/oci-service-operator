@@ -415,6 +415,47 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 	assert.Equal(t, "", resource.Status.TimeCreated)
 }
 
+func TestCreateOrUpdate_UpdateFailureAfterLiveGetKeepsClearedOptionalStatusFields(t *testing.T) {
+	getCalls := 0
+	manager := newNetworkSecurityGroupTestManager(&fakeNetworkSecurityGroupOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error) {
+			getCalls++
+			current := makeSDKNetworkSecurityGroup("ocid1.networksecuritygroup.oc1..existing", "test-network-security-group", coresdk.NetworkSecurityGroupLifecycleStateAvailable)
+			current.DisplayName = nil
+			current.DefinedTags = nil
+			current.FreeformTags = nil
+			current.TimeCreated = nil
+			return coresdk.GetNetworkSecurityGroupResponse{NetworkSecurityGroup: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateNetworkSecurityGroupRequest) (coresdk.UpdateNetworkSecurityGroupResponse, error) {
+			return coresdk.UpdateNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
+				statusCode: 409,
+				code:       errorutil.IncorrectState,
+				message:    "update failed",
+			}
+		},
+	})
+
+	resource := makeSpecNetworkSecurityGroup()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.networksecuritygroup.oc1..existing")
+	resource.Spec.DisplayName = "new-name"
+	resource.Status.DisplayName = "stale-name"
+	resource.Status.DefinedTags = map[string]shared.MapValue{"Operations": {"CostCenter": "42"}}
+	resource.Status.FreeformTags = map[string]string{"env": "stale"}
+	resource.Status.TimeCreated = "2026-04-01T00:00:00Z"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, "", resource.Status.DisplayName)
+	assert.Nil(t, resource.Status.DefinedTags)
+	assert.Nil(t, resource.Status.FreeformTags)
+	assert.Equal(t, "", resource.Status.TimeCreated)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+}
+
 func TestCreateOrUpdate_RetryableStates(t *testing.T) {
 	tests := []struct {
 		name   string

@@ -92,13 +92,14 @@ func (c *internetGatewayGeneratedParityClient) CreateOrUpdate(ctx context.Contex
 
 	previousStatus := resource.Status
 	c.clearProjectedStatus(resource)
+	clearedStatus := resource.Status
 
 	delegateCtx := ctx
 	if explicitRecreate {
 		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
 	}
 	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
-	if err != nil {
+	if err != nil && !internetGatewayProjectedStatusChanged(resource.Status, clearedStatus) {
 		c.restoreStatus(resource, previousStatus)
 	}
 	return response, err
@@ -159,14 +160,15 @@ func (c *internetGatewayGeneratedParityClient) get(ctx context.Context, ocid str
 }
 
 func (c *internetGatewayGeneratedParityClient) update(ctx context.Context, resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) (servicemanager.OSOKResponse, error) {
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
+
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
 	if err != nil {
 		return c.fail(resource, err)
 	}
 	if !updateNeeded {
-		if err := c.projectStatus(resource, current); err != nil {
-			return c.fail(resource, err)
-		}
 		return c.applyLifecycle(resource, current)
 	}
 
@@ -392,6 +394,12 @@ func currentInternetGatewayID(resource *corev1beta1.InternetGateway) string {
 		return ocid
 	}
 	return strings.TrimSpace(resource.Status.Id)
+}
+
+func internetGatewayProjectedStatusChanged(current, baseline corev1beta1.InternetGatewayStatus) bool {
+	current.OsokStatus = shared.OSOKStatus{}
+	baseline.OsokStatus = shared.OSOKStatus{}
+	return !reflect.DeepEqual(current, baseline)
 }
 
 func internetGatewayLifecycleIsRetryable(state coresdk.InternetGatewayLifecycleStateEnum) bool {
