@@ -137,7 +137,7 @@
   },
   "notes": [
     "Pinned OCI SDK contract: UpdateSubnetDetails exposes cidr_block, defined_tags, dhcp_options_id, display_name, freeform_tags, ipv6_cidr_block, ipv6_cidr_blocks, route_table_id, and security_list_ids as in-place updates.",
-    "Pinned OCI SDK contract: CreateSubnetDetails documents that prohibitPublicIpOnVnic is derived from prohibitInternetIngress on create, so the handwritten runtime accepts an OCI-projected prohibitPublicIpOnVnic=true when spec.prohibitInternetIngress is true and spec.prohibitPublicIpOnVnic was omitted.",
+    "Pinned OCI SDK contract: CreateSubnetDetails says only one of prohibitInternetIngress and prohibitPublicIpOnVnic should be specified on create and that prohibitPublicIpOnVnic is set from prohibitInternetIngress for IPv4 behavior, while the observed Subnet shape describes prohibitInternetIngress as behaving similarly to prohibitPublicIpOnVnic for IPv4.",
     "Repo-authored delete confirmation requires GetSubnet to return not found; observed TERMINATED remains an accepted intermediate state."
   ]
 }
