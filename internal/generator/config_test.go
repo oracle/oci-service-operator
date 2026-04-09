@@ -1211,8 +1211,22 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	services := serviceConfigsByName(t, cfg, "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
-	assertFormalSpecFor(t, services["core"], "Instance", "instance")
-	assertFormalSpecFor(t, services["core"], "Vcn", "vcn")
+	for _, formal := range []struct {
+		kind string
+		slug string
+	}{
+		{kind: "Instance", slug: "instance"},
+		{kind: "InternetGateway", slug: "internetgateway"},
+		{kind: "NatGateway", slug: "natgateway"},
+		{kind: "NetworkSecurityGroup", slug: "networksecuritygroup"},
+		{kind: "RouteTable", slug: "routetable"},
+		{kind: "SecurityList", slug: "securitylist"},
+		{kind: "ServiceGateway", slug: "servicegateway"},
+		{kind: "Subnet", slug: "subnet"},
+		{kind: "Vcn", slug: "vcn"},
+	} {
+		assertFormalSpecFor(t, services["core"], formal.kind, formal.slug)
+	}
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
@@ -1593,9 +1607,23 @@ func assertCoreRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 2)
+	assertResourceOverrideCount(t, service, 9)
 	assertPrimaryPortOverride(t, service, "Instance", "instance", "core/instance")
-	assertFormalSpecFor(t, service, "Vcn", "vcn")
+	for _, formal := range []struct {
+		kind string
+		slug string
+	}{
+		{kind: "InternetGateway", slug: "internetgateway"},
+		{kind: "NatGateway", slug: "natgateway"},
+		{kind: "NetworkSecurityGroup", slug: "networksecuritygroup"},
+		{kind: "RouteTable", slug: "routetable"},
+		{kind: "SecurityList", slug: "securitylist"},
+		{kind: "ServiceGateway", slug: "servicegateway"},
+		{kind: "Subnet", slug: "subnet"},
+		{kind: "Vcn", slug: "vcn"},
+	} {
+		assertFormalSpecFor(t, service, formal.kind, formal.slug)
+	}
 	assertPackageSplitContainsKind(t, service, "core-network", "Drg")
 }
 
