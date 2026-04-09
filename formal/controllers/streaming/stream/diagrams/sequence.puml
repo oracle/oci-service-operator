@@ -1,0 +1,145 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - streaming/Stream
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+participant "Kubernetes Secret" as SecretStore
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Stream reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Stream
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetStream
+else tracked identity is missing
+ServiceManager -> OCI: ListStreams(filters: compartment_id,\nid, name, state (+1 more))
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateStream
+loop create pending CREATING
+ServiceManager -> OCI: GetStream
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetStream
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteStream
+ServiceManager -> OCI: confirm delete via GetStream or\nListStreams
+loop delete pending DELETING
+ServiceManager -> OCI: GetStream or ListStreams
+end
+ServiceManager -> SecretStore: delete owned Secret after OCI delete\nconfirmation
+ServiceManager --> BaseReconciler: best-effort delete completion observed
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: defined_tags,
+freeform_tags, stream_pool_id
+Reject before mutate: force-new fields
+name, partitions, retention_in_hours
+Lookup filters: compartment_id, id,
+name, state (+1 more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateStream only for mutable\nfields defined_tags, freeform_tags,\nstream_pool_id
+loop update pending UPDATING
+ServiceManager -> OCI: GetStream
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource
+ServiceManager -> SecretStore: write ready-only connection secret
+alt Secret sync fails
+ServiceManager --> BaseReconciler: block success and retry
+end
+end
+ServiceManager --> BaseReconciler: status=required, finalizer=none
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: streaming
+slug: stream
+kind: Stream
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: defined_tags, freeform_tags,
+stream_pool_id
+reject before mutate: force-new fields name,
+partitions, retention_in_hours
+create-only fields: none
+list lookup: oci_streaming_streams filters
+compartment_id, id, name, state (+1 more)
+conflicts: none
+open gaps: none
+The generated runtime reuses existing streams
+before create by listing on name plus the
+optional pool and compartment filters, while
+delete-phase lookup can still resolve
+terminating or failed matches when no OCI
+identifier is recorded.
+A narrow package-local companion writes or
+updates the ready-only endpoint secret after
+ACTIVE when the same-name Secret already carries
+the current Stream UID ownership label, or when
+a legacy unlabeled Secret already matches the
+desired ready-only payload so reconcile can
+stamp the current UID label before future
+updates. Guarded update or delete revalidates
+the full Secret snapshot before mutating, and
+best-effort delete cleanup skips missing or
+unowned Secrets.
+Delete remains best-effort; DELETING or DELETED
+is sufficient for finalizer removal.
+end note
+@enduml

@@ -1,0 +1,819 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: containerinstances.containerinstances.oracle.com
+spec:
+  group: containerinstances.oracle.com
+  names:
+    kind: ContainerInstance
+    listKind: ContainerInstanceList
+    plural: containerinstances
+    singular: containerinstance
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ContainerInstance
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ContainerInstance
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ContainerInstance is the Schema for the containerinstances API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ContainerInstanceSpec defines the desired state of ContainerInstance.
+            properties:
+              availabilityDomain:
+                description: The availability domain where the container instance
+                  runs.
+                type: string
+              compartmentId:
+                description: The compartment OCID.
+                type: string
+              containerRestartPolicy:
+                description: Container restart policy
+                type: string
+              containers:
+                description: The containers to create on this container instance.
+                items:
+                  description: ContainerInstanceContainer defines nested fields for
+                    ContainerInstance.Container.
+                  properties:
+                    arguments:
+                      description: |-
+                        A list of string arguments for a container's ENTRYPOINT process.
+                        Many containers use an ENTRYPOINT process pointing to a shell
+                        (/bin/bash). For those containers, this argument list
+                        specifies the main command in the container process.
+                        The total size of all arguments combined must be 64 KB or smaller.
+                      items:
+                        type: string
+                      type: array
+                    command:
+                      description: |-
+                        An optional command that overrides the ENTRYPOINT process.
+                        If you do not provide a value, the existing ENTRYPOINT process defined in the image is used.
+                      items:
+                        type: string
+                      type: array
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                        Example: `{"foo-namespace": {"bar-key": "value"}}`.
+                      type: object
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+                        If you don't provide a name, a name is generated automatically.
+                      type: string
+                    environmentVariables:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        A map of additional environment variables to set in the environment of the container's
+                        ENTRYPOINT process. These variables are in addition to any variables already defined
+                        in the container's image.
+                        The total size of all environment variables combined, name and values, must be 64 KB or smaller.
+                      type: object
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                        Example: `{"bar-key": "value"}`
+                      type: object
+                    healthChecks:
+                      description: |-
+                        list of container health checks to check container status and take appropriate action if container status is failed.
+                        There are three types of health checks that we currently support HTTP, TCP, and Command.
+                      items:
+                        description: ContainerInstanceContainerHealthCheck defines
+                          nested fields for ContainerInstance.Container.HealthCheck.
+                        properties:
+                          command:
+                            description: The list of strings that will be simplified
+                              to a single command for checking the status of the container.
+                            items:
+                              type: string
+                            type: array
+                          failureAction:
+                            description: |-
+                              The action will be triggered when the container health check fails. There are two types of action: KILL or NONE. The default
+                              action is KILL. If failure action is KILL, the container will be subject to the container restart policy.
+                            type: string
+                          failureThreshold:
+                            description: Number of consecutive failures at which we
+                              consider the check failed.
+                            type: integer
+                          headers:
+                            description: Container health check HTTP headers.
+                            items:
+                              description: ContainerInstanceContainerHealthCheckHeader
+                                defines nested fields for ContainerInstance.Container.HealthCheck.Header.
+                              properties:
+                                name:
+                                  description: Container HTTP header Key.
+                                  type: string
+                                value:
+                                  description: Container HTTP header value.
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                          healthCheckType:
+                            type: string
+                          initialDelayInSeconds:
+                            description: The initial delay in seconds before start
+                              checking container health status.
+                            type: integer
+                          intervalInSeconds:
+                            description: Number of seconds between two consecutive
+                              runs for checking container health.
+                            type: integer
+                          jsonData:
+                            type: string
+                          name:
+                            description: Health check name.
+                            type: string
+                          path:
+                            description: Container health check HTTP path.
+                            type: string
+                          port:
+                            description: Container health check port.
+                            type: integer
+                          successThreshold:
+                            description: Number of consecutive successes at which
+                              we consider the check succeeded again after it was in
+                              failure state.
+                            type: integer
+                          timeoutInSeconds:
+                            description: Length of waiting time in seconds before
+                              marking health check failed.
+                            type: integer
+                        type: object
+                      type: array
+                    imageUrl:
+                      description: |-
+                        A URL identifying the image that the container runs in, such as docker.io/library/busybox:latest. If you do not provide a tag, the tag will default to latest.
+                        If no registry is provided, will default the registry to public docker hub `docker.io/library`.
+                        The registry used for container image must be reachable over the Container Instance's VNIC.
+                      type: string
+                    isResourcePrincipalDisabled:
+                      description: |-
+                        Determines if the container will have access to the container instance resource principal.
+                        This method utilizes resource principal version 2.2. For information on how to use the exposed resource principal elements, see
+                        https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm#sdk_authentication_methods_resource_principal.
+                      type: boolean
+                    resourceConfig:
+                      description: ContainerInstanceContainerResourceConfig defines
+                        nested fields for ContainerInstance.Container.ResourceConfig.
+                      properties:
+                        memoryLimitInGBs:
+                          description: |-
+                            The maximum amount of memory that can be consumed by the container's
+                            process.
+                            If you do not set a value, then the process
+                            may use all available memory on the instance.
+                          type: number
+                        vcpusLimit:
+                          description: |-
+                            The maximum amount of CPUs that can be consumed by the container's process.
+                            If you do not set a value, then the process
+                            can use all available CPU resources on the instance.
+                            CPU usage is defined in terms of logical CPUs. This means that the maximum possible value on
+                            an E3 ContainerInstance with 1 OCPU is 2.0.
+                            A container with a 2.0 vcpusLimit could consume up to 100% of the CPU resources available on the container instance.
+                            Values can be fractional. A value of "1.5" means that the container
+                            can consume at most the equivalent of 1 and a half logical CPUs worth of CPU capacity.
+                          type: number
+                      type: object
+                    securityContext:
+                      description: ContainerInstanceContainerSecurityContext defines
+                        nested fields for ContainerInstance.Container.SecurityContext.
+                      properties:
+                        capabilities:
+                          description: ContainerInstanceContainerSecurityContextCapabilities
+                            defines nested fields for ContainerInstance.Container.SecurityContext.Capabilities.
+                          properties:
+                            addCapabilities:
+                              description: A list of additional configurable container
+                                capabilities.
+                              items:
+                                type: string
+                              type: array
+                            dropCapabilities:
+                              description: A list of container capabilities that can
+                                be dropped.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        isNonRootUserCheckEnabled:
+                          description: Indicates if the container must run as a non-root
+                            user. If true, the service validates the container image
+                            at runtime to ensure that it is not going to run with
+                            UID 0 (root) and fails the container instance creation
+                            if the validation fails.
+                          type: boolean
+                        isRootFileSystemReadonly:
+                          description: Determines if the container will have a read-only
+                            root file system. Default value is false.
+                          type: boolean
+                        jsonData:
+                          type: string
+                        runAsGroup:
+                          description: The group ID (GID) to run the entrypoint process
+                            of the container. Uses runtime default if not provided.
+                          type: integer
+                        runAsUser:
+                          description: The user ID (UID) to run the entrypoint process
+                            of the container. Defaults to user specified UID in container
+                            image metadata if not provided. This must be provided
+                            if runAsGroup is provided.
+                          type: integer
+                        securityContextType:
+                          type: string
+                      type: object
+                    volumeMounts:
+                      description: List of the volume mounts.
+                      items:
+                        description: ContainerInstanceContainerVolumeMount defines
+                          nested fields for ContainerInstance.Container.VolumeMount.
+                        properties:
+                          isReadOnly:
+                            description: Whether the volume was mounted in read-only
+                              mode. By default, the volume is not read-only.
+                            type: boolean
+                          mountPath:
+                            description: The volume access path.
+                            type: string
+                          partition:
+                            description: |-
+                              If there is more than one partition in the volume, reference this number of partitions.
+                              Here is an example:
+                              Number  Start   End     Size    File system  Name                  Flags
+                              1      1049kB  106MB   105MB   fat16        EFI System Partition  boot, esp
+                              2      106MB   1180MB  1074MB  xfs
+                              3      1180MB  50.0GB  48.8GB                                     lvm
+                            type: integer
+                          subPath:
+                            description: A subpath inside the referenced volume.
+                            type: string
+                          volumeName:
+                            description: The name of the volume. Avoid entering confidential
+                              information.
+                            type: string
+                        required:
+                        - mountPath
+                        - volumeName
+                        type: object
+                      type: array
+                    workingDirectory:
+                      description: |-
+                        The working directory within the container's filesystem for
+                        the container process. If not specified, the default
+                        working directory from the image is used.
+                      type: string
+                  required:
+                  - imageUrl
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`.
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information. If you
+                  don't provide a name, a name is generated automatically.
+                type: string
+              dnsConfig:
+                description: ContainerInstanceDnsConfig defines nested fields for
+                  ContainerInstance.DnsConfig.
+                properties:
+                  nameservers:
+                    description: |-
+                      IP address of a name server that the resolver should query, either an IPv4 address
+                      (in dot notation), or an IPv6 address in colon (and possibly dot) notation. If null, uses
+                      nameservers from subnet dhcpDnsOptions.
+                    items:
+                      type: string
+                    type: array
+                  options:
+                    description: |-
+                      Options allows certain internal resolver variables to be modified. Options are a list of objects in
+                      https://man7.org/linux/man-pages/man5/resolv.conf.5.html. Examples: ["ndots:n", "edns0"].
+                    items:
+                      type: string
+                    type: array
+                  searches:
+                    description: Search list for host-name lookup. If null, we will
+                      use searches from subnet dhcpDnsOptios.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              faultDomain:
+                description: The fault domain where the container instance runs.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              gracefulShutdownTimeoutInSeconds:
+                description: The amount of time that processes in a container have
+                  to gracefully end when the container must be stopped. For example,
+                  when you delete a container instance. After the timeout is reached,
+                  the processes are sent a signal to be deleted.
+                format: int64
+                type: integer
+              imagePullSecrets:
+                description: The image pulls secrets so you can access private registry
+                  to pull container images.
+                items:
+                  description: ContainerInstanceImagePullSecret defines nested fields
+                    for ContainerInstance.ImagePullSecret.
+                  properties:
+                    jsonData:
+                      type: string
+                    password:
+                      description: The password which should be used with the registry
+                        for authentication. The value is expected in base64 format.
+                      type: string
+                    registryEndpoint:
+                      description: The registry endpoint of the container image.
+                      type: string
+                    secretId:
+                      description: The OCID of the secret for registry credentials.
+                      type: string
+                    secretType:
+                      type: string
+                    username:
+                      description: The username which should be used with the registry
+                        for authentication. The value is expected in base64 format.
+                      type: string
+                  required:
+                  - registryEndpoint
+                  type: object
+                type: array
+              shape:
+                description: The shape of the container instance. The shape determines
+                  the resources available to the container instance.
+                type: string
+              shapeConfig:
+                description: ContainerInstanceShapeConfig defines nested fields for
+                  ContainerInstance.ShapeConfig.
+                properties:
+                  memoryInGBs:
+                    description: The total amount of memory available to the container
+                      instance (GB).
+                    type: number
+                  ocpus:
+                    description: The total number of OCPUs available to the container
+                      instance.
+                    type: number
+                required:
+                - ocpus
+                type: object
+              vnics:
+                description: The networks available to containers on this container
+                  instance.
+                items:
+                  description: ContainerInstanceVnic defines nested fields for ContainerInstance.Vnic.
+                  properties:
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                        Example: `{"foo-namespace": {"bar-key": "value"}}`.
+                      type: object
+                    displayName:
+                      description: |-
+                        A user-friendly name for the VNIC. Does not have to be unique.
+                        Avoid entering confidential information.
+                      type: string
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                        Example: `{"bar-key": "value"}`
+                      type: object
+                    hostnameLabel:
+                      description: The hostname for the VNIC's primary private IP.
+                        Used for DNS.
+                      type: string
+                    isPublicIpAssigned:
+                      description: Whether the VNIC should be assigned a public IP
+                        address.
+                      type: boolean
+                    nsgIds:
+                      description: A list of the OCIDs of the network security groups
+                        (NSGs) to add the VNIC to.
+                      items:
+                        type: string
+                      type: array
+                    privateIp:
+                      description: |-
+                        A private IP address of your choice to assign to the VNIC. Must be an
+                        available IP address within the subnet's CIDR.
+                      type: string
+                    skipSourceDestCheck:
+                      description: Whether the source/destination check is disabled
+                        on the VNIC.
+                      type: boolean
+                    subnetId:
+                      description: The OCID of the subnet to create the VNIC in.
+                      type: string
+                  required:
+                  - subnetId
+                  type: object
+                type: array
+              volumes:
+                description: |-
+                  A volume is a directory with data that is accessible across multiple containers in a
+                  container instance.
+                  You can attach up to 32 volumes to single container instance.
+                items:
+                  description: ContainerInstanceVolume defines nested fields for ContainerInstance.Volume.
+                  properties:
+                    backingStore:
+                      description: The volume type of the empty directory, can be
+                        either File Storage or Memory.
+                      type: string
+                    configs:
+                      description: Contains key value pairs which can be mounted as
+                        individual files inside the container. The value needs to
+                        be base64 encoded. It is decoded to plain text before the
+                        mount.
+                      items:
+                        description: ContainerInstanceVolumeConfig defines nested
+                          fields for ContainerInstance.Volume.Config.
+                        properties:
+                          data:
+                            description: The base64 encoded contents of the file.
+                              The contents are decoded to plain text before mounted
+                              as a file to a container inside container instance.
+                            type: string
+                          fileName:
+                            description: The name of the file. The fileName should
+                              be unique across the volume.
+                            type: string
+                          path:
+                            description: (Optional) Relative path for this file inside
+                              the volume mount directory. By default, the file is
+                              presented at the root of the volume mount path.
+                            type: string
+                        required:
+                        - data
+                        - fileName
+                        type: object
+                      type: array
+                    jsonData:
+                      type: string
+                    name:
+                      description: The name of the volume. This must be unique within
+                        a single container instance.
+                      type: string
+                    volumeType:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+            required:
+            - availabilityDomain
+            - compartmentId
+            - containers
+            - shape
+            - shapeConfig
+            - vnics
+            type: object
+          status:
+            description: ContainerInstanceStatus defines the observed state of ContainerInstance.
+            properties:
+              availabilityDomain:
+                description: The availability domain to place the container instance.
+                type: string
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              containerCount:
+                description: The number of containers on the container instance.
+                type: integer
+              containerRestartPolicy:
+                description: The container restart policy is applied for all containers
+                  in container instance.
+                type: string
+              containers:
+                description: The containers on the container instance.
+                items:
+                  description: ContainerInstanceContainerObservedState defines nested
+                    fields for ContainerInstance.Container.
+                  properties:
+                    containerId:
+                      description: The OCID of the container.
+                      type: string
+                    displayName:
+                      description: Display name for the Container.
+                      type: string
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`.
+                type: object
+              displayName:
+                description: A user-friendly name. Does not have to be unique, and
+                  it's changeable. Avoid entering confidential information.
+                type: string
+              dnsConfig:
+                description: ContainerInstanceDnsConfig defines nested fields for
+                  ContainerInstance.DnsConfig.
+                properties:
+                  nameservers:
+                    description: |-
+                      IP address of a name server that the resolver should query, either an IPv4 address
+                      (in dot notation), or an IPv6 address in colon (and possibly dot) notation. If null, uses
+                      nameservers from subnet dhcpDnsOptions.
+                    items:
+                      type: string
+                    type: array
+                  options:
+                    description: |-
+                      Options allows certain internal resolver variables to be modified. Options are a list of objects in
+                      https://man7.org/linux/man-pages/man5/resolv.conf.5.html. Examples: ["ndots:n", "edns0"].
+                    items:
+                      type: string
+                    type: array
+                  searches:
+                    description: Search list for host-name lookup. If null, we will
+                      use searches from subnet dhcpDnsOptios.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              faultDomain:
+                description: The fault domain to place the container instance.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              gracefulShutdownTimeoutInSeconds:
+                description: The amount of time that processes in a container have
+                  to gracefully end when the container must be stopped. For example,
+                  when you delete a container instance. After the timeout is reached,
+                  the processes are sent a signal to be deleted.
+                format: int64
+                type: integer
+              id:
+                description: An OCID that cannot be changed.
+                type: string
+              imagePullSecrets:
+                description: The image pulls secrets so you can access private registry
+                  to pull container images.
+                items:
+                  description: ContainerInstanceImagePullSecretObservedState defines
+                    nested fields for ContainerInstance.ImagePullSecret.
+                  properties:
+                    jsonData:
+                      type: string
+                    registryEndpoint:
+                      description: The registry endpoint of the container image.
+                      type: string
+                    secretId:
+                      description: The OCID of the secret for registry credentials.
+                      type: string
+                    secretType:
+                      type: string
+                  type: object
+                type: array
+              lifecycleDetails:
+                description: |-
+                  A message that describes the current state of the container in more detail. Can be used to provide
+                  actionable information.
+                type: string
+              lifecycleState:
+                description: The current state of the container instance.
+                type: string
+              shape:
+                description: The shape of the container instance. The shape determines
+                  the number of OCPUs, amount of memory, and other resources that
+                  are allocated to a container instance.
+                type: string
+              shapeConfig:
+                description: ContainerInstanceShapeConfigObservedState defines nested
+                  fields for ContainerInstance.ShapeConfig.
+                properties:
+                  memoryInGBs:
+                    description: The total amount of memory available to the container
+                      instance, in gigabytes.
+                    type: number
+                  networkingBandwidthInGbps:
+                    description: The networking bandwidth available to the container
+                      instance, in gigabits per second.
+                    type: number
+                  ocpus:
+                    description: The total number of OCPUs available to the container
+                      instance.
+                    type: number
+                  processorDescription:
+                    description: A short description of the container instance's processor
+                      (CPU).
+                    type: string
+                type: object
+              status:
+                properties:
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`.
+                type: object
+              timeCreated:
+                description: The time the container instance was created, in the format
+                  defined by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              timeUpdated:
+                description: The time the container instance was updated, in the format
+                  defined by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              vnics:
+                description: The virtual networks available to the containers in the
+                  container instance.
+                items:
+                  description: ContainerInstanceVnicObservedState defines nested fields
+                    for ContainerInstance.Vnic.
+                  properties:
+                    vnicId:
+                      description: |-
+                        The identifier of the virtual network interface card (VNIC) over which
+                        the containers accessing this network can communicate with the
+                        larger virtual cloud network.
+                      type: string
+                  type: object
+                type: array
+              volumeCount:
+                description: The number of volumes that are attached to the container
+                  instance.
+                type: integer
+              volumes:
+                description: |-
+                  A volume is a directory with data that is accessible across multiple containers in a
+                  container instance.
+                items:
+                  description: ContainerInstanceVolumeObservedState defines nested
+                    fields for ContainerInstance.Volume.
+                  properties:
+                    backingStore:
+                      description: The volume type of the empty directory, can be
+                        either File Storage or Memory.
+                      type: string
+                    configs:
+                      description: Contains string key value pairs which can be mounted
+                        as individual files inside the container. The value needs
+                        to be base64 encoded. It is decoded to plain text before the
+                        mount.
+                      items:
+                        description: ContainerInstanceVolumeConfig defines nested
+                          fields for ContainerInstance.Volume.Config.
+                        properties:
+                          data:
+                            description: The base64 encoded contents of the file.
+                              The contents are decoded to plain text before mounted
+                              as a file to a container inside container instance.
+                            type: string
+                          fileName:
+                            description: The name of the file. The fileName should
+                              be unique across the volume.
+                            type: string
+                          path:
+                            description: (Optional) Relative path for this file inside
+                              the volume mount directory. By default, the file is
+                              presented at the root of the volume mount path.
+                            type: string
+                        required:
+                        - data
+                        - fileName
+                        type: object
+                      type: array
+                    jsonData:
+                      type: string
+                    name:
+                      description: The name of the volume. This must be unique within
+                        a single container instance.
+                      type: string
+                    volumeType:
+                      type: string
+                  type: object
+                type: array
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

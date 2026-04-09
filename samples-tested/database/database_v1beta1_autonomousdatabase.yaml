@@ -1,0 +1,24 @@
+apiVersion: database.oracle.com/v1beta1
+kind: AutonomousDatabase
+metadata:
+  name: autonomousdatabase-sample
+spec:
+  # Replace with a real compartment OCID before running against OCI.
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  # Use a unique display name for repeatable OCI e2e runs.
+  displayName: SampleADB20260403
+  # Must start with a letter, use only alphanumeric characters, and be unique in the tenancy.
+  dbName: sampleadb20260403
+  dbWorkload: OLTP
+  isDedicated: false
+  dbVersion: "19c"
+  dataStorageSizeInTBs: 1
+  # The validated serverless create path uses ECPU sizing rather than cpuCoreCount.
+  computeModel: ECPU
+  computeCount: 2
+  adminPassword:
+    secret:
+      secretName: admin-password
+  isAutoScalingEnabled: true
+  isFreeTier: false
+  licenseModel: LICENSE_INCLUDED

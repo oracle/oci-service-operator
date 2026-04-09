@@ -1,0 +1,119 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - psql/DbSystem
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateDbSystem
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, NEEDS_ATTENTION
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE,\nNEEDS_ATTENTION
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndbConfigurationParams.applyConfig,\ndbConfigurationParams.configId,\ndefinedTags (+5 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: psql
+slug: dbsystem
+kind: DbSystem
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift:
+dbConfigurationParams.applyConfig,
+dbConfigurationParams.configId, definedTags,
+description (+4 more)
+reject before mutate: force-new fields
+compartmentId, dbVersion, instanceCount,
+instanceMemorySizeInGBs (+7 more)
+create-only fields:
+adminPassword.secret.secretName,
+adminUsername.secret.secretName, configId,
+credentials (+2 more)
+list lookup: oci_psql_db_systems filters
+compartmentId, displayName; tracked OCI ID via
+GetDbSystem wins; otherwise exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION; duplicate matches fail
+conflicts: none
+open gaps: none
+Handwritten DbSystem bind first checks the
+tracked OCID with GetDbSystem, then searches
+ListDbSystems for an exact compartment plus
+displayName match, rereads a single candidate
+through GetDbSystem, and fails on ambiguous
+duplicates instead of guessing.
+Create resolves inline credentials or
+same-namespace admin secret refs, stamps only
+non-empty secret refs into status, and does not
+write follow-up Kubernetes secrets.
+Create and update do not poll work requests
+directly; provider-backed completion is modeled
+through GetDbSystem lifecycle projection with
+one-minute requeues while OCI reports CREATING,
+UPDATING, or DELETING.
+ACTIVE, INACTIVE, and NEEDS_ATTENTION settle as
+Active unless the reconcile is already in update
+or delete follow-up, and delete retains the
+finalizer until GetDbSystem or ListDbSystems
+confirms the DbSystem is deleted or not found.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetDbSystem or ListDbSystems
+delete targets: DELETED
+end note
+@enduml

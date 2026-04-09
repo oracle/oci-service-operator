@@ -1,0 +1,1187 @@
+# Source-of-truth service map for the OSOK generator contract.
+# Service selection metadata declares the default active generation surface.
+# - selection.enabled=false keeps a service inactive by default.
+# - selection.mode=all enables all discovered kinds for that service.
+# - selection.mode=explicit limits the primary default activity to selection.includeKinds.
+# - packageSplits.includeKinds stay active for split outputs even when the primary
+#   service selection is explicit.
+# Services without a `generation` block default to:
+# - controller/serviceManager/registration: none
+# - webhooks: manual
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+
+packageProfiles:
+  controller-backed:
+    description: Groups that participate in the shared manager install, whether runtime pieces are manual or generated.
+  crd-only:
+    description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
+
+services:
+  - service: artifacts
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
+    group: artifacts
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: certificates
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates
+    group: certificates
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    observedState:
+      excludedFieldPaths:
+        CertificateBundle:
+          - JsonData
+          - PrivateKeyPem
+          - PrivateKeyPemPassphrase
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: certificatesmanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/certificatesmanagement
+    group: certificatesmanagement
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: containerengine
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
+    group: containerengine
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: containerinstances
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerinstances
+    group: containerinstances
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ContainerInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: manual
+      registration:
+        strategy: manual
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ContainerInstance
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of binding to an existing ContainerInstance with the same display name in
+              # the same compartment and availability domain.
+              #
+              apiVersion: containerinstances.oracle.com/v1beta1
+              kind: ContainerInstance
+              metadata:
+                name: containerinstance-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                availabilityDomain: "AD-1"
+                shape: "CI.Standard.E4.Flex"
+                shapeConfig:
+                  ocpus: 1
+                  memoryInGBs: 4
+                containers:
+                  - imageUrl: "busybox:latest"
+                    displayName: "hello"
+                    command:
+                      - "/bin/sh"
+                    arguments:
+                      - "-c"
+                      - "echo hello && sleep 3600"
+                vnics:
+                  - subnetId: ocid1.subnet.oc1..exampleuniqueID
+                    displayName: "primary-vnic"
+                displayName: "containerinstance-sample"
+                containerRestartPolicy: "NEVER"
+          serviceManager:
+            packagePath: containerinstance
+    observedState:
+      excludedFieldPaths:
+        ContainerInstance:
+          - ImagePullSecrets.Password
+
+  - service: core
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/core
+    group: core
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Instance
+    packageSplits:
+      - name: core-network
+        defaultControllerImage: iad.ocir.io/oracle/oci-service-operator-core-network:latest
+        includeKinds:
+          - Drg
+          - InternetGateway
+          - NatGateway
+          - NetworkSecurityGroup
+          - RouteTable
+          - SecurityList
+          - ServiceGateway
+          - Subnet
+          - Vcn
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Instance
+          formalSpec: instance
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing Instance with the same display name in the same
+              # compartment and availability domain.
+              # Adjust spec.shape and spec.shapeConfig if your tenancy or region does not have
+              # capacity for this starter shape.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: Instance
+              metadata:
+                name: instance-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                availabilityDomain: "AD-1"
+                subnetId: ocid1.subnet.oc1..exampleuniqueID
+                displayName: "instance-sample"
+                shape: "VM.Standard.E4.Flex"
+                shapeConfig:
+                  ocpus: 1
+                  memoryInGBs: 16
+                sourceDetails:
+                  sourceType: image
+                  imageId: ocid1.image.oc1..exampleuniqueID
+          serviceManager:
+            packagePath: core/instance
+    observedState:
+      sdkAliases:
+        AllDrgAttachment:
+          - DrgAttachmentInfo
+        AllowedPeerRegionsForRemotePeering:
+          - PeerRegionForRemotePeering
+        AppCatalogListingAgreement:
+          - AppCatalogListingResourceVersionAgreements
+        ClusterNetworkInstance:
+          - InstanceSummary
+        ComputeCapacityReservationInstance:
+          - CapacityReservationInstanceSummary
+        ComputeGlobalImageCapabilitySchema:
+          - ComputeGlobalImageCapabilitySchemaVersionSummary
+        CrossConnectLetterOfAuthority:
+          - LetterOfAuthority
+        CrossConnectMapping:
+          - CrossConnectMappingDetails
+        CrossconnectPortSpeedShape:
+          - CrossConnectPortSpeedShape
+        DhcpOption:
+          - DhcpOptions
+        FastConnectProviderVirtualCircuitBandwidthShape:
+          - VirtualCircuitBandwidthShape
+        IPSecConnectionTunnelError:
+          - IpSecConnectionTunnelErrorDetails
+        IPSecConnectionTunnelRoute:
+          - TunnelRouteSummary
+        IPSecConnectionTunnelSecurityAssociation:
+          - TunnelSecurityAssociationSummary
+        InstanceDevice:
+          - Device
+        NetworkSecurityGroupSecurityRule:
+          - SecurityRule
+        VirtualCircuitAssociatedTunnel:
+          - VirtualCircuitAssociatedTunnelDetails
+        VolumeBackupPolicyAssetAssignment:
+          - VolumeBackupPolicyAssignment
+        WindowsInstanceInitialCredential:
+          - InstanceCredentials
+      excludedFieldPaths:
+        CrossConnectMapping:
+          - BgpMd5AuthKey
+        IPSecConnectionDeviceConfig:
+          - Tunnels.SharedSecret
+        IPSecConnectionTunnelSharedSecret:
+          - SharedSecret
+        VirtualCircuit:
+          - CrossConnectMappings.BgpMd5AuthKey
+        VolumeAttachment:
+          - JsonData
+          - ChapSecret
+        WindowsInstanceInitialCredential:
+          - Password
+
+  - service: database
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/database
+    group: database
+    version: v1beta1
+    phase: data-and-storage
+    sampleOrder: 10
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutonomousDatabase
+    package:
+      extraResources:
+        - ../../../config/rbac/autonomousdatabases_editor_role.yaml
+        - ../../../config/rbac/autonomousdatabases_viewer_role.yaml
+    observedState:
+      excludedFieldPaths:
+        ExternalBackupJob:
+          - SwiftPassword
+        ExternalDatabaseConnector:
+          - JsonData
+          - ConnectionCredentials.JsonData
+          - ConnectionCredentials.Password
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: AutonomousDatabase
+          formalSpec: databaseautonomousdatabase
+          serviceManager:
+            packagePath: database/autonomousdatabase
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=events,verbs=create;patch
+          specFields:
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The administrative password sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
+              markers:
+                - +kubebuilder:validation:Optional
+
+  - service: dataflow
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
+    group: dataflow
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: dns
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
+    group: dns
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      excludedFieldPaths:
+        TsigKey:
+          - Secret
+      sdkAliases:
+        DomainRecord:
+          - Record
+        ZoneFromZoneFile:
+          - Zone
+        ZoneRecord:
+          - Record
+
+  - service: events
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/events
+    group: events
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: functions
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/functions
+    group: functions
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+        - Function
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: manual
+      registration:
+        strategy: manual
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Application
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+          serviceManager:
+            packagePath: functions
+        - kind: Function
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
+              - groups="",resources=events,verbs=create;patch
+          serviceManager:
+            packagePath: functions
+
+  - service: identity
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
+    group: identity
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Compartment
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Compartment
+          formalSpec: compartment
+          serviceManager:
+            packagePath: identity/compartment
+    observedState:
+      excludedFieldPaths:
+        AuthToken:
+          - Token
+        CustomerSecretKey:
+          - Key
+        OrResetUIPassword:
+          - Password
+        SmtpCredential:
+          - Password
+        SwiftPassword:
+          - Password
+      sdkAliases:
+        BulkActionResourceType:
+          - BulkActionResourceTypeCollection
+        BulkEditTagsResourceType:
+          - BulkEditTagsResourceTypeCollection
+        CostTrackingTag:
+          - Tag
+        IdentityProvider:
+          - Saml2IdentityProvider
+        NetworkSource:
+          - NetworkSources
+        OrResetUIPassword:
+          - UiPassword
+        StandardTagNamespace:
+          - StandardTagNamespaceTemplate
+          - StandardTagNamespaceTemplateSummary
+        StandardTagTemplate:
+          - StandardTagDefinitionTemplate
+        UserState:
+          - User
+        UserUIPasswordInformation:
+          - UiPasswordInformation
+
+  - service: keymanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/keymanagement
+    group: keymanagement
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Vault
+    observedState:
+      excludedFieldPaths:
+        PreCoUserCredential:
+          - Password
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Vault
+          specFields:
+            - name: DeletionScheduleDays
+              type: int32
+              tag: 'json:"deletionScheduleDays,omitempty,omitzero"'
+              comments:
+                - The number of days to retain the Vault after OCI deletion has been scheduled.
+                - Set a value from 7 to 30 to control the retention window used when Vault deletion is scheduled.
+              markers:
+                - +kubebuilder:validation:Optional
+                - +kubebuilder:validation:Minimum=7
+                - +kubebuilder:validation:Maximum=30
+          statusFields:
+            - name: RequestedDeletionScheduleDays
+              type: int32
+              tag: 'json:"requestedDeletionScheduleDays,omitempty,omitzero"'
+              comments:
+                - The retention period in days last applied when Vault deletion was scheduled.
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Set `deletionScheduleDays` to a value from 7 to 30 to control OCI deletion retention.
+              #
+              apiVersion: keymanagement.oracle.com/v1beta1
+              kind: Vault
+              metadata:
+                name: vault-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: vault-sample
+                vaultType: DEFAULT
+          serviceManager:
+            packagePath: keymanagement/vault
+        - kind: Key
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: KeyVersion
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ReplicationStatus
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WrappingKey
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: limits
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/limits
+    group: limits
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: loadbalancer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/loadbalancer
+    group: loadbalancer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: logging
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
+    group: logging
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: monitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
+    group: monitoring
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        AlarmHistory:
+          - AlarmHistoryCollection
+
+  - service: mysql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
+    group: mysql
+    version: v1beta1
+    phase: data-and-storage
+    sampleOrder: 30
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DbSystem
+    observedState:
+      excludedFieldPaths:
+        Channel:
+          - Source.Password
+        DbSystem:
+          - Source.SourceUrl
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DbSystem
+          formalSpec: dbsystem
+          controller:
+            maxConcurrentReconciles: 3
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
+          specFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The username for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `username` key.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The password for the administrative user sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative username.
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative password.
+          sample:
+            body: |-
+              apiVersion: mysql.oracle.com/v1beta1
+              kind: DbSystem
+              metadata:
+                name: dbsystem-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                # Replace with a currently supported MySQL DB System shape for your tenancy.
+                shapeName: MySQL.2
+                # Replace with a private subnet OCID. MySQL DB Systems reject public subnets.
+                subnetId: ocid1.subnet.oc1..exampleuniqueID
+                adminUsername:
+                  secret:
+                    secretName: admin-secret
+                adminPassword:
+                  secret:
+                    secretName: admin-secret
+          serviceManager:
+            packagePath: mysql/dbsystem
+            needsCredentialClient: true
+
+  - service: networkloadbalancer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/networkloadbalancer
+    group: networkloadbalancer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: nosql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/nosql
+    group: nosql
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Table
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Table
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: objectstorage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/objectstorage
+    group: objectstorage
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Bucket
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Bucket
+          formalSpec: objectstoragebucket
+          serviceManager:
+            packagePath: objectstorage/bucket
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: opensearch
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
+    group: opensearch
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OpensearchCluster
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: OpensearchCluster
+          formalSpec: opensearchopensearchcluster
+          serviceManager:
+            packagePath: opensearch/opensearchcluster
+        - kind: Manifest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OpensearchClusterBackup
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OpensearchOpensearchVersion
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: ons
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ons
+    group: ons
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        ConfirmSubscription:
+          - ConfirmationResult
+
+  - service: psql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/psql
+    group: psql
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DbSystem
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DbSystem
+          formalSpec: dbsystem
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch
+              - groups="",resources=events,verbs=create;patch
+          specFields:
+            - name: AdminUsername
+              type: shared.UsernameSource
+              tag: 'json:"adminUsername,omitempty,omitzero"'
+              comments:
+                - The administrative username sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input.
+              markers:
+                - +kubebuilder:validation:Optional
+            - name: AdminPassword
+              type: shared.PasswordSource
+              tag: 'json:"adminPassword,omitempty,omitzero"'
+              comments:
+                - The administrative password sourced from a Kubernetes Secret in the same namespace.
+                - The referenced Secret must contain a `password` key. If omitted, `spec.credentials.passwordDetails` remains available for plaintext or OCI Vault secret input.
+              markers:
+                - +kubebuilder:validation:Optional
+          statusFields:
+            - name: AdminUsernameSource
+              type: shared.UsernameSource
+              tag: 'json:"adminUsernameSource,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative username.
+            - name: AdminPasswordSource
+              type: shared.PasswordSource
+              tag: 'json:"adminPasswordSource,omitempty,omitzero"'
+              comments:
+                - The last applied secret reference for the administrative password.
+          sample:
+            body: |-
+              apiVersion: psql.oracle.com/v1beta1
+              kind: DbSystem
+              metadata:
+                name: dbsystem-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: dbsystem-sample
+                dbVersion: "14"
+                shape: PostgreSQL.VM.Standard.E5.Flex
+                instanceOcpuCount: 2
+                instanceMemorySizeInGBs: 32
+                storageDetails:
+                  systemType: OCI_OPTIMIZED_STORAGE
+                  isRegionallyDurable: true
+                networkDetails:
+                  subnetId: ocid1.subnet.oc1..exampleuniqueID
+                adminUsername:
+                  secret:
+                    secretName: admin-secret
+                adminPassword:
+                  secret:
+                    secretName: admin-secret
+          serviceManager:
+            packagePath: psql/dbsystem
+            needsCredentialClient: true
+    observedState:
+      sdkAliases:
+        PrimaryDbInstance:
+          - PrimaryDbInstanceDetails
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: queue
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/queue
+    group: queue
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Queue
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Queue
+          formalSpec: queue
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
+          serviceManager:
+            packagePath: queue/queue
+          statusFields:
+            - name: CreateWorkRequestId
+              type: string
+              tag: 'json:"createWorkRequestId,omitempty"'
+              comments:
+                - The work request OCID tracking the in-flight create operation.
+            - name: UpdateWorkRequestId
+              type: string
+              tag: 'json:"updateWorkRequestId,omitempty"'
+              comments:
+                - The work request OCID tracking the in-flight update operation.
+            - name: DeleteWorkRequestId
+              type: string
+              tag: 'json:"deleteWorkRequestId,omitempty"'
+              comments:
+                - The work request OCID tracking the in-flight delete operation.
+          sample:
+            body: |-
+              apiVersion: queue.oracle.com/v1beta1
+              kind: Queue
+              metadata:
+                name: queue-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: queue-sample
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
+  - service: redis
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/redis
+    group: redis
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - RedisCluster
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: RedisCluster
+          formalSpec: rediscluster
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=events,verbs=create;patch
+          serviceManager:
+            packagePath: redis/rediscluster
+
+  - service: secrets
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/secrets
+    group: secrets
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      excludedFieldPaths:
+        SecretBundle:
+          - SecretBundleContent
+        SecretBundleByName:
+          - SecretBundleContent
+      sdkAliases:
+        SecretBundleByName:
+          - SecretBundle
+
+  - service: streaming
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming
+    group: streaming
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    sampleOrder: 20
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Stream
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: manual
+      resources:
+        - kind: Stream
+          formalSpec: stream
+          controller:
+            extraRBACMarkers:
+              - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
+          serviceManager:
+            packagePath: streaming/stream
+
+  - service: vault
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
+    group: vault
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: workrequests
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/workrequests
+    group: workrequests
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: false
+      mode: all
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry

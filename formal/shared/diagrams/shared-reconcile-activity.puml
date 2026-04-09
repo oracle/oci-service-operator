@@ -1,0 +1,52 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Shared Reconcile Activity
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+:Common reconcile flow specialized by\ncontroller-local activity diagrams;
+:Step 1. Read desired spec and existing status\nfrom Kubernetes.;
+:Step 2. Resolve current OCI identity through\nGET or datasource list fallback before\nchoosing bind, create, update, or delete.;
+:Step 3. Apply controller-local spec, secret,\nand delete policies while keeping\nBaseReconciler invariants intact.;
+:Step 4. Project OSOK status, finalizer state,\nand retryable conditions back to the\nreconciler.;
+stop
+legend right
+Common reconcile flow specialized by
+controller-local activity diagrams
+--
+Shared Contract (#0F172A)
+Shared reconcile semantics and common
+controller invariants.
+--
+Provider Facts (#0F766E)
+Imported terraform-provider-oci operations,
+waits, datasource behavior, and lifecycle
+states.
+--
+Controller Local (#1D4ED8)
+Per-controller specialization derived from
+manifest rows and spec settings.
+--
+Repo Authored (#B45309)
+OSOK-only status, finalizer, Secret, and
+delete semantics captured in formal specs and
+gaps.
+endlegend
+@enduml

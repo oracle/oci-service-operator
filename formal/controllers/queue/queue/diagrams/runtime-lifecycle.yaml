@@ -1,0 +1,17 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: queue
+slug: queue
+kind: Queue
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - Queue create, update, and delete are work-request-backed. The runtime persists createWorkRequestId, updateWorkRequestId, and deleteWorkRequestId in status so reconcile resumes asynchronous OCI operations across requeues instead of relying on name-only lookup.
+  - Create binds identity from Queue work-request resources, then reads the Queue by recovered OCID before projecting status. Delete is not best-effort; it only completes after GetQueue confirms the tracked Queue is gone or exposes lifecycle state DELETED.
+  - Mutable drift is limited to UpdateQueueDetails fields such as displayName, timeout, visibility, tags, channelConsumptionLimit, deadLetterQueueDeliveryCount, and customEncryptionKeyId. Create-only inputs like compartmentId and retentionInSeconds are rejected as force-new drift.
+  - A package-local companion writes or updates the same-name endpoint Secret only after ACTIVE when messagesEndpoint is present, adopts only unlabeled matching Secrets, uses guarded updates/deletes for owned Secrets, and skips missing or unowned Secrets during delete cleanup.

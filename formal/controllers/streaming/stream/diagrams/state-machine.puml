@@ -1,0 +1,114 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - streaming/Stream
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "SyncSecret" as sync_secret
+state "SecretBlocked" as secret_blocked
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateStream
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, freeform_tags,\nstream_pool_id
+apply_update --> sync_secret : update path completes
+evaluate_ready --> sync_secret : apply secret policy\nready-only
+sync_secret --> secret_blocked : Secret sync fails
+secret_blocked --> sync_secret : retry Secret sync
+sync_secret --> ready : Secret side effects succeed
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: streaming
+slug: stream
+kind: Stream
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: defined_tags, freeform_tags,
+stream_pool_id
+reject before mutate: force-new fields name,
+partitions, retention_in_hours
+create-only fields: none
+list lookup: oci_streaming_streams filters
+compartment_id, id, name, state (+1 more)
+conflicts: none
+open gaps: none
+The generated runtime reuses existing streams
+before create by listing on name plus the
+optional pool and compartment filters, while
+delete-phase lookup can still resolve
+terminating or failed matches when no OCI
+identifier is recorded.
+A narrow package-local companion writes or
+updates the ready-only endpoint secret after
+ACTIVE when the same-name Secret already carries
+the current Stream UID ownership label, or when
+a legacy unlabeled Secret already matches the
+desired ready-only payload so reconcile can
+stamp the current UID label before future
+updates. Guarded update or delete revalidates
+the full Secret snapshot before mutating, and
+best-effort delete cleanup skips missing or
+unowned Secrets.
+Delete remains best-effort; DELETING or DELETED
+is sufficient for finalizer removal.
+end note
+note right of delete_pending
+delete policy: best-effort
+delete observe: GetStream or ListStreams
+delete targets: DELETED
+Secret cleanup waits for OCI delete
+confirmation.
+end note
+@enduml

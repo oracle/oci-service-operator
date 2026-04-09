@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "opensearch",
+  "slug": "opensearchopensearchcluster",
+  "kind": "OpensearchCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_opensearch_opensearch_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOpensearchCluster",
+        "requestType": "opensearch.CreateOpensearchClusterRequest",
+        "responseType": "opensearch.CreateOpensearchClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOpensearchCluster",
+        "requestType": "opensearch.GetOpensearchClusterRequest",
+        "responseType": "opensearch.GetOpensearchClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOpensearchClusters",
+        "requestType": "opensearch.ListOpensearchClustersRequest",
+        "responseType": "opensearch.ListOpensearchClustersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOpensearchCluster",
+        "requestType": "opensearch.UpdateOpensearchClusterRequest",
+        "responseType": "opensearch.UpdateOpensearchClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOpensearchCluster",
+        "requestType": "opensearch.DeleteOpensearchClusterRequest",
+        "responseType": "opensearch.DeleteOpensearchClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_opensearch_opensearch_clusters",
+    "collectionField": "opensearchClusters",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/opensearch/opensearchopensearchcluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/opensearch/opensearchopensearchcluster/logic-gaps.md",
+    "excludedSemantics": [
+      "published-kind-alias"
+    ]
+  },
+  "notes": [
+    "Seeded published OpensearchCluster row for opensearch; generatedruntime binds through compartmentId and displayName before create."
+  ]
+}

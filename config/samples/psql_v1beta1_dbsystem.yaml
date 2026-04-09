@@ -1,0 +1,27 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: psql.oracle.com/v1beta1
+kind: DbSystem
+metadata:
+  name: dbsystem-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: dbsystem-sample
+  dbVersion: "14"
+  shape: PostgreSQL.VM.Standard.E5.Flex
+  instanceOcpuCount: 2
+  instanceMemorySizeInGBs: 32
+  storageDetails:
+    systemType: OCI_OPTIMIZED_STORAGE
+    isRegionallyDurable: true
+  networkDetails:
+    subnetId: ocid1.subnet.oc1..exampleuniqueID
+  adminUsername:
+    secret:
+      secretName: admin-secret
+  adminPassword:
+    secret:
+      secretName: admin-secret

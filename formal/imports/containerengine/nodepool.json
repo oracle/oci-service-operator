@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "containerengine",
+  "slug": "nodepool",
+  "kind": "NodePool",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_containerengine_nodepool",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateNodePool",
+        "requestType": "containerengine.CreateNodePoolRequest",
+        "responseType": "containerengine.CreateNodePoolResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetNodePool",
+        "requestType": "containerengine.GetNodePoolRequest",
+        "responseType": "containerengine.GetNodePoolResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListNodePool",
+        "requestType": "containerengine.ListNodePoolRequest",
+        "responseType": "containerengine.ListNodePoolResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateNodePool",
+        "requestType": "containerengine.UpdateNodePoolRequest",
+        "responseType": "containerengine.UpdateNodePoolResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteNodePool",
+        "requestType": "containerengine.DeleteNodePoolRequest",
+        "responseType": "containerengine.DeleteNodePoolResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_containerengine_nodepool",
+    "collectionField": "nodepool",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/containerengine/nodepool/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/containerengine/nodepool/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for containerengine/nodepool; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

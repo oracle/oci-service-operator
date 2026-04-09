@@ -1,0 +1,44 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: nosql
+slug: table
+kind: Table
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartment_id
+      - name
+      - state=ALL
+    matchRule: exact-name unique match only; duplicate exact-name matches fail
+  mutation:
+    mutable:
+      - compartment_id
+      - defined_tags
+      - freeform_tags
+      - table_limits.capacity_mode
+      - table_limits.max_read_units
+      - table_limits.max_storage_in_gbs
+      - table_limits.max_write_units
+    forceNew:
+      - is_auto_reclaimable
+      - name
+    createOnly:
+      - ddl_statement
+notes:
+  - Handwritten Table bind first checks the tracked OCID, then searches ListTables in the requested compartment, and rereads a single exact-name match through GetTable before reusing it.
+  - Create, compartment move, update, and delete use read-after-write confirmation instead of explicit work-request polling; CREATING, UPDATING, and DELETING keep one-minute requeues until ACTIVE or delete confirmation.
+  - DDL remains create-only; compartment moves run before table-limit or tag updates when both kinds of drift are present.
+  - Delete retains the finalizer until GetTable or ListTables confirms the Table is deleted or not found.

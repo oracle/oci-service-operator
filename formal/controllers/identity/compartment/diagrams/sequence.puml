@@ -1,0 +1,130 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - identity/Compartment
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Compartment reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Compartment
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetCompartment
+else tracked identity is missing
+ServiceManager -> OCI: ListCompartments(filters:\ncompartment_id, name,\nlifecycle_state)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateCompartment
+loop create pending CREATING
+ServiceManager -> OCI: GetCompartment
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetCompartment
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteCompartment
+ServiceManager -> OCI: confirm delete via GetCompartment or\nListCompartments
+loop delete pending DELETING
+ServiceManager -> OCI: GetCompartment or ListCompartments
+end
+ServiceManager --> BaseReconciler: best-effort delete completion observed
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: defined_tags,
+description, freeform_tags, name
+Reject before mutate: force-new fields
+compartment_id
+Lookup filters: compartment_id, name,
+lifecycle_state
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateCompartment only for\nmutable fields defined_tags,\ndescription, freeform_tags, name
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required, finalizer=none
+end
+BaseReconciler --> Controller: requeue on provisioning, terminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: identity
+slug: compartment
+kind: Compartment
+archetype: generated-service-manager
+status/finalizer: required / none
+requeue: provisioning, terminating
+provider states: create CREATING; update none;
+delete DELETING
+supported drift: defined_tags, description,
+freeform_tags, name
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_identity_compartments filters
+compartment_id, name, lifecycle_state
+conflicts: none
+open gaps: none
+The checked-in Compartment runtime keeps the
+`identity` service disabled for
+blank/default-active runs while preserving the
+explicit Compartment rollout in-repo.
+Generated runtime binds through
+`ListCompartments`, reads back the live
+Compartment with `GetCompartment`, and stamps
+the observed OCI identity into status.
+Delete is best-effort for compartments. After
+`DeleteCompartment` is accepted, or OCI already
+reports `DELETING` or `DELETED`, the controller
+clears the finalizer and lets cloud-side
+teardown finish asynchronously.
+end note
+@enduml

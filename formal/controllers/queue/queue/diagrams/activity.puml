@@ -1,0 +1,141 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - queue/Queue
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Queue spec, tracked status, and\ndelete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetQueue;
+else (no)
+:Resolve an existing OCI resource through\nListQueues using filters compartment_id,\ndisplay_name, id, lifecycle_state;
+:Create the OCI resource via CreateQueue when\nno reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteQueue with required via\nGetQueue or ListQueues to DELETED confirmation;
+:Confirm deletion via GetQueue or ListQueues\nuntil OCI reaches DELETED;
+:Delete owned Secret side effects only after\nOCI delete confirmation;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, retention_in_seconds;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateQueue only for mutable fields\nchannel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count, defined_tags\n(+4 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=queue action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=queue action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=queue action=DELETED when the matching\nfield-driven path executes;
+:Apply repo-authored secret policy ready-only;
+if ("Secret sync succeeds?") then (yes)
+:Return success for the ACTIVE success state;
+else (no)
+:Block successful completion until Secret sync\nsucceeds;
+endif
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: queue
+slug: queue
+kind: Queue
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: channel_consumption_limit,
+custom_encryption_key_id,
+dead_letter_queue_delivery_count, defined_tags
+(+4 more)
+reject before mutate: force-new fields
+compartment_id, retention_in_seconds
+create-only fields: none
+list lookup: oci_queue_queues filters
+compartment_id, display_name, id,
+lifecycle_state
+conflicts: none
+open gaps: none
+Queue create, update, and delete are
+work-request-backed. The runtime persists
+createWorkRequestId, updateWorkRequestId, and
+deleteWorkRequestId in status so reconcile
+resumes asynchronous OCI operations across
+requeues instead of relying on name-only lookup.
+Create binds identity from Queue work-request
+resources, then reads the Queue by recovered
+OCID before projecting status. Delete is not
+best-effort; it only completes after GetQueue
+confirms the tracked Queue is gone or exposes
+lifecycle state DELETED.
+Mutable drift is limited to UpdateQueueDetails
+fields such as displayName, timeout, visibility,
+tags, channelConsumptionLimit,
+deadLetterQueueDeliveryCount, and
+customEncryptionKeyId. Create-only inputs like
+compartmentId and retentionInSeconds are
+rejected as force-new drift.
+A package-local companion writes or updates the
+same-name endpoint Secret only after ACTIVE when
+messagesEndpoint is present, adopts only
+unlabeled matching Secrets, uses guarded
+updates/deletes for owned Secrets, and skips
+missing or unowned Secrets during delete
+cleanup.
+end note
+@enduml

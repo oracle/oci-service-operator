@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - objectstorage.oracle.com
+  resources:
+  - buckets/status
+  verbs:
+  - get
+  - patch
+  - update

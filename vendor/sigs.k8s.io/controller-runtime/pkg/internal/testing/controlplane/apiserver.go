@@ -19,7 +19,6 @@ package controlplane
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -32,9 +31,9 @@ import (
 )
 
 const (
-	// saKeyFile is the name of the service account signing private key file
+	// saKeyFile is the name of the service account signing private key file.
 	saKeyFile = "sa-signer.key"
-	// saKeyFile is the name of the service account signing public key (cert) file
+	// saKeyFile is the name of the service account signing public key (cert) file.
 	saCertFile = "sa-signer.crt"
 )
 
@@ -170,10 +169,7 @@ func (s *APIServer) prepare() error {
 	if err := s.setProcessState(); err != nil {
 		return err
 	}
-	if err := s.Authn.Start(); err != nil {
-		return err
-	}
-	return nil
+	return s.Authn.Start()
 }
 
 // configurePorts configures the serving ports for this API server.
@@ -292,7 +288,7 @@ func (s *APIServer) setProcessState() error {
 		return err
 	}
 
-	s.processState.Args, s.Args, err = process.TemplateAndArguments(s.Args, s.Configure(), process.TemplateDefaults{
+	s.processState.Args, s.Args, err = process.TemplateAndArguments(s.Args, s.Configure(), process.TemplateDefaults{ //nolint:staticcheck
 		Data:     s,
 		Defaults: s.defaultArgs(),
 		MinimalDefaults: map[string][]string{
@@ -332,7 +328,6 @@ func (s *APIServer) discoverFlags() error {
 
 func (s *APIServer) defaultArgs() map[string][]string {
 	args := map[string][]string{
-		"advertise-address":        {"127.0.0.1"},
 		"service-cluster-ip-range": {"10.0.0.0/24"},
 		"allow-privileged":         {"true"},
 		// we're keeping this disabled because if enabled, default SA is
@@ -389,10 +384,10 @@ func (s *APIServer) populateAPIServerCerts() error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(s.CertDir, "apiserver.crt"), certData, 0640); err != nil {
+	if err := os.WriteFile(filepath.Join(s.CertDir, "apiserver.crt"), certData, 0640); err != nil { //nolint:gosec
 		return err
 	}
-	if err := ioutil.WriteFile(filepath.Join(s.CertDir, "apiserver.key"), keyData, 0640); err != nil {
+	if err := os.WriteFile(filepath.Join(s.CertDir, "apiserver.key"), keyData, 0640); err != nil { //nolint:gosec
 		return err
 	}
 
@@ -409,23 +404,19 @@ func (s *APIServer) populateAPIServerCerts() error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(s.CertDir, saCertFile), saCert, 0640); err != nil {
+	if err := os.WriteFile(filepath.Join(s.CertDir, saCertFile), saCert, 0640); err != nil { //nolint:gosec
 		return err
 	}
-	if err := ioutil.WriteFile(filepath.Join(s.CertDir, saKeyFile), saKey, 0640); err != nil {
-		return err
-	}
-
-	return nil
+	return os.WriteFile(filepath.Join(s.CertDir, saKeyFile), saKey, 0640) //nolint:gosec
 }
 
 // Stop stops this process gracefully, waits for its termination, and cleans up
 // the CertDir if necessary.
 func (s *APIServer) Stop() error {
-	if s.processState.DirNeedsCleaning {
-		s.CertDir = "" // reset the directory if it was randomly allocated, so that we can safely restart
-	}
 	if s.processState != nil {
+		if s.processState.DirNeedsCleaning {
+			s.CertDir = "" // reset the directory if it was randomly allocated, so that we can safely restart
+		}
 		if err := s.processState.Stop(); err != nil {
 			return err
 		}
@@ -440,7 +431,7 @@ func (s *APIServer) Stop() error {
 // complex feature detection neeeded.  It's recommended that you switch to .Configure
 // as you upgrade API server versions.
 //
-// Deprecated: use APIServer.Configure()
+// Deprecated: use APIServer.Configure().
 var APIServerDefaultArgs = []string{
 	"--advertise-address=127.0.0.1",
 	"--etcd-servers={{ if .EtcdURL }}{{ .EtcdURL.String }}{{ end }}",
@@ -471,7 +462,7 @@ func PrepareAPIServer(s *APIServer) error {
 // function that sets up the API server just before starting it,
 // without actually starting it.  It's public to make testing easier.
 //
-// NB(directxman12): do not expose this outside of internal
+// NB(directxman12): do not expose this outside of internal.
 func APIServerArguments(s *APIServer) []string {
 	return s.processState.Args
 }

@@ -1,0 +1,13 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: objectstorage.oracle.com/v1beta1
+kind: Bucket
+metadata:
+  name: bucket-sample
+spec:
+  name: ay5-bucket-sample
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  # namespace is optional for local e2e; the controller resolves the tenancy namespace when it is omitted.

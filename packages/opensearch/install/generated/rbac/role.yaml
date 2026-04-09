@@ -1,0 +1,32 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - opensearch.oracle.com
+  resources:
+  - opensearchclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - opensearch.oracle.com
+  resources:
+  - opensearchclusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - opensearch.oracle.com
+  resources:
+  - opensearchclusters/status
+  verbs:
+  - get
+  - patch
+  - update

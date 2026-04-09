@@ -5,16 +5,29 @@
 
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-- oci_v1beta1_autonomousdatabases.yaml
-- oci_v1beta1_stream.yaml
-- oci_v1beta1_mysqldbsystem.yaml
-- servicemesh.oci_v1beta1_mesh.yaml
-- servicemesh.oci_v1beta1_virtualservice.yaml
-- servicemesh.oci_v1beta1_virtualdeployment.yaml
-- servicemesh.oci_v1beta1_virtualserviceroutetable.yaml
-- servicemesh.oci_v1beta1_virtualdeploymentbinding.yaml
-- servicemesh.oci_v1beta1_accesspolicy.yaml
-- servicemesh.oci_v1beta1_ingressgateway.yaml
-- servicemesh.oci_v1beta1_ingressgatewaydeployment.yaml
-- servicemesh.oci_v1beta1_ingressgatewayroutetable.yaml
+- streaming_v1beta1_stream.yaml
+- nosql_v1beta1_table.yaml
+- psql_v1beta1_dbsystem.yaml
+- database_v1beta1_autonomousdatabase.yaml
+- mysql_v1beta1_dbsystem.yaml
+- identity_v1beta1_compartment.yaml
+- opensearch_v1beta1_opensearchcluster.yaml
+- redis_v1beta1_rediscluster.yaml
+- core_v1beta1_drg.yaml
+- core_v1beta1_instance.yaml
+- core_v1beta1_internetgateway.yaml
+- core_v1beta1_natgateway.yaml
+- core_v1beta1_networksecuritygroup.yaml
+- core_v1beta1_routetable.yaml
+- core_v1beta1_securitylist.yaml
+- core_v1beta1_servicegateway.yaml
+- core_v1beta1_subnet.yaml
+- core_v1beta1_vcn.yaml
+- queue_v1beta1_queue.yaml
+- dataflow_v1beta1_application.yaml
+- functions_v1beta1_application.yaml
+- functions_v1beta1_function.yaml
+- objectstorage_v1beta1_bucket.yaml
+- containerinstances_v1beta1_containerinstance.yaml
+- keymanagement_v1beta1_vault.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -1,0 +1,33 @@
+schemaVersion: 1
+title: Shared Diagram Legend
+subtitle: Diagram palette and controller archetype batches used by the formal generator strategy
+palette:
+  shared-contract:
+    color: "#0f172a"
+    label: Shared Contract
+    description: Shared reconcile semantics and common controller invariants.
+  controller-local:
+    color: "#1d4ed8"
+    label: Controller Local
+    description: Per-controller specialization derived from manifest rows and spec settings.
+  provider-facts:
+    color: "#0f766e"
+    label: Provider Facts
+    description: Imported terraform-provider-oci operations, waits, datasource behavior, and lifecycle states.
+  repo-authored:
+    color: "#b45309"
+    label: Repo Authored
+    description: OSOK-only status, finalizer, Secret, and delete semantics captured in formal specs and gaps.
+  open-gap:
+    color: "#b91c1c"
+    label: Open Gap
+    description: Explicit stop conditions that still block generated promotion or adapter removal.
+archetypeBatches:
+  generated-service-manager:
+    color: "#1d4ed8"
+    label: Generated Service Manager Batch
+    description: Controller-backed services where generated runtime owns CRUD, waits, delete confirmation, and status projection.
+  legacy-adapter:
+    color: "#b91c1c"
+    label: Legacy Adapter Batch
+    description: Controllers that still route through handwritten adapters until open gaps close.

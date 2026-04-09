@@ -1,0 +1,34 @@
+.git
+.codex/
+.beads/
+
+# Local caches and verification outputs.
+.cache
+.gocache
+.gomodcache
+.gotmp
+.verify
+
+# Local test and e2e artifacts.
+bin/
+dist/
+e2e/.e2e-lite-local-*
+samples-tested/
+cover.out
+unittests.cover
+unittests.percent
+baseline.json
+
+# Local worktree artifacts that are not part of the manager build context.
+packages/
+containerengine/
+database/
+identity/
+mysql/
+nosql/
+objectstorage/
+oci-service-operator/
+opensearch/
+psql/
+redis/
+streaming/

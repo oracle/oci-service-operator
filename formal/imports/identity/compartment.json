@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "identity",
+  "slug": "compartment",
+  "kind": "Compartment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_identity_compartment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCompartment",
+        "requestType": "identity.CreateCompartmentRequest",
+        "responseType": "identity.CreateCompartmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCompartment",
+        "requestType": "identity.GetCompartmentRequest",
+        "responseType": "identity.GetCompartmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCompartments",
+        "requestType": "identity.ListCompartmentsRequest",
+        "responseType": "identity.ListCompartmentsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCompartment",
+        "requestType": "identity.UpdateCompartmentRequest",
+        "responseType": "identity.UpdateCompartmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCompartment",
+        "requestType": "identity.DeleteCompartmentRequest",
+        "responseType": "identity.DeleteCompartmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_identity_compartments",
+    "collectionField": "compartments",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/identity/compartment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/identity/compartment/logic-gaps.md",
+    "excludedSemantics": [
+      "status-projection",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded Compartment row for identity; the checked-in generated runtime uses CreateCompartment/GetCompartment/ListCompartments/UpdateCompartment/DeleteCompartment directly from the vendored OCI SDK.",
+    "Bind resolution first honors a tracked OCI identity and otherwise adopts only a unique ListCompartments match on compartment_id plus name before create."
+  ]
+}

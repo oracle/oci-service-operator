@@ -1,0 +1,13 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: database
+slug: databaseautonomousdatabase
+kind: AutonomousDatabase
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Promoted generated-runtime metadata for database/AutonomousDatabase now lives under pkg/servicemanager/database/autonomousdatabase.

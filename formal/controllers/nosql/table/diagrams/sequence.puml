@@ -1,0 +1,148 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - nosql/Table
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Table reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Table
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetTable
+else tracked identity is missing
+ServiceManager -> OCI: ListTables(filters: compartment_id,\nname, state=ALL)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateTable
+loop create pending CREATING
+ServiceManager -> OCI: GetTable
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetTable
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteTable
+ServiceManager -> OCI: confirm delete via GetTable or\nListTables
+loop delete pending DELETING
+ServiceManager -> OCI: GetTable or ListTables
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+compartment_id, defined_tags,
+freeform_tags,
+table_limits.capacity_mode (+3 more)
+Reject before mutate: force-new fields
+is_auto_reclaimable, name
+Create-only fields: ddl_statement
+Lookup filters: compartment_id, name,
+state=ALL
+Lookup matching: exact-name unique match
+only; duplicate exact-name matches fail
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply ChangeTableCompartment,\nUpdateTable only for mutable fields\ncompartment_id, defined_tags,\nfreeform_tags,\ntable_limits.capacity_mode (+3 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetTable
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: nosql
+slug: table
+kind: Table
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: compartment_id, defined_tags,
+freeform_tags, table_limits.capacity_mode (+3
+more)
+reject before mutate: force-new fields
+is_auto_reclaimable, name
+create-only fields: ddl_statement
+list lookup: oci_nosql_tables filters
+compartment_id, name, state=ALL; exact-name
+unique match only; duplicate exact-name matches
+fail
+conflicts: none
+open gaps: none
+Handwritten Table bind first checks the tracked
+OCID, then searches ListTables in the requested
+compartment, and rereads a single exact-name
+match through GetTable before reusing it.
+Create, compartment move, update, and delete use
+read-after-write confirmation instead of
+explicit work-request polling; CREATING,
+UPDATING, and DELETING keep one-minute requeues
+until ACTIVE or delete confirmation.
+DDL remains create-only; compartment moves run
+before table-limit or tag updates when both
+kinds of drift are present.
+Delete retains the finalizer until GetTable or
+ListTables confirms the Table is deleted or not
+found.
+end note
+@enduml

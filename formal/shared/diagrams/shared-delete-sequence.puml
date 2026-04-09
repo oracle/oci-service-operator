@@ -1,0 +1,61 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Shared Delete Sequence
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+participant "Kubernetes Secret" as SecretStore
+note over BaseReconciler,ServiceManager
+Finalizer discipline, delete confirmation, work
+requests, and optional Secret cleanup
+end note
+group Step 1
+BaseReconciler -> ServiceManager: Handle delete request with finalizer discipline
+note right of ServiceManager
+Keep the OSOK finalizer until delete
+confirmation or an explicit not-supported
+policy says otherwise.
+end note
+end
+group Step 2
+ServiceManager -> OCI: Delete target resource
+loop confirmation until terminal delete state
+ServiceManager -> OCI: GET or list fallback
+end
+note right of OCI
+Controller-local specialization supplies
+delete confirmation via GET, datasource list
+fallback, or provider wait helpers.
+end note
+end
+group Step 3
+opt repo-authored secret cleanup
+ServiceManager -> SecretStore: Delete ready-only secret when policy allows
+end
+ServiceManager --> BaseReconciler: Remove finalizer when delete is confirmed
+note right of SecretStore
+Optional Secret cleanup remains explicit and
+only happens when repo-authored policy allows
+it.
+end note
+end
+@enduml

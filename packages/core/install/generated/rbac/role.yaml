@@ -1,0 +1,59 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - core.oracle.com
+  resources:
+  - drgs
+  - instances
+  - internetgateways
+  - natgateways
+  - networksecuritygroups
+  - routetables
+  - securitylists
+  - servicegateways
+  - subnets
+  - vcns
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - core.oracle.com
+  resources:
+  - drgs/finalizers
+  - instances/finalizers
+  - internetgateways/finalizers
+  - natgateways/finalizers
+  - networksecuritygroups/finalizers
+  - routetables/finalizers
+  - securitylists/finalizers
+  - servicegateways/finalizers
+  - subnets/finalizers
+  - vcns/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - core.oracle.com
+  resources:
+  - drgs/status
+  - instances/status
+  - internetgateways/status
+  - natgateways/status
+  - networksecuritygroups/status
+  - routetables/status
+  - securitylists/status
+  - servicegateways/status
+  - subnets/status
+  - vcns/status
+  verbs:
+  - get
+  - patch
+  - update

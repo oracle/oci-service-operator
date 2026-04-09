@@ -1,0 +1,15 @@
+#
+# Replace the OCI identifiers below before running e2e.
+# Use a tenancy-unique spec.name if you want to force a fresh create instead of
+# reusing an existing Stream with the same name.
+#
+
+apiVersion: streaming.oracle.com/v1beta1
+kind: Stream
+metadata:
+  name: stream-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  name: aze-stream-sample
+  partitions: 1
+  retentionInHours: 24

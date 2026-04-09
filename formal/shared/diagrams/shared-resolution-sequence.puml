@@ -1,0 +1,59 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Shared Resolution Sequence
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+Shared ID binding, datasource pagination, and
+create-update dispatch
+end note
+group Step 1
+Controller -> BaseReconciler: Start reconcile
+BaseReconciler -> ServiceManager: Resolve current OCI identity
+note right of ServiceManager
+BaseReconciler asks the service manager to
+resolve the controller's current OCI identity.
+end note
+end
+group Step 2
+ServiceManager -> OCI: GET current resource state
+alt datasource fallback
+ServiceManager -> OCI: List resources with controller filters
+OCI --> ServiceManager: matching collection items
+end
+note right of OCI
+Controller-local specialization supplies
+datasource filters, pagination behavior, and
+bind-versus-create policy.
+end note
+end
+group Step 3
+ServiceManager --> BaseReconciler: Dispatch hints and retryable states
+note right of ServiceManager
+Imported terraform-provider-oci waits and
+read-after-write behavior keep retryable
+states explicit.
+end note
+end
+@enduml

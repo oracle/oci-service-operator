@@ -1,0 +1,18 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: core
+slug: securitylist
+kind: SecurityList
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - terminated
+  - deleted
+notes:
+  - Ready state maps to OCI AVAILABLE.
+  - Requeue continues while OCI reports PROVISIONING, the defensive literal UPDATING, TERMINATING, or TERMINATED.
+  - Delete completes only after GetSecurityList returns not found; TERMINATING and TERMINATED are accepted observed pre-delete states.
+  - In-place updates are limited to displayName, definedTags, freeformTags, egressSecurityRules, and ingressSecurityRules.

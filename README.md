@@ -6,38 +6,73 @@ The OCI Service Operator for Kubernetes (OSOK) makes it easy to create, manage, 
 
 OSOK is based on the [Operator Framework](https://operatorframework.io/), an open-source toolkit used to manage Operators. It uses the [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) library, which provides high-level APIs and abstractions to write operational logic and also provides tools for scaffolding and code generation for Operators.
 
-**Services Supported**
-1. [Autonomous Database Service](https://www.oracle.com/in/autonomous-database/)
-1. [Oracle Streaming Service](https://docs.cloud.oracle.com/iaas/Content/Streaming/Concepts/streamingoverview.htm)
-1. [MySQL DB System Service](https://www.oracle.com/mysql/)
-1. [Service Mesh Service](https://docs.oracle.com/iaas/Content/service-mesh/home.htm)
+> **Important:** Use OSOK in a test or non-production OCI and Kubernetes
+> environment first.
+>
+> **Do not make a production cluster your first deployment target.** Validate
+> authentication, IAM policy scope, create and delete behavior, finalizers, and
+> service-specific limits in an isolated test environment before promoting any
+> package bundle to production.
+
+## Start Here
+
+The customer docs are organized for the GitHub Pages site at
+[oracle.github.io/oci-service-operator](https://oracle.github.io/oci-service-operator/).
+The checked-in source for that site lives under [docs/](docs/).
+
+For the quickest repo-local path, start with:
+
+- [Installation](docs/installation.md#installation)
+- [Quick start with KRO](docs/user-guide.md)
+- [Supported Resources](docs/reference/index.md)
+- [API Reference](docs/reference/api/index.md)
+- [Contributor Docs](docs/contributor/index.md)
 
 ## Installation
 
-See the [Installation](docs/installation.md#install-operator-sdk) instructions for detailed installation and configuration of OCI Service Operator for Kubernetes.
+Start with the [Installation](docs/installation.md#installation) guide for OLM
+prerequisites, authentication setup, and published per-package bundle commands.
+Then use [Quick start with KRO](docs/user-guide.md) for the end-to-end MySQL
+example that assumes those installation prerequisites are already complete. Use
+[Supported Resources](docs/reference/index.md) for the generated package and
+kind inventory behind the current docs set.
+
+## Controller Manager Config
+
+The default `config/default` deployment turns
+`config/manager/controller_manager_config.yaml` into the `manager-config`
+ConfigMap and starts the manager with `--config=controller_manager_config.yaml`.
+When that flag is present, the file is authoritative for controller-runtime
+settings such as metrics, health probes, webhooks, cache behavior, and leader
+election instead of the built-in flag defaults.
+
+The file must keep
+`apiVersion: controller-runtime.sigs.k8s.io/v1alpha1` and
+`kind: ControllerManagerConfig`. OSOK now unmarshals this file strictly, so
+unknown fields or mismatched type metadata fail startup instead of silently
+falling back to defaults. See
+[docs/installation.md](docs/installation.md#controller-manager-config) for the
+deployment wiring details.
 
 ## Documentation
 
-See the [Documentation](docs/README.md#oci-service-operator-for-kubernetes) for complete details on installation, security and service related configurations of OCI Service Operator for Kubernetes.
-
-## Release Bundle
-
-The OCI Service Operator for Kubernetes is packaged as Operator Lifecycle Manager (OLM) Bundle for making it easy to install in Kubernetes Clusters. The bundle can be downloaded as docker image using below command.
-
-```
-docker pull iad.ocir.io/oracle/oci-service-operator-bundle:1.1.9
-```
+See the [docs site](https://oracle.github.io/oci-service-operator/) for the
+customer-facing layout and [docs/index.md](docs/index.md) for the checked-in
+source landing page.
 
 ## Samples
 
-Samples for managing OCI Services/Resources using `oci-service-operator`, can be found [here](config/samples).
+Samples for managing OCI Services/Resources using `oci-service-operator` can be
+found in [config/samples](config/samples).
 
 ## Changes
 
 See [CHANGELOG](CHANGELOG.md).
 
 ## Contributing
-`oci-service-operator` project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md).
+
+`oci-service-operator` welcomes contributions from the community. Before
+submitting a pull request, review the [contribution guide](./CONTRIBUTING.md).
 
 ## Security
 

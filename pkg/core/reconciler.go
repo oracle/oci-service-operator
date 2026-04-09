@@ -12,7 +12,7 @@ import (
 	"time"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -20,16 +20,22 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	"github.com/oracle/oci-service-operator/api/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 )
 
 const (
 	OSOKFinalizerName  = "finalizers.oci.oracle.com/oci-resources"
 	defaultRequeueTime = time.Minute * 2
+)
+
+const (
+	deleteEventReasonBlocked    = "DeleteBlocked"
+	deleteEventReasonInProgress = "DeleteInProgress"
 )
 
 type BaseReconciler struct {
@@ -48,7 +54,7 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 	ctx = metrics.AddFixedLogMapEntries(ctx, req.Name, req.Namespace)
 	r.Log.DebugLogWithFixedMessage(ctx, "Fetching the resource from server")
 	if err := r.Get(ctx, req.NamespacedName, obj); err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			r.Log.ErrorLogWithFixedMessage(ctx, err, "The resource could be in deleting state. Ignoring")
 			return ctrl.Result{}, client.IgnoreNotFound(err)
 		}
@@ -67,8 +73,6 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 				r.Log.ErrorLogWithFixedMessage(ctx, err, "Requeuing object due to error during delete of CR")
 				r.Metrics.AddCRDeleteFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
 					"Requeuing object due to error during delete of CR", req.Name, req.Namespace)
-				r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
-					fmt.Sprintf("Failed to remove the finalizer: %s", err.Error()))
 				return util.RequeueWithError(ctx, err, defaultRequeueTime, r.Log)
 			}
 			if delSuc {
@@ -84,10 +88,6 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 				r.Recorder.Event(obj, v1.EventTypeNormal, "Success", "Removed finalizer")
 				return util.DoNotRequeue()
 			} else {
-				r.Log.ErrorLogWithFixedMessage(ctx, err, "Re-queuing object as delete was unsuccessful")
-				r.Metrics.AddCRDeleteFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
-					"Re-queuing object as delete was unsuccessful", req.Name, req.Namespace)
-				r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Failed Delete the resource")
 				return util.RequeueWithoutError(ctx, defaultRequeueTime, r.Log)
 			}
 		}
@@ -105,7 +105,7 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 	return r.ReconcileResource(ctx, obj, req)
 }
 
-func (r *BaseReconciler) GetStatus(obj client.Object) (*v1beta1.OSOKStatus, error) {
+func (r *BaseReconciler) GetStatus(obj client.Object) (*shared.OSOKStatus, error) {
 	status, err := r.OSOKServiceManager.GetCrdStatus(obj)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (r *BaseReconciler) GetStatus(obj client.Object) (*v1beta1.OSOKStatus, erro
 func (r *BaseReconciler) ReconcileResource(ctx context.Context, obj client.Object, req ctrl.Request) (ctrl.Result, error) {
 	ctx = metrics.AddFixedLogMapEntries(ctx, req.Name, req.Namespace)
 
-	oldObj := obj.DeepCopyObject()
+	oldObj := obj.DeepCopyObject().(client.Object)
 	OSOKResponse, err := r.OSOKServiceManager.CreateOrUpdate(ctx, obj, req)
 	if err != nil {
 		r.Log.ErrorLogWithFixedMessage(ctx, err, "Create Or Update failed in the Service Manager with error")
@@ -170,8 +170,28 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	//TODO Emit Delete Start metrics
 	delSucc, err := r.OSOKServiceManager.Delete(ctx, obj)
 	if err != nil {
+		classification := errorutil.ClassifyDeleteError(err)
+		if classification.IsUnambiguousNotFound() {
+			r.Log.InfoLogWithFixedMessage(ctx, "Delete treated as successful because OCI resource no longer exists",
+				"oci_http_status_code", classification.HTTPStatusCodeString(),
+				"oci_error_code", classification.ErrorCodeString(),
+				"normalized_error_type", classification.NormalizedTypeString())
+			return true, nil
+		}
+		if classification.IsConflict() {
+			r.Log.InfoLogWithFixedMessage(ctx, "Delete is blocked and will be retried",
+				"oci_http_status_code", classification.HTTPStatusCodeString(),
+				"oci_error_code", classification.ErrorCodeString(),
+				"normalized_error_type", classification.NormalizedTypeString())
+			r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonBlocked,
+				fmt.Sprintf("Delete blocked and will be retried: %s", err.Error()))
+			return false, nil
+		}
 		r.Log.ErrorLogWithFixedMessage(ctx, err, "Delete failed in the Service Manager with error", "name", req.Name,
-			"namespace", req.Namespace, "namespacedName", req.String())
+			"namespace", req.Namespace, "namespacedName", req.String(),
+			"oci_http_status_code", classification.HTTPStatusCodeString(),
+			"oci_error_code", classification.ErrorCodeString(),
+			"normalized_error_type", classification.NormalizedTypeString())
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
 			fmt.Sprintf("Failed to delete resource: %s", err.Error()))
 		// TODO Emit Delete Fault metrics end
@@ -180,8 +200,8 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	if delSucc {
 		r.Log.InfoLogWithFixedMessage(ctx, "Delete Successful")
 	} else {
-		r.Log.InfoLogWithFixedMessage(ctx, "Delete Unsuccessful, re-queuing the request after 2 minutes")
-		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Delete Unsuccessful")
+		r.Log.InfoLogWithFixedMessage(ctx, "Delete is in progress and will be retried")
+		r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonInProgress, "Delete is in progress")
 	}
 	// TODO Emit Delete Success metrics end
 	return delSucc, nil

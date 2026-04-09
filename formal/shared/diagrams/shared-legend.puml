@@ -1,0 +1,44 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Shared Diagram Legend
+skinparam packageStyle rectangle
+skinparam package {
+  backgroundColor #ffffff
+  borderColor #0f172a
+}
+skinparam rectangle {
+  backgroundColor #f8fafc
+  borderColor #cbd5e1
+  fontColor #0f172a
+}
+note as legend_subtitle
+Diagram palette and controller archetype batches
+used by the formal generator strategy
+end note
+package "Palette" {
+rectangle "Controller Local\n#1D4ED8\nPer-controller specialization\nderived from manifest rows and\nspec settings." as palette_controller_local
+rectangle "Open Gap\n#B91C1C\nExplicit stop conditions that\nstill block generated\npromotion or adapter removal." as palette_open_gap
+rectangle "Provider Facts\n#0F766E\nImported\nterraform-provider-oci\noperations, waits, datasource\nbehavior, and lifecycle\nstates." as palette_provider_facts
+rectangle "Repo Authored\n#B45309\nOSOK-only status, finalizer,\nSecret, and delete semantics\ncaptured in formal specs and\ngaps." as palette_repo_authored
+rectangle "Shared Contract\n#0F172A\nShared reconcile semantics and\ncommon controller invariants." as palette_shared_contract
+}
+palette_controller_local -[hidden]-> palette_open_gap
+palette_open_gap -[hidden]-> palette_provider_facts
+palette_provider_facts -[hidden]-> palette_repo_authored
+palette_repo_authored -[hidden]-> palette_shared_contract
+package "Controller Archetype Batches" {
+rectangle "Generated Service\nManager Batch\n#1D4ED8\nController-backed services\nwhere generated runtime owns\nCRUD, waits, delete\nconfirmation, and status\nprojection." as archetype_generated_service_manager
+rectangle "Legacy Adapter Batch\n#B91C1C\nControllers that still route\nthrough handwritten adapters\nuntil open gaps close." as archetype_legacy_adapter
+}
+archetype_generated_service_manager -[hidden]-> archetype_legacy_adapter
+palette_controller_local -[hidden]down-> archetype_generated_service_manager
+legend_subtitle -[hidden]-> palette_controller_local
+@enduml

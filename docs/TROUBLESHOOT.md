@@ -107,46 +107,50 @@ FATA[0125] Failed to run bundle upgrade: error waiting for CSV to install: timed
 ```
 The error signifies that during the installation of the OSOK, it timed out waiting for the condition. To mitigate this issue. Try to delete the bundle pod of the OSOK version we are trying to deploy
 ```bash
-$ kubectl get pods | grep oci-service-operator-bundle
+$ kubectl get pods | grep 'oci-service-operator-.*-bundle'
 
 $ kubectl delete pod <POD_FROM_ABOVE_COMMAND>
 ```
 After the bundle pod is deleted, re-install the OSOK bundle
 ```bash
-$ operator-sdk run bundle iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
+$ operator-sdk run bundle ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-<GROUP>-bundle:v2.0.0-alpha
 ## or for Upgrade
-$ operator-sdk run bundle-upgrade iad.ocir.io/oracle/oci-service-operator-bundle:<VERSION>
+$ operator-sdk run bundle-upgrade ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-<GROUP>-bundle:v2.0.0-alpha
 ```
 
 Verify the OSOK is deployed successfully 
 ```bash
-$ kubectl get deployments -n $NAMESPACE | grep "oci-service-operator-controller-manager"
+$ kubectl get deployments -n $NAMESPACE | grep "oci-service-operator-<GROUP>-controller-manager"
 ..
 
 NAME                                      READY   UP-TO-DATE   AVAILABLE   AGE
-oci-service-operator-controller-manager   1/1     1            1           2d20h
+oci-service-operator-mysql-controller-manager   1/1     1            1           2d20h
 ```
 
 If all the replicas in deployment is not running, verify deployment logs for specific issue using below commands : 
 ```bash
-$ kubectl logs deploy/oci-service-operator-controller-manager -n $NAMESPACE -f
+$ kubectl logs deploy/oci-service-operator-<GROUP>-controller-manager -n $NAMESPACE -f
 ```
 
 
 ### OSOK Pods Issues
 Verify the OSOK pods are running successfully
 ```bash
-$ kubectl get pods -n $NAMESPACE | grep "oci-service-operator-controller-manager"
+$ kubectl get pods -n $NAMESPACE | grep "oci-service-operator-<GROUP>-controller-manager"
 
-oci-service-operator-controller-manager-5fcf985fd7-zj7d9          1/1     Running     0          2d22h
+oci-service-operator-mysql-controller-manager-5fcf985fd7-zj7d9    1/1     Running     0          2d22h
 ```
 
 If the pods not running, verify pod logs for specific issue using below commands :
 ```bash
-$ kubectl logs pod/oci-service-operator-controller-manager-5fcf985fd7-zj7d9 -n $NAMESPACE -f 
+$ kubectl logs pod/oci-service-operator-<GROUP>-controller-manager-5fcf985fd7-zj7d9 -n $NAMESPACE -f
 ```
 
-Note : By default, operator-sdk installs OSOK bundle in 'default' namespace, however  we can specify the namespace while installing OSOK using '-n $NAMESPACE'. The same namespace has to be used while querying for the associated pods/deployments in above command samples to get the resources.
+Note : Use the namespace that contains the controller-manager deployment for the
+package you installed. For the published subpackage bundles this is normally the
+package namespace from `packages/<group>/metadata.env`, for example
+`oci-service-operator-mysql-system`, unless you explicitly overrode the
+installation namespace.
 
 ## Debugging Custom Resource (CR) Issues
 If CR creation fails, monitor the OSOK controller pod logs (with steps outlined above) to understand the corresponding error code. Below are few of the commonly encountered failure scenarios : 
@@ -160,36 +164,27 @@ This happens mostly due to user authorization. Follow below steps for remediatio
 * If using User credentials, cross verify if the secret for user credentials (ocicredentials as per installation doc) is populated correctly.
 * Note that OSOK uses user credentials for authorization if the secret 'ocicredentials' is available during installation. Else it uses instance principal by default. Delete the secret 'ocicredentials' if user principals are not intended and restart the deployment to switch to Instance principals
 
-2. **Secret \"admin-password\" not found**
-```bash
-ERROR	service-manager.AutonomousDatabases	Error while getting the admin password secret	{"error": "Secret \"admin-password\" not found"}
-``` 
-Ensure that secret admin-password (name as specified in the yaml) is present in the current namespace of CR. Sample secret : 
-```bash
-kubectl create secret generic admin-password --from-literal=password=Sample@1234
-```
+2. **Legacy or unsupported Autonomous Database credential fields rejected by schema validation**
 
-3. **Password key in admin/wallet password secret not found**
-```bash
-ERROR	service-manager.AutonomousDatabases	password key in admin password secret is not found
-```
- Ensure that secret admin-password/wallet-password (name as specified in the yaml) is present in the current namespace of CR and has a field by key-name as password. Sample secret : 
- ```bash
-kubectl create secret generic admin-password --from-literal=password=Sample@1234
+The generated v2 `AutonomousDatabase` CR no longer accepts the old
+`AutonomousDatabases` compatibility shape. Manifests that still use
+`kind: AutonomousDatabases`, `spec.wallet`, `spec.walletPassword`, or a
+plaintext `spec.adminPassword` value will be rejected before reconciliation.
+Use either `spec.adminPassword.secret.secretName` or `spec.secretId` instead,
+but not both in the same manifest. Migrate those manifests to the generated
+`AutonomousDatabase` fields and use the dedicated
+`AutonomousDatabaseWallet` or `AutonomousDatabaseRegionalWallet` resources for
+wallet material.
 
-kubectl create secret generic wallet-password --from-literal=walletpassword=Sample@1234
-```
-
-4. **Service error:InvalidParameter**
+3. **Service error:InvalidParameter**
 ```
 Sample error msg : 
-ERROR	service-manager.AutonomousDatabases	Create AutonomousDatabase failed	{"error": "Service error:InvalidParameter. The Autonomous Database name cannot be longer than 14 characters
+ERROR	service-manager.AutonomousDatabase	Create AutonomousDatabase failed	{"error": "Service error:InvalidParameter. The Autonomous Database name cannot be longer than 14 characters
 ```
 Invalid parameter error happens when one of the parameter for the associated OCI resource is not valid or not as per the specification. Check the specifications for the parameter being reported as invalid from the documentation page of the associated resource and update the same in the yaml for the CR. Parameter specifications : 
 * AutonomousDB : https://docs.oracle.com/en-us/iaas/api/#/en/database/20160918/AutonomousDatabase/
 * MySql : https://docs.oracle.com/en-us/iaas/api/#/en/mysql/20190415/DbSystem/
 * Streaming : https://docs.oracle.com/en-us/iaas/api/#/en/streaming/20180418/Stream/
 
-5. **If the CR creation fails with any 5XX error :**
+4. **If the CR creation fails with any 5XX error :**
 * Contact respective service team from Oracle for support with details of the request (opc-id) and failure message
-

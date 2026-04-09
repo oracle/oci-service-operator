@@ -3,55 +3,51 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 # This kustomization.yaml is not intended to be run by itself,
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/oci.oracle.com_autonomousdatabases.yaml
-- bases/oci.oracle.com_streams.yaml
-- bases/oci.oracle.com_mysqldbsystems.yaml
-- bases/servicemesh.oci.oracle.com_meshes.yaml
-- bases/servicemesh.oci.oracle.com_virtualservices.yaml
-- bases/servicemesh.oci.oracle.com_virtualdeployments.yaml
-- bases/servicemesh.oci.oracle.com_virtualserviceroutetables.yaml
-- bases/servicemesh.oci.oracle.com_virtualdeploymentbindings.yaml
-- bases/servicemesh.oci.oracle.com_accesspolicies.yaml
-- bases/servicemesh.oci.oracle.com_ingressgateways.yaml
-- bases/servicemesh.oci.oracle.com_ingressgatewaydeployments.yaml
-- bases/servicemesh.oci.oracle.com_ingressgatewayroutetables.yaml
+- bases/apigateway.oracle.com_apigatewaydeployments.yaml
+- bases/apigateway.oracle.com_apigateways.yaml
+- bases/containerinstances.oracle.com_containerinstances.yaml
+- bases/core.oracle.com_drgs.yaml
+- bases/core.oracle.com_instances.yaml
+- bases/core.oracle.com_internetgateways.yaml
+- bases/core.oracle.com_natgateways.yaml
+- bases/core.oracle.com_networksecuritygroups.yaml
+- bases/core.oracle.com_routetables.yaml
+- bases/core.oracle.com_securitylists.yaml
+- bases/core.oracle.com_servicegateways.yaml
+- bases/core.oracle.com_subnets.yaml
+- bases/core.oracle.com_vcns.yaml
+- bases/database.oracle.com_autonomousdatabases.yaml
+- bases/dataflow.oracle.com_applications.yaml
+- bases/functions.oracle.com_applications.yaml
+- bases/functions.oracle.com_functions.yaml
+- bases/identity.oracle.com_compartments.yaml
+- bases/keymanagement.oracle.com_vaults.yaml
+- bases/mysql.oracle.com_dbsystems.yaml
+- bases/nosql.oracle.com_tables.yaml
+- bases/objectstorage.oracle.com_buckets.yaml
+- bases/opensearch.oracle.com_opensearchclusters.yaml
+- bases/psql.oracle.com_dbsystems.yaml
+- bases/queue.oracle.com_queues.yaml
+- bases/redis.oracle.com_redisclusters.yaml
+- bases/streaming.oracle.com_streams.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
-patchesStrategicMerge:
+# patches:
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
 # patches here are for enabling the conversion webhook for each CRD
-#- patches/webhook_in_autonomousdatabases.yaml
 #- patches/webhook_in_streams.yaml
-#- patches/webhook_in_mysqldbsystems.yaml
-#- patches/webhook_in_meshes.yaml
-#- patches/webhook_in_virtualservices.yaml
-#- patches/webhook_in_accesspolicies.yaml
-#- patches/webhook_in_ingressgateways.yaml
-#- patches/webhook_in_virtualdeploymentbindings.yaml
-#- patches/webhook_in_virtualserviceroutetables.yaml
-#- patches/webhook_in_virtualdeployments.yaml
-#- patches/webhook_in_ingressgatewayroutetables.yaml
-#- patches/webhook_in_ingressgatewaydeployments.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
 # patches here are for enabling the CA injection for each CRD
-#- patches/cainjection_in_autonomousdatabases.yaml
 #- patches/cainjection_in_streams.yaml
-#- patches/cainjection_in_mysqldbsystems.yaml
-- patches/cainjection_in_meshes.yaml
-- patches/cainjection_in_virtualservices.yaml
-- patches/cainjection_in_virtualdeployments.yaml
-- patches/cainjection_in_virtualserviceroutetables.yaml
-- patches/cainjection_in_virtualdeploymentbindings.yaml
-- patches/cainjection_in_accesspolicies.yaml
-- patches/cainjection_in_ingressgateways.yaml
-- patches/cainjection_in_ingressgatewaydeployments.yaml
-- patches/cainjection_in_ingressgatewayroutetables.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

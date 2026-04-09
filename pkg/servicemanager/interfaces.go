@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/oracle/oci-service-operator/api/v1beta1"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
 type OSOKResponse struct {
@@ -26,5 +26,5 @@ type OSOKServiceManager interface {
 
 	Delete(ctx context.Context, obj runtime.Object) (bool, error)
 
-	GetCrdStatus(obj runtime.Object) (*v1beta1.OSOKStatus, error)
+	GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error)
 }

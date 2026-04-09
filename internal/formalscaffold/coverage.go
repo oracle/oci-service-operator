@@ -1,0 +1,138 @@
+package formalscaffold
+
+import (
+	"fmt"
+	"path/filepath"
+	"sort"
+	"strings"
+
+	"github.com/oracle/oci-service-operator/internal/formal"
+	"github.com/oracle/oci-service-operator/internal/generator"
+)
+
+type CoverageReport struct {
+	Root          string
+	ConfigPath    string
+	ExpectedRows  int
+	ManifestRows  int
+	MissingRows   int
+	ProviderKinds int
+}
+
+func (r CoverageReport) String() string {
+	var b strings.Builder
+	b.WriteString("formal scaffold coverage passed\n")
+	fmt.Fprintf(&b, "- root: %s\n", filepath.ToSlash(r.Root))
+	fmt.Fprintf(&b, "- config: %s\n", filepath.ToSlash(r.ConfigPath))
+	fmt.Fprintf(&b, "- provider kinds discovered: %d\n", r.ProviderKinds)
+	fmt.Fprintf(&b, "- expected rows: %d\n", r.ExpectedRows)
+	fmt.Fprintf(&b, "- manifest rows: %d\n", r.ManifestRows)
+	return b.String()
+}
+
+func VerifyCoverage(opts Options) (CoverageReport, error) {
+	report, formalRoot, configPath, err := initializeCoverageReport(opts)
+	if err != nil {
+		return report, err
+	}
+
+	expectedEntries, err := expectedCoverageEntries(formalRoot, configPath, strings.TrimSpace(opts.ProviderPath), &report)
+	if err != nil {
+		return report, err
+	}
+
+	catalog, err := formal.LoadCatalog(formalRoot)
+	if err != nil {
+		return report, err
+	}
+	report.ManifestRows = len(catalog.Controllers)
+
+	missingRows, problems := compareCoverageEntries(expectedEntries, manifestKindIndex(catalog))
+	report.MissingRows = missingRows
+	if len(problems) > 0 {
+		sort.Strings(problems)
+		return report, fmt.Errorf("formal scaffold coverage failed:\n- %s", strings.Join(problems, "\n- "))
+	}
+	return report, nil
+}
+
+func initializeCoverageReport(opts Options) (CoverageReport, string, string, error) {
+	report := CoverageReport{}
+	if strings.TrimSpace(opts.ProviderPath) == "" {
+		return report, "", "", fmt.Errorf("provider source path must not be empty")
+	}
+	if strings.TrimSpace(opts.Root) == "" {
+		return report, "", "", fmt.Errorf("formal root must not be empty")
+	}
+	if strings.TrimSpace(opts.ConfigPath) == "" {
+		return report, "", "", fmt.Errorf("generator config path must not be empty")
+	}
+
+	formalRoot, err := filepath.Abs(strings.TrimSpace(opts.Root))
+	if err != nil {
+		return report, "", "", err
+	}
+	configPath, err := filepath.Abs(strings.TrimSpace(opts.ConfigPath))
+	if err != nil {
+		return report, "", "", err
+	}
+	report.Root = formalRoot
+	report.ConfigPath = configPath
+
+	if err := requireDirectory(formalRoot); err != nil {
+		return report, "", "", err
+	}
+	return report, formalRoot, configPath, nil
+}
+
+func expectedCoverageEntries(formalRoot string, configPath string, providerPath string, report *CoverageReport) ([]inventoryEntry, error) {
+	cfg, err := generator.LoadConfig(configPath)
+	if err != nil {
+		return nil, err
+	}
+	repoRoot := filepath.Clean(filepath.Join(filepath.Dir(configPath), "..", "..", ".."))
+
+	publishedEntries, _, err := discoverPublishedKinds(repoRoot, cfg)
+	if err != nil {
+		return nil, err
+	}
+	providerEntries, err := discoverProviderKinds(providerPath, publishedEntries)
+	if err != nil {
+		return nil, err
+	}
+	expectedEntries, err := mergeInventoryEntries(publishedEntries, providerEntries)
+	if err != nil {
+		return nil, err
+	}
+
+	report.Root = formalRoot
+	report.ExpectedRows = len(expectedEntries)
+	report.ProviderKinds = len(providerEntries)
+	return expectedEntries, nil
+}
+
+func manifestKindIndex(catalog *formal.Catalog) map[string]string {
+	manifestKinds := make(map[string]string, len(catalog.Controllers))
+	for _, binding := range catalog.Controllers {
+		manifestKinds[rowKey(binding.Manifest.Service, binding.Manifest.Slug)] = binding.Manifest.Kind
+	}
+	return manifestKinds
+}
+
+func compareCoverageEntries(expectedEntries []inventoryEntry, manifestKinds map[string]string) (int, []string) {
+	missingRows := 0
+	var problems []string
+	for _, entry := range expectedEntries {
+		key := rowKey(entry.Service, entry.Slug)
+		kind, ok := manifestKinds[key]
+		if !ok {
+			missingRows++
+			problems = append(problems, fmt.Sprintf("missing formal scaffold row for %s/%s (%s)", entry.Service, entry.Slug, entry.Kind))
+			continue
+		}
+		if kind != entry.Kind {
+			problems = append(problems, fmt.Sprintf("formal scaffold row %s/%s has kind %q, want %q", entry.Service, entry.Slug, kind, entry.Kind))
+		}
+	}
+	return missingRows, problems
+}

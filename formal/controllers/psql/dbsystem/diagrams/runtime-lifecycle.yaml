@@ -1,0 +1,58 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: psql
+slug: dbsystem
+kind: DbSystem
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: tracked OCI ID via GetDbSystem wins; otherwise exact compartmentId plus displayName unique match in ACTIVE, CREATING, UPDATING, INACTIVE, or NEEDS_ATTENTION; duplicate matches fail
+  mutation:
+    mutable:
+      - dbConfigurationParams.applyConfig
+      - dbConfigurationParams.configId
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - managementPolicy
+      - storageDetails.iops
+    forceNew:
+      - compartmentId
+      - dbVersion
+      - instanceCount
+      - instanceMemorySizeInGBs
+      - instanceOcpuCount
+      - networkDetails
+      - shape
+      - storageDetails.availabilityDomain
+      - storageDetails.isRegionallyDurable
+      - storageDetails.systemType
+      - systemType
+    createOnly:
+      - adminPassword.secret.secretName
+      - adminUsername.secret.secretName
+      - configId
+      - credentials
+      - instancesDetails
+      - source
+notes:
+  - Handwritten DbSystem bind first checks the tracked OCID with GetDbSystem, then searches ListDbSystems for an exact compartment plus displayName match, rereads a single candidate through GetDbSystem, and fails on ambiguous duplicates instead of guessing.
+  - Create resolves inline credentials or same-namespace admin secret refs, stamps only non-empty secret refs into status, and does not write follow-up Kubernetes secrets.
+  - Create and update do not poll work requests directly; provider-backed completion is modeled through GetDbSystem lifecycle projection with one-minute requeues while OCI reports CREATING, UPDATING, or DELETING.
+  - ACTIVE, INACTIVE, and NEEDS_ATTENTION settle as Active unless the reconcile is already in update or delete follow-up, and delete retains the finalizer until GetDbSystem or ListDbSystems confirms the DbSystem is deleted or not found.

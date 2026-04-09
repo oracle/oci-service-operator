@@ -1,8 +1,20 @@
 .idea
+WORKFLOW.md
+.taiga-symphony/
 cover.out
+unittests.cover
+unittests.percent
+generated-coverage-report.json
+generated-runtime-report.json
+validator-report.json
+codex-session.log
 bin/
 testbin/
+.envtest-home/
 bundle/
 
 # This is to remediate SCA findings wrt downloads from dockerfiles present in go vendor tree
 vendor/**/Dockerfile
+
+symphony/worktrees
+site/

@@ -1,0 +1,136 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - opensearch/OpensearchCluster
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue OpensearchCluster reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired OpensearchCluster
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetOpensearchCluster
+else tracked identity is missing
+ServiceManager -> OCI: ListOpensearchClusters(filters:\ncompartment_id, display_name, state)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateOpensearchCluster
+loop create pending PROVISIONING
+ServiceManager -> OCI: GetOpensearchCluster
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetOpensearchCluster
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteOpensearchCluster
+ServiceManager -> OCI: confirm delete via\nGetOpensearchCluster or\nListOpensearchClusters
+loop delete pending DELETING
+ServiceManager -> OCI: GetOpensearchCluster or\nListOpensearchClusters
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: display_name
+Reject before mutate: force-new fields
+compartment_id
+Lookup filters: compartment_id,
+display_name, state
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateOpensearchCluster only\nfor mutable fields display_name
+loop update pending UPDATING
+ServiceManager -> OCI: GetOpensearchCluster
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: opensearch
+slug: opensearchopensearchcluster
+kind: OpensearchCluster
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete DELETING
+supported drift: display_name
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_opensearch_opensearch_clusters
+filters compartment_id, display_name, state
+conflicts: none
+open gaps: none
+Create first reuses a unique list match on
+compartmentId plus displayName when one already
+exists; otherwise it issues
+CreateOpensearchCluster and follows with
+read-after-write status projection.
+Reconcile remains retryable while OCI reports
+PROVISIONING or UPDATING, succeeds when ACTIVE,
+and keeps the finalizer until delete follow-up
+confirms DELETING or the resource is absent.
+Only displayName is mutable in place,
+compartmentId remains create-only drift, and no
+Kubernetes secret reads or writes are part of
+this runtime path.
+end note
+@enduml

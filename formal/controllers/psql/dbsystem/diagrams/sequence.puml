@@ -1,0 +1,168 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - psql/DbSystem
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue DbSystem reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired DbSystem
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetDbSystem
+else tracked identity is missing
+ServiceManager -> OCI: ListDbSystems(filters:\ncompartmentId, displayName)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateDbSystem
+loop create pending CREATING
+ServiceManager -> OCI: GetDbSystem
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetDbSystem
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteDbSystem
+ServiceManager -> OCI: confirm delete via GetDbSystem or\nListDbSystems
+loop delete pending DELETING
+ServiceManager -> OCI: GetDbSystem or ListDbSystems
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+dbConfigurationParams.applyConfig,
+dbConfigurationParams.configId,
+definedTags, description (+4 more)
+Reject before mutate: force-new fields
+compartmentId, dbVersion, instanceCount,
+instanceMemorySizeInGBs (+7 more)
+Create-only fields:
+adminPassword.secret.secretName,
+adminUsername.secret.secretName,
+configId, credentials (+2 more)
+Lookup filters: compartmentId,
+displayName
+Lookup matching: tracked OCI ID via
+GetDbSystem wins; otherwise exact
+compartmentId plus displayName unique
+match in ACTIVE, CREATING, UPDATING,
+INACTIVE, or NEEDS_ATTENTION; duplicate
+matches fail
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply ChangeDbSystemCompartment,\nPatchDbSystem,\nResetMasterUserPassword (+1 more)\nonly for mutable fields\ndbConfigurationParams.applyConfig,\ndbConfigurationParams.configId,\ndefinedTags, description (+4 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetDbSystem
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: psql
+slug: dbsystem
+kind: DbSystem
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift:
+dbConfigurationParams.applyConfig,
+dbConfigurationParams.configId, definedTags,
+description (+4 more)
+reject before mutate: force-new fields
+compartmentId, dbVersion, instanceCount,
+instanceMemorySizeInGBs (+7 more)
+create-only fields:
+adminPassword.secret.secretName,
+adminUsername.secret.secretName, configId,
+credentials (+2 more)
+list lookup: oci_psql_db_systems filters
+compartmentId, displayName; tracked OCI ID via
+GetDbSystem wins; otherwise exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION; duplicate matches fail
+conflicts: none
+open gaps: none
+Handwritten DbSystem bind first checks the
+tracked OCID with GetDbSystem, then searches
+ListDbSystems for an exact compartment plus
+displayName match, rereads a single candidate
+through GetDbSystem, and fails on ambiguous
+duplicates instead of guessing.
+Create resolves inline credentials or
+same-namespace admin secret refs, stamps only
+non-empty secret refs into status, and does not
+write follow-up Kubernetes secrets.
+Create and update do not poll work requests
+directly; provider-backed completion is modeled
+through GetDbSystem lifecycle projection with
+one-minute requeues while OCI reports CREATING,
+UPDATING, or DELETING.
+ACTIVE, INACTIVE, and NEEDS_ATTENTION settle as
+Active unless the reconcile is already in update
+or delete follow-up, and delete retains the
+finalizer until GetDbSystem or ListDbSystems
+confirms the DbSystem is deleted or not found.
+end note
+@enduml

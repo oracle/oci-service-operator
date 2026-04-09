@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "instance",
+  "kind": "Instance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "LaunchInstance",
+        "requestType": "core.LaunchInstanceRequest",
+        "responseType": "core.LaunchInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetInstance",
+        "requestType": "core.GetInstanceRequest",
+        "responseType": "core.GetInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListInstances",
+        "requestType": "core.ListInstancesRequest",
+        "responseType": "core.ListInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateInstance",
+        "requestType": "core.UpdateInstanceRequest",
+        "responseType": "core.UpdateInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "TerminateInstance",
+        "requestType": "core.TerminateInstanceRequest",
+        "responseType": "core.TerminateInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING",
+        "STARTING"
+      ],
+      "target": [
+        "RUNNING",
+        "STOPPED"
+      ]
+    },
+    "update": {
+      "pending": [
+        "MOVING",
+        "STOPPING"
+      ],
+      "target": [
+        "RUNNING",
+        "STOPPED"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "compartment_id",
+      "shape",
+      "shape_config",
+      "source_details",
+      "subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING"
+    ],
+    "target": [
+      "TERMINATED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_instances",
+    "collectionField": "instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "availability_domain",
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/instance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/instance/logic-gaps.md",
+    "excludedSemantics": [
+      "launch-body-projection"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Instance rollout uses LaunchInstance/GetInstance/ListInstances/UpdateInstance/TerminateInstance for the first promoted compute path in core.",
+    "The current repo-owned runtime keeps launch-time drift reviewable by mutating only displayName and tags after the instance identity is established.",
+    "Delete confirmation is finalizer-backed until GetInstance stops finding the instance; observed TERMINATED remains an accepted intermediate state on the way to OCI not found."
+  ]
+}
