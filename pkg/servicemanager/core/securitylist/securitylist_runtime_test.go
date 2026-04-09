@@ -93,6 +93,16 @@ func newSecurityListTestManager(client securityListOCIClient) *SecurityListServi
 	return manager
 }
 
+func TestNewSecurityListServiceManager_RetainsExplicitRuntimeClient(t *testing.T) {
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	manager := NewSecurityListServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
+
+	_, isExplicitRuntime := manager.client.(*securityListRuntimeClient)
+	assert.True(t, isExplicitRuntime)
+	_, isGeneratedRuntime := manager.client.(defaultSecurityListServiceClient)
+	assert.False(t, isGeneratedRuntime)
+}
+
 func makeSpecSecurityList() *corev1beta1.SecurityList {
 	return &corev1beta1.SecurityList{
 		Spec: corev1beta1.SecurityListSpec{
