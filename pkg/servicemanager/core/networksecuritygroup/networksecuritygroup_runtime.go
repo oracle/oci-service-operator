@@ -95,13 +95,14 @@ func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.C
 
 	previousStatus := resource.Status
 	c.clearProjectedStatus(resource)
+	clearedStatus := resource.Status
 
 	delegateCtx := ctx
 	if explicitRecreate {
 		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
 	}
 	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
-	if err != nil {
+	if err != nil && !networkSecurityGroupProjectedStatusChanged(resource.Status, clearedStatus) {
 		c.restoreStatus(resource, previousStatus)
 	}
 	return response, err
@@ -162,14 +163,15 @@ func (c *networkSecurityGroupGeneratedParityClient) get(ctx context.Context, oci
 }
 
 func (c *networkSecurityGroupGeneratedParityClient) update(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) (servicemanager.OSOKResponse, error) {
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
+
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
 	if err != nil {
 		return c.fail(resource, err)
 	}
 	if !updateNeeded {
-		if err := c.projectStatus(resource, current); err != nil {
-			return c.fail(resource, err)
-		}
 		return c.applyLifecycle(resource, current)
 	}
 
@@ -402,6 +404,12 @@ func currentNetworkSecurityGroupID(resource *corev1beta1.NetworkSecurityGroup) s
 		return ocid
 	}
 	return strings.TrimSpace(resource.Status.Id)
+}
+
+func networkSecurityGroupProjectedStatusChanged(current, baseline corev1beta1.NetworkSecurityGroupStatus) bool {
+	current.OsokStatus = shared.OSOKStatus{}
+	baseline.OsokStatus = shared.OSOKStatus{}
+	return !reflect.DeepEqual(current, baseline)
 }
 
 func networkSecurityGroupLifecycleIsRetryable(state coresdk.NetworkSecurityGroupLifecycleStateEnum) bool {
