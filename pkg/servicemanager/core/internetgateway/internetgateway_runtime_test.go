@@ -20,6 +20,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ import (
 type fakeInternetGatewayOCIClient struct {
 	createFn func(context.Context, coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error)
 	getFn    func(context.Context, coresdk.GetInternetGatewayRequest) (coresdk.GetInternetGatewayResponse, error)
+	listFn   func(context.Context, coresdk.ListInternetGatewaysRequest) (coresdk.ListInternetGatewaysResponse, error)
 	updateFn func(context.Context, coresdk.UpdateInternetGatewayRequest) (coresdk.UpdateInternetGatewayResponse, error)
 	deleteFn func(context.Context, coresdk.DeleteInternetGatewayRequest) (coresdk.DeleteInternetGatewayResponse, error)
 }
@@ -50,7 +52,18 @@ func (f *fakeInternetGatewayOCIClient) GetInternetGateway(ctx context.Context, r
 	if f.getFn != nil {
 		return f.getFn(ctx, req)
 	}
-	return coresdk.GetInternetGatewayResponse{}, nil
+	return coresdk.GetInternetGatewayResponse{}, fakeInternetGatewayServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "missing",
+	}
+}
+
+func (f *fakeInternetGatewayOCIClient) ListInternetGateways(ctx context.Context, req coresdk.ListInternetGatewaysRequest) (coresdk.ListInternetGatewaysResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return coresdk.ListInternetGatewaysResponse{}, nil
 }
 
 func (f *fakeInternetGatewayOCIClient) UpdateInternetGateway(ctx context.Context, req coresdk.UpdateInternetGatewayRequest) (coresdk.UpdateInternetGatewayResponse, error) {
@@ -81,13 +94,120 @@ func (f fakeInternetGatewayServiceError) GetOpcRequestID() string {
 	return ""
 }
 
+func newTestGeneratedInternetGatewayDelegate(manager *InternetGatewayServiceManager, client internetGatewayOCIClient) InternetGatewayServiceClient {
+	if client == nil {
+		client = &fakeInternetGatewayOCIClient{}
+	}
+
+	config := generatedruntime.Config[*corev1beta1.InternetGateway]{
+		Kind:    "InternetGateway",
+		SDKName: "InternetGateway",
+		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "internetgateway",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"definedTags", "displayName", "freeformTags", "isEnabled", "routeTableId"},
+				ForceNew:      []string{"compartmentId", "vcnId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.CreateInternetGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.CreateInternetGateway(ctx, *request.(*coresdk.CreateInternetGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateInternetGatewayDetails", RequestName: "CreateInternetGatewayDetails", Contribution: "body"}},
+		},
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.GetInternetGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.GetInternetGateway(ctx, *request.(*coresdk.GetInternetGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true}},
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.ListInternetGatewaysRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.ListInternetGateways(ctx, *request.(*coresdk.ListInternetGatewaysRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+			},
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.UpdateInternetGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.UpdateInternetGateway(ctx, *request.(*coresdk.UpdateInternetGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateInternetGatewayDetails", RequestName: "UpdateInternetGatewayDetails", Contribution: "body"},
+			},
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.DeleteInternetGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.DeleteInternetGateway(ctx, *request.(*coresdk.DeleteInternetGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true}},
+		},
+	}
+
+	return defaultInternetGatewayServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.InternetGateway](config),
+	}
+}
+
 func newInternetGatewayTestManager(client internetGatewayOCIClient) *InternetGatewayServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewInternetGatewayServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&internetGatewayRuntimeClient{
-			manager: manager,
-			client:  client,
+		manager.WithClient(&internetGatewayGeneratedParityClient{
+			manager:  manager,
+			delegate: newTestGeneratedInternetGatewayDelegate(manager, client),
+			client:   client,
 		})
 	}
 	return manager
@@ -176,7 +296,7 @@ func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 }
@@ -258,6 +378,38 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	assert.False(t, resource.Status.IsEnabled)
 }
 
+func TestCreateOrUpdate_ExplicitEmptyTagMapsTriggerUpdate(t *testing.T) {
+	var captured coresdk.UpdateInternetGatewayRequest
+	manager := newInternetGatewayTestManager(&fakeInternetGatewayOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetInternetGatewayRequest) (coresdk.GetInternetGatewayResponse, error) {
+			return coresdk.GetInternetGatewayResponse{
+				InternetGateway: makeSDKInternetGateway("ocid1.internetgateway.oc1..existing", "test-internet-gateway", coresdk.InternetGatewayLifecycleStateAvailable),
+			}, nil
+		},
+		updateFn: func(_ context.Context, req coresdk.UpdateInternetGatewayRequest) (coresdk.UpdateInternetGatewayResponse, error) {
+			captured = req
+			updated := makeSDKInternetGateway("ocid1.internetgateway.oc1..existing", "test-internet-gateway", coresdk.InternetGatewayLifecycleStateAvailable)
+			updated.DefinedTags = map[string]map[string]interface{}{}
+			updated.FreeformTags = map[string]string{}
+			return coresdk.UpdateInternetGatewayResponse{InternetGateway: updated}, nil
+		},
+	})
+
+	resource := makeSpecInternetGateway()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.internetgateway.oc1..existing")
+	resource.Spec.DefinedTags = map[string]shared.MapValue{}
+	resource.Spec.FreeformTags = map[string]string{}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, map[string]map[string]interface{}{}, captured.DefinedTags)
+	assert.Equal(t, map[string]string{}, captured.FreeformTags)
+	assert.Len(t, resource.Status.DefinedTags, 0)
+	assert.Len(t, resource.Status.FreeformTags, 0)
+}
+
 func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -311,15 +463,25 @@ func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 
 func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 	getCalls := 0
+	listCalls := 0
 	createCalls := 0
 	manager := newInternetGatewayTestManager(&fakeInternetGatewayOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetInternetGatewayRequest) (coresdk.GetInternetGatewayResponse, error) {
 			getCalls++
-			return coresdk.GetInternetGatewayResponse{}, fakeInternetGatewayServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "not found",
+			if getCalls == 1 {
+				return coresdk.GetInternetGatewayResponse{}, fakeInternetGatewayServiceError{
+					statusCode: 404,
+					code:       "NotFound",
+					message:    "not found",
+				}
 			}
+			return coresdk.GetInternetGatewayResponse{
+				InternetGateway: makeSDKInternetGateway("ocid1.internetgateway.oc1..recreated", "test-internet-gateway", coresdk.InternetGatewayLifecycleStateAvailable),
+			}, nil
+		},
+		listFn: func(_ context.Context, _ coresdk.ListInternetGatewaysRequest) (coresdk.ListInternetGatewaysResponse, error) {
+			listCalls++
+			return coresdk.ListInternetGatewaysResponse{}, nil
 		},
 		createFn: func(_ context.Context, req coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error) {
 			createCalls++
@@ -339,10 +501,48 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 0, listCalls)
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, shared.OCID("ocid1.internetgateway.oc1..recreated"), resource.Status.OsokStatus.Ocid)
 	assert.Equal(t, "ocid1.internetgateway.oc1..recreated", resource.Status.Id)
+}
+
+func TestCreateOrUpdate_DoesNotRecreateOnAuthShapedNotFound(t *testing.T) {
+	getCalls := 0
+	listCalls := 0
+	createCalls := 0
+	manager := newInternetGatewayTestManager(&fakeInternetGatewayOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetInternetGatewayRequest) (coresdk.GetInternetGatewayResponse, error) {
+			getCalls++
+			return coresdk.GetInternetGatewayResponse{}, fakeInternetGatewayServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "not authorized or not found",
+			}
+		},
+		listFn: func(_ context.Context, _ coresdk.ListInternetGatewaysRequest) (coresdk.ListInternetGatewaysResponse, error) {
+			listCalls++
+			return coresdk.ListInternetGatewaysResponse{}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error) {
+			createCalls++
+			return coresdk.CreateInternetGatewayResponse{}, nil
+		},
+	})
+
+	resource := makeSpecInternetGateway()
+	resource.Status.Id = "ocid1.internetgateway.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.internetgateway.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 0, listCalls)
+	assert.Equal(t, 0, createCalls)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 }
 
 func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {

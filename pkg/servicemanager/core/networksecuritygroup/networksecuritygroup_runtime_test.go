@@ -20,6 +20,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ import (
 type fakeNetworkSecurityGroupOCIClient struct {
 	createFn func(context.Context, coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error)
 	getFn    func(context.Context, coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error)
+	listFn   func(context.Context, coresdk.ListNetworkSecurityGroupsRequest) (coresdk.ListNetworkSecurityGroupsResponse, error)
 	updateFn func(context.Context, coresdk.UpdateNetworkSecurityGroupRequest) (coresdk.UpdateNetworkSecurityGroupResponse, error)
 	deleteFn func(context.Context, coresdk.DeleteNetworkSecurityGroupRequest) (coresdk.DeleteNetworkSecurityGroupResponse, error)
 }
@@ -50,7 +52,18 @@ func (f *fakeNetworkSecurityGroupOCIClient) GetNetworkSecurityGroup(ctx context.
 	if f.getFn != nil {
 		return f.getFn(ctx, req)
 	}
-	return coresdk.GetNetworkSecurityGroupResponse{}, nil
+	return coresdk.GetNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "missing",
+	}
+}
+
+func (f *fakeNetworkSecurityGroupOCIClient) ListNetworkSecurityGroups(ctx context.Context, req coresdk.ListNetworkSecurityGroupsRequest) (coresdk.ListNetworkSecurityGroupsResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return coresdk.ListNetworkSecurityGroupsResponse{}, nil
 }
 
 func (f *fakeNetworkSecurityGroupOCIClient) UpdateNetworkSecurityGroup(ctx context.Context, req coresdk.UpdateNetworkSecurityGroupRequest) (coresdk.UpdateNetworkSecurityGroupResponse, error) {
@@ -81,13 +94,121 @@ func (f fakeNetworkSecurityGroupServiceError) GetOpcRequestID() string {
 	return ""
 }
 
+func newTestGeneratedNetworkSecurityGroupDelegate(manager *NetworkSecurityGroupServiceManager, client networkSecurityGroupOCIClient) NetworkSecurityGroupServiceClient {
+	if client == nil {
+		client = &fakeNetworkSecurityGroupOCIClient{}
+	}
+
+	config := generatedruntime.Config[*corev1beta1.NetworkSecurityGroup]{
+		Kind:    "NetworkSecurityGroup",
+		SDKName: "NetworkSecurityGroup",
+		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "networksecuritygroup",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "state", "vcnId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+				ForceNew:      []string{"compartmentId", "vcnId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.CreateNetworkSecurityGroupRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.CreateNetworkSecurityGroup(ctx, *request.(*coresdk.CreateNetworkSecurityGroupRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body"}},
+		},
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.GetNetworkSecurityGroupRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.GetNetworkSecurityGroup(ctx, *request.(*coresdk.GetNetworkSecurityGroupRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.ListNetworkSecurityGroupsRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.ListNetworkSecurityGroups(ctx, *request.(*coresdk.ListNetworkSecurityGroupsRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "VlanId", RequestName: "vlanId", Contribution: "query"},
+				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+			},
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.UpdateNetworkSecurityGroupRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.UpdateNetworkSecurityGroup(ctx, *request.(*coresdk.UpdateNetworkSecurityGroupRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateNetworkSecurityGroupDetails", RequestName: "UpdateNetworkSecurityGroupDetails", Contribution: "body"},
+			},
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.DeleteNetworkSecurityGroupRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.DeleteNetworkSecurityGroup(ctx, *request.(*coresdk.DeleteNetworkSecurityGroupRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},
+		},
+	}
+
+	return defaultNetworkSecurityGroupServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.NetworkSecurityGroup](config),
+	}
+}
+
 func newNetworkSecurityGroupTestManager(client networkSecurityGroupOCIClient) *NetworkSecurityGroupServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewNetworkSecurityGroupServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&networkSecurityGroupRuntimeClient{
-			manager: manager,
-			client:  client,
+		manager.WithClient(&networkSecurityGroupGeneratedParityClient{
+			manager:  manager,
+			delegate: newTestGeneratedNetworkSecurityGroupDelegate(manager, client),
+			client:   client,
 		})
 	}
 	return manager
@@ -170,7 +291,7 @@ func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 }
@@ -339,15 +460,25 @@ func TestCreateOrUpdate_RetryableStates(t *testing.T) {
 
 func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 	getCalls := 0
+	listCalls := 0
 	createCalls := 0
 	manager := newNetworkSecurityGroupTestManager(&fakeNetworkSecurityGroupOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error) {
 			getCalls++
-			return coresdk.GetNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "not found",
+			if getCalls == 1 {
+				return coresdk.GetNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
+					statusCode: 404,
+					code:       "NotFound",
+					message:    "not found",
+				}
 			}
+			return coresdk.GetNetworkSecurityGroupResponse{
+				NetworkSecurityGroup: makeSDKNetworkSecurityGroup("ocid1.networksecuritygroup.oc1..recreated", "test-network-security-group", coresdk.NetworkSecurityGroupLifecycleStateAvailable),
+			}, nil
+		},
+		listFn: func(_ context.Context, _ coresdk.ListNetworkSecurityGroupsRequest) (coresdk.ListNetworkSecurityGroupsResponse, error) {
+			listCalls++
+			return coresdk.ListNetworkSecurityGroupsResponse{}, nil
 		},
 		createFn: func(_ context.Context, req coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error) {
 			createCalls++
@@ -366,10 +497,48 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 0, listCalls)
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, shared.OCID("ocid1.networksecuritygroup.oc1..recreated"), resource.Status.OsokStatus.Ocid)
 	assert.Equal(t, "ocid1.networksecuritygroup.oc1..recreated", resource.Status.Id)
+}
+
+func TestCreateOrUpdate_DoesNotRecreateOnAuthShapedNotFound(t *testing.T) {
+	getCalls := 0
+	listCalls := 0
+	createCalls := 0
+	manager := newNetworkSecurityGroupTestManager(&fakeNetworkSecurityGroupOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error) {
+			getCalls++
+			return coresdk.GetNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "not authorized or not found",
+			}
+		},
+		listFn: func(_ context.Context, _ coresdk.ListNetworkSecurityGroupsRequest) (coresdk.ListNetworkSecurityGroupsResponse, error) {
+			listCalls++
+			return coresdk.ListNetworkSecurityGroupsResponse{}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error) {
+			createCalls++
+			return coresdk.CreateNetworkSecurityGroupResponse{}, nil
+		},
+	})
+
+	resource := makeSpecNetworkSecurityGroup()
+	resource.Status.Id = "ocid1.networksecuritygroup.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.networksecuritygroup.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 0, listCalls)
+	assert.Equal(t, 0, createCalls)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 }
 
 func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
@@ -400,6 +569,11 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 
 func TestDelete_AlreadyMissingOCIResourceIsTreatedAsDeleted(t *testing.T) {
 	manager := newNetworkSecurityGroupTestManager(&fakeNetworkSecurityGroupOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error) {
+			return coresdk.GetNetworkSecurityGroupResponse{
+				NetworkSecurityGroup: makeSDKNetworkSecurityGroup("ocid1.networksecuritygroup.oc1..delete", "test-network-security-group", coresdk.NetworkSecurityGroupLifecycleStateAvailable),
+			}, nil
+		},
 		deleteFn: func(_ context.Context, req coresdk.DeleteNetworkSecurityGroupRequest) (coresdk.DeleteNetworkSecurityGroupResponse, error) {
 			assert.Equal(t, "ocid1.networksecuritygroup.oc1..delete", *req.NetworkSecurityGroupId)
 			return coresdk.DeleteNetworkSecurityGroupResponse{}, fakeNetworkSecurityGroupServiceError{
