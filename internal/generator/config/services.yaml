@@ -242,6 +242,14 @@ services:
           formalSpec: internetgateway
         - kind: NatGateway
           formalSpec: natgateway
+          statusFields:
+            - name: PublicIpIdCreateIntent
+              type: string
+              tag: 'json:"publicIpIdCreateIntent,omitempty"'
+              comments:
+                - Tracks whether `spec.publicIpId` was explicitly set or omitted when the current tracked NAT gateway first became managed by this controller.
+              markers:
+                - +kubebuilder:validation:Enum=Explicit;Omitted
         - kind: NetworkSecurityGroup
           formalSpec: networksecuritygroup
         - kind: RouteTable

@@ -741,6 +741,7 @@ NatGatewayStatus defines the observed state of NatGateway.
 | `lifecycleState` | The NAT gateway's current state. | `string` | No | - | - |
 | `natIp` | The IP address associated with the NAT gateway. | `string` | No | - | - |
 | `publicIpId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the public IP address associated with the NAT gateway. | `string` | No | - | - |
+| `publicIpIdCreateIntent` | Tracks whether `spec.publicIpId` was explicitly set or omitted when the current tracked NAT gateway first became managed by this controller. | `string` | No | - | `Explicit`, `Omitted` |
 | `routeTableId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway. If you don't specify a route table here, the NAT gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the NAT gateway. | `string` | No | - | - |
 | [`status`](#kind-natgateway-status-status) | - | `object` | Yes | - | - |
 | `timeCreated` | The date and time the NAT gateway was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |

@@ -159,6 +159,14 @@ spec:
                 description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the public IP address associated with the NAT gateway.
                 type: string
+              publicIpIdCreateIntent:
+                description: Tracks whether `spec.publicIpId` was explicitly set or
+                  omitted when the current tracked NAT gateway first became managed
+                  by this controller.
+                enum:
+                - Explicit
+                - Omitted
+                type: string
               routeTableId:
                 description: |-
                   The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway.

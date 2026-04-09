@@ -276,6 +276,7 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 	assert.Equal(t, "203.0.113.10", resource.Status.NatIp)
 	assert.Equal(t, "2026-04-01T00:00:00Z", resource.Status.TimeCreated)
+	assert.Equal(t, natGatewayPublicIPIDCreateIntentExplicit, resource.Status.PublicIpIdCreateIntent)
 }
 
 func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
@@ -466,12 +467,51 @@ func TestCreateOrUpdate_OmittedPublicIPIDAllowsObservedAssignedValue(t *testing.
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.Equal(t, assignedPublicIPID, resource.Status.PublicIpId)
+	assert.Equal(t, natGatewayPublicIPIDCreateIntentOmitted, resource.Status.PublicIpIdCreateIntent)
 
 	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.False(t, resp.ShouldRequeue)
 	assert.Equal(t, assignedPublicIPID, resource.Status.PublicIpId)
+	assert.Equal(t, natGatewayPublicIPIDCreateIntentOmitted, resource.Status.PublicIpIdCreateIntent)
+	assert.Equal(t, 0, updateCalls)
+}
+
+func TestCreateOrUpdate_ExplicitPublicIPIDStillRejectsWhenLaterCleared(t *testing.T) {
+	updateCalls := 0
+	manager := newNatGatewayTestManager(&fakeNatGatewayOCIClient{
+		createFn: func(_ context.Context, req coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
+			assert.Equal(t, common.String("ocid1.publicip.oc1..example"), req.PublicIpId)
+			return coresdk.CreateNatGatewayResponse{
+				NatGateway: makeSDKNatGateway("ocid1.natgateway.oc1..existing", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable),
+			}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
+			assert.Equal(t, "ocid1.natgateway.oc1..existing", *req.NatGatewayId)
+			return coresdk.GetNatGatewayResponse{
+				NatGateway: makeSDKNatGateway("ocid1.natgateway.oc1..existing", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error) {
+			updateCalls++
+			return coresdk.UpdateNatGatewayResponse{}, nil
+		},
+	})
+
+	resource := makeSpecNatGateway()
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, natGatewayPublicIPIDCreateIntentExplicit, resource.Status.PublicIpIdCreateIntent)
+
+	resource.Spec.PublicIpId = ""
+
+	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Contains(t, err.Error(), "publicIpId")
 	assert.Equal(t, 0, updateCalls)
 }
 
@@ -521,6 +561,7 @@ func TestCreateOrUpdate_RejectsImmutableDrift(t *testing.T) {
 
 			resource := makeSpecNatGateway()
 			resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.natgateway.oc1..existing")
+			resource.Status.PublicIpIdCreateIntent = natGatewayPublicIPIDCreateIntentExplicit
 			tt.mutateSpec(resource)
 
 			resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})

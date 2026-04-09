@@ -90,6 +90,9 @@ type NatGatewayStatus struct {
 	// table. The Networking service does NOT automatically associate the attached VCN's default route table
 	// with the NAT gateway.
 	RouteTableId string `json:"routeTableId,omitempty"`
+	// Tracks whether `spec.publicIpId` was explicitly set or omitted when the current tracked NAT gateway first became managed by this controller.
+	// +kubebuilder:validation:Enum=Explicit;Omitted
+	PublicIpIdCreateIntent string `json:"publicIpIdCreateIntent,omitempty"`
 }
 
 // +kubebuilder:object:root=true
