@@ -69,9 +69,16 @@ This example is generated from the checked-in sample manifest at `config/samples
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want a distinct DRG to be
+# created for this sample.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: Drg
 metadata:
   name: drg-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: "drg-sample"
 ```

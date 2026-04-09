@@ -16,9 +16,22 @@ This page is generated from the checked-in sample manifest at `config/samples/co
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing ServiceGateway with the same display name in the
+# same VCN.
+# Replace spec.services[*].serviceId with a regional service OCID such as Object
+# Storage.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: ServiceGateway
 metadata:
   name: servicegateway-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  displayName: "servicegateway-sample"
+  services:
+    - serviceId: ocid1.service.oc1..exampleuniqueID
 ```

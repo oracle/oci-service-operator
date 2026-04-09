@@ -3,8 +3,23 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing Subnet with the same display name in the same VCN.
+# This starter sample creates a regional private subnet.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: Subnet
 metadata:
   name: subnet-sample
-spec: {}
+spec:
+  cidrBlock: 10.0.1.0/24
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  displayName: "private-subnet-sample"
+  dnsLabel: "privsubnet"
+  prohibitPublicIpOnVnic: true
+  routeTableId: ocid1.routetable.oc1..exampleuniqueID
+  securityListIds:
+    - ocid1.securitylist.oc1..exampleuniqueID
