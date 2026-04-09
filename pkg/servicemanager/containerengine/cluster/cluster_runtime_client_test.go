@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -330,6 +331,68 @@ func TestClusterCreateOrUpdateReusesMatchingListEntry(t *testing.T) {
 	requireClusterOCID(t, resource, existingID)
 	if resource.Status.Id != existingID {
 		t.Fatalf("status.id = %q, want %q", resource.Status.Id, existingID)
+	}
+}
+
+func TestClusterCreateOrUpdateFallsBackFromStaleTrackedIDToListWithoutLifecycleQuery(t *testing.T) {
+	t.Parallel()
+
+	const staleID = "ocid1.cluster.oc1..stale"
+	const replacementID = "ocid1.cluster.oc1..replacement"
+
+	resource := newExistingClusterTestResource(staleID)
+	resource.Status.LifecycleState = "ACTIVE"
+
+	var listRequest containerenginesdk.ListClustersRequest
+
+	manager := newClusterRuntimeTestManager(generatedruntime.Config[*containerenginev1beta1.Cluster]{
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.GetClusterRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getRequest := request.(*containerenginesdk.GetClusterRequest)
+				gotClusterID := ""
+				if getRequest.ClusterId != nil {
+					gotClusterID = *getRequest.ClusterId
+				}
+				if gotClusterID != staleID {
+					t.Fatalf("get request clusterId = %q, want %q", gotClusterID, staleID)
+				}
+				return nil, fmt.Errorf("NotAuthorizedOrNotFound: cluster not found")
+			},
+			Fields: clusterGetFields(),
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*containerenginesdk.ListClustersRequest)
+				return containerenginesdk.ListClustersResponse{
+					Items: []containerenginesdk.ClusterSummary{
+						observedClusterSummaryFromSpec(replacementID, resource.Spec, "ACTIVE"),
+					},
+				}, nil
+			},
+			Fields: clusterListFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed when the list fallback rebinds a replacement cluster")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue when fallback list reuse observes ACTIVE")
+	}
+	if len(listRequest.LifecycleState) != 0 {
+		t.Fatalf("list request lifecycleState = %#v, want empty after stale tracked ID fallback", listRequest.LifecycleState)
+	}
+	requireClusterIDPointer(t, "list request compartmentId", listRequest.CompartmentId, resource.Spec.CompartmentId)
+	requireClusterIDPointer(t, "list request name", listRequest.Name, resource.Spec.Name)
+	requireClusterOCID(t, resource, replacementID)
+	if resource.Status.Id != replacementID {
+		t.Fatalf("status.id = %q, want %q", resource.Status.Id, replacementID)
 	}
 }
 
@@ -927,7 +990,6 @@ func clusterGetFields() []generatedruntime.RequestField {
 func clusterListFields() []generatedruntime.RequestField {
 	return []generatedruntime.RequestField{
 		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 		{FieldName: "Name", RequestName: "name", Contribution: "query"},
 		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 		{FieldName: "Page", RequestName: "page", Contribution: "query"},

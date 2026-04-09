@@ -151,7 +151,6 @@ func init() {
 				},
 				Fields: []generatedruntime.RequestField{
 					{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-					{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 					{FieldName: "Name", RequestName: "name", Contribution: "query"},
 					{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
 					{FieldName: "Page", RequestName: "page", Contribution: "query"},
