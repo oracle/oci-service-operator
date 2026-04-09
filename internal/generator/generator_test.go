@@ -1955,6 +1955,7 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		assertContains(t, serviceClient, append([]string{
 			"Semantics: &generatedruntime.Semantics{",
 			`FormalService:     "core"`,
+			`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,
 			`ProvisioningStates: []string{"PROVISIONING"}`,
 			`PendingStates:  []string{"TERMINATED", "TERMINATING"}`,
 			`TerminalStates: []string{"NOT_FOUND"}`,

@@ -3562,6 +3562,25 @@ func TestValidateFormalSemanticsAllowsWorkRequestFollowUpHelper(t *testing.T) {
 	}
 }
 
+func TestValidateFormalSemanticsBlocksAuxiliaryOperations(t *testing.T) {
+	t.Parallel()
+
+	err := validateFormalSemantics("Vcn", &Semantics{
+		Delete: DeleteSemantics{
+			Policy: "best-effort",
+		},
+		AuxiliaryOperations: []AuxiliaryOperation{
+			{Phase: "list", MethodName: "ListVcns"},
+		},
+	})
+	if err == nil {
+		t.Fatal("validateFormalSemantics() error = nil, want auxiliary-operation failure")
+	}
+	if !strings.Contains(err.Error(), "unsupported list auxiliary operation ListVcns") {
+		t.Fatalf("validateFormalSemantics() error = %v, want auxiliary-operation detail", err)
+	}
+}
+
 func requireCreateOrUpdateSuccess(t *testing.T, response servicemanager.OSOKResponse, err error) {
 	t.Helper()
 
