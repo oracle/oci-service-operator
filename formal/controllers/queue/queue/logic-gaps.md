@@ -10,7 +10,7 @@ gaps: []
 
 ## Current runtime intent
 
-- `Queue` now uses a handwritten runtime override installed through the generated `newQueueServiceClient` seam. Create, update, and delete persist work-request IDs in status and resume through `GetWorkRequest` until the Queue reaches a terminal observed state.
+- `Queue` intentionally retains a handwritten core runtime as the active manager path. The generated `newQueueServiceClient` scaffold is not the live reconcile path because the generic `generatedruntime` flow still cannot preserve Queue's work-request-backed identity recovery and explicit empty-string and zero-value update intent without a broader seam. Create, update, and delete persist work-request IDs in status and resume through `GetWorkRequest` until the Queue reaches a terminal observed state.
 - Create-time identity recovery is work-request-backed. The runtime resolves the created Queue OCID from work-request resources and does not rely on display-name-only list matching as the primary binding mechanism.
 - Update is field-aware and repo-authored. The runtime reads the live Queue by tracked OCID, rejects create-only drift for `compartmentId` and `retentionInSeconds`, allows mutable `UpdateQueueDetails` fields, and preserves the explicit empty-string custom-encryption-key clear path.
 - Status projection is part of the checked-in contract. The runtime projects live OCI Queue fields into the published `QueueStatus` surface and keeps `createWorkRequestId`, `updateWorkRequestId`, and `deleteWorkRequestId` stable across requeues.
