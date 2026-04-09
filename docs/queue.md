@@ -86,13 +86,21 @@ This example is generated from the checked-in sample manifest at `config/samples
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of binding to an existing Queue with the same display name in the same
+# compartment.
+#
 apiVersion: queue.oracle.com/v1beta1
 kind: Queue
 metadata:
   name: queue-sample
 spec:
   compartmentId: ocid1.compartment.oc1..exampleuniqueID
-  displayName: queue-sample
+  displayName: "queue-sample"
+  visibilityInSeconds: 30
+  timeoutInSeconds: 20
 ```
 
 ## Update Behavior
