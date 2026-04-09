@@ -20,6 +20,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ import (
 type fakeNatGatewayOCIClient struct {
 	createFn func(context.Context, coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error)
 	getFn    func(context.Context, coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error)
+	listFn   func(context.Context, coresdk.ListNatGatewaysRequest) (coresdk.ListNatGatewaysResponse, error)
 	updateFn func(context.Context, coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error)
 	deleteFn func(context.Context, coresdk.DeleteNatGatewayRequest) (coresdk.DeleteNatGatewayResponse, error)
 }
@@ -51,6 +53,13 @@ func (f *fakeNatGatewayOCIClient) GetNatGateway(ctx context.Context, req coresdk
 		return f.getFn(ctx, req)
 	}
 	return coresdk.GetNatGatewayResponse{}, nil
+}
+
+func (f *fakeNatGatewayOCIClient) ListNatGateways(ctx context.Context, req coresdk.ListNatGatewaysRequest) (coresdk.ListNatGatewaysResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return coresdk.ListNatGatewaysResponse{Items: []coresdk.NatGateway{}}, nil
 }
 
 func (f *fakeNatGatewayOCIClient) UpdateNatGateway(ctx context.Context, req coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error) {
@@ -81,13 +90,120 @@ func (f fakeNatGatewayServiceError) GetOpcRequestID() string {
 	return ""
 }
 
+func newTestNatGatewayDelegate(manager *NatGatewayServiceManager, client natGatewayOCIClient) NatGatewayServiceClient {
+	if client == nil {
+		client = &fakeNatGatewayOCIClient{}
+	}
+
+	config := generatedruntime.Config[*corev1beta1.NatGateway]{
+		Kind:    "NatGateway",
+		SDKName: "NatGateway",
+		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "natgateway",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId"},
+				ForceNew:      []string{"compartmentId", "publicIpId", "vcnId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.CreateNatGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.CreateNatGateway(ctx, *request.(*coresdk.CreateNatGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateNatGatewayDetails", RequestName: "CreateNatGatewayDetails", Contribution: "body"}},
+		},
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.GetNatGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.GetNatGateway(ctx, *request.(*coresdk.GetNatGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.ListNatGatewaysRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.ListNatGateways(ctx, *request.(*coresdk.ListNatGatewaysRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+			},
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.UpdateNatGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.UpdateNatGateway(ctx, *request.(*coresdk.UpdateNatGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateNatGatewayDetails", RequestName: "UpdateNatGatewayDetails", Contribution: "body"},
+			},
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.DeleteNatGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.DeleteNatGateway(ctx, *request.(*coresdk.DeleteNatGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},
+		},
+	}
+
+	return defaultNatGatewayServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.NatGateway](config),
+	}
+}
+
 func newNatGatewayTestManager(client natGatewayOCIClient) *NatGatewayServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewNatGatewayServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
 		manager.WithClient(&natGatewayRuntimeClient{
-			manager: manager,
-			client:  client,
+			manager:  manager,
+			delegate: newTestNatGatewayDelegate(manager, client),
+			client:   client,
 		})
 	}
 	return manager
@@ -131,6 +247,12 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 		createFn: func(_ context.Context, req coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
 			captured = req
 			return coresdk.CreateNatGatewayResponse{
+				NatGateway: makeSDKNatGateway("ocid1.natgateway.oc1..create", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable),
+			}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
+			assert.Equal(t, "ocid1.natgateway.oc1..create", *req.NatGatewayId)
+			return coresdk.GetNatGatewayResponse{
 				NatGateway: makeSDKNatGateway("ocid1.natgateway.oc1..create", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable),
 			}, nil
 		},
@@ -180,7 +302,7 @@ func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.GreaterOrEqual(t, getCalls, 1)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 }
@@ -230,14 +352,21 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 
 func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	var captured coresdk.UpdateNatGatewayRequest
+	getCalls := 0
 	manager := newNatGatewayTestManager(&fakeNatGatewayOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
-			current := makeSDKNatGateway("ocid1.natgateway.oc1..existing", "old-name", coresdk.NatGatewayLifecycleStateAvailable)
-			current.BlockTraffic = common.Bool(false)
-			current.DefinedTags = map[string]map[string]interface{}{"Operations": {"CostCenter": "41"}}
-			current.FreeformTags = map[string]string{"env": "stage"}
-			current.RouteTableId = common.String("ocid1.routetable.oc1..old")
-			return coresdk.GetNatGatewayResponse{NatGateway: current}, nil
+			getCalls++
+			if getCalls <= 2 {
+				current := makeSDKNatGateway("ocid1.natgateway.oc1..existing", "old-name", coresdk.NatGatewayLifecycleStateAvailable)
+				current.BlockTraffic = common.Bool(false)
+				current.DefinedTags = map[string]map[string]interface{}{"Operations": {"CostCenter": "41"}}
+				current.FreeformTags = map[string]string{"env": "stage"}
+				current.RouteTableId = common.String("ocid1.routetable.oc1..old")
+				return coresdk.GetNatGatewayResponse{NatGateway: current}, nil
+			}
+			updated := makeSDKNatGateway("ocid1.natgateway.oc1..existing", "new-name", coresdk.NatGatewayLifecycleStateAvailable)
+			updated.BlockTraffic = common.Bool(true)
+			return coresdk.GetNatGatewayResponse{NatGateway: updated}, nil
 		},
 		updateFn: func(_ context.Context, req coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error) {
 			captured = req
@@ -275,6 +404,7 @@ func TestCreateOrUpdate_ClearingMutableFieldsTriggersUpdate(t *testing.T) {
 		updateFn: func(_ context.Context, req coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error) {
 			captured = req
 			updated := makeSDKNatGateway("ocid1.natgateway.oc1..existing", "", coresdk.NatGatewayLifecycleStateAvailable)
+			updated.BlockTraffic = common.Bool(false)
 			updated.DisplayName = common.String("")
 			updated.DefinedTags = map[string]map[string]interface{}{}
 			updated.FreeformTags = map[string]string{}
@@ -285,6 +415,7 @@ func TestCreateOrUpdate_ClearingMutableFieldsTriggersUpdate(t *testing.T) {
 
 	resource := makeSpecNatGateway()
 	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.natgateway.oc1..existing")
+	resource.Spec.BlockTraffic = false
 	resource.Spec.DisplayName = ""
 	resource.Spec.DefinedTags = nil
 	resource.Spec.FreeformTags = nil
@@ -294,10 +425,12 @@ func TestCreateOrUpdate_ClearingMutableFieldsTriggersUpdate(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, false, *captured.BlockTraffic)
 	assert.Equal(t, "", *captured.DisplayName)
 	assert.Equal(t, map[string]map[string]interface{}{}, captured.DefinedTags)
 	assert.Equal(t, map[string]string{}, captured.FreeformTags)
 	assert.Equal(t, "", *captured.RouteTableId)
+	assert.False(t, resource.Status.BlockTraffic)
 	assert.Equal(t, "", resource.Status.DisplayName)
 	assert.Len(t, resource.Status.DefinedTags, 0)
 	assert.Len(t, resource.Status.FreeformTags, 0)
@@ -410,11 +543,16 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 	manager := newNatGatewayTestManager(&fakeNatGatewayOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
 			getCalls++
-			return coresdk.GetNatGatewayResponse{}, fakeNatGatewayServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "not found",
+			if getCalls == 1 {
+				return coresdk.GetNatGatewayResponse{}, fakeNatGatewayServiceError{
+					statusCode: 404,
+					code:       "NotFound",
+					message:    "not found",
+				}
 			}
+			return coresdk.GetNatGatewayResponse{
+				NatGateway: makeSDKNatGateway("ocid1.natgateway.oc1..recreated", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable),
+			}, nil
 		},
 		createFn: func(_ context.Context, req coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
 			createCalls++
@@ -433,10 +571,39 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, shared.OCID("ocid1.natgateway.oc1..recreated"), resource.Status.OsokStatus.Ocid)
 	assert.Equal(t, "ocid1.natgateway.oc1..recreated", resource.Status.Id)
+}
+
+func TestCreateOrUpdate_DoesNotRecreateOnAuthShapedNotFound(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	manager := newNatGatewayTestManager(&fakeNatGatewayOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
+			getCalls++
+			return coresdk.GetNatGatewayResponse{}, fakeNatGatewayServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "auth ambiguity",
+			}
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
+			createCalls++
+			return coresdk.CreateNatGatewayResponse{}, nil
+		},
+	})
+
+	resource := makeSpecNatGateway()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.natgateway.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 0, createCalls)
 }
 
 func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {

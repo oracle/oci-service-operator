@@ -19,6 +19,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -31,14 +32,16 @@ const serviceGatewayRequeueDuration = time.Minute
 type serviceGatewayOCIClient interface {
 	CreateServiceGateway(ctx context.Context, request coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error)
 	GetServiceGateway(ctx context.Context, request coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error)
+	ListServiceGateways(ctx context.Context, request coresdk.ListServiceGatewaysRequest) (coresdk.ListServiceGatewaysResponse, error)
 	UpdateServiceGateway(ctx context.Context, request coresdk.UpdateServiceGatewayRequest) (coresdk.UpdateServiceGatewayResponse, error)
 	DeleteServiceGateway(ctx context.Context, request coresdk.DeleteServiceGatewayRequest) (coresdk.DeleteServiceGatewayResponse, error)
 }
 
 type serviceGatewayRuntimeClient struct {
-	manager *ServiceGatewayServiceManager
-	client  serviceGatewayOCIClient
-	initErr error
+	manager  *ServiceGatewayServiceManager
+	delegate ServiceGatewayServiceClient
+	client   serviceGatewayOCIClient
+	initErr  error
 }
 
 type normalizedServiceGatewayService struct {
@@ -46,11 +49,14 @@ type normalizedServiceGatewayService struct {
 }
 
 func init() {
+	generatedFactory := newServiceGatewayServiceClient
 	newServiceGatewayServiceClient = func(manager *ServiceGatewayServiceManager) ServiceGatewayServiceClient {
+		delegate := generatedFactory(manager)
 		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
 		runtimeClient := &serviceGatewayRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
+			manager:  manager,
+			delegate: delegate,
+			client:   sdkClient,
 		}
 		if err != nil {
 			runtimeClient.initErr = fmt.Errorf("initialize ServiceGateway OCI client: %w", err)
@@ -59,89 +65,96 @@ func init() {
 	}
 }
 
-func (c *serviceGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.ServiceGateway, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+func (c *serviceGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.ServiceGateway, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("servicegateway parity delegate is not configured")
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		return c.create(ctx, resource)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isServiceGatewayReadNotFoundOCI(err) {
-			c.clearTrackedIdentity(resource)
-			return c.create(ctx, resource)
+	trackedID := currentServiceGatewayID(resource)
+	explicitRecreate := false
+	if trackedID != "" {
+		if c.initErr != nil {
+			return c.fail(resource, c.initErr)
 		}
+		if c.client == nil {
+			return c.fail(resource, fmt.Errorf("servicegateway parity OCI client is not configured"))
+		}
+
+		current, err := c.get(ctx, trackedID)
+		if err != nil {
+			if isServiceGatewayReadNotFoundOCI(err) {
+				c.clearTrackedIdentity(resource)
+				explicitRecreate = true
+			} else {
+				return c.fail(resource, normalizeServiceGatewayOCIError(err))
+			}
+		} else {
+			c.normalizeEquivalentServices(resource, current)
+
+			if !serviceGatewayLifecycleIsRetryable(current.LifecycleState) {
+				updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+				if err != nil {
+					return c.fail(resource, err)
+				}
+				if serviceGatewayRequiresLocalParity(resource, current) {
+					if updateNeeded {
+						return c.updateWithParity(ctx, resource, updateRequest)
+					}
+					if err := c.projectStatus(resource, current); err != nil {
+						return c.fail(resource, err)
+					}
+					return c.applyLifecycle(resource, current)
+				}
+			}
+		}
+	}
+
+	previousStatus := resource.Status
+	c.clearProjectedStatus(resource)
+
+	delegateCtx := ctx
+	if explicitRecreate {
+		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
+	}
+
+	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
+	if err != nil {
+		c.restoreStatus(resource, previousStatus)
+	}
+	return response, err
+}
+
+func (c *serviceGatewayRuntimeClient) updateWithParity(
+	ctx context.Context,
+	resource *corev1beta1.ServiceGateway,
+	request coresdk.UpdateServiceGatewayRequest,
+) (servicemanager.OSOKResponse, error) {
+	response, err := c.client.UpdateServiceGateway(ctx, request)
+	if err != nil {
 		return c.fail(resource, normalizeServiceGatewayOCIError(err))
 	}
 
-	if err := c.projectStatus(resource, current); err != nil {
+	if err := c.projectStatus(resource, response.ServiceGateway); err != nil {
 		return c.fail(resource, err)
 	}
-
-	switch current.LifecycleState {
-	case coresdk.ServiceGatewayLifecycleStateProvisioning, coresdk.ServiceGatewayLifecycleStateTerminating, coresdk.ServiceGatewayLifecycleStateTerminated:
-		return c.applyLifecycle(resource, current)
-	}
-
-	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
-	if err != nil {
-		return c.fail(resource, err)
-	}
-
-	if updateNeeded {
-		response, err := c.client.UpdateServiceGateway(ctx, updateRequest)
-		if err != nil {
-			return c.fail(resource, normalizeServiceGatewayOCIError(err))
-		}
-		current = response.ServiceGateway
-	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
-	}
-	return c.applyLifecycle(resource, current)
+	return c.applyLifecycle(resource, response.ServiceGateway)
 }
 
 func (c *serviceGatewayRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.ServiceGateway) (bool, error) {
+	if c.delegate == nil {
+		return false, fmt.Errorf("servicegateway parity delegate is not configured")
+	}
 	if c.initErr != nil {
 		return false, c.initErr
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	trackedID := currentServiceGatewayID(resource)
 	if trackedID == "" {
 		c.markDeleted(resource, "OCI resource identifier is not recorded")
 		return true, nil
 	}
 
-	deleteRequest := coresdk.DeleteServiceGatewayRequest{
-		ServiceGatewayId: common.String(trackedID),
-	}
-	if _, err := c.client.DeleteServiceGateway(ctx, deleteRequest); err != nil {
-		if isServiceGatewayDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
-		return false, normalizeServiceGatewayOCIError(err)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isServiceGatewayDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-		return false, normalizeServiceGatewayOCIError(err)
-	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
-	}
-	c.markTerminating(resource, current)
-	return false, nil
+	return c.delegate.Delete(ctx, resource)
 }
 
 func (c *serviceGatewayRuntimeClient) create(ctx context.Context, resource *corev1beta1.ServiceGateway) (servicemanager.OSOKResponse, error) {
@@ -388,6 +401,35 @@ func (c *serviceGatewayRuntimeClient) clearTrackedIdentity(resource *corev1beta1
 	resource.Status = corev1beta1.ServiceGatewayStatus{}
 }
 
+func (c *serviceGatewayRuntimeClient) clearProjectedStatus(resource *corev1beta1.ServiceGateway) {
+	if resource == nil {
+		return
+	}
+
+	resource.Status = corev1beta1.ServiceGatewayStatus{
+		OsokStatus: resource.Status.OsokStatus,
+	}
+}
+
+func (c *serviceGatewayRuntimeClient) restoreStatus(resource *corev1beta1.ServiceGateway, previous corev1beta1.ServiceGatewayStatus) {
+	if resource == nil {
+		return
+	}
+
+	failedStatus := resource.Status.OsokStatus
+	resource.Status = previous
+	resource.Status.OsokStatus = failedStatus
+}
+
+func (c *serviceGatewayRuntimeClient) normalizeEquivalentServices(resource *corev1beta1.ServiceGateway, current coresdk.ServiceGateway) {
+	if resource == nil {
+		return
+	}
+	if normalizedServicesEqual(current.Services, convertSpecServicesToOCI(resource.Spec.Services)) {
+		resource.Spec.Services = convertOCIServicesToStatus(current.Services)
+	}
+}
+
 func (c *serviceGatewayRuntimeClient) markTerminating(resource *corev1beta1.ServiceGateway, current coresdk.ServiceGateway) {
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
@@ -448,6 +490,64 @@ func isServiceGatewayReadNotFoundOCI(err error) bool {
 func isServiceGatewayDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func currentServiceGatewayID(resource *corev1beta1.ServiceGateway) string {
+	if resource == nil {
+		return ""
+	}
+	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+}
+
+func serviceGatewayLifecycleIsRetryable(state coresdk.ServiceGatewayLifecycleStateEnum) bool {
+	switch state {
+	case coresdk.ServiceGatewayLifecycleStateProvisioning,
+		coresdk.ServiceGatewayLifecycleStateTerminating,
+		coresdk.ServiceGatewayLifecycleStateTerminated:
+		return true
+	default:
+		return false
+	}
+}
+
+func serviceGatewayRequiresParityUpdate(resource *corev1beta1.ServiceGateway, current coresdk.ServiceGateway) bool {
+	if resource == nil {
+		return false
+	}
+
+	if !resource.Spec.BlockTraffic && !boolPtrEqual(current.BlockTraffic, resource.Spec.BlockTraffic) {
+		return true
+	}
+	if strings.TrimSpace(resource.Spec.DisplayName) == "" && !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
+		return true
+	}
+	if strings.TrimSpace(resource.Spec.RouteTableId) == "" && !stringPtrEqual(current.RouteTableId, resource.Spec.RouteTableId) {
+		return true
+	}
+
+	desiredFreeformTags := desiredFreeformTagsForUpdate(resource.Spec.FreeformTags, current.FreeformTags)
+	if len(desiredFreeformTags) == 0 && !reflect.DeepEqual(current.FreeformTags, desiredFreeformTags) {
+		return true
+	}
+
+	desiredDefinedTags := desiredDefinedTagsForUpdate(resource.Spec.DefinedTags, current.DefinedTags)
+	if len(desiredDefinedTags) == 0 && !reflect.DeepEqual(current.DefinedTags, desiredDefinedTags) {
+		return true
+	}
+
+	desiredServices := convertSpecServicesToOCI(resource.Spec.Services)
+	if len(desiredServices) == 0 && !normalizedServicesEqual(current.Services, desiredServices) {
+		return true
+	}
+
+	return false
+}
+
+func serviceGatewayRequiresLocalParity(resource *corev1beta1.ServiceGateway, current coresdk.ServiceGateway) bool {
+	if serviceGatewayRequiresParityUpdate(resource, current) {
+		return true
+	}
+	return len(resource.Spec.Services) > 0 || len(current.Services) > 0
 }
 
 func stringPtrEqual(actual *string, expected string) bool {
