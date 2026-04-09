@@ -464,6 +464,49 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	assert.NotEqual(t, oldCreatedAt.Time.Format(time.RFC3339Nano), resource.Status.TimeCreated)
 }
 
+func TestCreateOrUpdate_RecreatesWhenTrackedApplicationTurnsDeleted(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	manager := newTestManager(&fakeApplicationOCIClient{
+		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			getCalls++
+			if getCalls == 1 {
+				return dataflowsdk.GetApplicationResponse{
+					Application: makeSDKApplication("ocid1.dataflowapplication.oc1..existing", "test-application", dataflowsdk.ApplicationLifecycleStateActive),
+				}, nil
+			}
+			return dataflowsdk.GetApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..existing", "test-application", dataflowsdk.ApplicationLifecycleStateDeleted),
+			}, nil
+		},
+		createFn: func(_ context.Context, req dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error) {
+			createCalls++
+			assert.Equal(t, common.String("ocid1.compartment.oc1..example"), req.CompartmentId)
+			return dataflowsdk.CreateApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..recreated", "test-application", dataflowsdk.ApplicationLifecycleStateActive),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ dataflowsdk.UpdateApplicationRequest) (dataflowsdk.UpdateApplicationResponse, error) {
+			t.Fatal("UpdateApplication should not be called once the tracked application turns DELETED")
+			return dataflowsdk.UpdateApplicationResponse{}, nil
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.Id = "ocid1.dataflowapplication.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, "ocid1.dataflowapplication.oc1..recreated", string(resource.Status.OsokStatus.Ocid))
+	assert.Equal(t, "ACTIVE", resource.Status.LifecycleState)
+}
+
 func TestCreateOrUpdate_TreatsInactiveAsSuccessfulObservedState(t *testing.T) {
 	updateCalls := 0
 	manager := newTestManager(&fakeApplicationOCIClient{
@@ -515,4 +558,29 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 	assert.True(t, done)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
+func TestDelete_StaysTerminatingWhileOCIStillReportsDeleted(t *testing.T) {
+	manager := newTestManager(&fakeApplicationOCIClient{
+		deleteFn: func(_ context.Context, req dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error) {
+			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
+			return dataflowsdk.DeleteApplicationResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			return dataflowsdk.GetApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..delete", "test-application", dataflowsdk.ApplicationLifecycleStateDeleted),
+			}, nil
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, done)
+	assert.Equal(t, "DELETED", resource.Status.LifecycleState)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
 }

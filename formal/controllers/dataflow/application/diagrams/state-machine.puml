@@ -74,23 +74,29 @@ create-only fields: none
 list lookup: none
 conflicts: none
 open gaps: none
-The active Application runtime is still the
-handwritten override in
-`pkg/servicemanager/dataflow/application`; this
-seeded formal row exists to regenerate a
-generatedruntime baseline without switching the
-active reconcile path.
-Create and update treat OCI `ACTIVE` and
-`INACTIVE` as successful observed states,
-project the live Application payload into
-status, and reject create-only drift for
-`compartmentId` and `type`.
-The handwritten runtime never binds by list
-lookup. Delete stays finalizer-backed for the
-tracked OCID until `GetApplication` returns not
-found; if OCI ever echoes lifecycle `DELETED`,
-the runtime still treats that as terminating
-instead of final completion.
+The active Application runtime keeps the
+generated service-manager shell but overrides
+the generated client seam with an
+`applicationGeneratedRuntimeClient` wrapper
+around `generatedruntime.ServiceClient`.
+Tracked OCI identity is preflighted through
+`GetApplication`; NotFound or lifecycle
+`DELETED` clears the recorded identity and
+re-enters `CreateApplication` instead of binding
+by list lookup.
+Create and update use custom request-body
+builders so `execute` precedence, enum
+validation, and optional field omission stay
+explicit in the checked-in contract.
+The generatedruntime delegate fully replaces
+`ApplicationStatus` from the latest OCI payload,
+clearing omitted optional fields while
+preserving OSOK bookkeeping.
+Delete keeps the finalizer until
+`GetApplication` returns not found; during
+delete confirmation a `DELETED` lifecycle
+readback remains terminating instead of final
+completion.
 end note
 note right of delete_pending
 delete policy: required

@@ -126,10 +126,9 @@
     ]
   },
   "notes": [
-    "Pinned OCI SDK contract: Application baseline uses CreateApplication/GetApplication/UpdateApplication/DeleteApplication in the seeded formal contract, while the generated serviceclient still discovers ListApplications directly from the SDK for non-active baseline output.",
-    "The active handwritten runtime does not bind by list lookup; it creates when no tracked OCID exists and recreates when GetApplication returns not found for a previously tracked identity.",
-    "Mutable drift is repo-authored and broad, but create-only drift remains explicit for compartmentId and type.",
-    "When spec.execute is set, the handwritten runtime suppresses subordinate className, fileUri, arguments, configuration, and parameters drift instead of treating those fields as update signals.",
-    "Delete confirmation completes only after GetApplication stops finding the tracked resource; a DELETED lifecycle readback is still treated as an intermediate terminating state."
+    "Pinned OCI SDK contract imported from terraform-provider-oci for the published Application resource; the active generatedruntime-backed override uses CreateApplication/GetApplication/UpdateApplication/DeleteApplication and intentionally leaves ListApplications out of the live reconcile path.",
+    "The active Application runtime preflights tracked OCIDs through GetApplication, clears recorded identity and recreates when OCI returns NotFound or lifecycle DELETED, and never adopts by display-name list lookup.",
+    "Mutable drift is repo-authored: compartmentId and type stay create-only, execute suppresses subordinate className/fileUri/arguments/configuration/parameters drift, and the remaining Data Flow update surface is handled through custom generatedruntime request builders.",
+    "Status projection replaces the published ApplicationStatus from the latest OCI payload so omitted optional fields clear, while delete confirmation keeps the finalizer until GetApplication returns not found even if OCI briefly echoes lifecycle DELETED."
   ]
 }
