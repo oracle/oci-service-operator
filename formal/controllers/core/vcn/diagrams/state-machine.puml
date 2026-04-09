@@ -93,7 +93,7 @@ pre-delete state.
 end note
 note right of delete_pending
 delete policy: required
-delete observe: GetVcn or ListVcn
+delete observe: GetVcn or ListVcns
 delete targets: NOT_FOUND
 end note
 @enduml
