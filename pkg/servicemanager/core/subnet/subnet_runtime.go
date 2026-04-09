@@ -88,6 +88,7 @@ func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *core
 				return c.fail(resource, err)
 			}
 			c.normalizeMutableCollections(resource, &current)
+			c.normalizeEquivalentCreateOnlyFields(resource, current)
 			if subnetLifecycleIsRetryable(current.LifecycleState) {
 				return c.applyLifecycle(resource, current)
 			}
@@ -205,6 +206,20 @@ func (c *subnetRuntimeClient) normalizeMutableCollections(resource *corev1beta1.
 	}
 	if normalizedStringSlicesEqual(current.Ipv6CidrBlocks, resource.Spec.Ipv6CidrBlocks) {
 		resource.Spec.Ipv6CidrBlocks = append([]string(nil), current.Ipv6CidrBlocks...)
+	}
+}
+
+func (c *subnetRuntimeClient) normalizeEquivalentCreateOnlyFields(resource *corev1beta1.Subnet, current coresdk.Subnet) {
+	if resource == nil {
+		return
+	}
+
+	// OCI derives prohibitPublicIpOnVnic from prohibitInternetIngress on create.
+	if resource.Spec.ProhibitInternetIngress &&
+		!resource.Spec.ProhibitPublicIpOnVnic &&
+		boolValue(current.ProhibitInternetIngress) &&
+		boolValue(current.ProhibitPublicIpOnVnic) {
+		resource.Spec.ProhibitPublicIpOnVnic = true
 	}
 }
 
@@ -335,7 +350,7 @@ func validateSubnetCreateOnlyDrift(spec corev1beta1.SubnetSpec, current coresdk.
 	if !boolCreateOnlyMatches(current.ProhibitInternetIngress, spec.ProhibitInternetIngress) {
 		unsupported = append(unsupported, "prohibitInternetIngress")
 	}
-	if !boolCreateOnlyMatches(current.ProhibitPublicIpOnVnic, spec.ProhibitPublicIpOnVnic) {
+	if !subnetProhibitPublicIPOnVNICCreateOnlyMatches(spec, current) {
 		unsupported = append(unsupported, "prohibitPublicIpOnVnic")
 	}
 
@@ -560,6 +575,17 @@ func boolPtrEqual(actual *bool, expected bool) bool {
 
 func boolCreateOnlyMatches(actual *bool, expected bool) bool {
 	return boolValue(actual) == expected
+}
+
+func subnetProhibitPublicIPOnVNICCreateOnlyMatches(spec corev1beta1.SubnetSpec, current coresdk.Subnet) bool {
+	if boolCreateOnlyMatches(current.ProhibitPublicIpOnVnic, spec.ProhibitPublicIpOnVnic) {
+		return true
+	}
+
+	// OCI derives prohibitPublicIpOnVnic from prohibitInternetIngress on create.
+	return spec.ProhibitInternetIngress &&
+		!spec.ProhibitPublicIpOnVnic &&
+		boolValue(current.ProhibitPublicIpOnVnic)
 }
 
 func metav1Time(t time.Time) metav1.Time {
