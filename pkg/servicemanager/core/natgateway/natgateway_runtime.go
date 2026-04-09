@@ -28,6 +28,11 @@ import (
 
 const natGatewayRequeueDuration = time.Minute
 
+const (
+	natGatewayPublicIPIDCreateIntentExplicit = "Explicit"
+	natGatewayPublicIPIDCreateIntentOmitted  = "Omitted"
+)
+
 type natGatewayOCIClient interface {
 	CreateNatGateway(ctx context.Context, request coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error)
 	GetNatGateway(ctx context.Context, request coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error)
@@ -94,6 +99,7 @@ func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 		}
 	}
 
+	publicIPIDCreateIntent := natGatewayCreateIntentForReconcile(resource, trackedID, explicitRecreate)
 	previousStatus := resource.Status
 	c.clearProjectedStatus(resource)
 
@@ -105,6 +111,8 @@ func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
 	if err != nil {
 		c.restoreStatus(resource, previousStatus)
+	} else {
+		resource.Status.PublicIpIdCreateIntent = publicIPIDCreateIntent
 	}
 	return response, err
 }
@@ -173,7 +181,7 @@ func (c *natGatewayRuntimeClient) buildUpdateRequest(resource *corev1beta1.NatGa
 		return coresdk.UpdateNatGatewayRequest{}, false, fmt.Errorf("current NatGateway does not expose an OCI identifier")
 	}
 
-	if err := validateNatGatewayCreateOnlyDrift(resource.Spec, current); err != nil {
+	if err := validateNatGatewayCreateOnlyDrift(resource, current); err != nil {
 		return coresdk.UpdateNatGatewayRequest{}, false, err
 	}
 
@@ -261,7 +269,8 @@ func desiredDefinedTagsForUpdate(spec map[string]shared.MapValue, current map[st
 	return nil
 }
 
-func validateNatGatewayCreateOnlyDrift(spec corev1beta1.NatGatewaySpec, current coresdk.NatGateway) error {
+func validateNatGatewayCreateOnlyDrift(resource *corev1beta1.NatGateway, current coresdk.NatGateway) error {
+	spec := resource.Spec
 	var unsupported []string
 
 	if !stringCreateOnlyMatches(current.CompartmentId, spec.CompartmentId) {
@@ -270,7 +279,7 @@ func validateNatGatewayCreateOnlyDrift(spec corev1beta1.NatGatewaySpec, current 
 	if !stringCreateOnlyMatches(current.VcnId, spec.VcnId) {
 		unsupported = append(unsupported, "vcnId")
 	}
-	if !natGatewayOptionalCreateOnlyMatches(current.PublicIpId, spec.PublicIpId) {
+	if natGatewayShouldEnforcePublicIPIDDrift(resource) && !stringCreateOnlyMatches(current.PublicIpId, spec.PublicIpId) {
 		unsupported = append(unsupported, "publicIpId")
 	}
 
@@ -344,7 +353,8 @@ func (c *natGatewayRuntimeClient) clearProjectedStatus(resource *corev1beta1.Nat
 	}
 
 	resource.Status = corev1beta1.NatGatewayStatus{
-		OsokStatus: resource.Status.OsokStatus,
+		OsokStatus:             resource.Status.OsokStatus,
+		PublicIpIdCreateIntent: resource.Status.PublicIpIdCreateIntent,
 	}
 }
 
@@ -369,19 +379,20 @@ func (c *natGatewayRuntimeClient) markTerminating(resource *corev1beta1.NatGatew
 
 func (c *natGatewayRuntimeClient) projectStatus(resource *corev1beta1.NatGateway, current coresdk.NatGateway) error {
 	resource.Status = corev1beta1.NatGatewayStatus{
-		OsokStatus:     resource.Status.OsokStatus,
-		CompartmentId:  stringValue(current.CompartmentId),
-		Id:             stringValue(current.Id),
-		BlockTraffic:   boolValue(current.BlockTraffic),
-		LifecycleState: string(current.LifecycleState),
-		NatIp:          stringValue(current.NatIp),
-		TimeCreated:    sdkTimeString(current.TimeCreated),
-		VcnId:          stringValue(current.VcnId),
-		DefinedTags:    convertOCIToStatusDefinedTags(current.DefinedTags),
-		DisplayName:    stringValue(current.DisplayName),
-		FreeformTags:   cloneStringMap(current.FreeformTags),
-		PublicIpId:     stringValue(current.PublicIpId),
-		RouteTableId:   stringValue(current.RouteTableId),
+		OsokStatus:             resource.Status.OsokStatus,
+		CompartmentId:          stringValue(current.CompartmentId),
+		Id:                     stringValue(current.Id),
+		BlockTraffic:           boolValue(current.BlockTraffic),
+		LifecycleState:         string(current.LifecycleState),
+		NatIp:                  stringValue(current.NatIp),
+		TimeCreated:            sdkTimeString(current.TimeCreated),
+		VcnId:                  stringValue(current.VcnId),
+		DefinedTags:            convertOCIToStatusDefinedTags(current.DefinedTags),
+		DisplayName:            stringValue(current.DisplayName),
+		FreeformTags:           cloneStringMap(current.FreeformTags),
+		PublicIpId:             stringValue(current.PublicIpId),
+		RouteTableId:           stringValue(current.RouteTableId),
+		PublicIpIdCreateIntent: natGatewayCurrentCreateIntent(resource),
 	}
 	return nil
 }
@@ -467,6 +478,47 @@ func natGatewayRequiresParityUpdate(resource *corev1beta1.NatGateway, current co
 	return false
 }
 
+func natGatewayCreateIntentForReconcile(
+	resource *corev1beta1.NatGateway,
+	trackedID string,
+	explicitRecreate bool,
+) string {
+	if trackedID == "" || explicitRecreate {
+		return natGatewayCreateIntentFromSpec(resource.Spec.PublicIpId)
+	}
+	return natGatewayCurrentCreateIntent(resource)
+}
+
+func natGatewayCreateIntentFromSpec(publicIPID string) string {
+	if strings.TrimSpace(publicIPID) != "" {
+		return natGatewayPublicIPIDCreateIntentExplicit
+	}
+	return natGatewayPublicIPIDCreateIntentOmitted
+}
+
+func natGatewayCurrentCreateIntent(resource *corev1beta1.NatGateway) string {
+	if resource == nil {
+		return ""
+	}
+	if resource.Status.PublicIpIdCreateIntent != "" {
+		return resource.Status.PublicIpIdCreateIntent
+	}
+	if strings.TrimSpace(resource.Spec.PublicIpId) != "" {
+		return natGatewayPublicIPIDCreateIntentExplicit
+	}
+	return ""
+}
+
+func natGatewayShouldEnforcePublicIPIDDrift(resource *corev1beta1.NatGateway) bool {
+	if resource == nil {
+		return false
+	}
+	if strings.TrimSpace(resource.Spec.PublicIpId) != "" {
+		return true
+	}
+	return natGatewayCurrentCreateIntent(resource) == natGatewayPublicIPIDCreateIntentExplicit
+}
+
 func stringPtrEqual(actual *string, expected string) bool {
 	if actual == nil {
 		return strings.TrimSpace(expected) == ""
@@ -476,13 +528,6 @@ func stringPtrEqual(actual *string, expected string) bool {
 
 func stringCreateOnlyMatches(actual *string, expected string) bool {
 	return strings.TrimSpace(stringValue(actual)) == strings.TrimSpace(expected)
-}
-
-func natGatewayOptionalCreateOnlyMatches(actual *string, expected string) bool {
-	if strings.TrimSpace(expected) == "" {
-		return true
-	}
-	return stringCreateOnlyMatches(actual, expected)
 }
 
 func boolPtrEqual(actual *bool, expected bool) bool {
