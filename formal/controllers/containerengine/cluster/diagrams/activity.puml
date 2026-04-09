@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetCluster;
 else (no)
-:Resolve an existing OCI resource through\nListCluster using filters compartment_id,\nstate;
+:Resolve an existing OCI resource through\nListClusters using filters compartment_id,\nlifecycle_state, name;
 :Create the OCI resource via CreateCluster when\nno reusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteCluster with required\nvia GetCluster or ListCluster to DELETED\nconfirmation;
-:Confirm deletion via GetCluster or ListCluster\nuntil OCI reaches DELETED;
+:Delete path uses DeleteCluster with required\nvia GetCluster or ListClusters to DELETED\nconfirmation;
+:Confirm deletion via GetCluster or\nListClusters until OCI reaches DELETED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -46,7 +46,7 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
@@ -57,15 +57,15 @@ endif
 partition "Ready and Drift Handling" {
 :Compare live OCI state against the imported\nfield surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields cluster_pod_network_options.cni_type,\ncluster_pod_network_options.json_data,\ncompartment_id,\nendpoint_config.is_public_ip_enabled (+9 more);
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateCluster only for mutable fields\ndisplay_name;
+:Apply UpdateCluster only for mutable fields\ndefined_tags, freeform_tags,\nimage_policy_config.is_policy_enabled,\nimage_policy_config.key_details.kms_key_id (+8\nmore);
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=cluster action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=cluster action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=cluster action=DELETED when the\nmatching field-driven path executes;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -91,14 +91,20 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: defined_tags, freeform_tags,
+image_policy_config.is_policy_enabled,
+image_policy_config.key_details.kms_key_id (+8
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_pod_network_options.cni_type,
+cluster_pod_network_options.json_data,
+compartment_id,
+endpoint_config.is_public_ip_enabled (+9 more)
 create-only fields: none
-list lookup: scaffold_containerengine_cluster
-filters compartment_id, state
+list lookup: oci_containerengine_clusters
+filters compartment_id, lifecycle_state, name
 conflicts: none
 open gaps: none
 Scaffold metadata only; replace with

@@ -18,6 +18,19 @@ packages:
         kind: ApiGatewayDeployment
         summary: Manage OCI API Gateway deployment routes and backend bindings.
 
+  - package: containerengine
+    displayName: Container Engine for Kubernetes
+    summary: Manage OCI Container Engine for Kubernetes clusters from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Cluster.
+    kindOverrides:
+      - group: containerengine
+        kind: Cluster
+        summary: Manage OCI Container Engine for Kubernetes clusters.
+
   - package: containerinstances
     displayName: Container Instances
     summary: Manage OCI Container Instances from Kubernetes.

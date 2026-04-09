@@ -53,6 +53,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - containerengine.oracle.com
+  resources:
+  - clusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - containerengine.oracle.com
+  resources:
+  - clusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - containerengine.oracle.com
+  resources:
+  - clusters/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - containerinstances.oracle.com
   resources:
   - containerinstances

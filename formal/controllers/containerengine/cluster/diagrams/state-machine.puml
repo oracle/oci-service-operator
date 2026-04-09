@@ -33,14 +33,14 @@ state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateCluster
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, freeform_tags,\nimage_policy_config.is_policy_enabled\n(+9 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,14 +69,20 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create CREATING, UPDATING;
+update UPDATING; delete DELETING
+supported drift: defined_tags, freeform_tags,
+image_policy_config.is_policy_enabled,
+image_policy_config.key_details.kms_key_id (+8
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_pod_network_options.cni_type,
+cluster_pod_network_options.json_data,
+compartment_id,
+endpoint_config.is_public_ip_enabled (+9 more)
 create-only fields: none
-list lookup: scaffold_containerengine_cluster
-filters compartment_id, state
+list lookup: oci_containerengine_clusters
+filters compartment_id, lifecycle_state, name
 conflicts: none
 open gaps: none
 Scaffold metadata only; replace with
@@ -85,7 +91,7 @@ promotion.
 end note
 note right of delete_pending
 delete policy: required
-delete observe: GetCluster or ListCluster
+delete observe: GetCluster or ListClusters
 delete targets: DELETED
 end note
 @enduml

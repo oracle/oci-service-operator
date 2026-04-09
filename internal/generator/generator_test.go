@@ -2008,6 +2008,80 @@ func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	}
 }
 
+func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	services, err := cfg.SelectServices("containerengine", false)
+	if err != nil {
+		t.Fatalf("SelectServices(--service containerengine) error = %v", err)
+	}
+	if len(services) != 1 {
+		t.Fatalf("SelectServices(--service containerengine) returned %d services, want 1", len(services))
+	}
+	containerengineService := services[0]
+	if got := containerengineService.SelectedKinds(); !slices.Equal(got, []string{"Cluster"}) {
+		t.Fatalf("containerengine SelectedKinds() = %v, want [Cluster]", got)
+	}
+	assertServiceFormalSpec(t, &containerengineService, "Cluster", "cluster")
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{containerengineService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	serviceClientPath := "pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go"
+	serviceManagerPath := "pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go"
+	assertPathsExist(t, []string{
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "groupversion_info.go"),
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "cluster_types.go"),
+		filepath.Join(outputRoot, "controllers", "containerengine", "cluster_controller.go"),
+		filepath.Join(outputRoot, serviceClientPath),
+		filepath.Join(outputRoot, serviceManagerPath),
+		filepath.Join(outputRoot, "internal", "registrations", "containerengine_generated.go"),
+		filepath.Join(outputRoot, "packages", "containerengine", "metadata.env"),
+		filepath.Join(outputRoot, "packages", "containerengine", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"),
+	})
+	assertPathsNotExist(t, []string{
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "nodepool_types.go"),
+		filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "containerengine", "nodepool", "nodepool_serviceclient.go"),
+	})
+
+	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
+	assertContains(t, content, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "containerengine"`,
+		`FormalSlug:        "cluster"`,
+		`ProvisioningStates: []string{"CREATING", "UPDATING"}`,
+		`UpdatingStates:     []string{"UPDATING"}`,
+		`PendingStates:  []string{"DELETING"}`,
+		`TerminalStates: []string{"DELETED"}`,
+		`ResponseItemsField: "Items"`,
+		`MatchFields:        []string{"compartmentId", "lifecycleState", "name"}`,
+		`Mutable:       []string{"definedTags", "freeformTags", "imagePolicyConfig.isPolicyEnabled", "imagePolicyConfig.keyDetails.kmsKeyId", "kubernetesVersion", "name", "options.admissionControllerOptions.isPodSecurityPolicyEnabled", "options.persistentVolumeConfig.definedTags", "options.persistentVolumeConfig.freeformTags", "options.serviceLbConfig.definedTags", "options.serviceLbConfig.freeformTags", "type"}`,
+		`ForceNew:      []string{"clusterPodNetworkOptions.cniType", "clusterPodNetworkOptions.jsonData", "compartmentId", "endpointConfig.isPublicIpEnabled", "endpointConfig.nsgIds", "endpointConfig.subnetId", "kmsKeyId", "options.addOns.isKubernetesDashboardEnabled", "options.addOns.isTillerEnabled", "options.kubernetesNetworkConfig.podsCidr", "options.kubernetesNetworkConfig.servicesCidr", "options.serviceLbSubnetIds", "vcnId"}`,
+		`EntityType: "cluster", Action: "CREATED"`,
+		`EntityType: "cluster", Action: "UPDATED"`,
+		`EntityType: "cluster", Action: "DELETED"`,
+		`NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} }`,
+		`return sdkClient.ListClusters(ctx, *request.(*containerenginesdk.ListClustersRequest))`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}},`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+	})
+}
+
 func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services, err := cfg.SelectServices("identity", false)

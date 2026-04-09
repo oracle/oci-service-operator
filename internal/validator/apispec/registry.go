@@ -3,6 +3,7 @@ package apispec
 import (
 	"reflect"
 
+	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
@@ -236,6 +237,27 @@ var targets = []Target{
 			},
 			{
 				SDKStruct:  "psql.DbSystemSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "ContainerEngineCluster",
+		SpecType:   reflect.TypeOf(containerenginev1beta1.ClusterSpec{}),
+		StatusType: reflect.TypeOf(containerenginev1beta1.ClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "containerengine.CreateClusterDetails",
+			},
+			{
+				SDKStruct: "containerengine.UpdateClusterDetails",
+			},
+			{
+				SDKStruct:  "containerengine.Cluster",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "containerengine.ClusterSummary",
 				APISurface: "status",
 			},
 		},
