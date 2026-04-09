@@ -54,10 +54,11 @@ func init() {
 	newQueueServiceClient = newActiveQueueServiceClient
 }
 
-// Queue intentionally keeps the handwritten runtime as the active core path.
-// The generated client scaffold remains generator-owned metadata, but the live
-// manager wiring must preserve work-request resume, work-request-backed Queue ID
-// recovery, required delete confirmation, and explicit empty/zero update intent.
+// Queue intentionally keeps a queue-local core runtime as the active path.
+// The generated client scaffold still carries the formal generatedruntime
+// metadata, but the shared core has no narrow seam for persisted work-request
+// resume, work-request-backed Queue ID recovery, or Queue's explicit zero and
+// empty-string update intent without recreating most of this state machine.
 func newActiveQueueServiceClient(manager *QueueServiceManager) QueueServiceClient {
 	sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
 	runtimeClient := &queueRuntimeClient{
@@ -326,6 +327,9 @@ func (c *queueRuntimeClient) buildUpdateRequest(resource *queuev1beta1.Queue, cu
 		return queuesdk.UpdateQueueRequest{}, false, err
 	}
 
+	// Queue updates must preserve explicit zero and empty-string intent. The
+	// generic generatedruntime mutation filter still treats those values as
+	// absent, so Queue keeps a local typed request builder here.
 	updateDetails := queuesdk.UpdateQueueDetails{}
 	updateNeeded := false
 

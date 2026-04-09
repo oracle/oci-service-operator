@@ -214,6 +214,33 @@ func TestQueueRuntime_ResumeCreateRecoversQueueIDAndProjectsStatus(t *testing.T)
 	assert.Equal(t, "https://cell-1.queue.messaging.us-phoenix-1.oci.oraclecloud.com", resource.Status.MessagesEndpoint)
 }
 
+func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
+	manager := newQueueTestManager(nil)
+	runtimeClient := &queueRuntimeClient{manager: manager}
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus = shared.OSOKStatus{
+		Reason:  string(shared.Updating),
+		Message: "queue update work request is IN_PROGRESS",
+	}
+	resource.Status.CreateWorkRequestId = "wr-create-status"
+	resource.Status.UpdateWorkRequestId = "wr-update-status"
+	resource.Status.DeleteWorkRequestId = "wr-delete-status"
+
+	err := runtimeClient.projectStatus(resource, makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateUpdating))
+
+	assert.NoError(t, err)
+	assert.Equal(t, "wr-create-status", resource.Status.CreateWorkRequestId)
+	assert.Equal(t, "wr-update-status", resource.Status.UpdateWorkRequestId)
+	assert.Equal(t, "wr-delete-status", resource.Status.DeleteWorkRequestId)
+	assert.Equal(t, "ocid1.queue.oc1..existing", resource.Status.Id)
+	assert.Equal(t, "queue-sample", resource.Status.DisplayName)
+	assert.Equal(t, "UPDATING", resource.Status.LifecycleState)
+	assert.Equal(t, "https://cell-1.queue.messaging.us-phoenix-1.oci.oraclecloud.com", resource.Status.MessagesEndpoint)
+	assert.Equal(t, string(shared.Updating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "queue update work request is IN_PROGRESS", resource.Status.OsokStatus.Message)
+}
+
 func TestQueueRuntime_ObserveNoOpWhenStateMatches(t *testing.T) {
 	getCalls := 0
 	updateCalls := 0
@@ -293,6 +320,69 @@ func TestQueueRuntime_MutableUpdateDriftTriggersWorkRequestAndClearCustomEncrypt
 	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
 }
 
+func TestQueueRuntime_MutableUpdateDriftPreservesExplicitZeroValues(t *testing.T) {
+	var captured queuesdk.UpdateQueueRequest
+	getCalls := 0
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			current := makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive)
+			if getCalls == 1 {
+				return queuesdk.GetQueueResponse{Queue: current}, nil
+			}
+			current.VisibilityInSeconds = common.Int(0)
+			current.TimeoutInSeconds = common.Int(0)
+			current.ChannelConsumptionLimit = common.Int(0)
+			current.DeadLetterQueueDeliveryCount = common.Int(0)
+			return queuesdk.GetQueueResponse{Queue: current}, nil
+		},
+		updateFn: func(_ context.Context, req queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+			captured = req
+			return queuesdk.UpdateQueueResponse{
+				OpcWorkRequestId: common.String("wr-update-zero"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-zero", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-update-zero", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Spec.VisibilityInSeconds = 0
+	resource.Spec.TimeoutInSeconds = 0
+	resource.Spec.ChannelConsumptionLimit = 0
+	resource.Spec.DeadLetterQueueDeliveryCount = 0
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, "ocid1.queue.oc1..existing", *captured.QueueId)
+	if assert.NotNil(t, captured.VisibilityInSeconds) {
+		assert.Equal(t, 0, *captured.VisibilityInSeconds)
+	}
+	if assert.NotNil(t, captured.TimeoutInSeconds) {
+		assert.Equal(t, 0, *captured.TimeoutInSeconds)
+	}
+	if assert.NotNil(t, captured.ChannelConsumptionLimit) {
+		assert.Equal(t, 0, *captured.ChannelConsumptionLimit)
+	}
+	if assert.NotNil(t, captured.DeadLetterQueueDeliveryCount) {
+		assert.Equal(t, 0, *captured.DeadLetterQueueDeliveryCount)
+	}
+	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
+	assert.Equal(t, 0, resource.Status.VisibilityInSeconds)
+	assert.Equal(t, 0, resource.Status.TimeoutInSeconds)
+	assert.Equal(t, 0, resource.Status.ChannelConsumptionLimit)
+	assert.Equal(t, 0, resource.Status.DeadLetterQueueDeliveryCount)
+}
+
 func TestQueueRuntime_RejectsCreateOnlyDrift(t *testing.T) {
 	updateCalls := 0
 	manager := newQueueTestManager(&fakeQueueOCIClient{
@@ -340,6 +430,37 @@ func TestQueueRuntime_DeletePendingWorkRequestKeepsTerminating(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, deleted)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
+func TestQueueRuntime_DeleteWaitsForQueueDisappearanceWhenWorkRequestReadIsGone(t *testing.T) {
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-delete-missing", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{}, fakeQueueServiceError{
+				statusCode: 404,
+				code:       errorutil.NotFound,
+				message:    "work request not found",
+			}
+		},
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			return queuesdk.GetQueueResponse{
+				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateDeleting),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Status.DeleteWorkRequestId = "wr-delete-missing"
+
+	deleted, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, deleted)
+	assert.Equal(t, "wr-delete-missing", resource.Status.DeleteWorkRequestId)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Contains(t, resource.Status.OsokStatus.Message, "waiting for Queue ocid1.queue.oc1..existing to disappear")
 }
 
 func TestQueueRuntime_DeleteConfirmationTreatsNotFoundAsSuccess(t *testing.T) {
