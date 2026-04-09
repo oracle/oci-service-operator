@@ -16,9 +16,25 @@ This page is generated from the checked-in sample manifest at `config/samples/da
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers and Object Storage URI below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing Application with the same display name in the
+# same compartment.
+# Replace the starter shapes and Spark version with values currently supported in
+# your region if needed.
+#
 apiVersion: dataflow.oracle.com/v1beta1
 kind: Application
 metadata:
   name: application-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: "application-sample"
+  driverShape: "VM.Standard.E4.Flex"
+  executorShape: "VM.Standard.E4.Flex"
+  language: "PYTHON"
+  numExecutors: 2
+  sparkVersion: "3.5.0"
+  fileUri: "oci://bucket@namespace/app/main.py"
 ```
