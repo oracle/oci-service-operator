@@ -1,0 +1,14 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dataflow
+slug: application
+kind: Application
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - failed
+notes:
+  - The active Application runtime is still the handwritten override in `pkg/servicemanager/dataflow/application`; this seeded formal row exists to regenerate a generatedruntime baseline without switching the active reconcile path.
+  - Create and update treat OCI `ACTIVE` and `INACTIVE` as successful observed states, project the live Application payload into status, and reject create-only drift for `compartmentId` and `type`.
+  - The handwritten runtime never binds by list lookup. Delete stays finalizer-backed for the tracked OCID until `GetApplication` returns not found; if OCI ever echoes lifecycle `DELETED`, the runtime still treats that as terminating instead of final completion.

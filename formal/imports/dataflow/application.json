@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "dataflow",
+  "slug": "application",
+  "kind": "Application",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_dataflow_application",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApplication",
+        "requestType": "dataflow.CreateApplicationRequest",
+        "responseType": "dataflow.CreateApplicationResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApplication",
+        "requestType": "dataflow.GetApplicationRequest",
+        "responseType": "dataflow.GetApplicationResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateApplication",
+        "requestType": "dataflow.UpdateApplicationRequest",
+        "responseType": "dataflow.UpdateApplicationResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApplication",
+        "requestType": "dataflow.DeleteApplicationRequest",
+        "responseType": "dataflow.DeleteApplicationResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "application_log_config",
+      "archive_uri",
+      "arguments",
+      "class_name",
+      "configuration",
+      "defined_tags",
+      "description",
+      "display_name",
+      "driver_shape",
+      "driver_shape_config",
+      "execute",
+      "executor_shape",
+      "executor_shape_config",
+      "file_uri",
+      "freeform_tags",
+      "idle_timeout_in_minutes",
+      "language",
+      "logs_bucket_uri",
+      "max_duration_in_minutes",
+      "metastore_id",
+      "num_executors",
+      "parameters",
+      "pool_id",
+      "private_endpoint_id",
+      "spark_version",
+      "warehouse_bucket_uri"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/dataflow/application/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/dataflow/application/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "execute-precedence",
+      "mutation-policy",
+      "recreate-on-deleted",
+      "status-projection"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Application baseline uses CreateApplication/GetApplication/UpdateApplication/DeleteApplication in the seeded formal contract, while the generated serviceclient still discovers ListApplications directly from the SDK for non-active baseline output.",
+    "The active handwritten runtime does not bind by list lookup; it creates when no tracked OCID exists and recreates when GetApplication returns not found for a previously tracked identity.",
+    "Mutable drift is repo-authored and broad, but create-only drift remains explicit for compartmentId and type.",
+    "When spec.execute is set, the handwritten runtime suppresses subordinate className, fileUri, arguments, configuration, and parameters drift instead of treating those fields as update signals.",
+    "Delete confirmation completes only after GetApplication stops finding the tracked resource; a DELETED lifecycle readback is still treated as an intermediate terminating state."
+  ]
+}

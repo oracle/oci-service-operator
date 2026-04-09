@@ -1,0 +1,100 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - dataflow/Application
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateApplication
+observe --> evaluate_ready : OCI state in ACTIVE,\nINACTIVE
+observe --> retryable : OCI state in DELETED
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\napplication_log_config,\narchive_uri, arguments (+23\nmore)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: dataflow
+slug: application
+kind: Application
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete DELETED
+supported drift: application_log_config,
+archive_uri, arguments, class_name (+22 more)
+reject before mutate: force-new fields
+compartment_id, type
+create-only fields: none
+list lookup: none
+conflicts: none
+open gaps: none
+The active Application runtime is still the
+handwritten override in
+`pkg/servicemanager/dataflow/application`; this
+seeded formal row exists to regenerate a
+generatedruntime baseline without switching the
+active reconcile path.
+Create and update treat OCI `ACTIVE` and
+`INACTIVE` as successful observed states,
+project the live Application payload into
+status, and reject create-only drift for
+`compartmentId` and `type`.
+The handwritten runtime never binds by list
+lookup. Delete stays finalizer-backed for the
+tracked OCID until `GetApplication` returns not
+found; if OCI ever echoes lifecycle `DELETED`,
+the runtime still treats that as terminating
+instead of final completion.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetApplication
+delete targets: NOT_FOUND
+end note
+@enduml

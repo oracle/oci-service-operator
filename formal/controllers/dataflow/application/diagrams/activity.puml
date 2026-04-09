@@ -1,0 +1,121 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - dataflow/Application
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Application spec, tracked status,\nand delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetApplication;
+else (no)
+:Create the OCI resource via CreateApplication\nwhen no tracked identity is present;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteApplication with\nrequired via GetApplication to NOT_FOUND\nconfirmation;
+:Confirm deletion via GetApplication until OCI\nreaches NOT_FOUND;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in DELETED;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, type;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateApplication only for mutable\nfields application_log_config, archive_uri,\narguments, class_name (+22 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: dataflow
+slug: application
+kind: Application
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete DELETED
+supported drift: application_log_config,
+archive_uri, arguments, class_name (+22 more)
+reject before mutate: force-new fields
+compartment_id, type
+create-only fields: none
+list lookup: none
+conflicts: none
+open gaps: none
+The active Application runtime is still the
+handwritten override in
+`pkg/servicemanager/dataflow/application`; this
+seeded formal row exists to regenerate a
+generatedruntime baseline without switching the
+active reconcile path.
+Create and update treat OCI `ACTIVE` and
+`INACTIVE` as successful observed states,
+project the live Application payload into
+status, and reject create-only drift for
+`compartmentId` and `type`.
+The handwritten runtime never binds by list
+lookup. Delete stays finalizer-backed for the
+tracked OCID until `GetApplication` returns not
+found; if OCI ever echoes lifecycle `DELETED`,
+the runtime still treats that as terminating
+instead of final completion.
+end note
+@enduml

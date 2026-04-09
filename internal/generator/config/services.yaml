@@ -374,6 +374,9 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Application
+          formalSpec: application
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns

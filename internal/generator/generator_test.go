@@ -2072,7 +2072,7 @@ func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testin
 
 func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "database", "mysql", "streaming")
+	services := serviceConfigsByName(t, cfg, "database", "dataflow", "mysql", "streaming")
 
 	tests := []promotedRuntimeArtifactExpectation{
 		{
@@ -2092,6 +2092,26 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 				`SecretSideEffects: "none"`,
 				`StatusProjection:  "required"`,
 				`CredentialClient: manager.CredentialClient,`,
+			},
+		},
+		{
+			serviceName:       "dataflow",
+			kind:              "Application",
+			formalSlug:        "application",
+			serviceClientPath: "pkg/servicemanager/dataflow/application/application_serviceclient.go",
+			controllerPath:    "controllers/dataflow/application_controller.go",
+			serviceClientChecks: []string{
+				"Semantics: &generatedruntime.Semantics{",
+				`FormalService:     "dataflow"`,
+				`FormalSlug:        "application"`,
+				`SecretSideEffects: "none"`,
+				`StatusProjection:  "required"`,
+				`PendingStates:  []string{"DELETED"}`,
+				`TerminalStates: []string{"NOT_FOUND"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateApplicationDetails", RequestName: "CreateApplicationDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}},`,
+				`FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateApplicationDetails", RequestName: "UpdateApplicationDetails", Contribution: "body", PreferResourceID: false}},`,
 			},
 		},
 		{
