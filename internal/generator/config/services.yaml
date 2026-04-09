@@ -231,6 +231,20 @@ services:
                   imageId: ocid1.image.oc1..exampleuniqueID
           serviceManager:
             packagePath: core/instance
+        - kind: InternetGateway
+          formalSpec: internetgateway
+        - kind: NatGateway
+          formalSpec: natgateway
+        - kind: NetworkSecurityGroup
+          formalSpec: networksecuritygroup
+        - kind: RouteTable
+          formalSpec: routetable
+        - kind: SecurityList
+          formalSpec: securitylist
+        - kind: ServiceGateway
+          formalSpec: servicegateway
+        - kind: Subnet
+          formalSpec: subnet
         - kind: Vcn
           formalSpec: vcn
     observedState:
