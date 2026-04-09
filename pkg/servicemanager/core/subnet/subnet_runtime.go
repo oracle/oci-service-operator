@@ -88,10 +88,11 @@ func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *core
 				return c.fail(resource, err)
 			}
 			c.normalizeMutableCollections(resource, &current)
-			if !subnetLifecycleIsRetryable(current.LifecycleState) {
-				if err := validateSubnetCreateOnlyDrift(resource.Spec, current); err != nil {
-					return c.fail(resource, err)
-				}
+			if subnetLifecycleIsRetryable(current.LifecycleState) {
+				return c.applyLifecycle(resource, current)
+			}
+			if err := validateSubnetCreateOnlyDrift(resource.Spec, current); err != nil {
+				return c.fail(resource, err)
 			}
 			if current.LifecycleState == coresdk.SubnetLifecycleStateTerminated {
 				return c.fail(resource, fmt.Errorf("Subnet lifecycle state %q is not modeled for create or update", current.LifecycleState))
