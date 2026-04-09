@@ -19,6 +19,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -31,22 +32,26 @@ const subnetRequeueDuration = time.Minute
 type subnetOCIClient interface {
 	CreateSubnet(ctx context.Context, request coresdk.CreateSubnetRequest) (coresdk.CreateSubnetResponse, error)
 	GetSubnet(ctx context.Context, request coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error)
+	ListSubnets(ctx context.Context, request coresdk.ListSubnetsRequest) (coresdk.ListSubnetsResponse, error)
 	UpdateSubnet(ctx context.Context, request coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error)
 	DeleteSubnet(ctx context.Context, request coresdk.DeleteSubnetRequest) (coresdk.DeleteSubnetResponse, error)
 }
 
 type subnetRuntimeClient struct {
-	manager *SubnetServiceManager
-	client  subnetOCIClient
-	initErr error
+	manager  *SubnetServiceManager
+	delegate SubnetServiceClient
+	client   subnetOCIClient
+	initErr  error
 }
 
 func init() {
+	generatedFactory := newSubnetServiceClient
 	newSubnetServiceClient = func(manager *SubnetServiceManager) SubnetServiceClient {
 		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
 		runtimeClient := &subnetRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
+			manager:  manager,
+			delegate: generatedFactory(manager),
+			client:   sdkClient,
 		}
 		if err != nil {
 			runtimeClient.initErr = fmt.Errorf("initialize Subnet OCI client: %w", err)
@@ -55,51 +60,58 @@ func init() {
 	}
 }
 
-func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.Subnet, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.Subnet, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return c.fail(resource, fmt.Errorf("subnet parity delegate is not configured"))
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		return c.create(ctx, resource)
-	}
+	c.normalizeMutableCollections(resource, nil)
 
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isSubnetReadNotFoundOCI(err) {
-			c.clearTrackedIdentity(resource)
-			return c.create(ctx, resource)
+	trackedID := currentSubnetOCID(resource)
+	explicitRecreate := false
+
+	if trackedID != "" {
+		if c.initErr != nil {
+			return c.fail(resource, c.initErr)
 		}
-		return c.fail(resource, normalizeSubnetOCIError(err))
-	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
-	}
-
-	switch current.LifecycleState {
-	case coresdk.SubnetLifecycleStateProvisioning, coresdk.SubnetLifecycleStateUpdating, coresdk.SubnetLifecycleStateTerminating:
-		return c.applyLifecycle(resource, current)
-	}
-
-	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
-	if err != nil {
-		return c.fail(resource, err)
-	}
-
-	if updateNeeded {
-		response, err := c.client.UpdateSubnet(ctx, updateRequest)
+		current, err := c.get(ctx, trackedID)
 		if err != nil {
-			return c.fail(resource, normalizeSubnetOCIError(err))
+			if isSubnetReadNotFoundOCI(err) {
+				c.clearTrackedIdentity(resource)
+				explicitRecreate = true
+			} else {
+				return c.fail(resource, normalizeSubnetOCIError(err))
+			}
+		} else {
+			if err := c.projectStatus(resource, current); err != nil {
+				return c.fail(resource, err)
+			}
+			c.normalizeMutableCollections(resource, &current)
+			if !subnetLifecycleIsRetryable(current.LifecycleState) {
+				if err := validateSubnetCreateOnlyDrift(resource.Spec, current); err != nil {
+					return c.fail(resource, err)
+				}
+			}
+			if current.LifecycleState == coresdk.SubnetLifecycleStateTerminated {
+				return c.fail(resource, fmt.Errorf("Subnet lifecycle state %q is not modeled for create or update", current.LifecycleState))
+			}
 		}
-		current = response.Subnet
 	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
+	previousStatus := resource.Status
+	c.clearProjectedStatus(resource)
+
+	delegateCtx := ctx
+	if trackedID == "" || explicitRecreate {
+		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
 	}
-	return c.applyLifecycle(resource, current)
+
+	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
+	if err != nil {
+		c.restoreStatus(resource, previousStatus)
+	}
+	return response, err
 }
 
 func (c *subnetRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.Subnet) (bool, error) {
@@ -173,6 +185,26 @@ func (c *subnetRuntimeClient) get(ctx context.Context, ocid string) (coresdk.Sub
 		return coresdk.Subnet{}, err
 	}
 	return response.Subnet, nil
+}
+
+func (c *subnetRuntimeClient) normalizeMutableCollections(resource *corev1beta1.Subnet, current *coresdk.Subnet) {
+	if resource == nil {
+		return
+	}
+
+	resource.Spec.SecurityListIds = normalizeStringSlice(resource.Spec.SecurityListIds)
+	resource.Spec.Ipv6CidrBlocks = normalizeStringSlice(resource.Spec.Ipv6CidrBlocks)
+
+	if current == nil {
+		return
+	}
+
+	if normalizedStringSlicesEqual(current.SecurityListIds, resource.Spec.SecurityListIds) {
+		resource.Spec.SecurityListIds = append([]string(nil), current.SecurityListIds...)
+	}
+	if normalizedStringSlicesEqual(current.Ipv6CidrBlocks, resource.Spec.Ipv6CidrBlocks) {
+		resource.Spec.Ipv6CidrBlocks = append([]string(nil), current.Ipv6CidrBlocks...)
+	}
 }
 
 func (c *subnetRuntimeClient) buildUpdateRequest(resource *corev1beta1.Subnet, current coresdk.Subnet) (coresdk.UpdateSubnetRequest, bool, error) {
@@ -391,6 +423,31 @@ func (c *subnetRuntimeClient) clearTrackedIdentity(resource *corev1beta1.Subnet)
 	resource.Status = corev1beta1.SubnetStatus{}
 }
 
+func (c *subnetRuntimeClient) clearProjectedStatus(resource *corev1beta1.Subnet) {
+	if resource == nil {
+		return
+	}
+
+	trackedID := currentSubnetOCID(resource)
+	previousID := resource.Status.Id
+	resource.Status = corev1beta1.SubnetStatus{
+		OsokStatus: resource.Status.OsokStatus,
+	}
+	if trackedID != "" {
+		resource.Status.Id = previousID
+	}
+}
+
+func (c *subnetRuntimeClient) restoreStatus(resource *corev1beta1.Subnet, previous corev1beta1.SubnetStatus) {
+	if resource == nil {
+		return
+	}
+
+	failedStatus := resource.Status.OsokStatus
+	resource.Status = previous
+	resource.Status.OsokStatus = failedStatus
+}
+
 func (c *subnetRuntimeClient) markTerminating(resource *corev1beta1.Subnet, current coresdk.Subnet) {
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
@@ -462,6 +519,24 @@ func isSubnetReadNotFoundOCI(err error) bool {
 func isSubnetDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func currentSubnetOCID(resource *corev1beta1.Subnet) string {
+	if resource == nil {
+		return ""
+	}
+	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+}
+
+func subnetLifecycleIsRetryable(state coresdk.SubnetLifecycleStateEnum) bool {
+	switch state {
+	case coresdk.SubnetLifecycleStateProvisioning,
+		coresdk.SubnetLifecycleStateUpdating,
+		coresdk.SubnetLifecycleStateTerminating:
+		return true
+	default:
+		return false
+	}
 }
 
 func stringPtrEqual(actual *string, expected string) bool {

@@ -19,6 +19,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -34,14 +35,16 @@ const (
 type routeTableOCIClient interface {
 	CreateRouteTable(ctx context.Context, request coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error)
 	GetRouteTable(ctx context.Context, request coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error)
+	ListRouteTables(ctx context.Context, request coresdk.ListRouteTablesRequest) (coresdk.ListRouteTablesResponse, error)
 	UpdateRouteTable(ctx context.Context, request coresdk.UpdateRouteTableRequest) (coresdk.UpdateRouteTableResponse, error)
 	DeleteRouteTable(ctx context.Context, request coresdk.DeleteRouteTableRequest) (coresdk.DeleteRouteTableResponse, error)
 }
 
 type routeTableRuntimeClient struct {
-	manager *RouteTableServiceManager
-	client  routeTableOCIClient
-	initErr error
+	manager  *RouteTableServiceManager
+	delegate RouteTableServiceClient
+	client   routeTableOCIClient
+	initErr  error
 }
 
 type normalizedRouteRule struct {
@@ -53,11 +56,13 @@ type normalizedRouteRule struct {
 }
 
 func init() {
+	generatedFactory := newRouteTableServiceClient
 	newRouteTableServiceClient = func(manager *RouteTableServiceManager) RouteTableServiceClient {
 		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
 		runtimeClient := &routeTableRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
+			manager:  manager,
+			delegate: generatedFactory(manager),
+			client:   sdkClient,
 		}
 		if err != nil {
 			runtimeClient.initErr = fmt.Errorf("initialize RouteTable OCI client: %w", err)
@@ -66,51 +71,62 @@ func init() {
 	}
 }
 
-func (c *routeTableRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.RouteTable, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+func (c *routeTableRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.RouteTable, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return c.fail(resource, fmt.Errorf("route table parity delegate is not configured"))
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		return c.create(ctx, resource)
-	}
+	trackedID := currentRouteTableOCID(resource)
+	explicitRecreate := false
 
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isRouteTableReadNotFoundOCI(err) {
-			c.clearTrackedIdentity(resource)
-			return c.create(ctx, resource)
+	if trackedID != "" {
+		if c.initErr != nil {
+			return c.fail(resource, c.initErr)
 		}
-		return c.fail(resource, normalizeRouteTableOCIError(err))
-	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
-	}
-
-	switch current.LifecycleState {
-	case coresdk.RouteTableLifecycleStateProvisioning, routeTableLifecycleStateUpdate, coresdk.RouteTableLifecycleStateTerminating, coresdk.RouteTableLifecycleStateTerminated:
-		return c.applyLifecycle(resource, current)
-	}
-
-	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
-	if err != nil {
-		return c.fail(resource, err)
-	}
-
-	if updateNeeded {
-		response, err := c.client.UpdateRouteTable(ctx, updateRequest)
+		current, err := c.get(ctx, trackedID)
 		if err != nil {
-			return c.fail(resource, normalizeRouteTableOCIError(err))
+			if isRouteTableReadNotFoundOCI(err) {
+				c.clearTrackedIdentity(resource)
+				explicitRecreate = true
+			} else {
+				return c.fail(resource, normalizeRouteTableOCIError(err))
+			}
+		} else {
+			if err := c.projectStatus(resource, current); err != nil {
+				return c.fail(resource, err)
+			}
+			if routeTableLifecycleIsRetryable(current.LifecycleState) {
+				return c.applyLifecycle(resource, current)
+			}
+
+			routeRulesEquivalent := normalizedRouteRulesEqual(current.RouteRules, convertSpecRouteRulesToOCI(resource.Spec.RouteRules))
+			_, updateNeeded, err := c.buildUpdateRequest(resource, current)
+			if err != nil {
+				return c.fail(resource, err)
+			}
+			if !updateNeeded {
+				return c.applyLifecycle(resource, current)
+			}
+			if routeRulesEquivalent {
+				resource.Spec.RouteRules = nil
+			}
 		}
-		current = response.RouteTable
 	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
+	previousStatus := resource.Status
+	c.clearProjectedStatus(resource)
+
+	delegateCtx := ctx
+	if trackedID == "" || explicitRecreate {
+		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
 	}
-	return c.applyLifecycle(resource, current)
+
+	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
+	if err != nil {
+		c.restoreStatus(resource, previousStatus)
+	}
+	return response, err
 }
 
 func (c *routeTableRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.RouteTable) (bool, error) {
@@ -432,6 +448,31 @@ func (c *routeTableRuntimeClient) clearTrackedIdentity(resource *corev1beta1.Rou
 	resource.Status = corev1beta1.RouteTableStatus{}
 }
 
+func (c *routeTableRuntimeClient) clearProjectedStatus(resource *corev1beta1.RouteTable) {
+	if resource == nil {
+		return
+	}
+
+	trackedID := currentRouteTableOCID(resource)
+	previousID := resource.Status.Id
+	resource.Status = corev1beta1.RouteTableStatus{
+		OsokStatus: resource.Status.OsokStatus,
+	}
+	if trackedID != "" {
+		resource.Status.Id = previousID
+	}
+}
+
+func (c *routeTableRuntimeClient) restoreStatus(resource *corev1beta1.RouteTable, previous corev1beta1.RouteTableStatus) {
+	if resource == nil {
+		return
+	}
+
+	failedStatus := resource.Status.OsokStatus
+	resource.Status = previous
+	resource.Status.OsokStatus = failedStatus
+}
+
 func (c *routeTableRuntimeClient) markTerminating(resource *corev1beta1.RouteTable, current coresdk.RouteTable) {
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
@@ -490,6 +531,25 @@ func isRouteTableReadNotFoundOCI(err error) bool {
 func isRouteTableDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func currentRouteTableOCID(resource *corev1beta1.RouteTable) string {
+	if resource == nil {
+		return ""
+	}
+	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+}
+
+func routeTableLifecycleIsRetryable(state coresdk.RouteTableLifecycleStateEnum) bool {
+	switch state {
+	case coresdk.RouteTableLifecycleStateProvisioning,
+		routeTableLifecycleStateUpdate,
+		coresdk.RouteTableLifecycleStateTerminating,
+		coresdk.RouteTableLifecycleStateTerminated:
+		return true
+	default:
+		return false
+	}
 }
 
 func stringPtrEqual(actual *string, expected string) bool {
