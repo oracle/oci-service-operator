@@ -21,13 +21,6 @@ import (
 
 const queueEndpointSecretOwnerUIDLabel = "queue.oracle.com/queue-uid"
 
-func init() {
-	previousDecorator := queueServiceClientDecorator
-	queueServiceClientDecorator = func(manager *QueueServiceManager, delegate QueueServiceClient) QueueServiceClient {
-		return newQueueEndpointSecretClient(manager, previousDecorator(manager, delegate))
-	}
-}
-
 type queueEndpointSecretRecordReader interface {
 	GetSecretRecord(context.Context, string, string) (credhelper.SecretRecord, error)
 }

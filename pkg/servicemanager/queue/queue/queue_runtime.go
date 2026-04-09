@@ -50,22 +50,24 @@ const (
 	queueWorkRequestPhaseDelete queueWorkRequestPhase = "delete"
 )
 
-var queueServiceClientDecorator = func(_ *QueueServiceManager, delegate QueueServiceClient) QueueServiceClient {
-	return delegate
+func init() {
+	newQueueServiceClient = newActiveQueueServiceClient
 }
 
-func init() {
-	newQueueServiceClient = func(manager *QueueServiceManager) QueueServiceClient {
-		sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &queueRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
-		}
-		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize Queue OCI client: %w", err)
-		}
-		return queueServiceClientDecorator(manager, runtimeClient)
+// Queue intentionally keeps the handwritten runtime as the active core path.
+// The generated client scaffold remains generator-owned metadata, but the live
+// manager wiring must preserve work-request resume, work-request-backed Queue ID
+// recovery, required delete confirmation, and explicit empty/zero update intent.
+func newActiveQueueServiceClient(manager *QueueServiceManager) QueueServiceClient {
+	sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
+	runtimeClient := &queueRuntimeClient{
+		manager: manager,
+		client:  sdkClient,
 	}
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize Queue OCI client: %w", err)
+	}
+	return newQueueEndpointSecretClient(manager, runtimeClient)
 }
 
 func (c *queueRuntimeClient) CreateOrUpdate(ctx context.Context, resource *queuev1beta1.Queue, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
