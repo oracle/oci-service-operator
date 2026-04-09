@@ -136,6 +136,7 @@ type Config[T any] struct {
 	InitError        error
 	Semantics        *Semantics
 	BuildCreateBody  func(context.Context, T, string) (any, error)
+	BuildUpdateBody  func(context.Context, T, string, any) (any, bool, error)
 
 	Create *Operation
 	Get    *Operation
@@ -292,7 +293,7 @@ func (c ServiceClient[T]) mergeLiveResponseIntoStatus(resource T, currentID stri
 }
 
 func (c ServiceClient[T]) reconcileExistingResource(ctx context.Context, resource T, state createOrUpdateState, namespace string) (servicemanager.OSOKResponse, error) {
-	shouldUpdate, err := c.shouldInvokeUpdate(resource, state.liveResponse)
+	shouldUpdate, err := c.shouldInvokeUpdate(ctx, resource, namespace, state.liveResponse)
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
@@ -667,12 +668,16 @@ func (c ServiceClient[T]) requiresLiveMutationAssessment() bool {
 		(c.config.Get != nil || c.config.List != nil)
 }
 
-func (c ServiceClient[T]) shouldInvokeUpdate(resource T, currentResponse any) (bool, error) {
+func (c ServiceClient[T]) shouldInvokeUpdate(ctx context.Context, resource T, namespace string, currentResponse any) (bool, error) {
 	if c.config.Update == nil {
 		return false, nil
 	}
 	if c.shouldObserveCurrentLifecycle(currentResponse) {
 		return false, nil
+	}
+	if c.config.BuildUpdateBody != nil {
+		_, updateNeeded, err := c.config.BuildUpdateBody(ctx, resource, namespace, currentResponse)
+		return updateNeeded, err
 	}
 	if c.config.Semantics == nil {
 		return true, nil
@@ -1214,6 +1219,16 @@ func (c ServiceClient[T]) requestBodyOverride(op *Operation, resource T, options
 		return body, true, nil
 	}
 	if op == c.config.Update {
+		if c.config.BuildUpdateBody != nil {
+			body, ok, err := c.config.BuildUpdateBody(options.Context, resource, options.Namespace, options.CurrentResponse)
+			if err != nil {
+				return nil, false, fmt.Errorf("build %s update body: %w", c.config.Kind, err)
+			}
+			if ok {
+				return body, true, nil
+			}
+			return nil, false, nil
+		}
 		body, ok, err := c.filteredUpdateBody(resource, options)
 		if err != nil {
 			return nil, false, fmt.Errorf("build %s update body: %w", c.config.Kind, err)
@@ -2118,14 +2133,24 @@ func mergeResponseIntoStatus(resource any, response any) error {
 	if err != nil {
 		return err
 	}
+	projectedStatus := reflect.New(statusValue.Type()).Elem()
+	if osokStatusField, ok := fieldValue(statusValue, "OsokStatus"); ok {
+		if projectedOsokStatus := projectedStatus.FieldByName("OsokStatus"); projectedOsokStatus.IsValid() &&
+			projectedOsokStatus.CanSet() &&
+			projectedOsokStatus.Type() == osokStatusField.Type() {
+			projectedOsokStatus.Set(osokStatusField)
+		}
+	}
+	copySecretSourceFields(statusValue, projectedStatus)
 
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return fmt.Errorf("marshal OCI response body: %w", err)
 	}
-	if err := json.Unmarshal(payload, statusValue.Addr().Interface()); err != nil {
+	if err := json.Unmarshal(payload, projectedStatus.Addr().Interface()); err != nil {
 		return fmt.Errorf("project OCI response body into status: %w", err)
 	}
+	statusValue.Set(projectedStatus)
 	return nil
 }
 

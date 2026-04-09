@@ -1099,6 +1099,127 @@ func TestServiceClientCreateOrUpdateSkipsUpdateWhileLifecycleProvisioning(t *tes
 	}
 }
 
+func TestMergeResponseIntoStatusClearsOmittedFields(t *testing.T) {
+	t.Parallel()
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus:  shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:          "ocid1.thing.oc1..existing",
+			DisplayName: "stale-name",
+			ShapeConfig: &fakeShapeConfig{
+				Ocpus:       1,
+				MemoryInGBs: 16,
+			},
+			AdminUsername: shared.UsernameSource{
+				Secret: shared.SecretSource{SecretName: "admin-user"},
+			},
+		},
+	}
+
+	if err := mergeResponseIntoStatus(resource, fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:             "ocid1.thing.oc1..existing",
+			LifecycleState: "ACTIVE",
+		},
+	}); err != nil {
+		t.Fatalf("mergeResponseIntoStatus() error = %v", err)
+	}
+
+	if resource.Status.DisplayName != "" {
+		t.Fatalf("status.displayName = %q, want omitted field cleared", resource.Status.DisplayName)
+	}
+	if resource.Status.ShapeConfig != nil {
+		t.Fatalf("status.shapeConfig = %#v, want omitted field cleared", resource.Status.ShapeConfig)
+	}
+	if got := resource.Status.AdminUsername.Secret.SecretName; got != "admin-user" {
+		t.Fatalf("status.adminUsername.secret.secretName = %q, want preserved secret source", got)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != "ocid1.thing.oc1..existing" {
+		t.Fatalf("status.ocid = %q, want preserved OSOK identity", got)
+	}
+}
+
+func TestServiceClientBuildUpdateBodyCanSuppressUpdate(t *testing.T) {
+	t.Parallel()
+
+	buildCalls := 0
+	updateCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		BuildUpdateBody: func(_ context.Context, _ *fakeResource, _ string, currentResponse any) (any, bool, error) {
+			buildCalls++
+			response, ok := currentResponse.(fakeGetThingResponse)
+			if !ok {
+				t.Fatalf("currentResponse type = %T, want fakeGetThingResponse", currentResponse)
+			}
+			if response.Thing.DisplayName != "existing-name" {
+				t.Fatalf("currentResponse displayName = %q, want existing-name", response.Thing.DisplayName)
+			}
+			return nil, false, nil
+		},
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..existing",
+						DisplayName:    "existing-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				updateCalled = true
+				return fakeUpdateThingResponse{}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			DisplayName: "desired-name",
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.thing.oc1..existing"},
+			Id:         "ocid1.thing.oc1..existing",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful observe result", response)
+	}
+	if updateCalled {
+		t.Fatal("Update() should not be called when BuildUpdateBody suppresses the update")
+	}
+	if buildCalls != 1 {
+		t.Fatalf("BuildUpdateBody() calls = %d, want 1", buildCalls)
+	}
+	if resource.Status.DisplayName != "existing-name" {
+		t.Fatalf("status.displayName = %q, want observed displayName", resource.Status.DisplayName)
+	}
+}
+
 func TestServiceClientCreateOrUpdateSkipsUpdateWhenMutableFieldIsNotReturnedByService(t *testing.T) {
 	t.Parallel()
 

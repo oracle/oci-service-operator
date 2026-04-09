@@ -72,10 +72,7 @@ func newTestManager(client applicationOCIClient) *ApplicationServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewApplicationServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&applicationRuntimeClient{
-			manager: manager,
-			client:  client,
-		})
+		manager.WithClient(newApplicationServiceClientWithOCIClient(manager, client, nil))
 	}
 	return manager
 }
@@ -395,6 +392,40 @@ func TestCreateOrUpdate_ExecutePrecedenceSkipsSubordinateDrift(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.Equal(t, 0, updateCalls)
+}
+
+func TestCreateOrUpdate_ClearsStatusFieldsOmittedByUpdateResponse(t *testing.T) {
+	var captured dataflowsdk.UpdateApplicationRequest
+	manager := newTestManager(&fakeApplicationOCIClient{
+		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			app := makeSDKApplication("ocid1.dataflowapplication.oc1..existing", "old-name", dataflowsdk.ApplicationLifecycleStateActive)
+			app.ClassName = common.String("com.example.Stale")
+			app.Configuration = map[string]string{"spark.app.name": "stale"}
+			app.LogsBucketUri = common.String("oci://bucket@app/stale-logs/")
+			app.Parameters = []dataflowsdk.ApplicationParameter{{Name: common.String("stale"), Value: common.String("value")}}
+			return dataflowsdk.GetApplicationResponse{Application: app}, nil
+		},
+		updateFn: func(_ context.Context, req dataflowsdk.UpdateApplicationRequest) (dataflowsdk.UpdateApplicationResponse, error) {
+			captured = req
+			app := makeSDKApplication("ocid1.dataflowapplication.oc1..existing", "new-name", dataflowsdk.ApplicationLifecycleStateActive)
+			return dataflowsdk.UpdateApplicationResponse{Application: app}, nil
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..existing")
+	resource.Spec.DisplayName = "new-name"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, "new-name", *captured.DisplayName)
+	assert.Equal(t, "new-name", resource.Status.DisplayName)
+	assert.Empty(t, resource.Status.ClassName)
+	assert.Nil(t, resource.Status.Configuration)
+	assert.Empty(t, resource.Status.LogsBucketUri)
+	assert.Nil(t, resource.Status.Parameters)
 }
 
 func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
