@@ -20,6 +20,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ import (
 type fakeServiceGatewayOCIClient struct {
 	createFn func(context.Context, coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error)
 	getFn    func(context.Context, coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error)
+	listFn   func(context.Context, coresdk.ListServiceGatewaysRequest) (coresdk.ListServiceGatewaysResponse, error)
 	updateFn func(context.Context, coresdk.UpdateServiceGatewayRequest) (coresdk.UpdateServiceGatewayResponse, error)
 	deleteFn func(context.Context, coresdk.DeleteServiceGatewayRequest) (coresdk.DeleteServiceGatewayResponse, error)
 }
@@ -51,6 +53,13 @@ func (f *fakeServiceGatewayOCIClient) GetServiceGateway(ctx context.Context, req
 		return f.getFn(ctx, req)
 	}
 	return coresdk.GetServiceGatewayResponse{}, nil
+}
+
+func (f *fakeServiceGatewayOCIClient) ListServiceGateways(ctx context.Context, req coresdk.ListServiceGatewaysRequest) (coresdk.ListServiceGatewaysResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return coresdk.ListServiceGatewaysResponse{Items: []coresdk.ServiceGateway{}}, nil
 }
 
 func (f *fakeServiceGatewayOCIClient) UpdateServiceGateway(ctx context.Context, req coresdk.UpdateServiceGatewayRequest) (coresdk.UpdateServiceGatewayResponse, error) {
@@ -81,13 +90,119 @@ func (f fakeServiceGatewayServiceError) GetOpcRequestID() string {
 	return ""
 }
 
+func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client serviceGatewayOCIClient) ServiceGatewayServiceClient {
+	if client == nil {
+		client = &fakeServiceGatewayOCIClient{}
+	}
+
+	config := generatedruntime.Config[*corev1beta1.ServiceGateway]{
+		Kind:    "ServiceGateway",
+		SDKName: "ServiceGateway",
+		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "servicegateway",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId", "services"},
+				ForceNew:      []string{"compartmentId", "vcnId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.CreateServiceGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.CreateServiceGateway(ctx, *request.(*coresdk.CreateServiceGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceGatewayDetails", RequestName: "CreateServiceGatewayDetails", Contribution: "body"}},
+		},
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.GetServiceGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.GetServiceGateway(ctx, *request.(*coresdk.GetServiceGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.ListServiceGatewaysRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.ListServiceGateways(ctx, *request.(*coresdk.ListServiceGatewaysRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+			},
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.UpdateServiceGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.UpdateServiceGateway(ctx, *request.(*coresdk.UpdateServiceGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateServiceGatewayDetails", RequestName: "UpdateServiceGatewayDetails", Contribution: "body"},
+			},
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.DeleteServiceGatewayRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.DeleteServiceGateway(ctx, *request.(*coresdk.DeleteServiceGatewayRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},
+		},
+	}
+
+	return defaultServiceGatewayServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.ServiceGateway](config),
+	}
+}
+
 func newServiceGatewayTestManager(client serviceGatewayOCIClient) *ServiceGatewayServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewServiceGatewayServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
 		manager.WithClient(&serviceGatewayRuntimeClient{
-			manager: manager,
-			client:  client,
+			manager:  manager,
+			delegate: newTestServiceGatewayDelegate(manager, client),
+			client:   client,
 		})
 	}
 	return manager
@@ -136,6 +251,12 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 		createFn: func(_ context.Context, req coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
 			captured = req
 			return coresdk.CreateServiceGatewayResponse{
+				ServiceGateway: makeSDKServiceGateway("ocid1.servicegateway.oc1..create", "test-service-gateway", coresdk.ServiceGatewayLifecycleStateAvailable),
+			}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error) {
+			assert.Equal(t, "ocid1.servicegateway.oc1..create", *req.ServiceGatewayId)
+			return coresdk.GetServiceGatewayResponse{
 				ServiceGateway: makeSDKServiceGateway("ocid1.servicegateway.oc1..create", "test-service-gateway", coresdk.ServiceGatewayLifecycleStateAvailable),
 			}, nil
 		},
@@ -290,6 +411,54 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdateForScalarAndServices(t *testin
 	}, resource.Status.Services)
 }
 
+func TestCreateOrUpdate_ClearingMutableFieldsTriggersUpdate(t *testing.T) {
+	var captured coresdk.UpdateServiceGatewayRequest
+	manager := newServiceGatewayTestManager(&fakeServiceGatewayOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error) {
+			return coresdk.GetServiceGatewayResponse{
+				ServiceGateway: makeSDKServiceGateway("ocid1.servicegateway.oc1..existing", "old-name", coresdk.ServiceGatewayLifecycleStateAvailable),
+			}, nil
+		},
+		updateFn: func(_ context.Context, req coresdk.UpdateServiceGatewayRequest) (coresdk.UpdateServiceGatewayResponse, error) {
+			captured = req
+			updated := makeSDKServiceGateway("ocid1.servicegateway.oc1..existing", "", coresdk.ServiceGatewayLifecycleStateAvailable)
+			updated.BlockTraffic = common.Bool(false)
+			updated.DisplayName = common.String("")
+			updated.DefinedTags = map[string]map[string]interface{}{}
+			updated.FreeformTags = map[string]string{}
+			updated.RouteTableId = common.String("")
+			updated.Services = []coresdk.ServiceIdResponseDetails{}
+			return coresdk.UpdateServiceGatewayResponse{ServiceGateway: updated}, nil
+		},
+	})
+
+	resource := makeSpecServiceGateway()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.servicegateway.oc1..existing")
+	resource.Spec.BlockTraffic = false
+	resource.Spec.DisplayName = ""
+	resource.Spec.DefinedTags = nil
+	resource.Spec.FreeformTags = nil
+	resource.Spec.RouteTableId = ""
+	resource.Spec.Services = []corev1beta1.ServiceGatewayService{}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, false, *captured.BlockTraffic)
+	assert.Equal(t, "", *captured.DisplayName)
+	assert.Equal(t, map[string]map[string]interface{}{}, captured.DefinedTags)
+	assert.Equal(t, map[string]string{}, captured.FreeformTags)
+	assert.Equal(t, "", *captured.RouteTableId)
+	assert.Empty(t, captured.Services)
+	assert.False(t, resource.Status.BlockTraffic)
+	assert.Equal(t, "", resource.Status.DisplayName)
+	assert.Len(t, resource.Status.DefinedTags, 0)
+	assert.Len(t, resource.Status.FreeformTags, 0)
+	assert.Equal(t, "", resource.Status.RouteTableId)
+	assert.Empty(t, resource.Status.Services)
+}
+
 func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -347,11 +516,16 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 	manager := newServiceGatewayTestManager(&fakeServiceGatewayOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error) {
 			getCalls++
-			return coresdk.GetServiceGatewayResponse{}, fakeServiceGatewayServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "not found",
+			if getCalls == 1 {
+				return coresdk.GetServiceGatewayResponse{}, fakeServiceGatewayServiceError{
+					statusCode: 404,
+					code:       "NotFound",
+					message:    "not found",
+				}
 			}
+			return coresdk.GetServiceGatewayResponse{
+				ServiceGateway: makeSDKServiceGateway("ocid1.servicegateway.oc1..recreated", "test-service-gateway", coresdk.ServiceGatewayLifecycleStateAvailable),
+			}, nil
 		},
 		createFn: func(_ context.Context, req coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
 			createCalls++
@@ -371,10 +545,39 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, shared.OCID("ocid1.servicegateway.oc1..recreated"), resource.Status.OsokStatus.Ocid)
 	assert.Equal(t, "ocid1.servicegateway.oc1..recreated", resource.Status.Id)
+}
+
+func TestCreateOrUpdate_DoesNotRecreateOnAuthShapedNotFound(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	manager := newServiceGatewayTestManager(&fakeServiceGatewayOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error) {
+			getCalls++
+			return coresdk.GetServiceGatewayResponse{}, fakeServiceGatewayServiceError{
+				statusCode: 404,
+				code:       errorutil.NotAuthorizedOrNotFound,
+				message:    "auth ambiguity",
+			}
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
+			createCalls++
+			return coresdk.CreateServiceGatewayResponse{}, nil
+		},
+	})
+
+	resource := makeSpecServiceGateway()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.servicegateway.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 0, createCalls)
 }
 
 func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
