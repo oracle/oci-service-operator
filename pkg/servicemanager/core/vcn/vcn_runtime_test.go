@@ -265,6 +265,33 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, []string{"10.0.0.0/16"}, resource.Status.CidrBlocks)
 }
 
+func TestCreateOrUpdate_AllowsObservedOracleAllocatedIPv6WhenCreateFlagWasOmitted(t *testing.T) {
+	updateCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			assert.Equal(t, "ocid1.vcn.oc1..existing", *req.VcnId)
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			current.Ipv6CidrBlocks = []string{"2001:db8::/56"}
+			return coresdk.GetVcnResponse{Vcn: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			updateCalls++
+			return coresdk.UpdateVcnResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.IsIpv6Enabled = true
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, []string{"2001:db8::/56"}, resource.Status.Ipv6CidrBlocks)
+}
+
 func TestCreateOrUpdate_RejectsConflictingCreateCIDRInputs(t *testing.T) {
 	createCalls := 0
 	manager := newTestManager(&fakeVcnOCIClient{

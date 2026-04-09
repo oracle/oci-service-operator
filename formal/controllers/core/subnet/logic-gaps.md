@@ -21,6 +21,10 @@ gaps: []
   `UpdateSubnetDetails` SDK surface and the handwritten runtime.
 - Create-only drift is rejected for `availabilityDomain`, `compartmentId`,
   `dnsLabel`, `prohibitInternetIngress`, `prohibitPublicIpOnVnic`, and `vcnId`.
+- When `spec.prohibitInternetIngress` is true and
+  `spec.prohibitPublicIpOnVnic` was omitted, the runtime accepts the
+  OCI-derived `prohibitPublicIpOnVnic=true` projection instead of treating that
+  post-create value as unsupported drift.
 - Secret side effects are out of scope because subnet reconciliation does not
   publish connection material.
 
