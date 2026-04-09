@@ -1821,7 +1821,15 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		filepath.Join(outputRoot, "cmd", "manager", "core-network", "main.go"),
 		filepath.Join(outputRoot, "config", "manager", "core", "manager.yaml"),
 		filepath.Join(outputRoot, "config", "manager", "core-network", "manager.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_drg.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_internetgateway.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_natgateway.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_networksecuritygroup.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_routetable.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_securitylist.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_servicegateway.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_subnet.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_vcn.yaml"),
 	})
 	assertPathsNotExist(t, []string{
@@ -1965,13 +1973,101 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		}, test.contains...))
 	}
 
-	instanceSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"))
-	assertContains(t, instanceSample, []string{
-		"availabilityDomain:",
-		"subnetId:",
-		"sourceDetails:",
-		"imageId:",
-	})
+	for _, sample := range []struct {
+		path        string
+		contains    []string
+		notContains []string
+	}{
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_drg.yaml"),
+			contains: []string{
+				"compartmentId:",
+				`displayName: "drg-sample"`,
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"),
+			contains: []string{
+				"availabilityDomain:",
+				"subnetId:",
+				"sourceDetails:",
+				"imageId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_internetgateway.yaml"),
+			contains: []string{
+				"isEnabled: true",
+				"vcnId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_natgateway.yaml"),
+			contains: []string{
+				"vcnId:",
+				`displayName: "natgateway-sample"`,
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_networksecuritygroup.yaml"),
+			contains: []string{
+				"vcnId:",
+				`displayName: "networksecuritygroup-sample"`,
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_routetable.yaml"),
+			contains: []string{
+				"routeRules:",
+				"destinationType: CIDR_BLOCK",
+				"networkEntityId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_securitylist.yaml"),
+			contains: []string{
+				"egressSecurityRules:",
+				"ingressSecurityRules:",
+				"destinationPortRange:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_servicegateway.yaml"),
+			contains: []string{
+				"services:",
+				"serviceId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_subnet.yaml"),
+			contains: []string{
+				"cidrBlock: 10.0.1.0/24",
+				"securityListIds:",
+				"prohibitPublicIpOnVnic: true",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_vcn.yaml"),
+			contains: []string{
+				"cidrBlocks:",
+				`dnsLabel: "vcnsample"`,
+			},
+			notContains: []string{"spec: {}", "cidrBlock:"},
+		},
+	} {
+		content := readFile(t, sample.path)
+		assertContains(t, content, sample.contains)
+		assertNotContains(t, content, sample.notContains)
+	}
 
 	coreMetadata := readFile(t, filepath.Join(outputRoot, "packages", "core", "metadata.env"))
 	assertContains(t, coreMetadata, []string{
@@ -2079,6 +2175,15 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
+
+	clusterSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"))
+	assertContains(t, clusterSample, []string{
+		`name: "cluster-sample"`,
+		`kubernetesVersion: "v1.30.1"`,
+		"endpointConfig:",
+		"serviceLbSubnetIds:",
+	})
+	assertNotContains(t, clusterSample, []string{"spec: {}"})
 }
 
 func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testing.T) {

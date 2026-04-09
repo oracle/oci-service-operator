@@ -106,6 +106,32 @@ services:
       resources:
         - kind: Cluster
           formalSpec: cluster
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.name if you want to force a fresh create instead of
+              # binding to an existing Cluster with the same name in the same compartment.
+              # Replace spec.kubernetesVersion with a currently supported OKE version for your
+              # region before running this sample.
+              #
+              apiVersion: containerengine.oracle.com/v1beta1
+              kind: Cluster
+              metadata:
+                name: cluster-sample
+              spec:
+                name: "cluster-sample"
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                kubernetesVersion: "v1.30.1"
+                endpointConfig:
+                  subnetId: ocid1.subnet.oc1..exampleuniqueID
+                  nsgIds:
+                    - ocid1.networksecuritygroup.oc1..exampleuniqueID
+                  isPublicIpEnabled: false
+                options:
+                  serviceLbSubnetIds:
+                    - ocid1.subnet.oc1..exampleuniqueID
           serviceManager:
             packagePath: containerengine/cluster
     observedState:
@@ -208,6 +234,21 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Drg
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want a distinct DRG to be
+              # created for this sample.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: Drg
+              metadata:
+                name: drg-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: "drg-sample"
         - kind: Instance
           formalSpec: instance
           sample:
@@ -240,8 +281,41 @@ services:
             packagePath: core/instance
         - kind: InternetGateway
           formalSpec: internetgateway
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing InternetGateway with the same display name in the
+              # same VCN.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: InternetGateway
+              metadata:
+                name: internetgateway-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                isEnabled: true
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                displayName: "internetgateway-sample"
         - kind: NatGateway
           formalSpec: natgateway
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing NatGateway with the same display name in the same
+              # VCN.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: NatGateway
+              metadata:
+                name: natgateway-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                displayName: "natgateway-sample"
           statusFields:
             - name: PublicIpIdCreateIntent
               type: string
@@ -252,16 +326,142 @@ services:
                 - +kubebuilder:validation:Enum=Explicit;Omitted
         - kind: NetworkSecurityGroup
           formalSpec: networksecuritygroup
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing NetworkSecurityGroup with the same display name in
+              # the same VCN.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: NetworkSecurityGroup
+              metadata:
+                name: networksecuritygroup-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                displayName: "networksecuritygroup-sample"
         - kind: RouteTable
           formalSpec: routetable
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing RouteTable with the same display name in the same
+              # VCN.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: RouteTable
+              metadata:
+                name: routetable-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                displayName: "routetable-sample"
+                routeRules:
+                  - destination: 0.0.0.0/0
+                    destinationType: CIDR_BLOCK
+                    networkEntityId: ocid1.internetgateway.oc1..exampleuniqueID
+                    description: "Route internet-bound traffic through an internet gateway"
         - kind: SecurityList
           formalSpec: securitylist
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing SecurityList with the same display name in the same
+              # VCN.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: SecurityList
+              metadata:
+                name: securitylist-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                displayName: "securitylist-sample"
+                egressSecurityRules:
+                  - destination: 0.0.0.0/0
+                    protocol: "all"
+                    description: "Allow outbound traffic"
+                ingressSecurityRules:
+                  - protocol: "6"
+                    source: 10.0.0.0/16
+                    description: "Allow SSH from the VCN CIDR"
+                    tcpOptions:
+                      destinationPortRange:
+                        min: 22
+                        max: 22
         - kind: ServiceGateway
           formalSpec: servicegateway
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing ServiceGateway with the same display name in the
+              # same VCN.
+              # Replace spec.services[*].serviceId with a regional service OCID such as Object
+              # Storage.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: ServiceGateway
+              metadata:
+                name: servicegateway-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                displayName: "servicegateway-sample"
+                services:
+                  - serviceId: ocid1.service.oc1..exampleuniqueID
         - kind: Subnet
           formalSpec: subnet
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing Subnet with the same display name in the same VCN.
+              # This starter sample creates a regional private subnet.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: Subnet
+              metadata:
+                name: subnet-sample
+              spec:
+                cidrBlock: 10.0.1.0/24
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vcnId: ocid1.vcn.oc1..exampleuniqueID
+                displayName: "private-subnet-sample"
+                dnsLabel: "privsubnet"
+                prohibitPublicIpOnVnic: true
+                routeTableId: ocid1.routetable.oc1..exampleuniqueID
+                securityListIds:
+                  - ocid1.securitylist.oc1..exampleuniqueID
         - kind: Vcn
           formalSpec: vcn
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing Vcn with the same display name in the same
+              # compartment.
+              # Replace spec.dnsLabel with a unique label before applying this sample.
+              #
+              apiVersion: core.oracle.com/v1beta1
+              kind: Vcn
+              metadata:
+                name: vcn-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: "vcn-sample"
+                dnsLabel: "vcnsample"
+                cidrBlocks:
+                  - 10.0.0.0/16
     observedState:
       sdkAliases:
         AllDrgAttachment:

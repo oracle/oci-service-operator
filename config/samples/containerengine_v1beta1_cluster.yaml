@@ -3,8 +3,27 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.name if you want to force a fresh create instead of
+# binding to an existing Cluster with the same name in the same compartment.
+# Replace spec.kubernetesVersion with a currently supported OKE version for your
+# region before running this sample.
+#
 apiVersion: containerengine.oracle.com/v1beta1
 kind: Cluster
 metadata:
   name: cluster-sample
-spec: {}
+spec:
+  name: "cluster-sample"
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  kubernetesVersion: "v1.30.1"
+  endpointConfig:
+    subnetId: ocid1.subnet.oc1..exampleuniqueID
+    nsgIds:
+      - ocid1.networksecuritygroup.oc1..exampleuniqueID
+    isPublicIpEnabled: false
+  options:
+    serviceLbSubnetIds:
+      - ocid1.subnet.oc1..exampleuniqueID

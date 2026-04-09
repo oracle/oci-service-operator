@@ -1587,6 +1587,20 @@ func assertPrimaryPortOverride(t *testing.T, service *ServiceConfig, kind string
 	}
 }
 
+func assertSampleOverrideContains(t *testing.T, service *ServiceConfig, kind string, want ...string) {
+	t.Helper()
+
+	override, ok := overridesByKind(service)[kind]
+	if !ok {
+		t.Fatalf("%s does not define a generation override for %q", service.Service, kind)
+	}
+	for _, snippet := range want {
+		if !strings.Contains(override.Sample.Body, snippet) {
+			t.Fatalf("%s %s sample override = %q, want %q", service.Service, kind, override.Sample.Body, snippet)
+		}
+	}
+}
+
 func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	t.Helper()
 
@@ -1610,8 +1624,24 @@ func assertCoreRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 9)
+	assertResourceOverrideCount(t, service, 10)
+	overrides := overridesByKind(service)
 	assertPrimaryPortOverride(t, service, "Instance", "instance", "core/instance")
+	assertSampleOverrideContains(t, service, "Drg", `displayName: "drg-sample"`)
+	if overrides["Drg"].FormalSpec != "" {
+		t.Fatalf("core Drg formalSpec = %q, want empty", overrides["Drg"].FormalSpec)
+	}
+	if overrides["Drg"].ServiceManager.PackagePath != "" {
+		t.Fatalf("core Drg packagePath = %q, want empty", overrides["Drg"].ServiceManager.PackagePath)
+	}
+	assertSampleOverrideContains(t, service, "InternetGateway", "isEnabled: true", `displayName: "internetgateway-sample"`)
+	assertSampleOverrideContains(t, service, "NatGateway", `displayName: "natgateway-sample"`)
+	assertSampleOverrideContains(t, service, "NetworkSecurityGroup", `displayName: "networksecuritygroup-sample"`)
+	assertSampleOverrideContains(t, service, "RouteTable", "routeRules:", "destinationType: CIDR_BLOCK")
+	assertSampleOverrideContains(t, service, "SecurityList", "egressSecurityRules:", "ingressSecurityRules:")
+	assertSampleOverrideContains(t, service, "ServiceGateway", "services:", "serviceId: ocid1.service.oc1..exampleuniqueID")
+	assertSampleOverrideContains(t, service, "Subnet", "cidrBlock: 10.0.1.0/24", "securityListIds:")
+	assertSampleOverrideContains(t, service, "Vcn", "cidrBlocks:", `dnsLabel: "vcnsample"`)
 	for _, formal := range []struct {
 		kind string
 		slug string
@@ -1660,6 +1690,7 @@ func assertContainerengineRuntimeRolloutMetadata(t *testing.T, service *ServiceC
 	})
 	assertResourceOverrideCount(t, service, 1)
 	assertPrimaryPortOverride(t, service, "Cluster", "cluster", "containerengine/cluster")
+	assertSampleOverrideContains(t, service, "Cluster", "kubernetesVersion:", "endpointConfig:", "serviceLbSubnetIds:")
 }
 
 func assertPackageSplitContainsKind(t *testing.T, service *ServiceConfig, splitName string, wantKind string) {

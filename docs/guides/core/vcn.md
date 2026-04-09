@@ -83,9 +83,21 @@ This example is generated from the checked-in sample manifest at `config/samples
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing Vcn with the same display name in the same
+# compartment.
+# Replace spec.dnsLabel with a unique label before applying this sample.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: Vcn
 metadata:
   name: vcn-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  displayName: "vcn-sample"
+  dnsLabel: "vcnsample"
+  cidrBlocks:
+    - 10.0.0.0/16
 ```
