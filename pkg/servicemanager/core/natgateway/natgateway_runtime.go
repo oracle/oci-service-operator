@@ -270,7 +270,7 @@ func validateNatGatewayCreateOnlyDrift(spec corev1beta1.NatGatewaySpec, current 
 	if !stringCreateOnlyMatches(current.VcnId, spec.VcnId) {
 		unsupported = append(unsupported, "vcnId")
 	}
-	if !stringCreateOnlyMatches(current.PublicIpId, spec.PublicIpId) {
+	if !natGatewayOptionalCreateOnlyMatches(current.PublicIpId, spec.PublicIpId) {
 		unsupported = append(unsupported, "publicIpId")
 	}
 
@@ -476,6 +476,13 @@ func stringPtrEqual(actual *string, expected string) bool {
 
 func stringCreateOnlyMatches(actual *string, expected string) bool {
 	return strings.TrimSpace(stringValue(actual)) == strings.TrimSpace(expected)
+}
+
+func natGatewayOptionalCreateOnlyMatches(actual *string, expected string) bool {
+	if strings.TrimSpace(expected) == "" {
+		return true
+	}
+	return stringCreateOnlyMatches(actual, expected)
 }
 
 func boolPtrEqual(actual *bool, expected bool) bool {

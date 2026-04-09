@@ -20,7 +20,10 @@ gaps: []
   `UpdateNatGatewayDetails` SDK surface and the handwritten runtime.
 - The runtime reconciles removals for mutable `displayName`, `definedTags`,
   `freeformTags`, and `routeTableId` when OCI still retains those values.
-- Create-only drift is rejected for `compartmentId`, `vcnId`, and `publicIpId`.
+- Create-only drift is rejected for `compartmentId` and `vcnId`, and for
+  `publicIpId` only when the spec explicitly sets it. If `spec.publicIpId` is
+  omitted, the runtime accepts OCI-assigned `publicIpId` values and projects
+  them into status.
 - Status projection is authoritative for `id`, `compartmentId`, `vcnId`,
   `blockTraffic`, `natIp`, `timeCreated`, `displayName`, tags, `publicIpId`,
   `routeTableId`, `lifecycleState`, and `status.ocid`, and clears stale optional

@@ -437,6 +437,44 @@ func TestCreateOrUpdate_ClearingMutableFieldsTriggersUpdate(t *testing.T) {
 	assert.Equal(t, "", resource.Status.RouteTableId)
 }
 
+func TestCreateOrUpdate_OmittedPublicIPIDAllowsObservedAssignedValue(t *testing.T) {
+	assignedPublicIPID := "ocid1.publicip.oc1..assigned"
+	updateCalls := 0
+	manager := newNatGatewayTestManager(&fakeNatGatewayOCIClient{
+		createFn: func(_ context.Context, req coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
+			assert.Nil(t, req.PublicIpId)
+			current := makeSDKNatGateway("ocid1.natgateway.oc1..existing", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable)
+			current.PublicIpId = common.String(assignedPublicIPID)
+			return coresdk.CreateNatGatewayResponse{NatGateway: current}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
+			assert.Equal(t, "ocid1.natgateway.oc1..existing", *req.NatGatewayId)
+			current := makeSDKNatGateway("ocid1.natgateway.oc1..existing", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable)
+			current.PublicIpId = common.String(assignedPublicIPID)
+			return coresdk.GetNatGatewayResponse{NatGateway: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error) {
+			updateCalls++
+			return coresdk.UpdateNatGatewayResponse{}, nil
+		},
+	})
+
+	resource := makeSpecNatGateway()
+	resource.Spec.PublicIpId = ""
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, assignedPublicIPID, resource.Status.PublicIpId)
+
+	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, assignedPublicIPID, resource.Status.PublicIpId)
+	assert.Equal(t, 0, updateCalls)
+}
+
 func TestCreateOrUpdate_RejectsImmutableDrift(t *testing.T) {
 	tests := []struct {
 		name        string
