@@ -717,7 +717,7 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 	if !existing {
 		return nil
 	}
-	if err := c.validateForceNewFields(specValues, currentValues); err != nil {
+	if err := c.validateForceNewFields(resource, specValues, currentValues); err != nil {
 		return err
 	}
 	if c.config.Update == nil {
@@ -739,6 +739,12 @@ func mutationValues(resource any, currentResponse any) (map[string]any, map[stri
 
 	specValues := jsonMap(fieldInterface(resourceValue, "Spec"))
 	currentValues := jsonMap(fieldInterface(resourceValue, "Status"))
+	if specValues == nil {
+		specValues = map[string]any{}
+	}
+	if currentValues == nil {
+		currentValues = map[string]any{}
+	}
 	if body, ok := responseBody(currentResponse); ok && body != nil {
 		mergeJSONMapOverwrite(currentValues, body)
 	}
@@ -759,14 +765,21 @@ func (c ServiceClient[T]) validateMutationConflicts(specValues map[string]any) e
 	return nil
 }
 
-func (c ServiceClient[T]) validateForceNewFields(specValues map[string]any, currentValues map[string]any) error {
+func (c ServiceClient[T]) validateForceNewFields(resource T, specValues map[string]any, currentValues map[string]any) error {
 	for _, field := range c.config.Semantics.Mutation.ForceNew {
-		specValue, specOK := lookupMeaningfulValue(specValues, field)
+		wantedValue, specOK := lookupMeaningfulValue(specValues, field)
+		if !specOK {
+			var err error
+			wantedValue, specOK, err = meaningfulMutationValueByPath(specValue(resource), field)
+			if err != nil {
+				return err
+			}
+		}
 		statusValue, statusOK := lookupValueByPath(currentValues, field)
 		if !specOK || !statusOK {
 			continue
 		}
-		if !forceNewValuesEqual(specValue, statusValue) {
+		if !forceNewValuesEqual(wantedValue, statusValue) {
 			return fmt.Errorf("%s formal semantics require replacement when %s changes", c.config.Kind, field)
 		}
 	}
@@ -829,18 +842,24 @@ func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool
 	}
 
 	for _, field := range semantics.Mutation.Mutable {
-		specValue, specFound := lookupValueByPath(specValues, field)
-		if !specFound || !meaningfulValue(specValue) {
+		wantedValue, specFound := lookupMeaningfulValue(specValues, field)
+		if !specFound {
+			wantedValue, specFound, err = meaningfulMutationValueByPath(fieldInterface(resourceValue, "Spec"), field)
+			if err != nil {
+				return false, err
+			}
+		}
+		if !specFound {
 			continue
 		}
-		currentValue, currentFound := lookupValueByPath(currentValues, field)
-		if !currentFound || !meaningfulValue(currentValue) {
+		currentValue, currentFound := lookupMeaningfulValue(currentValues, field)
+		if !currentFound {
 			if responseExposesFieldPath(currentResponse, field) {
 				return true, nil
 			}
 			continue
 		}
-		if !valuesEqual(specValue, currentValue) {
+		if !valuesEqual(wantedValue, currentValue) {
 			return true, nil
 		}
 	}
@@ -1245,7 +1264,7 @@ func (c ServiceClient[T]) filteredUpdateBody(resource T, options requestBuildOpt
 		return nil, false, nil
 	}
 
-	resolvedSpec, err := resolvedSpecValue(resource, options)
+	resolvedSpec, err := resolvedSpecValueWithDecoder(resource, options, decodedJSONValueWithBoolFields, true)
 	if err != nil {
 		return nil, false, err
 	}
@@ -1257,7 +1276,10 @@ func (c ServiceClient[T]) filteredUpdateBody(resource T, options requestBuildOpt
 	currentValues := map[string]any{}
 	if options.CurrentResponse != nil {
 		if body, ok := responseBody(options.CurrentResponse); ok && body != nil {
-			currentValues = jsonMap(body)
+			currentValues, err = mutationJSONMap(body)
+			if err != nil {
+				return nil, false, err
+			}
 		}
 	}
 	if len(currentValues) == 0 {
@@ -1265,7 +1287,10 @@ func (c ServiceClient[T]) filteredUpdateBody(resource T, options requestBuildOpt
 		if err != nil {
 			return nil, false, err
 		}
-		currentValues = jsonMap(statusValue.Interface())
+		currentValues, err = mutationJSONMap(statusValue.Interface())
+		if err != nil {
+			return nil, false, err
+		}
 	}
 
 	body := make(map[string]any)
@@ -1492,6 +1517,16 @@ func ResolveSpecValue(resource any, ctx context.Context, credentialClient credhe
 		CredentialClient: credentialClient,
 		Namespace:        namespace,
 	})
+}
+
+// ResolveSpecValueWithBoolFields rewrites secret-backed spec inputs while
+// preserving explicit false booleans for request-body projection.
+func ResolveSpecValueWithBoolFields(resource any, ctx context.Context, credentialClient credhelper.CredentialClient, namespace string) (any, error) {
+	return resolvedSpecValueWithDecoder(resource, requestBuildOptions{
+		Context:          ctx,
+		CredentialClient: credentialClient,
+		Namespace:        namespace,
+	}, decodedJSONValueWithBoolFields, true)
 }
 
 func buildHeuristicRequest(
@@ -1814,17 +1849,17 @@ func requestNeedsResolvedSpec(fields []RequestField, requestType reflect.Type) b
 }
 
 func resolvedSpecValue(resource any, options requestBuildOptions) (any, error) {
+	return resolvedSpecValueWithDecoder(resource, options, decodedJSONValue, false)
+}
+
+func resolvedSpecValueWithDecoder(resource any, options requestBuildOptions, decoder func(any) (any, error), preserveZeroStructDecoded bool) (any, error) {
 	raw := specValue(resource)
 	if raw == nil {
 		return nil, nil
 	}
 
-	payload, err := json.Marshal(raw)
+	decoded, err := decoder(raw)
 	if err != nil {
-		return nil, fmt.Errorf("marshal spec value: %w", err)
-	}
-	var decoded any
-	if err := json.Unmarshal(payload, &decoded); err != nil {
 		return nil, fmt.Errorf("decode spec value: %w", err)
 	}
 
@@ -1837,7 +1872,7 @@ func resolvedSpecValue(resource any, options requestBuildOptions) (any, error) {
 		return nil, fmt.Errorf("resource %T does not expose Spec", resource)
 	}
 
-	resolved, _, err := rewriteSecretSources(specField, decoded, options)
+	resolved, _, err := rewriteSecretSources(specField, decoded, options, preserveZeroStructDecoded)
 	if err != nil {
 		return nil, err
 	}
@@ -1854,7 +1889,7 @@ func indirectValue(value reflect.Value) (reflect.Value, bool) {
 	return value, value.IsValid()
 }
 
-func rewriteSecretSources(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+func rewriteSecretSources(value reflect.Value, decoded any, options requestBuildOptions, preserveZeroStructDecoded bool) (any, bool, error) {
 	value, ok := indirectValue(value)
 	if !ok {
 		return nil, false, nil
@@ -1863,16 +1898,21 @@ func rewriteSecretSources(value reflect.Value, decoded any, options requestBuild
 		return rewritten, include, err
 	}
 	if value.Kind() == reflect.Struct && value.IsZero() {
-		return nil, false, nil
+		if !preserveZeroStructDecoded {
+			return nil, false, nil
+		}
+		if decodedMap, ok := decoded.(map[string]any); !ok || !meaningfulValue(decodedMap) {
+			return nil, false, nil
+		}
 	}
 
 	switch value.Kind() {
 	case reflect.Struct:
-		return rewriteSecretStruct(value, decoded, options)
+		return rewriteSecretStruct(value, decoded, options, preserveZeroStructDecoded)
 	case reflect.Slice, reflect.Array:
-		return rewriteSecretSlice(value, decoded, options)
+		return rewriteSecretSlice(value, decoded, options, preserveZeroStructDecoded)
 	case reflect.Map:
-		return rewriteSecretMap(value, decoded, options)
+		return rewriteSecretMap(value, decoded, options, preserveZeroStructDecoded)
 	default:
 		return decoded, true, nil
 	}
@@ -1891,7 +1931,7 @@ func rewriteSharedSecretSource(value reflect.Value, options requestBuildOptions)
 	}
 }
 
-func rewriteSecretStruct(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+func rewriteSecretStruct(value reflect.Value, decoded any, options requestBuildOptions, preserveZeroStructDecoded bool) (any, bool, error) {
 	decodedMap := decodedMapValue(decoded)
 	typ := value.Type()
 	for i := 0; i < value.NumField(); i++ {
@@ -1901,13 +1941,13 @@ func rewriteSecretStruct(value reflect.Value, decoded any, options requestBuildO
 		}
 		if fieldType.Anonymous && embeddedJSONField(fieldType) {
 			var err error
-			decodedMap, err = rewriteEmbeddedSecretField(value.Field(i), decodedMap, options)
+			decodedMap, err = rewriteEmbeddedSecretField(value.Field(i), decodedMap, options, preserveZeroStructDecoded)
 			if err != nil {
 				return nil, false, err
 			}
 			continue
 		}
-		if err := rewriteNamedSecretField(decodedMap, value.Field(i), fieldType, options); err != nil {
+		if err := rewriteNamedSecretField(decodedMap, value.Field(i), fieldType, options, preserveZeroStructDecoded); err != nil {
 			return nil, false, err
 		}
 	}
@@ -1922,8 +1962,8 @@ func decodedMapValue(decoded any) map[string]any {
 	return decodedMap
 }
 
-func rewriteEmbeddedSecretField(fieldValue reflect.Value, decodedMap map[string]any, options requestBuildOptions) (map[string]any, error) {
-	rewritten, _, err := rewriteSecretSources(fieldValue, decodedMap, options)
+func rewriteEmbeddedSecretField(fieldValue reflect.Value, decodedMap map[string]any, options requestBuildOptions, preserveZeroStructDecoded bool) (map[string]any, error) {
+	rewritten, _, err := rewriteSecretSources(fieldValue, decodedMap, options, preserveZeroStructDecoded)
 	if err != nil {
 		return nil, err
 	}
@@ -1933,13 +1973,13 @@ func rewriteEmbeddedSecretField(fieldValue reflect.Value, decodedMap map[string]
 	return decodedMap, nil
 }
 
-func rewriteNamedSecretField(decodedMap map[string]any, fieldValue reflect.Value, fieldType reflect.StructField, options requestBuildOptions) error {
+func rewriteNamedSecretField(decodedMap map[string]any, fieldValue reflect.Value, fieldType reflect.StructField, options requestBuildOptions, preserveZeroStructDecoded bool) error {
 	jsonName, skip := fieldJSONTagName(fieldType)
 	if skip {
 		return nil
 	}
 	childDecoded, exists := decodedMap[jsonName]
-	rewritten, include, err := rewriteSecretSources(fieldValue, childDecoded, options)
+	rewritten, include, err := rewriteSecretSources(fieldValue, childDecoded, options, preserveZeroStructDecoded)
 	if err != nil {
 		return err
 	}
@@ -1953,13 +1993,13 @@ func rewriteNamedSecretField(decodedMap map[string]any, fieldValue reflect.Value
 	return nil
 }
 
-func rewriteSecretSlice(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+func rewriteSecretSlice(value reflect.Value, decoded any, options requestBuildOptions, preserveZeroStructDecoded bool) (any, bool, error) {
 	decodedSlice, ok := decoded.([]any)
 	if !ok {
 		return decoded, true, nil
 	}
 	for i := 0; i < value.Len() && i < len(decodedSlice); i++ {
-		rewritten, include, err := rewriteSecretSources(value.Index(i), decodedSlice[i], options)
+		rewritten, include, err := rewriteSecretSources(value.Index(i), decodedSlice[i], options, preserveZeroStructDecoded)
 		if err != nil {
 			return nil, false, err
 		}
@@ -1970,7 +2010,7 @@ func rewriteSecretSlice(value reflect.Value, decoded any, options requestBuildOp
 	return decodedSlice, true, nil
 }
 
-func rewriteSecretMap(value reflect.Value, decoded any, options requestBuildOptions) (any, bool, error) {
+func rewriteSecretMap(value reflect.Value, decoded any, options requestBuildOptions, preserveZeroStructDecoded bool) (any, bool, error) {
 	if value.Type().Key().Kind() != reflect.String {
 		return decoded, true, nil
 	}
@@ -1982,7 +2022,7 @@ func rewriteSecretMap(value reflect.Value, decoded any, options requestBuildOpti
 	for iter.Next() {
 		key := iter.Key().String()
 		childDecoded, exists := decodedMap[key]
-		rewritten, include, err := rewriteSecretSources(iter.Value(), childDecoded, options)
+		rewritten, include, err := rewriteSecretSources(iter.Value(), childDecoded, options, preserveZeroStructDecoded)
 		if err != nil {
 			return nil, false, err
 		}
@@ -3049,6 +3089,124 @@ func jsonMap(value any) map[string]any {
 	return decoded
 }
 
+func mutationJSONMap(value any) (map[string]any, error) {
+	decoded, err := decodedJSONValueWithBoolFields(value)
+	if err != nil {
+		return nil, err
+	}
+	if decoded == nil {
+		return nil, nil
+	}
+	decodedMap, ok := decoded.(map[string]any)
+	if !ok {
+		return nil, nil
+	}
+	return decodedMap, nil
+}
+
+func meaningfulMutationValueByPath(value any, path string) (any, bool, error) {
+	values, err := mutationJSONMap(value)
+	if err != nil {
+		return nil, false, err
+	}
+	if values == nil {
+		return nil, false, nil
+	}
+	resolved, ok := lookupMeaningfulValue(values, path)
+	if !ok {
+		return nil, false, nil
+	}
+	return resolved, true, nil
+}
+
+func decodedJSONValue(value any) (any, error) {
+	if value == nil {
+		return nil, nil
+	}
+
+	payload, err := json.Marshal(value)
+	if err != nil {
+		return nil, fmt.Errorf("marshal value: %w", err)
+	}
+
+	var decoded any
+	if err := json.Unmarshal(payload, &decoded); err != nil {
+		return nil, err
+	}
+	return decoded, nil
+}
+
+func decodedJSONValueWithBoolFields(value any) (any, error) {
+	decoded, err := decodedJSONValue(value)
+	if err != nil {
+		return nil, err
+	}
+	overlayed, _ := overlayBoolFields(reflect.ValueOf(value), decoded)
+	return overlayed, nil
+}
+
+func overlayBoolFields(value reflect.Value, decoded any) (any, bool) {
+	value, ok := indirectValue(value)
+	if !ok {
+		return decoded, decoded != nil
+	}
+	if value.Kind() != reflect.Struct {
+		return decoded, decoded != nil
+	}
+
+	decodedMap, _ := decoded.(map[string]any)
+	if decodedMap == nil {
+		decodedMap = map[string]any{}
+	}
+	hasAny := len(decodedMap) > 0
+
+	typ := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		fieldType := typ.Field(i)
+		if !fieldType.IsExported() {
+			continue
+		}
+
+		fieldValue := value.Field(i)
+		if fieldType.Anonymous && embeddedJSONField(fieldType) {
+			embedded, embeddedHasAny := overlayBoolFields(fieldValue, decodedMap)
+			if embeddedMap, ok := embedded.(map[string]any); ok {
+				decodedMap = embeddedMap
+				hasAny = len(decodedMap) > 0 || embeddedHasAny
+			}
+			continue
+		}
+
+		jsonName := fieldJSONName(fieldType)
+		if jsonName == "" {
+			continue
+		}
+
+		indirectField, ok := indirectValue(fieldValue)
+		if !ok {
+			continue
+		}
+
+		switch indirectField.Kind() {
+		case reflect.Bool:
+			decodedMap[jsonName] = indirectField.Bool()
+			hasAny = true
+		case reflect.Struct:
+			childDecoded, _ := decodedMap[jsonName]
+			child, childHasAny := overlayBoolFields(fieldValue, childDecoded)
+			if childHasAny {
+				decodedMap[jsonName] = child
+				hasAny = true
+			}
+		}
+	}
+
+	if !hasAny {
+		return nil, false
+	}
+	return decodedMap, true
+}
+
 func responseLifecycleState(response any) string {
 	body, ok := responseBody(response)
 	if !ok || body == nil {
@@ -3127,11 +3285,21 @@ func meaningfulValue(value any) bool {
 	case string:
 		return strings.TrimSpace(concrete) != ""
 	case []any:
-		return len(concrete) > 0
+		for _, item := range concrete {
+			if meaningfulValue(item) {
+				return true
+			}
+		}
+		return false
 	case map[string]any:
-		return len(concrete) > 0
+		for _, item := range concrete {
+			if meaningfulValue(item) {
+				return true
+			}
+		}
+		return false
 	case bool:
-		return concrete
+		return true
 	case float64:
 		return concrete != 0
 	default:
