@@ -343,6 +343,46 @@ func TestCreateOrUpdate_AllowsDerivedProhibitPublicIPOnVNICAfterOmittedCreate(t 
 	assert.Equal(t, 0, updateCalls)
 }
 
+func TestCreateOrUpdate_AllowsDerivedProhibitInternetIngressAfterOmittedCreate(t *testing.T) {
+	updateCalls := 0
+	manager := newTestManager(&fakeSubnetOCIClient{
+		createFn: func(_ context.Context, req coresdk.CreateSubnetRequest) (coresdk.CreateSubnetResponse, error) {
+			assert.Nil(t, req.ProhibitInternetIngress)
+			assert.Equal(t, common.Bool(true), req.ProhibitPublicIpOnVnic)
+			return coresdk.CreateSubnetResponse{
+				Subnet: makeSDKSubnet("ocid1.subnet.oc1..create", "test-subnet", coresdk.SubnetLifecycleStateAvailable),
+			}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+			assert.Equal(t, "ocid1.subnet.oc1..create", *req.SubnetId)
+			return coresdk.GetSubnetResponse{
+				Subnet: makeSDKSubnet("ocid1.subnet.oc1..create", "test-subnet", coresdk.SubnetLifecycleStateAvailable),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error) {
+			updateCalls++
+			return coresdk.UpdateSubnetResponse{}, nil
+		},
+	})
+
+	resource := makeSpecSubnet()
+	resource.Spec.ProhibitInternetIngress = false
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, resource.Status.ProhibitInternetIngress)
+	assert.True(t, resource.Status.ProhibitPublicIpOnVnic)
+
+	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.True(t, resource.Status.ProhibitInternetIngress)
+	assert.True(t, resource.Status.ProhibitPublicIpOnVnic)
+	assert.Equal(t, 0, updateCalls)
+}
+
 func TestCreateOrUpdate_ObserveByStatusOCID(t *testing.T) {
 	getCalls := 0
 	updateCalls := 0
@@ -471,6 +511,7 @@ func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.subnet.oc1..existing")
 	resource.Spec.DnsLabel = ""
 	resource.Spec.ProhibitInternetIngress = false
+	resource.Spec.ProhibitPublicIpOnVnic = false
 
 	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 
@@ -479,6 +520,7 @@ func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 	assert.Contains(t, err.Error(), "create-only field drift")
 	assert.Contains(t, err.Error(), "dnsLabel")
 	assert.Contains(t, err.Error(), "prohibitInternetIngress")
+	assert.Contains(t, err.Error(), "prohibitPublicIpOnVnic")
 	assert.Equal(t, 0, updateCalls)
 }
 

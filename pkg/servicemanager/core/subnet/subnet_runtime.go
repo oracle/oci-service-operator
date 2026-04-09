@@ -214,11 +214,10 @@ func (c *subnetRuntimeClient) normalizeEquivalentCreateOnlyFields(resource *core
 		return
 	}
 
-	// OCI derives prohibitPublicIpOnVnic from prohibitInternetIngress on create.
-	if resource.Spec.ProhibitInternetIngress &&
-		!resource.Spec.ProhibitPublicIpOnVnic &&
-		boolValue(current.ProhibitInternetIngress) &&
-		boolValue(current.ProhibitPublicIpOnVnic) {
+	// OCI can project both private-subnet flags to true on read-after-create when either
+	// create-only flag requested private-subnet behavior.
+	if subnetEquivalentProhibitFlagsObserved(resource.Spec, current) {
+		resource.Spec.ProhibitInternetIngress = true
 		resource.Spec.ProhibitPublicIpOnVnic = true
 	}
 }
@@ -347,7 +346,7 @@ func validateSubnetCreateOnlyDrift(spec corev1beta1.SubnetSpec, current coresdk.
 	if !stringCreateOnlyMatches(current.DnsLabel, spec.DnsLabel) {
 		unsupported = append(unsupported, "dnsLabel")
 	}
-	if !boolCreateOnlyMatches(current.ProhibitInternetIngress, spec.ProhibitInternetIngress) {
+	if !subnetProhibitInternetIngressCreateOnlyMatches(spec, current) {
 		unsupported = append(unsupported, "prohibitInternetIngress")
 	}
 	if !subnetProhibitPublicIPOnVNICCreateOnlyMatches(spec, current) {
@@ -577,15 +576,26 @@ func boolCreateOnlyMatches(actual *bool, expected bool) bool {
 	return boolValue(actual) == expected
 }
 
+func subnetProhibitInternetIngressCreateOnlyMatches(spec corev1beta1.SubnetSpec, current coresdk.Subnet) bool {
+	if boolCreateOnlyMatches(current.ProhibitInternetIngress, spec.ProhibitInternetIngress) {
+		return true
+	}
+	return subnetEquivalentProhibitFlagsObserved(spec, current)
+}
+
 func subnetProhibitPublicIPOnVNICCreateOnlyMatches(spec corev1beta1.SubnetSpec, current coresdk.Subnet) bool {
 	if boolCreateOnlyMatches(current.ProhibitPublicIpOnVnic, spec.ProhibitPublicIpOnVnic) {
 		return true
 	}
 
-	// OCI derives prohibitPublicIpOnVnic from prohibitInternetIngress on create.
-	return spec.ProhibitInternetIngress &&
-		!spec.ProhibitPublicIpOnVnic &&
-		boolValue(current.ProhibitPublicIpOnVnic)
+	return subnetEquivalentProhibitFlagsObserved(spec, current)
+}
+
+func subnetEquivalentProhibitFlagsObserved(spec corev1beta1.SubnetSpec, current coresdk.Subnet) bool {
+	if !boolValue(current.ProhibitInternetIngress) || !boolValue(current.ProhibitPublicIpOnVnic) {
+		return false
+	}
+	return spec.ProhibitInternetIngress || spec.ProhibitPublicIpOnVnic
 }
 
 func metav1Time(t time.Time) metav1.Time {
