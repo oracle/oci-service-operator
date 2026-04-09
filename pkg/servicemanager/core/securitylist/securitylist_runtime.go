@@ -75,18 +75,20 @@ type normalizedSecurityRule struct {
 	hasUDPSrc     bool
 }
 
-func init() {
-	newSecurityListServiceClient = func(manager *SecurityListServiceManager) SecurityListServiceClient {
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &securityListRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
-		}
-		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize SecurityList OCI client: %w", err)
-		}
-		return runtimeClient
+// SecurityList keeps an explicit handwritten runtime because its parity contract
+// depends on nested rule normalization, stale optional status clearing, tracked
+// OCID recreate behavior, and an SDK surface guard that are still narrower than
+// a safe generatedruntime adaptation.
+func newExplicitSecurityListServiceClient(manager *SecurityListServiceManager) SecurityListServiceClient {
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient := &securityListRuntimeClient{
+		manager: manager,
+		client:  sdkClient,
 	}
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize SecurityList OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *securityListRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.SecurityList, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
