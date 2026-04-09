@@ -2186,6 +2186,69 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 	assertNotContains(t, clusterSample, []string{"spec: {}"})
 }
 
+func TestCheckedInQueueSampleUsesPracticalOverride(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	queueService := serviceConfigsByName(t, cfg, "queue")["queue"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*queueService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	sampleContent := readFile(t, filepath.Join(outputRoot, "config", "samples", "queue_v1beta1_queue.yaml"))
+	assertContains(t, sampleContent, []string{
+		"# Replace the OCI identifiers below before running e2e.",
+		"# Update metadata.name and spec.displayName if you want to force a fresh create",
+		`displayName: "queue-sample"`,
+		"visibilityInSeconds: 30",
+		"timeoutInSeconds: 20",
+	})
+	assertNotContains(t, sampleContent, []string{"spec: {}"})
+}
+
+func TestCheckedInDataflowApplicationSampleUsesPracticalOverride(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	dataflowService := serviceConfigsByName(t, cfg, "dataflow")["dataflow"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*dataflowService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	sampleContent := readFile(t, filepath.Join(outputRoot, "config", "samples", "dataflow_v1beta1_application.yaml"))
+	assertContains(t, sampleContent, []string{
+		"# Replace the OCI identifiers and Object Storage URI below before running e2e.",
+		"# Replace the starter shapes and Spark version with values currently supported in",
+		"compartmentId: ocid1.compartment.oc1..exampleuniqueID",
+		`displayName: "application-sample"`,
+		`driverShape: "VM.Standard.E4.Flex"`,
+		`executorShape: "VM.Standard.E4.Flex"`,
+		`language: "PYTHON"`,
+		`numExecutors: 2`,
+		`sparkVersion: "3.5.0"`,
+		`fileUri: "oci://bucket@namespace/app/main.py"`,
+	})
+	assertNotContains(t, sampleContent, []string{"spec: {}"})
+}
+
 func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services, err := cfg.SelectServices("identity", false)
