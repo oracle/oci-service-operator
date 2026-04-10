@@ -128,7 +128,7 @@
   },
   "notes": [
     "Pinned OCI SDK contract: NatGateway lifecycle exposes PROVISIONING, AVAILABLE, TERMINATING, and TERMINATED; there is no distinct UPDATING, DELETING, or DELETED state in this branch.",
-    "Pinned OCI SDK contract: UpdateNatGatewayDetails exposes block_traffic, defined_tags, display_name, freeform_tags, and route_table_id as in-place update fields; the handwritten runtime rejects create-only drift for compartment_id, public_ip_id, and vcn_id.",
+    "Pinned OCI SDK contract: UpdateNatGatewayDetails exposes block_traffic, defined_tags, display_name, freeform_tags, and route_table_id as in-place update fields; the handwritten parity wrapper persists repo-authored public_ip_id create intent in status so replacement-only validation distinguishes explicit create intent from OCI-assigned values after omitted creates.",
     "Repo-authored delete confirmation requires GetNatGateway to return not found; observed TERMINATING and TERMINATED remain intermediate finalizer-holding states.",
     "The handwritten runtime observes by tracked OCI identity rather than list-based bind semantics. The listLookup block is retained only as provider-facts reference metadata."
   ]

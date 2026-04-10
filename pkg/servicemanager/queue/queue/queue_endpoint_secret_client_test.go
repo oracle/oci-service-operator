@@ -579,7 +579,7 @@ func TestQueueEndpointSecretClientDeleteSkipsUnownedSecret(t *testing.T) {
 	assertQueueCredentialCalls(t, credClient, queueSecretCallExpectation{get: true})
 }
 
-func TestQueueEndpointSecretClientInstalledOnManagerPath(t *testing.T) {
+func TestQueueManagerInstallsExplicitRuntimePath(t *testing.T) {
 	t.Parallel()
 
 	manager := NewQueueServiceManager(
@@ -596,5 +596,8 @@ func TestQueueEndpointSecretClientInstalledOnManagerPath(t *testing.T) {
 	}
 	if _, ok := client.delegate.(*queueRuntimeClient); !ok {
 		t.Fatalf("wrapped delegate type = %T, want *queueRuntimeClient", client.delegate)
+	}
+	if _, ok := client.delegate.(defaultQueueServiceClient); ok {
+		t.Fatal("wrapped delegate should not use the generated default Queue client")
 	}
 }

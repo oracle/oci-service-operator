@@ -1,0 +1,718 @@
+/*
+  Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+  Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+*/
+
+package cluster
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	"github.com/oracle/oci-go-sdk/v65/common"
+	containerenginesdk "github.com/oracle/oci-go-sdk/v65/containerengine"
+	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
+)
+
+func init() {
+	newClusterServiceClient = func(manager *ClusterServiceManager) ClusterServiceClient {
+		sdkClient, err := containerenginesdk.NewContainerEngineClientWithConfigurationProvider(manager.Provider)
+		config := generatedruntime.Config[*containerenginev1beta1.Cluster]{
+			Kind:             "Cluster",
+			SDKName:          "Cluster",
+			Log:              manager.Log,
+			CredentialClient: manager.CredentialClient,
+			BuildCreateBody: func(_ context.Context, resource *containerenginev1beta1.Cluster, _ string) (any, error) {
+				return buildClusterCreateDetails(resource)
+			},
+			BuildUpdateBody: func(
+				ctx context.Context,
+				resource *containerenginev1beta1.Cluster,
+				namespace string,
+				currentResponse any,
+			) (any, bool, error) {
+				return buildClusterUpdateBody(ctx, manager.CredentialClient, resource, namespace, currentResponse)
+			},
+			Semantics: &generatedruntime.Semantics{
+				FormalService:     "containerengine",
+				FormalSlug:        "cluster",
+				StatusProjection:  "required",
+				SecretSideEffects: "none",
+				FinalizerPolicy:   "retain-until-confirmed-delete",
+				Lifecycle: generatedruntime.LifecycleSemantics{
+					ProvisioningStates: []string{"CREATING"},
+					UpdatingStates:     []string{"UPDATING"},
+					ActiveStates:       []string{"ACTIVE"},
+				},
+				Delete: generatedruntime.DeleteSemantics{
+					Policy:         "required",
+					PendingStates:  []string{"DELETING"},
+					TerminalStates: []string{"DELETED"},
+				},
+				List: &generatedruntime.ListSemantics{
+					ResponseItemsField: "Items",
+					MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
+				},
+				Mutation: generatedruntime.MutationSemantics{
+					Mutable: []string{
+						"definedTags",
+						"freeformTags",
+						"imagePolicyConfig.isPolicyEnabled",
+						"imagePolicyConfig.keyDetails.kmsKeyId",
+						"kubernetesVersion",
+						"name",
+						"options.admissionControllerOptions.isPodSecurityPolicyEnabled",
+						"options.persistentVolumeConfig.definedTags",
+						"options.persistentVolumeConfig.freeformTags",
+						"options.serviceLbConfig.definedTags",
+						"options.serviceLbConfig.freeformTags",
+						"type",
+					},
+					ForceNew: []string{
+						"clusterPodNetworkOptions.cniType",
+						"clusterPodNetworkOptions.jsonData",
+						"compartmentId",
+						"endpointConfig.isPublicIpEnabled",
+						"endpointConfig.nsgIds",
+						"endpointConfig.subnetId",
+						"kmsKeyId",
+						"options.addOns.isKubernetesDashboardEnabled",
+						"options.addOns.isTillerEnabled",
+						"options.kubernetesNetworkConfig.podsCidr",
+						"options.kubernetesNetworkConfig.servicesCidr",
+						"options.serviceLbSubnetIds",
+						"vcnId",
+					},
+					ConflictsWith: map[string][]string{},
+				},
+				Hooks: generatedruntime.HookSet{
+					Create: []generatedruntime.Hook{
+						{Helper: "tfresource.CreateResource"},
+						{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"},
+					},
+					Update: []generatedruntime.Hook{
+						{Helper: "tfresource.UpdateResource"},
+						{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"},
+					},
+					Delete: []generatedruntime.Hook{
+						{Helper: "tfresource.DeleteResource"},
+						{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"},
+					},
+				},
+				CreateFollowUp: generatedruntime.FollowUpSemantics{
+					Strategy: "read-after-write",
+					Hooks: []generatedruntime.Hook{
+						{Helper: "tfresource.CreateResource"},
+						{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"},
+					},
+				},
+				UpdateFollowUp: generatedruntime.FollowUpSemantics{
+					Strategy: "read-after-write",
+					Hooks: []generatedruntime.Hook{
+						{Helper: "tfresource.UpdateResource"},
+						{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"},
+					},
+				},
+				DeleteFollowUp: generatedruntime.FollowUpSemantics{
+					Strategy: "confirm-delete",
+					Hooks: []generatedruntime.Hook{
+						{Helper: "tfresource.DeleteResource"},
+						{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"},
+					},
+				},
+			},
+			Create: &generatedruntime.Operation{
+				NewRequest: func() any { return &containerenginesdk.CreateClusterRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.CreateCluster(ctx, *request.(*containerenginesdk.CreateClusterRequest))
+				},
+				Fields: []generatedruntime.RequestField{
+					{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body"},
+				},
+			},
+			Get: &generatedruntime.Operation{
+				NewRequest: func() any { return &containerenginesdk.GetClusterRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.GetCluster(ctx, *request.(*containerenginesdk.GetClusterRequest))
+				},
+				Fields: []generatedruntime.RequestField{
+					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
+				},
+			},
+			List: &generatedruntime.Operation{
+				NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.ListClusters(ctx, *request.(*containerenginesdk.ListClustersRequest))
+				},
+				Fields: []generatedruntime.RequestField{
+					{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+					{FieldName: "Name", RequestName: "name", Contribution: "query"},
+					{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+					{FieldName: "Page", RequestName: "page", Contribution: "query"},
+					{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+					{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+				},
+			},
+			Update: &generatedruntime.Operation{
+				NewRequest: func() any { return &containerenginesdk.UpdateClusterRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.UpdateCluster(ctx, *request.(*containerenginesdk.UpdateClusterRequest))
+				},
+				Fields: []generatedruntime.RequestField{
+					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
+					{FieldName: "UpdateClusterDetails", RequestName: "UpdateClusterDetails", Contribution: "body"},
+				},
+			},
+			Delete: &generatedruntime.Operation{
+				NewRequest: func() any { return &containerenginesdk.DeleteClusterRequest{} },
+				Call: func(ctx context.Context, request any) (any, error) {
+					return sdkClient.DeleteCluster(ctx, *request.(*containerenginesdk.DeleteClusterRequest))
+				},
+				Fields: []generatedruntime.RequestField{
+					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
+				},
+			},
+		}
+		if err != nil {
+			config.InitError = fmt.Errorf("initialize Cluster OCI client: %w", err)
+		}
+		return defaultClusterServiceClient{
+			ServiceClient: generatedruntime.NewServiceClient[*containerenginev1beta1.Cluster](config),
+		}
+	}
+}
+
+func buildClusterCreateDetails(resource *containerenginev1beta1.Cluster) (containerenginesdk.CreateClusterDetails, error) {
+	if resource == nil {
+		return containerenginesdk.CreateClusterDetails{}, fmt.Errorf("cluster resource is nil")
+	}
+
+	spec := resource.Spec
+	details := containerenginesdk.CreateClusterDetails{
+		Name:              common.String(spec.Name),
+		CompartmentId:     common.String(spec.CompartmentId),
+		VcnId:             common.String(spec.VcnId),
+		KubernetesVersion: common.String(spec.KubernetesVersion),
+	}
+
+	if endpointConfig := buildClusterEndpointConfigDetails(spec.EndpointConfig); endpointConfig != nil {
+		details.EndpointConfig = endpointConfig
+	}
+	if spec.KmsKeyId != "" {
+		details.KmsKeyId = common.String(spec.KmsKeyId)
+	}
+	if len(spec.FreeformTags) > 0 {
+		details.FreeformTags = copyClusterStringMap(spec.FreeformTags)
+	}
+	definedTags, err := convertClusterDefinedTags(spec.DefinedTags)
+	if err != nil {
+		return containerenginesdk.CreateClusterDetails{}, fmt.Errorf("convert cluster definedTags: %w", err)
+	}
+	if len(definedTags) > 0 {
+		details.DefinedTags = definedTags
+	}
+	options, err := buildClusterCreateOptions(spec.Options)
+	if err != nil {
+		return containerenginesdk.CreateClusterDetails{}, err
+	}
+	if options != nil {
+		details.Options = options
+	}
+	if imagePolicyConfig := buildClusterImagePolicyConfig(spec.ImagePolicyConfig); imagePolicyConfig != nil {
+		details.ImagePolicyConfig = imagePolicyConfig
+	}
+	clusterPodNetworkOptions, err := buildClusterPodNetworkOptions(spec.ClusterPodNetworkOptions)
+	if err != nil {
+		return containerenginesdk.CreateClusterDetails{}, err
+	}
+	if len(clusterPodNetworkOptions) > 0 {
+		details.ClusterPodNetworkOptions = clusterPodNetworkOptions
+	}
+	if spec.Type != "" {
+		details.Type = containerenginesdk.ClusterTypeEnum(spec.Type)
+	}
+
+	return details, nil
+}
+
+func buildClusterUpdateBody(
+	ctx context.Context,
+	credentialClient credhelper.CredentialClient,
+	resource *containerenginev1beta1.Cluster,
+	namespace string,
+	currentResponse any,
+) (containerenginesdk.UpdateClusterDetails, bool, error) {
+	details, err := buildClusterUpdateDetails(ctx, credentialClient, resource, namespace)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, false, err
+	}
+
+	desiredValues, err := clusterJSONMap(details)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, false, fmt.Errorf("project desired cluster update body: %w", err)
+	}
+	if len(desiredValues) == 0 {
+		return details, false, nil
+	}
+
+	currentDetails, err := buildCurrentClusterUpdateDetails(currentResponse)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, false, err
+	}
+	currentValues, err := clusterJSONMap(currentDetails)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, false, fmt.Errorf("project current cluster update body: %w", err)
+	}
+
+	return details, !clusterMapSubsetEqual(desiredValues, currentValues), nil
+}
+
+func buildClusterUpdateDetails(
+	ctx context.Context,
+	credentialClient credhelper.CredentialClient,
+	resource *containerenginev1beta1.Cluster,
+	namespace string,
+) (containerenginesdk.UpdateClusterDetails, error) {
+	if resource == nil {
+		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("cluster resource is nil")
+	}
+
+	resolvedSpec, err := generatedruntime.ResolveSpecValueWithBoolFields(resource, ctx, credentialClient, namespace)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, err
+	}
+
+	payload, err := json.Marshal(resolvedSpec)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("marshal resolved cluster spec: %w", err)
+	}
+
+	var details containerenginesdk.UpdateClusterDetails
+	if err := json.Unmarshal(payload, &details); err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("decode cluster update request body: %w", err)
+	}
+
+	return details, nil
+}
+
+func buildCurrentClusterUpdateDetails(currentResponse any) (containerenginesdk.UpdateClusterDetails, error) {
+	body, err := clusterRuntimeResponseBody(currentResponse)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, err
+	}
+
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("marshal current cluster response: %w", err)
+	}
+
+	var details containerenginesdk.UpdateClusterDetails
+	if err := json.Unmarshal(payload, &details); err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("decode current cluster update body: %w", err)
+	}
+
+	return details, nil
+}
+
+func clusterRuntimeResponseBody(currentResponse any) (any, error) {
+	switch current := currentResponse.(type) {
+	case containerenginesdk.Cluster:
+		return current, nil
+	case *containerenginesdk.Cluster:
+		if current == nil {
+			return nil, fmt.Errorf("current Cluster response is nil")
+		}
+		return *current, nil
+	case containerenginesdk.ClusterSummary:
+		return current, nil
+	case *containerenginesdk.ClusterSummary:
+		if current == nil {
+			return nil, fmt.Errorf("current Cluster response is nil")
+		}
+		return *current, nil
+	case containerenginesdk.GetClusterResponse:
+		return current.Cluster, nil
+	case *containerenginesdk.GetClusterResponse:
+		if current == nil {
+			return nil, fmt.Errorf("current Cluster response is nil")
+		}
+		return current.Cluster, nil
+	default:
+		return nil, fmt.Errorf("unexpected current Cluster response type %T", currentResponse)
+	}
+}
+
+func buildClusterEndpointConfigDetails(spec containerenginev1beta1.ClusterEndpointConfig) *containerenginesdk.CreateClusterEndpointConfigDetails {
+	if spec.SubnetId == "" && len(spec.NsgIds) == 0 && !spec.IsPublicIpEnabled {
+		return nil
+	}
+
+	details := &containerenginesdk.CreateClusterEndpointConfigDetails{
+		IsPublicIpEnabled: common.Bool(spec.IsPublicIpEnabled),
+	}
+	if spec.SubnetId != "" {
+		details.SubnetId = common.String(spec.SubnetId)
+	}
+	if len(spec.NsgIds) > 0 {
+		details.NsgIds = append([]string(nil), spec.NsgIds...)
+	}
+	return details
+}
+
+func buildClusterCreateOptions(spec containerenginev1beta1.ClusterOptions) (*containerenginesdk.ClusterCreateOptions, error) {
+	kubernetesNetworkConfig := buildClusterKubernetesNetworkConfig(spec.KubernetesNetworkConfig)
+	addOns := buildClusterAddOnOptions(spec.AddOns)
+	admissionControllerOptions := buildClusterAdmissionControllerOptions(spec.AdmissionControllerOptions)
+	persistentVolumeConfig, err := buildClusterPersistentVolumeConfigDetails(spec.PersistentVolumeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("build cluster persistentVolumeConfig: %w", err)
+	}
+	serviceLBConfig, err := buildClusterServiceLBConfigDetails(spec.ServiceLbConfig)
+	if err != nil {
+		return nil, fmt.Errorf("build cluster serviceLbConfig: %w", err)
+	}
+
+	if len(spec.ServiceLbSubnetIds) == 0 &&
+		kubernetesNetworkConfig == nil &&
+		addOns == nil &&
+		admissionControllerOptions == nil &&
+		persistentVolumeConfig == nil &&
+		serviceLBConfig == nil {
+		return nil, nil
+	}
+
+	details := &containerenginesdk.ClusterCreateOptions{
+		KubernetesNetworkConfig:    kubernetesNetworkConfig,
+		AddOns:                     addOns,
+		AdmissionControllerOptions: admissionControllerOptions,
+		PersistentVolumeConfig:     persistentVolumeConfig,
+		ServiceLbConfig:            serviceLBConfig,
+	}
+	if len(spec.ServiceLbSubnetIds) > 0 {
+		details.ServiceLbSubnetIds = append([]string(nil), spec.ServiceLbSubnetIds...)
+	}
+	return details, nil
+}
+
+func buildClusterKubernetesNetworkConfig(
+	spec containerenginev1beta1.ClusterOptionsKubernetesNetworkConfig,
+) *containerenginesdk.KubernetesNetworkConfig {
+	if spec.PodsCidr == "" && spec.ServicesCidr == "" {
+		return nil
+	}
+
+	details := &containerenginesdk.KubernetesNetworkConfig{}
+	if spec.PodsCidr != "" {
+		details.PodsCidr = common.String(spec.PodsCidr)
+	}
+	if spec.ServicesCidr != "" {
+		details.ServicesCidr = common.String(spec.ServicesCidr)
+	}
+	return details
+}
+
+func buildClusterAddOnOptions(spec containerenginev1beta1.ClusterOptionsAddOns) *containerenginesdk.AddOnOptions {
+	if !spec.IsKubernetesDashboardEnabled && !spec.IsTillerEnabled {
+		return nil
+	}
+
+	return &containerenginesdk.AddOnOptions{
+		IsKubernetesDashboardEnabled: common.Bool(spec.IsKubernetesDashboardEnabled),
+		IsTillerEnabled:              common.Bool(spec.IsTillerEnabled),
+	}
+}
+
+func buildClusterAdmissionControllerOptions(
+	spec containerenginev1beta1.ClusterOptionsAdmissionControllerOptions,
+) *containerenginesdk.AdmissionControllerOptions {
+	if !spec.IsPodSecurityPolicyEnabled {
+		return nil
+	}
+
+	return &containerenginesdk.AdmissionControllerOptions{
+		IsPodSecurityPolicyEnabled: common.Bool(spec.IsPodSecurityPolicyEnabled),
+	}
+}
+
+func buildClusterPersistentVolumeConfigDetails(
+	spec containerenginev1beta1.ClusterOptionsPersistentVolumeConfig,
+) (*containerenginesdk.PersistentVolumeConfigDetails, error) {
+	if len(spec.FreeformTags) == 0 && len(spec.DefinedTags) == 0 {
+		return nil, nil
+	}
+
+	definedTags, err := convertClusterDefinedTags(spec.DefinedTags)
+	if err != nil {
+		return nil, err
+	}
+
+	return &containerenginesdk.PersistentVolumeConfigDetails{
+		FreeformTags: copyClusterStringMap(spec.FreeformTags),
+		DefinedTags:  definedTags,
+	}, nil
+}
+
+func buildClusterServiceLBConfigDetails(
+	spec containerenginev1beta1.ClusterOptionsServiceLbConfig,
+) (*containerenginesdk.ServiceLbConfigDetails, error) {
+	if len(spec.FreeformTags) == 0 && len(spec.DefinedTags) == 0 {
+		return nil, nil
+	}
+
+	definedTags, err := convertClusterDefinedTags(spec.DefinedTags)
+	if err != nil {
+		return nil, err
+	}
+
+	return &containerenginesdk.ServiceLbConfigDetails{
+		FreeformTags: copyClusterStringMap(spec.FreeformTags),
+		DefinedTags:  definedTags,
+	}, nil
+}
+
+func buildClusterImagePolicyConfig(
+	spec containerenginev1beta1.ClusterImagePolicyConfig,
+) *containerenginesdk.CreateImagePolicyConfigDetails {
+	if !spec.IsPolicyEnabled && len(spec.KeyDetails) == 0 {
+		return nil
+	}
+
+	details := &containerenginesdk.CreateImagePolicyConfigDetails{
+		IsPolicyEnabled: common.Bool(spec.IsPolicyEnabled),
+	}
+	if len(spec.KeyDetails) > 0 {
+		keyDetails := make([]containerenginesdk.KeyDetails, 0, len(spec.KeyDetails))
+		for _, keyDetail := range spec.KeyDetails {
+			if keyDetail.KmsKeyId == "" {
+				continue
+			}
+			keyDetails = append(keyDetails, containerenginesdk.KeyDetails{
+				KmsKeyId: common.String(keyDetail.KmsKeyId),
+			})
+		}
+		if len(keyDetails) > 0 {
+			details.KeyDetails = keyDetails
+		}
+	}
+	return details
+}
+
+func buildClusterPodNetworkOptions(
+	spec []containerenginev1beta1.ClusterPodNetworkOption,
+) ([]containerenginesdk.ClusterPodNetworkOptionDetails, error) {
+	if len(spec) == 0 {
+		return nil, nil
+	}
+
+	details := make([]containerenginesdk.ClusterPodNetworkOptionDetails, 0, len(spec))
+	for index, option := range spec {
+		detail, err := buildClusterPodNetworkOption(option)
+		if err != nil {
+			return nil, fmt.Errorf("build clusterPodNetworkOptions[%d]: %w", index, err)
+		}
+		if detail != nil {
+			details = append(details, detail)
+		}
+	}
+
+	if len(details) == 0 {
+		return nil, nil
+	}
+	return details, nil
+}
+
+func buildClusterPodNetworkOption(
+	spec containerenginev1beta1.ClusterPodNetworkOption,
+) (containerenginesdk.ClusterPodNetworkOptionDetails, error) {
+	rawJSON := strings.TrimSpace(spec.JsonData)
+	cniType := strings.TrimSpace(spec.CniType)
+	if cniType == "" && rawJSON != "" {
+		var discriminator struct {
+			CniType string `json:"cniType"`
+		}
+		if err := json.Unmarshal([]byte(rawJSON), &discriminator); err != nil {
+			return nil, fmt.Errorf("parse clusterPodNetworkOptions discriminator: %w", err)
+		}
+		cniType = strings.TrimSpace(discriminator.CniType)
+	}
+
+	switch strings.ToUpper(cniType) {
+	case "":
+		if rawJSON == "" {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("missing cniType")
+	case "FLANNEL_OVERLAY":
+		var detail containerenginesdk.FlannelOverlayClusterPodNetworkOptionDetails
+		if rawJSON != "" {
+			if err := json.Unmarshal([]byte(rawJSON), &detail); err != nil {
+				return nil, fmt.Errorf("decode FLANNEL_OVERLAY jsonData: %w", err)
+			}
+		}
+		return detail, nil
+	case "OCI_VCN_IP_NATIVE":
+		var detail containerenginesdk.OciVcnIpNativeClusterPodNetworkOptionDetails
+		if rawJSON != "" {
+			if err := json.Unmarshal([]byte(rawJSON), &detail); err != nil {
+				return nil, fmt.Errorf("decode OCI_VCN_IP_NATIVE jsonData: %w", err)
+			}
+		}
+		return detail, nil
+	default:
+		return nil, fmt.Errorf("unsupported cniType %q", cniType)
+	}
+}
+
+func convertClusterDefinedTags(tags map[string]shared.MapValue) (map[string]map[string]interface{}, error) {
+	if len(tags) == 0 {
+		return nil, nil
+	}
+
+	payload, err := json.Marshal(tags)
+	if err != nil {
+		return nil, err
+	}
+
+	var converted map[string]map[string]interface{}
+	if err := json.Unmarshal(payload, &converted); err != nil {
+		return nil, err
+	}
+	return converted, nil
+}
+
+func copyClusterStringMap(values map[string]string) map[string]string {
+	if len(values) == 0 {
+		return nil
+	}
+
+	copied := make(map[string]string, len(values))
+	for key, value := range values {
+		copied[key] = value
+	}
+	return copied
+}
+
+func clusterJSONMap(value any) (map[string]any, error) {
+	if value == nil {
+		return nil, nil
+	}
+
+	payload, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+
+	var decoded any
+	if err := json.Unmarshal(payload, &decoded); err != nil {
+		return nil, err
+	}
+
+	pruned, ok := pruneClusterJSONValue(decoded)
+	if !ok {
+		return nil, nil
+	}
+
+	values, ok := pruned.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("cluster JSON projection is %T, want map[string]any", pruned)
+	}
+	return values, nil
+}
+
+func pruneClusterJSONValue(value any) (any, bool) {
+	switch concrete := value.(type) {
+	case nil:
+		return nil, false
+	case map[string]any:
+		pruned := make(map[string]any, len(concrete))
+		for key, child := range concrete {
+			prunedChild, ok := pruneClusterJSONValue(child)
+			if !ok {
+				continue
+			}
+			pruned[key] = prunedChild
+		}
+		if len(pruned) == 0 {
+			return nil, false
+		}
+		return pruned, true
+	case []any:
+		pruned := make([]any, 0, len(concrete))
+		for _, child := range concrete {
+			prunedChild, ok := pruneClusterJSONValue(child)
+			if !ok {
+				continue
+			}
+			pruned = append(pruned, prunedChild)
+		}
+		if len(pruned) == 0 {
+			return nil, false
+		}
+		return pruned, true
+	case string:
+		if strings.TrimSpace(concrete) == "" {
+			return nil, false
+		}
+		return concrete, true
+	case float64:
+		if concrete == 0 {
+			return nil, false
+		}
+		return concrete, true
+	default:
+		return concrete, true
+	}
+}
+
+func clusterMapSubsetEqual(want map[string]any, got map[string]any) bool {
+	for key, wantValue := range want {
+		gotValue, ok := got[key]
+		if !ok {
+			return false
+		}
+		if !clusterJSONValueEqual(wantValue, gotValue) {
+			return false
+		}
+	}
+	return true
+}
+
+func clusterJSONValueEqual(left any, right any) bool {
+	leftMap, leftIsMap := left.(map[string]any)
+	rightMap, rightIsMap := right.(map[string]any)
+	switch {
+	case leftIsMap && rightIsMap:
+		return clusterMapSubsetEqual(leftMap, rightMap)
+	case leftIsMap || rightIsMap:
+		return false
+	}
+
+	leftSlice, leftIsSlice := left.([]any)
+	rightSlice, rightIsSlice := right.([]any)
+	switch {
+	case leftIsSlice && rightIsSlice:
+		if len(leftSlice) != len(rightSlice) {
+			return false
+		}
+		for i := range leftSlice {
+			if !clusterJSONValueEqual(leftSlice[i], rightSlice[i]) {
+				return false
+			}
+		}
+		return true
+	case leftIsSlice || rightIsSlice:
+		return false
+	}
+
+	leftPayload, leftErr := json.Marshal(left)
+	rightPayload, rightErr := json.Marshal(right)
+	if leftErr != nil || rightErr != nil {
+		return false
+	}
+	return string(leftPayload) == string(rightPayload)
+}

@@ -57,6 +57,7 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | `lifecycleState` | The NAT gateway's current state. | `string` | No |
 | `natIp` | The IP address associated with the NAT gateway. | `string` | No |
 | `publicIpId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the public IP address associated with the NAT gateway. | `string` | No |
+| `publicIpIdCreateIntent` | Tracks whether `spec.publicIpId` was explicitly set or omitted when the current tracked NAT gateway first became managed by this controller. | `string` | No |
 | `routeTableId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway. If you don't specify a route table here, the NAT gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the NAT gateway. | `string` | No |
 | [`status`](../../reference/api/core/v1beta1/index.md#kind-natgateway-status-status) | - | `object` | Yes |
 | `timeCreated` | The date and time the NAT gateway was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No |
@@ -75,9 +76,18 @@ This example is generated from the checked-in sample manifest at `config/samples
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing NatGateway with the same display name in the same
+# VCN.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: NatGateway
 metadata:
   name: natgateway-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  displayName: "natgateway-sample"
 ```

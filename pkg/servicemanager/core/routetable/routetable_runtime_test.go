@@ -20,6 +20,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ import (
 type fakeRouteTableOCIClient struct {
 	createFn func(context.Context, coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error)
 	getFn    func(context.Context, coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error)
+	listFn   func(context.Context, coresdk.ListRouteTablesRequest) (coresdk.ListRouteTablesResponse, error)
 	updateFn func(context.Context, coresdk.UpdateRouteTableRequest) (coresdk.UpdateRouteTableResponse, error)
 	deleteFn func(context.Context, coresdk.DeleteRouteTableRequest) (coresdk.DeleteRouteTableResponse, error)
 }
@@ -50,7 +52,18 @@ func (f *fakeRouteTableOCIClient) GetRouteTable(ctx context.Context, req coresdk
 	if f.getFn != nil {
 		return f.getFn(ctx, req)
 	}
-	return coresdk.GetRouteTableResponse{}, nil
+	return coresdk.GetRouteTableResponse{}, fakeRouteTableServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "missing",
+	}
+}
+
+func (f *fakeRouteTableOCIClient) ListRouteTables(ctx context.Context, req coresdk.ListRouteTablesRequest) (coresdk.ListRouteTablesResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return coresdk.ListRouteTablesResponse{}, nil
 }
 
 func (f *fakeRouteTableOCIClient) UpdateRouteTable(ctx context.Context, req coresdk.UpdateRouteTableRequest) (coresdk.UpdateRouteTableResponse, error) {
@@ -81,13 +94,120 @@ func (f fakeRouteTableServiceError) GetOpcRequestID() string {
 	return ""
 }
 
+func newTestGeneratedDelegate(manager *RouteTableServiceManager, client routeTableOCIClient) RouteTableServiceClient {
+	if client == nil {
+		client = &fakeRouteTableOCIClient{}
+	}
+
+	config := generatedruntime.Config[*corev1beta1.RouteTable]{
+		Kind:    "RouteTable",
+		SDKName: "RouteTable",
+		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "routetable",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"definedTags", "displayName", "freeformTags", "routeRules"},
+				ForceNew:      []string{"compartmentId", "vcnId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.CreateRouteTableRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.CreateRouteTable(ctx, *request.(*coresdk.CreateRouteTableRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateRouteTableDetails", RequestName: "CreateRouteTableDetails", Contribution: "body"}},
+		},
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.GetRouteTableRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.GetRouteTable(ctx, *request.(*coresdk.GetRouteTableRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true}},
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.ListRouteTablesRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.ListRouteTables(ctx, *request.(*coresdk.ListRouteTablesRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+			},
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.UpdateRouteTableRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.UpdateRouteTable(ctx, *request.(*coresdk.UpdateRouteTableRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateRouteTableDetails", RequestName: "UpdateRouteTableDetails", Contribution: "body"},
+			},
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.DeleteRouteTableRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.DeleteRouteTable(ctx, *request.(*coresdk.DeleteRouteTableRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true}},
+		},
+	}
+
+	return defaultRouteTableServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.RouteTable](config),
+	}
+}
+
 func newRouteTableTestManager(client routeTableOCIClient) *RouteTableServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewRouteTableServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
 		manager.WithClient(&routeTableRuntimeClient{
-			manager: manager,
-			client:  client,
+			manager:  manager,
+			delegate: newTestGeneratedDelegate(manager, client),
+			client:   client,
 		})
 	}
 	return manager
@@ -154,6 +274,12 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 		createFn: func(_ context.Context, req coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
 			captured = req
 			return coresdk.CreateRouteTableResponse{
+				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..create", "test-route-table", coresdk.RouteTableLifecycleStateAvailable),
+			}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+			assert.Equal(t, "ocid1.routetable.oc1..create", *req.RtId)
+			return coresdk.GetRouteTableResponse{
 				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..create", "test-route-table", coresdk.RouteTableLifecycleStateAvailable),
 			}, nil
 		},
@@ -248,12 +374,22 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 	getCalls := 0
 	createCalls := 0
 	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
-		getFn: func(_ context.Context, _ coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+		getFn: func(_ context.Context, req coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
 			getCalls++
-			return coresdk.GetRouteTableResponse{}, fakeRouteTableServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "not found",
+			switch *req.RtId {
+			case "ocid1.routetable.oc1..existing":
+				return coresdk.GetRouteTableResponse{}, fakeRouteTableServiceError{
+					statusCode: 404,
+					code:       "NotFound",
+					message:    "not found",
+				}
+			case "ocid1.routetable.oc1..recreated":
+				return coresdk.GetRouteTableResponse{
+					RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..recreated", "test-route-table", coresdk.RouteTableLifecycleStateAvailable),
+				}, nil
+			default:
+				t.Fatalf("unexpected route table lookup %q", *req.RtId)
+				return coresdk.GetRouteTableResponse{}, nil
 			}
 		},
 		createFn: func(_ context.Context, req coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
@@ -273,16 +409,61 @@ func TestCreateOrUpdate_RecreatesOnNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, shared.OCID("ocid1.routetable.oc1..recreated"), resource.Status.OsokStatus.Ocid)
 	assert.Equal(t, "ocid1.routetable.oc1..recreated", resource.Status.Id)
 }
 
+func TestCreateOrUpdate_DoesNotBindByStatusIDWithoutTrackedOCID(t *testing.T) {
+	getCalls := 0
+	listCalls := 0
+	createCalls := 0
+	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
+		listFn: func(_ context.Context, _ coresdk.ListRouteTablesRequest) (coresdk.ListRouteTablesResponse, error) {
+			listCalls++
+			return coresdk.ListRouteTablesResponse{}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
+			createCalls++
+			return coresdk.CreateRouteTableResponse{
+				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..create", "test-route-table", coresdk.RouteTableLifecycleStateAvailable),
+			}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.routetable.oc1..create", *req.RtId)
+			return coresdk.GetRouteTableResponse{
+				RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..create", "test-route-table", coresdk.RouteTableLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecRouteTable()
+	resource.Status.Id = "ocid1.routetable.oc1..status-only"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 0, listCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, shared.OCID("ocid1.routetable.oc1..create"), resource.Status.OsokStatus.Ocid)
+}
+
 func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	var captured coresdk.UpdateRouteTableRequest
+	getCalls := 0
 	manager := newRouteTableTestManager(&fakeRouteTableOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+			getCalls++
+			if getCalls >= 3 {
+				return coresdk.GetRouteTableResponse{
+					RouteTable: makeSDKRouteTable("ocid1.routetable.oc1..existing", "new-name", coresdk.RouteTableLifecycleStateAvailable),
+				}, nil
+			}
+
 			current := makeSDKRouteTable("ocid1.routetable.oc1..existing", "old-name", coresdk.RouteTableLifecycleStateAvailable)
 			current.DefinedTags = map[string]map[string]interface{}{"Operations": {"CostCenter": "41"}}
 			current.FreeformTags = map[string]string{"env": "stage"}
@@ -318,6 +499,7 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	assert.Equal(t, "ocid1.internetgateway.oc1..example", *captured.RouteRules[0].NetworkEntityId)
 	assert.Len(t, captured.RouteRules, 2)
 	assert.Equal(t, "new-name", resource.Status.DisplayName)
+	assert.Equal(t, 3, getCalls)
 }
 
 func TestCreateOrUpdate_RejectsImmutableDrift(t *testing.T) {

@@ -38,35 +38,85 @@ var newNetworkSecurityGroupServiceClient = func(manager *NetworkSecurityGroupSer
 		Kind:    "NetworkSecurityGroup",
 		SDKName: "NetworkSecurityGroup",
 		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "networksecuritygroup",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "state", "vcnId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+				ForceNew:      []string{"compartmentId", "vcnId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.CreateNetworkSecurityGroupRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateNetworkSecurityGroup(ctx, *request.(*coresdk.CreateNetworkSecurityGroupRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.GetNetworkSecurityGroupRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetNetworkSecurityGroup(ctx, *request.(*coresdk.GetNetworkSecurityGroupRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.ListNetworkSecurityGroupsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListNetworkSecurityGroups(ctx, *request.(*coresdk.ListNetworkSecurityGroupsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "VlanId", RequestName: "vlanId", Contribution: "query", PreferResourceID: false}, {FieldName: "VcnId", RequestName: "vcnId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.UpdateNetworkSecurityGroupRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateNetworkSecurityGroup(ctx, *request.(*coresdk.UpdateNetworkSecurityGroupRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateNetworkSecurityGroupDetails", RequestName: "UpdateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.DeleteNetworkSecurityGroupRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteNetworkSecurityGroup(ctx, *request.(*coresdk.DeleteNetworkSecurityGroupRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

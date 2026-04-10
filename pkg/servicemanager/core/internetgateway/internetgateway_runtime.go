@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -30,116 +31,109 @@ const internetGatewayRequeueDuration = time.Minute
 type internetGatewayOCIClient interface {
 	CreateInternetGateway(ctx context.Context, request coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error)
 	GetInternetGateway(ctx context.Context, request coresdk.GetInternetGatewayRequest) (coresdk.GetInternetGatewayResponse, error)
+	ListInternetGateways(ctx context.Context, request coresdk.ListInternetGatewaysRequest) (coresdk.ListInternetGatewaysResponse, error)
 	UpdateInternetGateway(ctx context.Context, request coresdk.UpdateInternetGatewayRequest) (coresdk.UpdateInternetGatewayResponse, error)
 	DeleteInternetGateway(ctx context.Context, request coresdk.DeleteInternetGatewayRequest) (coresdk.DeleteInternetGatewayResponse, error)
 }
 
-type internetGatewayRuntimeClient struct {
-	manager *InternetGatewayServiceManager
-	client  internetGatewayOCIClient
-	initErr error
+type internetGatewayGeneratedParityClient struct {
+	manager  *InternetGatewayServiceManager
+	delegate InternetGatewayServiceClient
+	client   internetGatewayOCIClient
+	initErr  error
 }
 
 func init() {
+	generatedFactory := newInternetGatewayServiceClient
 	newInternetGatewayServiceClient = func(manager *InternetGatewayServiceManager) InternetGatewayServiceClient {
+		delegate := generatedFactory(manager)
 		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &internetGatewayRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
+		parityClient := &internetGatewayGeneratedParityClient{
+			manager:  manager,
+			delegate: delegate,
+			client:   sdkClient,
 		}
 		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize InternetGateway OCI client: %w", err)
+			parityClient.initErr = fmt.Errorf("initialize InternetGateway OCI client: %w", err)
 		}
-		return runtimeClient
+		return parityClient
 	}
 }
 
-func (c *internetGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.InternetGateway, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+func (c *internetGatewayGeneratedParityClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.InternetGateway, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("internet gateway parity delegate is not configured")
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		return c.create(ctx, resource)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isInternetGatewayReadNotFoundOCI(err) {
-			c.clearTrackedIdentity(resource)
-			return c.create(ctx, resource)
+	trackedID := currentInternetGatewayID(resource)
+	explicitRecreate := false
+	if trackedID != "" {
+		if c.initErr != nil {
+			return c.fail(resource, c.initErr)
 		}
-		return c.fail(resource, normalizeInternetGatewayOCIError(err))
-	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
-	}
-
-	switch current.LifecycleState {
-	case coresdk.InternetGatewayLifecycleStateProvisioning, coresdk.InternetGatewayLifecycleStateTerminating, coresdk.InternetGatewayLifecycleStateTerminated:
-		return c.applyLifecycle(resource, current)
-	}
-
-	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
-	if err != nil {
-		return c.fail(resource, err)
-	}
-
-	if updateNeeded {
-		response, err := c.client.UpdateInternetGateway(ctx, updateRequest)
+		current, err := c.get(ctx, trackedID)
 		if err != nil {
-			return c.fail(resource, normalizeInternetGatewayOCIError(err))
+			if isInternetGatewayReadNotFoundOCI(err) {
+				c.clearTrackedIdentity(resource)
+				explicitRecreate = true
+			} else {
+				return c.fail(resource, normalizeInternetGatewayOCIError(err))
+			}
+		} else if internetGatewayLifecycleIsRetryable(current.LifecycleState) {
+			if err := c.projectStatus(resource, current); err != nil {
+				return c.fail(resource, err)
+			}
+			return c.applyLifecycle(resource, current)
+		} else if requiresManualInternetGatewayUpdate(resource.Spec, current) {
+			return c.update(ctx, resource, current)
 		}
-		current = response.InternetGateway
 	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
+	previousStatus := resource.Status
+	c.clearProjectedStatus(resource)
+	clearedStatus := resource.Status
+
+	delegateCtx := ctx
+	if explicitRecreate {
+		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
 	}
-	return c.applyLifecycle(resource, current)
+	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
+	if err != nil && !internetGatewayProjectedStatusChanged(resource.Status, clearedStatus) {
+		c.restoreStatus(resource, previousStatus)
+	}
+	return response, err
 }
 
-func (c *internetGatewayRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.InternetGateway) (bool, error) {
-	if c.initErr != nil {
-		return false, c.initErr
+func (c *internetGatewayGeneratedParityClient) Delete(ctx context.Context, resource *corev1beta1.InternetGateway) (bool, error) {
+	if c.delegate == nil {
+		return false, fmt.Errorf("internet gateway parity delegate is not configured")
 	}
-
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
-		return true, nil
-	}
-
-	deleteRequest := coresdk.DeleteInternetGatewayRequest{
-		IgId: common.String(trackedID),
-	}
-	if _, err := c.client.DeleteInternetGateway(ctx, deleteRequest); err != nil {
-		if isInternetGatewayDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
-		return false, normalizeInternetGatewayOCIError(err)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isInternetGatewayDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-		return false, normalizeInternetGatewayOCIError(err)
-	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
-	}
-	c.markTerminating(resource, current)
-	return false, nil
+	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *internetGatewayRuntimeClient) create(ctx context.Context, resource *corev1beta1.InternetGateway) (servicemanager.OSOKResponse, error) {
+func (c *internetGatewayGeneratedParityClient) clearProjectedStatus(resource *corev1beta1.InternetGateway) {
+	if resource == nil {
+		return
+	}
+
+	resource.Status = corev1beta1.InternetGatewayStatus{
+		OsokStatus: resource.Status.OsokStatus,
+		Id:         resource.Status.Id,
+	}
+}
+
+func (c *internetGatewayGeneratedParityClient) restoreStatus(resource *corev1beta1.InternetGateway, previous corev1beta1.InternetGatewayStatus) {
+	if resource == nil {
+		return
+	}
+
+	failedStatus := resource.Status.OsokStatus
+	resource.Status = previous
+	resource.Status.OsokStatus = failedStatus
+}
+
+func (c *internetGatewayGeneratedParityClient) create(ctx context.Context, resource *corev1beta1.InternetGateway) (servicemanager.OSOKResponse, error) {
 	request := coresdk.CreateInternetGatewayRequest{
 		CreateInternetGatewayDetails: buildCreateInternetGatewayDetails(resource.Spec),
 	}
@@ -155,7 +149,7 @@ func (c *internetGatewayRuntimeClient) create(ctx context.Context, resource *cor
 	return c.applyLifecycle(resource, response.InternetGateway)
 }
 
-func (c *internetGatewayRuntimeClient) get(ctx context.Context, ocid string) (coresdk.InternetGateway, error) {
+func (c *internetGatewayGeneratedParityClient) get(ctx context.Context, ocid string) (coresdk.InternetGateway, error) {
 	response, err := c.client.GetInternetGateway(ctx, coresdk.GetInternetGatewayRequest{
 		IgId: common.String(ocid),
 	})
@@ -165,7 +159,30 @@ func (c *internetGatewayRuntimeClient) get(ctx context.Context, ocid string) (co
 	return response.InternetGateway, nil
 }
 
-func (c *internetGatewayRuntimeClient) buildUpdateRequest(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) (coresdk.UpdateInternetGatewayRequest, bool, error) {
+func (c *internetGatewayGeneratedParityClient) update(ctx context.Context, resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) (servicemanager.OSOKResponse, error) {
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
+
+	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+	if !updateNeeded {
+		return c.applyLifecycle(resource, current)
+	}
+
+	response, err := c.client.UpdateInternetGateway(ctx, updateRequest)
+	if err != nil {
+		return c.fail(resource, normalizeInternetGatewayOCIError(err))
+	}
+	if err := c.projectStatus(resource, response.InternetGateway); err != nil {
+		return c.fail(resource, err)
+	}
+	return c.applyLifecycle(resource, response.InternetGateway)
+}
+
+func (c *internetGatewayGeneratedParityClient) buildUpdateRequest(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) (coresdk.UpdateInternetGatewayRequest, bool, error) {
 	if current.Id == nil || strings.TrimSpace(*current.Id) == "" {
 		return coresdk.UpdateInternetGatewayRequest{}, false, fmt.Errorf("current InternetGateway does not expose an OCI identifier")
 	}
@@ -250,7 +267,7 @@ func validateInternetGatewayCreateOnlyDrift(spec corev1beta1.InternetGatewaySpec
 	return fmt.Errorf("InternetGateway create-only field drift is not supported: %s", strings.Join(unsupported, ", "))
 }
 
-func (c *internetGatewayRuntimeClient) applyLifecycle(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) (servicemanager.OSOKResponse, error) {
+func (c *internetGatewayGeneratedParityClient) applyLifecycle(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
 	now := time.Now()
 	if status.CreatedAt == nil && current.Id != nil && strings.TrimSpace(*current.Id) != "" {
@@ -284,7 +301,7 @@ func (c *internetGatewayRuntimeClient) applyLifecycle(resource *corev1beta1.Inte
 	}
 }
 
-func (c *internetGatewayRuntimeClient) fail(resource *corev1beta1.InternetGateway, err error) (servicemanager.OSOKResponse, error) {
+func (c *internetGatewayGeneratedParityClient) fail(resource *corev1beta1.InternetGateway, err error) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
@@ -294,7 +311,7 @@ func (c *internetGatewayRuntimeClient) fail(resource *corev1beta1.InternetGatewa
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
 }
 
-func (c *internetGatewayRuntimeClient) markDeleted(resource *corev1beta1.InternetGateway, message string) {
+func (c *internetGatewayGeneratedParityClient) markDeleted(resource *corev1beta1.InternetGateway, message string) {
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
 	status.DeletedAt = &now
@@ -304,11 +321,11 @@ func (c *internetGatewayRuntimeClient) markDeleted(resource *corev1beta1.Interne
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
 }
 
-func (c *internetGatewayRuntimeClient) clearTrackedIdentity(resource *corev1beta1.InternetGateway) {
+func (c *internetGatewayGeneratedParityClient) clearTrackedIdentity(resource *corev1beta1.InternetGateway) {
 	resource.Status = corev1beta1.InternetGatewayStatus{}
 }
 
-func (c *internetGatewayRuntimeClient) markTerminating(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) {
+func (c *internetGatewayGeneratedParityClient) markTerminating(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) {
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
 	status.UpdatedAt = &now
@@ -317,7 +334,7 @@ func (c *internetGatewayRuntimeClient) markTerminating(resource *corev1beta1.Int
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", status.Message, c.manager.Log)
 }
 
-func (c *internetGatewayRuntimeClient) projectStatus(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) error {
+func (c *internetGatewayGeneratedParityClient) projectStatus(resource *corev1beta1.InternetGateway, current coresdk.InternetGateway) error {
 	resource.Status = corev1beta1.InternetGatewayStatus{
 		OsokStatus:     resource.Status.OsokStatus,
 		CompartmentId:  stringValue(current.CompartmentId),
@@ -367,6 +384,49 @@ func isInternetGatewayReadNotFoundOCI(err error) bool {
 func isInternetGatewayDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func currentInternetGatewayID(resource *corev1beta1.InternetGateway) string {
+	if resource == nil {
+		return ""
+	}
+	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
+		return ocid
+	}
+	return strings.TrimSpace(resource.Status.Id)
+}
+
+func internetGatewayProjectedStatusChanged(current, baseline corev1beta1.InternetGatewayStatus) bool {
+	current.OsokStatus = shared.OSOKStatus{}
+	baseline.OsokStatus = shared.OSOKStatus{}
+	return !reflect.DeepEqual(current, baseline)
+}
+
+func internetGatewayLifecycleIsRetryable(state coresdk.InternetGatewayLifecycleStateEnum) bool {
+	switch state {
+	case coresdk.InternetGatewayLifecycleStateProvisioning,
+		coresdk.InternetGatewayLifecycleStateTerminating,
+		coresdk.InternetGatewayLifecycleStateTerminated:
+		return true
+	default:
+		return false
+	}
+}
+
+func requiresManualInternetGatewayUpdate(spec corev1beta1.InternetGatewaySpec, current coresdk.InternetGateway) bool {
+	if !spec.IsEnabled && !boolPtrEqual(current.IsEnabled, spec.IsEnabled) {
+		return true
+	}
+	if spec.FreeformTags != nil && len(spec.FreeformTags) == 0 && !reflect.DeepEqual(current.FreeformTags, spec.FreeformTags) {
+		return true
+	}
+	if spec.DefinedTags != nil && len(spec.DefinedTags) == 0 {
+		desiredDefinedTags := *util.ConvertToOciDefinedTags(&spec.DefinedTags)
+		if !reflect.DeepEqual(current.DefinedTags, desiredDefinedTags) {
+			return true
+		}
+	}
+	return false
 }
 
 func stringPtrEqual(actual *string, expected string) bool {

@@ -72,9 +72,19 @@ This example is generated from the checked-in sample manifest at `config/samples
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing InternetGateway with the same display name in the
+# same VCN.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: InternetGateway
 metadata:
   name: internetgateway-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  isEnabled: true
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  displayName: "internetgateway-sample"
 ```

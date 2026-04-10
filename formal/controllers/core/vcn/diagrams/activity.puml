@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetVcn;
 else (no)
-:Resolve an existing OCI resource through\nListVcn using filters compartment_id,\ndisplay_name, id, state;
+:Resolve an existing OCI resource through\nListVcns using filters compartment_id,\ndisplay_name, id, state;
 :Create the OCI resource via CreateVcn when no\nreusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteVcn with required via\nGetVcn or ListVcn to NOT_FOUND confirmation;
-:Confirm deletion via GetVcn or ListVcn until\nOCI reaches NOT_FOUND;
+:Delete path uses DeleteVcn with required via\nGetVcn or ListVcns to NOT_FOUND confirmation;
+:Confirm deletion via GetVcn or ListVcns until\nOCI reaches NOT_FOUND;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)

@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -33,116 +34,109 @@ const (
 type networkSecurityGroupOCIClient interface {
 	CreateNetworkSecurityGroup(ctx context.Context, request coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error)
 	GetNetworkSecurityGroup(ctx context.Context, request coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error)
+	ListNetworkSecurityGroups(ctx context.Context, request coresdk.ListNetworkSecurityGroupsRequest) (coresdk.ListNetworkSecurityGroupsResponse, error)
 	UpdateNetworkSecurityGroup(ctx context.Context, request coresdk.UpdateNetworkSecurityGroupRequest) (coresdk.UpdateNetworkSecurityGroupResponse, error)
 	DeleteNetworkSecurityGroup(ctx context.Context, request coresdk.DeleteNetworkSecurityGroupRequest) (coresdk.DeleteNetworkSecurityGroupResponse, error)
 }
 
-type networkSecurityGroupRuntimeClient struct {
-	manager *NetworkSecurityGroupServiceManager
-	client  networkSecurityGroupOCIClient
-	initErr error
+type networkSecurityGroupGeneratedParityClient struct {
+	manager  *NetworkSecurityGroupServiceManager
+	delegate NetworkSecurityGroupServiceClient
+	client   networkSecurityGroupOCIClient
+	initErr  error
 }
 
 func init() {
+	generatedFactory := newNetworkSecurityGroupServiceClient
 	newNetworkSecurityGroupServiceClient = func(manager *NetworkSecurityGroupServiceManager) NetworkSecurityGroupServiceClient {
+		delegate := generatedFactory(manager)
 		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &networkSecurityGroupRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
+		parityClient := &networkSecurityGroupGeneratedParityClient{
+			manager:  manager,
+			delegate: delegate,
+			client:   sdkClient,
 		}
 		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize NetworkSecurityGroup OCI client: %w", err)
+			parityClient.initErr = fmt.Errorf("initialize NetworkSecurityGroup OCI client: %w", err)
 		}
-		return runtimeClient
+		return parityClient
 	}
 }
 
-func (c *networkSecurityGroupRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("network security group parity delegate is not configured")
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		return c.create(ctx, resource)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isNetworkSecurityGroupReadNotFoundOCI(err) {
-			c.clearTrackedIdentity(resource)
-			return c.create(ctx, resource)
+	trackedID := currentNetworkSecurityGroupID(resource)
+	explicitRecreate := false
+	if trackedID != "" {
+		if c.initErr != nil {
+			return c.fail(resource, c.initErr)
 		}
-		return c.fail(resource, normalizeNetworkSecurityGroupOCIError(err))
-	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
-	}
-
-	switch current.LifecycleState {
-	case coresdk.NetworkSecurityGroupLifecycleStateProvisioning, networkSecurityGroupLifecycleStateUpdate, coresdk.NetworkSecurityGroupLifecycleStateTerminating, coresdk.NetworkSecurityGroupLifecycleStateTerminated:
-		return c.applyLifecycle(resource, current)
-	}
-
-	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
-	if err != nil {
-		return c.fail(resource, err)
-	}
-
-	if updateNeeded {
-		response, err := c.client.UpdateNetworkSecurityGroup(ctx, updateRequest)
+		current, err := c.get(ctx, trackedID)
 		if err != nil {
-			return c.fail(resource, normalizeNetworkSecurityGroupOCIError(err))
+			if isNetworkSecurityGroupReadNotFoundOCI(err) {
+				c.clearTrackedIdentity(resource)
+				explicitRecreate = true
+			} else {
+				return c.fail(resource, normalizeNetworkSecurityGroupOCIError(err))
+			}
+		} else if networkSecurityGroupLifecycleIsRetryable(current.LifecycleState) {
+			if err := c.projectStatus(resource, current); err != nil {
+				return c.fail(resource, err)
+			}
+			return c.applyLifecycle(resource, current)
+		} else if requiresManualNetworkSecurityGroupUpdate(resource.Spec, current) {
+			return c.update(ctx, resource, current)
 		}
-		current = response.NetworkSecurityGroup
 	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
+	previousStatus := resource.Status
+	c.clearProjectedStatus(resource)
+	clearedStatus := resource.Status
+
+	delegateCtx := ctx
+	if explicitRecreate {
+		delegateCtx = generatedruntime.WithSkipExistingBeforeCreate(delegateCtx)
 	}
-	return c.applyLifecycle(resource, current)
+	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
+	if err != nil && !networkSecurityGroupProjectedStatusChanged(resource.Status, clearedStatus) {
+		c.restoreStatus(resource, previousStatus)
+	}
+	return response, err
 }
 
-func (c *networkSecurityGroupRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup) (bool, error) {
-	if c.initErr != nil {
-		return false, c.initErr
+func (c *networkSecurityGroupGeneratedParityClient) Delete(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup) (bool, error) {
+	if c.delegate == nil {
+		return false, fmt.Errorf("network security group parity delegate is not configured")
 	}
-
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
-		return true, nil
-	}
-
-	deleteRequest := coresdk.DeleteNetworkSecurityGroupRequest{
-		NetworkSecurityGroupId: common.String(trackedID),
-	}
-	if _, err := c.client.DeleteNetworkSecurityGroup(ctx, deleteRequest); err != nil {
-		if isNetworkSecurityGroupDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
-		return false, normalizeNetworkSecurityGroupOCIError(err)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isNetworkSecurityGroupDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-		return false, normalizeNetworkSecurityGroupOCIError(err)
-	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
-	}
-	c.markTerminating(resource, current)
-	return false, nil
+	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *networkSecurityGroupRuntimeClient) create(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup) (servicemanager.OSOKResponse, error) {
+func (c *networkSecurityGroupGeneratedParityClient) clearProjectedStatus(resource *corev1beta1.NetworkSecurityGroup) {
+	if resource == nil {
+		return
+	}
+
+	resource.Status = corev1beta1.NetworkSecurityGroupStatus{
+		OsokStatus: resource.Status.OsokStatus,
+		Id:         resource.Status.Id,
+	}
+}
+
+func (c *networkSecurityGroupGeneratedParityClient) restoreStatus(resource *corev1beta1.NetworkSecurityGroup, previous corev1beta1.NetworkSecurityGroupStatus) {
+	if resource == nil {
+		return
+	}
+
+	failedStatus := resource.Status.OsokStatus
+	resource.Status = previous
+	resource.Status.OsokStatus = failedStatus
+}
+
+func (c *networkSecurityGroupGeneratedParityClient) create(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup) (servicemanager.OSOKResponse, error) {
 	request := coresdk.CreateNetworkSecurityGroupRequest{
 		CreateNetworkSecurityGroupDetails: buildCreateNetworkSecurityGroupDetails(resource.Spec),
 	}
@@ -158,7 +152,7 @@ func (c *networkSecurityGroupRuntimeClient) create(ctx context.Context, resource
 	return c.applyLifecycle(resource, response.NetworkSecurityGroup)
 }
 
-func (c *networkSecurityGroupRuntimeClient) get(ctx context.Context, ocid string) (coresdk.NetworkSecurityGroup, error) {
+func (c *networkSecurityGroupGeneratedParityClient) get(ctx context.Context, ocid string) (coresdk.NetworkSecurityGroup, error) {
 	response, err := c.client.GetNetworkSecurityGroup(ctx, coresdk.GetNetworkSecurityGroupRequest{
 		NetworkSecurityGroupId: common.String(ocid),
 	})
@@ -168,7 +162,30 @@ func (c *networkSecurityGroupRuntimeClient) get(ctx context.Context, ocid string
 	return response.NetworkSecurityGroup, nil
 }
 
-func (c *networkSecurityGroupRuntimeClient) buildUpdateRequest(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) (coresdk.UpdateNetworkSecurityGroupRequest, bool, error) {
+func (c *networkSecurityGroupGeneratedParityClient) update(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) (servicemanager.OSOKResponse, error) {
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
+
+	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+	if !updateNeeded {
+		return c.applyLifecycle(resource, current)
+	}
+
+	response, err := c.client.UpdateNetworkSecurityGroup(ctx, updateRequest)
+	if err != nil {
+		return c.fail(resource, normalizeNetworkSecurityGroupOCIError(err))
+	}
+	if err := c.projectStatus(resource, response.NetworkSecurityGroup); err != nil {
+		return c.fail(resource, err)
+	}
+	return c.applyLifecycle(resource, response.NetworkSecurityGroup)
+}
+
+func (c *networkSecurityGroupGeneratedParityClient) buildUpdateRequest(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) (coresdk.UpdateNetworkSecurityGroupRequest, bool, error) {
 	if current.Id == nil || strings.TrimSpace(*current.Id) == "" {
 		return coresdk.UpdateNetworkSecurityGroupRequest{}, false, fmt.Errorf("current NetworkSecurityGroup does not expose an OCI identifier")
 	}
@@ -262,7 +279,7 @@ func validateNetworkSecurityGroupCreateOnlyDrift(spec corev1beta1.NetworkSecurit
 	return fmt.Errorf("NetworkSecurityGroup create-only field drift is not supported: %s", strings.Join(unsupported, ", "))
 }
 
-func (c *networkSecurityGroupRuntimeClient) applyLifecycle(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) (servicemanager.OSOKResponse, error) {
+func (c *networkSecurityGroupGeneratedParityClient) applyLifecycle(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
 	now := time.Now()
 	if status.CreatedAt == nil && current.Id != nil && strings.TrimSpace(*current.Id) != "" {
@@ -296,7 +313,7 @@ func (c *networkSecurityGroupRuntimeClient) applyLifecycle(resource *corev1beta1
 	}
 }
 
-func (c *networkSecurityGroupRuntimeClient) fail(resource *corev1beta1.NetworkSecurityGroup, err error) (servicemanager.OSOKResponse, error) {
+func (c *networkSecurityGroupGeneratedParityClient) fail(resource *corev1beta1.NetworkSecurityGroup, err error) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
@@ -306,7 +323,7 @@ func (c *networkSecurityGroupRuntimeClient) fail(resource *corev1beta1.NetworkSe
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
 }
 
-func (c *networkSecurityGroupRuntimeClient) markDeleted(resource *corev1beta1.NetworkSecurityGroup, message string) {
+func (c *networkSecurityGroupGeneratedParityClient) markDeleted(resource *corev1beta1.NetworkSecurityGroup, message string) {
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
 	status.DeletedAt = &now
@@ -316,11 +333,11 @@ func (c *networkSecurityGroupRuntimeClient) markDeleted(resource *corev1beta1.Ne
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
 }
 
-func (c *networkSecurityGroupRuntimeClient) clearTrackedIdentity(resource *corev1beta1.NetworkSecurityGroup) {
+func (c *networkSecurityGroupGeneratedParityClient) clearTrackedIdentity(resource *corev1beta1.NetworkSecurityGroup) {
 	resource.Status = corev1beta1.NetworkSecurityGroupStatus{}
 }
 
-func (c *networkSecurityGroupRuntimeClient) markTerminating(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) {
+func (c *networkSecurityGroupGeneratedParityClient) markTerminating(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) {
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
 	status.UpdatedAt = &now
@@ -329,7 +346,7 @@ func (c *networkSecurityGroupRuntimeClient) markTerminating(resource *corev1beta
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", status.Message, c.manager.Log)
 }
 
-func (c *networkSecurityGroupRuntimeClient) projectStatus(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) error {
+func (c *networkSecurityGroupGeneratedParityClient) projectStatus(resource *corev1beta1.NetworkSecurityGroup, current coresdk.NetworkSecurityGroup) error {
 	resource.Status = corev1beta1.NetworkSecurityGroupStatus{
 		OsokStatus:     resource.Status.OsokStatus,
 		CompartmentId:  stringValue(current.CompartmentId),
@@ -377,6 +394,56 @@ func isNetworkSecurityGroupReadNotFoundOCI(err error) bool {
 func isNetworkSecurityGroupDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func currentNetworkSecurityGroupID(resource *corev1beta1.NetworkSecurityGroup) string {
+	if resource == nil {
+		return ""
+	}
+	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
+		return ocid
+	}
+	return strings.TrimSpace(resource.Status.Id)
+}
+
+func networkSecurityGroupProjectedStatusChanged(current, baseline corev1beta1.NetworkSecurityGroupStatus) bool {
+	current.OsokStatus = shared.OSOKStatus{}
+	baseline.OsokStatus = shared.OSOKStatus{}
+	return !reflect.DeepEqual(current, baseline)
+}
+
+func networkSecurityGroupLifecycleIsRetryable(state coresdk.NetworkSecurityGroupLifecycleStateEnum) bool {
+	switch state {
+	case coresdk.NetworkSecurityGroupLifecycleStateProvisioning,
+		networkSecurityGroupLifecycleStateUpdate,
+		coresdk.NetworkSecurityGroupLifecycleStateTerminating,
+		coresdk.NetworkSecurityGroupLifecycleStateTerminated:
+		return true
+	default:
+		return false
+	}
+}
+
+func requiresManualNetworkSecurityGroupUpdate(spec corev1beta1.NetworkSecurityGroupSpec, current coresdk.NetworkSecurityGroup) bool {
+	if spec.DisplayName == "" && !stringPtrEqual(current.DisplayName, spec.DisplayName) {
+		return true
+	}
+	if spec.FreeformTags == nil {
+		return current.FreeformTags != nil
+	}
+	if len(spec.FreeformTags) == 0 && !reflect.DeepEqual(current.FreeformTags, spec.FreeformTags) {
+		return true
+	}
+	if spec.DefinedTags == nil {
+		return current.DefinedTags != nil
+	}
+	if len(spec.DefinedTags) == 0 {
+		desiredDefinedTags := *util.ConvertToOciDefinedTags(&spec.DefinedTags)
+		if !reflect.DeepEqual(current.DefinedTags, desiredDefinedTags) {
+			return true
+		}
+	}
+	return false
 }
 
 func stringPtrEqual(actual *string, expected string) bool {

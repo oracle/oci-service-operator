@@ -23,9 +23,9 @@
     ],
     "list": [
       {
-        "operation": "ListVcn",
-        "requestType": "core.ListVcnRequest",
-        "responseType": "core.ListVcnResponse"
+        "operation": "ListVcns",
+        "requestType": "core.ListVcnsRequest",
+        "responseType": "core.ListVcnsResponse"
       }
     ],
     "update": [

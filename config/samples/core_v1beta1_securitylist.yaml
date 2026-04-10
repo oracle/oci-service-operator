@@ -3,8 +3,29 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing SecurityList with the same display name in the same
+# VCN.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: SecurityList
 metadata:
   name: securitylist-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  displayName: "securitylist-sample"
+  egressSecurityRules:
+    - destination: 0.0.0.0/0
+      protocol: "all"
+      description: "Allow outbound traffic"
+  ingressSecurityRules:
+    - protocol: "6"
+      source: 10.0.0.0/16
+      description: "Allow SSH from the VCN CIDR"
+      tcpOptions:
+        destinationPortRange:
+          min: 22
+          max: 22

@@ -50,22 +50,25 @@ const (
 	queueWorkRequestPhaseDelete queueWorkRequestPhase = "delete"
 )
 
-var queueServiceClientDecorator = func(_ *QueueServiceManager, delegate QueueServiceClient) QueueServiceClient {
-	return delegate
+func init() {
+	newQueueServiceClient = newActiveQueueServiceClient
 }
 
-func init() {
-	newQueueServiceClient = func(manager *QueueServiceManager) QueueServiceClient {
-		sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &queueRuntimeClient{
-			manager: manager,
-			client:  sdkClient,
-		}
-		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize Queue OCI client: %w", err)
-		}
-		return queueServiceClientDecorator(manager, runtimeClient)
+// Queue intentionally keeps a queue-local core runtime as the active path.
+// The generated client scaffold still carries the formal generatedruntime
+// metadata, but the shared core has no narrow seam for persisted work-request
+// resume, work-request-backed Queue ID recovery, or Queue's explicit zero and
+// empty-string update intent without recreating most of this state machine.
+func newActiveQueueServiceClient(manager *QueueServiceManager) QueueServiceClient {
+	sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
+	runtimeClient := &queueRuntimeClient{
+		manager: manager,
+		client:  sdkClient,
 	}
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize Queue OCI client: %w", err)
+	}
+	return newQueueEndpointSecretClient(manager, runtimeClient)
 }
 
 func (c *queueRuntimeClient) CreateOrUpdate(ctx context.Context, resource *queuev1beta1.Queue, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -324,6 +327,9 @@ func (c *queueRuntimeClient) buildUpdateRequest(resource *queuev1beta1.Queue, cu
 		return queuesdk.UpdateQueueRequest{}, false, err
 	}
 
+	// Queue updates must preserve explicit zero and empty-string intent. The
+	// generic generatedruntime mutation filter still treats those values as
+	// absent, so Queue keeps a local typed request builder here.
 	updateDetails := queuesdk.UpdateQueueDetails{}
 	updateNeeded := false
 

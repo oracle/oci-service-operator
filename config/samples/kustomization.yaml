@@ -24,10 +24,10 @@ resources:
 - core_v1beta1_subnet.yaml
 - core_v1beta1_vcn.yaml
 - queue_v1beta1_queue.yaml
-- dataflow_v1beta1_application.yaml
 - functions_v1beta1_application.yaml
 - functions_v1beta1_function.yaml
 - objectstorage_v1beta1_bucket.yaml
 - containerinstances_v1beta1_containerinstance.yaml
 - keymanagement_v1beta1_vault.yaml
+- containerengine_v1beta1_cluster.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

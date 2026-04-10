@@ -1123,17 +1123,16 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerinstances", "core", "database", "dataflow", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
+	wantActiveServices := []string{"containerengine", "containerinstances", "core", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "database", "dataflow", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
-	assertServiceSelection(t, services["containerengine"], false, SelectionModeAll, nil)
+	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
-	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["keymanagement"], true, SelectionModeExplicit, []string{"Vault"})
@@ -1152,7 +1151,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
 
 	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
@@ -1173,6 +1172,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		webhook:        GenerationStrategyManual,
 	})
 
+	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
@@ -1208,10 +1208,26 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
-	assertFormalSpecFor(t, services["core"], "Instance", "instance")
+	for _, formal := range []struct {
+		kind string
+		slug string
+	}{
+		{kind: "Instance", slug: "instance"},
+		{kind: "InternetGateway", slug: "internetgateway"},
+		{kind: "NatGateway", slug: "natgateway"},
+		{kind: "NetworkSecurityGroup", slug: "networksecuritygroup"},
+		{kind: "RouteTable", slug: "routetable"},
+		{kind: "SecurityList", slug: "securitylist"},
+		{kind: "ServiceGateway", slug: "servicegateway"},
+		{kind: "Subnet", slug: "subnet"},
+		{kind: "Vcn", slug: "vcn"},
+	} {
+		assertFormalSpecFor(t, services["core"], formal.kind, formal.slug)
+	}
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
@@ -1225,8 +1241,9 @@ func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerinstances", "core", "database", "identity", "keymanagement", "mysql", "objectstorage", "opensearch", "psql", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "core", "database", "identity", "keymanagement", "mysql", "objectstorage", "opensearch", "psql", "redis")
 
+	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
 	assertPrimaryPortOverride(t, services["core"], "Instance", "instance", "core/instance")
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
@@ -1569,6 +1586,20 @@ func assertPrimaryPortOverride(t *testing.T, service *ServiceConfig, kind string
 	}
 }
 
+func assertSampleOverrideContains(t *testing.T, service *ServiceConfig, kind string, want ...string) {
+	t.Helper()
+
+	override, ok := overridesByKind(service)[kind]
+	if !ok {
+		t.Fatalf("%s does not define a generation override for %q", service.Service, kind)
+	}
+	for _, snippet := range want {
+		if !strings.Contains(override.Sample.Body, snippet) {
+			t.Fatalf("%s %s sample override = %q, want %q", service.Service, kind, override.Sample.Body, snippet)
+		}
+	}
+}
+
 func assertStreamingRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	t.Helper()
 
@@ -1592,8 +1623,39 @@ func assertCoreRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 1)
+	assertResourceOverrideCount(t, service, 10)
+	overrides := overridesByKind(service)
 	assertPrimaryPortOverride(t, service, "Instance", "instance", "core/instance")
+	assertSampleOverrideContains(t, service, "Drg", `displayName: "drg-sample"`)
+	if overrides["Drg"].FormalSpec != "" {
+		t.Fatalf("core Drg formalSpec = %q, want empty", overrides["Drg"].FormalSpec)
+	}
+	if overrides["Drg"].ServiceManager.PackagePath != "" {
+		t.Fatalf("core Drg packagePath = %q, want empty", overrides["Drg"].ServiceManager.PackagePath)
+	}
+	assertSampleOverrideContains(t, service, "InternetGateway", "isEnabled: true", `displayName: "internetgateway-sample"`)
+	assertSampleOverrideContains(t, service, "NatGateway", `displayName: "natgateway-sample"`)
+	assertSampleOverrideContains(t, service, "NetworkSecurityGroup", `displayName: "networksecuritygroup-sample"`)
+	assertSampleOverrideContains(t, service, "RouteTable", "routeRules:", "destinationType: CIDR_BLOCK")
+	assertSampleOverrideContains(t, service, "SecurityList", "egressSecurityRules:", "ingressSecurityRules:")
+	assertSampleOverrideContains(t, service, "ServiceGateway", "services:", "serviceId: ocid1.service.oc1..exampleuniqueID")
+	assertSampleOverrideContains(t, service, "Subnet", "cidrBlock: 10.0.1.0/24", "securityListIds:")
+	assertSampleOverrideContains(t, service, "Vcn", "cidrBlocks:", `dnsLabel: "vcnsample"`)
+	for _, formal := range []struct {
+		kind string
+		slug string
+	}{
+		{kind: "InternetGateway", slug: "internetgateway"},
+		{kind: "NatGateway", slug: "natgateway"},
+		{kind: "NetworkSecurityGroup", slug: "networksecuritygroup"},
+		{kind: "RouteTable", slug: "routetable"},
+		{kind: "SecurityList", slug: "securitylist"},
+		{kind: "ServiceGateway", slug: "servicegateway"},
+		{kind: "Subnet", slug: "subnet"},
+		{kind: "Vcn", slug: "vcn"},
+	} {
+		assertFormalSpecFor(t, service, formal.kind, formal.slug)
+	}
 	assertPackageSplitContainsKind(t, service, "core-network", "Drg")
 }
 
@@ -1611,6 +1673,23 @@ func assertContainerInstancesRuntimeRolloutMetadata(t *testing.T, service *Servi
 	})
 	assertResourceOverrideCount(t, service, 1)
 	assertPrimaryPortOverride(t, service, "ContainerInstance", "", "containerinstance")
+}
+
+func assertContainerengineRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	if service.PackageProfile != PackageProfileControllerBacked {
+		t.Fatalf("containerengine packageProfile = %q, want %q", service.PackageProfile, PackageProfileControllerBacked)
+	}
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 1)
+	assertPrimaryPortOverride(t, service, "Cluster", "cluster", "containerengine/cluster")
+	assertSampleOverrideContains(t, service, "Cluster", "kubernetesVersion:", "endpointConfig:", "serviceLbSubnetIds:")
 }
 
 func assertPackageSplitContainsKind(t *testing.T, service *ServiceConfig, splitName string, wantKind string) {

@@ -1764,7 +1764,22 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	if got := coreService.SelectedKinds(); !slices.Equal(got, []string{"Instance", "Drg", "InternetGateway", "NatGateway", "NetworkSecurityGroup", "RouteTable", "SecurityList", "ServiceGateway", "Subnet", "Vcn"}) {
 		t.Fatalf("core SelectedKinds() = %v, want instance plus core-network split kinds", got)
 	}
-	assertServiceFormalSpec(t, &coreService, "Instance", "instance")
+	for _, formal := range []struct {
+		kind string
+		slug string
+	}{
+		{kind: "Instance", slug: "instance"},
+		{kind: "InternetGateway", slug: "internetgateway"},
+		{kind: "NatGateway", slug: "natgateway"},
+		{kind: "NetworkSecurityGroup", slug: "networksecuritygroup"},
+		{kind: "RouteTable", slug: "routetable"},
+		{kind: "SecurityList", slug: "securitylist"},
+		{kind: "ServiceGateway", slug: "servicegateway"},
+		{kind: "Subnet", slug: "subnet"},
+		{kind: "Vcn", slug: "vcn"},
+	} {
+		assertServiceFormalSpec(t, &coreService, formal.kind, formal.slug)
+	}
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)
@@ -1785,8 +1800,15 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		filepath.Join(outputRoot, "api", "core", "v1beta1", "vcn_types.go"),
 		filepath.Join(outputRoot, "controllers", "core", "instance_controller.go"),
 		filepath.Join(outputRoot, "controllers", "core", "vcn_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "internetgateway", "internetgateway_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_servicemanager.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "natgateway", "natgateway_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "networksecuritygroup", "networksecuritygroup_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "routetable", "routetable_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "securitylist", "securitylist_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "servicegateway", "servicegateway_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "subnet", "subnet_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_servicemanager.go"),
 		filepath.Join(outputRoot, "internal", "registrations", "core_generated.go"),
@@ -1799,7 +1821,15 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		filepath.Join(outputRoot, "cmd", "manager", "core-network", "main.go"),
 		filepath.Join(outputRoot, "config", "manager", "core", "manager.yaml"),
 		filepath.Join(outputRoot, "config", "manager", "core-network", "manager.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_drg.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_internetgateway.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_natgateway.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_networksecuritygroup.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_routetable.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_securitylist.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_servicegateway.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_subnet.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "core_v1beta1_vcn.yaml"),
 	})
 	assertPathsNotExist(t, []string{
@@ -1820,13 +1850,224 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		`Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}},`,
 	})
 
-	instanceSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"))
-	assertContains(t, instanceSample, []string{
-		"availabilityDomain:",
-		"subnetId:",
-		"sourceDetails:",
-		"imageId:",
+	vcnServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"))
+	assertContains(t, vcnServiceClient, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "core"`,
+		`FormalSlug:        "vcn"`,
+		`ProvisioningStates: []string{"PROVISIONING"}`,
+		`UpdatingStates:     []string{"UPDATING"}`,
+		`ActiveStates:       []string{"AVAILABLE"}`,
+		`PendingStates:  []string{"TERMINATED", "TERMINATING"}`,
+		`TerminalStates: []string{"NOT_FOUND"}`,
+		`ResponseItemsField: "Items"`,
+		`MatchFields:        []string{"compartmentId", "displayName", "id", "state"}`,
+		`Mutable:       []string{"definedTags", "displayName", "freeformTags"}`,
+		`ForceNew:      []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"}`,
+		`ConflictsWith: map[string][]string{"cidrBlock": []string{"cidrBlocks"}, "cidrBlocks": []string{"cidrBlock"}}`,
+		`Helper: "tfresource.WaitForWorkRequestWithErrorHandling"`,
+		`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
+
+	coreFormalServiceClients := []struct {
+		path     string
+		contains []string
+	}{
+		{
+			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "internetgateway", "internetgateway_serviceclient.go"),
+			contains: []string{
+				`FormalSlug:        "internetgateway"`,
+				`UpdatingStates:     []string{}`,
+				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable:       []string{"definedTags", "displayName", "freeformTags", "isEnabled", "routeTableId"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateInternetGatewayDetails", RequestName: "CreateInternetGatewayDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true}},`,
+			},
+		},
+		{
+			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "natgateway", "natgateway_serviceclient.go"),
+			contains: []string{
+				`FormalSlug:        "natgateway"`,
+				`UpdatingStates:     []string{}`,
+				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId"}`,
+				`ForceNew:      []string{"compartmentId", "publicIpId", "vcnId"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateNatGatewayDetails", RequestName: "CreateNatGatewayDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},`,
+			},
+		},
+		{
+			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "networksecuritygroup", "networksecuritygroup_serviceclient.go"),
+			contains: []string{
+				`FormalSlug:        "networksecuritygroup"`,
+				`UpdatingStates:     []string{"UPDATING"}`,
+				`MatchFields:        []string{"compartmentId", "displayName", "state", "vcnId"}`,
+				`Mutable:       []string{"definedTags", "displayName", "freeformTags"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},`,
+			},
+		},
+		{
+			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "routetable", "routetable_serviceclient.go"),
+			contains: []string{
+				`FormalSlug:        "routetable"`,
+				`UpdatingStates:     []string{"UPDATING"}`,
+				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable:       []string{"definedTags", "displayName", "freeformTags", "routeRules"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateRouteTableDetails", RequestName: "CreateRouteTableDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true}},`,
+			},
+		},
+		{
+			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "securitylist", "securitylist_serviceclient.go"),
+			contains: []string{
+				`FormalSlug:        "securitylist"`,
+				`UpdatingStates:     []string{"UPDATING"}`,
+				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable:       []string{"definedTags", "displayName", "egressSecurityRules", "freeformTags", "ingressSecurityRules"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateSecurityListDetails", RequestName: "CreateSecurityListDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true}},`,
+			},
+		},
+		{
+			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "servicegateway", "servicegateway_serviceclient.go"),
+			contains: []string{
+				`FormalSlug:        "servicegateway"`,
+				`UpdatingStates:     []string{}`,
+				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId", "services"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceGatewayDetails", RequestName: "CreateServiceGatewayDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},`,
+			},
+		},
+		{
+			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "subnet", "subnet_serviceclient.go"),
+			contains: []string{
+				`FormalSlug:        "subnet"`,
+				`UpdatingStates:     []string{"UPDATING"}`,
+				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable:       []string{"cidrBlock", "definedTags", "dhcpOptionsId", "displayName", "freeformTags", "ipv6CidrBlock", "ipv6CidrBlocks", "routeTableId", "securityListIds"}`,
+				`ForceNew:      []string{"availabilityDomain", "compartmentId", "dnsLabel", "prohibitInternetIngress", "prohibitPublicIpOnVnic", "vcnId"}`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "CreateSubnetDetails", RequestName: "CreateSubnetDetails", Contribution: "body", PreferResourceID: false}},`,
+				`Fields: []generatedruntime.RequestField{{FieldName: "SubnetId", RequestName: "subnetId", Contribution: "path", PreferResourceID: true}},`,
+			},
+		},
+	}
+	for _, test := range coreFormalServiceClients {
+		serviceClient := readFile(t, test.path)
+		assertContains(t, serviceClient, append([]string{
+			"Semantics: &generatedruntime.Semantics{",
+			`FormalService:     "core"`,
+			`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,
+			`ProvisioningStates: []string{"PROVISIONING"}`,
+			`PendingStates:  []string{"TERMINATED", "TERMINATING"}`,
+			`TerminalStates: []string{"NOT_FOUND"}`,
+			`Helper: "tfresource.WaitForWorkRequestWithErrorHandling"`,
+			`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+			`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+		}, test.contains...))
+	}
+
+	for _, sample := range []struct {
+		path        string
+		contains    []string
+		notContains []string
+	}{
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_drg.yaml"),
+			contains: []string{
+				"compartmentId:",
+				`displayName: "drg-sample"`,
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_instance.yaml"),
+			contains: []string{
+				"availabilityDomain:",
+				"subnetId:",
+				"sourceDetails:",
+				"imageId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_internetgateway.yaml"),
+			contains: []string{
+				"isEnabled: true",
+				"vcnId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_natgateway.yaml"),
+			contains: []string{
+				"vcnId:",
+				`displayName: "natgateway-sample"`,
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_networksecuritygroup.yaml"),
+			contains: []string{
+				"vcnId:",
+				`displayName: "networksecuritygroup-sample"`,
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_routetable.yaml"),
+			contains: []string{
+				"routeRules:",
+				"destinationType: CIDR_BLOCK",
+				"networkEntityId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_securitylist.yaml"),
+			contains: []string{
+				"egressSecurityRules:",
+				"ingressSecurityRules:",
+				"destinationPortRange:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_servicegateway.yaml"),
+			contains: []string{
+				"services:",
+				"serviceId:",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_subnet.yaml"),
+			contains: []string{
+				"cidrBlock: 10.0.1.0/24",
+				"securityListIds:",
+				"prohibitPublicIpOnVnic: true",
+			},
+			notContains: []string{"spec: {}"},
+		},
+		{
+			path: filepath.Join(outputRoot, "config", "samples", "core_v1beta1_vcn.yaml"),
+			contains: []string{
+				"cidrBlocks:",
+				`dnsLabel: "vcnsample"`,
+			},
+			notContains: []string{"spec: {}", "cidrBlock:"},
+		},
+	} {
+		content := readFile(t, sample.path)
+		assertContains(t, content, sample.contains)
+		assertNotContains(t, content, sample.notContains)
+	}
 
 	coreMetadata := readFile(t, filepath.Join(outputRoot, "packages", "core", "metadata.env"))
 	assertContains(t, coreMetadata, []string{
@@ -1860,6 +2101,118 @@ func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	if nameColumn.Type != "string" {
 		t.Fatalf("Stream first print column type = %q, want %q", nameColumn.Type, "string")
 	}
+}
+
+func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	services, err := cfg.SelectServices("containerengine", false)
+	if err != nil {
+		t.Fatalf("SelectServices(--service containerengine) error = %v", err)
+	}
+	if len(services) != 1 {
+		t.Fatalf("SelectServices(--service containerengine) returned %d services, want 1", len(services))
+	}
+	containerengineService := services[0]
+	if got := containerengineService.SelectedKinds(); !slices.Equal(got, []string{"Cluster"}) {
+		t.Fatalf("containerengine SelectedKinds() = %v, want [Cluster]", got)
+	}
+	assertServiceFormalSpec(t, &containerengineService, "Cluster", "cluster")
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{containerengineService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	serviceClientPath := "pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go"
+	serviceManagerPath := "pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go"
+	assertPathsExist(t, []string{
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "groupversion_info.go"),
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "cluster_types.go"),
+		filepath.Join(outputRoot, "controllers", "containerengine", "cluster_controller.go"),
+		filepath.Join(outputRoot, serviceClientPath),
+		filepath.Join(outputRoot, serviceManagerPath),
+		filepath.Join(outputRoot, "internal", "registrations", "containerengine_generated.go"),
+		filepath.Join(outputRoot, "packages", "containerengine", "metadata.env"),
+		filepath.Join(outputRoot, "packages", "containerengine", "install", "kustomization.yaml"),
+		filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"),
+	})
+	assertPathsNotExist(t, []string{
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "nodepool_types.go"),
+		filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "containerengine", "nodepool", "nodepool_serviceclient.go"),
+	})
+
+	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
+	assertContains(t, content, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "containerengine"`,
+		`FormalSlug:        "cluster"`,
+		`ProvisioningStates: []string{"CREATING", "UPDATING"}`,
+		`UpdatingStates:     []string{"UPDATING"}`,
+		`PendingStates:  []string{"DELETING"}`,
+		`TerminalStates: []string{"DELETED"}`,
+		`ResponseItemsField: "Items"`,
+		`MatchFields:        []string{"compartmentId", "lifecycleState", "name"}`,
+		`Mutable:       []string{"definedTags", "freeformTags", "imagePolicyConfig.isPolicyEnabled", "imagePolicyConfig.keyDetails.kmsKeyId", "kubernetesVersion", "name", "options.admissionControllerOptions.isPodSecurityPolicyEnabled", "options.persistentVolumeConfig.definedTags", "options.persistentVolumeConfig.freeformTags", "options.serviceLbConfig.definedTags", "options.serviceLbConfig.freeformTags", "type"}`,
+		`ForceNew:      []string{"clusterPodNetworkOptions.cniType", "clusterPodNetworkOptions.jsonData", "compartmentId", "endpointConfig.isPublicIpEnabled", "endpointConfig.nsgIds", "endpointConfig.subnetId", "kmsKeyId", "options.addOns.isKubernetesDashboardEnabled", "options.addOns.isTillerEnabled", "options.kubernetesNetworkConfig.podsCidr", "options.kubernetesNetworkConfig.servicesCidr", "options.serviceLbSubnetIds", "vcnId"}`,
+		`EntityType: "cluster", Action: "CREATED"`,
+		`EntityType: "cluster", Action: "UPDATED"`,
+		`EntityType: "cluster", Action: "DELETED"`,
+		`NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} }`,
+		`return sdkClient.ListClusters(ctx, *request.(*containerenginesdk.ListClustersRequest))`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},`,
+		`Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}},`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+	})
+
+	clusterSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"))
+	assertContains(t, clusterSample, []string{
+		`name: "cluster-sample"`,
+		`kubernetesVersion: "v1.30.1"`,
+		"endpointConfig:",
+		"serviceLbSubnetIds:",
+	})
+	assertNotContains(t, clusterSample, []string{"spec: {}"})
+}
+
+func TestCheckedInQueueSampleUsesPracticalOverride(t *testing.T) {
+	cfg := loadCheckedInConfig(t)
+	queueService := serviceConfigsByName(t, cfg, "queue")["queue"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	pipeline := New()
+	result, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{*queueService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	sampleContent := readFile(t, filepath.Join(outputRoot, "config", "samples", "queue_v1beta1_queue.yaml"))
+	assertContains(t, sampleContent, []string{
+		"# Replace the OCI identifiers below before running e2e.",
+		"# Update metadata.name and spec.displayName if you want to force a fresh create",
+		`displayName: "queue-sample"`,
+		"visibilityInSeconds: 30",
+		"timeoutInSeconds: 20",
+	})
+	assertNotContains(t, sampleContent, []string{"spec: {}"})
 }
 
 func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testing.T) {

@@ -38,35 +38,85 @@ var newSecurityListServiceClient = func(manager *SecurityListServiceManager) Sec
 		Kind:    "SecurityList",
 		SDKName: "SecurityList",
 		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "securitylist",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"definedTags", "displayName", "egressSecurityRules", "freeformTags", "ingressSecurityRules"},
+				ForceNew:      []string{"compartmentId", "vcnId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.CreateSecurityListRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateSecurityList(ctx, *request.(*coresdk.CreateSecurityListRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateSecurityListDetails", RequestName: "CreateSecurityListDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.GetSecurityListRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetSecurityList(ctx, *request.(*coresdk.GetSecurityListRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.ListSecurityListsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListSecurityLists(ctx, *request.(*coresdk.ListSecurityListsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "VcnId", RequestName: "vcnId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.UpdateSecurityListRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateSecurityList(ctx, *request.(*coresdk.UpdateSecurityListRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSecurityListDetails", RequestName: "UpdateSecurityListDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.DeleteSecurityListRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteSecurityList(ctx, *request.(*coresdk.DeleteSecurityListRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

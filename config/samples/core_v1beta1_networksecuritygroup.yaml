@@ -3,8 +3,17 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reusing an existing NetworkSecurityGroup with the same display name in
+# the same VCN.
+#
 apiVersion: core.oracle.com/v1beta1
 kind: NetworkSecurityGroup
 metadata:
   name: networksecuritygroup-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  vcnId: ocid1.vcn.oc1..exampleuniqueID
+  displayName: "networksecuritygroup-sample"

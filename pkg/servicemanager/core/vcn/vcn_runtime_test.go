@@ -20,6 +20,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ import (
 type fakeVcnOCIClient struct {
 	createFn func(context.Context, coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error)
 	getFn    func(context.Context, coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error)
+	listFn   func(context.Context, coresdk.ListVcnsRequest) (coresdk.ListVcnsResponse, error)
 	updateFn func(context.Context, coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error)
 	deleteFn func(context.Context, coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error)
 }
@@ -50,7 +52,18 @@ func (f *fakeVcnOCIClient) GetVcn(ctx context.Context, req coresdk.GetVcnRequest
 	if f.getFn != nil {
 		return f.getFn(ctx, req)
 	}
-	return coresdk.GetVcnResponse{}, nil
+	return coresdk.GetVcnResponse{}, fakeServiceError{
+		statusCode: 404,
+		code:       "NotFound",
+		message:    "missing",
+	}
+}
+
+func (f *fakeVcnOCIClient) ListVcns(ctx context.Context, req coresdk.ListVcnsRequest) (coresdk.ListVcnsResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return coresdk.ListVcnsResponse{}, nil
 }
 
 func (f *fakeVcnOCIClient) UpdateVcn(ctx context.Context, req coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
@@ -81,13 +94,119 @@ func (f fakeServiceError) GetOpcRequestID() string {
 	return ""
 }
 
+func newTestGeneratedDelegate(manager *VcnServiceManager, client vcnOCIClient) VcnServiceClient {
+	if client == nil {
+		client = &fakeVcnOCIClient{}
+	}
+
+	config := generatedruntime.Config[*corev1beta1.Vcn]{
+		Kind:    "Vcn",
+		SDKName: "Vcn",
+		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "core",
+			FormalSlug:        "vcn",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"AVAILABLE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"TERMINATED", "TERMINATING"},
+				TerminalStates: []string{"NOT_FOUND"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+				ForceNew:      []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"},
+				ConflictsWith: map[string][]string{"cidrBlock": {"cidrBlocks"}, "cidrBlocks": {"cidrBlock"}},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+			},
+		},
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.CreateVcnRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.CreateVcn(ctx, *request.(*coresdk.CreateVcnRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body"}},
+		},
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.GetVcnRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.GetVcn(ctx, *request.(*coresdk.GetVcnRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.ListVcnsRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.ListVcns(ctx, *request.(*coresdk.ListVcnsRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+			},
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.UpdateVcnRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.UpdateVcn(ctx, *request.(*coresdk.UpdateVcnRequest))
+			},
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateVcnDetails", RequestName: "UpdateVcnDetails", Contribution: "body"},
+			},
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &coresdk.DeleteVcnRequest{} },
+			Call: func(ctx context.Context, request any) (any, error) {
+				return client.DeleteVcn(ctx, *request.(*coresdk.DeleteVcnRequest))
+			},
+			Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},
+		},
+	}
+
+	return defaultVcnServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Vcn](config),
+	}
+}
+
 func newTestManager(client vcnOCIClient) *VcnServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewVcnServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&vcnRuntimeClient{
-			manager: manager,
-			client:  client,
+		manager.WithClient(&vcnGeneratedParityClient{
+			manager:  manager,
+			client:   client,
+			delegate: newTestGeneratedDelegate(manager, client),
 		})
 	}
 	return manager
@@ -146,6 +265,33 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, []string{"10.0.0.0/16"}, resource.Status.CidrBlocks)
 }
 
+func TestCreateOrUpdate_AllowsObservedOracleAllocatedIPv6WhenCreateFlagWasOmitted(t *testing.T) {
+	updateCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			assert.Equal(t, "ocid1.vcn.oc1..existing", *req.VcnId)
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			current.Ipv6CidrBlocks = []string{"2001:db8::/56"}
+			return coresdk.GetVcnResponse{Vcn: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			updateCalls++
+			return coresdk.UpdateVcnResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.IsIpv6Enabled = true
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, []string{"2001:db8::/56"}, resource.Status.Ipv6CidrBlocks)
+}
+
 func TestCreateOrUpdate_RejectsConflictingCreateCIDRInputs(t *testing.T) {
 	createCalls := 0
 	manager := newTestManager(&fakeVcnOCIClient{
@@ -163,7 +309,8 @@ func TestCreateOrUpdate_RejectsConflictingCreateCIDRInputs(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
-	assert.Contains(t, err.Error(), "both cidrBlock and cidrBlocks")
+	assert.Contains(t, err.Error(), "cidrBlock")
+	assert.Contains(t, err.Error(), "cidrBlocks")
 	assert.Equal(t, 0, createCalls)
 }
 
@@ -195,7 +342,7 @@ func TestCreateOrUpdate_ObserveByStatusOCID(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 }
@@ -241,10 +388,16 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 
 func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	var captured coresdk.UpdateVcnRequest
+	getCalls := 0
 	manager := newTestManager(&fakeVcnOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			displayName := "old-name"
+			if getCalls >= 3 {
+				displayName = "new-name"
+			}
 			return coresdk.GetVcnResponse{
-				Vcn: makeSDKVcn("ocid1.vcn.oc1..existing", "old-name", coresdk.VcnLifecycleStateAvailable),
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..existing", displayName, coresdk.VcnLifecycleStateAvailable),
 			}, nil
 		},
 		updateFn: func(_ context.Context, req coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
@@ -266,6 +419,7 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	assert.Equal(t, "new-name", *captured.DisplayName)
 	assert.Nil(t, captured.FreeformTags)
 	assert.Equal(t, "new-name", resource.Status.DisplayName)
+	assert.Equal(t, 3, getCalls)
 }
 
 func TestCreateOrUpdate_DoesNotUpdateDuringRetryableLiveStates(t *testing.T) {
@@ -431,12 +585,67 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 2, getCalls)
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, "ocid1.vcn.oc1..recreated", string(resource.Status.OsokStatus.Ocid))
 	assert.Equal(t, "ocid1.vcn.oc1..recreated", resource.Status.Id)
 	assert.NotNil(t, resource.Status.OsokStatus.CreatedAt)
 	assert.NotEqual(t, oldCreatedAt, *resource.Status.OsokStatus.CreatedAt)
+}
+
+func TestCreateOrUpdate_ExplicitNotFoundRecreateIgnoresListBeforeCreate(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	listCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			switch getCalls {
+			case 1:
+				assert.Equal(t, "ocid1.vcn.oc1..existing", *req.VcnId)
+				return coresdk.GetVcnResponse{}, fakeServiceError{
+					statusCode: 404,
+					code:       "NotFound",
+					message:    "missing",
+				}
+			case 2:
+				assert.Equal(t, "ocid1.vcn.oc1..recreated", *req.VcnId)
+				return coresdk.GetVcnResponse{
+					Vcn: makeSDKVcn("ocid1.vcn.oc1..recreated", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+				}, nil
+			default:
+				t.Fatalf("unexpected GetVcn call %d for %v", getCalls, req.VcnId)
+				return coresdk.GetVcnResponse{}, nil
+			}
+		},
+		listFn: func(_ context.Context, _ coresdk.ListVcnsRequest) (coresdk.ListVcnsResponse, error) {
+			listCalls++
+			return coresdk.ListVcnsResponse{
+				Items: []coresdk.Vcn{
+					makeSDKVcn("ocid1.vcn.oc1..same-name", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+				},
+			}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+			createCalls++
+			return coresdk.CreateVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..recreated", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.Id = "ocid1.vcn.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, 0, listCalls)
+	assert.Equal(t, shared.OCID("ocid1.vcn.oc1..recreated"), resource.Status.OsokStatus.Ocid)
 }
 
 func TestCreateOrUpdate_RecreateClearsStaleNestedOsokStatusMetadata(t *testing.T) {
@@ -509,11 +718,20 @@ func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
 func TestCreateOrUpdate_RecreatesTrackedTerminatedVcn(t *testing.T) {
 	createCalls := 0
 	updateCalls := 0
+	getCalls := 0
 	manager := newTestManager(&fakeVcnOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
-			return coresdk.GetVcnResponse{
-				Vcn: makeSDKVcn("ocid1.vcn.oc1..terminated", "old-name", coresdk.VcnLifecycleStateTerminated),
-			}, nil
+			getCalls++
+			if getCalls == 1 {
+				return coresdk.GetVcnResponse{
+					Vcn: makeSDKVcn("ocid1.vcn.oc1..terminated", "old-name", coresdk.VcnLifecycleStateTerminated),
+				}, nil
+			}
+			return coresdk.GetVcnResponse{}, fakeServiceError{
+				statusCode: 404,
+				code:       "NotFound",
+				message:    "missing",
+			}
 		},
 		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
 			createCalls++
@@ -538,6 +756,7 @@ func TestCreateOrUpdate_RecreatesTrackedTerminatedVcn(t *testing.T) {
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, shared.OCID("ocid1.vcn.oc1..recreated"), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, 2, getCalls)
 }
 
 func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {

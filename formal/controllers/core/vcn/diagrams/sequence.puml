@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetVcn
 else tracked identity is missing
-ServiceManager -> OCI: ListVcn(filters: compartment_id,\ndisplay_name, id, state)
+ServiceManager -> OCI: ListVcns(filters: compartment_id,\ndisplay_name, id, state)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateVcn
 loop create pending PROVISIONING
@@ -52,9 +52,9 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteVcn
-ServiceManager -> OCI: confirm delete via GetVcn or ListVcn
+ServiceManager -> OCI: confirm delete via GetVcn or\nListVcns
 loop delete pending TERMINATING,\nTERMINATED
-ServiceManager -> OCI: GetVcn or ListVcn
+ServiceManager -> OCI: GetVcn or ListVcns
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
