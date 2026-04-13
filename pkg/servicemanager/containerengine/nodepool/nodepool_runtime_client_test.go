@@ -2,7 +2,11 @@ package nodepool
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"io"
 	"net/http"
 	"strings"
@@ -11,6 +15,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	containerenginesdk "github.com/oracle/oci-go-sdk/v65/containerengine"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -304,6 +309,53 @@ func TestNodePoolCreateOrUpdateReusesListMatchesForSeededSuccessStates(t *testin
 			}
 		})
 	}
+}
+
+func TestNewNodePoolServiceClientAllowsPrimaryListSemantics(t *testing.T) {
+	t.Parallel()
+
+	manager := &NodePoolServiceManager{
+		Provider: newNodePoolTestConfigurationProvider(t),
+		Log:      loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")},
+	}
+
+	client := newNodePoolServiceClient(manager)
+	response, err := client.CreateOrUpdate(context.Background(), (*containerenginev1beta1.NodePool)(nil), ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want resource validation failure")
+	}
+	if strings.Contains(err.Error(), "unsupported list auxiliary operation ListNodePools") {
+		t.Fatalf("CreateOrUpdate() error = %v, want primary list semantics without auxiliary-operation blocker", err)
+	}
+	if !strings.Contains(err.Error(), "expected pointer resource") {
+		t.Fatalf("CreateOrUpdate() error = %v, want nil resource validation after successful client construction", err)
+	}
+	if response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should not report success for a nil NodePool resource")
+	}
+}
+
+func newNodePoolTestConfigurationProvider(t *testing.T) common.ConfigurationProvider {
+	t.Helper()
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("GenerateKey() error = %v", err)
+	}
+
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+	})
+
+	return common.NewRawConfigurationProvider(
+		"ocid1.tenancy.oc1..example",
+		"ocid1.user.oc1..example",
+		"us-ashburn-1",
+		"20:3b:97:13:55:1c",
+		string(privateKeyPEM),
+		nil,
+	)
 }
 
 func newNodePoolRuntimeTestManager(cfg generatedruntime.Config[*containerenginev1beta1.NodePool]) *NodePoolServiceManager {

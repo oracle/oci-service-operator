@@ -119,15 +119,8 @@ func init() {
 						{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"},
 					},
 				},
-				AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{
-					{
-						Phase:            "list",
-						MethodName:       "ListNodePools",
-						RequestTypeName:  "containerengine.ListNodePoolsRequest",
-						ResponseTypeName: "containerengine.ListNodePoolsResponse",
-					},
-				},
-				Unsupported: []generatedruntime.UnsupportedSemantic{},
+				AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+				Unsupported:         []generatedruntime.UnsupportedSemantic{},
 			},
 			Create: &generatedruntime.Operation{
 				NewRequest: func() any { return &containerenginesdk.CreateNodePoolRequest{} },
