@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetNodePool
 else tracked identity is missing
-ServiceManager -> OCI: ListNodePool(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListNodePools(filters:\ncompartment_id, cluster_id,\nlifecycle_state, name)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateNodePool
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetNodePool
 end
 else reusable OCI resource already exists
@@ -52,9 +52,9 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteNodePool
-ServiceManager -> OCI: confirm delete via GetNodePool or\nListNodePool
+ServiceManager -> OCI: confirm delete via GetNodePool or\nListNodePools
 loop delete pending DELETING
-ServiceManager -> OCI: GetNodePool or ListNodePool
+ServiceManager -> OCI: GetNodePool or ListNodePools
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -63,25 +63,39 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface: defined_tags,
+freeform_tags, initial_node_labels,
+kubernetes_version (+11 more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+cluster_id, compartment_id,
+node_image_name and conflicts
+node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet ->
+node_config_details, subnet_ids ->
+node_config_details
+Conflicts: node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet ->
+node_config_details, subnet_ids ->
+node_config_details
+Lookup filters: compartment_id,
+cluster_id, lifecycle_state, name
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateNodePool only for\nmutable fields display_name
+ServiceManager -> OCI: Apply UpdateNodePool only for\nmutable fields defined_tags,\nfreeform_tags, initial_node_labels,\nkubernetes_version (+11 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetNodePool
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=nodepool action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=nodepool action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=nodepool action=DELETED
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +122,36 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+supported drift: defined_tags, freeform_tags,
+initial_node_labels, kubernetes_version (+11
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_id, compartment_id, node_image_name and
+conflicts node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet -> node_config_details,
+subnet_ids -> node_config_details
 create-only fields: none
-list lookup: scaffold_containerengine_nodepool
-filters compartment_id, state
-conflicts: none
+list lookup: oci_containerengine_node_pools
+filters compartment_id, cluster_id,
+lifecycle_state, name
+conflicts: node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet -> node_config_details,
+subnet_ids -> node_config_details
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Ready state maps to OCI ACTIVE, INACTIVE, or
+NEEDS_ATTENTION.
+Requeue continues while OCI reports CREATING,
+UPDATING, or DELETING.
+Bind-before-create reuses only exact compartment
+and cluster matches that remain in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION.
+Delete completes after GetNodePool or
+ListNodePools returns DELETED or no longer finds
+the resource.
 end note
 @enduml

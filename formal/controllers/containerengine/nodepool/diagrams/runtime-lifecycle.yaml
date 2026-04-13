@@ -9,5 +9,10 @@ states:
   - active
   - updating
   - terminating
+  - failed
+  - deleted
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - Ready state maps to OCI ACTIVE, INACTIVE, or NEEDS_ATTENTION.
+  - Requeue continues while OCI reports CREATING, UPDATING, or DELETING.
+  - Bind-before-create reuses only exact compartment and cluster matches that remain in ACTIVE, CREATING, UPDATING, INACTIVE, or NEEDS_ATTENTION.
+  - Delete completes after GetNodePool or ListNodePools returns DELETED or no longer finds the resource.

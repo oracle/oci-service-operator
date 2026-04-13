@@ -45,9 +45,9 @@ var newNodePoolServiceClient = func(manager *NodePoolServiceManager) NodePoolSer
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
 			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
+				ProvisioningStates: []string{"CREATING"},
 				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE"},
+				ActiveStates:       []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"},
 			},
 			Delete: generatedruntime.DeleteSemantics{
 				Policy:         "required",
@@ -56,31 +56,31 @@ var newNodePoolServiceClient = func(manager *NodePoolServiceManager) NodePoolSer
 			},
 			List: &generatedruntime.ListSemantics{
 				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "state"},
+				MatchFields:        []string{"clusterId", "compartmentId", "lifecycleState", "name"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"displayName"},
-				ForceNew:      []string{"compartmentId"},
-				ConflictsWith: map[string][]string{},
+				Mutable:       []string{"definedTags", "freeformTags", "initialNodeLabels", "kubernetesVersion", "name", "nodeConfigDetails", "nodeEvictionNodePoolSettings", "nodeMetadata", "nodePoolCyclingDetails", "nodeShape", "nodeShapeConfig", "nodeSourceDetails", "quantityPerSubnet", "sshPublicKey", "subnetIds"},
+				ForceNew:      []string{"clusterId", "compartmentId", "nodeImageName"},
+				ConflictsWith: map[string][]string{"nodeConfigDetails": []string{"quantityPerSubnet", "subnetIds"}, "quantityPerSubnet": []string{"nodeConfigDetails"}, "subnetIds": []string{"nodeConfigDetails"}},
 			},
 			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
 			},
 			UpdateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
 			},
 			DeleteFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
 			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "list", MethodName: "ListNodePool", RequestTypeName: "containerengine.ListNodePoolRequest", ResponseTypeName: "containerengine.ListNodePoolResponse"}},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
 			Unsupported:         []generatedruntime.UnsupportedSemantic{},
 		},
 		Create: &generatedruntime.Operation{

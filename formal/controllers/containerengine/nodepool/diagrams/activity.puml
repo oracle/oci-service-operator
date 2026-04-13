@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetNodePool;
 else (no)
-:Resolve an existing OCI resource through\nListNodePool using filters compartment_id,\nstate;
+:Resolve an existing OCI resource through\nListNodePools using filters compartment_id,\ncluster_id, lifecycle_state, name;
 :Create the OCI resource via CreateNodePool\nwhen no reusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteNodePool with required\nvia GetNodePool or ListNodePool to DELETED\nconfirmation;
-:Confirm deletion via GetNodePool or\nListNodePool until OCI reaches DELETED;
+:Delete path uses DeleteNodePool with required\nvia GetNodePool or ListNodePools to DELETED\nconfirmation;
+:Confirm deletion via GetNodePool or\nListNodePools until OCI reaches DELETED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -46,27 +46,28 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
-:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE, NEEDS_ATTENTION;
 stop
 endif
 }
 partition "Ready and Drift Handling" {
 :Compare live OCI state against the imported\nfield surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields cluster_id, compartment_id,\nnode_image_name and conflicts\nnode_config_details -> quantity_per_subnet,\nsubnet_ids, quantity_per_subnet ->\nnode_config_details, subnet_ids ->\nnode_config_details;
 stop
 endif
+:Enforce conflictsWith rules\nnode_config_details -> quantity_per_subnet,\nsubnet_ids, quantity_per_subnet ->\nnode_config_details, subnet_ids ->\nnode_config_details before any OCI mutation;
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateNodePool only for mutable fields\ndisplay_name;
+:Apply UpdateNodePool only for mutable fields\ndefined_tags, freeform_tags,\ninitial_node_labels, kubernetes_version (+11\nmore);
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Return success for the ACTIVE success state;
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=nodepool action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=nodepool action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=nodepool action=DELETED when the\nmatching field-driven path executes;
+:Return success for the ACTIVE, INACTIVE,\nNEEDS_ATTENTION success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
 }
@@ -91,18 +92,36 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+supported drift: defined_tags, freeform_tags,
+initial_node_labels, kubernetes_version (+11
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_id, compartment_id, node_image_name and
+conflicts node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet -> node_config_details,
+subnet_ids -> node_config_details
 create-only fields: none
-list lookup: scaffold_containerengine_nodepool
-filters compartment_id, state
-conflicts: none
+list lookup: oci_containerengine_node_pools
+filters compartment_id, cluster_id,
+lifecycle_state, name
+conflicts: node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet -> node_config_details,
+subnet_ids -> node_config_details
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Ready state maps to OCI ACTIVE, INACTIVE, or
+NEEDS_ATTENTION.
+Requeue continues while OCI reports CREATING,
+UPDATING, or DELETING.
+Bind-before-create reuses only exact compartment
+and cluster matches that remain in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION.
+Delete completes after GetNodePool or
+ListNodePools returns DELETED or no longer finds
+the resource.
 end note
 @enduml
