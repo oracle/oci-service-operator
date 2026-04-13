@@ -577,13 +577,6 @@ func orderedSampleResources(samplesDir string, generatedOrder []string) ([]strin
 		delete(remaining, name)
 	}
 
-	var leftovers []string
-	for name := range remaining {
-		leftovers = append(leftovers, name)
-	}
-	sort.Strings(leftovers)
-	ordered = append(ordered, leftovers...)
-
 	return ordered, nil
 }
 

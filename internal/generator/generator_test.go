@@ -3105,6 +3105,46 @@ func TestGenerateIncrementalSampleKustomizationKeepsExistingGeneratedServices(t 
 	}
 }
 
+func TestGenerateDoesNotAppendUnlistedSampleFiles(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := testServiceConfig(PackageProfileCRDOnly)
+	pipeline := newTestGenerator(t)
+
+	outputRoot := t.TempDir()
+	samplesDir := filepath.Join(outputRoot, "config", "samples")
+	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%s) error = %v", samplesDir, err)
+	}
+	if err := os.WriteFile(filepath.Join(samplesDir, "dataflow_v1beta1_application.yaml"), []byte("apiVersion: dataflow.oracle.com/v1beta1\nkind: Application\nmetadata:\n  name: application-sample\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(dataflow_v1beta1_application.yaml) error = %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte("resources:\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(kustomization.yaml) error = %v", err)
+	}
+
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	order, err := readSampleKustomizationOrder(filepath.Join(samplesDir, "kustomization.yaml"))
+	if err != nil {
+		t.Fatalf("readSampleKustomizationOrder(kustomization.yaml) error = %v", err)
+	}
+	if slices.Contains(order, "dataflow_v1beta1_application.yaml") {
+		t.Fatalf("sample kustomization unexpectedly included unrelated sample: %#v", order)
+	}
+	if !slices.Contains(order, "mysql_v1beta1_dbsystem.yaml") {
+		t.Fatalf("sample kustomization resources = %#v, want generated mysql sample", order)
+	}
+}
+
 func sampleSDKDir(t *testing.T) string {
 	t.Helper()
 
