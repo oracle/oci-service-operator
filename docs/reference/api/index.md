@@ -9,7 +9,7 @@ This landing page is generated from the checked-in package and release inventory
 | API version | Resources | Packages |
 | --- | --- | --- |
 | [apigateway.oracle.com/v1beta1](apigateway/v1beta1/index.md) | [ApiGateway](apigateway/v1beta1/index.md#kind-apigateway), [ApiGatewayDeployment](apigateway/v1beta1/index.md#kind-apigatewaydeployment) | API Gateway (`v2.0.0-alpha`) |
-| [containerengine.oracle.com/v1beta1](containerengine/v1beta1/index.md) | [Cluster](containerengine/v1beta1/index.md#kind-cluster) | - |
+| [containerengine.oracle.com/v1beta1](containerengine/v1beta1/index.md) | [Cluster](containerengine/v1beta1/index.md#kind-cluster), [NodePool](containerengine/v1beta1/index.md#kind-nodepool) | - |
 | [containerinstances.oracle.com/v1beta1](containerinstances/v1beta1/index.md) | [ContainerInstance](containerinstances/v1beta1/index.md#kind-containerinstance) | Container Instances (`v2.0.0-alpha`) |
 | [core.oracle.com/v1beta1](core/v1beta1/index.md) | [Drg](core/v1beta1/index.md#kind-drg), [Instance](core/v1beta1/index.md#kind-instance), [InternetGateway](core/v1beta1/index.md#kind-internetgateway), [NatGateway](core/v1beta1/index.md#kind-natgateway), [NetworkSecurityGroup](core/v1beta1/index.md#kind-networksecuritygroup), [RouteTable](core/v1beta1/index.md#kind-routetable), [SecurityList](core/v1beta1/index.md#kind-securitylist), [ServiceGateway](core/v1beta1/index.md#kind-servicegateway), [Subnet](core/v1beta1/index.md#kind-subnet), [Vcn](core/v1beta1/index.md#kind-vcn) | Core Compute (`Not yet released`), Core Networking (`v2.0.0-alpha`) |
 | [database.oracle.com/v1beta1](database/v1beta1/index.md) | [AutonomousDatabase](database/v1beta1/index.md#kind-autonomousdatabase) | Autonomous Database (`v2.0.0-alpha`) |

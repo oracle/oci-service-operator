@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
@@ -42,6 +43,8 @@ func TestAllAddToSchemeRegistersDefaultActiveGroupKinds(t *testing.T) {
 	}
 
 	for _, obj := range []runtime.Object{
+		&containerenginev1beta1.Cluster{},
+		&containerenginev1beta1.NodePool{},
 		&containerinstancesv1beta1.ContainerInstance{},
 		&corev1beta1.Instance{},
 		&databasev1beta1.AutonomousDatabase{},

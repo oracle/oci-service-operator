@@ -1135,7 +1135,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	}
 
 	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
-	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster"})
+	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
@@ -1217,6 +1217,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "identity", "core", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
+	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
 	for _, formal := range []struct {
@@ -2157,8 +2158,9 @@ func assertContainerengineRuntimeRolloutMetadata(t *testing.T, service *ServiceC
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 1)
+	assertResourceOverrideCount(t, service, 2)
 	assertPrimaryPortOverride(t, service, "Cluster", "cluster", "containerengine/cluster")
+	assertPrimaryPortOverride(t, service, "NodePool", "nodepool", "containerengine/nodepool")
 	assertSampleOverrideContains(t, service, "Cluster", "kubernetesVersion:", "endpointConfig:", "serviceLbSubnetIds:")
 }
 

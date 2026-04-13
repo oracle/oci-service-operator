@@ -25,3 +25,4 @@ Manage OCI Container Engine for Kubernetes clusters from Kubernetes.
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `containerengine/Cluster` | `containerengine.oracle.com/v1beta1` | Manage OCI Container Engine for Kubernetes clusters. | — | [Sample](../../samples/containerengine/v1beta1/cluster.md) | [Reference](../../api/containerengine/v1beta1/index.md#kind-cluster) |
+| `containerengine/NodePool` | `containerengine.oracle.com/v1beta1` | — | — | [Sample](../../samples/containerengine/v1beta1/nodepool.md) | [Reference](../../api/containerengine/v1beta1/index.md#kind-nodepool) |

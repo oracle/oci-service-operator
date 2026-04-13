@@ -94,6 +94,7 @@ services:
       mode: explicit
       includeKinds:
         - Cluster
+        - NodePool
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -138,6 +139,10 @@ services:
                     - ocid1.subnet.oc1..exampleuniqueID
           serviceManager:
             packagePath: containerengine/cluster
+        - kind: NodePool
+          formalSpec: nodepool
+          serviceManager:
+            packagePath: containerengine/nodepool
     observedState:
       sdkAliases:
         WorkRequestLog:

@@ -262,6 +262,27 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "ContainerEngineNodePool",
+		SpecType:   reflect.TypeOf(containerenginev1beta1.NodePoolSpec{}),
+		StatusType: reflect.TypeOf(containerenginev1beta1.NodePoolStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "containerengine.CreateNodePoolDetails",
+			},
+			{
+				SDKStruct: "containerengine.UpdateNodePoolDetails",
+			},
+			{
+				SDKStruct:  "containerengine.NodePool",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "containerengine.NodePoolSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "IdentityCompartment",
 		SpecType:   reflect.TypeOf(identityv1beta1.CompartmentSpec{}),
 		StatusType: reflect.TypeOf(identityv1beta1.CompartmentStatus{}),

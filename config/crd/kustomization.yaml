@@ -13,6 +13,7 @@ resources:
 - bases/apigateway.oracle.com_apigatewaydeployments.yaml
 - bases/apigateway.oracle.com_apigateways.yaml
 - bases/containerengine.oracle.com_clusters.yaml
+- bases/containerengine.oracle.com_nodepools.yaml
 - bases/containerinstances.oracle.com_containerinstances.yaml
 - bases/core.oracle.com_drgs.yaml
 - bases/core.oracle.com_instances.yaml

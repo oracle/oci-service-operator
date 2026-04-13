@@ -2139,7 +2139,7 @@ func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	}
 }
 
-func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *testing.T) {
+func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services, err := cfg.SelectServices("containerengine", false)
 	if err != nil {
@@ -2149,10 +2149,11 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 		t.Fatalf("SelectServices(--service containerengine) returned %d services, want 1", len(services))
 	}
 	containerengineService := services[0]
-	if got := containerengineService.SelectedKinds(); !slices.Equal(got, []string{"Cluster"}) {
-		t.Fatalf("containerengine SelectedKinds() = %v, want [Cluster]", got)
+	if got := containerengineService.SelectedKinds(); !slices.Equal(got, []string{"Cluster", "NodePool"}) {
+		t.Fatalf("containerengine SelectedKinds() = %v, want [Cluster NodePool]", got)
 	}
 	assertServiceFormalSpec(t, &containerengineService, "Cluster", "cluster")
+	assertServiceFormalSpec(t, &containerengineService, "NodePool", "nodepool")
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)
@@ -2170,21 +2171,24 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 
 	serviceClientPath := "pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go"
 	serviceManagerPath := "pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go"
+	nodePoolServiceClientPath := "pkg/servicemanager/containerengine/nodepool/nodepool_serviceclient.go"
+	nodePoolServiceManagerPath := "pkg/servicemanager/containerengine/nodepool/nodepool_servicemanager.go"
+	registrationPath := filepath.Join(outputRoot, "internal", "registrations", "containerengine_generated.go")
 	assertPathsExist(t, []string{
 		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "groupversion_info.go"),
 		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "cluster_types.go"),
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "nodepool_types.go"),
 		filepath.Join(outputRoot, "controllers", "containerengine", "cluster_controller.go"),
+		filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"),
 		filepath.Join(outputRoot, serviceClientPath),
 		filepath.Join(outputRoot, serviceManagerPath),
-		filepath.Join(outputRoot, "internal", "registrations", "containerengine_generated.go"),
+		filepath.Join(outputRoot, nodePoolServiceClientPath),
+		filepath.Join(outputRoot, nodePoolServiceManagerPath),
+		registrationPath,
 		filepath.Join(outputRoot, "packages", "containerengine", "metadata.env"),
 		filepath.Join(outputRoot, "packages", "containerengine", "install", "kustomization.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"),
-	})
-	assertPathsNotExist(t, []string{
-		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "nodepool_types.go"),
-		filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"),
-		filepath.Join(outputRoot, "pkg", "servicemanager", "containerengine", "nodepool", "nodepool_serviceclient.go"),
+		filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_nodepool.yaml"),
 	})
 
 	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, serviceClientPath)))
@@ -2214,6 +2218,31 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
 	assertNotContains(t, content, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
+
+	nodePoolContent := readFile(t, filepath.Join(outputRoot, nodePoolServiceClientPath))
+	assertContains(t, nodePoolContent, []string{
+		"Semantics: &generatedruntime.Semantics{",
+		`FormalService:     "containerengine"`,
+		`FormalSlug:        "nodepool"`,
+		`ProvisioningStates: []string{"PROVISIONING"}`,
+		`UpdatingStates:     []string{"UPDATING"}`,
+		`PendingStates:  []string{"DELETING"}`,
+		`TerminalStates: []string{"DELETED"}`,
+		`ResponseItemsField: "Items"`,
+		`MatchFields:        []string{"compartmentId", "state"}`,
+		`NewRequest: func() any { return &containerenginesdk.ListNodePoolsRequest{} }`,
+		`return sdkClient.ListNodePools(ctx, *request.(*containerenginesdk.ListNodePoolsRequest))`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+	})
+
+	registration := readFile(t, registrationPath)
+	assertContains(t, registration, []string{
+		"NodePoolReconciler",
+		"setup NodePool controller",
+		"containerenginenodepoolservicemanager",
+	})
 
 	clusterSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"))
 	assertContains(t, clusterSample, []string{
