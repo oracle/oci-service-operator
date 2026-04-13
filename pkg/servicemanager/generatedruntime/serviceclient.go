@@ -93,9 +93,10 @@ type ListSemantics struct {
 }
 
 type MutationSemantics struct {
-	Mutable       []string
-	ForceNew      []string
-	ConflictsWith map[string][]string
+	UpdateCandidate []string
+	Mutable         []string
+	ForceNew        []string
+	ConflictsWith   map[string][]string
 }
 
 type AuxiliaryOperation struct {

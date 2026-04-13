@@ -59,9 +59,10 @@ var newBucketServiceClient = func(manager *BucketServiceManager) BucketServiceCl
 				MatchFields:        []string{"compartmentId", "name", "namespace"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"autoTiering", "compartmentId", "definedTags", "freeformTags", "kmsKeyId", "metadata", "name", "namespace", "objectEventsEnabled", "publicAccessType", "versioning"},
-				ForceNew:      []string{"storageTier"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"autoTiering", "compartmentId", "definedTags", "freeformTags", "kmsKeyId", "metadata", "name", "namespace", "objectEventsEnabled", "publicAccessType", "versioning"},
+				Mutable:         []string{"autoTiering", "compartmentId", "definedTags", "freeformTags", "kmsKeyId", "metadata", "name", "namespace", "objectEventsEnabled", "publicAccessType", "versioning"},
+				ForceNew:        []string{"storageTier"},
+				ConflictsWith:   map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},

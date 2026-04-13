@@ -24,6 +24,7 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 	}
 
 	binding := formalModel.Binding
+	updateCandidates := normalizeFormalPaths(binding.Import.Mutation.Mutable)
 	semantics := &RuntimeSemanticsModel{
 		FormalService:     formalModel.Reference.Service,
 		FormalSlug:        formalModel.Reference.Slug,
@@ -44,9 +45,10 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 			TerminalStates: normalizeFormalStates(binding.Import.DeleteConfirmation.Target),
 		},
 		Mutation: RuntimeMutationModel{
-			Mutable:       normalizeFormalPaths(binding.Import.Mutation.Mutable),
-			ForceNew:      normalizeFormalPaths(binding.Import.Mutation.ForceNew),
-			ConflictsWith: normalizeFormalConflicts(binding.Import.Mutation.ConflictsWith),
+			UpdateCandidate: append([]string(nil), updateCandidates...),
+			Mutable:         append([]string(nil), updateCandidates...),
+			ForceNew:        normalizeFormalPaths(binding.Import.Mutation.ForceNew),
+			ConflictsWith:   normalizeFormalConflicts(binding.Import.Mutation.ConflictsWith),
 		},
 		Hooks: RuntimeHookSetModel{
 			Create: buildRuntimeHookModels(binding.Import.Hooks.Create),

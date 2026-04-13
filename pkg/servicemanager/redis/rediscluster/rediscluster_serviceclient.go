@@ -59,9 +59,10 @@ var newRedisClusterServiceClient = func(manager *RedisClusterServiceManager) Red
 				MatchFields:        []string{"compartmentId", "displayName"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "freeformTags", "nodeCount", "nodeMemoryInGbs"},
-				ForceNew:      []string{"compartmentId", "softwareVersion", "subnetId"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"definedTags", "displayName", "freeformTags", "nodeCount", "nodeMemoryInGbs"},
+				Mutable:         []string{"definedTags", "displayName", "freeformTags", "nodeCount", "nodeMemoryInGbs"},
+				ForceNew:        []string{"compartmentId", "softwareVersion", "subnetId"},
+				ConflictsWith:   map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},

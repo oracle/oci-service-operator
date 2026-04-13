@@ -1607,9 +1607,10 @@ func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testin
 				MatchFields:        []string{"name"},
 			},
 			Mutation: RuntimeMutationModel{
-				Mutable:       []string{"displayName"},
-				ForceNew:      []string{"compartmentId"},
-				ConflictsWith: map[string][]string{"name": {"displayName"}},
+				UpdateCandidate: []string{"displayName"},
+				Mutable:         []string{"displayName"},
+				ForceNew:        []string{"compartmentId"},
+				ConflictsWith:   map[string][]string{"name": {"displayName"}},
 			},
 			Hooks: RuntimeHookSetModel{
 				Create: []RuntimeHookModel{{Helper: "tfresource.CreateResource"}},
@@ -1644,6 +1645,8 @@ func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testin
 		"Semantics: &generatedruntime.Semantics{",
 		`FormalService:     "identity"`,
 		`FormalSlug:        "user"`,
+		`UpdateCandidate: []string{"displayName"},`,
+		`Mutable:         []string{"displayName"},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -2737,8 +2740,11 @@ func TestCheckedInRedisClusterFormalBindingMatchesDiscovery(t *testing.T) {
 	} else if !slices.Equal(got.MatchFields, []string{"compartmentId", "displayName"}) {
 		t.Fatalf("RedisCluster list match fields = %v, want [compartmentId displayName]", got.MatchFields)
 	}
+	if got := redisCluster.Runtime.Semantics.Mutation.UpdateCandidate; !slices.Equal(got, []string{"definedTags", "displayName", "freeformTags", "nodeCount", "nodeMemoryInGbs"}) {
+		t.Fatalf("RedisCluster update candidates = %v, want reviewed AST candidate surface", got)
+	}
 	if got := redisCluster.Runtime.Semantics.Mutation.Mutable; !slices.Equal(got, []string{"definedTags", "displayName", "freeformTags", "nodeCount", "nodeMemoryInGbs"}) {
-		t.Fatalf("RedisCluster mutable fields = %v, want reviewed mutable surface", got)
+		t.Fatalf("RedisCluster mutable allowlist = %v, want bridged runtime surface", got)
 	}
 	if got := redisCluster.Runtime.Semantics.Mutation.ForceNew; !slices.Equal(got, []string{"compartmentId", "softwareVersion", "subnetId"}) {
 		t.Fatalf("RedisCluster force-new fields = %v, want [compartmentId softwareVersion subnetId]", got)

@@ -338,6 +338,40 @@ func TestServiceClientHasMutableDriftIgnoresIdenticalTags(t *testing.T) {
 	}
 }
 
+func TestServiceClientHasMutableDriftIgnoresUpdateCandidateWithoutMutableAllowlist(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				UpdateCandidate: []string{"freeformTags"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			FreeformTags: map[string]string{"scenario": "e2e"},
+		},
+	}
+	current := fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:             "ocid1.thing.oc1..existing",
+			LifecycleState: "ACTIVE",
+		},
+	}
+
+	drift, err := client.hasMutableDrift(resource, current)
+	if err != nil {
+		t.Fatalf("hasMutableDrift() error = %v", err)
+	}
+	if drift {
+		t.Fatal("hasMutableDrift() = true, want false until the runtime mutable allowlist is populated")
+	}
+}
+
 func TestServiceClientCreateOrUpdateResolvesSecretBackedBodyFields(t *testing.T) {
 	t.Parallel()
 

@@ -59,9 +59,10 @@ var newOpensearchClusterServiceClient = func(manager *OpensearchClusterServiceMa
 				MatchFields:        []string{"compartmentId", "displayName", "state"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"displayName"},
-				ForceNew:      []string{"compartmentId"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"displayName"},
+				Mutable:         []string{"displayName"},
+				ForceNew:        []string{"compartmentId"},
+				ConflictsWith:   map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},

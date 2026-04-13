@@ -48,9 +48,10 @@ func init() {
 					MatchFields:        []string{"compartmentId", "displayName", "state"},
 				},
 				Mutation: generatedruntime.MutationSemantics{
-					Mutable:       []string{"displayName"},
-					ForceNew:      []string{"compartmentId"},
-					ConflictsWith: map[string][]string{},
+					UpdateCandidate: []string{"displayName"},
+					Mutable:         []string{"displayName"},
+					ForceNew:        []string{"compartmentId"},
+					ConflictsWith:   map[string][]string{},
 				},
 				CreateFollowUp: generatedruntime.FollowUpSemantics{
 					Strategy: "read-after-write",

@@ -212,11 +212,13 @@ type RuntimeListLookupModel struct {
 	MatchFields        []string
 }
 
-// RuntimeMutationModel captures explicit mutable, force-new, and conflictsWith rules.
+// RuntimeMutationModel captures explicit AST update-candidate, runtime mutable-allowlist,
+// force-new, and conflictsWith rules.
 type RuntimeMutationModel struct {
-	Mutable       []string
-	ForceNew      []string
-	ConflictsWith map[string][]string
+	UpdateCandidate []string
+	Mutable         []string
+	ForceNew        []string
+	ConflictsWith   map[string][]string
 }
 
 // RuntimeHookSetModel groups imported helper hooks by CRUD phase.

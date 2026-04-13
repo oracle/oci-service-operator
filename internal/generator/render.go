@@ -1072,6 +1072,7 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 			},
 {{- end }}
 			Mutation: generatedruntime.MutationSemantics{
+				UpdateCandidate: {{ stringSliceLiteral .Semantics.Mutation.UpdateCandidate }},
 				Mutable:       {{ stringSliceLiteral .Semantics.Mutation.Mutable }},
 				ForceNew:      {{ stringSliceLiteral .Semantics.Mutation.ForceNew }},
 				ConflictsWith: {{ stringSliceMapLiteral .Semantics.Mutation.ConflictsWith }},

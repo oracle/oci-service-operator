@@ -59,9 +59,10 @@ var newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceCl
 				MatchFields:        []string{"compartmentId", "id", "name", "state", "streamPoolId"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "freeformTags", "streamPoolId"},
-				ForceNew:      []string{"name", "partitions", "retentionInHours"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"definedTags", "freeformTags", "streamPoolId"},
+				Mutable:         []string{"definedTags", "freeformTags", "streamPoolId"},
+				ForceNew:        []string{"name", "partitions", "retentionInHours"},
+				ConflictsWith:   map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},

@@ -59,9 +59,10 @@ var newCompartmentServiceClient = func(manager *CompartmentServiceManager) Compa
 				MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "description", "freeformTags", "name"},
-				ForceNew:      []string{"compartmentId"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"definedTags", "description", "freeformTags", "name"},
+				Mutable:         []string{"definedTags", "description", "freeformTags", "name"},
+				ForceNew:        []string{"compartmentId"},
+				ConflictsWith:   map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},

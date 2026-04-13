@@ -62,9 +62,10 @@ func newInstanceRuntimeConfig(log loggerutil.OSOKLogger, sdkClient instanceOCICl
 				MatchFields:        []string{"availabilityDomain", "compartmentId", "displayName", "lifecycleState"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-				ForceNew:      []string{"availabilityDomain", "compartmentId", "shape", "shapeConfig", "sourceDetails", "subnetId"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"definedTags", "displayName", "freeformTags"},
+				Mutable:         []string{"definedTags", "displayName", "freeformTags"},
+				ForceNew:        []string{"availabilityDomain", "compartmentId", "shape", "shapeConfig", "sourceDetails", "subnetId"},
+				ConflictsWith:   map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},

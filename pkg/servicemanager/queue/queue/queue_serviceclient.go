@@ -59,9 +59,10 @@ var newQueueServiceClient = func(manager *QueueServiceManager) QueueServiceClien
 				MatchFields:        []string{"compartmentId", "displayName", "id", "lifecycleState"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
-				ForceNew:      []string{"compartmentId", "retentionInSeconds"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
+				Mutable:         []string{"channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
+				ForceNew:        []string{"compartmentId", "retentionInSeconds"},
+				ConflictsWith:   map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
 				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"}},
