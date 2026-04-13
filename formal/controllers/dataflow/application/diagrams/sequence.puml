@@ -38,12 +38,9 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetApplication
 else tracked identity is missing
-ServiceManager -> OCI: ListApplication(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListApplications(filters:\ncompartment_id, display_name,\ndisplay_name_starts_with,\nowner_principal_id (+1 more))
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateApplication
-loop create pending PROVISIONING
-ServiceManager -> OCI: GetApplication
-end
 else reusable OCI resource already exists
 ServiceManager -> OCI: GetApplication
 end
@@ -52,40 +49,36 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteApplication
-ServiceManager -> OCI: confirm delete via GetApplication or\nListApplication
-loop delete pending DELETING
-ServiceManager -> OCI: GetApplication or ListApplication
-end
+ServiceManager -> OCI: confirm delete via GetApplication or\nListApplications
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
 else delete completion observed
 ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
-else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+application_log_config, archive_uri,
+arguments, class_name (+22 more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+compartment_id, type
+Lookup filters: compartment_id,
+display_name, display_name_starts_with,
+owner_principal_id (+1 more)
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateApplication only for\nmutable fields display_name
-loop update pending UPDATING
-ServiceManager -> OCI: GetApplication
-end
+ServiceManager -> OCI: Apply UpdateApplication only for\nmutable fields\napplication_log_config, archive_uri,\narguments, class_name (+22 more)
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
-BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+BaseReconciler --> Controller: requeue on terminating
 note right of ServiceManager
 shared diagram:
 shared/diagrams/shared-resolution-sequence.svg
@@ -107,19 +100,37 @@ kind: Application
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
-requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift: application_log_config,
+archive_uri, arguments, class_name (+22 more)
 reject before mutate: force-new fields
-compartment_id
+compartment_id, type
 create-only fields: none
-list lookup: scaffold_dataflow_application
-filters compartment_id, state
+list lookup: oci_dataflow_applications filters
+compartment_id, display_name,
+display_name_starts_with, owner_principal_id (+1
+more)
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Package-local generatedruntime owns create,
+update, and observe; create and update use the
+immediate OCI response body rather than shared
+read-after-write follow-up.
+Ready states map to OCI ACTIVE and INACTIVE.
+Tracked status.osokStatus.ocid is preflighted
+with GetApplication; OCI not found or observed
+DELETED clears the tracked identity and forces a
+fresh create.
+Delete confirmation is absence-based:
+DeleteApplication is followed by GetApplication
+until OCI returns not found, while ACTIVE,
+INACTIVE, and DELETED remain terminating
+intermediate observations.
+In-place updates follow the package-local
+BuildUpdateBody surface and preserve execute
+precedence over className, fileUri, arguments,
+configuration, and parameters.
 end note
 @enduml

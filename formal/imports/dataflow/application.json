@@ -5,7 +5,7 @@
   "slug": "application",
   "kind": "Application",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_dataflow_application",
+  "providerResource": "oci_dataflow_application",
   "operations": {
     "create": [
       {
@@ -23,9 +23,9 @@
     ],
     "list": [
       {
-        "operation": "ListApplication",
-        "requestType": "dataflow.ListApplicationRequest",
-        "responseType": "dataflow.ListApplicationResponse"
+        "operation": "ListApplications",
+        "requestType": "dataflow.ListApplicationsRequest",
+        "responseType": "dataflow.ListApplicationsResponse"
       }
     ],
     "update": [
@@ -45,28 +45,52 @@
   },
   "lifecycle": {
     "create": {
-      "pending": [
-        "PROVISIONING"
-      ],
+      "pending": [],
       "target": [
-        "ACTIVE"
+        "ACTIVE",
+        "INACTIVE"
       ]
     },
     "update": {
-      "pending": [
-        "UPDATING"
-      ],
+      "pending": [],
       "target": [
-        "ACTIVE"
+        "ACTIVE",
+        "INACTIVE"
       ]
     }
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "application_log_config",
+      "archive_uri",
+      "arguments",
+      "class_name",
+      "configuration",
+      "defined_tags",
+      "description",
+      "display_name",
+      "driver_shape",
+      "driver_shape_config",
+      "execute",
+      "executor_shape",
+      "executor_shape_config",
+      "file_uri",
+      "freeform_tags",
+      "idle_timeout_in_minutes",
+      "language",
+      "logs_bucket_uri",
+      "max_duration_in_minutes",
+      "metastore_id",
+      "num_executors",
+      "parameters",
+      "pool_id",
+      "private_endpoint_id",
+      "spark_version",
+      "warehouse_bucket_uri"
     ],
     "forceNew": [
-      "compartment_id"
+      "compartment_id",
+      "type"
     ],
     "conflictsWith": {}
   },
@@ -93,20 +117,21 @@
     ]
   },
   "deleteConfirmation": {
-    "pending": [
-      "DELETING"
-    ],
+    "pending": [],
     "target": [
       "DELETED"
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_dataflow_application",
-    "collectionField": "application",
+    "datasource": "oci_dataflow_applications",
+    "collectionField": "applications",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
-      "state"
+      "display_name",
+      "display_name_starts_with",
+      "owner_principal_id",
+      "spark_version"
     ]
   },
   "boundary": {
@@ -115,11 +140,19 @@
     "repoAuthoredLogicGapsPath": "controllers/dataflow/application/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
-      "secret-output",
-      "delete-confirmation"
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation",
+      "waiter-work-request",
+      "secret-output"
     ]
   },
   "notes": [
-    "Scaffold placeholder for dataflow/application; replace imported facts before promoting this row beyond scaffold."
+    "Pinned OCI SDK contract: CreateApplication, GetApplication, ListApplications, UpdateApplication, and DeleteApplication are the available CRUD and lookup operations for dataflow/Application.",
+    "Pinned OCI SDK lifecycle contract: Application responses expose ACTIVE, INACTIVE, and DELETED; there is no separate PROVISIONING or UPDATING lifecycle enum in the vendored SDK surface.",
+    "Pinned SDK request surface: UpdateApplicationDetails exposes archive_uri, application_log_config, arguments, class_name, configuration, defined_tags, description, display_name, driver/executor shape fields, execute, file_uri, language, logs_bucket_uri, metastore_id, num_executors, parameters, pool/private endpoint IDs, spark_version, warehouse_bucket_uri, and timeout fields as update payload inputs.",
+    "The package-local runtime intentionally does not use list-based bind-or-reuse semantics for create. Tracked status.osokStatus.ocid is preflighted with GetApplication, and only confirmed NotFound or DELETED clears the tracked identity before a fresh CreateApplication call.",
+    "Delete confirmation is repo-authored and absence-based rather than DELETED-target based: DeleteApplication is followed by GetApplication until OCI stops finding the resource, while observed ACTIVE, INACTIVE, and DELETED remain finalizer-holding intermediate states."
   ]
 }

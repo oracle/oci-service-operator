@@ -5,9 +5,14 @@ slug: application
 kind: Application
 archetype: generated-service-manager
 states:
-  - provisioning
   - active
-  - updating
+  - inactive
   - terminating
+  - deleted
+  - failed
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - "Package-local generatedruntime owns create, update, and observe; create and update use the immediate OCI response body rather than shared read-after-write follow-up."
+  - "Ready states map to OCI ACTIVE and INACTIVE."
+  - "Tracked status.osokStatus.ocid is preflighted with GetApplication; OCI not found or observed DELETED clears the tracked identity and forces a fresh create."
+  - "Delete confirmation is absence-based: DeleteApplication is followed by GetApplication until OCI returns not found, while ACTIVE, INACTIVE, and DELETED remain terminating intermediate observations."
+  - "In-place updates follow the package-local BuildUpdateBody surface and preserve execute precedence over className, fileUri, arguments, configuration, and parameters."

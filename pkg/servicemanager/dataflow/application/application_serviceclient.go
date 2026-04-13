@@ -45,22 +45,22 @@ var newApplicationServiceClient = func(manager *ApplicationServiceManager) Appli
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
 			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE"},
+				ProvisioningStates: []string{},
+				UpdatingStates:     []string{},
+				ActiveStates:       []string{"ACTIVE", "INACTIVE"},
 			},
 			Delete: generatedruntime.DeleteSemantics{
 				Policy:         "required",
-				PendingStates:  []string{"DELETING"},
+				PendingStates:  []string{},
 				TerminalStates: []string{"DELETED"},
 			},
 			List: &generatedruntime.ListSemantics{
 				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "state"},
+				MatchFields:        []string{"compartmentId", "displayName", "displayNameStartsWith", "ownerPrincipalId", "sparkVersion"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"displayName"},
-				ForceNew:      []string{"compartmentId"},
+				Mutable:       []string{"applicationLogConfig", "archiveUri", "arguments", "className", "configuration", "definedTags", "description", "displayName", "driverShape", "driverShapeConfig", "execute", "executorShape", "executorShapeConfig", "fileUri", "freeformTags", "idleTimeoutInMinutes", "language", "logsBucketUri", "maxDurationInMinutes", "metastoreId", "numExecutors", "parameters", "poolId", "privateEndpointId", "sparkVersion", "warehouseBucketUri"},
+				ForceNew:      []string{"compartmentId", "type"},
 				ConflictsWith: map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
@@ -80,7 +80,7 @@ var newApplicationServiceClient = func(manager *ApplicationServiceManager) Appli
 				Strategy: "confirm-delete",
 				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "list", MethodName: "ListApplication", RequestTypeName: "dataflow.ListApplicationRequest", ResponseTypeName: "dataflow.ListApplicationResponse"}},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
 			Unsupported:         []generatedruntime.UnsupportedSemantic{},
 		},
 		Create: &generatedruntime.Operation{

@@ -32,15 +32,13 @@ state "Deleted" as deleted
 state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateApplication
 observe --> resolve_by_lookup : tracked identity missing
-resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, INACTIVE
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
-observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> evaluate_ready : OCI state in ACTIVE,\nINACTIVE
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\napplication_log_config,\narchive_uri, arguments (+23\nmore)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -68,25 +66,43 @@ kind: Application
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
-requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift: application_log_config,
+archive_uri, arguments, class_name (+22 more)
 reject before mutate: force-new fields
-compartment_id
+compartment_id, type
 create-only fields: none
-list lookup: scaffold_dataflow_application
-filters compartment_id, state
+list lookup: oci_dataflow_applications filters
+compartment_id, display_name,
+display_name_starts_with, owner_principal_id (+1
+more)
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Package-local generatedruntime owns create,
+update, and observe; create and update use the
+immediate OCI response body rather than shared
+read-after-write follow-up.
+Ready states map to OCI ACTIVE and INACTIVE.
+Tracked status.osokStatus.ocid is preflighted
+with GetApplication; OCI not found or observed
+DELETED clears the tracked identity and forces a
+fresh create.
+Delete confirmation is absence-based:
+DeleteApplication is followed by GetApplication
+until OCI returns not found, while ACTIVE,
+INACTIVE, and DELETED remain terminating
+intermediate observations.
+In-place updates follow the package-local
+BuildUpdateBody surface and preserve execute
+precedence over className, fileUri, arguments,
+configuration, and parameters.
 end note
 note right of delete_pending
 delete policy: required
 delete observe: GetApplication or
-ListApplication
+ListApplications
 delete targets: DELETED
 end note
 @enduml

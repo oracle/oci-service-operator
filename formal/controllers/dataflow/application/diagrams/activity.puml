@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via\nGetApplication;
 else (no)
-:Resolve an existing OCI resource through\nListApplication using filters compartment_id,\nstate;
+:Resolve an existing OCI resource through\nListApplications using filters compartment_id,\ndisplay_name, display_name_starts_with,\nowner_principal_id (+1 more);
 :Create the OCI resource via CreateApplication\nwhen no reusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteApplication with\nrequired via GetApplication or ListApplication\nto DELETED confirmation;
-:Confirm deletion via GetApplication or\nListApplication until OCI reaches DELETED;
+:Delete path uses DeleteApplication with\nrequired via GetApplication or\nListApplications to DELETED confirmation;
+:Confirm deletion via GetApplication or\nListApplications until OCI reaches DELETED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -45,30 +45,26 @@ endif
 stop
 else (no)
 partition "Lifecycle Classification" {
-if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
-stop
-endif
 if ("OCI state is outside success targets?") then (yes)
-:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
 stop
 endif
 }
 partition "Ready and Drift Handling" {
 :Compare live OCI state against the imported\nfield surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields compartment_id, type;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateApplication only for mutable\nfields display_name;
+:Apply UpdateApplication only for mutable\nfields application_log_config, archive_uri,\narguments, class_name (+22 more);
 else (no)
 :Skip the no-op mutation path;
 endif
 :Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Return success for the ACTIVE success state;
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
-:Requeue on provisioning, updating, terminating;
+:Requeue on terminating;
 }
 endif
 stop
@@ -90,19 +86,37 @@ kind: Application
 archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
-requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift: application_log_config,
+archive_uri, arguments, class_name (+22 more)
 reject before mutate: force-new fields
-compartment_id
+compartment_id, type
 create-only fields: none
-list lookup: scaffold_dataflow_application
-filters compartment_id, state
+list lookup: oci_dataflow_applications filters
+compartment_id, display_name,
+display_name_starts_with, owner_principal_id (+1
+more)
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Package-local generatedruntime owns create,
+update, and observe; create and update use the
+immediate OCI response body rather than shared
+read-after-write follow-up.
+Ready states map to OCI ACTIVE and INACTIVE.
+Tracked status.osokStatus.ocid is preflighted
+with GetApplication; OCI not found or observed
+DELETED clears the tracked identity and forces a
+fresh create.
+Delete confirmation is absence-based:
+DeleteApplication is followed by GetApplication
+until OCI returns not found, while ACTIVE,
+INACTIVE, and DELETED remain terminating
+intermediate observations.
+In-place updates follow the package-local
+BuildUpdateBody surface and preserve execute
+precedence over className, fileUri, arguments,
+configuration, and parameters.
 end note
 @enduml
