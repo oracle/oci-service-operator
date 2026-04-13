@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "database",
+  "kind": "Database",
+  "formalSlug": "database",
+  "providerResource": "oci_database_database",
+  "terraformDocsVersion": "contract-example-v1",
+  "registryPath": "providers/oracle/oci/contract-example-v1/docs/resources/database_database",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/contract-example-v1/docs/resources/database_database",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:contract-example-v1/database/database/page.html",
+  "bodySHA256": "762a2277d85deddfd4ac5e4ac658d0b04553bf66b1185895b25a96b4fa3d392e",
+  "bodyBytes": 1054,
+  "fixtureBodyPath": "contract-example-v1/database/database/page.html"
+}
