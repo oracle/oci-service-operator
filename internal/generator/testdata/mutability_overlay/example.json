@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "contract-example-v1"
+  },
+  "sourceContract": {
+    "astPrimaryFacts": [
+      "forceNew",
+      "conflictsWith",
+      "lifecycle",
+      "hooks",
+      "crud",
+      "listLookup"
+    ],
+    "astMutableAlias": "updateCandidate",
+    "docsOverlayScope": "terraform-argument-reference-for-ast-update-candidate-fields",
+    "docsEvidenceSource": "terraform-argument-reference"
+  },
+  "resource": {
+    "service": "nosql",
+    "kind": "Table",
+    "formalSlug": "table",
+    "providerResource": "oci_nosql_table",
+    "repoAuthoredSpecPath": "controllers/nosql/table/spec.cfg",
+    "formalImportPath": "formal/imports/nosql/table.json"
+  },
+  "fields": [
+    {
+      "astFieldPath": "freeform_tags",
+      "terraformFieldPath": "freeform_tags",
+      "canonicalJoinKey": "freeformTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": []
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST candidate.",
+        "rawSignal": "No (Updatable) or replacement wording matched this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "formal/imports/nosql/table.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "nosql_table#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "Documents the AST-only candidate case without widening the update allowlist."
+        ]
+      }
+    },
+    {
+      "astFieldPath": "ddl_statement",
+      "terraformFieldPath": "ddl_statement",
+      "canonicalJoinKey": "ddlStatement",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": []
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(Updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "formal/imports/nosql/table.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "nosql_table#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "Represents a docs-confirmed AST updateCandidate row."
+        ]
+      }
+    },
+    {
+      "astFieldPath": "table_limits.max_read_units",
+      "terraformFieldPath": "table_limits.max_read_units",
+      "canonicalJoinKey": "tableLimits.maxReadUnits",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": []
+      },
+      "docs": {
+        "evidenceState": "deniedUpdatable",
+        "detail": "Docs text says changing this field requires recreating throughput settings elsewhere.",
+        "rawSignal": "Updating this value after creation is not supported."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsDeniedCandidate",
+        "finalPolicy": "denyInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "formal/imports/nosql/table.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "nosql_table#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "Shows a nested block path that docs deny even though AST classified it as an updateCandidate."
+        ]
+      }
+    },
+    {
+      "astFieldPath": "name",
+      "terraformFieldPath": "name",
+      "canonicalJoinKey": "name",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": []
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative even without docs overlay evidence."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "formal/imports/nosql/table.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "nosql_table#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "Encodes the replacement-required case sourced directly from formal import facts."
+        ]
+      }
+    },
+    {
+      "astFieldPath": "table_limits.read_units[].capacity_mode",
+      "terraformFieldPath": "table_limits.read_units[].capacity_mode",
+      "canonicalJoinKey": "tableLimits.readUnits[].capacityMode",
+      "pathShape": "listItem",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": []
+      },
+      "docs": {
+        "evidenceState": "ambiguous",
+        "detail": "Docs wording mixes conditional in-place update and recreate guidance.",
+        "rawSignal": "Changing replica capacity may update or may require replacement depending on workload mode."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "unknown",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "formal/imports/nosql/table.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "nosql_table#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "Shows how collection-item paths and ambiguous docs text stay preserved as evidence instead of becoming allowlisted."
+        ]
+      }
+    },
+    {
+      "astFieldPath": "defined_tags",
+      "terraformFieldPath": "defined_tags.*",
+      "canonicalJoinKey": "definedTags.*",
+      "pathShape": "mapEntry",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": []
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Docs expose map-entry evidence but the AST row is only available at the map root.",
+        "rawSignal": "Defined tags can be updated key by key."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "formal/imports/nosql/table.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "nosql_table#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "Represents an unresolved canonical join that later work must normalize without silently attaching docs evidence to the wrong field."
+        ]
+      }
+    },
+    {
+      "astFieldPath": "table_limits.max_storage_in_gbs",
+      "terraformFieldPath": "table_limits.max_storage_in_gbs",
+      "canonicalJoinKey": "tableLimits.maxStorageInGbs",
+      "pathShape": "unsupported",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": []
+      },
+      "docs": {
+        "evidenceState": "unsupported",
+        "detail": "The parser captured the field mention but does not yet support this docs shape deterministically.",
+        "rawSignal": "Storage block limits are described in a table layout that the first parser revision does not consume."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "unknown",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "formal/imports/nosql/table.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "nosql_table#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "Demonstrates that unsupported field shapes are preserved as typed evidence with an unknown final policy."
+        ]
+      }
+    }
+  ]
+}

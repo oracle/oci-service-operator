@@ -1,0 +1,313 @@
+{
+  "$defs": {
+    "ast": {
+      "additionalProperties": false,
+      "properties": {
+        "conflictsWith": {
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "forceNew": {
+          "type": "boolean"
+        },
+        "updateCandidateState": {
+          "enum": [
+            "updateCandidate",
+            "notUpdateCandidate"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "updateCandidateState",
+        "forceNew",
+        "conflictsWith"
+      ],
+      "type": "object"
+    },
+    "docs": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "evidenceState": {
+          "enum": [
+            "confirmedUpdatable",
+            "deniedUpdatable",
+            "replacementRequired",
+            "unknown",
+            "notDocumented",
+            "ambiguous",
+            "unsupported"
+          ],
+          "type": "string"
+        },
+        "rawSignal": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      },
+      "required": [
+        "evidenceState"
+      ],
+      "type": "object"
+    },
+    "field": {
+      "additionalProperties": false,
+      "properties": {
+        "ast": {
+          "$ref": "#/$defs/ast"
+        },
+        "astFieldPath": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "canonicalJoinKey": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "docs": {
+          "$ref": "#/$defs/docs"
+        },
+        "merge": {
+          "$ref": "#/$defs/merge"
+        },
+        "pathShape": {
+          "enum": [
+            "scalar",
+            "object",
+            "listItem",
+            "mapEntry",
+            "unsupported"
+          ],
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "terraformFieldPath": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      },
+      "required": [
+        "astFieldPath",
+        "terraformFieldPath",
+        "canonicalJoinKey",
+        "pathShape",
+        "ast",
+        "docs",
+        "merge",
+        "provenance"
+      ],
+      "type": "object"
+    },
+    "merge": {
+      "additionalProperties": false,
+      "properties": {
+        "finalPolicy": {
+          "enum": [
+            "allowInPlaceUpdate",
+            "denyInPlaceUpdate",
+            "replacementRequired",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "joinStatus": {
+          "enum": [
+            "matched",
+            "unresolved",
+            "ambiguous"
+          ],
+          "type": "string"
+        },
+        "mergeCase": {
+          "enum": [
+            "astOnlyCandidate",
+            "docsConfirmedCandidate",
+            "docsDeniedCandidate",
+            "replacementRequired",
+            "unknown",
+            "unresolvedJoin"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "joinStatus",
+        "mergeCase",
+        "finalPolicy"
+      ],
+      "type": "object"
+    },
+    "metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "providerRevision": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "providerSourceRef": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "terraformDocsVersion": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      },
+      "required": [
+        "providerSourceRef",
+        "providerRevision",
+        "terraformDocsVersion"
+      ],
+      "type": "object"
+    },
+    "nonEmptyString": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "astSourceBucket": {
+          "enum": [
+            "mutation.mutable",
+            "mutation.forceNew"
+          ],
+          "type": "string"
+        },
+        "formalImportPath": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "formalSourceRef": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "terraformDocsPage": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "terraformDocsSection": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      },
+      "required": [
+        "formalImportPath",
+        "formalSourceRef",
+        "astSourceBucket",
+        "terraformDocsPage",
+        "terraformDocsSection"
+      ],
+      "type": "object"
+    },
+    "resource": {
+      "additionalProperties": false,
+      "properties": {
+        "formalImportPath": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "formalSlug": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "kind": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "providerResource": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "repoAuthoredSpecPath": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "service": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      },
+      "required": [
+        "service",
+        "kind",
+        "formalSlug",
+        "providerResource",
+        "repoAuthoredSpecPath",
+        "formalImportPath"
+      ],
+      "type": "object"
+    },
+    "sourceContract": {
+      "additionalProperties": false,
+      "properties": {
+        "astMutableAlias": {
+          "const": "updateCandidate"
+        },
+        "astPrimaryFacts": {
+          "const": [
+            "forceNew",
+            "conflictsWith",
+            "lifecycle",
+            "hooks",
+            "crud",
+            "listLookup"
+          ],
+          "type": "array"
+        },
+        "docsEvidenceSource": {
+          "const": "terraform-argument-reference"
+        },
+        "docsOverlayScope": {
+          "const": "terraform-argument-reference-for-ast-update-candidate-fields"
+        }
+      },
+      "required": [
+        "astPrimaryFacts",
+        "astMutableAlias",
+        "docsOverlayScope",
+        "docsEvidenceSource"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://oracle.com/oci-service-operator/schemas/generator/mutability-overlay-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": {
+      "const": "v1alpha1"
+    },
+    "fields": {
+      "items": {
+        "$ref": "#/$defs/field"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "resource": {
+      "$ref": "#/$defs/resource"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "sourceContract": {
+      "$ref": "#/$defs/sourceContract"
+    },
+    "surface": {
+      "const": "generator-mutability-overlay"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "surface",
+    "contractVersion",
+    "metadata",
+    "sourceContract",
+    "resource",
+    "fields"
+  ],
+  "title": "OSOK Generator Mutability Overlay Contract",
+  "type": "object"
+}
