@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -119,7 +120,7 @@ func TestMakeTestKeepsEnvtestOutsideRepoByDefault(t *testing.T) {
 	tmpDir := filepath.Join(t.TempDir(), "envtest-root")
 	output := runMakeDryRun(t, "test", []string{"TMPDIR=" + tmpDir})
 
-	if strings.Contains(output, filepath.Join(root, ".envtest-home")) {
+	if strings.Contains(output, filepath.Join(root, ".envtest-home", "home")) {
 		t.Fatalf("make -n test output still points ENVTEST_HOME into the repo:\n%s", output)
 	}
 	if strings.Contains(output, filepath.Join(root, "testbin")) {
@@ -146,6 +147,55 @@ func TestMakeTestSetupEnvtestUsesIsolatedGoPath(t *testing.T) {
 	expectedGoPath := filepath.Join(tmpDir, "oci-service-operator-envtest", "gopath")
 	if !strings.Contains(output, "GOPATH="+expectedGoPath) {
 		t.Fatalf("make -n test output did not use isolated setup-envtest GOPATH %q:\n%s", expectedGoPath, output)
+	}
+}
+
+func TestMakeTestPrefersPreseededEnvtestAssets(t *testing.T) {
+	tmpDir := filepath.Join(t.TempDir(), "envtest-root")
+	output := runMakeDryRun(t, "test", []string{"TMPDIR=" + tmpDir})
+
+	expectedAssetsRoot := filepath.Join(tmpDir, "oci-service-operator-envtest", "testbin", runtime.GOOS+"-"+runtime.GOARCH)
+	if !strings.Contains(output, filepath.Join(expectedAssetsRoot, "kube-apiserver")) {
+		t.Fatalf("make -n test output did not check for a preseeded kube-apiserver in %q:\n%s", expectedAssetsRoot, output)
+	}
+	if !strings.Contains(output, filepath.Join(expectedAssetsRoot, "etcd")) {
+		t.Fatalf("make -n test output did not check for a preseeded etcd in %q:\n%s", expectedAssetsRoot, output)
+	}
+}
+
+func TestMakeTestDocumentsPreseedAndEnvOverrides(t *testing.T) {
+	tmpDir := filepath.Join(t.TempDir(), "envtest-root")
+	output := runMakeDryRun(t, "test", []string{"TMPDIR=" + tmpDir})
+
+	if !strings.Contains(output, "Run make envtest while network access is available") {
+		t.Fatalf("make -n test output did not explain how to preseed envtest assets:\n%s", output)
+	}
+	if !strings.Contains(output, "ENVTEST_USE_ENV=true") || !strings.Contains(output, "KUBEBUILDER_ASSETS=/path") {
+		t.Fatalf("make -n test output did not explain how to reuse an external envtest asset bundle:\n%s", output)
+	}
+}
+
+func TestMakeEnvtestUsesTempBasedEnvtestRoot(t *testing.T) {
+	root, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+
+	tmpDir := filepath.Join(t.TempDir(), "envtest-root")
+	output := runMakeDryRun(t, "envtest", []string{"TMPDIR=" + tmpDir})
+	expectedRoot := filepath.Join(tmpDir, "oci-service-operator-envtest")
+
+	if !strings.Contains(output, filepath.Join(expectedRoot, "testbin")) {
+		t.Fatalf("make -n envtest output did not use temp-based ENVTEST_ASSETS_DIR under %q:\n%s", filepath.Join(expectedRoot, "testbin"), output)
+	}
+	if !strings.Contains(output, filepath.Join(expectedRoot, "gopath")) {
+		t.Fatalf("make -n envtest output did not use temp-based setup-envtest GOPATH %q:\n%s", filepath.Join(expectedRoot, "gopath"), output)
+	}
+	if !strings.Contains(output, "setup-envtest@v0.0.0-20240812162837-9557f1031fe4") {
+		t.Fatalf("make -n envtest output did not use the pinned setup-envtest revision:\n%s", output)
+	}
+	if !strings.Contains(output, filepath.Join(root, ".envtest-home", ".gomodcache")) {
+		t.Fatalf("make -n envtest output did not clean the legacy repo-local envtest GOMODCACHE path:\n%s", output)
 	}
 }
 
