@@ -31,4 +31,5 @@ resources:
 - database_v1beta1_autonomousdatabase.yaml
 - streaming_v1beta1_stream.yaml
 - mysql_v1beta1_dbsystem.yaml
+- dataflow_v1beta1_application.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

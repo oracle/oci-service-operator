@@ -38,35 +38,85 @@ var newApplicationServiceClient = func(manager *ApplicationServiceManager) Appli
 		Kind:    "Application",
 		SDKName: "Application",
 		Log:     manager.Log,
+		Semantics: &generatedruntime.Semantics{
+			FormalService:     "dataflow",
+			FormalSlug:        "application",
+			StatusProjection:  "required",
+			SecretSideEffects: "none",
+			FinalizerPolicy:   "retain-until-confirmed-delete",
+			Lifecycle: generatedruntime.LifecycleSemantics{
+				ProvisioningStates: []string{"PROVISIONING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: generatedruntime.DeleteSemantics{
+				Policy:         "required",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+			List: &generatedruntime.ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"compartmentId", "state"},
+			},
+			Mutation: generatedruntime.MutationSemantics{
+				Mutable:       []string{"displayName"},
+				ForceNew:      []string{"compartmentId"},
+				ConflictsWith: map[string][]string{},
+			},
+			Hooks: generatedruntime.HookSet{
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			CreateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			},
+			UpdateFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "read-after-write",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			},
+			DeleteFollowUp: generatedruntime.FollowUpSemantics{
+				Strategy: "confirm-delete",
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+			},
+			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "list", MethodName: "ListApplication", RequestTypeName: "dataflow.ListApplicationRequest", ResponseTypeName: "dataflow.ListApplicationResponse"}},
+			Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		},
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &dataflowsdk.CreateApplicationRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateApplication(ctx, *request.(*dataflowsdk.CreateApplicationRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateApplicationDetails", RequestName: "CreateApplicationDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &dataflowsdk.GetApplicationRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetApplication(ctx, *request.(*dataflowsdk.GetApplicationRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &dataflowsdk.ListApplicationsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListApplications(ctx, *request.(*dataflowsdk.ListApplicationsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OwnerPrincipalId", RequestName: "ownerPrincipalId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayNameStartsWith", RequestName: "displayNameStartsWith", Contribution: "query", PreferResourceID: false}, {FieldName: "SparkVersion", RequestName: "sparkVersion", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &dataflowsdk.UpdateApplicationRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateApplication(ctx, *request.(*dataflowsdk.UpdateApplicationRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateApplicationDetails", RequestName: "UpdateApplicationDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &dataflowsdk.DeleteApplicationRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteApplication(ctx, *request.(*dataflowsdk.DeleteApplicationRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

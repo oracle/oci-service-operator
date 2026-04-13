@@ -538,6 +538,55 @@ services:
         WindowsInstanceInitialCredential:
           - Password
 
+  - service: dataflow
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
+    group: dataflow
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Application
+          formalSpec: application
+          serviceManager:
+            packagePath: dataflow/application
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers and Object Storage URI below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of reusing an existing Application with the same display name in the
+              # same compartment.
+              # Replace the starter shapes and Spark version with values currently supported in
+              # your region if needed.
+              #
+              apiVersion: dataflow.oracle.com/v1beta1
+              kind: Application
+              metadata:
+                name: application-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: "application-sample"
+                driverShape: "VM.Standard.E4.Flex"
+                executorShape: "VM.Standard.E4.Flex"
+                language: "PYTHON"
+                numExecutors: 2
+                sparkVersion: "3.5.0"
+                fileUri: "oci://bucket@namespace/app/main.py"
+
   - service: database
     sdkPackage: github.com/oracle/oci-go-sdk/v65/database
     group: database

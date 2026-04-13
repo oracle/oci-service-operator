@@ -7,6 +7,7 @@ import (
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
@@ -506,6 +507,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "DataflowApplication",
+		SpecType:   reflect.TypeOf(dataflowv1beta1.ApplicationSpec{}),
+		StatusType: reflect.TypeOf(dataflowv1beta1.ApplicationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dataflow.CreateApplicationDetails",
+			},
+			{
+				SDKStruct: "dataflow.UpdateApplicationDetails",
+			},
+			{
+				SDKStruct: "dataflow.Application",
+			},
+			{
+				SDKStruct: "dataflow.ApplicationSummary",
 			},
 		},
 	},
