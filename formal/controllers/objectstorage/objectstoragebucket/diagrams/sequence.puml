@@ -61,7 +61,7 @@ group Drift handling
 note over ServiceManager,OCI
 Supported update surface: auto_tiering,
 compartment_id, defined_tags,
-freeform_tags (+7 more)
+freeform_tags (+5 more)
 Reject before mutate: force-new fields
 storage_tier
 Lookup filters: name, namespace,
@@ -71,7 +71,7 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateBucket only for mutable\nfields auto_tiering, compartment_id,\ndefined_tags, freeform_tags (+7\nmore)
+ServiceManager -> OCI: Apply UpdateBucket only for mutable\nfields auto_tiering, compartment_id,\ndefined_tags, freeform_tags (+5\nmore)
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
 end
@@ -103,7 +103,7 @@ requeue: updating, terminating
 provider states: create none; update none;
 delete none
 supported drift: auto_tiering, compartment_id,
-defined_tags, freeform_tags (+7 more)
+defined_tags, freeform_tags (+5 more)
 reject before mutate: force-new fields
 storage_tier
 create-only fields: none

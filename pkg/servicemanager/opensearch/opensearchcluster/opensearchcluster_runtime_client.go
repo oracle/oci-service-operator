@@ -27,45 +27,7 @@ func init() {
 			BuildCreateBody: func(ctx context.Context, resource *opensearchv1beta1.OpensearchCluster, namespace string) (any, error) {
 				return buildOpensearchCreateDetails(ctx, manager.CredentialClient, resource, namespace)
 			},
-			Semantics: &generatedruntime.Semantics{
-				FormalService:     "opensearch",
-				FormalSlug:        "opensearchopensearchcluster",
-				StatusProjection:  "required",
-				SecretSideEffects: "none",
-				FinalizerPolicy:   "retain-until-confirmed-delete",
-				Lifecycle: generatedruntime.LifecycleSemantics{
-					ProvisioningStates: []string{"CREATING"},
-					UpdatingStates:     []string{"UPDATING"},
-					ActiveStates:       []string{"ACTIVE"},
-				},
-				Delete: generatedruntime.DeleteSemantics{
-					Policy:         "required",
-					PendingStates:  []string{"DELETING"},
-					TerminalStates: []string{"DELETED"},
-				},
-				List: &generatedruntime.ListSemantics{
-					ResponseItemsField: "Items",
-					MatchFields:        []string{"compartmentId", "displayName", "state"},
-				},
-				Mutation: generatedruntime.MutationSemantics{
-					UpdateCandidate: []string{"displayName"},
-					Mutable:         []string{"displayName"},
-					ForceNew:        []string{"compartmentId"},
-					ConflictsWith:   map[string][]string{},
-				},
-				CreateFollowUp: generatedruntime.FollowUpSemantics{
-					Strategy: "read-after-write",
-					Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-				},
-				UpdateFollowUp: generatedruntime.FollowUpSemantics{
-					Strategy: "read-after-write",
-					Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-				},
-				DeleteFollowUp: generatedruntime.FollowUpSemantics{
-					Strategy: "confirm-delete",
-					Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-				},
-			},
+			Semantics: newOpensearchClusterRuntimeSemantics(),
 			Create: &generatedruntime.Operation{
 				NewRequest: func() any { return &opensearchsdk.CreateOpensearchClusterRequest{} },
 				Call: func(ctx context.Context, request any) (any, error) {

@@ -38,7 +38,7 @@ observe --> evaluate_ready : OCI state in ACTIVE
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\nauto_tiering,\ncompartment_id, defined_tags\n(+8 more)
+evaluate_ready --> apply_update : supported mutable drift for\nauto_tiering,\ncompartment_id, defined_tags\n(+6 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -70,7 +70,7 @@ requeue: updating, terminating
 provider states: create none; update none;
 delete none
 supported drift: auto_tiering, compartment_id,
-defined_tags, freeform_tags (+7 more)
+defined_tags, freeform_tags (+5 more)
 reject before mutate: force-new fields
 storage_tier
 create-only fields: none

@@ -338,40 +338,6 @@ func TestServiceClientHasMutableDriftIgnoresIdenticalTags(t *testing.T) {
 	}
 }
 
-func TestServiceClientHasMutableDriftIgnoresUpdateCandidateWithoutMutableAllowlist(t *testing.T) {
-	t.Parallel()
-
-	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
-		Kind:    "Thing",
-		SDKName: "Thing",
-		Semantics: &Semantics{
-			Mutation: MutationSemantics{
-				UpdateCandidate: []string{"freeformTags"},
-			},
-		},
-	})
-
-	resource := &fakeResource{
-		Spec: fakeSpec{
-			FreeformTags: map[string]string{"scenario": "e2e"},
-		},
-	}
-	current := fakeGetThingResponse{
-		Thing: fakeThing{
-			Id:             "ocid1.thing.oc1..existing",
-			LifecycleState: "ACTIVE",
-		},
-	}
-
-	drift, err := client.hasMutableDrift(resource, current)
-	if err != nil {
-		t.Fatalf("hasMutableDrift() error = %v", err)
-	}
-	if drift {
-		t.Fatal("hasMutableDrift() = true, want false until the runtime mutable allowlist is populated")
-	}
-}
-
 func TestServiceClientCreateOrUpdateResolvesSecretBackedBodyFields(t *testing.T) {
 	t.Parallel()
 
@@ -1054,6 +1020,58 @@ func TestServiceClientCreateOrUpdateBuildsMinimalUpdateBodyFromChangedMutableFie
 	}
 	if got := updateRequest.FreeformTags; !valuesEqual(got, map[string]string{"scenario": "update", "run": "123"}) {
 		t.Fatalf("update request freeformTags = %#v, want only changed mutable tags", got)
+	}
+}
+
+func TestServiceClientFilteredUpdateBodyOmitsDocsDeniedNameChange(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Bucket",
+		SDKName: "Bucket",
+		Semantics: &Semantics{
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			Name:        "bucket-new",
+			DisplayName: "display-new",
+		},
+	}
+
+	body, ok, err := client.filteredUpdateBody(resource, requestBuildOptions{
+		CurrentResponse: fakeGetThingResponse{
+			Thing: fakeThing{
+				Id:             "ocid1.bucket.oc1..existing",
+				Name:           "bucket-old",
+				DisplayName:    "display-old",
+				LifecycleState: "ACTIVE",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("filteredUpdateBody() error = %v", err)
+	}
+	if !ok {
+		t.Fatal("filteredUpdateBody() = false, want mutable displayName change to produce an update body")
+	}
+
+	bodyMap, ok := body.(map[string]any)
+	if !ok {
+		t.Fatalf("filteredUpdateBody() body = %T, want map[string]any", body)
+	}
+	if _, found := bodyMap["name"]; found {
+		t.Fatalf("filteredUpdateBody() body = %#v, want docs-denied name omitted", bodyMap)
+	}
+	if got, found := bodyMap["displayName"]; !found || got != "display-new" {
+		t.Fatalf("filteredUpdateBody() body = %#v, want displayName only", bodyMap)
 	}
 }
 
@@ -1893,6 +1911,64 @@ func TestServiceClientRejectsConflictingMutationFields(t *testing.T) {
 
 	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "forbid setting name with displayName") {
 		t.Fatalf("CreateOrUpdate() error = %v, want conflictsWith failure", err)
+	}
+}
+
+func TestServiceClientCreateOrUpdateRejectsDocsDeniedNameDrift(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Bucket",
+		SDKName: "Bucket",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Get: &Operation{
+			NewRequest: func() any { return &fakeGetThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.bucket.oc1..existing" {
+					t.Fatalf("get request thingId = %v, want existing OCID", request.(*fakeGetThingRequest).ThingId)
+				}
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.bucket.oc1..existing",
+						Name:           "bucket-old",
+						DisplayName:    "display-old",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called when Bucket.name drift is outside the conservative mutable surface")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			Name:        "bucket-new",
+			DisplayName: "display-old",
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{Ocid: "ocid1.bucket.oc1..existing"},
+			Id:         "ocid1.bucket.oc1..existing",
+		},
+	}
+
+	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "reject unsupported update drift for name") {
+		t.Fatalf("CreateOrUpdate() error = %v, want docs-denied name drift failure", err)
 	}
 }
 
