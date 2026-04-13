@@ -1,0 +1,52 @@
+# Deterministic fixture-backed service surface for mutability overlay validation.
+schemaVersion: v1alpha1
+domain: oracle.com
+defaultVersion: v1beta1
+generatorEntrypoint: ./cmd/generator
+
+packageProfiles:
+  controller-backed:
+    description: Fixture-backed validation surface for mutability overlay and VAP regression gates.
+
+services:
+  - service: core
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/core
+    group: core
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Instance
+    generation:
+      resources:
+        - kind: Instance
+          formalSpec: instance
+
+  - service: nosql
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/nosql
+    group: nosql
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Table
+    generation:
+      resources:
+        - kind: Table
+          formalSpec: table
+
+  - service: objectstorage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/objectstorage
+    group: objectstorage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Bucket
+    generation:
+      resources:
+        - kind: Bucket
+          formalSpec: objectstoragebucket

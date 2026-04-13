@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <main>
+      <h2 id="argument-reference">Argument Reference</h2>
+      <ul>
+        <li><code>compartment_id</code> - (Optional) (Updatable) Move the table to a different compartment.</li>
+        <li><code>ddl_statement</code> - (Required) (Updatable) Complete CREATE TABLE DDL statement.</li>
+        <li><code>table_limits</code> - (Optional) Throughput limits for the table.
+          <ul>
+            <li><code>capacity_mode</code> - (Optional) (Updatable) Capacity mode for the table.</li>
+            <li><code>max_read_units</code> - (Optional) (Updatable) Maximum sustained read throughput.</li>
+            <li><code>max_storage_in_gbs</code> - (Optional) (Updatable) Maximum storage size.</li>
+            <li><code>max_write_units</code> - (Optional) (Updatable) Maximum sustained write throughput.</li>
+          </ul>
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>

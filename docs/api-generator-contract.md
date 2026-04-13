@@ -394,6 +394,7 @@ from scaffold coverage into generated runtime:
    go run ./hack/update_validator_registries.go --write
    make generated-coverage-gate
    make generated-runtime-gate
+   make generated-mutability-gate
    ```
 
 7. Move a service from `crd-only` to `controller-backed` in `services.yaml`
@@ -475,10 +476,18 @@ Expected regeneration and validation flow:
    generator config (by default `internal/generator/config/services.yaml`).
    Override `GENERATED_RUNTIME_CONFIG` when staging an alternate rollout config
    ahead of promotion.
-8. Run `make fmt`.
-9. Run `make vet`.
-10. Run `make test`.
-11. Run `make build`.
+8. Run `make generated-mutability-gate` to keep the pinned mutability overlay
+   and derived VAP update-policy decisions from regressing on the
+   fixture-backed validation surface defined in
+   `internal/generator/config/mutability_validation_services.yaml`. When the
+   pinned Terraform docs version changes, refresh the checked-in docs fixtures
+   first with `make mutability-docs-refresh`, review the new mutability report,
+   and only then refresh
+   `internal/generator/config/generated_mutability_baseline.json` intentionally.
+9. Run `make fmt`.
+10. Run `make vet`.
+11. Run `make test`.
+12. Run `make build`.
 
 The checked-in generator emits API/package outputs for all enabled services in
 the default active surface and can also emit controller, service-manager, and

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "objectstorage",
+  "kind": "Bucket",
+  "formalSlug": "objectstoragebucket",
+  "providerResource": "oci_objectstorage_bucket",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/objectstorage_bucket",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/objectstorage_bucket",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/objectstorage/objectstoragebucket/page.html",
+  "bodySHA256": "61de1abc6da3287ea3b0c4d36dac36c3785525045f2b43add19e15e23c7261af",
+  "bodyBytes": 1300,
+  "fixtureBodyPath": "7.22.0/objectstorage/objectstoragebucket/page.html"
+}

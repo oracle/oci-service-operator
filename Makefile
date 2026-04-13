@@ -241,6 +241,20 @@ GENERATED_RUNTIME_KEEP_SNAPSHOT ?=
 GENERATED_RUNTIME_SERVICE_ARG = $(if $(strip $(GENERATED_RUNTIME_SERVICE)),--service $(GENERATED_RUNTIME_SERVICE),--all)
 GENERATED_RUNTIME_SNAPSHOT_ARG = $(if $(strip $(GENERATED_RUNTIME_SNAPSHOT_DIR)),--snapshot-dir $(GENERATED_RUNTIME_SNAPSHOT_DIR),)
 GENERATED_RUNTIME_KEEP_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_RUNTIME_KEEP_SNAPSHOT)),--keep-snapshot,)
+GENERATED_MUTABILITY_CONFIG ?= internal/generator/config/mutability_validation_services.yaml
+GENERATED_MUTABILITY_REPORT ?= generated-mutability-report.json
+GENERATED_MUTABILITY_SERVICE ?=
+GENERATED_MUTABILITY_SNAPSHOT_DIR ?=
+GENERATED_MUTABILITY_KEEP_SNAPSHOT ?=
+GENERATED_MUTABILITY_BASELINE ?= internal/generator/config/generated_mutability_baseline.json
+GENERATED_MUTABILITY_SERVICE_ARG = $(if $(strip $(GENERATED_MUTABILITY_SERVICE)),--service $(GENERATED_MUTABILITY_SERVICE),--all)
+GENERATED_MUTABILITY_SNAPSHOT_ARG = $(if $(strip $(GENERATED_MUTABILITY_SNAPSHOT_DIR)),--snapshot-dir $(GENERATED_MUTABILITY_SNAPSHOT_DIR),)
+GENERATED_MUTABILITY_KEEP_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_MUTABILITY_KEEP_SNAPSHOT)),--keep-snapshot,)
+GENERATED_MUTABILITY_BASELINE_ARG = $(if $(strip $(GENERATED_MUTABILITY_BASELINE)),--baseline $(GENERATED_MUTABILITY_BASELINE),)
+MUTABILITY_DOCS_CONFIG ?= $(GENERATED_MUTABILITY_CONFIG)
+MUTABILITY_DOCS_SERVICE ?=
+MUTABILITY_DOCS_FIXTURE_ROOT ?= internal/generator/testdata/mutability_overlay/docs
+MUTABILITY_DOCS_SERVICE_ARG = $(if $(strip $(MUTABILITY_DOCS_SERVICE)),--service $(MUTABILITY_DOCS_SERVICE),--all)
 
 generated-coverage-report: controller-gen ## Generate APIs in a snapshot tree, run validator coverage, and write a JSON summary.
 	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-coverage --config $(EFFECTIVE_GENERATOR_CONFIG) $(GENERATED_COVERAGE_SERVICE_ARG) --top $(GENERATED_COVERAGE_TOP) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_COVERAGE_REPORT) $(GENERATED_COVERAGE_SNAPSHOT_ARG) $(GENERATED_COVERAGE_KEEP_ARG) $(GENERATED_COVERAGE_VALIDATOR_JSON_ARG)
@@ -263,7 +277,23 @@ generated-runtime-gate: controller-gen ## Fail when generated controller/service
 	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-runtime-check --config $(GENERATED_RUNTIME_CONFIG) --all --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_RUNTIME_REPORT) $(GENERATED_RUNTIME_SNAPSHOT_ARG) $(GENERATED_RUNTIME_KEEP_ARG)
 	@echo "Generated runtime gate passed; report at $(GENERATED_RUNTIME_REPORT)"
 
-generator-validation: generated-coverage-gate generated-runtime-gate ## Run generator regression gates for API coverage and generated runtime outputs.
+generated-mutability-report: ## Generate a mutability overlay/VAP validation report from the fixture-backed validation config.
+	go run ./cmd/osok-generated-mutability-check --config $(GENERATED_MUTABILITY_CONFIG) $(GENERATED_MUTABILITY_SERVICE_ARG) --report-out $(GENERATED_MUTABILITY_REPORT) $(GENERATED_MUTABILITY_SNAPSHOT_ARG) $(GENERATED_MUTABILITY_KEEP_ARG)
+	@echo "Wrote generated mutability report to $(GENERATED_MUTABILITY_REPORT)"
+
+generated-mutability-baseline: ## Refresh the checked-in mutability validation baseline intentionally.
+	go run ./cmd/osok-generated-mutability-check --config $(GENERATED_MUTABILITY_CONFIG) --all --report-out $(GENERATED_MUTABILITY_REPORT) --write-baseline $(GENERATED_MUTABILITY_BASELINE) $(GENERATED_MUTABILITY_SNAPSHOT_ARG) $(GENERATED_MUTABILITY_KEEP_ARG)
+	@echo "Wrote generated mutability report to $(GENERATED_MUTABILITY_REPORT)"
+	@echo "Updated generated mutability baseline at $(GENERATED_MUTABILITY_BASELINE)"
+
+generated-mutability-gate: ## Fail when mutability overlay/VAP decisions regress compared to the checked-in baseline.
+	go run ./cmd/osok-generated-mutability-check --config $(GENERATED_MUTABILITY_CONFIG) --all --report-out $(GENERATED_MUTABILITY_REPORT) $(GENERATED_MUTABILITY_BASELINE_ARG) --fail-on-regression $(GENERATED_MUTABILITY_SNAPSHOT_ARG) $(GENERATED_MUTABILITY_KEEP_ARG)
+	@echo "Generated mutability gate passed; report at $(GENERATED_MUTABILITY_REPORT)"
+
+mutability-docs-refresh: ## Refresh checked-in mutability docs fixtures for the validation surface.
+	go run ./cmd/osok-mutability-docs-refresh --config $(MUTABILITY_DOCS_CONFIG) $(MUTABILITY_DOCS_SERVICE_ARG) --fixture-root $(MUTABILITY_DOCS_FIXTURE_ROOT)
+
+generator-validation: generated-coverage-gate generated-runtime-gate generated-mutability-gate ## Run generator regression gates for API coverage, generated runtime outputs, and mutability policy artifacts.
 	@echo "Generator validation passed."
 
 BASH ?= /bin/bash

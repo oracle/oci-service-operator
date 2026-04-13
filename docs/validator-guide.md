@@ -320,6 +320,108 @@ runtime seams rather than a fully isolated generated tree.
 compiles or it fails, which makes it a straightforward regression tripwire for
 runtime template changes.
 
+## Generated Mutability Gate
+
+Use the mutability gate when generator work changes the Terraform docs overlay,
+the merged mutability artifact, or the VAP update-policy projection. This
+workflow is intentionally fixture-backed instead of live-network-backed: it
+uses `internal/generator/config/mutability_validation_services.yaml` to select a
+small deterministic service surface, generates overlay and VAP artifacts into a
+temporary output tree, validates the rendered JSON contracts, and compares the
+result against the checked-in baseline at
+`internal/generator/config/generated_mutability_baseline.json`.
+
+The checked-in fixture set under
+`internal/generator/testdata/mutability_overlay/docs/7.22.0/` is the pinned
+input for this gate. Today that validation surface covers:
+
+- `core/Instance`
+- `nosql/Table`
+- `objectstorage/Bucket`
+
+This gives the gate deterministic coverage for:
+
+- confirmed-updatable fields that stay in the allowlist
+- docs-denied fields such as `Bucket.name` and `Bucket.namespace`
+- force-new fields that remain replacement-required
+- unknown classifications that must not silently disappear or widen
+
+```bash
+# Write a mutability validation summary JSON
+make generated-mutability-report
+
+# CI-style gate against the checked-in mutability baseline
+make generated-mutability-gate
+
+# Keep the generated output tree for inspection
+make generated-mutability-gate \
+  GENERATED_MUTABILITY_SNAPSHOT_DIR=/tmp/osok-generated-mutability \
+  GENERATED_MUTABILITY_REPORT=/tmp/generated-mutability-report.json
+
+# Refresh the checked-in baseline intentionally after reviewing a valid change
+make generated-mutability-baseline
+```
+
+Common variables and flags:
+
+| Variable / Flag | Default | Purpose |
+| --- | --- | --- |
+| `GENERATED_MUTABILITY_CONFIG` / `--config` | `internal/generator/config/mutability_validation_services.yaml` | Fixture-backed service surface used for mutability validation. |
+| `GENERATED_MUTABILITY_SERVICE` / `--service` | empty | Run the mutability report for one service from the validation config. |
+| `--all` | false | Explicitly validate the enabled default-active service surface from the selected mutability config. Blank runs target the same surface automatically. |
+| `GENERATED_MUTABILITY_REPORT` / `--report-out` | `generated-mutability-report.json` for the Make target | Write the mutability validation summary JSON. |
+| `GENERATED_MUTABILITY_SNAPSHOT_DIR` / `--snapshot-dir` | empty | Keep the generated mutability output tree at a specific path instead of using an auto-cleaned temp dir. |
+| `GENERATED_MUTABILITY_KEEP_SNAPSHOT` / `--keep-snapshot` | empty / false | Keep an automatically created temp output tree after a successful run. |
+| `GENERATED_MUTABILITY_BASELINE` / `--baseline` | `internal/generator/config/generated_mutability_baseline.json` | Baseline file used by the mutability regression gate. |
+| `--write-baseline` | empty | Refresh the baseline file intentionally from the current mutability summary. |
+| `--fail-on-regression` | false | Exit non-zero if the mutability summary regresses compared to `--baseline`. |
+
+The mutability summary JSON includes:
+
+- `summary.aggregate` — aggregate counts for rendered fields, allowlist size,
+  docs-denied candidates, unknown policies, join failures, and merge conflicts.
+- `summary.services[]` — per-service rollups for the same counters.
+- `summary.resources[]` — per-resource decision snapshots, allow paths, deny
+  rules, docs-denied fields, unknown fields, and merge-conflict details.
+- `snapshot.root` — present only when the generated output tree is retained.
+
+The gate checks two classes of failure:
+
+- **Scope changes** — the validation surface, field inventory, docs version, or
+  field-level decision snapshot changed from the baseline.
+- **Regressions** — the allowlist widened, unknown classifications increased,
+  unresolved or ambiguous joins increased, or merge-conflict counts increased.
+
+When the gate fails, the command prints grouped scope changes and regressions
+plus a short top-offender summary so you can jump straight to the affected
+resource. If the change is intentional, refresh the baseline explicitly:
+
+```bash
+make generated-mutability-baseline
+```
+
+### Refreshing Pinned Docs Fixtures
+
+When you intentionally bump the pinned docs version in
+`internal/generator/mutability_overlay_integration.go`, refresh the checked-in
+fixtures for the validation surface before updating the baseline:
+
+```bash
+# Refresh the full fixture-backed validation surface
+make mutability-docs-refresh
+
+# Or refresh one service while iterating locally
+make mutability-docs-refresh MUTABILITY_DOCS_SERVICE=objectstorage
+```
+
+That target runs `go run ./cmd/osok-mutability-docs-refresh` and rewrites the
+checked-in HTML fixture pairs under
+`internal/generator/testdata/mutability_overlay/docs/`. It requires network
+access to `registry.terraform.io`; if refresh fails, the command groups mapping,
+docs-acquisition, parser, and generation failures separately so you can see
+whether the break was caused by a missing page, a renamed resource, a parser
+drift, or another typed failure.
+
 ## Registry Generation Workflow
 
 The validator registries can now be generated automatically:

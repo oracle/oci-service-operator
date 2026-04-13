@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "nosql",
+  "kind": "Table",
+  "formalSlug": "table",
+  "providerResource": "oci_nosql_table",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/nosql_table",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/nosql_table",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/nosql/table/page.html",
+  "bodySHA256": "1064fd16159f74ac4fc2a9f7ac1485c8a5c47008d53b9ec14eb0bf01e9595c57",
+  "bodyBytes": 934,
+  "fixtureBodyPath": "7.22.0/nosql/table/page.html"
+}
