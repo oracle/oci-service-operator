@@ -624,7 +624,7 @@ func exampleMutabilityOverlayDocument() mutabilityOverlayDocument {
 			newExampleMutabilityOverlayField(resource, exampleMutabilityOverlayFieldConfig{
 				ASTFieldPath:       "table_limits.max_storage_in_gbs",
 				TerraformFieldPath: "table_limits.max_storage_in_gbs",
-				CanonicalJoinKey:   "tableLimits.maxStorageInGbs",
+				CanonicalJoinKey:   "tableLimits.maxStorageInGBs",
 				PathShape:          mutabilityOverlayPathShapeUnsupported,
 				ASTState:           mutabilityOverlayASTStateUpdateCandidate,
 				DocsState:          mutabilityOverlayDocsStateUnsupported,

@@ -217,7 +217,7 @@
     {
       "astFieldPath": "table_limits.max_storage_in_gbs",
       "terraformFieldPath": "table_limits.max_storage_in_gbs",
-      "canonicalJoinKey": "tableLimits.maxStorageInGbs",
+      "canonicalJoinKey": "tableLimits.maxStorageInGBs",
       "pathShape": "unsupported",
       "ast": {
         "updateCandidateState": "updateCandidate",
