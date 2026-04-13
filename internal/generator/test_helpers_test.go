@@ -277,7 +277,7 @@ func collectDesiredGeneratorOwnedRelativePaths(t *testing.T, cfg *Config, servic
 		packages = append(packages, pkg)
 	}
 
-	inventory, err := buildCleanupInventory(root, services, packages, nil, false)
+	inventory, err := buildCleanupInventory(root, services, packages, nil, nil, false)
 	if err != nil {
 		t.Fatalf("buildCleanupInventory() error = %v", err)
 	}

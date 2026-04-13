@@ -18,8 +18,9 @@ type Options struct {
 	SkipExisting bool
 	FullSync     bool
 	// EnableMutabilityOverlay opts the generator into the pinned AST+docs
-	// mutability artifact flow used by cmd/generator. Internal callers can keep
-	// the legacy code-only generation behavior by leaving this disabled.
+	// mutability artifact flow, including conservative VAP update-policy input
+	// projections, used by cmd/generator. Internal callers can keep the legacy
+	// code-only generation behavior by leaving this disabled.
 	EnableMutabilityOverlay bool
 }
 
@@ -70,13 +71,21 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		builtPackages = append(builtPackages, pkg)
 	}
 
-	var mutabilityOverlayArtifacts []mutabilityOverlayGeneratedArtifact
+	var (
+		mutabilityOverlayArtifacts []mutabilityOverlayGeneratedArtifact
+		vapUpdatePolicyArtifacts   []vapUpdatePolicyGeneratedArtifact
+	)
 	if options.EnableMutabilityOverlay {
 		artifacts, err := g.buildMutabilityOverlayArtifacts(ctx, cfg, builtPackages)
 		if err != nil {
 			return result, fmt.Errorf("build mutability overlay artifacts: %w", err)
 		}
 		mutabilityOverlayArtifacts = artifacts
+		vapArtifacts, err := buildVAPUpdatePolicyArtifacts(builtPackages, mutabilityOverlayArtifacts)
+		if err != nil {
+			return result, fmt.Errorf("build vap update policy artifacts: %w", err)
+		}
+		vapUpdatePolicyArtifacts = vapArtifacts
 	}
 
 	if options.Overwrite {
@@ -84,7 +93,14 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 		if options.FullSync && cfg != nil {
 			cleanupServices = cfg.Services
 		}
-		if err := cleanupGeneratedOutputs(options.OutputRoot, cleanupServices, builtPackages, mutabilityOverlayArtifacts, options.FullSync); err != nil {
+		if err := cleanupGeneratedOutputs(
+			options.OutputRoot,
+			cleanupServices,
+			builtPackages,
+			mutabilityOverlayArtifacts,
+			vapUpdatePolicyArtifacts,
+			options.FullSync,
+		); err != nil {
 			return result, err
 		}
 	}
@@ -153,6 +169,9 @@ func (g *Generator) Generate(ctx context.Context, cfg *Config, services []Servic
 	if options.EnableMutabilityOverlay {
 		if err := g.renderer.RenderMutabilityOverlayArtifacts(options.OutputRoot, mutabilityOverlayArtifacts); err != nil {
 			return result, fmt.Errorf("render mutability overlay artifacts: %w", err)
+		}
+		if err := g.renderer.RenderVAPUpdatePolicyArtifacts(options.OutputRoot, vapUpdatePolicyArtifacts); err != nil {
+			return result, fmt.Errorf("render vap update policy artifacts: %w", err)
 		}
 	}
 

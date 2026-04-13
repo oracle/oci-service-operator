@@ -27,6 +27,7 @@ type cleanupInventory struct {
 	managerCmdFiles         map[string]struct{}
 	managerConfigFiles      map[string]struct{}
 	mutabilityOverlayFiles  map[string]struct{}
+	vapUpdatePolicyFiles    map[string]struct{}
 	packageGroups           map[string]struct{}
 	sampleFiles             map[string]struct{}
 	selectedGroups          map[string]struct{}
@@ -40,9 +41,10 @@ func cleanupGeneratedOutputs(
 	services []ServiceConfig,
 	packages []*PackageModel,
 	mutabilityOverlayArtifacts []mutabilityOverlayGeneratedArtifact,
+	vapUpdatePolicyArtifacts []vapUpdatePolicyGeneratedArtifact,
 	fullSync bool,
 ) error {
-	inventory, err := buildCleanupInventory(root, services, packages, mutabilityOverlayArtifacts, fullSync)
+	inventory, err := buildCleanupInventory(root, services, packages, mutabilityOverlayArtifacts, vapUpdatePolicyArtifacts, fullSync)
 	if err != nil {
 		return fmt.Errorf("build cleanup inventory: %w", err)
 	}
@@ -71,6 +73,9 @@ func cleanupGeneratedOutputs(
 	if err := cleanupMutabilityOverlayOutputs(root, inventory); err != nil {
 		return fmt.Errorf("cleanup mutability overlay outputs: %w", err)
 	}
+	if err := cleanupVAPUpdatePolicyOutputs(root, inventory); err != nil {
+		return fmt.Errorf("cleanup vap update policy outputs: %w", err)
+	}
 	if err := cleanupPackageOutputs(root, inventory); err != nil {
 		return fmt.Errorf("cleanup package outputs: %w", err)
 	}
@@ -86,6 +91,7 @@ func buildCleanupInventory(
 	services []ServiceConfig,
 	packages []*PackageModel,
 	mutabilityOverlayArtifacts []mutabilityOverlayGeneratedArtifact,
+	vapUpdatePolicyArtifacts []vapUpdatePolicyGeneratedArtifact,
 	fullSync bool,
 ) (cleanupInventory, error) {
 	inventory := newCleanupInventory(services)
@@ -106,6 +112,7 @@ func buildCleanupInventory(
 		}
 	}
 	inventory.includeMutabilityOverlayOutputs(root, mutabilityOverlayArtifacts)
+	inventory.includeVAPUpdatePolicyOutputs(root, vapUpdatePolicyArtifacts)
 
 	return inventory, nil
 }
@@ -119,6 +126,7 @@ func newCleanupInventory(services []ServiceConfig) cleanupInventory {
 		managerCmdFiles:         map[string]struct{}{},
 		managerConfigFiles:      map[string]struct{}{},
 		mutabilityOverlayFiles:  map[string]struct{}{},
+		vapUpdatePolicyFiles:    map[string]struct{}{},
 		packageGroups:           map[string]struct{}{},
 		sampleFiles:             map[string]struct{}{},
 		selectedGroups:          map[string]struct{}{},
@@ -161,6 +169,13 @@ func (inventory *cleanupInventory) includeMutabilityOverlayOutputs(root string, 
 	for _, artifact := range artifacts {
 		inventory.addOverlayService(artifact.Service)
 		inventory.mutabilityOverlayFiles[filepath.Join(root, filepath.FromSlash(artifact.RelativePath))] = struct{}{}
+	}
+}
+
+func (inventory *cleanupInventory) includeVAPUpdatePolicyOutputs(root string, artifacts []vapUpdatePolicyGeneratedArtifact) {
+	for _, artifact := range artifacts {
+		inventory.addOverlayService(artifact.Service)
+		inventory.vapUpdatePolicyFiles[filepath.Join(root, filepath.FromSlash(artifact.RelativePath))] = struct{}{}
 	}
 }
 
@@ -330,6 +345,17 @@ func cleanupMutabilityOverlayOutputs(root string, inventory cleanupInventory) er
 	for _, service := range scopedGroupEntries(inventory.selectedOverlayServices) {
 		serviceDir := filepath.Join(overlayRoot, service)
 		if err := deleteGeneratedFiles(serviceDir, overlayRoot, inventory.mutabilityOverlayFiles, isOwnedMutabilityOverlayArtifactFile); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func cleanupVAPUpdatePolicyOutputs(root string, inventory cleanupInventory) error {
+	policyRoot := filepath.Join(root, filepath.FromSlash(vapUpdatePolicyGeneratedRootRelativePath))
+	for _, service := range scopedGroupEntries(inventory.selectedOverlayServices) {
+		serviceDir := filepath.Join(policyRoot, service)
+		if err := deleteGeneratedFiles(serviceDir, policyRoot, inventory.vapUpdatePolicyFiles, isOwnedVAPUpdatePolicyArtifactFile); err != nil {
 			return err
 		}
 	}
@@ -545,6 +571,9 @@ func (inventory *cleanupInventory) includeExistingGeneratedCleanupScope(root str
 	if err := inventory.includeGeneratedMutabilityOverlayServices(filepath.Join(root, filepath.FromSlash(mutabilityOverlayGeneratedRootRelativePath))); err != nil {
 		return err
 	}
+	if err := inventory.includeGeneratedVAPUpdatePolicyServices(filepath.Join(root, filepath.FromSlash(vapUpdatePolicyGeneratedRootRelativePath))); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -671,6 +700,31 @@ func (inventory *cleanupInventory) includeGeneratedMutabilityOverlayServices(ove
 	return nil
 }
 
+func (inventory *cleanupInventory) includeGeneratedVAPUpdatePolicyServices(policyRoot string) error {
+	entries, err := os.ReadDir(policyRoot)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		service := entry.Name()
+		hasPolicyFiles, err := dirContainsOwnedFiles(filepath.Join(policyRoot, service), isOwnedVAPUpdatePolicyArtifactFile)
+		if err != nil {
+			return err
+		}
+		if hasPolicyFiles {
+			inventory.addOverlayService(service)
+		}
+	}
+	return nil
+}
+
 func dirContainsOwnedFiles(root string, owned func(string) bool) (bool, error) {
 	if _, err := os.Stat(root); os.IsNotExist(err) {
 		return false, nil
@@ -737,6 +791,10 @@ func fileContainsGeneratedMarker(path string) (bool, error) {
 }
 
 func isOwnedMutabilityOverlayArtifactFile(name string) bool {
+	return filepath.Ext(name) == ".json"
+}
+
+func isOwnedVAPUpdatePolicyArtifactFile(name string) bool {
 	return filepath.Ext(name) == ".json"
 }
 
