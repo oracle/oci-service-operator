@@ -79,6 +79,7 @@ remains opt-in and non-destructive.
 | `internal/generator/config/services.yaml` | Manual source-of-truth | Edited by hand when onboarding, reclassifying, or rolling out services. |
 | `cmd/generator/**` | Manual implementation | Canonical user-facing generator entrypoint. |
 | `internal/generator/**` Go code | Manual implementation | Reads the service map, discovers SDK resources, and renders outputs. |
+| `internal/generator/generated/mutability_overlay/<service>/*.json` | generator | Conservative AST+docs mutability artifacts for the selected formal-backed resources. Emitted only by `cmd/generator`, not by manual edits. |
 | `api/<group>/<version>/groupversion_info.go` | generator | Derived from `group`, `version`, and repo domain. |
 | `api/<group>/<version>/*_types.go` | generator | Top-level kinds, spec/status types, kubebuilder markers, and imports. |
 | `api/<group>/<version>/zz_generated.deepcopy.go` | `controller-gen` | Rebuilt after generated API types change. This file is generated but not hand-authored and not directly owned by the generator. |
@@ -446,12 +447,14 @@ Expected regeneration and validation flow:
    coverage is expected, `make formal-scaffold-verify
    FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci`.
 3. Run `go run ./cmd/generator ...` to emit API packages, sample manifests,
-   sample kustomization, and package scaffolding for the selected services.
+   sample kustomization, package scaffolding, and the pinned mutability overlay
+   artifacts for the selected services.
    Generator-owned spec, helper, sample, and package artifacts regenerate
    directly from `services.yaml` and the current v2 contract; there is no
    legacy-preservation mode in the generator. With `--all --overwrite`, the
    generator performs a full-sync cleanup that removes stale generator-owned
    outputs under `api/`, `controllers/`, `pkg/servicemanager/`,
+   `internal/generator/generated/mutability_overlay/`,
    `internal/registrations/`, `packages/`, and `config/samples/` when they no
    longer belong to the active surface.
 4. When deepcopy output and CRD manifests also need refresh, run `make generate`

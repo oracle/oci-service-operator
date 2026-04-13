@@ -72,10 +72,11 @@ func execute(ctx context.Context, opts options, stdout io.Writer) error {
 
 	pipeline := generator.New()
 	result, err := pipeline.Generate(ctx, cfg, services, generator.Options{
-		OutputRoot:   opts.outputRoot,
-		Overwrite:    opts.overwrite,
-		SkipExisting: opts.all && !opts.overwrite,
-		FullSync:     opts.all,
+		OutputRoot:              opts.outputRoot,
+		Overwrite:               opts.overwrite,
+		SkipExisting:            opts.all && !opts.overwrite,
+		FullSync:                opts.all,
+		EnableMutabilityOverlay: true,
 	})
 	if err != nil {
 		return err

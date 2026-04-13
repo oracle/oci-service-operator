@@ -248,6 +248,8 @@ func collectGeneratorOwnedRelativePaths(t *testing.T, root string) ([]string, []
 			exactPaths = append(exactPaths, relPath)
 		case strings.HasPrefix(relPath, "config/samples/") && filepath.Ext(name) == ".yaml":
 			exactPaths = append(exactPaths, relPath)
+		case strings.HasPrefix(relPath, filepath.ToSlash(mutabilityOverlayGeneratedRootRelativePath)+"/") && filepath.Ext(name) == ".json":
+			exactPaths = append(exactPaths, relPath)
 		}
 
 		return nil
@@ -275,7 +277,7 @@ func collectDesiredGeneratorOwnedRelativePaths(t *testing.T, cfg *Config, servic
 		packages = append(packages, pkg)
 	}
 
-	inventory, err := buildCleanupInventory(root, services, packages, false)
+	inventory, err := buildCleanupInventory(root, services, packages, nil, false)
 	if err != nil {
 		t.Fatalf("buildCleanupInventory() error = %v", err)
 	}
