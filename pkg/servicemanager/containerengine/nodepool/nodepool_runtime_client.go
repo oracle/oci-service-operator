@@ -319,6 +319,7 @@ func normalizeNodePoolCreateDetails(
 		&details.QuantityPerSubnet,
 		func() { details.NodeConfigDetails = nil },
 	)
+	normalizeNodePoolCreateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
 }
 
 func normalizeNodePoolUpdateDetails(
@@ -336,6 +337,7 @@ func normalizeNodePoolUpdateDetails(
 		&details.QuantityPerSubnet,
 		func() { details.NodeConfigDetails = nil },
 	)
+	normalizeNodePoolUpdateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
 }
 
 func normalizeObservedNodePoolUpdateDetails(details *containerenginesdk.UpdateNodePoolDetails) {
@@ -345,6 +347,45 @@ func normalizeObservedNodePoolUpdateDetails(details *containerenginesdk.UpdateNo
 
 	if len(details.SubnetIds) == 0 {
 		details.SubnetIds = nil
+	}
+}
+
+func normalizeNodePoolCreateNodeConfigDetails(
+	spec containerenginev1beta1.NodePoolNodeConfigDetails,
+	details *containerenginesdk.CreateNodePoolNodeConfigDetails,
+) {
+	if details == nil {
+		return
+	}
+
+	normalizeNodePoolNodeConfigDetails(spec.PlacementConfigs, details.PlacementConfigs, &details.NsgIds)
+}
+
+func normalizeNodePoolUpdateNodeConfigDetails(
+	spec containerenginev1beta1.NodePoolNodeConfigDetails,
+	details *containerenginesdk.UpdateNodePoolNodeConfigDetails,
+) {
+	if details == nil {
+		return
+	}
+
+	normalizeNodePoolNodeConfigDetails(spec.PlacementConfigs, details.PlacementConfigs, &details.NsgIds)
+}
+
+func normalizeNodePoolNodeConfigDetails(
+	specs []containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfig,
+	details []containerenginesdk.NodePoolPlacementConfigDetails,
+	nsgIDs *[]string,
+) {
+	if nsgIDs != nil && len(*nsgIDs) == 0 {
+		*nsgIDs = nil
+	}
+
+	for i := 0; i < len(specs) && i < len(details); i++ {
+		if strings.TrimSpace(specs[i].PreemptibleNodeConfig.PreemptionAction.Type) != "" {
+			continue
+		}
+		details[i].PreemptibleNodeConfig = nil
 	}
 }
 

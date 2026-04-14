@@ -124,6 +124,38 @@ func TestBuildNodePoolCreateDetailsPreservesLegacyPlacementFieldsWithoutNodeConf
 	}
 }
 
+func TestBuildNodePoolCreateDetailsOmitsEmptyPreemptibleNodeConfigAndDerivedEmptyNsgIDs(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails.NsgIds = nil
+	resource.Spec.NodeConfigDetails.PlacementConfigs[0].PreemptibleNodeConfig = containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig{}
+
+	details, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v", err)
+	}
+	if details.NodeConfigDetails == nil {
+		t.Fatal("buildNodePoolCreateDetails() NodeConfigDetails = nil, want active nodeConfigDetails path")
+	}
+	if details.NodeConfigDetails.NsgIds != nil {
+		t.Fatalf("buildNodePoolCreateDetails() NodeConfigDetails.NsgIds = %#v, want nil", details.NodeConfigDetails.NsgIds)
+	}
+	if got := details.NodeConfigDetails.PlacementConfigs[0].PreemptibleNodeConfig; got != nil {
+		t.Fatalf("buildNodePoolCreateDetails() PlacementConfigs[0].PreemptibleNodeConfig = %#v, want nil", got)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.CreateNodePoolRequest{
+		CreateNodePoolDetails: details,
+	}, http.MethodPost, "/nodePools")
+
+	for _, field := range []string{`"preemptibleNodeConfig"`, `"preemptionAction"`, `"nsgIds"`} {
+		if strings.Contains(body, field) {
+			t.Fatalf("request body unexpectedly serialized %s: %s", field, body)
+		}
+	}
+}
+
 func TestBuildNodePoolCreateDetailsRejectsUnsupportedNodeSourceType(t *testing.T) {
 	t.Parallel()
 
@@ -201,6 +233,39 @@ func TestBuildNodePoolUpdateDetailsOmitsDeprecatedPlacementFieldsWhenNodeConfigD
 		t.Fatalf("request body %s does not contain nodeConfigDetails", body)
 	}
 	for _, field := range []string{`"subnetIds"`, `"quantityPerSubnet"`} {
+		if strings.Contains(body, field) {
+			t.Fatalf("request body unexpectedly serialized %s: %s", field, body)
+		}
+	}
+}
+
+func TestBuildNodePoolUpdateDetailsOmitsEmptyPreemptibleNodeConfigAndDerivedEmptyNsgIDs(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails.NsgIds = nil
+	resource.Spec.NodeConfigDetails.PlacementConfigs[0].PreemptibleNodeConfig = containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig{}
+
+	details, err := buildNodePoolUpdateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() error = %v", err)
+	}
+	if details.NodeConfigDetails == nil {
+		t.Fatal("buildNodePoolUpdateDetails() NodeConfigDetails = nil, want active nodeConfigDetails path")
+	}
+	if details.NodeConfigDetails.NsgIds != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() NodeConfigDetails.NsgIds = %#v, want nil", details.NodeConfigDetails.NsgIds)
+	}
+	if got := details.NodeConfigDetails.PlacementConfigs[0].PreemptibleNodeConfig; got != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() PlacementConfigs[0].PreemptibleNodeConfig = %#v, want nil", got)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.UpdateNodePoolRequest{
+		NodePoolId:            common.String("ocid1.nodepool.oc1..example"),
+		UpdateNodePoolDetails: details,
+	}, http.MethodPut, "/nodePools/ocid1.nodepool.oc1..example")
+
+	for _, field := range []string{`"preemptibleNodeConfig"`, `"preemptionAction"`, `"nsgIds"`} {
 		if strings.Contains(body, field) {
 			t.Fatalf("request body unexpectedly serialized %s: %s", field, body)
 		}
