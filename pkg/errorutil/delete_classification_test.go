@@ -8,7 +8,7 @@ package errorutil
 import (
 	"testing"
 
-	"github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,12 +26,8 @@ func TestClassifyDeleteError(t *testing.T) {
 		wantTypeString       string
 	}{
 		{
-			name: "raw service not found",
-			err: deleteTestServiceError{
-				statusCode: 404,
-				code:       NotFound,
-				message:    "resource not found",
-			},
+			name:                 "raw service not found",
+			err:                  errortest.NewServiceError(404, NotFound, "resource not found"),
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotFound,
 			wantNormalizedType:   "errorutil.NotFoundOciError",
@@ -40,12 +36,8 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantTypeString:       "errorutil.NotFoundOciError",
 		},
 		{
-			name: "raw service auth shaped 404",
-			err: deleteTestServiceError{
-				statusCode: 404,
-				code:       NotAuthorizedOrNotFound,
-				message:    "not authorized or not found",
-			},
+			name:                 "raw service auth shaped 404",
+			err:                  errortest.NewServiceError(404, NotAuthorizedOrNotFound, "not authorized or not found"),
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotAuthorizedOrNotFound,
 			wantNormalizedType:   "errorutil.UnauthorizedAndNotFoundOciError",
@@ -84,12 +76,8 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantTypeString:       "errorutil.UnauthorizedAndNotFoundOciError",
 		},
 		{
-			name: "raw conflict",
-			err: deleteTestServiceError{
-				statusCode: 409,
-				code:       IncorrectState,
-				message:    "conflict",
-			},
+			name:                 "raw conflict",
+			err:                  errortest.NewServiceError(409, IncorrectState, "conflict"),
 			wantHTTPStatusCode:   409,
 			wantErrorCode:        IncorrectState,
 			wantNormalizedType:   "errorutil.ConflictOciError",
@@ -129,31 +117,3 @@ func TestClassifyDeleteError(t *testing.T) {
 		})
 	}
 }
-
-type deleteTestServiceError struct {
-	statusCode int
-	code       string
-	message    string
-}
-
-func (e deleteTestServiceError) Error() string {
-	return e.message
-}
-
-func (e deleteTestServiceError) GetHTTPStatusCode() int {
-	return e.statusCode
-}
-
-func (e deleteTestServiceError) GetMessage() string {
-	return e.message
-}
-
-func (e deleteTestServiceError) GetCode() string {
-	return e.code
-}
-
-func (e deleteTestServiceError) GetOpcRequestID() string {
-	return "opc-request-id"
-}
-
-var _ common.ServiceError = deleteTestServiceError{}

@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -166,21 +167,6 @@ type fakeNamedThingCollection struct {
 
 type fakeNamedListThingResponse struct {
 	Collection fakeNamedThingCollection `presentIn:"body"`
-}
-
-type fakeServiceError struct {
-	code       string
-	message    string
-	statusCode int
-	opcID      string
-}
-
-func (f fakeServiceError) Error() string          { return f.message }
-func (f fakeServiceError) GetHTTPStatusCode() int { return f.statusCode }
-func (f fakeServiceError) GetMessage() string     { return f.message }
-func (f fakeServiceError) GetCode() string        { return f.code }
-func (f fakeServiceError) GetOpcRequestID() string {
-	return f.opcID
 }
 
 type fakeCredentialClient struct {
@@ -1450,12 +1436,7 @@ func TestServiceClientDeleteTreatsNotFoundAsDeleted(t *testing.T) {
 		Get: &Operation{
 			NewRequest: func() any { return &fakeGetThingRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
 			},
 		},
 	})
@@ -2174,12 +2155,7 @@ func TestServiceClientDeleteConflictStillConfirmsFormalPendingState(t *testing.T
 			NewRequest: func() any { return &fakeDeleteThingRequest{} },
 			Call: func(_ context.Context, request any) (any, error) {
 				deleteRequest = *request.(*fakeDeleteThingRequest)
-				return nil, fakeServiceError{
-					code:       "IncorrectState",
-					message:    "delete is still settling",
-					statusCode: 409,
-					opcID:      "opc-delete-conflict",
-				}
+				return nil, errortest.NewServiceError(409, "IncorrectState", "delete is still settling")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -2337,12 +2313,7 @@ func TestServiceClientDeleteConflictStillConfirmsFormalTerminalState(t *testing.
 		Delete: &Operation{
 			NewRequest: func() any { return &fakeDeleteThingRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
-				return nil, fakeServiceError{
-					code:       "IncorrectState",
-					message:    "delete is still settling",
-					statusCode: 409,
-					opcID:      "opc-delete-conflict",
-				}
+				return nil, errortest.NewServiceError(409, "IncorrectState", "delete is still settling")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3114,12 +3085,7 @@ func TestServiceClientCreateOrUpdateCreatesWhenLiveGetMissesAfterListReuse(t *te
 		Get: &Operation{
 			NewRequest: func() any { return &fakeGetThingRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3217,12 +3183,7 @@ func TestServiceClientCreateOrUpdateRebindsWhenTrackedStatusIDIsStale(t *testing
 				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
 					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
 				}
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3331,12 +3292,7 @@ func TestServiceClientCreateOrUpdateCreatesWhenTrackedStatusIDIsStaleAndNoReplac
 				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
 					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
 				}
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},

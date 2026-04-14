@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
@@ -84,11 +84,7 @@ func TestReconcileNotFoundDeleteRemovesFinalizer(t *testing.T) {
 	t.Parallel()
 
 	reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{
-		err: testServiceError{
-			statusCode: 404,
-			code:       "NotFound",
-			message:    "resource not found",
-		},
+		err: errortest.NewServiceError(404, "NotFound", "resource not found"),
 	})
 
 	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
@@ -113,11 +109,7 @@ func TestReconcileAuthShapedNotFoundDeleteRequeuesAndKeepsFinalizer(t *testing.T
 	t.Parallel()
 
 	reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{
-		err: testServiceError{
-			statusCode: 404,
-			code:       errorutil.NotAuthorizedOrNotFound,
-			message:    "not authorized or not found",
-		},
+		err: errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found"),
 	})
 
 	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
@@ -142,11 +134,7 @@ func TestReconcileConflictDeleteRequeuesAndKeepsFinalizer(t *testing.T) {
 	t.Parallel()
 
 	reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{
-		err: testServiceError{
-			statusCode: 409,
-			code:       errorutil.IncorrectState,
-			message:    "delete conflict",
-		},
+		err: errortest.NewServiceError(409, errorutil.IncorrectState, "delete conflict"),
 	})
 
 	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
@@ -197,11 +185,7 @@ func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
 
 	sink := &collectingLogSink{}
 	reconciler, _, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
-		err: testServiceError{
-			statusCode: 500,
-			code:       errorutil.InternalServerError,
-			message:    "delete failed",
-		},
+		err: errortest.NewServiceError(500, errorutil.InternalServerError, "delete failed"),
 	}, sink)
 
 	done, err := reconciler.DeleteResource(context.Background(), kubeClient.StoredConfigMap(), testRequest())
@@ -222,11 +206,7 @@ func TestDeleteResourceAuthShapedNotFoundRemainsFatal(t *testing.T) {
 
 	sink := &collectingLogSink{}
 	reconciler, _, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
-		err: testServiceError{
-			statusCode: 404,
-			code:       errorutil.NotAuthorizedOrNotFound,
-			message:    "not authorized or not found",
-		},
+		err: errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "not authorized or not found"),
 	}, sink)
 
 	done, err := reconciler.DeleteResource(context.Background(), kubeClient.StoredConfigMap(), testRequest())
@@ -247,11 +227,7 @@ func TestDeleteResourceLogsOCIClassificationOnDeleteNotFoundSuccess(t *testing.T
 
 	sink := &collectingLogSink{}
 	reconciler, _, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
-		err: testServiceError{
-			statusCode: 404,
-			code:       errorutil.NotFound,
-			message:    "resource not found",
-		},
+		err: errortest.NewServiceError(404, errorutil.NotFound, "resource not found"),
 	}, sink)
 
 	done, err := reconciler.DeleteResource(context.Background(), kubeClient.StoredConfigMap(), testRequest())
@@ -378,62 +354,6 @@ func (m deleteOnlyServiceManager) Delete(context.Context, runtime.Object) (bool,
 func (m deleteOnlyServiceManager) GetCrdStatus(runtime.Object) (*shared.OSOKStatus, error) {
 	return &shared.OSOKStatus{}, nil
 }
-
-type testServiceError struct {
-	statusCode int
-	code       string
-	message    string
-}
-
-func (e testServiceError) Error() string {
-	return e.message
-}
-
-func (e testServiceError) GetHTTPStatusCode() int {
-	return e.statusCode
-}
-
-func (e testServiceError) GetMessage() string {
-	return e.message
-}
-
-func (e testServiceError) GetCode() string {
-	return e.code
-}
-
-func (e testServiceError) GetOpcRequestID() string {
-	return "opc-request-id"
-}
-
-func (e testServiceError) GetTargetService() string {
-	return "core"
-}
-
-func (e testServiceError) GetOperationName() string {
-	return "DeleteTestResource"
-}
-
-func (e testServiceError) GetTimestamp() common.SDKTime {
-	return common.SDKTime{}
-}
-
-func (e testServiceError) GetClientVersion() string {
-	return "test"
-}
-
-func (e testServiceError) GetRequestTarget() string {
-	return "DELETE /resource"
-}
-
-func (e testServiceError) GetOperationReferenceLink() string {
-	return ""
-}
-
-func (e testServiceError) GetErrorTroubleshootingLink() string {
-	return ""
-}
-
-var _ common.ServiceError = testServiceError{}
 
 type memoryClient struct {
 	ctrlclient.Client
