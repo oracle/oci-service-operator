@@ -21,6 +21,7 @@ func TestClassifyDeleteError(t *testing.T) {
 		wantHTTPStatusCode   int
 		wantErrorCode        string
 		wantNormalizedType   string
+		wantIsConflict       bool
 		wantStatusCodeString string
 		wantErrorCodeString  string
 		wantTypeString       string
@@ -31,6 +32,7 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotFound,
 			wantNormalizedType:   "errorutil.NotFoundOciError",
+			wantIsConflict:       false,
 			wantStatusCodeString: "404",
 			wantErrorCodeString:  NotFound,
 			wantTypeString:       "errorutil.NotFoundOciError",
@@ -41,6 +43,7 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotAuthorizedOrNotFound,
 			wantNormalizedType:   "errorutil.UnauthorizedAndNotFoundOciError",
+			wantIsConflict:       false,
 			wantStatusCodeString: "404",
 			wantErrorCodeString:  NotAuthorizedOrNotFound,
 			wantTypeString:       "errorutil.UnauthorizedAndNotFoundOciError",
@@ -56,6 +59,7 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotFound,
 			wantNormalizedType:   "errorutil.NotFoundOciError",
+			wantIsConflict:       false,
 			wantStatusCodeString: "404",
 			wantErrorCodeString:  NotFound,
 			wantTypeString:       "errorutil.NotFoundOciError",
@@ -71,6 +75,7 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantHTTPStatusCode:   404,
 			wantErrorCode:        NotAuthorizedOrNotFound,
 			wantNormalizedType:   "errorutil.UnauthorizedAndNotFoundOciError",
+			wantIsConflict:       false,
 			wantStatusCodeString: "404",
 			wantErrorCodeString:  NotAuthorizedOrNotFound,
 			wantTypeString:       "errorutil.UnauthorizedAndNotFoundOciError",
@@ -81,8 +86,42 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantHTTPStatusCode:   409,
 			wantErrorCode:        IncorrectState,
 			wantNormalizedType:   "errorutil.ConflictOciError",
+			wantIsConflict:       true,
 			wantStatusCodeString: "409",
 			wantErrorCodeString:  IncorrectState,
+			wantTypeString:       "errorutil.ConflictOciError",
+		},
+		{
+			name:                 "raw external server incorrect state",
+			err:                  errortest.NewServiceError(409, "ExternalServerIncorrectState", "external conflict"),
+			wantHTTPStatusCode:   409,
+			wantErrorCode:        "ExternalServerIncorrectState",
+			wantNormalizedType:   "errorutil.ocierrors",
+			wantIsConflict:       true,
+			wantStatusCodeString: "409",
+			wantErrorCodeString:  "ExternalServerIncorrectState",
+			wantTypeString:       "errorutil.ocierrors",
+		},
+		{
+			name:                 "raw invalidated retry token",
+			err:                  errortest.NewServiceError(409, InvalidatedRetryToken, "retry token invalidated"),
+			wantHTTPStatusCode:   409,
+			wantErrorCode:        InvalidatedRetryToken,
+			wantNormalizedType:   "errorutil.ConflictOciError",
+			wantIsConflict:       false,
+			wantStatusCodeString: "409",
+			wantErrorCodeString:  InvalidatedRetryToken,
+			wantTypeString:       "errorutil.ConflictOciError",
+		},
+		{
+			name:                 "raw resource already exists ambiguity",
+			err:                  errortest.NewServiceError(409, NotAuthorizedOrResourceAlreadyExists, "already exists"),
+			wantHTTPStatusCode:   409,
+			wantErrorCode:        NotAuthorizedOrResourceAlreadyExists,
+			wantNormalizedType:   "errorutil.ConflictOciError",
+			wantIsConflict:       false,
+			wantStatusCodeString: "409",
+			wantErrorCodeString:  NotAuthorizedOrResourceAlreadyExists,
 			wantTypeString:       "errorutil.ConflictOciError",
 		},
 		{
@@ -96,6 +135,7 @@ func TestClassifyDeleteError(t *testing.T) {
 			wantHTTPStatusCode:   409,
 			wantErrorCode:        IncorrectState,
 			wantNormalizedType:   "errorutil.ConflictOciError",
+			wantIsConflict:       true,
 			wantStatusCodeString: "409",
 			wantErrorCodeString:  IncorrectState,
 			wantTypeString:       "errorutil.ConflictOciError",
@@ -111,6 +151,7 @@ func TestClassifyDeleteError(t *testing.T) {
 			assert.Equal(t, tt.wantHTTPStatusCode, classification.HTTPStatusCode)
 			assert.Equal(t, tt.wantErrorCode, classification.ErrorCode)
 			assert.Equal(t, tt.wantNormalizedType, classification.NormalizedType)
+			assert.Equal(t, tt.wantIsConflict, classification.IsConflict())
 			assert.Equal(t, tt.wantStatusCodeString, classification.HTTPStatusCodeString())
 			assert.Equal(t, tt.wantErrorCodeString, classification.ErrorCodeString())
 			assert.Equal(t, tt.wantTypeString, classification.NormalizedTypeString())

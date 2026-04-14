@@ -180,6 +180,60 @@ func TestReconcileDeleteInProgressRequeuesAndKeepsFinalizer(t *testing.T) {
 	assertNoEventContains(t, events, "Failed Delete the resource")
 }
 
+func TestReconcileDeleteRespectsCommonErrorMatrix(t *testing.T) {
+	t.Parallel()
+
+	for _, candidate := range errortest.CommonErrorMatrix {
+		candidate := candidate
+		t.Run(candidate.Name(), func(t *testing.T) {
+			t.Parallel()
+
+			reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{
+				err: errortest.NewServiceErrorFromCase(candidate),
+			})
+
+			result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
+			if err != nil {
+				t.Fatalf("Reconcile() error = %v, want nil", err)
+			}
+
+			stored := kubeClient.StoredConfigMap()
+			events := drainEvents(recorder)
+
+			switch {
+			case candidate.Expectations.Delete == errortest.ExpectationDeleted:
+				if result != (ctrl.Result{}) {
+					t.Fatalf("Reconcile() result = %#v, want empty result", result)
+				}
+				if HasFinalizer(stored, OSOKFinalizerName) {
+					t.Fatalf("finalizer still present after delete case %s", candidate.Name())
+				}
+				assertContainsEvent(t, events, "Removed finalizer")
+				assertNoEventContains(t, events, "Failed to delete resource")
+			case candidate.HTTPStatusCode == 409 && (candidate.ErrorCode == errorutil.IncorrectState || candidate.ErrorCode == "ExternalServerIncorrectState"):
+				if result.RequeueAfter != defaultRequeueTime {
+					t.Fatalf("Reconcile() requeueAfter = %v, want %v", result.RequeueAfter, defaultRequeueTime)
+				}
+				if !HasFinalizer(stored, OSOKFinalizerName) {
+					t.Fatalf("finalizer removed after retryable delete conflict %s", candidate.Name())
+				}
+				assertContainsEvent(t, events, "Delete blocked and will be retried")
+				assertNoEventContains(t, events, "Removed finalizer")
+				assertNoEventContains(t, events, "Failed to delete resource")
+			default:
+				if result.RequeueAfter != defaultRequeueTime {
+					t.Fatalf("Reconcile() requeueAfter = %v, want %v", result.RequeueAfter, defaultRequeueTime)
+				}
+				if !HasFinalizer(stored, OSOKFinalizerName) {
+					t.Fatalf("finalizer removed after delete failure %s", candidate.Name())
+				}
+				assertContainsEvent(t, events, "Failed to delete resource:")
+				assertNoEventContains(t, events, "Removed finalizer")
+			}
+		})
+	}
+}
+
 func TestDeleteResourceLogsOCIClassificationOnDeleteFailure(t *testing.T) {
 	t.Parallel()
 

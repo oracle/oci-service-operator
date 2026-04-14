@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	osokcore "github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
@@ -669,80 +670,12 @@ func TestDelete_KeepsFinalizerWhileObservedTerminated(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestIsInternetGatewayReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isInternetGatewayReadNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.False(t, isInternetGatewayReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.False(t, isInternetGatewayReadNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isInternetGatewayReadNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isInternetGatewayReadNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isInternetGatewayReadNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isInternetGatewayReadNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
-}
-
-func TestIsInternetGatewayDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
-	assert.True(t, isInternetGatewayDeleteNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.True(t, isInternetGatewayDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.True(t, isInternetGatewayDeleteNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isInternetGatewayDeleteNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isInternetGatewayDeleteNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isInternetGatewayDeleteNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isInternetGatewayDeleteNotFoundOCI(fakeInternetGatewayServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
+func TestInternetGatewayClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {
+	contract, err := errortest.ManualRuntimeClassifierContractFromReviewedRegistration("core", "InternetGateway")
+	if err != nil {
+		t.Fatalf("ManualRuntimeClassifierContractFromReviewedRegistration() error = %v", err)
+	}
+	errortest.RunManualRuntimeClassifierContract(t, contract, isInternetGatewayReadNotFoundOCI, isInternetGatewayDeleteNotFoundOCI)
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {

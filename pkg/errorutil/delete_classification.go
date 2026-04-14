@@ -78,7 +78,16 @@ func (c DeleteErrorClassification) IsAuthShapedNotFound() bool {
 }
 
 func (c DeleteErrorClassification) IsConflict() bool {
-	return c.HTTPStatusCode == 409
+	if c.HTTPStatusCode != 409 {
+		return false
+	}
+
+	switch c.ErrorCode {
+	case IncorrectState, "ExternalServerIncorrectState":
+		return true
+	default:
+		return false
+	}
 }
 
 func structuredOCIErrorFields(err error) (int, string, bool) {

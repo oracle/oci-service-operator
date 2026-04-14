@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	osokcore "github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
@@ -739,80 +740,12 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestIsNatGatewayReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isNatGatewayReadNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.False(t, isNatGatewayReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.False(t, isNatGatewayReadNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isNatGatewayReadNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isNatGatewayReadNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isNatGatewayReadNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isNatGatewayReadNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
-}
-
-func TestIsNatGatewayDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
-	assert.True(t, isNatGatewayDeleteNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.True(t, isNatGatewayDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.True(t, isNatGatewayDeleteNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isNatGatewayDeleteNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isNatGatewayDeleteNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isNatGatewayDeleteNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isNatGatewayDeleteNotFoundOCI(fakeNatGatewayServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
+func TestNatGatewayClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {
+	contract, err := errortest.ManualRuntimeClassifierContractFromReviewedRegistration("core", "NatGateway")
+	if err != nil {
+		t.Fatalf("ManualRuntimeClassifierContractFromReviewedRegistration() error = %v", err)
+	}
+	errortest.RunManualRuntimeClassifierContract(t, contract, isNatGatewayReadNotFoundOCI, isNatGatewayDeleteNotFoundOCI)
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
