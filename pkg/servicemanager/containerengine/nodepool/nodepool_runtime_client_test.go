@@ -257,6 +257,45 @@ func TestBuildNodePoolUpdateBodyDetectsMutableDrift(t *testing.T) {
 	}
 }
 
+func TestBuildNodePoolUpdateBodyDetectsExplicitEmptyNodeConfigNsgIDsDrift(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.nodepool.oc1..existing"
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails.NsgIds = []string{}
+
+	currentResource := newNodePoolTestResource()
+	currentDetails, err := buildNodePoolUpdateDetails(context.Background(), currentResource, currentResource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() error = %v", err)
+	}
+	current := observedNodePoolFromUpdateDetails(t, existingID, currentResource.Spec, currentDetails, "ACTIVE")
+
+	details, updateNeeded, err := buildNodePoolUpdateBody(context.Background(), resource, resource.Namespace, current)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildNodePoolUpdateBody() updateNeeded = false, want true for explicit empty nsgIds drift")
+	}
+	if details.NodeConfigDetails == nil {
+		t.Fatal("buildNodePoolUpdateBody() NodeConfigDetails = nil, want active nodeConfigDetails path")
+	}
+	if details.NodeConfigDetails.NsgIds == nil || len(details.NodeConfigDetails.NsgIds) != 0 {
+		t.Fatalf("buildNodePoolUpdateBody() NodeConfigDetails.NsgIds = %#v, want explicit empty slice", details.NodeConfigDetails.NsgIds)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.UpdateNodePoolRequest{
+		NodePoolId:            common.String(existingID),
+		UpdateNodePoolDetails: details,
+	}, http.MethodPut, "/nodePools/"+existingID)
+
+	if !strings.Contains(body, `"nsgIds":[]`) {
+		t.Fatalf("request body %s does not preserve explicit empty nsgIds intent", body)
+	}
+}
+
 func TestBuildNodePoolUpdateDetailsOmitsDeprecatedPlacementFieldsWhenNodeConfigDetailsPresent(t *testing.T) {
 	t.Parallel()
 

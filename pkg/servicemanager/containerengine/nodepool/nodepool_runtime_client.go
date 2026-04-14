@@ -232,7 +232,9 @@ func buildNodePoolUpdateBody(
 		return containerenginesdk.UpdateNodePoolDetails{}, false, err
 	}
 
-	desiredValues, err := nodePoolJSONMap(details)
+	preservedEmptyArrays := nodePoolPreservedEmptyArrayPaths(resource.Spec)
+
+	desiredValues, err := nodePoolJSONMap(details, preservedEmptyArrays)
 	if err != nil {
 		return containerenginesdk.UpdateNodePoolDetails{}, false, fmt.Errorf("project desired nodepool update body: %w", err)
 	}
@@ -244,7 +246,7 @@ func buildNodePoolUpdateBody(
 	if err != nil {
 		return containerenginesdk.UpdateNodePoolDetails{}, false, err
 	}
-	currentValues, err := nodePoolJSONMap(currentDetails)
+	currentValues, err := nodePoolJSONMap(currentDetails, preservedEmptyArrays)
 	if err != nil {
 		return containerenginesdk.UpdateNodePoolDetails{}, false, fmt.Errorf("project current nodepool update body: %w", err)
 	}
@@ -600,7 +602,7 @@ func validateNodePoolPlacementConfigs(configs []containerenginesdk.NodePoolPlace
 	return nil
 }
 
-func nodePoolJSONMap(value any) (map[string]any, error) {
+func nodePoolJSONMap(value any, preservedEmptyArrays map[string]struct{}) (map[string]any, error) {
 	if value == nil {
 		return nil, nil
 	}
@@ -615,7 +617,7 @@ func nodePoolJSONMap(value any) (map[string]any, error) {
 		return nil, err
 	}
 
-	pruned, ok := pruneNodePoolJSONValue(decoded)
+	pruned, ok := pruneNodePoolJSONValue(decoded, "", preservedEmptyArrays)
 	if !ok {
 		return nil, nil
 	}
@@ -627,14 +629,28 @@ func nodePoolJSONMap(value any) (map[string]any, error) {
 	return values, nil
 }
 
-func pruneNodePoolJSONValue(value any) (any, bool) {
+func nodePoolPreservedEmptyArrayPaths(spec containerenginev1beta1.NodePoolSpec) map[string]struct{} {
+	if spec.NodeConfigDetails.NsgIds == nil || len(spec.NodeConfigDetails.NsgIds) != 0 {
+		return nil
+	}
+
+	return map[string]struct{}{
+		"nodeConfigDetails.nsgIds": {},
+	}
+}
+
+func pruneNodePoolJSONValue(value any, path string, preservedEmptyArrays map[string]struct{}) (any, bool) {
 	switch concrete := value.(type) {
 	case nil:
 		return nil, false
 	case map[string]any:
 		pruned := make(map[string]any, len(concrete))
 		for key, child := range concrete {
-			prunedChild, ok := pruneNodePoolJSONValue(child)
+			childPath := key
+			if path != "" {
+				childPath = path + "." + key
+			}
+			prunedChild, ok := pruneNodePoolJSONValue(child, childPath, preservedEmptyArrays)
 			if !ok {
 				continue
 			}
@@ -647,13 +663,16 @@ func pruneNodePoolJSONValue(value any) (any, bool) {
 	case []any:
 		pruned := make([]any, 0, len(concrete))
 		for _, child := range concrete {
-			prunedChild, ok := pruneNodePoolJSONValue(child)
+			prunedChild, ok := pruneNodePoolJSONValue(child, path, preservedEmptyArrays)
 			if !ok {
 				continue
 			}
 			pruned = append(pruned, prunedChild)
 		}
 		if len(pruned) == 0 {
+			if nodePoolPreservesEmptyArrayPath(path, preservedEmptyArrays) {
+				return []any{}, true
+			}
 			return nil, false
 		}
 		return pruned, true
@@ -665,6 +684,14 @@ func pruneNodePoolJSONValue(value any) (any, bool) {
 	default:
 		return concrete, true
 	}
+}
+
+func nodePoolPreservesEmptyArrayPath(path string, preservedEmptyArrays map[string]struct{}) bool {
+	if len(preservedEmptyArrays) == 0 {
+		return false
+	}
+	_, ok := preservedEmptyArrays[path]
+	return ok
 }
 
 func nodePoolMapSubsetEqual(want map[string]any, got map[string]any) bool {
