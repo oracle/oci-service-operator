@@ -107,6 +107,8 @@ spec:
               secretKeyRef:
                 name: osokconfig
                 key: useinstanceprincipal
+          - name: OCI_GO_SDK_DEBUG
+            value: verbose
         volumeMounts:
           - name: pki
             mountPath: /etc/pki

@@ -9,12 +9,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	containerenginesdk "github.com/oracle/oci-go-sdk/v65/containerengine"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 func init() {
@@ -25,7 +29,12 @@ func init() {
 			SDKName: "NodePool",
 			Log:     manager.Log,
 			BuildCreateBody: func(ctx context.Context, resource *containerenginev1beta1.NodePool, namespace string) (any, error) {
-				return buildNodePoolCreateDetails(ctx, resource, namespace)
+				details, err := buildNodePoolCreateDetails(ctx, resource, namespace)
+				if err != nil {
+					return details, err
+				}
+				logNodePoolSDKBody(manager.Log, "create", resource, details)
+				return details, nil
 			},
 			BuildUpdateBody: func(
 				ctx context.Context,
@@ -33,7 +42,12 @@ func init() {
 				namespace string,
 				currentResponse any,
 			) (any, bool, error) {
-				return buildNodePoolUpdateBody(ctx, resource, namespace, currentResponse)
+				details, updateNeeded, err := buildNodePoolUpdateBody(ctx, resource, namespace, currentResponse)
+				if err != nil {
+					return details, updateNeeded, err
+				}
+				logNodePoolSDKBody(manager.Log, "update", resource, details)
+				return details, updateNeeded, nil
 			},
 			Semantics: &generatedruntime.Semantics{
 				FormalService:     "containerengine",
@@ -69,20 +83,14 @@ func init() {
 						"nodeShape",
 						"nodeShapeConfig",
 						"nodeSourceDetails",
-						"quantityPerSubnet",
 						"sshPublicKey",
-						"subnetIds",
 					},
 					ForceNew: []string{
 						"clusterId",
 						"compartmentId",
 						"nodeImageName",
 					},
-					ConflictsWith: map[string][]string{
-						"nodeConfigDetails": []string{"quantityPerSubnet", "subnetIds"},
-						"quantityPerSubnet": []string{"nodeConfigDetails"},
-						"subnetIds":         []string{"nodeConfigDetails"},
-					},
+					ConflictsWith: map[string][]string{},
 				},
 				Hooks: generatedruntime.HookSet{
 					Create: []generatedruntime.Hook{
@@ -213,12 +221,108 @@ func buildNodePoolCreateDetails(
 		return containerenginesdk.CreateNodePoolDetails{}, fmt.Errorf("decode nodepool create request body: %w", err)
 	}
 	applyNodePoolSpecPolymorphicValues(resource.Spec, &details, nil)
+	logNodePoolNormalizeState(managerLogForResource(resource), "pre-normalize", "create", resource.Name, details.SubnetIds, createNodeConfigNsgIDs(details.NodeConfigDetails))
 	normalizeNodePoolCreateDetails(resource.Spec, &details)
+	logNodePoolNormalizeState(managerLogForResource(resource), "post-normalize", "create", resource.Name, details.SubnetIds, createNodeConfigNsgIDs(details.NodeConfigDetails))
 	if err := validateNodePoolCreateDetails(details); err != nil {
 		return containerenginesdk.CreateNodePoolDetails{}, err
 	}
 
 	return details, nil
+}
+
+func logNodePoolSDKBody(log loggerutil.OSOKLogger, operation string, resource *containerenginev1beta1.NodePool, body any) {
+	payload, err := nodePoolSDKHTTPRequestBody(operation, body)
+	if err != nil {
+		log.ErrorLog(err, "failed to build NodePool SDK HTTP request body", "operation", operation)
+		return
+	}
+
+	resourceName := ""
+	if resource != nil {
+		resourceName = resource.Name
+	}
+
+	log.InfoLog(
+		"prepared NodePool SDK HTTP request body",
+		"operation", operation,
+		"name", resourceName,
+		"body", payload,
+	)
+}
+
+func logNodePoolNormalizeState(log loggerutil.OSOKLogger, stage string, operation string, resourceName string, subnetIDs []string, nsgIDs []string) {
+	log.InfoLog(
+		"NodePool request state",
+		"stage", stage,
+		"operation", operation,
+		"name", resourceName,
+		"subnetIdsIsNil", fmt.Sprintf("%t", subnetIDs == nil),
+		"subnetIdsLen", fmt.Sprintf("%d", len(subnetIDs)),
+		"nsgIdsIsNil", fmt.Sprintf("%t", nsgIDs == nil),
+		"nsgIdsLen", fmt.Sprintf("%d", len(nsgIDs)),
+	)
+}
+
+func managerLogForResource(resource *containerenginev1beta1.NodePool) loggerutil.OSOKLogger {
+	return loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("nodepool-runtime")}
+}
+
+func sdkRequestLog() loggerutil.OSOKLogger {
+	return loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("nodepool-sdk-request")}
+}
+
+func createNodeConfigNsgIDs(details *containerenginesdk.CreateNodePoolNodeConfigDetails) []string {
+	if details == nil {
+		return nil
+	}
+	return details.NsgIds
+}
+
+func updateNodeConfigNsgIDs(details *containerenginesdk.UpdateNodePoolNodeConfigDetails) []string {
+	if details == nil {
+		return nil
+	}
+	return details.NsgIds
+}
+
+func nodePoolSDKHTTPRequestBody(operation string, body any) (string, error) {
+	const debugNodePoolID = "ocid1.nodepool.oc1..debug"
+
+	var (
+		httpRequest http.Request
+		err         error
+	)
+
+	switch operation {
+	case "create":
+		request := containerenginesdk.CreateNodePoolRequest{
+			CreateNodePoolDetails: body.(containerenginesdk.CreateNodePoolDetails),
+		}
+		logNodePoolNormalizeState(sdkRequestLog(), "request-struct", "create", "", request.CreateNodePoolDetails.SubnetIds, createNodeConfigNsgIDs(request.CreateNodePoolDetails.NodeConfigDetails))
+		httpRequest, err = request.HTTPRequest(http.MethodPost, "/nodePools", nil, nil)
+	case "update":
+		request := containerenginesdk.UpdateNodePoolRequest{
+			NodePoolId:            common.String(debugNodePoolID),
+			UpdateNodePoolDetails: body.(containerenginesdk.UpdateNodePoolDetails),
+		}
+		logNodePoolNormalizeState(sdkRequestLog(), "request-struct", "update", "", request.UpdateNodePoolDetails.SubnetIds, updateNodeConfigNsgIDs(request.UpdateNodePoolDetails.NodeConfigDetails))
+		httpRequest, err = request.HTTPRequest(http.MethodPut, "/nodePools/"+debugNodePoolID, nil, nil)
+	default:
+		return "", fmt.Errorf("unsupported NodePool SDK body log operation %q", operation)
+	}
+	if err != nil {
+		return "", err
+	}
+	if httpRequest.Body == nil {
+		return "", nil
+	}
+
+	payload, err := io.ReadAll(httpRequest.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(payload), nil
 }
 
 func buildNodePoolUpdateBody(
@@ -278,7 +382,9 @@ func buildNodePoolUpdateDetails(
 		return containerenginesdk.UpdateNodePoolDetails{}, fmt.Errorf("decode nodepool update request body: %w", err)
 	}
 	applyNodePoolSpecPolymorphicValues(resource.Spec, nil, &details)
+	logNodePoolNormalizeState(managerLogForResource(resource), "pre-normalize", "update", resource.Name, details.SubnetIds, updateNodeConfigNsgIDs(details.NodeConfigDetails))
 	normalizeNodePoolUpdateDetails(resource.Spec, &details)
+	logNodePoolNormalizeState(managerLogForResource(resource), "post-normalize", "update", resource.Name, details.SubnetIds, updateNodeConfigNsgIDs(details.NodeConfigDetails))
 	if err := validateNodePoolUpdateDetails(details); err != nil {
 		return containerenginesdk.UpdateNodePoolDetails{}, err
 	}
@@ -314,13 +420,7 @@ func normalizeNodePoolCreateDetails(
 		return
 	}
 
-	normalizeNodePoolPlacementFields(
-		nodePoolSpecUsesDeprecatedPlacement(spec),
-		nodePoolSpecUsesNodeConfigDetails(spec),
-		&details.SubnetIds,
-		&details.QuantityPerSubnet,
-		func() { details.NodeConfigDetails = nil },
-	)
+	normalizeNodePoolPlacementFields(&details.SubnetIds, &details.QuantityPerSubnet)
 	normalizeNodePoolCreateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
 }
 
@@ -332,13 +432,7 @@ func normalizeNodePoolUpdateDetails(
 		return
 	}
 
-	normalizeNodePoolPlacementFields(
-		nodePoolSpecUsesDeprecatedPlacement(spec),
-		nodePoolSpecUsesNodeConfigDetails(spec),
-		&details.SubnetIds,
-		&details.QuantityPerSubnet,
-		func() { details.NodeConfigDetails = nil },
-	)
+	normalizeNodePoolPlacementFields(&details.SubnetIds, &details.QuantityPerSubnet)
 	normalizeNodePoolUpdateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
 }
 
@@ -383,78 +477,24 @@ func normalizeNodePoolNodeConfigDetails(
 		*nsgIDs = nil
 	}
 
-	for i := 0; i < len(spec.PlacementConfigs) && i < len(details); i++ {
-		if !nodePoolSpecPreemptibleNodeConfigIsEmpty(spec.PlacementConfigs[i].PreemptibleNodeConfig) {
+	for i := range details {
+		if details[i].PreemptibleNodeConfig == nil || details[i].PreemptibleNodeConfig.PreemptionAction != nil {
 			continue
 		}
 		details[i].PreemptibleNodeConfig = nil
 	}
 }
 
-func nodePoolSpecPreemptibleNodeConfigIsEmpty(
-	spec containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig,
-) bool {
-	action := spec.PreemptionAction
-	return strings.TrimSpace(action.Type) == "" && !action.IsPreserveBootVolume
-}
-
-func normalizeNodePoolPlacementFields(
-	hasDeprecatedPlacement bool,
-	hasNodeConfigDetails bool,
-	subnetIDs *[]string,
-	quantityPerSubnet **int,
-	clearNodeConfigDetails func(),
-) {
+func normalizeNodePoolPlacementFields(subnetIDs *[]string, quantityPerSubnet **int) {
 	if subnetIDs != nil && len(*subnetIDs) == 0 {
 		*subnetIDs = nil
 	}
-
-	switch {
-	case hasDeprecatedPlacement && !hasNodeConfigDetails:
-		if clearNodeConfigDetails != nil {
-			clearNodeConfigDetails()
-		}
-	case hasNodeConfigDetails && !hasDeprecatedPlacement:
-		if subnetIDs != nil {
-			*subnetIDs = nil
-		}
-		if quantityPerSubnet != nil {
-			*quantityPerSubnet = nil
-		}
-	case !hasDeprecatedPlacement && !hasNodeConfigDetails:
-		if clearNodeConfigDetails != nil {
-			clearNodeConfigDetails()
-		}
+	if subnetIDs != nil {
+		*subnetIDs = nil
 	}
-}
-
-func nodePoolSpecUsesDeprecatedPlacement(spec containerenginev1beta1.NodePoolSpec) bool {
-	return len(spec.SubnetIds) > 0 || spec.QuantityPerSubnet != 0
-}
-
-func nodePoolSpecUsesNodeConfigDetails(spec containerenginev1beta1.NodePoolSpec) bool {
-	details := spec.NodeConfigDetails
-
-	if details.Size != 0 ||
-		len(details.PlacementConfigs) > 0 ||
-		len(details.NsgIds) > 0 ||
-		strings.TrimSpace(details.KmsKeyId) != "" ||
-		details.IsPvEncryptionInTransitEnabled ||
-		len(details.FreeformTags) > 0 ||
-		len(details.DefinedTags) > 0 {
-		return true
+	if quantityPerSubnet != nil {
+		*quantityPerSubnet = nil
 	}
-
-	return nodePoolSpecUsesPodNetworkOptionDetails(details.NodePoolPodNetworkOptionDetails)
-}
-
-func nodePoolSpecUsesPodNetworkOptionDetails(
-	details containerenginev1beta1.NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetails,
-) bool {
-	return strings.TrimSpace(details.CniType) != "" ||
-		len(details.PodSubnetIds) > 0 ||
-		details.MaxPodsPerNode != 0 ||
-		len(details.PodNsgIds) > 0
 }
 
 func nodePoolRuntimeResponseBody(currentResponse any) (any, error) {
@@ -486,28 +526,17 @@ func nodePoolRuntimeResponseBody(currentResponse any) (any, error) {
 }
 
 func validateNodePoolCreateDetails(details containerenginesdk.CreateNodePoolDetails) error {
-	hasSubnetIDs := len(details.SubnetIds) > 0
-	hasNodeConfig := details.NodeConfigDetails != nil
-	switch {
-	case hasSubnetIDs && hasNodeConfig:
-		return fmt.Errorf("nodepool create request must not set both subnetIds and nodeConfigDetails")
-	case !hasSubnetIDs && !hasNodeConfig:
-		return fmt.Errorf("nodepool create request must set either subnetIds or nodeConfigDetails")
-	case details.QuantityPerSubnet != nil && !hasSubnetIDs:
-		return fmt.Errorf("nodepool create request requires subnetIds when quantityPerSubnet is set")
+	hasNodeConfig := details.NodeConfigDetails != nil &&
+		details.NodeConfigDetails.Size != nil &&
+		len(details.NodeConfigDetails.PlacementConfigs) > 0
+	if !hasNodeConfig {
+		return fmt.Errorf("nodepool create request must set nodeConfigDetails; deprecated subnetIds placement is no longer supported")
 	}
 
 	return validateNodePoolCommonDetails(details.NodeSourceDetails, details.NodeConfigDetails)
 }
 
 func validateNodePoolUpdateDetails(details containerenginesdk.UpdateNodePoolDetails) error {
-	if len(details.SubnetIds) > 0 && details.NodeConfigDetails != nil {
-		return fmt.Errorf("nodepool update request must not set both subnetIds and nodeConfigDetails")
-	}
-	if details.QuantityPerSubnet != nil && details.NodeConfigDetails != nil {
-		return fmt.Errorf("nodepool update request must not set both quantityPerSubnet and nodeConfigDetails")
-	}
-
 	return validateNodePoolCommonDetails(details.NodeSourceDetails, details.NodeConfigDetails)
 }
 

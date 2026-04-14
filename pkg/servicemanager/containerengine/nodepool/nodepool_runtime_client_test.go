@@ -88,7 +88,58 @@ func TestBuildNodePoolCreateDetailsOmitsDeprecatedPlacementFieldsWhenNodeConfigD
 	}
 }
 
-func TestBuildNodePoolCreateDetailsPreservesLegacyPlacementFieldsWithoutNodeConfigDetails(t *testing.T) {
+func TestNodePoolSDKHTTPRequestBodyOmitsNilSubnetIDsForNodeConfigDetailsCreate(t *testing.T) {
+	t.Parallel()
+
+	resource := &containerenginev1beta1.NodePool{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "np-controller-test-102954",
+			Namespace: "containerengine-nodepool-control",
+		},
+		Spec: containerenginev1beta1.NodePoolSpec{
+			CompartmentId: "ocid1.compartment.oc1..aaaaaaaa6xeqfnrxkdw7ktuuwnx4eisq7n6gbhqjvvaz44vq4tvrjp4a3ira",
+			ClusterId:     "ocid1.cluster.oc1.iad.aaaaaaaa2sq3asgawpb6oiqmroabsqrnmgbjblclwbrken5ztcstdsgncdva",
+			Name:          "np-controller-test-102954",
+			NodeShape:     "VM.Standard.E3.Flex",
+			NodeShapeConfig: containerenginev1beta1.NodePoolNodeShapeConfig{
+				Ocpus:       1,
+				MemoryInGBs: 16,
+			},
+			NodeConfigDetails: containerenginev1beta1.NodePoolNodeConfigDetails{
+				Size: 1,
+				PlacementConfigs: []containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfig{
+					{
+						AvailabilityDomain: "qqZb:US-ASHBURN-AD-1",
+						SubnetId:           "ocid1.subnet.oc1.iad.aaaaaaaajvdbcn6zaqlxms4iyx67tzap6bx2debb5wdbotvi3xh3vebfsq4q",
+					},
+				},
+			},
+		},
+	}
+
+	details, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v", err)
+	}
+
+	body, err := nodePoolSDKHTTPRequestBody("create", details)
+	if err != nil {
+		t.Fatalf("nodePoolSDKHTTPRequestBody() error = %v", err)
+	}
+
+	t.Logf("NodePool SDK HTTP request body: %s", body)
+
+	for _, field := range []string{`"subnetIds"`, `"quantityPerSubnet"`} {
+		if strings.Contains(body, field) {
+			t.Fatalf("SDK HTTP request body unexpectedly serialized %s: %s", field, body)
+		}
+	}
+	if !strings.Contains(body, `"nodeConfigDetails"`) {
+		t.Fatalf("SDK HTTP request body %s does not contain nodeConfigDetails", body)
+	}
+}
+
+func TestBuildNodePoolCreateDetailsRejectsDeprecatedSubnetIDsPlacement(t *testing.T) {
 	t.Parallel()
 
 	resource := newNodePoolTestResource()
@@ -96,31 +147,12 @@ func TestBuildNodePoolCreateDetailsPreservesLegacyPlacementFieldsWithoutNodeConf
 	resource.Spec.SubnetIds = []string{"ocid1.subnet.oc1..legacy"}
 	resource.Spec.QuantityPerSubnet = 2
 
-	details, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
-	if err != nil {
-		t.Fatalf("buildNodePoolCreateDetails() error = %v", err)
+	_, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err == nil {
+		t.Fatal("buildNodePoolCreateDetails() error = nil, want deprecated subnetIds rejection")
 	}
-	if details.NodeConfigDetails != nil {
-		t.Fatalf("buildNodePoolCreateDetails() NodeConfigDetails = %#v, want nil for legacy subnetIds path", details.NodeConfigDetails)
-	}
-	if len(details.SubnetIds) != 1 || details.SubnetIds[0] != "ocid1.subnet.oc1..legacy" {
-		t.Fatalf("buildNodePoolCreateDetails() SubnetIds = %#v, want legacy subnet preserved", details.SubnetIds)
-	}
-	if details.QuantityPerSubnet == nil || *details.QuantityPerSubnet != 2 {
-		t.Fatalf("buildNodePoolCreateDetails() QuantityPerSubnet = %#v, want 2", details.QuantityPerSubnet)
-	}
-
-	body := nodePoolSerializedRequestBody(t, containerenginesdk.CreateNodePoolRequest{
-		CreateNodePoolDetails: details,
-	}, http.MethodPost, "/nodePools")
-
-	for _, want := range []string{`"subnetIds":["ocid1.subnet.oc1..legacy"]`, `"quantityPerSubnet":2`} {
-		if !strings.Contains(body, want) {
-			t.Fatalf("request body %s does not contain %s", body, want)
-		}
-	}
-	if strings.Contains(body, `"nodeConfigDetails"`) {
-		t.Fatalf("request body unexpectedly serialized nodeConfigDetails: %s", body)
+	if !strings.Contains(err.Error(), "nodepool create request must set nodeConfigDetails") {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v, want nodeConfigDetails requirement", err)
 	}
 }
 
@@ -732,20 +764,14 @@ func testNodePoolRuntimeSemantics() *generatedruntime.Semantics {
 				"nodeShape",
 				"nodeShapeConfig",
 				"nodeSourceDetails",
-				"quantityPerSubnet",
 				"sshPublicKey",
-				"subnetIds",
 			},
 			ForceNew: []string{
 				"clusterId",
 				"compartmentId",
 				"nodeImageName",
 			},
-			ConflictsWith: map[string][]string{
-				"nodeConfigDetails": []string{"quantityPerSubnet", "subnetIds"},
-				"quantityPerSubnet": []string{"nodeConfigDetails"},
-				"subnetIds":         []string{"nodeConfigDetails"},
-			},
+			ConflictsWith: map[string][]string{},
 		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "read-after-write",
