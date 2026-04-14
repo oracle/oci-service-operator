@@ -35,16 +35,7 @@ func TestBuildNodePoolCreateDetailsPreservesPolymorphicDetailsAndFalseBooleans(t
 	request := containerenginesdk.CreateNodePoolRequest{
 		CreateNodePoolDetails: details,
 	}
-	httpRequest, err := request.HTTPRequest(http.MethodPost, "/nodePools", nil, nil)
-	if err != nil {
-		t.Fatalf("HTTPRequest() error = %v", err)
-	}
-
-	body, err := io.ReadAll(httpRequest.Body)
-	if err != nil {
-		t.Fatalf("ReadAll(request.Body) error = %v", err)
-	}
-	got := string(body)
+	got := nodePoolSerializedRequestBody(t, request, http.MethodPost, "/nodePools")
 
 	wantSnippets := []string{
 		`"sourceType":"IMAGE"`,
@@ -64,6 +55,72 @@ func TestBuildNodePoolCreateDetailsPreservesPolymorphicDetailsAndFalseBooleans(t
 
 	if strings.Contains(got, `"jsonData"`) {
 		t.Fatalf("request body unexpectedly exposes jsonData helper fields: %s", got)
+	}
+}
+
+func TestBuildNodePoolCreateDetailsOmitsDeprecatedPlacementFieldsWhenNodeConfigDetailsPresent(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+
+	details, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v", err)
+	}
+	if details.SubnetIds != nil {
+		t.Fatalf("buildNodePoolCreateDetails() SubnetIds = %#v, want nil when nodeConfigDetails is set", details.SubnetIds)
+	}
+	if details.QuantityPerSubnet != nil {
+		t.Fatalf("buildNodePoolCreateDetails() QuantityPerSubnet = %#v, want nil when nodeConfigDetails is set", details.QuantityPerSubnet)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.CreateNodePoolRequest{
+		CreateNodePoolDetails: details,
+	}, http.MethodPost, "/nodePools")
+
+	if !strings.Contains(body, `"nodeConfigDetails"`) {
+		t.Fatalf("request body %s does not contain nodeConfigDetails", body)
+	}
+	for _, field := range []string{`"subnetIds"`, `"quantityPerSubnet"`} {
+		if strings.Contains(body, field) {
+			t.Fatalf("request body unexpectedly serialized %s: %s", field, body)
+		}
+	}
+}
+
+func TestBuildNodePoolCreateDetailsPreservesLegacyPlacementFieldsWithoutNodeConfigDetails(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails = containerenginev1beta1.NodePoolNodeConfigDetails{}
+	resource.Spec.SubnetIds = []string{"ocid1.subnet.oc1..legacy"}
+	resource.Spec.QuantityPerSubnet = 2
+
+	details, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v", err)
+	}
+	if details.NodeConfigDetails != nil {
+		t.Fatalf("buildNodePoolCreateDetails() NodeConfigDetails = %#v, want nil for legacy subnetIds path", details.NodeConfigDetails)
+	}
+	if len(details.SubnetIds) != 1 || details.SubnetIds[0] != "ocid1.subnet.oc1..legacy" {
+		t.Fatalf("buildNodePoolCreateDetails() SubnetIds = %#v, want legacy subnet preserved", details.SubnetIds)
+	}
+	if details.QuantityPerSubnet == nil || *details.QuantityPerSubnet != 2 {
+		t.Fatalf("buildNodePoolCreateDetails() QuantityPerSubnet = %#v, want 2", details.QuantityPerSubnet)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.CreateNodePoolRequest{
+		CreateNodePoolDetails: details,
+	}, http.MethodPost, "/nodePools")
+
+	for _, want := range []string{`"subnetIds":["ocid1.subnet.oc1..legacy"]`, `"quantityPerSubnet":2`} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("request body %s does not contain %s", body, want)
+		}
+	}
+	if strings.Contains(body, `"nodeConfigDetails"`) {
+		t.Fatalf("request body unexpectedly serialized nodeConfigDetails: %s", body)
 	}
 }
 
@@ -116,6 +173,37 @@ func TestBuildNodePoolUpdateBodyDetectsMutableDrift(t *testing.T) {
 	}
 	if details.NodeShape == nil || *details.NodeShape != "VM.Standard.E5.Flex" {
 		t.Fatalf("buildNodePoolUpdateBody() nodeShape = %#v, want VM.Standard.E5.Flex", details.NodeShape)
+	}
+}
+
+func TestBuildNodePoolUpdateDetailsOmitsDeprecatedPlacementFieldsWhenNodeConfigDetailsPresent(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+
+	details, err := buildNodePoolUpdateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() error = %v", err)
+	}
+	if details.SubnetIds != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() SubnetIds = %#v, want nil when nodeConfigDetails is set", details.SubnetIds)
+	}
+	if details.QuantityPerSubnet != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() QuantityPerSubnet = %#v, want nil when nodeConfigDetails is set", details.QuantityPerSubnet)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.UpdateNodePoolRequest{
+		NodePoolId:            common.String("ocid1.nodepool.oc1..example"),
+		UpdateNodePoolDetails: details,
+	}, http.MethodPut, "/nodePools/ocid1.nodepool.oc1..example")
+
+	if !strings.Contains(body, `"nodeConfigDetails"`) {
+		t.Fatalf("request body %s does not contain nodeConfigDetails", body)
+	}
+	for _, field := range []string{`"subnetIds"`, `"quantityPerSubnet"`} {
+		if strings.Contains(body, field) {
+			t.Fatalf("request body unexpectedly serialized %s: %s", field, body)
+		}
 	}
 }
 
@@ -333,6 +421,26 @@ func TestNewNodePoolServiceClientAllowsPrimaryListSemantics(t *testing.T) {
 	if response.IsSuccessful {
 		t.Fatal("CreateOrUpdate() should not report success for a nil NodePool resource")
 	}
+}
+
+type nodePoolRequestBodyBuilder interface {
+	HTTPRequest(string, string, *common.OCIReadSeekCloser, map[string]string) (http.Request, error)
+}
+
+func nodePoolSerializedRequestBody(t *testing.T, request nodePoolRequestBodyBuilder, method string, path string) string {
+	t.Helper()
+
+	httpRequest, err := request.HTTPRequest(method, path, nil, nil)
+	if err != nil {
+		t.Fatalf("HTTPRequest() error = %v", err)
+	}
+
+	body, err := io.ReadAll(httpRequest.Body)
+	if err != nil {
+		t.Fatalf("ReadAll(request.Body) error = %v", err)
+	}
+
+	return string(body)
 }
 
 func newNodePoolTestConfigurationProvider(t *testing.T) common.ConfigurationProvider {

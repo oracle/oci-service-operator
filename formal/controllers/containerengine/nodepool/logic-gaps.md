@@ -31,7 +31,10 @@ and list-lookup semantics.
   replacement.
 - Deprecated placement inputs stay explicit: `nodeConfigDetails` conflicts with
   `subnetIds` and `quantityPerSubnet`, while `nodeImageName` remains create-only
-  drift beside the preferred `nodeSourceDetails` path.
+  drift beside the preferred `nodeSourceDetails` path. When
+  `nodeConfigDetails` is the active create or update path, the runtime strips
+  deprecated placement fields from the serialized SDK body instead of sending
+  empty placeholder values such as `subnetIds: []`.
 - Pre-create lookup semantics are explicit: `ListNodePools` searches by
   `compartmentId`, `clusterId`, `name`, and reusable lifecycle state, and only
   a single exact-name match in `ACTIVE`, `CREATING`, `UPDATING`, `INACTIVE`, or

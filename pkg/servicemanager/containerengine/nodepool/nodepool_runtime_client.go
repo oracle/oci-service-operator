@@ -213,6 +213,7 @@ func buildNodePoolCreateDetails(
 		return containerenginesdk.CreateNodePoolDetails{}, fmt.Errorf("decode nodepool create request body: %w", err)
 	}
 	applyNodePoolSpecPolymorphicValues(resource.Spec, &details, nil)
+	normalizeNodePoolCreateDetails(resource.Spec, &details)
 	if err := validateNodePoolCreateDetails(details); err != nil {
 		return containerenginesdk.CreateNodePoolDetails{}, err
 	}
@@ -275,6 +276,7 @@ func buildNodePoolUpdateDetails(
 		return containerenginesdk.UpdateNodePoolDetails{}, fmt.Errorf("decode nodepool update request body: %w", err)
 	}
 	applyNodePoolSpecPolymorphicValues(resource.Spec, nil, &details)
+	normalizeNodePoolUpdateDetails(resource.Spec, &details)
 	if err := validateNodePoolUpdateDetails(details); err != nil {
 		return containerenginesdk.UpdateNodePoolDetails{}, err
 	}
@@ -297,8 +299,112 @@ func buildCurrentNodePoolUpdateDetails(currentResponse any) (containerenginesdk.
 	if err := json.Unmarshal(payload, &details); err != nil {
 		return containerenginesdk.UpdateNodePoolDetails{}, fmt.Errorf("decode current nodepool update body: %w", err)
 	}
+	normalizeObservedNodePoolUpdateDetails(&details)
 
 	return details, nil
+}
+
+func normalizeNodePoolCreateDetails(
+	spec containerenginev1beta1.NodePoolSpec,
+	details *containerenginesdk.CreateNodePoolDetails,
+) {
+	if details == nil {
+		return
+	}
+
+	normalizeNodePoolPlacementFields(
+		nodePoolSpecUsesDeprecatedPlacement(spec),
+		nodePoolSpecUsesNodeConfigDetails(spec),
+		&details.SubnetIds,
+		&details.QuantityPerSubnet,
+		func() { details.NodeConfigDetails = nil },
+	)
+}
+
+func normalizeNodePoolUpdateDetails(
+	spec containerenginev1beta1.NodePoolSpec,
+	details *containerenginesdk.UpdateNodePoolDetails,
+) {
+	if details == nil {
+		return
+	}
+
+	normalizeNodePoolPlacementFields(
+		nodePoolSpecUsesDeprecatedPlacement(spec),
+		nodePoolSpecUsesNodeConfigDetails(spec),
+		&details.SubnetIds,
+		&details.QuantityPerSubnet,
+		func() { details.NodeConfigDetails = nil },
+	)
+}
+
+func normalizeObservedNodePoolUpdateDetails(details *containerenginesdk.UpdateNodePoolDetails) {
+	if details == nil {
+		return
+	}
+
+	if len(details.SubnetIds) == 0 {
+		details.SubnetIds = nil
+	}
+}
+
+func normalizeNodePoolPlacementFields(
+	hasDeprecatedPlacement bool,
+	hasNodeConfigDetails bool,
+	subnetIDs *[]string,
+	quantityPerSubnet **int,
+	clearNodeConfigDetails func(),
+) {
+	if subnetIDs != nil && len(*subnetIDs) == 0 {
+		*subnetIDs = nil
+	}
+
+	switch {
+	case hasDeprecatedPlacement && !hasNodeConfigDetails:
+		if clearNodeConfigDetails != nil {
+			clearNodeConfigDetails()
+		}
+	case hasNodeConfigDetails && !hasDeprecatedPlacement:
+		if subnetIDs != nil {
+			*subnetIDs = nil
+		}
+		if quantityPerSubnet != nil {
+			*quantityPerSubnet = nil
+		}
+	case !hasDeprecatedPlacement && !hasNodeConfigDetails:
+		if clearNodeConfigDetails != nil {
+			clearNodeConfigDetails()
+		}
+	}
+}
+
+func nodePoolSpecUsesDeprecatedPlacement(spec containerenginev1beta1.NodePoolSpec) bool {
+	return len(spec.SubnetIds) > 0 || spec.QuantityPerSubnet != 0
+}
+
+func nodePoolSpecUsesNodeConfigDetails(spec containerenginev1beta1.NodePoolSpec) bool {
+	details := spec.NodeConfigDetails
+
+	if details.Size != 0 ||
+		len(details.PlacementConfigs) > 0 ||
+		len(details.NsgIds) > 0 ||
+		strings.TrimSpace(details.KmsKeyId) != "" ||
+		details.IsPvEncryptionInTransitEnabled ||
+		len(details.FreeformTags) > 0 ||
+		len(details.DefinedTags) > 0 {
+		return true
+	}
+
+	return nodePoolSpecUsesPodNetworkOptionDetails(details.NodePoolPodNetworkOptionDetails)
+}
+
+func nodePoolSpecUsesPodNetworkOptionDetails(
+	details containerenginev1beta1.NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetails,
+) bool {
+	return strings.TrimSpace(details.CniType) != "" ||
+		len(details.PodSubnetIds) > 0 ||
+		details.MaxPodsPerNode != 0 ||
+		len(details.PodNsgIds) > 0
 }
 
 func nodePoolRuntimeResponseBody(currentResponse any) (any, error) {
