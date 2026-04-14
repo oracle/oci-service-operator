@@ -50,6 +50,7 @@ type fakeStatus struct {
 	OsokStatus           shared.OSOKStatus     `json:"status"`
 	Id                   string                `json:"id,omitempty"`
 	CompartmentId        string                `json:"compartmentId,omitempty"`
+	Name                 string                `json:"name,omitempty"`
 	DisplayName          string                `json:"displayName,omitempty"`
 	FreeformTags         map[string]string     `json:"freeformTags,omitempty"`
 	ShapeConfig          *fakeShapeConfig      `json:"shapeConfig,omitempty"`
@@ -1969,6 +1970,99 @@ func TestServiceClientCreateOrUpdateRejectsDocsDeniedNameDrift(t *testing.T) {
 
 	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "reject unsupported update drift for name") {
 		t.Fatalf("CreateOrUpdate() error = %v, want docs-denied name drift failure", err)
+	}
+}
+
+func TestServiceClientCreateOrUpdateKeepsTrackedCurrentIDWhenPreCreateLookupMisses(t *testing.T) {
+	t.Parallel()
+
+	createCalled := false
+	listCalled := false
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Bucket",
+		SDKName: "Bucket",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Mutation: MutationSemantics{
+				Mutable: []string{"displayName"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				t.Fatal("Create() should not be called when a tracked resource already exists")
+				return nil, nil
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listCalled = true
+				listRequest := request.(*fakeListThingRequest)
+				if listRequest.Name != "bucket-new" {
+					t.Fatalf("list request name = %q, want desired spec name", listRequest.Name)
+				}
+				return fakeListThingResponse{
+					Collection: fakeThingCollection{
+						Items: []fakeThingSummary{
+							{
+								Id:             "ocid1.bucket.oc1..other",
+								Name:           "bucket-old",
+								CompartmentId:  "ocid1.compartment.oc1..match",
+								LifecycleState: "ACTIVE",
+							},
+						},
+					},
+				}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+		Update: &Operation{
+			NewRequest: func() any { return &fakeUpdateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called when immutable drift is detected on a tracked resource")
+				return nil, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..match",
+			Name:          "bucket-new",
+			DisplayName:   "steady-name",
+		},
+		Status: fakeStatus{
+			OsokStatus:    shared.OSOKStatus{Ocid: "ocid1.bucket.oc1..existing"},
+			Id:            "ocid1.bucket.oc1..existing",
+			CompartmentId: "ocid1.compartment.oc1..match",
+			Name:          "bucket-old",
+			DisplayName:   "steady-name",
+		},
+	}
+
+	if _, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{}); err == nil || !strings.Contains(err.Error(), "reject unsupported update drift for name") {
+		t.Fatalf("CreateOrUpdate() error = %v, want docs-denied name drift failure", err)
+	}
+	if !listCalled {
+		t.Fatal("List() should be called during pre-create resolution")
+	}
+	if createCalled {
+		t.Fatal("Create() should not be called when immutable drift is detected on a tracked resource")
+	}
+	if string(resource.Status.OsokStatus.Ocid) != "ocid1.bucket.oc1..existing" {
+		t.Fatalf("status.ocid = %q, want tracked OCID preserved", resource.Status.OsokStatus.Ocid)
 	}
 }
 

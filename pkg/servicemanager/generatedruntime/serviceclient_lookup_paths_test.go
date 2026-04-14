@@ -3,6 +3,8 @@ package generatedruntime
 import (
 	"reflect"
 	"testing"
+
+	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
 )
 
 func TestExplicitRequestValueUsesLookupPaths(t *testing.T) {
@@ -119,5 +121,74 @@ func TestExplicitRequestValueFallsBackWithoutLookupPaths(t *testing.T) {
 	}
 	if got, ok := rawValue.(string); !ok || got != "metadata-name" {
 		t.Fatalf("explicitRequestValue() = %#v, want metadata-name", rawValue)
+	}
+}
+
+func TestExplicitRequestValuePrefersObservedBucketNameOverDesiredSpecName(t *testing.T) {
+	t.Parallel()
+
+	resource := &objectstoragev1beta1.Bucket{
+		Spec: objectstoragev1beta1.BucketSpec{
+			Name:          "spec-name",
+			CompartmentId: "ocid1.compartment.oc1..example",
+		},
+		Status: objectstoragev1beta1.BucketStatus{
+			Name: "status-name",
+		},
+	}
+
+	values, err := lookupValues(resource)
+	if err != nil {
+		t.Fatalf("lookupValues() error = %v", err)
+	}
+
+	field := RequestField{
+		FieldName:    "BucketName",
+		RequestName:  "bucketName",
+		Contribution: "path",
+		LookupPaths:  []string{"status.name", "spec.name", "name"},
+	}
+
+	rawValue, ok := explicitRequestValue(values, field, "")
+	if !ok {
+		t.Fatal("explicitRequestValue() did not resolve observed bucket name")
+	}
+	if got, ok := rawValue.(string); !ok || got != "status-name" {
+		t.Fatalf("explicitRequestValue() = %#v, want status-name", rawValue)
+	}
+}
+
+func TestExplicitRequestValuePrefersObservedBucketNamespaceOverDesiredSpecNamespace(t *testing.T) {
+	t.Parallel()
+
+	resource := &objectstoragev1beta1.Bucket{
+		Spec: objectstoragev1beta1.BucketSpec{
+			Name:          "bucket-name",
+			CompartmentId: "ocid1.compartment.oc1..example",
+			Namespace:     "spec-namespace",
+		},
+		Status: objectstoragev1beta1.BucketStatus{
+			Namespace: "status-namespace",
+		},
+	}
+
+	values, err := lookupValues(resource)
+	if err != nil {
+		t.Fatalf("lookupValues() error = %v", err)
+	}
+
+	field := RequestField{
+		FieldName:    "NamespaceName",
+		RequestName:  "namespaceName",
+		Contribution: "path",
+		LookupPaths:  []string{"status.namespace", "spec.namespace", "namespace"},
+	}
+
+	rawValue, ok := explicitRequestValue(values, field, "")
+	if !ok {
+		t.Fatal("explicitRequestValue() did not resolve observed namespace")
+	}
+	if got, ok := rawValue.(string); !ok || got != "status-namespace" {
+		t.Fatalf("explicitRequestValue() = %#v, want status-namespace", rawValue)
 	}
 }
