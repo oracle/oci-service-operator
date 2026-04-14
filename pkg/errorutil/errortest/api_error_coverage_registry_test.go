@@ -1,0 +1,232 @@
+package errortest
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExceptions(t *testing.T) {
+	t.Parallel()
+
+	inventory, err := LoadCheckedInAPIErrorCoverageInventory()
+	if err != nil {
+		t.Fatalf("LoadCheckedInAPIErrorCoverageInventory() error = %v", err)
+	}
+
+	byKey := inventoryByKey(inventory)
+	if got, want := len(inventory), 35; got != want {
+		t.Fatalf("len(inventory) = %d, want %d", got, want)
+	}
+	if got, want := countRegistrations(inventory), 25; got != want {
+		t.Fatalf("registration inventory count = %d, want %d", got, want)
+	}
+	if got, want := countExceptions(inventory), 10; got != want {
+		t.Fatalf("exception inventory count = %d, want %d", got, want)
+	}
+
+	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
+	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
+
+	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
+	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
+}
+
+func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T) {
+	t.Parallel()
+
+	if err := ValidateCheckedInAPIErrorCoverageRegistry(); err != nil {
+		t.Fatalf("ValidateCheckedInAPIErrorCoverageRegistry() error = %v", err)
+	}
+}
+
+func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
+	t.Parallel()
+
+	assertReviewedFamily(t, "containerengine/Cluster", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
+	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "core/Vcn", APIErrorCoverageFamilyManualRuntime)
+	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "identity/Compartment", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "keymanagement/Vault", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "nosql/Table", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
+
+	assertReviewedException(t, "keymanagement/Key", "strategy=none")
+	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")
+}
+
+func TestReviewedAPIErrorCoverageRegistrySplitCoreDeleteSemantics(t *testing.T) {
+	t.Parallel()
+
+	for _, key := range []string{
+		"core/InternetGateway",
+		"core/NatGateway",
+		"core/NetworkSecurityGroup",
+		"core/ServiceGateway",
+		"core/Vcn",
+	} {
+		assertReviewedSemantics(t, key, deleteNotFoundGeneratedRuntime, retryableConflictGeneratedRuntime)
+		assertReviewedDeviation(t, key, "Delete delegates to generatedruntime confirm-delete semantics")
+	}
+
+	for _, key := range []string{
+		"core/RouteTable",
+		"core/SecurityList",
+		"core/Subnet",
+	} {
+		assertReviewedSemantics(t, key, deleteNotFoundManualRuntime, retryableConflictManualRuntime)
+	}
+}
+
+func inventoryByKey(inventory []APIErrorCoverageInventoryItem) map[string]APIErrorCoverageInventoryItem {
+	items := make(map[string]APIErrorCoverageInventoryItem, len(inventory))
+	for _, item := range inventory {
+		items[item.Key()] = item
+	}
+	return items
+}
+
+func countRegistrations(inventory []APIErrorCoverageInventoryItem) int {
+	total := 0
+	for _, item := range inventory {
+		if item.RequiresRegistration() {
+			total++
+		}
+	}
+	return total
+}
+
+func countExceptions(inventory []APIErrorCoverageInventoryItem) int {
+	total := 0
+	for _, item := range inventory {
+		if item.RequiresException() {
+			total++
+		}
+	}
+	return total
+}
+
+func assertInventorySelectionSource(
+	t *testing.T,
+	byKey map[string]APIErrorCoverageInventoryItem,
+	key string,
+	wantSource string,
+) {
+	t.Helper()
+
+	item, ok := byKey[key]
+	if !ok {
+		t.Fatalf("inventory item %q was not found", key)
+	}
+	for _, source := range item.SelectionSources {
+		if source == wantSource {
+			return
+		}
+	}
+	t.Fatalf("%s selectionSources = %v, want %q", key, item.SelectionSources, wantSource)
+}
+
+func assertInventoryRegistration(
+	t *testing.T,
+	byKey map[string]APIErrorCoverageInventoryItem,
+	key string,
+) {
+	t.Helper()
+
+	item, ok := byKey[key]
+	if !ok {
+		t.Fatalf("inventory item %q was not found", key)
+	}
+	if !item.RequiresRegistration() {
+		t.Fatalf("%s RequiresRegistration() = false, selectionSources=%v exception=%q", key, item.SelectionSources, item.ExceptionReason)
+	}
+}
+
+func assertInventoryException(
+	t *testing.T,
+	byKey map[string]APIErrorCoverageInventoryItem,
+	key string,
+	wantSubstring string,
+) {
+	t.Helper()
+
+	item, ok := byKey[key]
+	if !ok {
+		t.Fatalf("inventory item %q was not found", key)
+	}
+	if !item.RequiresException() {
+		t.Fatalf("%s RequiresException() = false, selectionSources=%v", key, item.SelectionSources)
+	}
+	if !strings.Contains(item.ExceptionReason, wantSubstring) {
+		t.Fatalf("%s exceptionReason = %q, want substring %q", key, item.ExceptionReason, wantSubstring)
+	}
+}
+
+func assertReviewedFamily(t *testing.T, key string, want APIErrorCoverageFamily) {
+	t.Helper()
+
+	registration, ok := ReviewedAPIErrorCoverageRegistry.Registrations[key]
+	if !ok {
+		t.Fatalf("reviewed registration %q was not found", key)
+	}
+	if registration.Family != want {
+		t.Fatalf("%s family = %q, want %q", key, registration.Family, want)
+	}
+	if strings.TrimSpace(registration.DeleteNotFoundSemantics) == "" {
+		t.Fatalf("%s deleteNotFoundSemantics is empty", key)
+	}
+	if strings.TrimSpace(registration.RetryableConflictSemantics) == "" {
+		t.Fatalf("%s retryableConflictSemantics is empty", key)
+	}
+}
+
+func assertReviewedSemantics(
+	t *testing.T,
+	key string,
+	wantDeleteNotFound string,
+	wantRetryableConflict string,
+) {
+	t.Helper()
+
+	registration, ok := ReviewedAPIErrorCoverageRegistry.Registrations[key]
+	if !ok {
+		t.Fatalf("reviewed registration %q was not found", key)
+	}
+	if registration.DeleteNotFoundSemantics != wantDeleteNotFound {
+		t.Fatalf("%s deleteNotFoundSemantics = %q, want %q", key, registration.DeleteNotFoundSemantics, wantDeleteNotFound)
+	}
+	if registration.RetryableConflictSemantics != wantRetryableConflict {
+		t.Fatalf("%s retryableConflictSemantics = %q, want %q", key, registration.RetryableConflictSemantics, wantRetryableConflict)
+	}
+}
+
+func assertReviewedDeviation(t *testing.T, key string, wantSubstring string) {
+	t.Helper()
+
+	registration, ok := ReviewedAPIErrorCoverageRegistry.Registrations[key]
+	if !ok {
+		t.Fatalf("reviewed registration %q was not found", key)
+	}
+	if !strings.Contains(registration.Deviation, wantSubstring) {
+		t.Fatalf("%s deviation = %q, want substring %q", key, registration.Deviation, wantSubstring)
+	}
+}
+
+func assertReviewedException(t *testing.T, key string, wantSubstring string) {
+	t.Helper()
+
+	exception, ok := ReviewedAPIErrorCoverageRegistry.Exceptions[key]
+	if !ok {
+		t.Fatalf("reviewed exception %q was not found", key)
+	}
+	if !strings.Contains(exception.Reason, wantSubstring) {
+		t.Fatalf("%s reason = %q, want substring %q", key, exception.Reason, wantSubstring)
+	}
+}

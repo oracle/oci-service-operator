@@ -5,6 +5,7 @@ validation, and repository-owned documentation flows.
 
 ## Maintainer References
 
+- [API Error Coverage Registry](api-error-coverage-registry.md)
 - [Generator Contract](../api-generator-contract.md)
 - [Enabled Resource Async Strategy Audit](async-strategy-audit.md)
 - [Validator Guide](../validator-guide.md)
