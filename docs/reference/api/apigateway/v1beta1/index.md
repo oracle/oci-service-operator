@@ -67,6 +67,7 @@ ApiGatewayStatus defines the observed state of ApiGateway.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-apigateway-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-apigateway-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -75,6 +76,34 @@ ApiGatewayStatus defines the observed state of ApiGateway.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-apigateway-status-status-async"></a>
+##### Status.status.async
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-apigateway-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-apigateway-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to ApiGateway status](#kind-apigateway-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-apigateway-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -160,6 +189,7 @@ ApiGatewayDeploymentStatus defines the observed state of ApiGatewayDeployment.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-apigatewaydeployment-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-apigatewaydeployment-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -168,6 +198,34 @@ ApiGatewayDeploymentStatus defines the observed state of ApiGatewayDeployment.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-status-async"></a>
+##### Status.status.async
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-apigatewaydeployment-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-apigatewaydeployment-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to ApiGatewayDeployment status](#kind-apigatewaydeployment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-apigatewaydeployment-status-status-conditions"></a>
 ##### Status.status.conditions[]

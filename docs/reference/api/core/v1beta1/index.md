@@ -109,6 +109,7 @@ DrgDefaultDrgRouteTables defines nested fields for Drg.DefaultDrgRouteTables.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-drg-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-drg-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -117,6 +118,34 @@ DrgDefaultDrgRouteTables defines nested fields for Drg.DefaultDrgRouteTables.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-drg-status-status-async"></a>
+##### Status.status.async
+
+[Back to Drg status](#kind-drg-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-drg-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-drg-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Drg status](#kind-drg-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-drg-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -602,6 +631,7 @@ InstanceSourceDetailsInstanceSourceImageFilterDetails defines nested fields for 
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-instance-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-instance-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -610,6 +640,34 @@ InstanceSourceDetailsInstanceSourceImageFilterDetails defines nested fields for 
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-instance-status-status-async"></a>
+##### Status.status.async
+
+[Back to Instance status](#kind-instance-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-instance-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-instance-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Instance status](#kind-instance-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-instance-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -676,6 +734,7 @@ InternetGatewayStatus defines the observed state of InternetGateway.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-internetgateway-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-internetgateway-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -684,6 +743,34 @@ InternetGatewayStatus defines the observed state of InternetGateway.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-internetgateway-status-status-async"></a>
+##### Status.status.async
+
+[Back to InternetGateway status](#kind-internetgateway-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-internetgateway-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-internetgateway-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to InternetGateway status](#kind-internetgateway-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-internetgateway-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -754,6 +841,7 @@ NatGatewayStatus defines the observed state of NatGateway.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-natgateway-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-natgateway-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -762,6 +850,34 @@ NatGatewayStatus defines the observed state of NatGateway.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-natgateway-status-status-async"></a>
+##### Status.status.async
+
+[Back to NatGateway status](#kind-natgateway-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-natgateway-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-natgateway-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to NatGateway status](#kind-natgateway-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-natgateway-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -824,6 +940,7 @@ NetworkSecurityGroupStatus defines the observed state of NetworkSecurityGroup.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-networksecuritygroup-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-networksecuritygroup-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -832,6 +949,34 @@ NetworkSecurityGroupStatus defines the observed state of NetworkSecurityGroup.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-networksecuritygroup-status-status-async"></a>
+##### Status.status.async
+
+[Back to NetworkSecurityGroup status](#kind-networksecuritygroup-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-networksecuritygroup-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-networksecuritygroup-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to NetworkSecurityGroup status](#kind-networksecuritygroup-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-networksecuritygroup-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -928,6 +1073,7 @@ RouteTableRouteRule defines nested fields for RouteTable.RouteRule.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-routetable-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-routetable-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -936,6 +1082,34 @@ RouteTableRouteRule defines nested fields for RouteTable.RouteRule.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-routetable-status-status-async"></a>
+##### Status.status.async
+
+[Back to RouteTable status](#kind-routetable-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-routetable-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-routetable-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to RouteTable status](#kind-routetable-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-routetable-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -1410,6 +1584,7 @@ SecurityListIngressSecurityRuleUdpOptionsSourcePortRange defines nested fields f
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-securitylist-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-securitylist-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -1418,6 +1593,34 @@ SecurityListIngressSecurityRuleUdpOptionsSourcePortRange defines nested fields f
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-securitylist-status-status-async"></a>
+##### Status.status.async
+
+[Back to SecurityList status](#kind-securitylist-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-securitylist-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-securitylist-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to SecurityList status](#kind-securitylist-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-securitylist-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -1508,6 +1711,7 @@ ServiceGatewayService defines nested fields for ServiceGateway.Service.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-servicegateway-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-servicegateway-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -1516,6 +1720,34 @@ ServiceGatewayService defines nested fields for ServiceGateway.Service.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-servicegateway-status-status-async"></a>
+##### Status.status.async
+
+[Back to ServiceGateway status](#kind-servicegateway-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-servicegateway-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-servicegateway-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to ServiceGateway status](#kind-servicegateway-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-servicegateway-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -1602,6 +1834,7 @@ SubnetStatus defines the observed state of Subnet.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-subnet-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-subnet-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -1610,6 +1843,34 @@ SubnetStatus defines the observed state of Subnet.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-subnet-status-status-async"></a>
+##### Status.status.async
+
+[Back to Subnet status](#kind-subnet-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-subnet-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-subnet-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Subnet status](#kind-subnet-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-subnet-status-status-conditions"></a>
 ##### Status.status.conditions[]
@@ -1699,6 +1960,7 @@ VcnStatus defines the observed state of Vcn.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-vcn-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-vcn-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -1707,6 +1969,34 @@ VcnStatus defines the observed state of Vcn.
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-vcn-status-status-async"></a>
+##### Status.status.async
+
+[Back to Vcn status](#kind-vcn-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-vcn-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-vcn-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Vcn status](#kind-vcn-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-vcn-status-status-conditions"></a>
 ##### Status.status.conditions[]

@@ -8,6 +8,7 @@ validation, and repository-owned documentation flows.
 - [API Error Coverage Registry](api-error-coverage-registry.md)
 - [Generator Contract](../api-generator-contract.md)
 - [Enabled Resource Async Strategy Audit](async-strategy-audit.md)
+- [Shared Async Status Contract](shared-async-contract.md)
 - [Validator Guide](../validator-guide.md)
 - [GitHub Pages Handoff](github-pages-handoff.md)
 

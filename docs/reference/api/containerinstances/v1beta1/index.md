@@ -350,6 +350,7 @@ ContainerInstanceShapeConfigObservedState defines nested fields for ContainerIns
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-containerinstance-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-containerinstance-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
@@ -358,6 +359,34 @@ ContainerInstanceShapeConfigObservedState defines nested fields for ContainerIns
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-containerinstance-status-status-async"></a>
+##### Status.status.async
+
+[Back to ContainerInstance status](#kind-containerinstance-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-containerinstance-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-containerinstance-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to ContainerInstance status](#kind-containerinstance-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-containerinstance-status-status-conditions"></a>
 ##### Status.status.conditions[]

@@ -1445,19 +1445,30 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 		status.Ocid = shared.OCID(resourceID)
 	}
 
-	conditionType, shouldRequeue, message := c.classifyLifecycle(response, fallback)
-	status.Message = message
-	status.Reason = string(conditionType)
 	now := metav1.Now()
 	if resourceID != "" && status.CreatedAt == nil {
 		status.CreatedAt = &now
 	}
+	evaluation := c.classifyLifecycleAsync(response, status, fallback)
+	if evaluation.current != nil {
+		evaluation.current.UpdatedAt = &now
+		projection := servicemanager.ApplyAsyncOperation(status, evaluation.current, c.config.Log)
+		return servicemanager.OSOKResponse{
+			IsSuccessful:    projection.Condition != shared.Failed,
+			ShouldRequeue:   projection.ShouldRequeue,
+			RequeueDuration: defaultRequeueDuration,
+		}, nil
+	}
+
+	servicemanager.ClearAsyncOperation(status)
+	status.Message = evaluation.message
+	status.Reason = string(evaluation.condition)
 	status.UpdatedAt = &now
-	*status = util.UpdateOSOKStatusCondition(*status, conditionType, v1.ConditionTrue, "", message, c.config.Log)
+	*status = util.UpdateOSOKStatusCondition(*status, evaluation.condition, conditionStatusForCondition(evaluation.condition), "", evaluation.message, c.config.Log)
 
 	return servicemanager.OSOKResponse{
-		IsSuccessful:    conditionType != shared.Failed,
-		ShouldRequeue:   shouldRequeue,
+		IsSuccessful:    evaluation.condition != shared.Failed,
+		ShouldRequeue:   evaluation.shouldRequeue,
 		RequeueDuration: defaultRequeueDuration,
 	}, nil
 }
@@ -1471,6 +1482,14 @@ func (c ServiceClient[T]) markFailure(resource T, err error) error {
 	status.Reason = string(shared.Failed)
 	now := metav1.Now()
 	status.UpdatedAt = &now
+	if status.Async.Current != nil {
+		current := *status.Async.Current
+		current.NormalizedClass = shared.OSOKAsyncClassFailed
+		current.Message = err.Error()
+		current.UpdatedAt = &now
+		_ = servicemanager.ApplyAsyncOperation(status, &current, c.config.Log)
+		return err
+	}
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.config.Log)
 	return err
 }
@@ -1487,6 +1506,7 @@ func (c ServiceClient[T]) markDeleted(resource T, message string) {
 		status.Message = message
 	}
 	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, c.config.Log)
 }
 
@@ -1499,6 +1519,17 @@ func (c ServiceClient[T]) markCondition(resource T, condition shared.OSOKConditi
 	status.UpdatedAt = &now
 	status.Message = message
 	status.Reason = string(condition)
+	if condition == shared.Terminating {
+		current := &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseDelete,
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         message,
+			UpdatedAt:       &now,
+		}
+		_ = servicemanager.ApplyAsyncOperation(status, current, c.config.Log)
+		return
+	}
 	*status = util.UpdateOSOKStatusCondition(*status, condition, v1.ConditionTrue, "", message, c.config.Log)
 }
 
@@ -2420,17 +2451,33 @@ func responseID(response any) string {
 	return firstNonEmpty(values, "id", "ocid")
 }
 
-func (c ServiceClient[T]) classifyLifecycle(response any, fallback shared.OSOKConditionType) (shared.OSOKConditionType, bool, string) {
+type lifecycleAsyncEvaluation struct {
+	current       *shared.OSOKAsyncOperation
+	condition     shared.OSOKConditionType
+	shouldRequeue bool
+	message       string
+}
+
+func (c ServiceClient[T]) classifyLifecycleAsync(response any, status *shared.OSOKStatus, fallback shared.OSOKConditionType) lifecycleAsyncEvaluation {
 	if c.config.Semantics == nil {
-		return classifyLifecycleHeuristics(response, fallback)
+		return classifyLifecycleAsyncHeuristics(response, status, fallback)
 	}
-	return classifyLifecycleSemantics(response, fallback, c.config.Semantics)
+	return classifyLifecycleAsyncSemantics(response, status, fallback, c.config.Semantics)
 }
 
 func classifyLifecycleSemantics(response any, fallback shared.OSOKConditionType, semantics *Semantics) (shared.OSOKConditionType, bool, string) {
+	evaluation := classifyLifecycleAsyncSemantics(response, nil, fallback, semantics)
+	return evaluation.condition, evaluation.shouldRequeue, evaluation.message
+}
+
+func classifyLifecycleAsyncSemantics(response any, status *shared.OSOKStatus, fallback shared.OSOKConditionType, semantics *Semantics) lifecycleAsyncEvaluation {
 	body, ok := responseBody(response)
 	if !ok || body == nil {
-		return fallback, shouldRequeueForCondition(fallback), defaultConditionMessage(fallback)
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       defaultConditionMessage(fallback),
+		}
 	}
 
 	values := jsonMap(body)
@@ -2442,25 +2489,40 @@ func classifyLifecycleSemantics(response any, fallback shared.OSOKConditionType,
 
 	switch {
 	case lifecycleState == "":
-		return fallback, shouldRequeueForCondition(fallback), message
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       message,
+		}
 	case containsString(semantics.Lifecycle.ProvisioningStates, lifecycleState):
-		return shared.Provisioning, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncClassPending)
 	case containsString(semantics.Lifecycle.UpdatingStates, lifecycleState):
-		return shared.Updating, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseUpdate, shared.OSOKAsyncClassPending)
 	case containsString(semantics.Delete.PendingStates, lifecycleState):
-		return shared.Terminating, true, message
-	case containsString(semantics.Lifecycle.ActiveStates, lifecycleState),
-		containsString(semantics.Delete.TerminalStates, lifecycleState):
-		return shared.Active, false, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending)
+	case containsString(semantics.Delete.TerminalStates, lifecycleState):
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassSucceeded)
+	case containsString(semantics.Lifecycle.ActiveStates, lifecycleState):
+		return lifecycleAsyncEvaluation{condition: shared.Active, shouldRequeue: false, message: message}
 	default:
-		return shared.Failed, false, fmt.Sprintf("formal lifecycle state %q is not modeled: %s", lifecycleState, message)
+		failureMessage := fmt.Sprintf("formal lifecycle state %q is not modeled: %s", lifecycleState, message)
+		return lifecycleFailureEvaluation(status, fallback, lifecycleState, failureMessage, shared.OSOKAsyncClassUnknown)
 	}
 }
 
 func classifyLifecycleHeuristics(response any, fallback shared.OSOKConditionType) (shared.OSOKConditionType, bool, string) {
+	evaluation := classifyLifecycleAsyncHeuristics(response, nil, fallback)
+	return evaluation.condition, evaluation.shouldRequeue, evaluation.message
+}
+
+func classifyLifecycleAsyncHeuristics(response any, status *shared.OSOKStatus, fallback shared.OSOKConditionType) lifecycleAsyncEvaluation {
 	body, ok := responseBody(response)
 	if !ok || body == nil {
-		return fallback, shouldRequeueForCondition(fallback), defaultConditionMessage(fallback)
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       defaultConditionMessage(fallback),
+		}
 	}
 
 	values := jsonMap(body)
@@ -2472,33 +2534,95 @@ func classifyLifecycleHeuristics(response any, fallback shared.OSOKConditionType
 
 	switch {
 	case lifecycleState == "":
-		return fallback, shouldRequeueForCondition(fallback), message
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       message,
+		}
 	case strings.Contains(lifecycleState, "FAIL"),
 		strings.Contains(lifecycleState, "ERROR"),
-		strings.Contains(lifecycleState, "NEEDS_ATTENTION"),
 		strings.Contains(lifecycleState, "INOPERABLE"):
-		return shared.Failed, false, message
+		return lifecycleFailureEvaluation(status, fallback, lifecycleState, message, shared.OSOKAsyncClassFailed)
+	case strings.Contains(lifecycleState, "NEEDS_ATTENTION"):
+		return lifecycleFailureEvaluation(status, fallback, lifecycleState, message, shared.OSOKAsyncClassAttention)
+	case strings.Contains(lifecycleState, "DELETED"),
+		strings.Contains(lifecycleState, "TERMINATED"):
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassSucceeded)
 	case strings.Contains(lifecycleState, "DELETE"),
 		strings.Contains(lifecycleState, "TERMINAT"):
-		return shared.Terminating, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending)
 	case strings.Contains(lifecycleState, "UPDAT"),
 		strings.Contains(lifecycleState, "MODIFY"),
 		strings.Contains(lifecycleState, "PATCH"):
-		return shared.Updating, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseUpdate, shared.OSOKAsyncClassPending)
 	case strings.Contains(lifecycleState, "CREATE"),
 		strings.Contains(lifecycleState, "PROVISION"),
 		strings.Contains(lifecycleState, "PENDING"),
 		strings.Contains(lifecycleState, "IN_PROGRESS"),
 		strings.Contains(lifecycleState, "ACCEPT"),
 		strings.Contains(lifecycleState, "START"):
-		return shared.Provisioning, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncClassPending)
 	default:
-		return shared.Active, false, message
+		return lifecycleAsyncEvaluation{condition: shared.Active, shouldRequeue: false, message: message}
+	}
+}
+
+func newLifecycleAsyncEvaluation(status *shared.OSOKStatus, message string, lifecycleState string, phase shared.OSOKAsyncPhase, class shared.OSOKAsyncNormalizedClass) lifecycleAsyncEvaluation {
+	if phase == "" {
+		return lifecycleAsyncEvaluation{condition: shared.Failed, shouldRequeue: false, message: message}
+	}
+
+	current := &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           servicemanager.ResolveAsyncPhase(status, phase),
+		RawStatus:       lifecycleState,
+		NormalizedClass: class,
+		Message:         message,
+	}
+	projection := servicemanager.ProjectAsyncCondition(class, current.Phase)
+	if strings.TrimSpace(message) == "" {
+		message = projection.DefaultMessage
+		current.Message = message
+	}
+
+	return lifecycleAsyncEvaluation{
+		current:       current,
+		condition:     projection.Condition,
+		shouldRequeue: projection.ShouldRequeue,
+		message:       message,
+	}
+}
+
+func lifecycleFailureEvaluation(status *shared.OSOKStatus, fallback shared.OSOKConditionType, lifecycleState string, message string, class shared.OSOKAsyncNormalizedClass) lifecycleAsyncEvaluation {
+	phase := servicemanager.ResolveAsyncPhase(status, fallbackAsyncPhase(fallback))
+	if phase == "" {
+		return lifecycleAsyncEvaluation{condition: shared.Failed, shouldRequeue: false, message: message}
+	}
+	return newLifecycleAsyncEvaluation(status, message, lifecycleState, phase, class)
+}
+
+func fallbackAsyncPhase(condition shared.OSOKConditionType) shared.OSOKAsyncPhase {
+	switch condition {
+	case shared.Provisioning:
+		return shared.OSOKAsyncPhaseCreate
+	case shared.Updating:
+		return shared.OSOKAsyncPhaseUpdate
+	case shared.Terminating:
+		return shared.OSOKAsyncPhaseDelete
+	default:
+		return ""
 	}
 }
 
 func shouldRequeueForCondition(condition shared.OSOKConditionType) bool {
 	return condition == shared.Provisioning || condition == shared.Updating || condition == shared.Terminating
+}
+
+func conditionStatusForCondition(condition shared.OSOKConditionType) v1.ConditionStatus {
+	if condition == shared.Failed {
+		return v1.ConditionFalse
+	}
+	return v1.ConditionTrue
 }
 
 func defaultConditionMessage(condition shared.OSOKConditionType) string {

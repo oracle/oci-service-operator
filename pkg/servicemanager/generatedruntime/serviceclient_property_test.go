@@ -91,8 +91,10 @@ func (c lifecycleQuickCase) expectedClassification() (shared.OSOKConditionType, 
 		return shared.Updating, true
 	case 3:
 		return shared.Terminating, true
-	case 4, 5:
+	case 4:
 		return shared.Active, false
+	case 5:
+		return shared.Terminating, true
 	default:
 		return shared.Failed, false
 	}
