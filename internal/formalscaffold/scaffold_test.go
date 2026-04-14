@@ -589,6 +589,10 @@ services:
       resources:
         - kind: AutonomousDatabase
           formalSpec: databaseautonomousdatabase
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 `)
 	writeTestFile(t, filepath.Join(repoRoot, "api", "database", "v1beta1", "autonomousdatabase_types.go"), testAutonomousDatabaseAPI)
 	writeTestFile(t, filepath.Join(repoRoot, "api", "database", "v1beta1", "backup_types.go"), testBackupAPI)
@@ -774,6 +778,10 @@ services:
       mode: explicit
       includeKinds:
         - User
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
   - service: database
     sdkPackage: github.com/oracle/oci-go-sdk/v65/database
     group: database

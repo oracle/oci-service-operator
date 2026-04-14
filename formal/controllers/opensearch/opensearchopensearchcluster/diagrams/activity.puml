@@ -65,7 +65,8 @@ if ("Supported mutable drift detected?") then (yes)
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -93,6 +94,8 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
 supported drift: display_name
 reject before mutate: force-new fields
 compartment_id

@@ -9,6 +9,18 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
   - Create first reuses a unique list match on compartmentId plus displayName when one already exists; otherwise it issues CreateOpensearchCluster and follows with read-after-write status projection.
   - Reconcile remains retryable while OCI reports PROVISIONING or UPDATING, succeeds when ACTIVE, and keeps the finalizer until delete follow-up confirms DELETING or the resource is absent.

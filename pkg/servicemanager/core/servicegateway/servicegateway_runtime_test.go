@@ -100,8 +100,13 @@ func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client
 		SDKName: "ServiceGateway",
 		Log:     manager.Log,
 		Semantics: &generatedruntime.Semantics{
-			FormalService:     "core",
-			FormalSlug:        "servicegateway",
+			FormalService: "core",
+			FormalSlug:    "servicegateway",
+			Async: &generatedruntime.AsyncSemantics{
+				Strategy:             "lifecycle",
+				Runtime:              "generatedruntime",
+				FormalClassification: "lifecycle",
+			},
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -125,13 +130,13 @@ func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client
 				ConflictsWith: map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
 				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 			},
 			UpdateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",

@@ -94,6 +94,10 @@ services:
       mode: explicit
       includeKinds:
         - Cluster
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -161,6 +165,10 @@ services:
         strategy: none
       resources:
         - kind: ContainerInstance
+          async:
+            strategy: lifecycle
+            runtime: handwritten
+            formalClassification: lifecycle
           sample:
             body: |-
               #
@@ -211,6 +219,10 @@ services:
       mode: explicit
       includeKinds:
         - Instance
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     packageSplits:
       - name: core-network
         defaultControllerImage: iad.ocir.io/oracle/oci-service-operator-core-network:latest
@@ -251,6 +263,10 @@ services:
                 displayName: "drg-sample"
         - kind: Instance
           formalSpec: instance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           sample:
             body: |-
               #
@@ -553,6 +569,10 @@ services:
       resources:
         - kind: AutonomousDatabase
           formalSpec: databaseautonomousdatabase
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           serviceManager:
             packagePath: database/autonomousdatabase
           controller:
@@ -641,12 +661,20 @@ services:
         strategy: none
       resources:
         - kind: Application
+          async:
+            strategy: lifecycle
+            runtime: handwritten
+            formalClassification: lifecycle
           controller:
             extraRBACMarkers:
               - groups="",resources=events,verbs=create;patch
           serviceManager:
             packagePath: functions
         - kind: Function
+          async:
+            strategy: lifecycle
+            runtime: handwritten
+            formalClassification: lifecycle
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
@@ -677,6 +705,10 @@ services:
       resources:
         - kind: Compartment
           formalSpec: compartment
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           serviceManager:
             packagePath: identity/compartment
     observedState:
@@ -740,6 +772,10 @@ services:
         strategy: none
       resources:
         - kind: Vault
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           specFields:
             - name: DeletionScheduleDays
               type: int32
@@ -904,6 +940,10 @@ services:
       resources:
         - kind: DbSystem
           formalSpec: dbsystem
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           controller:
             maxConcurrentReconciles: 3
             extraRBACMarkers:
@@ -1003,6 +1043,10 @@ services:
         strategy: none
       resources:
         - kind: Table
+          async:
+            strategy: lifecycle
+            runtime: handwritten
+            formalClassification: lifecycle
           controller:
             extraRBACMarkers:
               - groups="",resources=events,verbs=create;patch
@@ -1034,6 +1078,10 @@ services:
       resources:
         - kind: Bucket
           formalSpec: objectstoragebucket
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           serviceManager:
             packagePath: objectstorage/bucket
     observedState:
@@ -1064,6 +1112,10 @@ services:
       resources:
         - kind: OpensearchCluster
           formalSpec: opensearchopensearchcluster
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           serviceManager:
             packagePath: opensearch/opensearchcluster
         - kind: Manifest
@@ -1143,6 +1195,10 @@ services:
       resources:
         - kind: DbSystem
           formalSpec: dbsystem
+          async:
+            strategy: lifecycle
+            runtime: handwritten
+            formalClassification: lifecycle
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
@@ -1232,6 +1288,20 @@ services:
       resources:
         - kind: Queue
           formalSpec: queue
+          async:
+            strategy: workrequest
+            runtime: handwritten
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+              legacyFieldBridge:
+                create: CreateWorkRequestId
+                update: UpdateWorkRequestId
+                delete: DeleteWorkRequestId
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
@@ -1298,6 +1368,10 @@ services:
       resources:
         - kind: RedisCluster
           formalSpec: rediscluster
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           controller:
             extraRBACMarkers:
               - groups="",resources=events,verbs=create;patch
@@ -1356,6 +1430,10 @@ services:
       resources:
         - kind: Stream
           formalSpec: stream
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;delete

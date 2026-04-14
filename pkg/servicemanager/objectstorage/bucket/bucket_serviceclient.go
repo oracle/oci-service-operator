@@ -32,8 +32,13 @@ type defaultBucketServiceClient struct {
 
 func newBucketRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "objectstorage",
-		FormalSlug:        "objectstoragebucket",
+		FormalService: "objectstorage",
+		FormalSlug:    "objectstoragebucket",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",

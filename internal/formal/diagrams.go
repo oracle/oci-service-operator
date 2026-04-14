@@ -71,6 +71,8 @@ type diagramRepoAuthoredSemantics struct {
 	ProviderLifecycle *diagramProviderLifecycle   `yaml:"providerLifecycle,omitempty"`
 	ListLookup        *diagramListLookupSemantics `yaml:"listLookup,omitempty"`
 	Mutation          *diagramMutationSemantics   `yaml:"mutation,omitempty"`
+	Hooks             *diagramHookSemantics       `yaml:"hooks,omitempty"`
+	FollowUp          *diagramFollowUpSemantics   `yaml:"followUp,omitempty"`
 }
 
 type diagramProviderLifecycle struct {
@@ -90,6 +92,18 @@ type diagramMutationSemantics struct {
 	CreateOnly []string `yaml:"createOnly,omitempty"`
 }
 
+type diagramHookSemantics struct {
+	Create []hook `yaml:"create,omitempty"`
+	Update []hook `yaml:"update,omitempty"`
+	Delete []hook `yaml:"delete,omitempty"`
+}
+
+type diagramFollowUpSemantics struct {
+	Create string `yaml:"create,omitempty"`
+	Update string `yaml:"update,omitempty"`
+	Delete string `yaml:"delete,omitempty"`
+}
+
 type renderedDiagramArtifacts struct {
 	Files              DiagramFiles
 	ActivitySource     []byte
@@ -98,14 +112,17 @@ type renderedDiagramArtifacts struct {
 }
 
 type diagramContext struct {
-	Binding      ControllerBinding
-	Diagram      diagramSpec
-	Strategy     diagramStrategy
-	OpenGaps     []string
-	CreateHooks  []string
-	UpdateHooks  []string
-	DeleteHooks  []string
-	ConflictSets []string
+	Binding        ControllerBinding
+	Diagram        diagramSpec
+	Strategy       diagramStrategy
+	OpenGaps       []string
+	CreateHooks    []string
+	UpdateHooks    []string
+	DeleteHooks    []string
+	CreateFollowUp string
+	UpdateFollowUp string
+	DeleteFollowUp string
+	ConflictSets   []string
 }
 
 // DiagramFilesForRow returns the upstream-aligned artifact layout for one row.
@@ -263,9 +280,12 @@ func buildDiagramContext(binding ControllerBinding, diagram diagramSpec, strateg
 		ctx.OpenGaps = append(ctx.OpenGaps, strings.TrimSpace(gap.Category))
 	}
 	sort.Strings(ctx.OpenGaps)
-	ctx.CreateHooks = summarizeHooks(binding.Import.Hooks.Create)
-	ctx.UpdateHooks = summarizeHooks(binding.Import.Hooks.Update)
-	ctx.DeleteHooks = summarizeHooks(binding.Import.Hooks.Delete)
+	ctx.CreateHooks = effectiveHookSummaries(diagram, "create", binding.Import.Hooks.Create)
+	ctx.UpdateHooks = effectiveHookSummaries(diagram, "update", binding.Import.Hooks.Update)
+	ctx.DeleteHooks = effectiveHookSummaries(diagram, "delete", binding.Import.Hooks.Delete)
+	ctx.CreateFollowUp = effectiveFollowUpStrategy(diagram, "create")
+	ctx.UpdateFollowUp = effectiveFollowUpStrategy(diagram, "update")
+	ctx.DeleteFollowUp = effectiveFollowUpStrategy(diagram, "delete")
 	ctx.ConflictSets = summarizeConflicts(binding.Import.Mutation.ConflictsWith)
 	return ctx
 }
@@ -351,6 +371,12 @@ func renderActivityPUML(ctx diagramContext) []byte {
 		lines = append(lines, plantUMLAction(fmt.Sprintf(
 			"Run provider helper hooks %s when the matching field-driven path executes",
 			hooks,
+		)))
+	}
+	if followUp := followUpPhaseSummary(ctx); followUp != "none" {
+		lines = append(lines, plantUMLAction(fmt.Sprintf(
+			"Apply explicit follow-up semantics %s",
+			followUp,
 		)))
 	}
 	lines = append(lines, renderSecretActivity(ctx)...)
@@ -560,13 +586,18 @@ func commonNoteLines(ctx diagramContext) []string {
 			transitionSummary(updatePendingStates(ctx), "none"),
 			transitionSummary(deletePendingStates(ctx), "none"),
 		),
+	}
+	if followUp := followUpPhaseSummary(ctx); followUp != "none" {
+		lines = append(lines, fmt.Sprintf("follow-up: %s", followUp))
+	}
+	lines = append(lines,
 		fmt.Sprintf("supported drift: %s", summarizeValues(mutableSurface(ctx), 4)),
 		fmt.Sprintf("reject before mutate: %s", rejectSurfaceSummary(ctx)),
 		fmt.Sprintf("create-only fields: %s", summarizeValues(createOnlySurface(ctx), 4)),
 		fmt.Sprintf("list lookup: %s", listLookupSummary(ctx)),
 		fmt.Sprintf("conflicts: %s", summarizeValues(ctx.ConflictSets, 3)),
 		fmt.Sprintf("open gaps: %s", summarizeValues(ctx.OpenGaps, 5)),
-	}
+	)
 	for _, note := range ctx.Diagram.Notes {
 		lines = append(lines, note)
 	}
@@ -868,6 +899,9 @@ func renderDriftHandlingSequence(ctx diagramContext) []string {
 	if hooks := hookPhaseSummary(ctx); hooks != "none" {
 		lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(fmt.Sprintf("run helper hooks %s", hooks), 36)))
 	}
+	if followUp := followUpPhaseSummary(ctx); followUp != "none" {
+		lines = append(lines, fmt.Sprintf("ServiceManager -> OCI: %s", wrapPlantUMLText(fmt.Sprintf("apply follow-up strategy %s", followUp), 36)))
+	}
 	if includeSecretsParticipant(ctx) {
 		lines = append(lines,
 			fmt.Sprintf("ServiceManager -> SecretStore: %s", wrapPlantUMLText(secretSequenceAction(ctx), 36)),
@@ -1025,6 +1059,67 @@ func hookPhaseSummary(ctx diagramContext) string {
 		return "none"
 	}
 	return strings.Join(parts, "; ")
+}
+
+func followUpPhaseSummary(ctx diagramContext) string {
+	parts := []string{}
+	if strings.TrimSpace(ctx.CreateFollowUp) != "" {
+		parts = append(parts, "create="+strings.TrimSpace(ctx.CreateFollowUp))
+	}
+	if strings.TrimSpace(ctx.UpdateFollowUp) != "" {
+		parts = append(parts, "update="+strings.TrimSpace(ctx.UpdateFollowUp))
+	}
+	if strings.TrimSpace(ctx.DeleteFollowUp) != "" {
+		parts = append(parts, "delete="+strings.TrimSpace(ctx.DeleteFollowUp))
+	}
+	if len(parts) == 0 {
+		return "none"
+	}
+	return strings.Join(parts, "; ")
+}
+
+func effectiveHookSummaries(diagram diagramSpec, phase string, imported []hook) []string {
+	if hooks, ok := repoAuthoredHooks(diagram, phase); ok {
+		return summarizeHooks(hooks)
+	}
+	return summarizeHooks(imported)
+}
+
+func repoAuthoredHooks(diagram diagramSpec, phase string) ([]hook, bool) {
+	if diagram.RepoAuthored == nil || diagram.RepoAuthored.Hooks == nil {
+		return nil, false
+	}
+	switch phase {
+	case "create":
+		if diagram.RepoAuthored.Hooks.Create != nil {
+			return diagram.RepoAuthored.Hooks.Create, true
+		}
+	case "update":
+		if diagram.RepoAuthored.Hooks.Update != nil {
+			return diagram.RepoAuthored.Hooks.Update, true
+		}
+	case "delete":
+		if diagram.RepoAuthored.Hooks.Delete != nil {
+			return diagram.RepoAuthored.Hooks.Delete, true
+		}
+	}
+	return nil, false
+}
+
+func effectiveFollowUpStrategy(diagram diagramSpec, phase string) string {
+	if diagram.RepoAuthored == nil || diagram.RepoAuthored.FollowUp == nil {
+		return ""
+	}
+	switch phase {
+	case "create":
+		return strings.TrimSpace(diagram.RepoAuthored.FollowUp.Create)
+	case "update":
+		return strings.TrimSpace(diagram.RepoAuthored.FollowUp.Update)
+	case "delete":
+		return strings.TrimSpace(diagram.RepoAuthored.FollowUp.Delete)
+	default:
+		return ""
+	}
 }
 
 func summarizeOperations(bindings []operationBinding, limit int) string {

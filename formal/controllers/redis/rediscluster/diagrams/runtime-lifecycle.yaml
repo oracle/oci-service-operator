@@ -9,6 +9,18 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
   - Bind through an explicit OCI identity first; otherwise adopt only a unique ListRedisClusters match on compartmentId plus displayName before create.
   - Mutable drift is limited to displayName, nodeCount, nodeMemoryInGBs, freeformTags, and definedTags; changes to compartmentId, softwareVersion, or subnetId are replacement-only.

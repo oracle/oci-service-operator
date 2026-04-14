@@ -71,6 +71,8 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
 supported drift: defined_tags, display_name,
 freeform_tags, node_count (+1 more)
 reject before mutate: force-new fields

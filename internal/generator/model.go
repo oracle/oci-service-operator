@@ -177,6 +177,7 @@ type RuntimeRequestFieldModel struct {
 type RuntimeSemanticsModel struct {
 	FormalService       string
 	FormalSlug          string
+	Async               *RuntimeAsyncModel
 	StatusProjection    string
 	SecretSideEffects   string
 	FinalizerPolicy     string
@@ -190,6 +191,28 @@ type RuntimeSemanticsModel struct {
 	DeleteFollowUp      RuntimeFollowUpModel
 	AuxiliaryOperations []RuntimeAuxiliaryOperationModel
 	OpenGaps            []RuntimeGapModel
+}
+
+// RuntimeAsyncModel captures the explicit async contract wired from services.yaml.
+type RuntimeAsyncModel struct {
+	Strategy             string
+	Runtime              string
+	FormalClassification string
+	WorkRequest          *RuntimeWorkRequestModel
+}
+
+// RuntimeWorkRequestModel captures explicit handwritten work-request adapter hints.
+type RuntimeWorkRequestModel struct {
+	Source            string
+	Phases            []string
+	LegacyFieldBridge *RuntimeLegacyFieldBridgeModel
+}
+
+// RuntimeLegacyFieldBridgeModel maps generic work-request phases onto legacy status field names.
+type RuntimeLegacyFieldBridgeModel struct {
+	Create string
+	Update string
+	Delete string
 }
 
 // RuntimeLifecycleModel groups explicit state buckets used for condition mapping.

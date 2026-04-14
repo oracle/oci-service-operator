@@ -32,8 +32,13 @@ type defaultStreamServiceClient struct {
 
 func newStreamRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "streaming",
-		FormalSlug:        "stream",
+		FormalService: "streaming",
+		FormalSlug:    "stream",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "ready-only",
 		FinalizerPolicy:   "none",

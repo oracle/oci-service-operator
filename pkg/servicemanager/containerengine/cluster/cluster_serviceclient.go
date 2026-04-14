@@ -32,8 +32,13 @@ type defaultClusterServiceClient struct {
 
 func newClusterRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "containerengine",
-		FormalSlug:        "cluster",
+		FormalService: "containerengine",
+		FormalSlug:    "cluster",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -57,21 +62,21 @@ func newClusterRuntimeSemantics() *generatedruntime.Semantics {
 			ConflictsWith: map[string][]string{},
 		},
 		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"}},
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"}},
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
 		},
 		UpdateFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"}},
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
 		},
 		DeleteFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"}},
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
 		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},

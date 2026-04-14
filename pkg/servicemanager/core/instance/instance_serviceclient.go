@@ -32,8 +32,13 @@ type defaultInstanceServiceClient struct {
 
 func newInstanceRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "core",
-		FormalSlug:        "instance",
+		FormalService: "core",
+		FormalSlug:    "instance",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",

@@ -424,6 +424,10 @@ services:
       mode: explicit
       includeKinds:
         - AutonomousDatabase
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
   - service: mysql
     sdkPackage: example.com/mysql
     group: mysql

@@ -32,8 +32,13 @@ type defaultServiceGatewayServiceClient struct {
 
 func newServiceGatewayRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "core",
-		FormalSlug:        "servicegateway",
+		FormalService: "core",
+		FormalSlug:    "servicegateway",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -57,13 +62,13 @@ func newServiceGatewayRuntimeSemantics() *generatedruntime.Semantics {
 			ConflictsWith: map[string][]string{},
 		},
 		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
 			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
 			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
 		},
 		UpdateFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "read-after-write",

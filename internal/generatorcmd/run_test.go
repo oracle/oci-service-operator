@@ -75,6 +75,10 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -262,6 +266,10 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -280,6 +288,10 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -308,6 +320,10 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated

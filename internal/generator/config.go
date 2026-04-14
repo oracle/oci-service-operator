@@ -37,6 +37,21 @@ const (
 
 	SelectionModeAll      = "all"
 	SelectionModeExplicit = "explicit"
+
+	AsyncStrategyLifecycle   = "lifecycle"
+	AsyncStrategyWorkRequest = "workrequest"
+	AsyncStrategyNone        = "none"
+
+	AsyncRuntimeGeneratedRuntime = "generatedruntime"
+	AsyncRuntimeHandwritten      = "handwritten"
+
+	AsyncWorkRequestSourceServiceSDK      = "service-sdk"
+	AsyncWorkRequestSourceWorkRequestsAPI = "workrequests-service"
+	AsyncWorkRequestSourceProviderHelper  = "provider-helper"
+
+	AsyncPhaseCreate = "create"
+	AsyncPhaseUpdate = "update"
+	AsyncPhaseDelete = "delete"
 )
 
 // PackageProfile describes how generated service outputs integrate with packaging.
@@ -74,6 +89,7 @@ type GenerationSurfaceConfig struct {
 type ResourceGenerationOverride struct {
 	Kind           string                           `yaml:"kind"`
 	FormalSpec     string                           `yaml:"formalSpec,omitempty"`
+	Async          AsyncConfig                      `yaml:"async,omitempty"`
 	Controller     ControllerGenerationOverride     `yaml:"controller,omitempty"`
 	ServiceManager ServiceManagerGenerationOverride `yaml:"serviceManager,omitempty"`
 	Webhooks       GenerationSurfaceConfig          `yaml:"webhooks,omitempty"`
@@ -119,6 +135,28 @@ type SampleOverride struct {
 	Spec         string `yaml:"spec,omitempty"`
 }
 
+// AsyncConfig declares the explicit async contract for a selected runtime surface.
+type AsyncConfig struct {
+	Strategy             string                 `yaml:"strategy,omitempty"`
+	Runtime              string                 `yaml:"runtime,omitempty"`
+	FormalClassification string                 `yaml:"formalClassification,omitempty"`
+	WorkRequest          AsyncWorkRequestConfig `yaml:"workRequest,omitempty"`
+}
+
+// AsyncWorkRequestConfig captures work-request adapter hints for handwritten runtimes.
+type AsyncWorkRequestConfig struct {
+	Source            string                 `yaml:"source,omitempty"`
+	Phases            []string               `yaml:"phases,omitempty"`
+	LegacyFieldBridge AsyncLegacyFieldBridge `yaml:"legacyFieldBridge,omitempty"`
+}
+
+// AsyncLegacyFieldBridge maps generic work-request phases onto existing status field names.
+type AsyncLegacyFieldBridge struct {
+	Create string `yaml:"create,omitempty"`
+	Update string `yaml:"update,omitempty"`
+	Delete string `yaml:"delete,omitempty"`
+}
+
 // ServiceConfig identifies one OCI SDK service and its OSOK output group.
 type ServiceConfig struct {
 	Service        string               `yaml:"service"`
@@ -132,6 +170,7 @@ type ServiceConfig struct {
 	PackageSplits  []PackageSplitConfig `yaml:"packageSplits,omitempty"`
 	Selection      SelectionConfig      `yaml:"selection"`
 	FormalSpec     string               `yaml:"formalSpec,omitempty"`
+	Async          AsyncConfig          `yaml:"async,omitempty"`
 	ObservedState  ObservedStateConfig  `yaml:"observedState,omitempty"`
 	Generation     GenerationConfig     `yaml:"generation,omitempty"`
 	selectedKinds  []string             `yaml:"-"`
@@ -216,7 +255,13 @@ func (c *Config) validateService(
 	if err := validateFormalSpec(fmt.Sprintf("service %q formalSpec", service.Service), service.FormalSpec); err != nil {
 		return err
 	}
+	if err := validateAsyncConfig(fmt.Sprintf("service %q async", service.Service), service.Async); err != nil {
+		return err
+	}
 	if err := service.Generation.Validate(service.Service); err != nil {
+		return err
+	}
+	if err := validateSelectedAsyncMetadata(service); err != nil {
 		return err
 	}
 	if err := validateObservedStateConfig(service); err != nil {
@@ -458,6 +503,12 @@ func validateResourceGenerationOverrides(serviceName string, resources []Resourc
 		); err != nil {
 			return err
 		}
+		if err := validateAsyncConfig(
+			fmt.Sprintf("service %q generation.resources[%q].async", serviceName, kind),
+			resource.Async,
+		); err != nil {
+			return err
+		}
 		if err := validateFieldOverrides(
 			fmt.Sprintf("service %q generation.resources[%q].specFields", serviceName, kind),
 			resource.SpecFields,
@@ -619,8 +670,158 @@ func validateSampleOverride(field string, sample SampleOverride) error {
 	return nil
 }
 
+func validateAsyncConfig(field string, async AsyncConfig) error {
+	if err := validateAsyncStrategyField(field+".strategy", async.Strategy); err != nil {
+		return err
+	}
+	if err := validateAsyncRuntimeField(field+".runtime", async.Runtime); err != nil {
+		return err
+	}
+	if err := validateAsyncStrategyField(field+".formalClassification", async.FormalClassification); err != nil {
+		return err
+	}
+	return validateAsyncWorkRequestConfig(field+".workRequest", async.WorkRequest)
+}
+
+func validateAsyncStrategyField(field string, strategy string) error {
+	switch strings.TrimSpace(strategy) {
+	case "", AsyncStrategyLifecycle, AsyncStrategyWorkRequest, AsyncStrategyNone:
+		return nil
+	default:
+		return fmt.Errorf(
+			"%s %q must be one of %q, %q, or %q",
+			field,
+			strategy,
+			AsyncStrategyLifecycle,
+			AsyncStrategyWorkRequest,
+			AsyncStrategyNone,
+		)
+	}
+}
+
+func validateAsyncRuntimeField(field string, runtime string) error {
+	switch strings.TrimSpace(runtime) {
+	case "", AsyncRuntimeGeneratedRuntime, AsyncRuntimeHandwritten:
+		return nil
+	default:
+		return fmt.Errorf(
+			"%s %q must be one of %q or %q",
+			field,
+			runtime,
+			AsyncRuntimeGeneratedRuntime,
+			AsyncRuntimeHandwritten,
+		)
+	}
+}
+
+func validateAsyncWorkRequestConfig(field string, workRequest AsyncWorkRequestConfig) error {
+	if strings.TrimSpace(workRequest.Source) != "" {
+		switch strings.TrimSpace(workRequest.Source) {
+		case AsyncWorkRequestSourceServiceSDK, AsyncWorkRequestSourceWorkRequestsAPI, AsyncWorkRequestSourceProviderHelper:
+		default:
+			return fmt.Errorf(
+				"%s.source %q must be one of %q, %q, or %q",
+				field,
+				workRequest.Source,
+				AsyncWorkRequestSourceServiceSDK,
+				AsyncWorkRequestSourceWorkRequestsAPI,
+				AsyncWorkRequestSourceProviderHelper,
+			)
+		}
+	}
+
+	seen := make(map[string]struct{}, len(workRequest.Phases))
+	for index, rawPhase := range workRequest.Phases {
+		phase := strings.TrimSpace(rawPhase)
+		switch phase {
+		case AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete:
+		case "":
+			return fmt.Errorf("%s.phases[%d] must not be blank", field, index)
+		default:
+			return fmt.Errorf(
+				"%s.phases[%d] %q must be one of %q, %q, or %q",
+				field,
+				index,
+				rawPhase,
+				AsyncPhaseCreate,
+				AsyncPhaseUpdate,
+				AsyncPhaseDelete,
+			)
+		}
+		if _, exists := seen[phase]; exists {
+			return fmt.Errorf("%s.phases contains duplicate phase %q", field, phase)
+		}
+		seen[phase] = struct{}{}
+	}
+
+	for subfield, value := range map[string]string{
+		"create": workRequest.LegacyFieldBridge.Create,
+		"update": workRequest.LegacyFieldBridge.Update,
+		"delete": workRequest.LegacyFieldBridge.Delete,
+	} {
+		if value == "" {
+			continue
+		}
+		if strings.TrimSpace(value) == "" {
+			return fmt.Errorf("%s.legacyFieldBridge.%s must not be blank", field, subfield)
+		}
+	}
+
+	return nil
+}
+
+func validateSelectedAsyncMetadata(service ServiceConfig) error {
+	if !service.IsDefaultActive() {
+		return nil
+	}
+	kinds := service.defaultSelectedKinds()
+	if len(kinds) == 0 {
+		return nil
+	}
+	for _, kind := range kinds {
+		field := fmt.Sprintf("service %q selected kind %q async", service.Service, kind)
+		if err := validateEffectiveAsyncConfig(field, service.AsyncConfigFor(kind)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateEffectiveAsyncConfig(field string, async AsyncConfig) error {
+	async = async.withDefaults()
+
+	if strings.TrimSpace(async.Strategy) == "" {
+		return fmt.Errorf("%s.strategy is required", field)
+	}
+	if strings.TrimSpace(async.Runtime) == "" {
+		return fmt.Errorf("%s.runtime is required", field)
+	}
+
+	if async.Strategy == AsyncStrategyWorkRequest {
+		if async.Runtime == AsyncRuntimeGeneratedRuntime {
+			return fmt.Errorf("%s runtime %q does not support strategy %q", field, async.Runtime, async.Strategy)
+		}
+		if !async.WorkRequest.hasOverride() {
+			return fmt.Errorf("%s.workRequest metadata is required for strategy %q", field, async.Strategy)
+		}
+		if strings.TrimSpace(async.WorkRequest.Source) == "" {
+			return fmt.Errorf("%s.workRequest.source is required for strategy %q", field, async.Strategy)
+		}
+		if len(async.WorkRequest.Phases) == 0 {
+			return fmt.Errorf("%s.workRequest.phases must list at least one phase for strategy %q", field, async.Strategy)
+		}
+		return nil
+	}
+
+	if async.WorkRequest.hasOverride() {
+		return fmt.Errorf("%s.workRequest metadata requires strategy %q", field, AsyncStrategyWorkRequest)
+	}
+	return nil
+}
+
 func (r ResourceGenerationOverride) hasOverrides() bool {
 	return strings.TrimSpace(r.FormalSpec) != "" ||
+		r.Async.hasOverride() ||
 		r.Controller.hasOverrides() ||
 		r.ServiceManager.hasOverrides() ||
 		strings.TrimSpace(r.Webhooks.Strategy) != "" ||
@@ -639,6 +840,84 @@ func (s ServiceManagerGenerationOverride) hasOverrides() bool {
 
 func (s SampleOverride) hasOverride() bool {
 	return strings.TrimSpace(s.Body) != "" || strings.TrimSpace(s.MetadataName) != "" || strings.TrimSpace(s.Spec) != ""
+}
+
+func (a AsyncConfig) hasOverride() bool {
+	return strings.TrimSpace(a.Strategy) != "" ||
+		strings.TrimSpace(a.Runtime) != "" ||
+		strings.TrimSpace(a.FormalClassification) != "" ||
+		a.WorkRequest.hasOverride()
+}
+
+func (a AsyncConfig) withDefaults() AsyncConfig {
+	normalized := a
+	normalized.Strategy = strings.TrimSpace(normalized.Strategy)
+	normalized.Runtime = strings.TrimSpace(normalized.Runtime)
+	normalized.FormalClassification = strings.TrimSpace(normalized.FormalClassification)
+	normalized.WorkRequest = normalized.WorkRequest.withDefaults()
+	if normalized.FormalClassification == "" && normalized.Strategy != "" {
+		normalized.FormalClassification = normalized.Strategy
+	}
+	return normalized
+}
+
+func (a AsyncConfig) merge(override AsyncConfig) AsyncConfig {
+	merged := a.withDefaults()
+	override = override.withDefaults()
+
+	if strategy := strings.TrimSpace(override.Strategy); strategy != "" {
+		merged.Strategy = strategy
+		if strings.TrimSpace(override.FormalClassification) == "" {
+			merged.FormalClassification = ""
+		}
+		if strategy != AsyncStrategyWorkRequest {
+			merged.WorkRequest = AsyncWorkRequestConfig{}
+		}
+	}
+	if runtime := strings.TrimSpace(override.Runtime); runtime != "" {
+		merged.Runtime = runtime
+	}
+	if classification := strings.TrimSpace(override.FormalClassification); classification != "" {
+		merged.FormalClassification = classification
+	}
+	if override.WorkRequest.hasOverride() {
+		// Treat resource-level work-request metadata as a full contract replacement
+		// so overrides can clear inherited legacy bridges or phase lists explicitly.
+		merged.WorkRequest = override.WorkRequest
+	}
+	return merged.withDefaults()
+}
+
+func (w AsyncWorkRequestConfig) hasOverride() bool {
+	return strings.TrimSpace(w.Source) != "" || len(w.Phases) > 0 || w.LegacyFieldBridge.hasOverride()
+}
+
+func (w AsyncWorkRequestConfig) withDefaults() AsyncWorkRequestConfig {
+	normalized := w
+	normalized.Source = strings.TrimSpace(normalized.Source)
+	if len(normalized.Phases) > 0 {
+		phases := make([]string, 0, len(normalized.Phases))
+		for _, phase := range normalized.Phases {
+			if trimmed := strings.TrimSpace(phase); trimmed != "" {
+				phases = append(phases, trimmed)
+			}
+		}
+		normalized.Phases = phases
+	}
+	normalized.LegacyFieldBridge = normalized.LegacyFieldBridge.withDefaults()
+	return normalized
+}
+
+func (b AsyncLegacyFieldBridge) hasOverride() bool {
+	return strings.TrimSpace(b.Create) != "" || strings.TrimSpace(b.Update) != "" || strings.TrimSpace(b.Delete) != ""
+}
+
+func (b AsyncLegacyFieldBridge) withDefaults() AsyncLegacyFieldBridge {
+	return AsyncLegacyFieldBridge{
+		Create: strings.TrimSpace(b.Create),
+		Update: strings.TrimSpace(b.Update),
+		Delete: strings.TrimSpace(b.Delete),
+	}
 }
 
 func validateFormalSpec(field string, value string) error {
@@ -957,6 +1236,15 @@ func (s ServiceConfig) FormalSpecFor(kind string) string {
 	return strings.TrimSpace(s.FormalSpec)
 }
 
+// AsyncConfigFor resolves the effective async contract for one resource.
+func (s ServiceConfig) AsyncConfigFor(kind string) AsyncConfig {
+	config := s.Async.withDefaults()
+	if override, ok := s.resourceGenerationOverride(kind); ok {
+		config = config.merge(override.Async)
+	}
+	return config.withDefaults()
+}
+
 // HasFormalSpecs reports whether the service or any resource override uses formal specs.
 func (s ServiceConfig) HasFormalSpecs() bool {
 	if strings.TrimSpace(s.FormalSpec) != "" {
@@ -1012,6 +1300,18 @@ func (s ServiceConfig) resourceGenerationOverride(kind string) (ResourceGenerati
 		}
 	}
 	return ResourceGenerationOverride{}, false
+}
+
+func (s ServiceConfig) hasAsyncContract() bool {
+	if s.Async.hasOverride() {
+		return true
+	}
+	for _, resource := range s.Generation.Resources {
+		if resource.Async.hasOverride() {
+			return true
+		}
+	}
+	return false
 }
 
 // ObservedStateStructCandidates returns the read-model structs that should feed status synthesis.

@@ -22,12 +22,28 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 	if formalModel == nil {
 		return nil
 	}
+	return buildRuntimeSemanticsModelWithAsync(formalModel, runtime, AsyncConfig{})
+}
+
+func buildRuntimeSemanticsModelWithAsync(
+	formalModel *FormalModel,
+	runtime *RuntimeModel,
+	async AsyncConfig,
+) *RuntimeSemanticsModel {
+	if formalModel == nil {
+		return nil
+	}
 
 	binding := formalModel.Binding
 	mutation := runtimeMutationPaths(formalModel)
+	asyncModel := buildRuntimeAsyncModel(async)
+	createHooks := filteredRuntimeHooks(binding.Import.Hooks.Create, asyncModel)
+	updateHooks := filteredRuntimeHooks(binding.Import.Hooks.Update, asyncModel)
+	deleteHooks := filteredRuntimeHooks(binding.Import.Hooks.Delete, asyncModel)
 	semantics := &RuntimeSemanticsModel{
 		FormalService:     formalModel.Reference.Service,
 		FormalSlug:        formalModel.Reference.Slug,
+		Async:             asyncModel,
 		StatusProjection:  strings.TrimSpace(binding.Spec.StatusProjection),
 		SecretSideEffects: strings.TrimSpace(binding.Spec.SecretSideEffects),
 		FinalizerPolicy:   strings.TrimSpace(binding.Spec.FinalizerPolicy),
@@ -50,9 +66,9 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 			ConflictsWith: normalizeFormalConflicts(binding.Import.Mutation.ConflictsWith),
 		},
 		Hooks: RuntimeHookSetModel{
-			Create: buildRuntimeHookModels(binding.Import.Hooks.Create),
-			Update: buildRuntimeHookModels(binding.Import.Hooks.Update),
-			Delete: buildRuntimeHookModels(binding.Import.Hooks.Delete),
+			Create: createHooks,
+			Update: updateHooks,
+			Delete: deleteHooks,
 		},
 		AuxiliaryOperations: buildAuxiliaryOperationModels(binding, runtime),
 		OpenGaps:            buildRuntimeGapModels(binding),
@@ -67,6 +83,49 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 	semantics.UpdateFollowUp = buildWriteFollowUpModel(semantics.Hooks.Update, runtime)
 	semantics.DeleteFollowUp = buildDeleteFollowUpModel(semantics.Hooks.Delete, semantics.Delete, runtime)
 	return semantics
+}
+
+func buildRuntimeAsyncModel(async AsyncConfig) *RuntimeAsyncModel {
+	async = async.withDefaults()
+	if !async.hasOverride() {
+		return nil
+	}
+
+	model := &RuntimeAsyncModel{
+		Strategy:             async.Strategy,
+		Runtime:              async.Runtime,
+		FormalClassification: async.FormalClassification,
+	}
+	if async.WorkRequest.hasOverride() {
+		model.WorkRequest = &RuntimeWorkRequestModel{
+			Source: async.WorkRequest.Source,
+			Phases: append([]string(nil), async.WorkRequest.Phases...),
+		}
+		if async.WorkRequest.LegacyFieldBridge.hasOverride() {
+			model.WorkRequest.LegacyFieldBridge = &RuntimeLegacyFieldBridgeModel{
+				Create: async.WorkRequest.LegacyFieldBridge.Create,
+				Update: async.WorkRequest.LegacyFieldBridge.Update,
+				Delete: async.WorkRequest.LegacyFieldBridge.Delete,
+			}
+		}
+	}
+	return model
+}
+
+func filteredRuntimeHooks(hooks []formal.Hook, async *RuntimeAsyncModel) []RuntimeHookModel {
+	models := buildRuntimeHookModels(hooks)
+	if async == nil || async.Strategy == AsyncStrategyWorkRequest {
+		return models
+	}
+
+	filtered := make([]RuntimeHookModel, 0, len(models))
+	for _, hook := range models {
+		if hook.Helper == "tfresource.WaitForWorkRequestWithErrorHandling" {
+			continue
+		}
+		filtered = append(filtered, hook)
+	}
+	return filtered
 }
 
 type runtimeMutationPathSet struct {

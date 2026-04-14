@@ -30,7 +30,24 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const defaultRequeueDuration = time.Minute
+const (
+	defaultRequeueDuration = time.Minute
+
+	asyncStrategyLifecycle   = "lifecycle"
+	asyncStrategyNone        = "none"
+	asyncStrategyWorkRequest = "workrequest"
+
+	asyncRuntimeGeneratedRuntime = "generatedruntime"
+	asyncRuntimeHandwritten      = "handwritten"
+
+	asyncWorkRequestSourceServiceSDK      = "service-sdk"
+	asyncWorkRequestSourceWorkRequestsAPI = "workrequests-service"
+	asyncWorkRequestSourceProviderHelper  = "provider-helper"
+
+	asyncPhaseCreate = "create"
+	asyncPhaseUpdate = "update"
+	asyncPhaseDelete = "delete"
+)
 
 var errResourceNotFound = errors.New("generated runtime resource not found")
 
@@ -66,6 +83,25 @@ type Hook struct {
 	Helper     string
 	EntityType string
 	Action     string
+}
+
+type AsyncSemantics struct {
+	Strategy             string
+	Runtime              string
+	FormalClassification string
+	WorkRequest          *WorkRequestSemantics
+}
+
+type WorkRequestSemantics struct {
+	Source            string
+	Phases            []string
+	LegacyFieldBridge *WorkRequestLegacyFieldBridge
+}
+
+type WorkRequestLegacyFieldBridge struct {
+	Create string
+	Update string
+	Delete string
 }
 
 type FollowUpSemantics struct {
@@ -118,6 +154,7 @@ type UnsupportedSemantic struct {
 type Semantics struct {
 	FormalService       string
 	FormalSlug          string
+	Async               *AsyncSemantics
 	StatusProjection    string
 	SecretSideEffects   string
 	FinalizerPolicy     string
@@ -2487,6 +2524,7 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 	problems := append([]string{}, unsupportedFormalProblems(semantics)...)
 	problems = append(problems, unsupportedAuxiliaryProblems(semantics)...)
 	problems = append(problems, unsupportedFollowUpHelpers(semantics)...)
+	problems = append(problems, invalidAsyncSemanticsProblems(semantics)...)
 	problems = append(problems, invalidListSemanticsProblems(semantics)...)
 	problems = append(problems, invalidDeleteSemanticsProblems(semantics)...)
 	if len(problems) == 0 {
@@ -2525,6 +2563,214 @@ func unsupportedFollowUpHelpers(semantics *Semantics) []string {
 		}
 	}
 	return problems
+}
+
+func invalidAsyncSemanticsProblems(semantics *Semantics) []string {
+	async := semantics.Async
+	if async == nil {
+		if hasWorkRequestHelper(semantics) {
+			return []string{fmt.Sprintf("workrequest helper requires explicit async strategy %q", asyncStrategyWorkRequest)}
+		}
+		return nil
+	}
+
+	var problems []string
+	strategy := strings.TrimSpace(async.Strategy)
+	runtime := strings.TrimSpace(async.Runtime)
+	formalClassification := strings.TrimSpace(async.FormalClassification)
+
+	problems = append(problems, invalidAsyncStrategyProblems("async.strategy", strategy)...)
+	problems = append(problems, invalidAsyncRuntimeProblems("async.runtime", runtime)...)
+	problems = append(problems, invalidAsyncStrategyProblems("async.formalClassification", formalClassification)...)
+	problems = append(problems, invalidAsyncWorkRequestProblems(async.WorkRequest)...)
+
+	if !hasExplicitAsyncContract(async) {
+		if hasWorkRequestHelper(semantics) {
+			problems = append(problems, fmt.Sprintf("workrequest helper requires explicit async strategy %q", asyncStrategyWorkRequest))
+		}
+		return problems
+	}
+
+	if strategy == "" {
+		problems = append(problems, "explicit async semantics require strategy")
+	}
+	if runtime == "" {
+		problems = append(problems, "explicit async semantics require runtime")
+	}
+	if runtime == asyncRuntimeHandwritten {
+		problems = append(problems, fmt.Sprintf("generatedruntime cannot honor explicit async runtime %q", runtime))
+	}
+
+	workRequestConfigured := hasWorkRequestSemantics(async.WorkRequest)
+	switch strategy {
+	case asyncStrategyWorkRequest:
+		if runtime == asyncRuntimeGeneratedRuntime {
+			problems = append(problems, "generatedruntime does not support explicit workrequest strategy")
+		}
+		if !workRequestConfigured {
+			problems = append(problems, "workrequest async semantics require workRequest metadata")
+		} else {
+			if strings.TrimSpace(async.WorkRequest.Source) == "" {
+				problems = append(problems, "workrequest async semantics require workRequest.source")
+			}
+			if len(async.WorkRequest.Phases) == 0 {
+				problems = append(problems, "workrequest async semantics require workRequest.phases")
+			}
+		}
+	case "", asyncStrategyLifecycle, asyncStrategyNone:
+		if workRequestConfigured {
+			problems = append(problems, fmt.Sprintf("workRequest metadata requires strategy %q", asyncStrategyWorkRequest))
+		}
+	default:
+		if workRequestConfigured {
+			problems = append(problems, fmt.Sprintf("workRequest metadata requires strategy %q", asyncStrategyWorkRequest))
+		}
+	}
+	if strategy != asyncStrategyWorkRequest && hasWorkRequestHelper(semantics) {
+		problems = append(problems, fmt.Sprintf("workrequest helper requires explicit async strategy %q", asyncStrategyWorkRequest))
+	}
+
+	return problems
+}
+
+func invalidAsyncStrategyProblems(field string, strategy string) []string {
+	switch strategy {
+	case "", asyncStrategyLifecycle, asyncStrategyWorkRequest, asyncStrategyNone:
+		return nil
+	default:
+		return []string{fmt.Sprintf(
+			`%s %q must be one of %q, %q, or %q`,
+			field,
+			strategy,
+			asyncStrategyLifecycle,
+			asyncStrategyWorkRequest,
+			asyncStrategyNone,
+		)}
+	}
+}
+
+func invalidAsyncRuntimeProblems(field string, runtime string) []string {
+	switch runtime {
+	case "", asyncRuntimeGeneratedRuntime, asyncRuntimeHandwritten:
+		return nil
+	default:
+		return []string{fmt.Sprintf(
+			`%s %q must be one of %q or %q`,
+			field,
+			runtime,
+			asyncRuntimeGeneratedRuntime,
+			asyncRuntimeHandwritten,
+		)}
+	}
+}
+
+func invalidAsyncWorkRequestProblems(workRequest *WorkRequestSemantics) []string {
+	if workRequest == nil {
+		return nil
+	}
+
+	var problems []string
+	if source := strings.TrimSpace(workRequest.Source); source != "" {
+		switch source {
+		case asyncWorkRequestSourceServiceSDK, asyncWorkRequestSourceWorkRequestsAPI, asyncWorkRequestSourceProviderHelper:
+		default:
+			problems = append(problems, fmt.Sprintf(
+				`async.workRequest.source %q must be one of %q, %q, or %q`,
+				workRequest.Source,
+				asyncWorkRequestSourceServiceSDK,
+				asyncWorkRequestSourceWorkRequestsAPI,
+				asyncWorkRequestSourceProviderHelper,
+			))
+		}
+	}
+
+	seen := make(map[string]struct{}, len(workRequest.Phases))
+	for index, rawPhase := range workRequest.Phases {
+		phase := strings.TrimSpace(rawPhase)
+		switch phase {
+		case asyncPhaseCreate, asyncPhaseUpdate, asyncPhaseDelete:
+		case "":
+			problems = append(problems, fmt.Sprintf("async.workRequest.phases[%d] must not be blank", index))
+			continue
+		default:
+			problems = append(problems, fmt.Sprintf(
+				`async.workRequest.phases[%d] %q must be one of %q, %q, or %q`,
+				index,
+				rawPhase,
+				asyncPhaseCreate,
+				asyncPhaseUpdate,
+				asyncPhaseDelete,
+			))
+			continue
+		}
+		if _, exists := seen[phase]; exists {
+			problems = append(problems, fmt.Sprintf(`async.workRequest.phases contains duplicate phase %q`, phase))
+			continue
+		}
+		seen[phase] = struct{}{}
+	}
+
+	if workRequest.LegacyFieldBridge == nil {
+		return problems
+	}
+
+	for subfield, value := range map[string]string{
+		"create": workRequest.LegacyFieldBridge.Create,
+		"update": workRequest.LegacyFieldBridge.Update,
+		"delete": workRequest.LegacyFieldBridge.Delete,
+	} {
+		if value == "" {
+			continue
+		}
+		if strings.TrimSpace(value) == "" {
+			problems = append(problems, fmt.Sprintf("async.workRequest.legacyFieldBridge.%s must not be blank", subfield))
+		}
+	}
+
+	return problems
+}
+
+func hasExplicitAsyncContract(async *AsyncSemantics) bool {
+	if async == nil {
+		return false
+	}
+	return strings.TrimSpace(async.Strategy) != "" ||
+		strings.TrimSpace(async.Runtime) != "" ||
+		strings.TrimSpace(async.FormalClassification) != "" ||
+		hasWorkRequestSemantics(async.WorkRequest)
+}
+
+func hasWorkRequestSemantics(workRequest *WorkRequestSemantics) bool {
+	if workRequest == nil {
+		return false
+	}
+	if strings.TrimSpace(workRequest.Source) != "" || len(workRequest.Phases) > 0 {
+		return true
+	}
+	if workRequest.LegacyFieldBridge == nil {
+		return false
+	}
+	return strings.TrimSpace(workRequest.LegacyFieldBridge.Create) != "" ||
+		strings.TrimSpace(workRequest.LegacyFieldBridge.Update) != "" ||
+		strings.TrimSpace(workRequest.LegacyFieldBridge.Delete) != ""
+}
+
+func hasWorkRequestHelper(semantics *Semantics) bool {
+	for _, hooks := range [][]Hook{
+		semantics.Hooks.Create,
+		semantics.Hooks.Update,
+		semantics.Hooks.Delete,
+		semantics.CreateFollowUp.Hooks,
+		semantics.UpdateFollowUp.Hooks,
+		semantics.DeleteFollowUp.Hooks,
+	} {
+		for _, hook := range hooks {
+			if strings.TrimSpace(hook.Helper) == "tfresource.WaitForWorkRequestWithErrorHandling" {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func invalidListSemanticsProblems(semantics *Semantics) []string {

@@ -104,8 +104,13 @@ func newTestGeneratedDelegate(manager *SubnetServiceManager, client subnetOCICli
 		SDKName: "Subnet",
 		Log:     manager.Log,
 		Semantics: &generatedruntime.Semantics{
-			FormalService:     "core",
-			FormalSlug:        "subnet",
+			FormalService: "core",
+			FormalSlug:    "subnet",
+			Async: &generatedruntime.AsyncSemantics{
+				Strategy:             "lifecycle",
+				Runtime:              "generatedruntime",
+				FormalClassification: "lifecycle",
+			},
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -129,13 +134,13 @@ func newTestGeneratedDelegate(manager *SubnetServiceManager, client subnetOCICli
 				ConflictsWith: map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
 				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 			},
 			UpdateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",

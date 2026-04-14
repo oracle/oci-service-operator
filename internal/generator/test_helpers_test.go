@@ -51,6 +51,77 @@ func serviceConfigsByName(t *testing.T, cfg *Config, names ...string) map[string
 	return found
 }
 
+type selectedKindTarget struct {
+	Service string
+	Kind    string
+}
+
+func defaultActiveExplicitSelectedKindTargets(cfg *Config) []selectedKindTarget {
+	if cfg == nil {
+		return nil
+	}
+
+	targets := make([]selectedKindTarget, 0)
+	for _, service := range cfg.Services {
+		if !service.IsDefaultActive() || service.DefaultSelectionMode() != SelectionModeExplicit {
+			continue
+		}
+		for _, kind := range service.defaultSelectedKinds() {
+			targets = append(targets, selectedKindTarget{
+				Service: service.Service,
+				Kind:    kind,
+			})
+		}
+	}
+	return targets
+}
+
+func defaultActiveLifecycleGeneratedRuntimeFormalTargets(cfg *Config) []selectedKindTarget {
+	if cfg == nil {
+		return nil
+	}
+
+	targets := make([]selectedKindTarget, 0)
+	for _, service := range cfg.Services {
+		if !service.IsDefaultActive() || service.DefaultSelectionMode() != SelectionModeExplicit {
+			continue
+		}
+		for _, kind := range service.defaultSelectedKinds() {
+			async := service.AsyncConfigFor(kind)
+			if async.Strategy != AsyncStrategyLifecycle || async.Runtime != AsyncRuntimeGeneratedRuntime {
+				continue
+			}
+			if service.ServiceManagerGenerationStrategyFor(kind) != GenerationStrategyGenerated {
+				continue
+			}
+			if strings.TrimSpace(service.FormalSpecFor(kind)) == "" {
+				continue
+			}
+			targets = append(targets, selectedKindTarget{
+				Service: service.Service,
+				Kind:    kind,
+			})
+		}
+	}
+	return targets
+}
+
+func assertAsyncContract(t *testing.T, service *ServiceConfig, kind string, wantStrategy string, wantRuntime string) AsyncConfig {
+	t.Helper()
+
+	got := service.AsyncConfigFor(kind)
+	if got.Strategy != wantStrategy {
+		t.Fatalf("%s %s async strategy = %q, want %q", service.Service, kind, got.Strategy, wantStrategy)
+	}
+	if got.Runtime != wantRuntime {
+		t.Fatalf("%s %s async runtime = %q, want %q", service.Service, kind, got.Runtime, wantRuntime)
+	}
+	if got.FormalClassification != wantStrategy {
+		t.Fatalf("%s %s formalClassification = %q, want %q", service.Service, kind, got.FormalClassification, wantStrategy)
+	}
+	return got
+}
+
 func missingServiceNames(found map[string]*ServiceConfig, names []string) []string {
 	missing := make([]string, 0, len(names))
 	for _, name := range names {
