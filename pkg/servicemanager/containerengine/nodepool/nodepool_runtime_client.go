@@ -358,7 +358,7 @@ func normalizeNodePoolCreateNodeConfigDetails(
 		return
 	}
 
-	normalizeNodePoolNodeConfigDetails(spec.PlacementConfigs, details.PlacementConfigs, &details.NsgIds)
+	normalizeNodePoolNodeConfigDetails(spec, details.PlacementConfigs, &details.NsgIds)
 }
 
 func normalizeNodePoolUpdateNodeConfigDetails(
@@ -369,24 +369,31 @@ func normalizeNodePoolUpdateNodeConfigDetails(
 		return
 	}
 
-	normalizeNodePoolNodeConfigDetails(spec.PlacementConfigs, details.PlacementConfigs, &details.NsgIds)
+	normalizeNodePoolNodeConfigDetails(spec, details.PlacementConfigs, &details.NsgIds)
 }
 
 func normalizeNodePoolNodeConfigDetails(
-	specs []containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfig,
+	spec containerenginev1beta1.NodePoolNodeConfigDetails,
 	details []containerenginesdk.NodePoolPlacementConfigDetails,
 	nsgIDs *[]string,
 ) {
-	if nsgIDs != nil && len(*nsgIDs) == 0 {
+	if nsgIDs != nil && len(*nsgIDs) == 0 && spec.NsgIds == nil {
 		*nsgIDs = nil
 	}
 
-	for i := 0; i < len(specs) && i < len(details); i++ {
-		if strings.TrimSpace(specs[i].PreemptibleNodeConfig.PreemptionAction.Type) != "" {
+	for i := 0; i < len(spec.PlacementConfigs) && i < len(details); i++ {
+		if !nodePoolSpecPreemptibleNodeConfigIsEmpty(spec.PlacementConfigs[i].PreemptibleNodeConfig) {
 			continue
 		}
 		details[i].PreemptibleNodeConfig = nil
 	}
+}
+
+func nodePoolSpecPreemptibleNodeConfigIsEmpty(
+	spec containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig,
+) bool {
+	action := spec.PreemptionAction
+	return strings.TrimSpace(action.Type) == "" && !action.IsPreserveBootVolume
 }
 
 func normalizeNodePoolPlacementFields(

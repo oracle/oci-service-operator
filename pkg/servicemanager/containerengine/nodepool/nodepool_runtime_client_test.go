@@ -156,6 +156,55 @@ func TestBuildNodePoolCreateDetailsOmitsEmptyPreemptibleNodeConfigAndDerivedEmpt
 	}
 }
 
+func TestBuildNodePoolCreateDetailsPreservesExplicitEmptyNsgIDs(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails.NsgIds = []string{}
+
+	details, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v", err)
+	}
+	if details.NodeConfigDetails == nil {
+		t.Fatal("buildNodePoolCreateDetails() NodeConfigDetails = nil, want active nodeConfigDetails path")
+	}
+	if details.NodeConfigDetails.NsgIds == nil {
+		t.Fatal("buildNodePoolCreateDetails() NodeConfigDetails.NsgIds = nil, want explicit empty slice preserved")
+	}
+	if len(details.NodeConfigDetails.NsgIds) != 0 {
+		t.Fatalf("buildNodePoolCreateDetails() NodeConfigDetails.NsgIds = %#v, want empty slice", details.NodeConfigDetails.NsgIds)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.CreateNodePoolRequest{
+		CreateNodePoolDetails: details,
+	}, http.MethodPost, "/nodePools")
+
+	if !strings.Contains(body, `"nsgIds":[]`) {
+		t.Fatalf("request body %s does not preserve explicit empty nsgIds intent", body)
+	}
+}
+
+func TestBuildNodePoolCreateDetailsRejectsNonEmptyUnsupportedPreemptibleNodeConfig(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails.PlacementConfigs[0].PreemptibleNodeConfig =
+		containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig{
+			PreemptionAction: containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction{
+				IsPreserveBootVolume: true,
+			},
+		}
+
+	_, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err == nil {
+		t.Fatal("buildNodePoolCreateDetails() error = nil, want unsupported preemptible action failure")
+	}
+	if !strings.Contains(err.Error(), "unsupported nodeConfigDetails.placementConfigs[0].preemptibleNodeConfig.preemptionAction type") {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v, want unsupported preemptible action context", err)
+	}
+}
+
 func TestBuildNodePoolCreateDetailsRejectsUnsupportedNodeSourceType(t *testing.T) {
 	t.Parallel()
 
@@ -269,6 +318,56 @@ func TestBuildNodePoolUpdateDetailsOmitsEmptyPreemptibleNodeConfigAndDerivedEmpt
 		if strings.Contains(body, field) {
 			t.Fatalf("request body unexpectedly serialized %s: %s", field, body)
 		}
+	}
+}
+
+func TestBuildNodePoolUpdateDetailsPreservesExplicitEmptyNsgIDs(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails.NsgIds = []string{}
+
+	details, err := buildNodePoolUpdateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() error = %v", err)
+	}
+	if details.NodeConfigDetails == nil {
+		t.Fatal("buildNodePoolUpdateDetails() NodeConfigDetails = nil, want active nodeConfigDetails path")
+	}
+	if details.NodeConfigDetails.NsgIds == nil {
+		t.Fatal("buildNodePoolUpdateDetails() NodeConfigDetails.NsgIds = nil, want explicit empty slice preserved")
+	}
+	if len(details.NodeConfigDetails.NsgIds) != 0 {
+		t.Fatalf("buildNodePoolUpdateDetails() NodeConfigDetails.NsgIds = %#v, want empty slice", details.NodeConfigDetails.NsgIds)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.UpdateNodePoolRequest{
+		NodePoolId:            common.String("ocid1.nodepool.oc1..example"),
+		UpdateNodePoolDetails: details,
+	}, http.MethodPut, "/nodePools/ocid1.nodepool.oc1..example")
+
+	if !strings.Contains(body, `"nsgIds":[]`) {
+		t.Fatalf("request body %s does not preserve explicit empty nsgIds intent", body)
+	}
+}
+
+func TestBuildNodePoolUpdateDetailsRejectsNonEmptyUnsupportedPreemptibleNodeConfig(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeConfigDetails.PlacementConfigs[0].PreemptibleNodeConfig =
+		containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig{
+			PreemptionAction: containerenginev1beta1.NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction{
+				IsPreserveBootVolume: true,
+			},
+		}
+
+	_, err := buildNodePoolUpdateDetails(context.Background(), resource, resource.Namespace)
+	if err == nil {
+		t.Fatal("buildNodePoolUpdateDetails() error = nil, want unsupported preemptible action failure")
+	}
+	if !strings.Contains(err.Error(), "unsupported nodeConfigDetails.placementConfigs[0].preemptibleNodeConfig.preemptionAction type") {
+		t.Fatalf("buildNodePoolUpdateDetails() error = %v, want unsupported preemptible action context", err)
 	}
 }
 
