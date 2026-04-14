@@ -1855,7 +1855,8 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 
 	vcnServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"))
 	assertContains(t, vcnServiceClient, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newVcnRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newVcnRuntimeSemantics(),",
 		`FormalService:     "core"`,
 		`FormalSlug:        "vcn"`,
 		`ProvisioningStates: []string{"PROVISIONING"}`,
@@ -1964,7 +1965,8 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	for _, test := range coreFormalServiceClients {
 		serviceClient := readFile(t, test.path)
 		assertContains(t, serviceClient, append([]string{
-			"Semantics: &generatedruntime.Semantics{",
+			"RuntimeSemantics() *generatedruntime.Semantics {",
+			`Semantics: new`,
 			`FormalService:     "core"`,
 			`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,
 			`ProvisioningStates: []string{"PROVISIONING"}`,
@@ -2156,7 +2158,8 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newClusterRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newClusterRuntimeSemantics(),",
 		`FormalService:     "containerengine"`,
 		`FormalSlug:        "cluster"`,
 		`ProvisioningStates: []string{"CREATING", "UPDATING"}`,
