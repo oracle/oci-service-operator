@@ -73,6 +73,11 @@ func newVaultRuntimeConfig(log loggerutil.OSOKLogger, sdkClient vaultOCIClient) 
 			return buildVaultCreateDetails(ctx, resource, namespace)
 		},
 		Semantics: &generatedruntime.Semantics{
+			Async: &generatedruntime.AsyncSemantics{
+				Strategy:             "lifecycle",
+				Runtime:              "generatedruntime",
+				FormalClassification: "lifecycle",
+			},
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",

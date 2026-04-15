@@ -506,6 +506,7 @@ func defaultControllerRBACMarkers(groupDNSName string, kindPlural string) []stri
 		fmt.Sprintf("+kubebuilder:rbac:groups=%s,resources=%s,verbs=get;list;watch;create;update;patch;delete", groupDNSName, kindPlural),
 		fmt.Sprintf("+kubebuilder:rbac:groups=%s,resources=%s/status,verbs=get;update;patch", groupDNSName, kindPlural),
 		fmt.Sprintf("+kubebuilder:rbac:groups=%s,resources=%s/finalizers,verbs=update", groupDNSName, kindPlural),
+		`+kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 	}
 }
 

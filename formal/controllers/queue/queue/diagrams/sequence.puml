@@ -134,11 +134,20 @@ lifecycle_state
 conflicts: none
 open gaps: none
 Queue create, update, and delete are
-work-request-backed. The runtime persists
+work-request-backed. The runtime projects the
+polled work request into status.async.current as
+the canonical async tracker, while
 createWorkRequestId, updateWorkRequestId, and
-deleteWorkRequestId in status so reconcile
-resumes asynchronous OCI operations across
-requeues instead of relying on name-only lookup.
+deleteWorkRequestId remain compatibility mirrors
+so reconcile resumes asynchronous OCI operations
+across requeues instead of relying on name-only
+lookup.
+Queue SDK OperationStatus values normalize into
+shared async classes and Queue ActionType values
+normalize into create, update, and delete
+phases, but raw work-request status, operation
+type, message, percent complete, and work
+request ID stay visible in status for debugging.
 Create binds identity from Queue work-request
 resources, then reads the Queue by recovered
 OCID before projecting status. Delete is not

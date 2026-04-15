@@ -22,11 +22,30 @@ metadata and regenerated diagrams.
   reuses only a single exact-name match, rereads that candidate through
   `GetTable`, and fails on ambiguous duplicate matches instead of guessing.
 - The runtime projects OCI lifecycle into OSOK status, mapping `CREATING`,
-  `UPDATING`, and `DELETING` into `Provisioning`, `Updating`, and
-  `Terminating` with one-minute requeues, while `ACTIVE` settles success and
-  `FAILED` becomes terminal without requeue.
+  `UPDATING`, `DELETING`, `FAILED`, and `DELETED` through the shared
+  lifecycle-backed `status.async.current` tracker; the centralized async
+  condition mapper then drives `Provisioning`, `Updating`, `Terminating`, and
+  terminal failure with the existing one-minute requeue policy.
 - Delete keeps the finalizer until `GetTable` or `ListTables` confirms the
   table is deleted or no longer exists.
+
+## Authority and scoped cleanup
+
+- `formal/controllers/nosql/table/*` is the authoritative formal path for the
+  lifecycle-only Table reference contract.
+- `formal/controllers/nosql/workrequest/logic-gaps.md`,
+  `formal/controllers/nosql/workrequesterror/logic-gaps.md`, and
+  `formal/controllers/nosql/workrequestlog/logic-gaps.md` remain
+  scaffold-only placeholders outside the promoted `Table` contract and are
+  tracked separately under `oci-service-operator-9s2`.
+- `Table` intentionally stays lifecycle-backed after the async migration. It
+  does not reopen the disabled top-level `service: workrequests` decision and
+  it does not imply promotion of the scaffolded NoSQL `WorkRequest*` rows under
+  `formal/controller_manifest.tsv`.
+- Remaining lifecycle/manual selected resources that still expose OCI
+  work-request APIs are re-audited separately under `oci-service-operator-0kb`;
+  `Table` is the lifecycle reference, not a proxy for adapter promotion
+  elsewhere.
 
 ## Shared generated-runtime baseline
 

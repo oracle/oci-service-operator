@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	osokcore "github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
@@ -104,8 +105,13 @@ func newTestGeneratedNetworkSecurityGroupDelegate(manager *NetworkSecurityGroupS
 		SDKName: "NetworkSecurityGroup",
 		Log:     manager.Log,
 		Semantics: &generatedruntime.Semantics{
-			FormalService:     "core",
-			FormalSlug:        "networksecuritygroup",
+			FormalService: "core",
+			FormalSlug:    "networksecuritygroup",
+			Async: &generatedruntime.AsyncSemantics{
+				Strategy:             "lifecycle",
+				Runtime:              "generatedruntime",
+				FormalClassification: "lifecycle",
+			},
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -129,13 +135,13 @@ func newTestGeneratedNetworkSecurityGroupDelegate(manager *NetworkSecurityGroupS
 				ConflictsWith: map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
 				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 			},
 			UpdateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
@@ -660,80 +666,12 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestIsNetworkSecurityGroupReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isNetworkSecurityGroupReadNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isNetworkSecurityGroupReadNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
-}
-
-func TestIsNetworkSecurityGroupDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
-	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isNetworkSecurityGroupDeleteNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isNetworkSecurityGroupDeleteNotFoundOCI(fakeNetworkSecurityGroupServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
+func TestNetworkSecurityGroupClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {
+	contract, err := errortest.ManualRuntimeClassifierContractFromReviewedRegistration("core", "NetworkSecurityGroup")
+	if err != nil {
+		t.Fatalf("ManualRuntimeClassifierContractFromReviewedRegistration() error = %v", err)
+	}
+	errortest.RunManualRuntimeClassifierContract(t, contract, isNetworkSecurityGroupReadNotFoundOCI, isNetworkSecurityGroupDeleteNotFoundOCI)
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {

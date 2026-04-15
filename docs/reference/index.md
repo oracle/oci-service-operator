@@ -126,6 +126,10 @@ Manage OCI NoSQL tables from Kubernetes.
 
 Package page: [NoSQL](packages/nosql/index.md)
 
+Notes:
+- Current package scope is intentionally limited to Table.
+- Table is the lifecycle-only reference for the shared async tracker; standalone NoSQL WorkRequest resources are not published with this package.
+
 | Package | Group/Kind | API Version | Support Status | Latest Released Version | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [NoSQL](packages/nosql/index.md) | `nosql/Table` | `nosql.oracle.com/v1beta1` | Preview | `v2.0.0-alpha` | [Guide](../guides/nosql/table.md) | [Sample](samples/nosql/v1beta1/table.md) | [Reference](api/nosql/v1beta1/index.md#kind-table) |
@@ -172,6 +176,10 @@ Manage OCI Queue service queues from Kubernetes.
 
 Package page: [Queue](packages/queue/index.md)
 
+Notes:
+- Current package scope is intentionally limited to Queue.
+- Queue is the work-request reference for the shared async tracker; standalone Queue WorkRequest resources and the generic workrequests API group are not published with this package.
+
 | Package | Group/Kind | API Version | Support Status | Latest Released Version | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [Queue](packages/queue/index.md) | `queue/Queue` | `queue.oracle.com/v1beta1` | Preview | `v2.0.0-alpha` | [Guide](../queue.md) | [Sample](samples/queue/v1beta1/queue.md) | [Reference](api/queue/v1beta1/index.md#kind-queue) |
@@ -184,6 +192,7 @@ Package page: [Redis](packages/redis/index.md)
 
 Notes:
 - Current package scope is intentionally limited to RedisCluster.
+- RedisCluster is the work-request-backed Redis reference for the shared async tracker; standalone Redis WorkRequest resources are not published with this package.
 
 | Package | Group/Kind | API Version | Support Status | Latest Released Version | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- | --- | --- |

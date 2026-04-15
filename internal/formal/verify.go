@@ -272,9 +272,9 @@ type hooks struct {
 }
 
 type hook struct {
-	Helper     string `json:"helper"`
-	EntityType string `json:"entityType,omitempty"`
-	Action     string `json:"action,omitempty"`
+	Helper     string `json:"helper" yaml:"helper"`
+	EntityType string `json:"entityType,omitempty" yaml:"entityType,omitempty"`
+	Action     string `json:"action,omitempty" yaml:"action,omitempty"`
 }
 
 type listLookup struct {

@@ -66,6 +66,7 @@ func (c *DeploymentServiceManager) CreateOrUpdate(ctx context.Context, obj runti
 
 	depInstance, err := c.resolveDeploymentInstance(ctx, dep)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 
@@ -91,7 +92,7 @@ func (c *DeploymentServiceManager) Delete(ctx context.Context, obj runtime.Objec
 	}
 
 	c.Log.InfoLog(fmt.Sprintf("Deleting ApiGatewayDeployment %s", targetID))
-	if err := c.DeleteDeployment(ctx, targetID); err != nil {
+	if err := c.DeleteDeployment(ctx, dep, targetID); err != nil {
 		if isDeploymentNotFound(err) {
 			return true, nil
 		}
@@ -102,8 +103,10 @@ func (c *DeploymentServiceManager) Delete(ctx context.Context, obj runtime.Objec
 	depInstance, err := c.GetDeployment(ctx, targetID, nil)
 	if err != nil {
 		if isDeploymentNotFound(err) {
+			servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 			return true, nil
 		}
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while checking ApiGatewayDeployment deletion")
 		return false, err
 	}
@@ -151,6 +154,7 @@ func (c *DeploymentServiceManager) lookupOrCreateDeployment(ctx context.Context,
 	dep *apigatewayv1beta1.ApiGatewayDeployment) (*apigatewaysdk.Deployment, error) {
 	depOcid, err := c.GetDeploymentOcid(ctx, *dep)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 		return nil, err
 	}
 	if depOcid == nil {
@@ -163,6 +167,7 @@ func (c *DeploymentServiceManager) bindDeployment(ctx context.Context,
 	dep *apigatewayv1beta1.ApiGatewayDeployment) (*apigatewaysdk.Deployment, error) {
 	depInstance, err := c.GetDeployment(ctx, dep.Spec.DeploymentId, nil)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while getting existing ApiGatewayDeployment")
 		return nil, err
 	}
@@ -181,12 +186,14 @@ func (c *DeploymentServiceManager) createDeploymentInstance(ctx context.Context,
 		applyGatewayCreateFailure(&dep.Status.OsokStatus, err, c.Log, "ApiGatewayDeployment")
 		return nil, err
 	}
+	servicemanager.RecordResponseOpcRequestID(&dep.Status.OsokStatus, resp)
 
 	c.Log.InfoLog(fmt.Sprintf("ApiGatewayDeployment %s is Provisioning", dep.Spec.DisplayName))
 	setGatewayProvisioning(&dep.Status.OsokStatus, "ApiGatewayDeployment", dep.Spec.DisplayName, shared.OCID(*resp.Id), c.Log)
 	retryPolicy := c.getDeploymentRetryPolicy(30)
 	depInstance, err := c.GetDeployment(ctx, shared.OCID(*resp.Id), &retryPolicy)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while getting ApiGatewayDeployment after create")
 		return nil, err
 	}
@@ -198,6 +205,7 @@ func (c *DeploymentServiceManager) updateResolvedDeployment(ctx context.Context,
 	c.Log.InfoLog(fmt.Sprintf("Getting existing ApiGatewayDeployment %s", depOcid))
 	depInstance, err := c.GetDeployment(ctx, depOcid, nil)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while getting ApiGatewayDeployment by OCID")
 		return nil, err
 	}

@@ -27,6 +27,20 @@ import (
 
 const queueRequeueDuration = time.Minute
 
+var queueWorkRequestAsyncAdapter = servicemanager.WorkRequestAsyncAdapter{
+	PendingStatusTokens: []string{
+		string(queuesdk.OperationStatusAccepted),
+		string(queuesdk.OperationStatusInProgress),
+		string(queuesdk.OperationStatusCanceling),
+	},
+	SucceededStatusTokens: []string{string(queuesdk.OperationStatusSucceeded)},
+	FailedStatusTokens:    []string{string(queuesdk.OperationStatusFailed)},
+	CanceledStatusTokens:  []string{string(queuesdk.OperationStatusCanceled)},
+	CreateActionTokens:    []string{string(queuesdk.ActionTypeCreated)},
+	UpdateActionTokens:    []string{string(queuesdk.ActionTypeUpdated)},
+	DeleteActionTokens:    []string{string(queuesdk.ActionTypeDeleted)},
+}
+
 type queueOCIClient interface {
 	CreateQueue(ctx context.Context, request queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error)
 	GetQueue(ctx context.Context, request queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error)
@@ -41,14 +55,6 @@ type queueRuntimeClient struct {
 	client  queueOCIClient
 	initErr error
 }
-
-type queueWorkRequestPhase string
-
-const (
-	queueWorkRequestPhaseCreate queueWorkRequestPhase = "create"
-	queueWorkRequestPhaseUpdate queueWorkRequestPhase = "update"
-	queueWorkRequestPhaseDelete queueWorkRequestPhase = "delete"
-)
 
 func init() {
 	newQueueServiceClient = newActiveQueueServiceClient
@@ -104,7 +110,7 @@ func (c *queueRuntimeClient) CreateOrUpdate(ctx context.Context, resource *queue
 
 	switch current.LifecycleState {
 	case queuesdk.QueueLifecycleStateCreating, queuesdk.QueueLifecycleStateUpdating, queuesdk.QueueLifecycleStateDeleting, queuesdk.QueueLifecycleStateFailed:
-		return c.finishWithLifecycle(resource, current), nil
+		return c.finishWithLifecycle(resource, current, ""), nil
 	}
 
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
@@ -112,13 +118,14 @@ func (c *queueRuntimeClient) CreateOrUpdate(ctx context.Context, resource *queue
 		return c.fail(resource, err)
 	}
 	if !updateNeeded {
-		return c.finishWithLifecycle(resource, current), nil
+		return c.finishWithLifecycle(resource, current, ""), nil
 	}
 
 	response, err := c.client.UpdateQueue(ctx, updateRequest)
 	if err != nil {
 		return c.fail(resource, normalizeQueueOCIError(err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -149,11 +156,15 @@ func (c *queueRuntimeClient) Delete(ctx context.Context, resource *queuev1beta1.
 	})
 	if err != nil {
 		if isQueueDeleteNotFoundOCI(err) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
-		return false, normalizeQueueOCIError(err)
+		err = normalizeQueueOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID = strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -170,6 +181,7 @@ func (c *queueRuntimeClient) create(ctx context.Context, resource *queuev1beta1.
 	if err != nil {
 		return c.fail(resource, normalizeQueueOCIError(err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -185,30 +197,35 @@ func (c *queueRuntimeClient) resumeCreate(ctx context.Context, resource *queuev1
 		return c.fail(resource, normalizeQueueOCIError(err))
 	}
 
-	switch workRequest.Status {
-	case queuesdk.OperationStatusAccepted, queuesdk.OperationStatusInProgress, queuesdk.OperationStatusCanceling:
-		return c.markWorkRequestProgress(resource, shared.Provisioning, queueWorkRequestMessage(workRequest, queueWorkRequestPhaseCreate)), nil
-	case queuesdk.OperationStatusFailed, queuesdk.OperationStatusCanceled:
-		return c.fail(resource, fmt.Errorf("Queue create work request %s finished with status %s", workRequestID, workRequest.Status))
-	case queuesdk.OperationStatusSucceeded:
+	currentAsync, err := queueWorkRequestAsyncOperation(resource, workRequest, shared.OSOKAsyncPhaseCreate)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+
+	switch currentAsync.NormalizedClass {
+	case shared.OSOKAsyncClassPending:
+		return c.setAsyncOperation(resource, currentAsync, shared.OSOKAsyncClassPending, queueWorkRequestMessage(currentAsync.Phase, workRequest)), nil
+	case shared.OSOKAsyncClassFailed, shared.OSOKAsyncClassCanceled, shared.OSOKAsyncClassAttention, shared.OSOKAsyncClassUnknown:
+		return c.failAsyncOperation(resource, currentAsync, fmt.Errorf("Queue %s work request %s finished with status %s", currentAsync.Phase, workRequestID, workRequest.Status))
+	case shared.OSOKAsyncClassSucceeded:
 		queueID, err := resolveQueueIDFromWorkRequest(workRequest, queuesdk.ActionTypeCreated)
 		if err != nil {
-			return c.fail(resource, err)
+			return c.failAsyncOperation(resource, currentAsync, err)
 		}
 		current, err := c.getQueue(ctx, queueID)
 		if err != nil {
 			if isQueueReadNotFoundOCI(err) {
-				return c.markWorkRequestProgress(resource, shared.Provisioning, fmt.Sprintf("Queue create work request %s succeeded; waiting for Queue %s to become readable", workRequestID, queueID)), nil
+				return c.setAsyncOperation(resource, currentAsync, shared.OSOKAsyncClassPending, fmt.Sprintf("Queue create work request %s succeeded; waiting for Queue %s to become readable", workRequestID, queueID)), nil
 			}
-			return c.fail(resource, normalizeQueueOCIError(err))
+			return c.failAsyncOperation(resource, currentAsync, normalizeQueueOCIError(err))
 		}
 		resource.Status.CreateWorkRequestId = ""
 		if err := c.projectStatus(resource, current); err != nil {
 			return c.fail(resource, err)
 		}
-		return c.finishWithLifecycle(resource, current), nil
+		return c.finishWithLifecycle(resource, current, shared.OSOKAsyncPhaseCreate), nil
 	default:
-		return c.fail(resource, fmt.Errorf("Queue create work request %s returned unmodeled status %s", workRequestID, workRequest.Status))
+		return c.fail(resource, fmt.Errorf("Queue create work request %s projected unsupported async class %s", workRequestID, currentAsync.NormalizedClass))
 	}
 }
 
@@ -218,26 +235,31 @@ func (c *queueRuntimeClient) resumeUpdate(ctx context.Context, resource *queuev1
 		return c.fail(resource, normalizeQueueOCIError(err))
 	}
 
-	switch workRequest.Status {
-	case queuesdk.OperationStatusAccepted, queuesdk.OperationStatusInProgress, queuesdk.OperationStatusCanceling:
-		return c.markWorkRequestProgress(resource, shared.Updating, queueWorkRequestMessage(workRequest, queueWorkRequestPhaseUpdate)), nil
-	case queuesdk.OperationStatusFailed, queuesdk.OperationStatusCanceled:
-		return c.fail(resource, fmt.Errorf("Queue update work request %s finished with status %s", workRequestID, workRequest.Status))
-	case queuesdk.OperationStatusSucceeded:
+	currentAsync, err := queueWorkRequestAsyncOperation(resource, workRequest, shared.OSOKAsyncPhaseUpdate)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+
+	switch currentAsync.NormalizedClass {
+	case shared.OSOKAsyncClassPending:
+		return c.setAsyncOperation(resource, currentAsync, shared.OSOKAsyncClassPending, queueWorkRequestMessage(currentAsync.Phase, workRequest)), nil
+	case shared.OSOKAsyncClassFailed, shared.OSOKAsyncClassCanceled, shared.OSOKAsyncClassAttention, shared.OSOKAsyncClassUnknown:
+		return c.failAsyncOperation(resource, currentAsync, fmt.Errorf("Queue %s work request %s finished with status %s", currentAsync.Phase, workRequestID, workRequest.Status))
+	case shared.OSOKAsyncClassSucceeded:
 		current, err = c.getQueue(ctx, currentQueueID(resource))
 		if err != nil {
 			if isQueueReadNotFoundOCI(err) {
-				return c.fail(resource, fmt.Errorf("Queue update work request %s succeeded but Queue %s is no longer readable", workRequestID, currentQueueID(resource)))
+				return c.failAsyncOperation(resource, currentAsync, fmt.Errorf("Queue update work request %s succeeded but Queue %s is no longer readable", workRequestID, currentQueueID(resource)))
 			}
-			return c.fail(resource, normalizeQueueOCIError(err))
+			return c.failAsyncOperation(resource, currentAsync, normalizeQueueOCIError(err))
 		}
 		resource.Status.UpdateWorkRequestId = ""
 		if err := c.projectStatus(resource, current); err != nil {
 			return c.fail(resource, err)
 		}
-		return c.finishWithLifecycle(resource, current), nil
+		return c.finishWithLifecycle(resource, current, shared.OSOKAsyncPhaseUpdate), nil
 	default:
-		return c.fail(resource, fmt.Errorf("Queue update work request %s returned unmodeled status %s", workRequestID, workRequest.Status))
+		return c.fail(resource, fmt.Errorf("Queue update work request %s projected unsupported async class %s", workRequestID, currentAsync.NormalizedClass))
 	}
 }
 
@@ -248,10 +270,13 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 			current, readErr := c.getQueue(ctx, trackedID)
 			if readErr != nil {
 				if isQueueDeleteNotFoundOCI(readErr) {
+					c.recordErrorRequestID(resource, readErr)
 					c.markDeleted(resource, "OCI Queue deleted")
 					return true, nil
 				}
-				return false, normalizeQueueOCIError(readErr)
+				readErr = normalizeQueueOCIError(readErr)
+				c.recordErrorRequestID(resource, readErr)
+				return false, readErr
 			}
 			if current.LifecycleState == queuesdk.QueueLifecycleStateDeleted {
 				c.markDeleted(resource, "OCI Queue deleted")
@@ -260,16 +285,24 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 			c.markDeleteProgress(resource, fmt.Sprintf("Queue delete work request %s is no longer readable; waiting for Queue %s to disappear", workRequestID, trackedID))
 			return false, nil
 		}
-		return false, normalizeQueueOCIError(err)
+		err = normalizeQueueOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
 
-	switch workRequest.Status {
-	case queuesdk.OperationStatusAccepted, queuesdk.OperationStatusInProgress, queuesdk.OperationStatusCanceling:
-		c.markDeleteProgress(resource, queueWorkRequestMessage(workRequest, queueWorkRequestPhaseDelete))
+	currentAsync, err := queueWorkRequestAsyncOperation(resource, workRequest, shared.OSOKAsyncPhaseDelete)
+	if err != nil {
+		return false, err
+	}
+
+	switch currentAsync.NormalizedClass {
+	case shared.OSOKAsyncClassPending:
+		_ = c.setAsyncOperation(resource, currentAsync, shared.OSOKAsyncClassPending, queueWorkRequestMessage(currentAsync.Phase, workRequest))
 		return false, nil
-	case queuesdk.OperationStatusFailed, queuesdk.OperationStatusCanceled:
-		return false, fmt.Errorf("Queue delete work request %s finished with status %s", workRequestID, workRequest.Status)
-	case queuesdk.OperationStatusSucceeded:
+	case shared.OSOKAsyncClassFailed, shared.OSOKAsyncClassCanceled, shared.OSOKAsyncClassAttention, shared.OSOKAsyncClassUnknown:
+		_, err := c.failAsyncOperation(resource, currentAsync, fmt.Errorf("Queue %s work request %s finished with status %s", currentAsync.Phase, workRequestID, workRequest.Status))
+		return false, err
+	case shared.OSOKAsyncClassSucceeded:
 		if trackedID == "" {
 			if _, err := resolveQueueIDFromWorkRequest(workRequest, queuesdk.ActionTypeDeleted); err != nil {
 				c.markDeleted(resource, "OCI Queue delete work request completed")
@@ -282,20 +315,22 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 		current, err := c.getQueue(ctx, trackedID)
 		if err != nil {
 			if isQueueDeleteNotFoundOCI(err) {
+				c.recordErrorRequestID(resource, err)
 				c.markDeleted(resource, "OCI Queue deleted")
 				return true, nil
 			}
-			return false, normalizeQueueOCIError(err)
+			_, deleteErr := c.failAsyncOperation(resource, currentAsync, normalizeQueueOCIError(err))
+			return false, deleteErr
 		}
 		if current.LifecycleState == queuesdk.QueueLifecycleStateDeleted {
 			c.markDeleted(resource, "OCI Queue deleted")
 			return true, nil
 		}
 
-		c.markDeleteProgress(resource, fmt.Sprintf("Queue delete work request %s succeeded; waiting for Queue %s to disappear", workRequestID, trackedID))
+		_ = c.setAsyncOperation(resource, currentAsync, shared.OSOKAsyncClassPending, fmt.Sprintf("Queue delete work request %s succeeded; waiting for Queue %s to disappear", workRequestID, trackedID))
 		return false, nil
 	default:
-		return false, fmt.Errorf("Queue delete work request %s returned unmodeled status %s", workRequestID, workRequest.Status)
+		return false, fmt.Errorf("Queue delete work request %s projected unsupported async class %s", workRequestID, currentAsync.NormalizedClass)
 	}
 }
 
@@ -413,9 +448,13 @@ func buildCreateQueueDetails(spec queuev1beta1.QueueSpec) queuesdk.CreateQueueDe
 	return createDetails
 }
 
-func (c *queueRuntimeClient) finishWithLifecycle(resource *queuev1beta1.Queue, current queuesdk.Queue) servicemanager.OSOKResponse {
+func (c *queueRuntimeClient) finishWithLifecycle(resource *queuev1beta1.Queue, current queuesdk.Queue, explicitPhase shared.OSOKAsyncPhase) servicemanager.OSOKResponse {
 	condition, shouldRequeue := classifyQueueLifecycle(current.LifecycleState)
-	return c.markCondition(resource, condition, queueLifecycleMessage(current), shouldRequeue)
+	message := queueLifecycleMessage(current)
+	if asyncCurrent := queueLifecycleAsyncOperation(resource, current, message, explicitPhase); asyncCurrent != nil {
+		return c.markAsyncOperation(resource, asyncCurrent)
+	}
+	return c.markCondition(resource, condition, message, shouldRequeue)
 }
 
 func (c *queueRuntimeClient) markCondition(resource *queuev1beta1.Queue, condition shared.OSOKConditionType, message string, shouldRequeue bool) servicemanager.OSOKResponse {
@@ -430,6 +469,9 @@ func (c *queueRuntimeClient) markCondition(resource *queuev1beta1.Queue, conditi
 	status.UpdatedAt = &now
 	status.Message = message
 	status.Reason = string(condition)
+	if condition == shared.Active {
+		servicemanager.ClearAsyncOperation(status)
+	}
 	conditionStatus := v1.ConditionTrue
 	if condition == shared.Failed {
 		conditionStatus = v1.ConditionFalse
@@ -443,27 +485,91 @@ func (c *queueRuntimeClient) markCondition(resource *queuev1beta1.Queue, conditi
 	}
 }
 
-func (c *queueRuntimeClient) markWorkRequestProgress(resource *queuev1beta1.Queue, condition shared.OSOKConditionType, message string) servicemanager.OSOKResponse {
-	return c.markCondition(resource, condition, message, true)
+func (c *queueRuntimeClient) markAsyncOperation(resource *queuev1beta1.Queue, current *shared.OSOKAsyncOperation) servicemanager.OSOKResponse {
+	status := &resource.Status.OsokStatus
+	now := metav1.Now()
+	if resource.Status.Id != "" {
+		status.Ocid = shared.OCID(resource.Status.Id)
+	}
+	if status.Ocid != "" && status.CreatedAt == nil {
+		status.CreatedAt = &now
+	}
+	if current.UpdatedAt == nil {
+		current.UpdatedAt = &now
+	}
+	projection := servicemanager.ApplyAsyncOperation(status, current, c.manager.Log)
+	return servicemanager.OSOKResponse{
+		IsSuccessful:    projection.Condition != shared.Failed,
+		ShouldRequeue:   projection.ShouldRequeue,
+		RequeueDuration: queueRequeueDuration,
+	}
+}
+
+func (c *queueRuntimeClient) setAsyncOperation(resource *queuev1beta1.Queue, current *shared.OSOKAsyncOperation, class shared.OSOKAsyncNormalizedClass, message string) servicemanager.OSOKResponse {
+	next := *current
+	next.NormalizedClass = class
+	next.Message = message
+	next.UpdatedAt = nil
+	return c.markAsyncOperation(resource, &next)
+}
+
+func (c *queueRuntimeClient) failAsyncOperation(resource *queuev1beta1.Queue, current *shared.OSOKAsyncOperation, err error) (servicemanager.OSOKResponse, error) {
+	if current == nil {
+		return c.fail(resource, err)
+	}
+	c.recordErrorRequestID(resource, err)
+
+	class := current.NormalizedClass
+	switch class {
+	case shared.OSOKAsyncClassCanceled, shared.OSOKAsyncClassAttention, shared.OSOKAsyncClassUnknown:
+	default:
+		class = shared.OSOKAsyncClassFailed
+	}
+
+	return c.setAsyncOperation(resource, current, class, err.Error()), err
 }
 
 func (c *queueRuntimeClient) markDeleteProgress(resource *queuev1beta1.Queue, message string) {
-	status := &resource.Status.OsokStatus
-	now := metav1.Now()
-	status.UpdatedAt = &now
-	status.Message = message
-	status.Reason = string(shared.Terminating)
-	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
+	_ = c.markAsyncOperation(resource, &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceWorkRequest,
+		Phase:           currentQueueAsyncPhase(resource, shared.OSOKAsyncPhaseDelete),
+		WorkRequestID:   strings.TrimSpace(resource.Status.DeleteWorkRequestId),
+		NormalizedClass: shared.OSOKAsyncClassPending,
+		Message:         message,
+	})
 }
 
 func (c *queueRuntimeClient) fail(resource *queuev1beta1.Queue, err error) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	now := metav1.Now()
 	status.UpdatedAt = &now
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
+	if status.Async.Current != nil {
+		current := *status.Async.Current
+		current.NormalizedClass = shared.OSOKAsyncClassFailed
+		current.Message = err.Error()
+		current.UpdatedAt = &now
+		_ = servicemanager.ApplyAsyncOperation(status, &current, c.manager.Log)
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	}
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
+
+func (c *queueRuntimeClient) recordResponseRequestID(resource *queuev1beta1.Queue, response any) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+}
+
+func (c *queueRuntimeClient) recordErrorRequestID(resource *queuev1beta1.Queue, err error) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 }
 
 func (c *queueRuntimeClient) markDeleted(resource *queuev1beta1.Queue, message string) {
@@ -476,6 +582,7 @@ func (c *queueRuntimeClient) markDeleted(resource *queuev1beta1.Queue, message s
 	resource.Status.CreateWorkRequestId = ""
 	resource.Status.UpdateWorkRequestId = ""
 	resource.Status.DeleteWorkRequestId = ""
+	servicemanager.ClearAsyncOperation(status)
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
 }
 
@@ -529,7 +636,7 @@ func validateQueueCreateOnlyDrift(spec queuev1beta1.QueueSpec, current queuesdk.
 
 func resolveQueueIDFromWorkRequest(workRequest queuesdk.WorkRequest, action queuesdk.ActionTypeEnum) (string, error) {
 	for _, resource := range workRequest.Resources {
-		if !strings.EqualFold(strings.TrimSpace(stringValue(resource.EntityType)), "queue") {
+		if !isQueueWorkRequestResource(resource) {
 			continue
 		}
 		if action != "" && resource.ActionType != action {
@@ -541,7 +648,7 @@ func resolveQueueIDFromWorkRequest(workRequest queuesdk.WorkRequest, action queu
 	}
 
 	for _, resource := range workRequest.Resources {
-		if !strings.EqualFold(strings.TrimSpace(stringValue(resource.EntityType)), "queue") {
+		if !isQueueWorkRequestResource(resource) {
 			continue
 		}
 		if id := strings.TrimSpace(stringValue(resource.Identifier)); id != "" {
@@ -552,8 +659,62 @@ func resolveQueueIDFromWorkRequest(workRequest queuesdk.WorkRequest, action queu
 	return "", fmt.Errorf("Queue work request %s does not expose a Queue identifier", stringValue(workRequest.Id))
 }
 
-func queueWorkRequestMessage(workRequest queuesdk.WorkRequest, phase queueWorkRequestPhase) string {
+func resolveQueueWorkRequestAction(workRequest queuesdk.WorkRequest) (string, error) {
+	var action string
+
+	for _, resource := range workRequest.Resources {
+		if !isQueueWorkRequestResource(resource) {
+			continue
+		}
+		candidate := strings.TrimSpace(string(resource.ActionType))
+		if candidate == "" {
+			continue
+		}
+		if action == "" {
+			action = candidate
+			continue
+		}
+		if action != candidate {
+			return "", fmt.Errorf("Queue work request %s exposes conflicting Queue action types %q and %q", stringValue(workRequest.Id), action, candidate)
+		}
+	}
+
+	return action, nil
+}
+
+func queueWorkRequestAsyncOperation(resource *queuev1beta1.Queue, workRequest queuesdk.WorkRequest, fallback shared.OSOKAsyncPhase) (*shared.OSOKAsyncOperation, error) {
+	var status *shared.OSOKStatus
+	if resource != nil {
+		status = &resource.Status.OsokStatus
+	}
+
+	rawAction, err := resolveQueueWorkRequestAction(workRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	current, err := servicemanager.BuildWorkRequestAsyncOperation(status, queueWorkRequestAsyncAdapter, servicemanager.WorkRequestAsyncInput{
+		RawStatus:        string(workRequest.Status),
+		RawAction:        rawAction,
+		RawOperationType: string(workRequest.OperationType),
+		WorkRequestID:    stringValue(workRequest.Id),
+		PercentComplete:  workRequest.PercentComplete,
+		FallbackPhase:    currentQueueAsyncPhase(resource, fallback),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	current.Message = queueWorkRequestMessage(current.Phase, workRequest)
+	return current, nil
+}
+
+func queueWorkRequestMessage(phase shared.OSOKAsyncPhase, workRequest queuesdk.WorkRequest) string {
 	return fmt.Sprintf("Queue %s work request %s is %s", phase, stringValue(workRequest.Id), workRequest.Status)
+}
+
+func isQueueWorkRequestResource(resource queuesdk.WorkRequestResource) bool {
+	return strings.EqualFold(strings.TrimSpace(stringValue(resource.EntityType)), "queue")
 }
 
 func queueLifecycleMessage(current queuesdk.Queue) string {
@@ -579,6 +740,78 @@ func classifyQueueLifecycle(state queuesdk.QueueLifecycleStateEnum) (shared.OSOK
 		return shared.Failed, false
 	default:
 		return shared.Active, false
+	}
+}
+
+func queueLifecycleAsyncOperation(resource *queuev1beta1.Queue, current queuesdk.Queue, message string, explicitPhase shared.OSOKAsyncPhase) *shared.OSOKAsyncOperation {
+	switch current.LifecycleState {
+	case queuesdk.QueueLifecycleStateCreating:
+		return &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseCreate,
+			RawStatus:       string(current.LifecycleState),
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         message,
+		}
+	case queuesdk.QueueLifecycleStateUpdating:
+		return &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseUpdate,
+			RawStatus:       string(current.LifecycleState),
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         message,
+		}
+	case queuesdk.QueueLifecycleStateDeleting:
+		return &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseDelete,
+			RawStatus:       string(current.LifecycleState),
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         message,
+		}
+	case queuesdk.QueueLifecycleStateFailed:
+		phase := currentQueueAsyncPhase(resource, explicitPhase)
+		if phase == "" {
+			return nil
+		}
+		return &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           phase,
+			RawStatus:       string(current.LifecycleState),
+			NormalizedClass: shared.OSOKAsyncClassFailed,
+			Message:         message,
+		}
+	default:
+		return nil
+	}
+}
+
+func currentQueueAsyncPhase(resource *queuev1beta1.Queue, fallback shared.OSOKAsyncPhase) shared.OSOKAsyncPhase {
+	if resource == nil {
+		return fallback
+	}
+	if fallback != "" {
+		return fallback
+	}
+	if legacy := queueLegacyWorkRequestPhase(resource); legacy != "" {
+		return legacy
+	}
+	return servicemanager.ResolveAsyncPhase(&resource.Status.OsokStatus, "")
+}
+
+func queueLegacyWorkRequestPhase(resource *queuev1beta1.Queue) shared.OSOKAsyncPhase {
+	if resource == nil {
+		return ""
+	}
+	switch {
+	case strings.TrimSpace(resource.Status.DeleteWorkRequestId) != "":
+		return shared.OSOKAsyncPhaseDelete
+	case strings.TrimSpace(resource.Status.UpdateWorkRequestId) != "":
+		return shared.OSOKAsyncPhaseUpdate
+	case strings.TrimSpace(resource.Status.CreateWorkRequestId) != "":
+		return shared.OSOKAsyncPhaseCreate
+	default:
+		return ""
 	}
 }
 

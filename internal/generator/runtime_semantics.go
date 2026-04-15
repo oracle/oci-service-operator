@@ -22,12 +22,28 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 	if formalModel == nil {
 		return nil
 	}
+	return buildRuntimeSemanticsModelWithAsync(formalModel, runtime, AsyncConfig{})
+}
+
+func buildRuntimeSemanticsModelWithAsync(
+	formalModel *FormalModel,
+	runtime *RuntimeModel,
+	async AsyncConfig,
+) *RuntimeSemanticsModel {
+	if formalModel == nil {
+		return nil
+	}
 
 	binding := formalModel.Binding
 	mutation := runtimeMutationPaths(formalModel)
+	asyncModel := buildRuntimeAsyncModel(async)
+	createHooks := effectiveRuntimeHooks(formalModel, "create", binding.Import.Hooks.Create, asyncModel)
+	updateHooks := effectiveRuntimeHooks(formalModel, "update", binding.Import.Hooks.Update, asyncModel)
+	deleteHooks := effectiveRuntimeHooks(formalModel, "delete", binding.Import.Hooks.Delete, asyncModel)
 	semantics := &RuntimeSemanticsModel{
 		FormalService:     formalModel.Reference.Service,
 		FormalSlug:        formalModel.Reference.Slug,
+		Async:             asyncModel,
 		StatusProjection:  strings.TrimSpace(binding.Spec.StatusProjection),
 		SecretSideEffects: strings.TrimSpace(binding.Spec.SecretSideEffects),
 		FinalizerPolicy:   strings.TrimSpace(binding.Spec.FinalizerPolicy),
@@ -50,9 +66,9 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 			ConflictsWith: normalizeFormalConflicts(binding.Import.Mutation.ConflictsWith),
 		},
 		Hooks: RuntimeHookSetModel{
-			Create: buildRuntimeHookModels(binding.Import.Hooks.Create),
-			Update: buildRuntimeHookModels(binding.Import.Hooks.Update),
-			Delete: buildRuntimeHookModels(binding.Import.Hooks.Delete),
+			Create: createHooks,
+			Update: updateHooks,
+			Delete: deleteHooks,
 		},
 		AuxiliaryOperations: buildAuxiliaryOperationModels(binding, runtime),
 		OpenGaps:            buildRuntimeGapModels(binding),
@@ -63,10 +79,79 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 			MatchFields:        normalizeFormalPaths(binding.Import.ListLookup.FilterFields),
 		}
 	}
-	semantics.CreateFollowUp = buildWriteFollowUpModel(semantics.Hooks.Create, runtime)
-	semantics.UpdateFollowUp = buildWriteFollowUpModel(semantics.Hooks.Update, runtime)
-	semantics.DeleteFollowUp = buildDeleteFollowUpModel(semantics.Hooks.Delete, semantics.Delete, runtime)
+	semantics.CreateFollowUp = buildWriteFollowUpModel(
+		semantics.Hooks.Create,
+		runtime,
+		repoAuthoredFollowUpStrategy(formalModel, "create"),
+	)
+	semantics.UpdateFollowUp = buildWriteFollowUpModel(
+		semantics.Hooks.Update,
+		runtime,
+		repoAuthoredFollowUpStrategy(formalModel, "update"),
+	)
+	semantics.DeleteFollowUp = buildDeleteFollowUpModel(
+		semantics.Hooks.Delete,
+		semantics.Delete,
+		runtime,
+		repoAuthoredFollowUpStrategy(formalModel, "delete"),
+	)
 	return semantics
+}
+
+func buildRuntimeAsyncModel(async AsyncConfig) *RuntimeAsyncModel {
+	async = async.withDefaults()
+	if !async.hasOverride() {
+		return nil
+	}
+
+	model := &RuntimeAsyncModel{
+		Strategy:             async.Strategy,
+		Runtime:              async.Runtime,
+		FormalClassification: async.FormalClassification,
+	}
+	if async.WorkRequest.hasOverride() {
+		model.WorkRequest = &RuntimeWorkRequestModel{
+			Source: async.WorkRequest.Source,
+			Phases: append([]string(nil), async.WorkRequest.Phases...),
+		}
+		if async.WorkRequest.LegacyFieldBridge.hasOverride() {
+			model.WorkRequest.LegacyFieldBridge = &RuntimeLegacyFieldBridgeModel{
+				Create: async.WorkRequest.LegacyFieldBridge.Create,
+				Update: async.WorkRequest.LegacyFieldBridge.Update,
+				Delete: async.WorkRequest.LegacyFieldBridge.Delete,
+			}
+		}
+	}
+	return model
+}
+
+func filteredRuntimeHooks(hooks []formal.Hook, async *RuntimeAsyncModel) []RuntimeHookModel {
+	models := buildRuntimeHookModels(hooks)
+	if async == nil || async.Strategy == AsyncStrategyWorkRequest {
+		return models
+	}
+
+	filtered := make([]RuntimeHookModel, 0, len(models))
+	for _, hook := range models {
+		if hook.Helper == "tfresource.WaitForWorkRequestWithErrorHandling" {
+			continue
+		}
+		filtered = append(filtered, hook)
+	}
+	return filtered
+}
+
+func effectiveRuntimeHooks(
+	formalModel *FormalModel,
+	phase string,
+	imported []formal.Hook,
+	async *RuntimeAsyncModel,
+) []RuntimeHookModel {
+	hooks := imported
+	if repoAuthored, ok := repoAuthoredRuntimeHooks(formalModel, phase); ok {
+		hooks = repoAuthored
+	}
+	return filteredRuntimeHooks(hooks, async)
 }
 
 type runtimeMutationPathSet struct {
@@ -92,10 +177,14 @@ func runtimeMutationPaths(formalModel *FormalModel) runtimeMutationPathSet {
 	}
 }
 
-func buildWriteFollowUpModel(hooks []RuntimeHookModel, runtime *RuntimeModel) RuntimeFollowUpModel {
+func buildWriteFollowUpModel(hooks []RuntimeHookModel, runtime *RuntimeModel, override string) RuntimeFollowUpModel {
 	followUp := RuntimeFollowUpModel{
 		Strategy: followUpStrategyNone,
 		Hooks:    append([]RuntimeHookModel(nil), hooks...),
+	}
+	if override != "" {
+		followUp.Strategy = override
+		return followUp
 	}
 	if len(hooks) > 0 && runtimeHasReadOperation(runtime) {
 		followUp.Strategy = followUpStrategyReadAfterWrite
@@ -103,10 +192,19 @@ func buildWriteFollowUpModel(hooks []RuntimeHookModel, runtime *RuntimeModel) Ru
 	return followUp
 }
 
-func buildDeleteFollowUpModel(hooks []RuntimeHookModel, deleteSemantics RuntimeDeleteSemanticsModel, runtime *RuntimeModel) RuntimeFollowUpModel {
+func buildDeleteFollowUpModel(
+	hooks []RuntimeHookModel,
+	deleteSemantics RuntimeDeleteSemanticsModel,
+	runtime *RuntimeModel,
+	override string,
+) RuntimeFollowUpModel {
 	followUp := RuntimeFollowUpModel{
 		Strategy: followUpStrategyNone,
 		Hooks:    append([]RuntimeHookModel(nil), hooks...),
+	}
+	if override != "" {
+		followUp.Strategy = override
+		return followUp
 	}
 	if (deleteSemantics.Policy == "required" || deleteSemantics.Policy == "best-effort") && runtimeHasReadOperation(runtime) {
 		followUp.Strategy = followUpStrategyConfirmDelete
@@ -119,6 +217,46 @@ func runtimeHasReadOperation(runtime *RuntimeModel) bool {
 		return false
 	}
 	return runtime.Get != nil || runtime.List != nil
+}
+
+func repoAuthoredRuntimeHooks(formalModel *FormalModel, phase string) ([]formal.Hook, bool) {
+	if formalModel == nil || formalModel.RuntimeLifecycle == nil || formalModel.RuntimeLifecycle.RepoAuthored == nil || formalModel.RuntimeLifecycle.RepoAuthored.Hooks == nil {
+		return nil, false
+	}
+
+	switch phase {
+	case "create":
+		if formalModel.RuntimeLifecycle.RepoAuthored.Hooks.Create != nil {
+			return append([]formal.Hook(nil), formalModel.RuntimeLifecycle.RepoAuthored.Hooks.Create...), true
+		}
+	case "update":
+		if formalModel.RuntimeLifecycle.RepoAuthored.Hooks.Update != nil {
+			return append([]formal.Hook(nil), formalModel.RuntimeLifecycle.RepoAuthored.Hooks.Update...), true
+		}
+	case "delete":
+		if formalModel.RuntimeLifecycle.RepoAuthored.Hooks.Delete != nil {
+			return append([]formal.Hook(nil), formalModel.RuntimeLifecycle.RepoAuthored.Hooks.Delete...), true
+		}
+	}
+
+	return nil, false
+}
+
+func repoAuthoredFollowUpStrategy(formalModel *FormalModel, phase string) string {
+	if formalModel == nil || formalModel.RuntimeLifecycle == nil || formalModel.RuntimeLifecycle.RepoAuthored == nil || formalModel.RuntimeLifecycle.RepoAuthored.FollowUp == nil {
+		return ""
+	}
+
+	switch phase {
+	case "create":
+		return strings.TrimSpace(formalModel.RuntimeLifecycle.RepoAuthored.FollowUp.Create)
+	case "update":
+		return strings.TrimSpace(formalModel.RuntimeLifecycle.RepoAuthored.FollowUp.Update)
+	case "delete":
+		return strings.TrimSpace(formalModel.RuntimeLifecycle.RepoAuthored.FollowUp.Delete)
+	default:
+		return ""
+	}
 }
 
 func buildAuxiliaryOperationModels(binding formal.ControllerBinding, runtime *RuntimeModel) []RuntimeAuxiliaryOperationModel {

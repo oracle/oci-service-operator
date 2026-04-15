@@ -23,6 +23,7 @@ type VaultReconciler struct {
 // +kubebuilder:rbac:groups=keymanagement.oracle.com,resources=vaults,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=keymanagement.oracle.com,resources=vaults/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=keymanagement.oracle.com,resources=vaults/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *VaultReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

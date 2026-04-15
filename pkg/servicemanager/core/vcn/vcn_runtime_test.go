@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	osokcore "github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
@@ -52,11 +53,7 @@ func (f *fakeVcnOCIClient) GetVcn(ctx context.Context, req coresdk.GetVcnRequest
 	if f.getFn != nil {
 		return f.getFn(ctx, req)
 	}
-	return coresdk.GetVcnResponse{}, fakeServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "missing",
-	}
+	return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "missing")
 }
 
 func (f *fakeVcnOCIClient) ListVcns(ctx context.Context, req coresdk.ListVcnsRequest) (coresdk.ListVcnsResponse, error) {
@@ -80,20 +77,6 @@ func (f *fakeVcnOCIClient) DeleteVcn(ctx context.Context, req coresdk.DeleteVcnR
 	return coresdk.DeleteVcnResponse{}, nil
 }
 
-type fakeServiceError struct {
-	statusCode int
-	code       string
-	message    string
-}
-
-func (f fakeServiceError) Error() string          { return f.message }
-func (f fakeServiceError) GetHTTPStatusCode() int { return f.statusCode }
-func (f fakeServiceError) GetMessage() string     { return f.message }
-func (f fakeServiceError) GetCode() string        { return f.code }
-func (f fakeServiceError) GetOpcRequestID() string {
-	return ""
-}
-
 func newTestGeneratedDelegate(manager *VcnServiceManager, client vcnOCIClient) VcnServiceClient {
 	if client == nil {
 		client = &fakeVcnOCIClient{}
@@ -104,8 +87,13 @@ func newTestGeneratedDelegate(manager *VcnServiceManager, client vcnOCIClient) V
 		SDKName: "Vcn",
 		Log:     manager.Log,
 		Semantics: &generatedruntime.Semantics{
-			FormalService:     "core",
-			FormalSlug:        "vcn",
+			FormalService: "core",
+			FormalSlug:    "vcn",
+			Async: &generatedruntime.AsyncSemantics{
+				Strategy:             "lifecycle",
+				Runtime:              "generatedruntime",
+				FormalClassification: "lifecycle",
+			},
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -129,13 +117,13 @@ func newTestGeneratedDelegate(manager *VcnServiceManager, client vcnOCIClient) V
 				ConflictsWith: map[string][]string{"cidrBlock": {"cidrBlocks"}, "cidrBlocks": {"cidrBlock"}},
 			},
 			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
 				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 			},
 			UpdateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
@@ -559,11 +547,7 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	manager := newTestManager(&fakeVcnOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
 			getCalls++
-			return coresdk.GetVcnResponse{}, fakeServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "missing",
-			}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "missing")
 		},
 		createFn: func(_ context.Context, req coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
 			createCalls++
@@ -603,11 +587,7 @@ func TestCreateOrUpdate_ExplicitNotFoundRecreateIgnoresListBeforeCreate(t *testi
 			switch getCalls {
 			case 1:
 				assert.Equal(t, "ocid1.vcn.oc1..existing", *req.VcnId)
-				return coresdk.GetVcnResponse{}, fakeServiceError{
-					statusCode: 404,
-					code:       "NotFound",
-					message:    "missing",
-				}
+				return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "missing")
 			case 2:
 				assert.Equal(t, "ocid1.vcn.oc1..recreated", *req.VcnId)
 				return coresdk.GetVcnResponse{
@@ -651,11 +631,7 @@ func TestCreateOrUpdate_ExplicitNotFoundRecreateIgnoresListBeforeCreate(t *testi
 func TestCreateOrUpdate_RecreateClearsStaleNestedOsokStatusMetadata(t *testing.T) {
 	manager := newTestManager(&fakeVcnOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
-			return coresdk.GetVcnResponse{}, fakeServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "missing",
-			}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "missing")
 		},
 		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
 			return coresdk.CreateVcnResponse{
@@ -691,11 +667,7 @@ func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
 	createCalls := 0
 	manager := newTestManager(&fakeVcnOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
-			return coresdk.GetVcnResponse{}, fakeServiceError{
-				statusCode: 404,
-				code:       "NotAuthorizedOrNotFound",
-				message:    "auth ambiguity",
-			}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "auth ambiguity")
 		},
 		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
 			createCalls++
@@ -713,6 +685,35 @@ func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
 	assert.False(t, resp.IsSuccessful)
 	assert.Equal(t, 0, createCalls)
 	assert.Equal(t, "ocid1.vcn.oc1..existing", string(resource.Status.OsokStatus.Ocid))
+	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+	errortest.AssertErrorType(t, err, "errorutil.UnauthorizedAndNotFoundOciError")
+}
+
+func TestCreateOrUpdate_UpdateConflictReturnsNormalizedConflictError(t *testing.T) {
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			return coresdk.GetVcnResponse{
+				Vcn: makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			return coresdk.UpdateVcnResponse{}, errortest.NewServiceError(409, errorutil.IncorrectState, "update conflict")
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.DisplayName = "updated-vcn"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, shared.OCID("ocid1.vcn.oc1..existing"), resource.Status.OsokStatus.Ocid)
+	errortest.AssertErrorType(t, err, "errorutil.ConflictOciError")
 }
 
 func TestCreateOrUpdate_RecreatesTrackedTerminatedVcn(t *testing.T) {
@@ -727,11 +728,7 @@ func TestCreateOrUpdate_RecreatesTrackedTerminatedVcn(t *testing.T) {
 					Vcn: makeSDKVcn("ocid1.vcn.oc1..terminated", "old-name", coresdk.VcnLifecycleStateTerminated),
 				}, nil
 			}
-			return coresdk.GetVcnResponse{}, fakeServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "missing",
-			}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "missing")
 		},
 		createFn: func(_ context.Context, _ coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
 			createCalls++
@@ -766,7 +763,7 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 			return coresdk.DeleteVcnResponse{}, nil
 		},
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
-			return coresdk.GetVcnResponse{}, fakeServiceError{statusCode: 404, code: "NotFound", message: "not found"}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "not found")
 		},
 	})
 
@@ -832,11 +829,7 @@ func TestDelete_ConfirmsDeletionOnAuthShapedNotFound(t *testing.T) {
 			return coresdk.DeleteVcnResponse{}, nil
 		},
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
-			return coresdk.GetVcnResponse{}, fakeServiceError{
-				statusCode: 404,
-				code:       "NotAuthorizedOrNotFound",
-				message:    "auth ambiguity",
-			}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "auth ambiguity")
 		},
 	})
 
@@ -879,11 +872,7 @@ func TestReconcileDelete_ReleasesFinalizerOnUnambiguousNotFound(t *testing.T) {
 			return coresdk.DeleteVcnResponse{}, nil
 		},
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
-			return coresdk.GetVcnResponse{}, fakeServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "resource not found",
-			}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "resource not found")
 		},
 	})
 
@@ -941,11 +930,7 @@ func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
 			return coresdk.DeleteVcnResponse{}, nil
 		},
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
-			return coresdk.GetVcnResponse{}, fakeServiceError{
-				statusCode: 404,
-				code:       "NotAuthorizedOrNotFound",
-				message:    "auth ambiguity",
-			}
+			return coresdk.GetVcnResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "auth ambiguity")
 		},
 	})
 
@@ -974,90 +959,12 @@ func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {
 	assertNoEventContains(t, events, "Failed to delete resource")
 }
 
-func TestIsReadNotFoundOCI_RejectsAuthShaped404(t *testing.T) {
-	assert.True(t, isReadNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.False(t, isReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.False(t, isReadNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isReadNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isReadNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isReadNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not authorized",
-	}))
-	assert.False(t, isReadNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isReadNotFoundOCI(fakeServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
-}
-
-func TestIsDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
-	assert.True(t, isDeleteNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.True(t, isDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.True(t, isDeleteNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isDeleteNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isDeleteNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isDeleteNotFoundOCI(fakeServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not authorized",
-	}))
-	assert.False(t, isDeleteNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isDeleteNotFoundOCI(fakeServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
+func TestVcnClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {
+	contract, err := errortest.ManualRuntimeClassifierContractFromReviewedRegistration("core", "Vcn")
+	if err != nil {
+		t.Fatalf("ManualRuntimeClassifierContractFromReviewedRegistration() error = %v", err)
+	}
+	errortest.RunManualRuntimeClassifierContract(t, contract, isReadNotFoundOCI, isDeleteNotFoundOCI)
 }
 
 func drainVcnEvents(recorder *record.FakeRecorder) []string {

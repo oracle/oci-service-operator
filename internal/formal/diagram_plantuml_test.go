@@ -214,6 +214,88 @@ notes:
 	}
 }
 
+func TestRenderDiagramsUseRepoAuthoredHookAndFollowUpOverridesWhenPresent(t *testing.T) {
+	root := writeScaffold(t)
+
+	writeFile(t, filepath.Join(root, "controllers", "template", "diagrams", "runtime-lifecycle.yaml"), `schemaVersion: 1
+surface: repo-authored-semantics
+service: template
+slug: template
+kind: Template
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Repo-authored hook and follow-up overrides should replace imported helper-only drift.
+`)
+	if _, err := RenderDiagrams(RenderOptions{Root: root}); err != nil {
+		t.Fatalf("RenderDiagrams(%q) error = %v", root, err)
+	}
+
+	for _, tc := range []struct {
+		path    string
+		needles []string
+	}{
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "activity.puml"),
+			needles: []string{
+				"Run provider helper hooks",
+				"tfresource.CreateResource",
+				"Apply explicit follow-up semantics",
+				"create=read-after-write",
+				"delete=confirm-delete",
+			},
+		},
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "sequence.puml"),
+			needles: []string{
+				"run helper hooks",
+				"tfresource.CreateResource",
+				"apply follow-up strategy",
+				"create=read-after-write",
+				"delete=confirm-delete",
+			},
+		},
+		{
+			path: filepath.Join(root, "controllers", "template", "diagrams", "state-machine.puml"),
+			needles: []string{
+				"follow-up: create=read-after-write;",
+				"update=read-after-write;",
+				"delete=confirm-delete",
+			},
+		},
+	} {
+		data, err := os.ReadFile(tc.path)
+		if err != nil {
+			t.Fatalf("ReadFile(%q) error = %v", tc.path, err)
+		}
+		text := string(data)
+		for _, needle := range tc.needles {
+			if !strings.Contains(text, needle) {
+				t.Fatalf("%s missing %q:\n%s", tc.path, needle, text)
+			}
+		}
+		if strings.Contains(text, "WaitForWorkRequestWithErrorHandling") {
+			t.Fatalf("%s still contains stale work-request helper:\n%s", tc.path, text)
+		}
+	}
+}
+
 func TestRenderDiagramsWritesSharedPlantUMLArtifacts(t *testing.T) {
 	root := writeScaffold(t)
 

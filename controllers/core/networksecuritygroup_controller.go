@@ -23,6 +23,7 @@ type NetworkSecurityGroupReconciler struct {
 // +kubebuilder:rbac:groups=core.oracle.com,resources=networksecuritygroups,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core.oracle.com,resources=networksecuritygroups/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core.oracle.com,resources=networksecuritygroups/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *NetworkSecurityGroupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

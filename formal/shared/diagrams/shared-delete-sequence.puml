@@ -25,8 +25,8 @@ participant "OSOKServiceManager" as ServiceManager
 participant OCI
 participant "Kubernetes Secret" as SecretStore
 note over BaseReconciler,ServiceManager
-Finalizer discipline, delete confirmation, work
-requests, and optional Secret cleanup
+Finalizer discipline, delete status persistence,
+work requests, and optional Secret cleanup
 end note
 group Step 1
 BaseReconciler -> ServiceManager: Handle delete request with finalizer discipline
@@ -42,9 +42,9 @@ loop confirmation until terminal delete state
 ServiceManager -> OCI: GET or list fallback
 end
 note right of OCI
-Controller-local specialization supplies
-delete confirmation via GET, datasource list
-fallback, or provider wait helpers.
+When delete stays pending or returns an error,
+BaseReconciler persists service-manager status
+mutations before the next reconcile loop.
 end note
 end
 group Step 3
@@ -53,9 +53,9 @@ ServiceManager -> SecretStore: Delete ready-only secret when policy allows
 end
 ServiceManager --> BaseReconciler: Remove finalizer when delete is confirmed
 note right of SecretStore
-Optional Secret cleanup remains explicit and
-only happens when repo-authored policy allows
-it.
+Controller-local specialization supplies
+delete confirmation via GET, datasource list
+fallback, or provider wait helpers.
 end note
 end
 @enduml

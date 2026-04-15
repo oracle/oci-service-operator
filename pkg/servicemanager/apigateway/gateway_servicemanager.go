@@ -67,6 +67,7 @@ func (c *GatewayServiceManager) CreateOrUpdate(ctx context.Context, obj runtime.
 
 	gwInstance, err := c.resolveGatewayInstance(ctx, gw)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 
@@ -102,7 +103,7 @@ func (c *GatewayServiceManager) Delete(ctx context.Context, obj runtime.Object) 
 	}
 
 	c.Log.InfoLog(fmt.Sprintf("Deleting ApiGateway %s", targetID))
-	if err := c.DeleteGateway(ctx, targetID); err != nil {
+	if err := c.DeleteGateway(ctx, gw, targetID); err != nil {
 		if isGatewayNotFound(err) {
 			return true, nil
 		}
@@ -113,8 +114,10 @@ func (c *GatewayServiceManager) Delete(ctx context.Context, obj runtime.Object) 
 	gwInstance, err := c.GetGateway(ctx, targetID, nil)
 	if err != nil {
 		if isGatewayNotFound(err) {
+			servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 			return true, nil
 		}
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while checking ApiGateway deletion")
 		return false, err
 	}
@@ -162,6 +165,7 @@ func (c *GatewayServiceManager) lookupOrCreateGateway(ctx context.Context,
 	gw *apigatewayv1beta1.ApiGateway) (*apigatewaysdk.Gateway, error) {
 	gwOcid, err := c.GetGatewayOcid(ctx, *gw)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 		return nil, err
 	}
 	if gwOcid == nil {
@@ -174,6 +178,7 @@ func (c *GatewayServiceManager) bindGateway(ctx context.Context,
 	gw *apigatewayv1beta1.ApiGateway) (*apigatewaysdk.Gateway, error) {
 	gwInstance, err := c.GetGateway(ctx, gw.Spec.ApiGatewayId, nil)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while getting existing ApiGateway")
 		return nil, err
 	}
@@ -191,12 +196,14 @@ func (c *GatewayServiceManager) createGatewayInstance(ctx context.Context, gw *a
 		applyGatewayCreateFailure(&gw.Status.OsokStatus, err, c.Log, "ApiGateway")
 		return nil, err
 	}
+	servicemanager.RecordResponseOpcRequestID(&gw.Status.OsokStatus, resp)
 
 	c.Log.InfoLog(fmt.Sprintf("ApiGateway %s is Provisioning", gw.Spec.DisplayName))
 	setGatewayProvisioning(&gw.Status.OsokStatus, "ApiGateway", gw.Spec.DisplayName, shared.OCID(*resp.Id), c.Log)
 	retryPolicy := c.getGatewayRetryPolicy(30)
 	gwInstance, err := c.GetGateway(ctx, shared.OCID(*resp.Id), &retryPolicy)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while getting ApiGateway after create")
 		return nil, err
 	}
@@ -208,6 +215,7 @@ func (c *GatewayServiceManager) updateResolvedGateway(ctx context.Context,
 	c.Log.InfoLog(fmt.Sprintf("Getting existing ApiGateway %s", gwOcid))
 	gwInstance, err := c.GetGateway(ctx, gwOcid, nil)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while getting ApiGateway by OCID")
 		return nil, err
 	}

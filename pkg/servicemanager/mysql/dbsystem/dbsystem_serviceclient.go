@@ -32,8 +32,13 @@ type defaultDbSystemServiceClient struct {
 
 func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "mysql",
-		FormalSlug:        "dbsystem",
+		FormalService: "mysql",
+		FormalSlug:    "dbsystem",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",

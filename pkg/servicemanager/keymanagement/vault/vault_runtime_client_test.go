@@ -14,6 +14,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	keymanagementsdk "github.com/oracle/oci-go-sdk/v65/keymanagement"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -371,6 +372,43 @@ func TestVaultRuntimeDelete_PendingDeletionReturnsSuccess(t *testing.T) {
 	assert.True(t, deleted)
 	assert.Equal(t, "PENDING_DELETION", resource.Status.LifecycleState)
 	assert.Equal(t, int32(10), resource.Status.RequestedDeletionScheduleDays)
+}
+
+func TestVaultRuntimeDelete_TreatsAuthShaped404AsDeleted(t *testing.T) {
+	vaultID := "ocid1.vault.oc1..missing"
+	getCalls := 0
+	listCalls := 0
+
+	manager := newVaultTestManager(&fakeVaultOCIClient{
+		getFn: func(_ context.Context, req keymanagementsdk.GetVaultRequest) (keymanagementsdk.GetVaultResponse, error) {
+			getCalls++
+			assert.Equal(t, vaultID, *req.VaultId)
+			return keymanagementsdk.GetVaultResponse{}, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "vault missing")
+		},
+		listFn: func(_ context.Context, req keymanagementsdk.ListVaultsRequest) (keymanagementsdk.ListVaultsResponse, error) {
+			listCalls++
+			assert.Equal(t, "ocid1.compartment.oc1..example", *req.CompartmentId)
+			return keymanagementsdk.ListVaultsResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVault()
+	resource.Status.Id = vaultID
+	resource.Status.OsokStatus.Ocid = shared.OCID(vaultID)
+	resource.Status.RequestedDeletionScheduleDays = 14
+	resource.Status.TimeOfDeletion = time.Now().UTC().AddDate(0, 0, 14).Format(time.RFC3339)
+
+	deleted, err := manager.Delete(context.Background(), resource)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.True(t, deleted)
+	assert.Equal(t, 1, getCalls)
+	assert.Zero(t, listCalls)
+	assert.Zero(t, resource.Status.RequestedDeletionScheduleDays)
+	assert.Empty(t, resource.Status.TimeOfDeletion)
+	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
 
 func TestVaultRuntimeDelete_ConflictWithPendingDeletionReturnsSuccess(t *testing.T) {

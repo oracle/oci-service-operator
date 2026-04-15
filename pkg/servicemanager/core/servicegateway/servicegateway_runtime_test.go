@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	osokcore "github.com/oracle/oci-service-operator/pkg/core"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
@@ -100,8 +101,13 @@ func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client
 		SDKName: "ServiceGateway",
 		Log:     manager.Log,
 		Semantics: &generatedruntime.Semantics{
-			FormalService:     "core",
-			FormalSlug:        "servicegateway",
+			FormalService: "core",
+			FormalSlug:    "servicegateway",
+			Async: &generatedruntime.AsyncSemantics{
+				Strategy:             "lifecycle",
+				Runtime:              "generatedruntime",
+				FormalClassification: "lifecycle",
+			},
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -125,13 +131,13 @@ func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client
 				ConflictsWith: map[string][]string{},
 			},
 			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
 				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
 			},
 			UpdateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",
@@ -629,80 +635,12 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 }
 
-func TestIsServiceGatewayReadNotFoundOCI_RejectsAuthAmbiguity(t *testing.T) {
-	assert.True(t, isServiceGatewayReadNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.False(t, isServiceGatewayReadNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.False(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isServiceGatewayReadNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isServiceGatewayReadNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
-}
-
-func TestIsServiceGatewayDeleteNotFoundOCI_AcceptsAuthShaped404(t *testing.T) {
-	assert.True(t, isServiceGatewayDeleteNotFoundOCI(errorutil.NotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotFound,
-		Description:    "normalized not found",
-	}))
-	assert.True(t, isServiceGatewayDeleteNotFoundOCI(errorutil.UnauthorizedAndNotFoundOciError{
-		HTTPStatusCode: 404,
-		ErrorCode:      errorutil.NotAuthorizedOrNotFound,
-		Description:    "normalized auth ambiguity",
-	}))
-	assert.True(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 404,
-		code:       "NotAuthorizedOrNotFound",
-		message:    "auth ambiguity",
-	}))
-	assert.True(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 404,
-		code:       "NotFound",
-		message:    "not found",
-	}))
-	assert.False(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 404,
-		code:       "UnexpectedCode",
-		message:    "resource not found",
-	}))
-	assert.False(t, isServiceGatewayDeleteNotFoundOCI(errorutil.ConflictOciError{
-		HTTPStatusCode: 409,
-		ErrorCode:      errorutil.IncorrectState,
-		Description:    "normalized conflict",
-	}))
-	assert.False(t, isServiceGatewayDeleteNotFoundOCI(fakeServiceGatewayServiceError{
-		statusCode: 409,
-		code:       errorutil.IncorrectState,
-		message:    "resource conflict",
-	}))
+func TestServiceGatewayClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {
+	contract, err := errortest.ManualRuntimeClassifierContractFromReviewedRegistration("core", "ServiceGateway")
+	if err != nil {
+		t.Fatalf("ManualRuntimeClassifierContractFromReviewedRegistration() error = %v", err)
+	}
+	errortest.RunManualRuntimeClassifierContract(t, contract, isServiceGatewayReadNotFoundOCI, isServiceGatewayDeleteNotFoundOCI)
 }
 
 func TestReconcileDelete_ReleasesFinalizerOnAuthShapedNotFound(t *testing.T) {

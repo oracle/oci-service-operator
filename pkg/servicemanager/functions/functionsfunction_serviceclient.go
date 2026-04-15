@@ -14,6 +14,7 @@ import (
 	ocifunctions "github.com/oracle/oci-go-sdk/v65/functions"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/shared"
 )
 
@@ -38,9 +39,15 @@ func (m *FunctionsFunctionServiceManager) CreateFunction(
 		return ocifunctions.CreateFunctionResponse{}, fmt.Errorf("build Functions Function create details: %w", err)
 	}
 
-	return client.CreateFunction(ctx, ocifunctions.CreateFunctionRequest{
+	response, err := client.CreateFunction(ctx, ocifunctions.CreateFunctionRequest{
 		CreateFunctionDetails: details,
 	})
+	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		return ocifunctions.CreateFunctionResponse{}, err
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+	return response, nil
 }
 
 func (m *FunctionsFunctionServiceManager) GetFunction(
@@ -145,12 +152,14 @@ func (m *FunctionsFunctionServiceManager) UpdateFunction(
 		UpdateFunctionDetails: details,
 	})
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 		return nil, false, err
 	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
 	return &response.Function, true, nil
 }
 
-func (m *FunctionsFunctionServiceManager) DeleteFunction(ctx context.Context, functionID shared.OCID) error {
+func (m *FunctionsFunctionServiceManager) DeleteFunction(ctx context.Context, resource *functionsv1beta1.Function, functionID shared.OCID) error {
 	if strings.TrimSpace(string(functionID)) == "" {
 		return nil
 	}
@@ -160,8 +169,15 @@ func (m *FunctionsFunctionServiceManager) DeleteFunction(ctx context.Context, fu
 		return err
 	}
 
-	_, err = client.DeleteFunction(ctx, ocifunctions.DeleteFunctionRequest{
+	response, err := client.DeleteFunction(ctx, ocifunctions.DeleteFunctionRequest{
 		FunctionId: common.String(string(functionID)),
 	})
+	if resource != nil {
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		} else {
+			servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+		}
+	}
 	return err
 }

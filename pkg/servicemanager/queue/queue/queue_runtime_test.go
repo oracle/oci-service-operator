@@ -72,9 +72,10 @@ func (f *fakeQueueOCIClient) GetWorkRequest(ctx context.Context, req queuesdk.Ge
 }
 
 type fakeQueueServiceError struct {
-	statusCode int
-	code       string
-	message    string
+	statusCode   int
+	code         string
+	message      string
+	opcRequestID string
 }
 
 func (f fakeQueueServiceError) Error() string          { return f.message }
@@ -82,7 +83,7 @@ func (f fakeQueueServiceError) GetHTTPStatusCode() int { return f.statusCode }
 func (f fakeQueueServiceError) GetMessage() string     { return f.message }
 func (f fakeQueueServiceError) GetCode() string        { return f.code }
 func (f fakeQueueServiceError) GetOpcRequestID() string {
-	return ""
+	return f.opcRequestID
 }
 
 func newQueueTestManager(client queueOCIClient) *QueueServiceManager {
@@ -136,10 +137,18 @@ func makeSDKQueue(id, displayName string, state queuesdk.QueueLifecycleStateEnum
 }
 
 func makeWorkRequest(id string, status queuesdk.OperationStatusEnum, action queuesdk.ActionTypeEnum, queueID string) queuesdk.WorkRequest {
+	operationType := queuesdk.OperationTypeCreateQueue
+	switch action {
+	case queuesdk.ActionTypeUpdated:
+		operationType = queuesdk.OperationTypeUpdateQueue
+	case queuesdk.ActionTypeDeleted:
+		operationType = queuesdk.OperationTypeDeleteQueue
+	}
+
 	return queuesdk.WorkRequest{
 		Id:            common.String(id),
 		Status:        status,
-		OperationType: queuesdk.OperationTypeCreateQueue,
+		OperationType: operationType,
 		CompartmentId: common.String("ocid1.compartment.oc1..example"),
 		Resources: []queuesdk.WorkRequestResource{
 			{
@@ -153,12 +162,115 @@ func makeWorkRequest(id string, status queuesdk.OperationStatusEnum, action queu
 	}
 }
 
+func seedStaleQueueAsyncStatus(resource *queuev1beta1.Queue) {
+	resource.Status.OsokStatus = shared.OSOKStatus{
+		Reason:  string(shared.Updating),
+		Message: "Queue update work request wr-stale is IN_PROGRESS",
+		Async: shared.OSOKAsyncTracker{
+			Current: &shared.OSOKAsyncOperation{
+				Source:           shared.OSOKAsyncSourceWorkRequest,
+				Phase:            shared.OSOKAsyncPhaseUpdate,
+				WorkRequestID:    "wr-stale",
+				RawStatus:        "IN_PROGRESS",
+				RawOperationType: "UPDATE_QUEUE",
+				NormalizedClass:  shared.OSOKAsyncClassPending,
+			},
+		},
+	}
+}
+
+func TestQueueWorkRequestAsyncOperationMapsKnownStatusesAndActions(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		status    queuesdk.OperationStatusEnum
+		action    queuesdk.ActionTypeEnum
+		phase     shared.OSOKAsyncPhase
+		wantClass shared.OSOKAsyncNormalizedClass
+	}{
+		{
+			name:      "accepted create pending",
+			status:    queuesdk.OperationStatusAccepted,
+			action:    queuesdk.ActionTypeCreated,
+			phase:     shared.OSOKAsyncPhaseCreate,
+			wantClass: shared.OSOKAsyncClassPending,
+		},
+		{
+			name:      "in progress update pending",
+			status:    queuesdk.OperationStatusInProgress,
+			action:    queuesdk.ActionTypeUpdated,
+			phase:     shared.OSOKAsyncPhaseUpdate,
+			wantClass: shared.OSOKAsyncClassPending,
+		},
+		{
+			name:      "canceling delete pending",
+			status:    queuesdk.OperationStatusCanceling,
+			action:    queuesdk.ActionTypeDeleted,
+			phase:     shared.OSOKAsyncPhaseDelete,
+			wantClass: shared.OSOKAsyncClassPending,
+		},
+		{
+			name:      "failed create failed",
+			status:    queuesdk.OperationStatusFailed,
+			action:    queuesdk.ActionTypeCreated,
+			phase:     shared.OSOKAsyncPhaseCreate,
+			wantClass: shared.OSOKAsyncClassFailed,
+		},
+		{
+			name:      "canceled update canceled",
+			status:    queuesdk.OperationStatusCanceled,
+			action:    queuesdk.ActionTypeUpdated,
+			phase:     shared.OSOKAsyncPhaseUpdate,
+			wantClass: shared.OSOKAsyncClassCanceled,
+		},
+		{
+			name:      "succeeded delete succeeded",
+			status:    queuesdk.OperationStatusSucceeded,
+			action:    queuesdk.ActionTypeDeleted,
+			phase:     shared.OSOKAsyncPhaseDelete,
+			wantClass: shared.OSOKAsyncClassSucceeded,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			workRequest := makeWorkRequest("wr-adapter", tt.status, tt.action, "ocid1.queue.oc1..existing")
+			current, err := queueWorkRequestAsyncOperation(makeSpecQueue(), workRequest, tt.phase)
+			assert.NoError(t, err)
+			if assert.NotNil(t, current) {
+				assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, current.Source)
+				assert.Equal(t, tt.phase, current.Phase)
+				assert.Equal(t, "wr-adapter", current.WorkRequestID)
+				assert.Equal(t, string(tt.status), current.RawStatus)
+				assert.Equal(t, string(workRequest.OperationType), current.RawOperationType)
+				assert.Equal(t, tt.wantClass, current.NormalizedClass)
+				assert.Equal(t, "Queue "+string(tt.phase)+" work request wr-adapter is "+string(tt.status), current.Message)
+				if assert.NotNil(t, current.PercentComplete) {
+					assert.Equal(t, float32(100), *current.PercentComplete)
+				}
+			}
+		})
+	}
+}
+
+func TestQueueWorkRequestAsyncOperationRejectsUnmodeledStatus(t *testing.T) {
+	t.Parallel()
+
+	_, err := queueWorkRequestAsyncOperation(makeSpecQueue(), makeWorkRequest("wr-unknown", queuesdk.OperationStatusEnum("WAITING"), queuesdk.ActionTypeCreated, "ocid1.queue.oc1..existing"), shared.OSOKAsyncPhaseCreate)
+	assert.EqualError(t, err, `unmodeled async status "WAITING"`)
+}
+
 func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T) {
 	var captured queuesdk.CreateQueueRequest
 	manager := newQueueTestManager(&fakeQueueOCIClient{
 		createFn: func(_ context.Context, req queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
 			captured = req
 			return queuesdk.CreateQueueResponse{
+				OpcRequestId:     common.String("opc-create-1"),
 				OpcWorkRequestId: common.String("wr-create-1"),
 			}, nil
 		},
@@ -177,10 +289,45 @@ func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T)
 	assert.True(t, resp.IsSuccessful)
 	assert.True(t, resp.ShouldRequeue)
 	assert.Equal(t, queueRequeueDuration, resp.RequeueDuration)
+	assert.Equal(t, "opc-create-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, "wr-create-1", resource.Status.CreateWorkRequestId)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseCreate, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-create-1", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "ACCEPTED", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+		if assert.NotNil(t, resource.Status.OsokStatus.Async.Current.PercentComplete) {
+			assert.Equal(t, float32(100), *resource.Status.OsokStatus.Async.Current.PercentComplete)
+		}
+	}
 	assert.Equal(t, "queue-sample", *captured.DisplayName)
 	assert.Equal(t, "ocid1.compartment.oc1..example", *captured.CompartmentId)
 	assert.Equal(t, 1200, *captured.RetentionInSeconds)
+}
+
+func TestQueueRuntime_CreateErrorCapturesOpcRequestID(t *testing.T) {
+	t.Parallel()
+
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		createFn: func(_ context.Context, _ queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
+			return queuesdk.CreateQueueResponse{}, fakeQueueServiceError{
+				statusCode:   409,
+				code:         errorutil.IncorrectState,
+				message:      "create conflict",
+				opcRequestID: "opc-create-conflict",
+			}
+		},
+	})
+
+	resource := makeSpecQueue()
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, "opc-create-conflict", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 }
 
 func TestQueueRuntime_ResumeCreateRecoversQueueIDAndProjectsStatus(t *testing.T) {
@@ -212,6 +359,259 @@ func TestQueueRuntime_ResumeCreateRecoversQueueIDAndProjectsStatus(t *testing.T)
 	assert.Equal(t, "ocid1.queue.oc1..created", string(resource.Status.OsokStatus.Ocid))
 	assert.Equal(t, "ACTIVE", resource.Status.LifecycleState)
 	assert.Equal(t, "https://cell-1.queue.messaging.us-phoenix-1.oci.oraclecloud.com", resource.Status.MessagesEndpoint)
+	assert.Nil(t, resource.Status.OsokStatus.Async.Current)
+}
+
+func TestQueueRuntime_ResumeCreateSucceededFailedLifecycleProjectsCanonicalAsyncPhase(t *testing.T) {
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-create-failed-lifecycle", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-create-failed-lifecycle", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeCreated, "ocid1.queue.oc1..created"),
+			}, nil
+		},
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			assert.Equal(t, "ocid1.queue.oc1..created", *req.QueueId)
+			return queuesdk.GetQueueResponse{
+				Queue: makeSDKQueue("ocid1.queue.oc1..created", "queue-sample", queuesdk.QueueLifecycleStateFailed),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.CreateWorkRequestId = "wr-create-failed-lifecycle"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, "", resource.Status.CreateWorkRequestId)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "Queue queue-sample is FAILED", resource.Status.OsokStatus.Message)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceLifecycle, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseCreate, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "FAILED", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawOperationType)
+		assert.Equal(t, shared.OSOKAsyncClassFailed, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+		assert.Equal(t, "Queue queue-sample is FAILED", resource.Status.OsokStatus.Async.Current.Message)
+	}
+}
+
+func TestQueueRuntime_ResumeUpdateSucceededFailedLifecycleProjectsCanonicalAsyncPhase(t *testing.T) {
+	getCalls := 0
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			state := queuesdk.QueueLifecycleStateActive
+			if getCalls == 2 {
+				state = queuesdk.QueueLifecycleStateFailed
+			}
+			return queuesdk.GetQueueResponse{
+				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", state),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-failed-lifecycle", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-update-failed-lifecycle", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Status.UpdateWorkRequestId = "wr-update-failed-lifecycle"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "Queue queue-sample is FAILED", resource.Status.OsokStatus.Message)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceLifecycle, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseUpdate, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "FAILED", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawOperationType)
+		assert.Equal(t, shared.OSOKAsyncClassFailed, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+		assert.Equal(t, "Queue queue-sample is FAILED", resource.Status.OsokStatus.Async.Current.Message)
+	}
+}
+
+func TestQueueRuntime_ResumeUpdateSucceededUnreadablePreservesWorkRequestDetails(t *testing.T) {
+	getCalls := 0
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			if getCalls == 1 {
+				return queuesdk.GetQueueResponse{
+					Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive),
+				}, nil
+			}
+			return queuesdk.GetQueueResponse{}, fakeQueueServiceError{
+				statusCode: 404,
+				code:       errorutil.NotFound,
+				message:    "queue not found",
+			}
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-missing", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-update-missing", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Status.UpdateWorkRequestId = "wr-update-missing"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.EqualError(t, err, "Queue update work request wr-update-missing succeeded but Queue ocid1.queue.oc1..existing is no longer readable")
+	assert.False(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "Queue update work request wr-update-missing succeeded but Queue ocid1.queue.oc1..existing is no longer readable", resource.Status.OsokStatus.Message)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseUpdate, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-update-missing", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "SUCCEEDED", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "UPDATE_QUEUE", resource.Status.OsokStatus.Async.Current.RawOperationType)
+		assert.Equal(t, shared.OSOKAsyncClassFailed, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+		assert.Equal(t, "Queue update work request wr-update-missing succeeded but Queue ocid1.queue.oc1..existing is no longer readable", resource.Status.OsokStatus.Async.Current.Message)
+	}
+}
+
+func TestQueueRuntime_TerminalWorkRequestOverwritesStaleAsyncTracker(t *testing.T) {
+	tests := []struct {
+		name              string
+		workRequestID     string
+		workRequest       queuesdk.WorkRequest
+		wantPhase         shared.OSOKAsyncPhase
+		wantClass         shared.OSOKAsyncNormalizedClass
+		wantOperation     string
+		runCreateOrUpdate bool
+		setupResource     func(*queuev1beta1.Queue)
+		setupClient       func(string) queueOCIClient
+	}{
+		{
+			name:              "create failed",
+			workRequestID:     "wr-create-terminal",
+			workRequest:       makeWorkRequest("wr-create-terminal", queuesdk.OperationStatusFailed, queuesdk.ActionTypeCreated, "ocid1.queue.oc1..created"),
+			wantPhase:         shared.OSOKAsyncPhaseCreate,
+			wantClass:         shared.OSOKAsyncClassFailed,
+			wantOperation:     "CREATE_QUEUE",
+			runCreateOrUpdate: true,
+			setupResource: func(resource *queuev1beta1.Queue) {
+				resource.Status.CreateWorkRequestId = "wr-create-terminal"
+			},
+			setupClient: func(workRequestID string) queueOCIClient {
+				return &fakeQueueOCIClient{
+					getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+						assert.Equal(t, workRequestID, *req.WorkRequestId)
+						return queuesdk.GetWorkRequestResponse{
+							WorkRequest: makeWorkRequest(workRequestID, queuesdk.OperationStatusFailed, queuesdk.ActionTypeCreated, "ocid1.queue.oc1..created"),
+						}, nil
+					},
+				}
+			},
+		},
+		{
+			name:              "update canceled",
+			workRequestID:     "wr-update-terminal",
+			workRequest:       makeWorkRequest("wr-update-terminal", queuesdk.OperationStatusCanceled, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			wantPhase:         shared.OSOKAsyncPhaseUpdate,
+			wantClass:         shared.OSOKAsyncClassCanceled,
+			wantOperation:     "UPDATE_QUEUE",
+			runCreateOrUpdate: true,
+			setupResource: func(resource *queuev1beta1.Queue) {
+				resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+				resource.Status.UpdateWorkRequestId = "wr-update-terminal"
+			},
+			setupClient: func(workRequestID string) queueOCIClient {
+				return &fakeQueueOCIClient{
+					getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+						assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+						return queuesdk.GetQueueResponse{
+							Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive),
+						}, nil
+					},
+					getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+						assert.Equal(t, workRequestID, *req.WorkRequestId)
+						return queuesdk.GetWorkRequestResponse{
+							WorkRequest: makeWorkRequest(workRequestID, queuesdk.OperationStatusCanceled, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+						}, nil
+					},
+				}
+			},
+		},
+		{
+			name:          "delete failed",
+			workRequestID: "wr-delete-terminal",
+			workRequest:   makeWorkRequest("wr-delete-terminal", queuesdk.OperationStatusFailed, queuesdk.ActionTypeDeleted, "ocid1.queue.oc1..existing"),
+			wantPhase:     shared.OSOKAsyncPhaseDelete,
+			wantClass:     shared.OSOKAsyncClassFailed,
+			wantOperation: "DELETE_QUEUE",
+			setupResource: func(resource *queuev1beta1.Queue) {
+				resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+				resource.Status.DeleteWorkRequestId = "wr-delete-terminal"
+			},
+			setupClient: func(workRequestID string) queueOCIClient {
+				return &fakeQueueOCIClient{
+					getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+						assert.Equal(t, workRequestID, *req.WorkRequestId)
+						return queuesdk.GetWorkRequestResponse{
+							WorkRequest: makeWorkRequest(workRequestID, queuesdk.OperationStatusFailed, queuesdk.ActionTypeDeleted, "ocid1.queue.oc1..existing"),
+						}, nil
+					},
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resource := makeSpecQueue()
+			seedStaleQueueAsyncStatus(resource)
+			tt.setupResource(resource)
+
+			manager := newQueueTestManager(tt.setupClient(tt.workRequestID))
+
+			if tt.runCreateOrUpdate {
+				resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+				assert.EqualError(t, err, "Queue "+string(tt.wantPhase)+" work request "+tt.workRequestID+" finished with status "+string(tt.workRequest.Status))
+				assert.False(t, resp.IsSuccessful)
+				assert.False(t, resp.ShouldRequeue)
+			} else {
+				deleted, err := manager.Delete(context.Background(), resource)
+				assert.EqualError(t, err, "Queue "+string(tt.wantPhase)+" work request "+tt.workRequestID+" finished with status "+string(tt.workRequest.Status))
+				assert.False(t, deleted)
+			}
+
+			assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+			assert.Equal(t, "Queue "+string(tt.wantPhase)+" work request "+tt.workRequestID+" finished with status "+string(tt.workRequest.Status), resource.Status.OsokStatus.Message)
+			if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+				assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+				assert.Equal(t, tt.wantPhase, resource.Status.OsokStatus.Async.Current.Phase)
+				assert.Equal(t, tt.workRequestID, resource.Status.OsokStatus.Async.Current.WorkRequestID)
+				assert.Equal(t, string(tt.workRequest.Status), resource.Status.OsokStatus.Async.Current.RawStatus)
+				assert.Equal(t, tt.wantOperation, resource.Status.OsokStatus.Async.Current.RawOperationType)
+				assert.Equal(t, tt.wantClass, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+				assert.Equal(t, "Queue "+string(tt.wantPhase)+" work request "+tt.workRequestID+" finished with status "+string(tt.workRequest.Status), resource.Status.OsokStatus.Async.Current.Message)
+			}
+		})
+	}
 }
 
 func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
@@ -222,6 +622,16 @@ func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
 	resource.Status.OsokStatus = shared.OSOKStatus{
 		Reason:  string(shared.Updating),
 		Message: "queue update work request is IN_PROGRESS",
+		Async: shared.OSOKAsyncTracker{
+			Current: &shared.OSOKAsyncOperation{
+				Source:           shared.OSOKAsyncSourceWorkRequest,
+				Phase:            shared.OSOKAsyncPhaseUpdate,
+				WorkRequestID:    "wr-update-status",
+				RawStatus:        "IN_PROGRESS",
+				RawOperationType: "UPDATE_QUEUE",
+				NormalizedClass:  shared.OSOKAsyncClassPending,
+			},
+		},
 	}
 	resource.Status.CreateWorkRequestId = "wr-create-status"
 	resource.Status.UpdateWorkRequestId = "wr-update-status"
@@ -239,6 +649,10 @@ func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
 	assert.Equal(t, "https://cell-1.queue.messaging.us-phoenix-1.oci.oraclecloud.com", resource.Status.MessagesEndpoint)
 	assert.Equal(t, string(shared.Updating), resource.Status.OsokStatus.Reason)
 	assert.Equal(t, "queue update work request is IN_PROGRESS", resource.Status.OsokStatus.Message)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, "wr-update-status", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, shared.OSOKAsyncPhaseUpdate, resource.Status.OsokStatus.Async.Current.Phase)
+	}
 }
 
 func TestQueueRuntime_ObserveNoOpWhenStateMatches(t *testing.T) {
@@ -318,6 +732,50 @@ func TestQueueRuntime_MutableUpdateDriftTriggersWorkRequestAndClearCustomEncrypt
 	assert.NotNil(t, captured.CustomEncryptionKeyId)
 	assert.Equal(t, "", *captured.CustomEncryptionKeyId)
 	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
+}
+
+func TestQueueRuntime_UpdateAcceptedPersistsLegacyMirrorAndSharedAsyncTracker(t *testing.T) {
+	var captured queuesdk.UpdateQueueRequest
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			return queuesdk.GetQueueResponse{
+				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "old-name", queuesdk.QueueLifecycleStateActive),
+			}, nil
+		},
+		updateFn: func(_ context.Context, req queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+			captured = req
+			return queuesdk.UpdateQueueResponse{
+				OpcWorkRequestId: common.String("wr-update-pending"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-pending", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-update-pending", queuesdk.OperationStatusInProgress, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Spec.DisplayName = "queue-sample"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, resp.ShouldRequeue)
+	assert.Equal(t, "ocid1.queue.oc1..existing", *captured.QueueId)
+	assert.Equal(t, "wr-update-pending", resource.Status.UpdateWorkRequestId)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseUpdate, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-update-pending", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "IN_PROGRESS", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "UPDATE_QUEUE", resource.Status.OsokStatus.Async.Current.RawOperationType)
+		assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+	}
 }
 
 func TestQueueRuntime_MutableUpdateDriftPreservesExplicitZeroValues(t *testing.T) {
@@ -430,6 +888,47 @@ func TestQueueRuntime_DeletePendingWorkRequestKeepsTerminating(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, deleted)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-delete-1", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "IN_PROGRESS", resource.Status.OsokStatus.Async.Current.RawStatus)
+	}
+}
+
+func TestQueueRuntime_DeleteAcceptedPersistsLegacyMirrorAndSharedAsyncTracker(t *testing.T) {
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		deleteFn: func(_ context.Context, req queuesdk.DeleteQueueRequest) (queuesdk.DeleteQueueResponse, error) {
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			return queuesdk.DeleteQueueResponse{
+				OpcWorkRequestId: common.String("wr-delete-pending"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-delete-pending", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-delete-pending", queuesdk.OperationStatusAccepted, queuesdk.ActionTypeDeleted, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+
+	deleted, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, deleted)
+	assert.Equal(t, "wr-delete-pending", resource.Status.DeleteWorkRequestId)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-delete-pending", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "ACCEPTED", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "DELETE_QUEUE", resource.Status.OsokStatus.Async.Current.RawOperationType)
+		assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+	}
 }
 
 func TestQueueRuntime_DeleteWaitsForQueueDisappearanceWhenWorkRequestReadIsGone(t *testing.T) {
@@ -453,6 +952,15 @@ func TestQueueRuntime_DeleteWaitsForQueueDisappearanceWhenWorkRequestReadIsGone(
 	resource := makeSpecQueue()
 	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
 	resource.Status.DeleteWorkRequestId = "wr-delete-missing"
+	resource.Status.UpdateWorkRequestId = "wr-update-stale"
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:           shared.OSOKAsyncSourceWorkRequest,
+		Phase:            shared.OSOKAsyncPhaseUpdate,
+		WorkRequestID:    "wr-update-stale",
+		RawStatus:        "IN_PROGRESS",
+		RawOperationType: "UPDATE_QUEUE",
+		NormalizedClass:  shared.OSOKAsyncClassPending,
+	}
 
 	deleted, err := manager.Delete(context.Background(), resource)
 
@@ -461,6 +969,12 @@ func TestQueueRuntime_DeleteWaitsForQueueDisappearanceWhenWorkRequestReadIsGone(
 	assert.Equal(t, "wr-delete-missing", resource.Status.DeleteWorkRequestId)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 	assert.Contains(t, resource.Status.OsokStatus.Message, "waiting for Queue ocid1.queue.oc1..existing to disappear")
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-delete-missing", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawOperationType)
+	}
 }
 
 func TestQueueRuntime_DeleteConfirmationTreatsNotFoundAsSuccess(t *testing.T) {
@@ -490,6 +1004,7 @@ func TestQueueRuntime_DeleteConfirmationTreatsNotFoundAsSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, deleted)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.Nil(t, resource.Status.OsokStatus.Async.Current)
 }
 
 func TestQueueRuntime_DeleteConfirmationTreatsDeletedLifecycleAsSuccess(t *testing.T) {

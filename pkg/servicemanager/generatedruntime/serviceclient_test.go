@@ -18,6 +18,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -101,7 +102,9 @@ type fakeCreateThingRequest struct {
 }
 
 type fakeCreateThingResponse struct {
-	Thing fakeThing `presentIn:"body"`
+	OpcRequestId     *string   `presentIn:"header" name:"opc-request-id"`
+	OpcWorkRequestId *string   `presentIn:"header" name:"opc-work-request-id"`
+	Thing            fakeThing `presentIn:"body"`
 }
 
 type FakeCreateThingWithSecretDetails struct {
@@ -119,7 +122,8 @@ type fakeGetThingRequest struct {
 }
 
 type fakeGetThingResponse struct {
-	Thing fakeThing `presentIn:"body"`
+	OpcRequestId *string   `presentIn:"header" name:"opc-request-id"`
+	Thing        fakeThing `presentIn:"body"`
 }
 
 type FakeUpdateThingDetails struct {
@@ -136,14 +140,19 @@ type fakeUpdateThingRequest struct {
 }
 
 type fakeUpdateThingResponse struct {
-	Thing fakeThing `presentIn:"body"`
+	OpcRequestId     *string   `presentIn:"header" name:"opc-request-id"`
+	OpcWorkRequestId *string   `presentIn:"header" name:"opc-work-request-id"`
+	Thing            fakeThing `presentIn:"body"`
 }
 
 type fakeDeleteThingRequest struct {
 	ThingId *string `contributesTo:"path" name:"thingId"`
 }
 
-type fakeDeleteThingResponse struct{}
+type fakeDeleteThingResponse struct {
+	OpcRequestId     *string `presentIn:"header" name:"opc-request-id"`
+	OpcWorkRequestId *string `presentIn:"header" name:"opc-work-request-id"`
+}
 
 type fakeListThingRequest struct {
 	CompartmentId string `contributesTo:"query" name:"compartmentId"`
@@ -166,21 +175,6 @@ type fakeNamedThingCollection struct {
 
 type fakeNamedListThingResponse struct {
 	Collection fakeNamedThingCollection `presentIn:"body"`
-}
-
-type fakeServiceError struct {
-	code       string
-	message    string
-	statusCode int
-	opcID      string
-}
-
-func (f fakeServiceError) Error() string          { return f.message }
-func (f fakeServiceError) GetHTTPStatusCode() int { return f.statusCode }
-func (f fakeServiceError) GetMessage() string     { return f.message }
-func (f fakeServiceError) GetCode() string        { return f.code }
-func (f fakeServiceError) GetOpcRequestID() string {
-	return f.opcID
 }
 
 type fakeCredentialClient struct {
@@ -225,6 +219,7 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 			Call: func(_ context.Context, request any) (any, error) {
 				createRequest = *request.(*fakeCreateThingRequest)
 				return fakeCreateThingResponse{
+					OpcRequestId: stringPtr("opc-create-1"),
 					Thing: fakeThing{
 						Id:             "ocid1.thing.oc1..create",
 						DisplayName:    "created-name",
@@ -263,11 +258,351 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	requireCreateThingRequestMatchesSpec(t, createRequest, resource.Spec)
 	requireThingIDRequest(t, "get", getRequest.ThingId, "ocid1.thing.oc1..create")
 	requireStatusOCID(t, resource, "ocid1.thing.oc1..create")
+	requireStatusOpcRequestID(t, resource, "opc-create-1")
 	requireStringEqual(t, "status.id", resource.Status.Id, "ocid1.thing.oc1..create")
 	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "created-name")
 	requireStringEqual(t, "status.lifecycleState", resource.Status.LifecycleState, "ACTIVE")
 	requireCreatedAt(t, resource)
 	requireTrailingCondition(t, resource, shared.Active)
+}
+
+func TestApplySuccessSetsLifecycleAsyncTrackerWhilePending(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				UpdatingStates: []string{"UPDATING"},
+				ActiveStates:   []string{"ACTIVE"},
+			},
+		},
+	})
+
+	resource := &fakeResource{}
+	response, err := client.applySuccess(resource, fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:             "ocid1.thing.oc1..pending",
+			DisplayName:    "pending-thing",
+			LifecycleState: "UPDATING",
+		},
+	}, shared.Updating)
+
+	if err != nil {
+		t.Fatalf("applySuccess() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatalf("response.IsSuccessful = false, want true")
+	}
+	if !response.ShouldRequeue {
+		t.Fatalf("response.ShouldRequeue = false, want true")
+	}
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatalf("status.async.current = nil, want lifecycle tracker")
+	}
+	if resource.Status.OsokStatus.Async.Current.Source != shared.OSOKAsyncSourceLifecycle {
+		t.Fatalf("status.async.current.source = %q, want %q", resource.Status.OsokStatus.Async.Current.Source, shared.OSOKAsyncSourceLifecycle)
+	}
+	if resource.Status.OsokStatus.Async.Current.Phase != shared.OSOKAsyncPhaseUpdate {
+		t.Fatalf("status.async.current.phase = %q, want %q", resource.Status.OsokStatus.Async.Current.Phase, shared.OSOKAsyncPhaseUpdate)
+	}
+	if resource.Status.OsokStatus.Async.Current.RawStatus != "UPDATING" {
+		t.Fatalf("status.async.current.rawStatus = %q, want %q", resource.Status.OsokStatus.Async.Current.RawStatus, "UPDATING")
+	}
+	if resource.Status.OsokStatus.Async.Current.NormalizedClass != shared.OSOKAsyncClassPending {
+		t.Fatalf("status.async.current.normalizedClass = %q, want %q", resource.Status.OsokStatus.Async.Current.NormalizedClass, shared.OSOKAsyncClassPending)
+	}
+}
+
+func TestServiceClientCreateOrUpdateCapturesOpcRequestIDFromOCIError(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return nil, errortest.NewServiceError(409, "IncorrectState", "update conflict")
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			DisplayName:   "desired-name",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want OCI failure")
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful response", response)
+	}
+	requireStatusOpcRequestID(t, resource, "opc-request-id")
+	requireTrailingCondition(t, resource, shared.Failed)
+}
+
+func TestApplySuccessClearsLifecycleAsyncTrackerWhenActive(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				UpdatingStates: []string{"UPDATING"},
+				ActiveStates:   []string{"ACTIVE"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Async: shared.OSOKAsyncTracker{
+					Current: &shared.OSOKAsyncOperation{
+						Source:          shared.OSOKAsyncSourceLifecycle,
+						Phase:           shared.OSOKAsyncPhaseUpdate,
+						RawStatus:       "UPDATING",
+						NormalizedClass: shared.OSOKAsyncClassPending,
+					},
+				},
+			},
+		},
+	}
+
+	response, err := client.applySuccess(resource, fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:             "ocid1.thing.oc1..active",
+			DisplayName:    "active-thing",
+			LifecycleState: "ACTIVE",
+		},
+	}, shared.Active)
+
+	if err != nil {
+		t.Fatalf("applySuccess() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatalf("response.IsSuccessful = false, want true")
+	}
+	if response.ShouldRequeue {
+		t.Fatalf("response.ShouldRequeue = true, want false")
+	}
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.async.current = %#v, want cleared tracker", resource.Status.OsokStatus.Async.Current)
+	}
+	if resource.Status.OsokStatus.Reason != string(shared.Active) {
+		t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Active)
+	}
+}
+
+func TestApplySuccessPrefersObservedLifecyclePhaseTransition(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				UpdatingStates: []string{"UPDATING"},
+				ActiveStates:   []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				PendingStates: []string{"DELETING"},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Async: shared.OSOKAsyncTracker{
+					Current: &shared.OSOKAsyncOperation{
+						Source:          shared.OSOKAsyncSourceLifecycle,
+						Phase:           shared.OSOKAsyncPhaseUpdate,
+						RawStatus:       "UPDATING",
+						NormalizedClass: shared.OSOKAsyncClassPending,
+					},
+				},
+			},
+		},
+	}
+
+	response, err := client.applySuccess(resource, fakeGetThingResponse{
+		Thing: fakeThing{
+			Id:             "ocid1.thing.oc1..deleting",
+			DisplayName:    "deleting-thing",
+			LifecycleState: "DELETING",
+		},
+	}, shared.Updating)
+
+	if err != nil {
+		t.Fatalf("applySuccess() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatalf("response.IsSuccessful = false, want true")
+	}
+	if !response.ShouldRequeue {
+		t.Fatalf("response.ShouldRequeue = false, want true")
+	}
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatalf("status.async.current = nil, want lifecycle tracker")
+	}
+	if resource.Status.OsokStatus.Async.Current.Phase != shared.OSOKAsyncPhaseDelete {
+		t.Fatalf("status.async.current.phase = %q, want %q", resource.Status.OsokStatus.Async.Current.Phase, shared.OSOKAsyncPhaseDelete)
+	}
+	if resource.Status.OsokStatus.Async.Current.RawStatus != "DELETING" {
+		t.Fatalf("status.async.current.rawStatus = %q, want %q", resource.Status.OsokStatus.Async.Current.RawStatus, "DELETING")
+	}
+	if resource.Status.OsokStatus.Reason != string(shared.Terminating) {
+		t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Terminating)
+	}
+}
+
+func TestApplySuccessHeuristicDeleteTerminalKeepsAsyncTrackerWithoutSemantics(t *testing.T) {
+	t.Parallel()
+
+	for _, lifecycleState := range []string{"DELETED", "TERMINATED"} {
+		lifecycleState := lifecycleState
+		t.Run(lifecycleState, func(t *testing.T) {
+			t.Parallel()
+
+			client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+				Kind:    "Thing",
+				SDKName: "Thing",
+			})
+
+			resource := &fakeResource{
+				Status: fakeStatus{
+					OsokStatus: shared.OSOKStatus{
+						Async: shared.OSOKAsyncTracker{
+							Current: &shared.OSOKAsyncOperation{
+								Source:          shared.OSOKAsyncSourceLifecycle,
+								Phase:           shared.OSOKAsyncPhaseUpdate,
+								RawStatus:       "UPDATING",
+								NormalizedClass: shared.OSOKAsyncClassPending,
+							},
+						},
+					},
+				},
+			}
+
+			response, err := client.applySuccess(resource, fakeGetThingResponse{
+				Thing: fakeThing{
+					Id:             "ocid1.thing.oc1..deleted",
+					DisplayName:    "deleted-thing",
+					LifecycleState: lifecycleState,
+				},
+			}, shared.Active)
+			if err != nil {
+				t.Fatalf("applySuccess() error = %v", err)
+			}
+			if !response.IsSuccessful {
+				t.Fatalf("response.IsSuccessful = false, want true")
+			}
+			if !response.ShouldRequeue {
+				t.Fatalf("response.ShouldRequeue = false, want true")
+			}
+			if resource.Status.OsokStatus.Async.Current == nil {
+				t.Fatalf("status.async.current = nil, want delete tracker")
+			}
+			if resource.Status.OsokStatus.Async.Current.Source != shared.OSOKAsyncSourceLifecycle {
+				t.Fatalf("status.async.current.source = %q, want %q", resource.Status.OsokStatus.Async.Current.Source, shared.OSOKAsyncSourceLifecycle)
+			}
+			if resource.Status.OsokStatus.Async.Current.Phase != shared.OSOKAsyncPhaseDelete {
+				t.Fatalf("status.async.current.phase = %q, want %q", resource.Status.OsokStatus.Async.Current.Phase, shared.OSOKAsyncPhaseDelete)
+			}
+			if resource.Status.OsokStatus.Async.Current.RawStatus != lifecycleState {
+				t.Fatalf("status.async.current.rawStatus = %q, want %q", resource.Status.OsokStatus.Async.Current.RawStatus, lifecycleState)
+			}
+			if resource.Status.OsokStatus.Async.Current.NormalizedClass != shared.OSOKAsyncClassSucceeded {
+				t.Fatalf("status.async.current.normalizedClass = %q, want %q", resource.Status.OsokStatus.Async.Current.NormalizedClass, shared.OSOKAsyncClassSucceeded)
+			}
+			if resource.Status.OsokStatus.Reason != string(shared.Terminating) {
+				t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Terminating)
+			}
+		})
+	}
+}
+
+func TestApplySuccessFormalDeleteTerminalKeepsAsyncTrackerWithSemantics(t *testing.T) {
+	t.Parallel()
+
+	for _, lifecycleState := range []string{"DELETED", "TERMINATED"} {
+		lifecycleState := lifecycleState
+		t.Run(lifecycleState, func(t *testing.T) {
+			t.Parallel()
+
+			client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+				Kind:    "Thing",
+				SDKName: "Thing",
+				Semantics: &Semantics{
+					Lifecycle: LifecycleSemantics{
+						UpdatingStates: []string{"UPDATING"},
+						ActiveStates:   []string{"ACTIVE"},
+					},
+					Delete: DeleteSemantics{
+						TerminalStates: []string{"DELETED", "TERMINATED"},
+					},
+				},
+			})
+
+			resource := &fakeResource{
+				Status: fakeStatus{
+					OsokStatus: shared.OSOKStatus{
+						Async: shared.OSOKAsyncTracker{
+							Current: &shared.OSOKAsyncOperation{
+								Source:          shared.OSOKAsyncSourceLifecycle,
+								Phase:           shared.OSOKAsyncPhaseUpdate,
+								RawStatus:       "UPDATING",
+								NormalizedClass: shared.OSOKAsyncClassPending,
+							},
+						},
+					},
+				},
+			}
+
+			response, err := client.applySuccess(resource, fakeGetThingResponse{
+				Thing: fakeThing{
+					Id:             "ocid1.thing.oc1..deleted",
+					DisplayName:    "deleted-thing",
+					LifecycleState: lifecycleState,
+				},
+			}, shared.Active)
+			if err != nil {
+				t.Fatalf("applySuccess() error = %v", err)
+			}
+			if !response.IsSuccessful {
+				t.Fatalf("response.IsSuccessful = false, want true")
+			}
+			if !response.ShouldRequeue {
+				t.Fatalf("response.ShouldRequeue = false, want true")
+			}
+			if resource.Status.OsokStatus.Async.Current == nil {
+				t.Fatalf("status.async.current = nil, want delete tracker")
+			}
+			if resource.Status.OsokStatus.Async.Current.Source != shared.OSOKAsyncSourceLifecycle {
+				t.Fatalf("status.async.current.source = %q, want %q", resource.Status.OsokStatus.Async.Current.Source, shared.OSOKAsyncSourceLifecycle)
+			}
+			if resource.Status.OsokStatus.Async.Current.Phase != shared.OSOKAsyncPhaseDelete {
+				t.Fatalf("status.async.current.phase = %q, want %q", resource.Status.OsokStatus.Async.Current.Phase, shared.OSOKAsyncPhaseDelete)
+			}
+			if resource.Status.OsokStatus.Async.Current.RawStatus != lifecycleState {
+				t.Fatalf("status.async.current.rawStatus = %q, want %q", resource.Status.OsokStatus.Async.Current.RawStatus, lifecycleState)
+			}
+			if resource.Status.OsokStatus.Async.Current.NormalizedClass != shared.OSOKAsyncClassSucceeded {
+				t.Fatalf("status.async.current.normalizedClass = %q, want %q", resource.Status.OsokStatus.Async.Current.NormalizedClass, shared.OSOKAsyncClassSucceeded)
+			}
+			if resource.Status.OsokStatus.Reason != string(shared.Terminating) {
+				t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Terminating)
+			}
+		})
+	}
 }
 
 func TestServiceClientHasMutableDriftDetectsTagAddition(t *testing.T) {
@@ -1450,12 +1785,7 @@ func TestServiceClientDeleteTreatsNotFoundAsDeleted(t *testing.T) {
 		Get: &Operation{
 			NewRequest: func() any { return &fakeGetThingRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
 			},
 		},
 	})
@@ -2174,12 +2504,7 @@ func TestServiceClientDeleteConflictStillConfirmsFormalPendingState(t *testing.T
 			NewRequest: func() any { return &fakeDeleteThingRequest{} },
 			Call: func(_ context.Context, request any) (any, error) {
 				deleteRequest = *request.(*fakeDeleteThingRequest)
-				return nil, fakeServiceError{
-					code:       "IncorrectState",
-					message:    "delete is still settling",
-					statusCode: 409,
-					opcID:      "opc-delete-conflict",
-				}
+				return nil, errortest.NewServiceError(409, "IncorrectState", "delete is still settling")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -2337,12 +2662,7 @@ func TestServiceClientDeleteConflictStillConfirmsFormalTerminalState(t *testing.
 		Delete: &Operation{
 			NewRequest: func() any { return &fakeDeleteThingRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
-				return nil, fakeServiceError{
-					code:       "IncorrectState",
-					message:    "delete is still settling",
-					statusCode: 409,
-					opcID:      "opc-delete-conflict",
-				}
+				return nil, errortest.NewServiceError(409, "IncorrectState", "delete is still settling")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3114,12 +3434,7 @@ func TestServiceClientCreateOrUpdateCreatesWhenLiveGetMissesAfterListReuse(t *te
 		Get: &Operation{
 			NewRequest: func() any { return &fakeGetThingRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3217,12 +3532,7 @@ func TestServiceClientCreateOrUpdateRebindsWhenTrackedStatusIDIsStale(t *testing
 				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
 					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
 				}
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3331,12 +3641,7 @@ func TestServiceClientCreateOrUpdateCreatesWhenTrackedStatusIDIsStaleAndNoReplac
 				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
 					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
 				}
-				return nil, fakeServiceError{
-					code:       "NotAuthorizedOrNotFound",
-					message:    "thing not found",
-					statusCode: 404,
-					opcID:      "opc-test",
-				}
+				return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3626,7 +3931,7 @@ func TestServiceClientDeleteResolvesDeletePhaseListMatchWithoutOcid(t *testing.T
 	}
 }
 
-func TestValidateFormalSemanticsAllowsWorkRequestFollowUpHelper(t *testing.T) {
+func TestValidateFormalSemanticsRejectsWorkRequestHelperWithoutExplicitAsyncContract(t *testing.T) {
 	t.Parallel()
 
 	err := validateFormalSemantics("RedisCluster", &Semantics{
@@ -3640,8 +3945,180 @@ func TestValidateFormalSemanticsAllowsWorkRequestFollowUpHelper(t *testing.T) {
 			},
 		},
 	})
-	if err != nil {
-		t.Fatalf("validateFormalSemantics() error = %v, want helper accepted", err)
+	if err == nil {
+		t.Fatal("validateFormalSemantics() error = nil, want explicit async helper failure")
+	}
+	if !strings.Contains(err.Error(), `workrequest helper requires explicit async strategy "workrequest"`) {
+		t.Fatalf("validateFormalSemantics() error = %v, want helper/strategy failure", err)
+	}
+}
+
+func TestValidateFormalSemanticsRejectsLifecycleAsyncWithWorkRequestHelper(t *testing.T) {
+	t.Parallel()
+
+	err := validateFormalSemantics("OpensearchCluster", &Semantics{
+		Async: &AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		Delete: DeleteSemantics{
+			Policy: "best-effort",
+		},
+		CreateFollowUp: FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks: []Hook{
+				{Helper: "tfresource.WaitForWorkRequestWithErrorHandling"},
+			},
+		},
+	})
+	if err == nil {
+		t.Fatal("validateFormalSemantics() error = nil, want explicit async helper failure")
+	}
+	if !strings.Contains(err.Error(), `workrequest helper requires explicit async strategy "workrequest"`) {
+		t.Fatalf("validateFormalSemantics() error = %v, want helper/strategy failure", err)
+	}
+}
+
+func TestValidateFormalSemanticsRejectsInvalidAsyncMetadataEnums(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		semantics *Semantics
+		wantErr   string
+	}{
+		{
+			name: "unknown strategy",
+			semantics: &Semantics{
+				Async: &AsyncSemantics{
+					Strategy:             "eventual",
+					Runtime:              "generatedruntime",
+					FormalClassification: "lifecycle",
+				},
+				Delete: DeleteSemantics{Policy: "best-effort"},
+			},
+			wantErr: `async.strategy "eventual" must be one of "lifecycle", "workrequest", or "none"`,
+		},
+		{
+			name: "unknown formal classification",
+			semantics: &Semantics{
+				Async: &AsyncSemantics{
+					Strategy:             "lifecycle",
+					Runtime:              "generatedruntime",
+					FormalClassification: "eventual",
+				},
+				Delete: DeleteSemantics{Policy: "best-effort"},
+			},
+			wantErr: `async.formalClassification "eventual" must be one of "lifecycle", "workrequest", or "none"`,
+		},
+		{
+			name: "unknown workrequest source",
+			semantics: &Semantics{
+				Async: &AsyncSemantics{
+					Strategy:             "workrequest",
+					Runtime:              "handwritten",
+					FormalClassification: "workrequest",
+					WorkRequest: &WorkRequestSemantics{
+						Source: "custom-source",
+						Phases: []string{"create"},
+					},
+				},
+				Delete: DeleteSemantics{Policy: "best-effort"},
+			},
+			wantErr: `async.workRequest.source "custom-source" must be one of "service-sdk", "workrequests-service", or "provider-helper"`,
+		},
+		{
+			name: "invalid workrequest phase",
+			semantics: &Semantics{
+				Async: &AsyncSemantics{
+					Strategy:             "workrequest",
+					Runtime:              "handwritten",
+					FormalClassification: "workrequest",
+					WorkRequest: &WorkRequestSemantics{
+						Source: "service-sdk",
+						Phases: []string{"reconcile"},
+					},
+				},
+				Delete: DeleteSemantics{Policy: "best-effort"},
+			},
+			wantErr: `async.workRequest.phases[0] "reconcile" must be one of "create", "update", or "delete"`,
+		},
+		{
+			name: "duplicate workrequest phase",
+			semantics: &Semantics{
+				Async: &AsyncSemantics{
+					Strategy:             "workrequest",
+					Runtime:              "handwritten",
+					FormalClassification: "workrequest",
+					WorkRequest: &WorkRequestSemantics{
+						Source: "service-sdk",
+						Phases: []string{"create", "create"},
+					},
+				},
+				Delete: DeleteSemantics{Policy: "best-effort"},
+			},
+			wantErr: `async.workRequest.phases contains duplicate phase "create"`,
+		},
+		{
+			name: "blank legacy bridge field",
+			semantics: &Semantics{
+				Async: &AsyncSemantics{
+					Strategy:             "workrequest",
+					Runtime:              "handwritten",
+					FormalClassification: "workrequest",
+					WorkRequest: &WorkRequestSemantics{
+						Source: "service-sdk",
+						Phases: []string{"create"},
+						LegacyFieldBridge: &WorkRequestLegacyFieldBridge{
+							Update: "   ",
+						},
+					},
+				},
+				Delete: DeleteSemantics{Policy: "best-effort"},
+			},
+			wantErr: `async.workRequest.legacyFieldBridge.update must not be blank`,
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := validateFormalSemantics("Thing", test.semantics)
+			if err == nil {
+				t.Fatal("validateFormalSemantics() error = nil, want invalid async metadata failure")
+			}
+			if !strings.Contains(err.Error(), test.wantErr) {
+				t.Fatalf("validateFormalSemantics() error = %v, want %q", err, test.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateFormalSemanticsRejectsExplicitHandwrittenAsyncRuntime(t *testing.T) {
+	t.Parallel()
+
+	err := validateFormalSemantics("Queue", &Semantics{
+		Async: &AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "handwritten",
+			FormalClassification: "workrequest",
+			WorkRequest: &WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "delete"},
+			},
+		},
+		Delete: DeleteSemantics{
+			Policy: "best-effort",
+		},
+	})
+	if err == nil {
+		t.Fatal("validateFormalSemantics() error = nil, want handwritten runtime failure")
+	}
+	if !strings.Contains(err.Error(), `generatedruntime cannot honor explicit async runtime "handwritten"`) {
+		t.Fatalf("validateFormalSemantics() error = %v, want handwritten-runtime detail", err)
 	}
 }
 
@@ -3661,6 +4138,34 @@ func TestValidateFormalSemanticsBlocksAuxiliaryOperations(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "unsupported list auxiliary operation ListVcns") {
 		t.Fatalf("validateFormalSemantics() error = %v, want auxiliary-operation detail", err)
+	}
+}
+
+func TestResponseWorkRequestIDReadsOCIHeader(t *testing.T) {
+	t.Parallel()
+
+	if got := responseWorkRequestID(fakeCreateThingResponse{
+		OpcWorkRequestId: stringPtr("wr-create-1"),
+	}); got != "wr-create-1" {
+		t.Fatalf("responseWorkRequestID(create) = %q, want %q", got, "wr-create-1")
+	}
+
+	if got := responseWorkRequestID(fakeDeleteThingResponse{}); got != "" {
+		t.Fatalf("responseWorkRequestID(delete) = %q, want empty string", got)
+	}
+}
+
+func TestResponseRequestIDReadsOCIHeader(t *testing.T) {
+	t.Parallel()
+
+	if got := responseRequestID(fakeCreateThingResponse{
+		OpcRequestId: stringPtr("opc-create-1"),
+	}); got != "opc-create-1" {
+		t.Fatalf("responseRequestID(create) = %q, want %q", got, "opc-create-1")
+	}
+
+	if got := responseRequestID(fakeDeleteThingResponse{}); got != "" {
+		t.Fatalf("responseRequestID(delete) = %q, want empty string", got)
 	}
 }
 
@@ -3707,6 +4212,14 @@ func requireStatusOCID(t *testing.T, resource *fakeResource, want string) {
 	}
 }
 
+func requireStatusOpcRequestID(t *testing.T, resource *fakeResource, want string) {
+	t.Helper()
+
+	if got := resource.Status.OsokStatus.OpcRequestID; got != want {
+		t.Fatalf("status.opcRequestId = %q, want %q", got, want)
+	}
+}
+
 func requireCreatedAt(t *testing.T, resource *fakeResource) {
 	t.Helper()
 
@@ -3724,6 +4237,39 @@ func requireTrailingCondition(t *testing.T, resource *fakeResource, want shared.
 	}
 }
 
+func requireCurrentWorkRequestID(t *testing.T, resource *fakeResource, want string) {
+	t.Helper()
+
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want populated tracker")
+	}
+	if got := resource.Status.OsokStatus.Async.Current.WorkRequestID; got != want {
+		t.Fatalf("status.async.current.workRequestId = %q, want %q", got, want)
+	}
+}
+
+func requireCurrentAsyncSource(t *testing.T, resource *fakeResource, want shared.OSOKAsyncSource) {
+	t.Helper()
+
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want populated tracker")
+	}
+	if got := resource.Status.OsokStatus.Async.Current.Source; got != want {
+		t.Fatalf("status.async.current.source = %q, want %q", got, want)
+	}
+}
+
+func requireCurrentAsyncPhase(t *testing.T, resource *fakeResource, want shared.OSOKAsyncPhase) {
+	t.Helper()
+
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want populated tracker")
+	}
+	if got := resource.Status.OsokStatus.Async.Current.Phase; got != want {
+		t.Fatalf("status.async.current.phase = %q, want %q", got, want)
+	}
+}
+
 func requireStringEqual(t *testing.T, fieldName string, got string, want string) {
 	t.Helper()
 
@@ -3738,4 +4284,8 @@ func requireTrue(t *testing.T, got bool, message string) {
 	if !got {
 		t.Fatal(message)
 	}
+}
+
+func stringPtr(value string) *string {
+	return &value
 }

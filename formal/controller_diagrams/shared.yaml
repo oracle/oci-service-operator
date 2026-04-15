@@ -17,9 +17,10 @@ diagrams:
       - Imported terraform-provider-oci waits and read-after-write behavior keep retryable states explicit.
   - file: shared/diagrams/shared-delete-sequence.svg
     title: Shared Delete Sequence
-    subtitle: Finalizer discipline, delete confirmation, work requests, and optional Secret cleanup
+    subtitle: Finalizer discipline, delete status persistence, work requests, and optional Secret cleanup
     lines:
       - Keep the OSOK finalizer until delete confirmation or an explicit not-supported policy says otherwise.
+      - When delete stays pending or returns an error, BaseReconciler persists service-manager status mutations before the next reconcile loop.
       - Controller-local specialization supplies delete confirmation via GET, datasource list fallback, or provider wait helpers.
       - Optional Secret cleanup remains explicit and only happens when repo-authored policy allows it.
   - file: shared/diagrams/shared-controller-state-machine.svg

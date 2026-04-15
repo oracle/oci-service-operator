@@ -1030,6 +1030,26 @@ func new{{ .Kind }}RuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService:     "{{ .Semantics.FormalService }}",
 		FormalSlug:        "{{ .Semantics.FormalSlug }}",
+{{- if .Semantics.Async }}
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "{{ .Semantics.Async.Strategy }}",
+			Runtime:              "{{ .Semantics.Async.Runtime }}",
+			FormalClassification: "{{ .Semantics.Async.FormalClassification }}",
+{{- if .Semantics.Async.WorkRequest }}
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "{{ .Semantics.Async.WorkRequest.Source }}",
+				Phases: {{ stringSliceLiteral .Semantics.Async.WorkRequest.Phases }},
+{{- if .Semantics.Async.WorkRequest.LegacyFieldBridge }}
+				LegacyFieldBridge: &generatedruntime.WorkRequestLegacyFieldBridge{
+					Create: "{{ .Semantics.Async.WorkRequest.LegacyFieldBridge.Create }}",
+					Update: "{{ .Semantics.Async.WorkRequest.LegacyFieldBridge.Update }}",
+					Delete: "{{ .Semantics.Async.WorkRequest.LegacyFieldBridge.Delete }}",
+				},
+{{- end }}
+			},
+{{- end }}
+		},
+{{- end }}
 		StatusProjection:  "{{ .Semantics.StatusProjection }}",
 		SecretSideEffects: "{{ .Semantics.SecretSideEffects }}",
 		FinalizerPolicy:   "{{ .Semantics.FinalizerPolicy }}",

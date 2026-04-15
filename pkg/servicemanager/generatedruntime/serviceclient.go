@@ -30,7 +30,24 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const defaultRequeueDuration = time.Minute
+const (
+	defaultRequeueDuration = time.Minute
+
+	asyncStrategyLifecycle   = "lifecycle"
+	asyncStrategyNone        = "none"
+	asyncStrategyWorkRequest = "workrequest"
+
+	asyncRuntimeGeneratedRuntime = "generatedruntime"
+	asyncRuntimeHandwritten      = "handwritten"
+
+	asyncWorkRequestSourceServiceSDK      = "service-sdk"
+	asyncWorkRequestSourceWorkRequestsAPI = "workrequests-service"
+	asyncWorkRequestSourceProviderHelper  = "provider-helper"
+
+	asyncPhaseCreate = "create"
+	asyncPhaseUpdate = "update"
+	asyncPhaseDelete = "delete"
+)
 
 var errResourceNotFound = errors.New("generated runtime resource not found")
 
@@ -66,6 +83,25 @@ type Hook struct {
 	Helper     string
 	EntityType string
 	Action     string
+}
+
+type AsyncSemantics struct {
+	Strategy             string
+	Runtime              string
+	FormalClassification string
+	WorkRequest          *WorkRequestSemantics
+}
+
+type WorkRequestSemantics struct {
+	Source            string
+	Phases            []string
+	LegacyFieldBridge *WorkRequestLegacyFieldBridge
+}
+
+type WorkRequestLegacyFieldBridge struct {
+	Create string
+	Update string
+	Delete string
 }
 
 type FollowUpSemantics struct {
@@ -118,6 +154,7 @@ type UnsupportedSemantic struct {
 type Semantics struct {
 	FormalService       string
 	FormalSlug          string
+	Async               *AsyncSemantics
 	StatusProjection    string
 	SecretSideEffects   string
 	FinalizerPolicy     string
@@ -324,7 +361,7 @@ func (c ServiceClient[T]) readResourceWithGetForExistingBeforeCreate(ctx context
 	if err == nil {
 		return state, response, true, false, nil
 	}
-	if !isNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.config.List == nil {
 		return state, nil, true, false, err
 	}
 
@@ -408,6 +445,8 @@ func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
+	c.seedOpeningRequestID(resource, response)
+	c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseUpdate)
 
 	response, err = c.followUpAfterWrite(ctx, resource, currentID, response, "update")
 	if err != nil {
@@ -434,6 +473,8 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, 
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
+		c.seedOpeningRequestID(resource, response)
+		c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseCreate)
 
 		followUp, err := c.followUpAfterWrite(ctx, resource, responseID(response), response, "create")
 		if err != nil {
@@ -493,13 +534,17 @@ func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
 }
 
 func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T, currentID string) (bool, error) {
-	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{}); err != nil {
-		if isNotFound(err) {
+	response, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{})
+	if err != nil {
+		if isDeleteNotFound(err) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
 	}
+	c.seedOpeningRequestID(resource, response)
+	c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseDelete)
 	return false, nil
 }
 
@@ -511,7 +556,8 @@ func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, res
 
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -609,7 +655,7 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil, true
 		}
@@ -628,7 +674,7 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 }
 
 func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
-	if err == nil || !isConflict(err) {
+	if err == nil || !isRetryableDeleteConflict(err) {
 		return false
 	}
 	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
@@ -659,7 +705,8 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resour
 
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -1134,7 +1181,7 @@ func (c ServiceClient[T]) readResourceForMutationValidation(ctx context.Context,
 
 	response, err := c.invoke(ctx, c.config.Get, resource, currentID, requestBuildOptions{})
 	if err != nil {
-		if isNotFound(err) {
+		if isReadNotFound(err) {
 			return nil, errResourceNotFound
 		}
 		return nil, err
@@ -1170,7 +1217,7 @@ func (c ServiceClient[T]) readResourceWithGet(ctx context.Context, resource T, s
 	if err == nil {
 		return state, response, true, nil
 	}
-	if !isNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.config.List == nil {
 		return state, nil, true, err
 	}
 
@@ -1408,19 +1455,30 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 		status.Ocid = shared.OCID(resourceID)
 	}
 
-	conditionType, shouldRequeue, message := c.classifyLifecycle(response, fallback)
-	status.Message = message
-	status.Reason = string(conditionType)
 	now := metav1.Now()
 	if resourceID != "" && status.CreatedAt == nil {
 		status.CreatedAt = &now
 	}
+	evaluation := c.classifyLifecycleAsync(response, status, fallback)
+	if evaluation.current != nil {
+		evaluation.current.UpdatedAt = &now
+		projection := servicemanager.ApplyAsyncOperation(status, evaluation.current, c.config.Log)
+		return servicemanager.OSOKResponse{
+			IsSuccessful:    projection.Condition != shared.Failed,
+			ShouldRequeue:   projection.ShouldRequeue,
+			RequeueDuration: defaultRequeueDuration,
+		}, nil
+	}
+
+	servicemanager.ClearAsyncOperation(status)
+	status.Message = evaluation.message
+	status.Reason = string(evaluation.condition)
 	status.UpdatedAt = &now
-	*status = util.UpdateOSOKStatusCondition(*status, conditionType, v1.ConditionTrue, "", message, c.config.Log)
+	*status = util.UpdateOSOKStatusCondition(*status, evaluation.condition, conditionStatusForCondition(evaluation.condition), "", evaluation.message, c.config.Log)
 
 	return servicemanager.OSOKResponse{
-		IsSuccessful:    conditionType != shared.Failed,
-		ShouldRequeue:   shouldRequeue,
+		IsSuccessful:    evaluation.condition != shared.Failed,
+		ShouldRequeue:   evaluation.shouldRequeue,
 		RequeueDuration: defaultRequeueDuration,
 	}, nil
 }
@@ -1430,10 +1488,19 @@ func (c ServiceClient[T]) markFailure(resource T, err error) error {
 	if statusErr != nil {
 		return err
 	}
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
 	now := metav1.Now()
 	status.UpdatedAt = &now
+	if status.Async.Current != nil {
+		current := *status.Async.Current
+		current.NormalizedClass = shared.OSOKAsyncClassFailed
+		current.Message = err.Error()
+		current.UpdatedAt = &now
+		_ = servicemanager.ApplyAsyncOperation(status, &current, c.config.Log)
+		return err
+	}
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.config.Log)
 	return err
 }
@@ -1450,6 +1517,7 @@ func (c ServiceClient[T]) markDeleted(resource T, message string) {
 		status.Message = message
 	}
 	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, c.config.Log)
 }
 
@@ -1462,6 +1530,17 @@ func (c ServiceClient[T]) markCondition(resource T, condition shared.OSOKConditi
 	status.UpdatedAt = &now
 	status.Message = message
 	status.Reason = string(condition)
+	if condition == shared.Terminating {
+		current := &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseDelete,
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         message,
+			UpdatedAt:       &now,
+		}
+		_ = servicemanager.ApplyAsyncOperation(status, current, c.config.Log)
+		return
+	}
 	*status = util.UpdateOSOKStatusCondition(*status, condition, v1.ConditionTrue, "", message, c.config.Log)
 }
 
@@ -2383,17 +2462,112 @@ func responseID(response any) string {
 	return firstNonEmpty(values, "id", "ocid")
 }
 
-func (c ServiceClient[T]) classifyLifecycle(response any, fallback shared.OSOKConditionType) (shared.OSOKConditionType, bool, string) {
-	if c.config.Semantics == nil {
-		return classifyLifecycleHeuristics(response, fallback)
+func responseWorkRequestID(response any) string {
+	if response == nil {
+		return ""
 	}
-	return classifyLifecycleSemantics(response, fallback, c.config.Semantics)
+
+	value, ok := indirectValue(reflect.ValueOf(response))
+	if !ok || value.Kind() != reflect.Struct {
+		return ""
+	}
+
+	typ := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		fieldType := typ.Field(i)
+		if !fieldType.IsExported() || !isWorkRequestHeaderField(fieldType) {
+			continue
+		}
+		if workRequestID := stringFieldValue(value.Field(i)); workRequestID != "" {
+			return workRequestID
+		}
+	}
+	return ""
+}
+
+func responseRequestID(response any) string {
+	return servicemanager.ResponseOpcRequestID(response)
+}
+
+func isWorkRequestHeaderField(fieldType reflect.StructField) bool {
+	return fieldType.Name == "OpcWorkRequestId" ||
+		(fieldType.Tag.Get("presentIn") == "header" && fieldType.Tag.Get("name") == "opc-work-request-id")
+}
+
+func stringFieldValue(value reflect.Value) string {
+	value, ok := indirectValue(value)
+	if !ok || value.Kind() != reflect.String {
+		return ""
+	}
+	return strings.TrimSpace(value.String())
+}
+
+func (c ServiceClient[T]) seedOpeningWorkRequestID(resource T, response any, phase shared.OSOKAsyncPhase) {
+	workRequestID := responseWorkRequestID(response)
+	if workRequestID == "" || phase == "" {
+		return
+	}
+
+	status, err := osokStatus(resource)
+	if err != nil {
+		return
+	}
+
+	now := metav1.Now()
+	_ = servicemanager.ApplyAsyncOperation(status, &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceWorkRequest,
+		Phase:           phase,
+		WorkRequestID:   workRequestID,
+		NormalizedClass: shared.OSOKAsyncClassPending,
+		UpdatedAt:       &now,
+	}, c.config.Log)
+}
+
+func (c ServiceClient[T]) seedOpeningRequestID(resource T, response any) {
+	status, err := osokStatus(resource)
+	if err != nil {
+		return
+	}
+
+	servicemanager.RecordResponseOpcRequestID(status, response)
+}
+
+func (c ServiceClient[T]) recordErrorRequestID(resource T, err error) {
+	status, statusErr := osokStatus(resource)
+	if statusErr != nil {
+		return
+	}
+
+	servicemanager.RecordErrorOpcRequestID(status, err)
+}
+
+type lifecycleAsyncEvaluation struct {
+	current       *shared.OSOKAsyncOperation
+	condition     shared.OSOKConditionType
+	shouldRequeue bool
+	message       string
+}
+
+func (c ServiceClient[T]) classifyLifecycleAsync(response any, status *shared.OSOKStatus, fallback shared.OSOKConditionType) lifecycleAsyncEvaluation {
+	if c.config.Semantics == nil {
+		return classifyLifecycleAsyncHeuristics(response, status, fallback)
+	}
+	return classifyLifecycleAsyncSemantics(response, status, fallback, c.config.Semantics)
 }
 
 func classifyLifecycleSemantics(response any, fallback shared.OSOKConditionType, semantics *Semantics) (shared.OSOKConditionType, bool, string) {
+	evaluation := classifyLifecycleAsyncSemantics(response, nil, fallback, semantics)
+	return evaluation.condition, evaluation.shouldRequeue, evaluation.message
+}
+
+func classifyLifecycleAsyncSemantics(response any, status *shared.OSOKStatus, fallback shared.OSOKConditionType, semantics *Semantics) lifecycleAsyncEvaluation {
 	body, ok := responseBody(response)
 	if !ok || body == nil {
-		return fallback, shouldRequeueForCondition(fallback), defaultConditionMessage(fallback)
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       defaultConditionMessage(fallback),
+		}
 	}
 
 	values := jsonMap(body)
@@ -2405,25 +2579,40 @@ func classifyLifecycleSemantics(response any, fallback shared.OSOKConditionType,
 
 	switch {
 	case lifecycleState == "":
-		return fallback, shouldRequeueForCondition(fallback), message
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       message,
+		}
 	case containsString(semantics.Lifecycle.ProvisioningStates, lifecycleState):
-		return shared.Provisioning, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncClassPending)
 	case containsString(semantics.Lifecycle.UpdatingStates, lifecycleState):
-		return shared.Updating, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseUpdate, shared.OSOKAsyncClassPending)
 	case containsString(semantics.Delete.PendingStates, lifecycleState):
-		return shared.Terminating, true, message
-	case containsString(semantics.Lifecycle.ActiveStates, lifecycleState),
-		containsString(semantics.Delete.TerminalStates, lifecycleState):
-		return shared.Active, false, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending)
+	case containsString(semantics.Delete.TerminalStates, lifecycleState):
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassSucceeded)
+	case containsString(semantics.Lifecycle.ActiveStates, lifecycleState):
+		return lifecycleAsyncEvaluation{condition: shared.Active, shouldRequeue: false, message: message}
 	default:
-		return shared.Failed, false, fmt.Sprintf("formal lifecycle state %q is not modeled: %s", lifecycleState, message)
+		failureMessage := fmt.Sprintf("formal lifecycle state %q is not modeled: %s", lifecycleState, message)
+		return lifecycleFailureEvaluation(status, fallback, lifecycleState, failureMessage, shared.OSOKAsyncClassUnknown)
 	}
 }
 
 func classifyLifecycleHeuristics(response any, fallback shared.OSOKConditionType) (shared.OSOKConditionType, bool, string) {
+	evaluation := classifyLifecycleAsyncHeuristics(response, nil, fallback)
+	return evaluation.condition, evaluation.shouldRequeue, evaluation.message
+}
+
+func classifyLifecycleAsyncHeuristics(response any, status *shared.OSOKStatus, fallback shared.OSOKConditionType) lifecycleAsyncEvaluation {
 	body, ok := responseBody(response)
 	if !ok || body == nil {
-		return fallback, shouldRequeueForCondition(fallback), defaultConditionMessage(fallback)
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       defaultConditionMessage(fallback),
+		}
 	}
 
 	values := jsonMap(body)
@@ -2435,33 +2624,95 @@ func classifyLifecycleHeuristics(response any, fallback shared.OSOKConditionType
 
 	switch {
 	case lifecycleState == "":
-		return fallback, shouldRequeueForCondition(fallback), message
+		return lifecycleAsyncEvaluation{
+			condition:     fallback,
+			shouldRequeue: shouldRequeueForCondition(fallback),
+			message:       message,
+		}
 	case strings.Contains(lifecycleState, "FAIL"),
 		strings.Contains(lifecycleState, "ERROR"),
-		strings.Contains(lifecycleState, "NEEDS_ATTENTION"),
 		strings.Contains(lifecycleState, "INOPERABLE"):
-		return shared.Failed, false, message
+		return lifecycleFailureEvaluation(status, fallback, lifecycleState, message, shared.OSOKAsyncClassFailed)
+	case strings.Contains(lifecycleState, "NEEDS_ATTENTION"):
+		return lifecycleFailureEvaluation(status, fallback, lifecycleState, message, shared.OSOKAsyncClassAttention)
+	case strings.Contains(lifecycleState, "DELETED"),
+		strings.Contains(lifecycleState, "TERMINATED"):
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassSucceeded)
 	case strings.Contains(lifecycleState, "DELETE"),
 		strings.Contains(lifecycleState, "TERMINAT"):
-		return shared.Terminating, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending)
 	case strings.Contains(lifecycleState, "UPDAT"),
 		strings.Contains(lifecycleState, "MODIFY"),
 		strings.Contains(lifecycleState, "PATCH"):
-		return shared.Updating, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseUpdate, shared.OSOKAsyncClassPending)
 	case strings.Contains(lifecycleState, "CREATE"),
 		strings.Contains(lifecycleState, "PROVISION"),
 		strings.Contains(lifecycleState, "PENDING"),
 		strings.Contains(lifecycleState, "IN_PROGRESS"),
 		strings.Contains(lifecycleState, "ACCEPT"),
 		strings.Contains(lifecycleState, "START"):
-		return shared.Provisioning, true, message
+		return newLifecycleAsyncEvaluation(status, message, lifecycleState, shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncClassPending)
 	default:
-		return shared.Active, false, message
+		return lifecycleAsyncEvaluation{condition: shared.Active, shouldRequeue: false, message: message}
+	}
+}
+
+func newLifecycleAsyncEvaluation(status *shared.OSOKStatus, message string, lifecycleState string, phase shared.OSOKAsyncPhase, class shared.OSOKAsyncNormalizedClass) lifecycleAsyncEvaluation {
+	if phase == "" {
+		return lifecycleAsyncEvaluation{condition: shared.Failed, shouldRequeue: false, message: message}
+	}
+
+	current := &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           servicemanager.ResolveAsyncPhase(status, phase),
+		RawStatus:       lifecycleState,
+		NormalizedClass: class,
+		Message:         message,
+	}
+	projection := servicemanager.ProjectAsyncCondition(class, current.Phase)
+	if strings.TrimSpace(message) == "" {
+		message = projection.DefaultMessage
+		current.Message = message
+	}
+
+	return lifecycleAsyncEvaluation{
+		current:       current,
+		condition:     projection.Condition,
+		shouldRequeue: projection.ShouldRequeue,
+		message:       message,
+	}
+}
+
+func lifecycleFailureEvaluation(status *shared.OSOKStatus, fallback shared.OSOKConditionType, lifecycleState string, message string, class shared.OSOKAsyncNormalizedClass) lifecycleAsyncEvaluation {
+	phase := servicemanager.ResolveAsyncPhase(status, fallbackAsyncPhase(fallback))
+	if phase == "" {
+		return lifecycleAsyncEvaluation{condition: shared.Failed, shouldRequeue: false, message: message}
+	}
+	return newLifecycleAsyncEvaluation(status, message, lifecycleState, phase, class)
+}
+
+func fallbackAsyncPhase(condition shared.OSOKConditionType) shared.OSOKAsyncPhase {
+	switch condition {
+	case shared.Provisioning:
+		return shared.OSOKAsyncPhaseCreate
+	case shared.Updating:
+		return shared.OSOKAsyncPhaseUpdate
+	case shared.Terminating:
+		return shared.OSOKAsyncPhaseDelete
+	default:
+		return ""
 	}
 }
 
 func shouldRequeueForCondition(condition shared.OSOKConditionType) bool {
 	return condition == shared.Provisioning || condition == shared.Updating || condition == shared.Terminating
+}
+
+func conditionStatusForCondition(condition shared.OSOKConditionType) v1.ConditionStatus {
+	if condition == shared.Failed {
+		return v1.ConditionFalse
+	}
+	return v1.ConditionTrue
 }
 
 func defaultConditionMessage(condition shared.OSOKConditionType) string {
@@ -2487,6 +2738,7 @@ func validateFormalSemantics(kind string, semantics *Semantics) error {
 	problems := append([]string{}, unsupportedFormalProblems(semantics)...)
 	problems = append(problems, unsupportedAuxiliaryProblems(semantics)...)
 	problems = append(problems, unsupportedFollowUpHelpers(semantics)...)
+	problems = append(problems, invalidAsyncSemanticsProblems(semantics)...)
 	problems = append(problems, invalidListSemanticsProblems(semantics)...)
 	problems = append(problems, invalidDeleteSemanticsProblems(semantics)...)
 	if len(problems) == 0 {
@@ -2527,6 +2779,214 @@ func unsupportedFollowUpHelpers(semantics *Semantics) []string {
 	return problems
 }
 
+func invalidAsyncSemanticsProblems(semantics *Semantics) []string {
+	async := semantics.Async
+	if async == nil {
+		if hasWorkRequestHelper(semantics) {
+			return []string{fmt.Sprintf("workrequest helper requires explicit async strategy %q", asyncStrategyWorkRequest)}
+		}
+		return nil
+	}
+
+	var problems []string
+	strategy := strings.TrimSpace(async.Strategy)
+	runtime := strings.TrimSpace(async.Runtime)
+	formalClassification := strings.TrimSpace(async.FormalClassification)
+
+	problems = append(problems, invalidAsyncStrategyProblems("async.strategy", strategy)...)
+	problems = append(problems, invalidAsyncRuntimeProblems("async.runtime", runtime)...)
+	problems = append(problems, invalidAsyncStrategyProblems("async.formalClassification", formalClassification)...)
+	problems = append(problems, invalidAsyncWorkRequestProblems(async.WorkRequest)...)
+
+	if !hasExplicitAsyncContract(async) {
+		if hasWorkRequestHelper(semantics) {
+			problems = append(problems, fmt.Sprintf("workrequest helper requires explicit async strategy %q", asyncStrategyWorkRequest))
+		}
+		return problems
+	}
+
+	if strategy == "" {
+		problems = append(problems, "explicit async semantics require strategy")
+	}
+	if runtime == "" {
+		problems = append(problems, "explicit async semantics require runtime")
+	}
+	if runtime == asyncRuntimeHandwritten {
+		problems = append(problems, fmt.Sprintf("generatedruntime cannot honor explicit async runtime %q", runtime))
+	}
+
+	workRequestConfigured := hasWorkRequestSemantics(async.WorkRequest)
+	switch strategy {
+	case asyncStrategyWorkRequest:
+		if runtime == asyncRuntimeGeneratedRuntime {
+			problems = append(problems, "generatedruntime does not support explicit workrequest strategy")
+		}
+		if !workRequestConfigured {
+			problems = append(problems, "workrequest async semantics require workRequest metadata")
+		} else {
+			if strings.TrimSpace(async.WorkRequest.Source) == "" {
+				problems = append(problems, "workrequest async semantics require workRequest.source")
+			}
+			if len(async.WorkRequest.Phases) == 0 {
+				problems = append(problems, "workrequest async semantics require workRequest.phases")
+			}
+		}
+	case "", asyncStrategyLifecycle, asyncStrategyNone:
+		if workRequestConfigured {
+			problems = append(problems, fmt.Sprintf("workRequest metadata requires strategy %q", asyncStrategyWorkRequest))
+		}
+	default:
+		if workRequestConfigured {
+			problems = append(problems, fmt.Sprintf("workRequest metadata requires strategy %q", asyncStrategyWorkRequest))
+		}
+	}
+	if strategy != asyncStrategyWorkRequest && hasWorkRequestHelper(semantics) {
+		problems = append(problems, fmt.Sprintf("workrequest helper requires explicit async strategy %q", asyncStrategyWorkRequest))
+	}
+
+	return problems
+}
+
+func invalidAsyncStrategyProblems(field string, strategy string) []string {
+	switch strategy {
+	case "", asyncStrategyLifecycle, asyncStrategyWorkRequest, asyncStrategyNone:
+		return nil
+	default:
+		return []string{fmt.Sprintf(
+			`%s %q must be one of %q, %q, or %q`,
+			field,
+			strategy,
+			asyncStrategyLifecycle,
+			asyncStrategyWorkRequest,
+			asyncStrategyNone,
+		)}
+	}
+}
+
+func invalidAsyncRuntimeProblems(field string, runtime string) []string {
+	switch runtime {
+	case "", asyncRuntimeGeneratedRuntime, asyncRuntimeHandwritten:
+		return nil
+	default:
+		return []string{fmt.Sprintf(
+			`%s %q must be one of %q or %q`,
+			field,
+			runtime,
+			asyncRuntimeGeneratedRuntime,
+			asyncRuntimeHandwritten,
+		)}
+	}
+}
+
+func invalidAsyncWorkRequestProblems(workRequest *WorkRequestSemantics) []string {
+	if workRequest == nil {
+		return nil
+	}
+
+	var problems []string
+	if source := strings.TrimSpace(workRequest.Source); source != "" {
+		switch source {
+		case asyncWorkRequestSourceServiceSDK, asyncWorkRequestSourceWorkRequestsAPI, asyncWorkRequestSourceProviderHelper:
+		default:
+			problems = append(problems, fmt.Sprintf(
+				`async.workRequest.source %q must be one of %q, %q, or %q`,
+				workRequest.Source,
+				asyncWorkRequestSourceServiceSDK,
+				asyncWorkRequestSourceWorkRequestsAPI,
+				asyncWorkRequestSourceProviderHelper,
+			))
+		}
+	}
+
+	seen := make(map[string]struct{}, len(workRequest.Phases))
+	for index, rawPhase := range workRequest.Phases {
+		phase := strings.TrimSpace(rawPhase)
+		switch phase {
+		case asyncPhaseCreate, asyncPhaseUpdate, asyncPhaseDelete:
+		case "":
+			problems = append(problems, fmt.Sprintf("async.workRequest.phases[%d] must not be blank", index))
+			continue
+		default:
+			problems = append(problems, fmt.Sprintf(
+				`async.workRequest.phases[%d] %q must be one of %q, %q, or %q`,
+				index,
+				rawPhase,
+				asyncPhaseCreate,
+				asyncPhaseUpdate,
+				asyncPhaseDelete,
+			))
+			continue
+		}
+		if _, exists := seen[phase]; exists {
+			problems = append(problems, fmt.Sprintf(`async.workRequest.phases contains duplicate phase %q`, phase))
+			continue
+		}
+		seen[phase] = struct{}{}
+	}
+
+	if workRequest.LegacyFieldBridge == nil {
+		return problems
+	}
+
+	for subfield, value := range map[string]string{
+		"create": workRequest.LegacyFieldBridge.Create,
+		"update": workRequest.LegacyFieldBridge.Update,
+		"delete": workRequest.LegacyFieldBridge.Delete,
+	} {
+		if value == "" {
+			continue
+		}
+		if strings.TrimSpace(value) == "" {
+			problems = append(problems, fmt.Sprintf("async.workRequest.legacyFieldBridge.%s must not be blank", subfield))
+		}
+	}
+
+	return problems
+}
+
+func hasExplicitAsyncContract(async *AsyncSemantics) bool {
+	if async == nil {
+		return false
+	}
+	return strings.TrimSpace(async.Strategy) != "" ||
+		strings.TrimSpace(async.Runtime) != "" ||
+		strings.TrimSpace(async.FormalClassification) != "" ||
+		hasWorkRequestSemantics(async.WorkRequest)
+}
+
+func hasWorkRequestSemantics(workRequest *WorkRequestSemantics) bool {
+	if workRequest == nil {
+		return false
+	}
+	if strings.TrimSpace(workRequest.Source) != "" || len(workRequest.Phases) > 0 {
+		return true
+	}
+	if workRequest.LegacyFieldBridge == nil {
+		return false
+	}
+	return strings.TrimSpace(workRequest.LegacyFieldBridge.Create) != "" ||
+		strings.TrimSpace(workRequest.LegacyFieldBridge.Update) != "" ||
+		strings.TrimSpace(workRequest.LegacyFieldBridge.Delete) != ""
+}
+
+func hasWorkRequestHelper(semantics *Semantics) bool {
+	for _, hooks := range [][]Hook{
+		semantics.Hooks.Create,
+		semantics.Hooks.Update,
+		semantics.Hooks.Delete,
+		semantics.CreateFollowUp.Hooks,
+		semantics.UpdateFollowUp.Hooks,
+		semantics.DeleteFollowUp.Hooks,
+	} {
+		for _, hook := range hooks {
+			if strings.TrimSpace(hook.Helper) == "tfresource.WaitForWorkRequestWithErrorHandling" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func invalidListSemanticsProblems(semantics *Semantics) []string {
 	if semantics.List == nil || strings.TrimSpace(semantics.List.ResponseItemsField) != "" {
 		return nil
@@ -2561,49 +3021,33 @@ func normalizeOCIError(err error) error {
 	return err
 }
 
-func isNotFound(err error) bool {
+func isReadNotFound(err error) bool {
 	if errors.Is(err, errResourceNotFound) {
 		return true
 	}
-	var serviceErr common.ServiceError
-	if errors.As(err, &serviceErr) {
-		if serviceErr.GetHTTPStatusCode() == 404 {
-			return true
-		}
-		switch serviceErr.GetCode() {
-		case "NotFound", "NotAuthorizedOrNotFound":
-			return true
-		default:
-			return false
-		}
-	}
-
-	message := err.Error()
-	if strings.Contains(message, "http status code: 404") {
-		return true
-	}
-	if strings.Contains(message, "NotFound") || strings.Contains(message, "NotAuthorizedOrNotFound") {
-		return true
-	}
-	return false
+	return errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound()
 }
 
-func isConflict(err error) bool {
-	if err == nil {
+func isDeleteNotFound(err error) bool {
+	if errors.Is(err, errResourceNotFound) {
+		return true
+	}
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func isRetryableDeleteConflict(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	if classification.HTTPStatusCode != 409 {
 		return false
 	}
 
-	var serviceErr common.ServiceError
-	if errors.As(err, &serviceErr) {
-		return serviceErr.GetHTTPStatusCode() == 409
-	}
-
-	var conflictErr errorutil.ConflictOciError
-	if errors.As(err, &conflictErr) {
+	switch classification.ErrorCode {
+	case errorutil.IncorrectState, "ExternalServerIncorrectState":
 		return true
+	default:
+		return false
 	}
-
-	return strings.Contains(err.Error(), "http status code: 409")
 }
 
 func (c ServiceClient[T]) selectListItem(body any, criteria map[string]any, preferredID string, phase readPhase) (any, error) {

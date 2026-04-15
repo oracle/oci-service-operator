@@ -13,6 +13,8 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	dataflowsdk "github.com/oracle/oci-go-sdk/v65/dataflow"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
@@ -52,20 +54,6 @@ func (f *fakeApplicationOCIClient) DeleteApplication(ctx context.Context, req da
 		return f.deleteFn(ctx, req)
 	}
 	return dataflowsdk.DeleteApplicationResponse{}, nil
-}
-
-type fakeApplicationServiceError struct {
-	statusCode int
-	code       string
-	message    string
-}
-
-func (f fakeApplicationServiceError) Error() string          { return f.message }
-func (f fakeApplicationServiceError) GetHTTPStatusCode() int { return f.statusCode }
-func (f fakeApplicationServiceError) GetMessage() string     { return f.message }
-func (f fakeApplicationServiceError) GetCode() string        { return f.code }
-func (f fakeApplicationServiceError) GetOpcRequestID() string {
-	return ""
 }
 
 func newTestManager(client applicationOCIClient) *ApplicationServiceManager {
@@ -235,7 +223,10 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 			app.OwnerUserName = common.String("example-user")
 			app.Parameters = []dataflowsdk.ApplicationParameter{{Name: common.String("input_file"), Value: common.String("data.csv")}}
 			app.WarehouseBucketUri = common.String("oci://bucket@app/warehouse/")
-			return dataflowsdk.CreateApplicationResponse{Application: app}, nil
+			return dataflowsdk.CreateApplicationResponse{
+				Application:  app,
+				OpcRequestId: common.String("opc-create-1"),
+			}, nil
 		},
 	})
 
@@ -263,6 +254,7 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, "opc-create-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, common.String("ocid1.compartment.oc1..example"), captured.CompartmentId)
 	assert.Equal(t, common.String("test-application"), captured.DisplayName)
 	assert.Equal(t, dataflowsdk.ApplicationLanguagePython, captured.Language)
@@ -302,7 +294,10 @@ func TestCreateOrUpdate_UpdateMutableFields(t *testing.T) {
 			app.PrivateEndpointId = common.String("ocid1.privateendpoint.oc1..new")
 			app.FreeformTags = map[string]string{"env": "dev"}
 			app.DefinedTags = map[string]map[string]interface{}{"Operations": {"CostCenter": "42"}}
-			return dataflowsdk.UpdateApplicationResponse{Application: app}, nil
+			return dataflowsdk.UpdateApplicationResponse{
+				Application:  app,
+				OpcRequestId: common.String("opc-update-1"),
+			}, nil
 		},
 	})
 
@@ -322,6 +317,7 @@ func TestCreateOrUpdate_UpdateMutableFields(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, "opc-update-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, "ocid1.dataflowapplication.oc1..existing", *captured.ApplicationId)
 	assert.Equal(t, "new-name", *captured.DisplayName)
 	assert.Equal(t, "VM.Standard.E5.Flex", *captured.DriverShape)
@@ -403,11 +399,7 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	manager := newTestManager(&fakeApplicationOCIClient{
 		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
 			getCalls++
-			return dataflowsdk.GetApplicationResponse{}, fakeApplicationServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "missing",
-			}
+			return dataflowsdk.GetApplicationResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "missing")
 		},
 		createFn: func(_ context.Context, req dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error) {
 			createCalls++
@@ -431,6 +423,60 @@ func TestCreateOrUpdate_RecreatesOnExplicitNotFound(t *testing.T) {
 	assert.Equal(t, 1, createCalls)
 	assert.Equal(t, "ocid1.dataflowapplication.oc1..recreated", string(resource.Status.OsokStatus.Ocid))
 	assert.NotEqual(t, oldCreatedAt.Time.Format(time.RFC3339Nano), resource.Status.TimeCreated)
+}
+
+func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
+	createCalls := 0
+	manager := newTestManager(&fakeApplicationOCIClient{
+		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			return dataflowsdk.GetApplicationResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "auth ambiguity")
+		},
+		createFn: func(_ context.Context, _ dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error) {
+			createCalls++
+			return dataflowsdk.CreateApplicationResponse{}, nil
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.Id = "ocid1.dataflowapplication.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, 0, createCalls)
+	assert.Equal(t, shared.OCID("ocid1.dataflowapplication.oc1..existing"), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+	errortest.AssertErrorType(t, err, "errorutil.UnauthorizedAndNotFoundOciError")
+}
+
+func TestCreateOrUpdate_UpdateConflictReturnsNormalizedConflictError(t *testing.T) {
+	manager := newTestManager(&fakeApplicationOCIClient{
+		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			return dataflowsdk.GetApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..existing", "current-application", dataflowsdk.ApplicationLifecycleStateActive),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ dataflowsdk.UpdateApplicationRequest) (dataflowsdk.UpdateApplicationResponse, error) {
+			return dataflowsdk.UpdateApplicationResponse{}, errortest.NewServiceError(409, errorutil.IncorrectState, "update conflict")
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..existing")
+	resource.Spec.DisplayName = "updated-application"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, shared.OCID("ocid1.dataflowapplication.oc1..existing"), resource.Status.OsokStatus.Ocid)
+	errortest.AssertErrorType(t, err, "errorutil.ConflictOciError")
 }
 
 func TestCreateOrUpdate_TreatsInactiveAsSuccessfulObservedState(t *testing.T) {
@@ -467,11 +513,7 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 			return dataflowsdk.DeleteApplicationResponse{}, nil
 		},
 		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
-			return dataflowsdk.GetApplicationResponse{}, fakeApplicationServiceError{
-				statusCode: 404,
-				code:       "NotFound",
-				message:    "not found",
-			}
+			return dataflowsdk.GetApplicationResponse{}, errortest.NewServiceError(404, errorutil.NotFound, "not found")
 		},
 	})
 
@@ -482,6 +524,55 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, done)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
+func TestDelete_ConfirmsDeletionOnAuthShapedNotFound(t *testing.T) {
+	manager := newTestManager(&fakeApplicationOCIClient{
+		deleteFn: func(_ context.Context, req dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error) {
+			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
+			return dataflowsdk.DeleteApplicationResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			return dataflowsdk.GetApplicationResponse{}, errortest.NewServiceError(404, errorutil.NotAuthorizedOrNotFound, "auth ambiguity")
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.True(t, done)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "OCI resource deleted", resource.Status.OsokStatus.Message)
+	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
+func TestDelete_ConflictReturnsRetryableError(t *testing.T) {
+	manager := newTestManager(&fakeApplicationOCIClient{
+		deleteFn: func(_ context.Context, req dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error) {
+			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
+			return dataflowsdk.DeleteApplicationResponse{}, errortest.NewServiceError(409, errorutil.IncorrectState, "delete conflict")
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.Error(t, err)
+	assert.False(t, done)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	errortest.AssertErrorType(t, err, "errorutil.ConflictOciError")
+}
+
+func TestApplicationClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {
+	contract := errortest.NewManualRuntimeClassifierContract("dataflow/Application", true)
+	errortest.RunManualRuntimeClassifierContract(t, contract, isApplicationReadNotFoundOCI, isApplicationDeleteNotFoundOCI)
 }

@@ -32,8 +32,22 @@ type defaultQueueServiceClient struct {
 
 func newQueueRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "queue",
-		FormalSlug:        "queue",
+		FormalService: "queue",
+		FormalSlug:    "queue",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "handwritten",
+			FormalClassification: "workrequest",
+			WorkRequest: &generatedruntime.WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+				LegacyFieldBridge: &generatedruntime.WorkRequestLegacyFieldBridge{
+					Create: "CreateWorkRequestId",
+					Update: "UpdateWorkRequestId",
+					Delete: "DeleteWorkRequestId",
+				},
+			},
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "ready-only",
 		FinalizerPolicy:   "retain-until-confirmed-delete",

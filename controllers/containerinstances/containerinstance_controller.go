@@ -23,6 +23,7 @@ type ContainerInstanceReconciler struct {
 // +kubebuilder:rbac:groups=containerinstances.oracle.com,resources=containerinstances,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=containerinstances.oracle.com,resources=containerinstances/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=containerinstances.oracle.com,resources=containerinstances/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *ContainerInstanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

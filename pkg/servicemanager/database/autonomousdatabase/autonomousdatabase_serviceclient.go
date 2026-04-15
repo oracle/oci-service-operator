@@ -32,8 +32,13 @@ type defaultAutonomousDatabaseServiceClient struct {
 
 func newAutonomousDatabaseRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "database",
-		FormalSlug:        "databaseautonomousdatabase",
+		FormalService: "database",
+		FormalSlug:    "databaseautonomousdatabase",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",

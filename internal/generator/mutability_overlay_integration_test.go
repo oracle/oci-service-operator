@@ -33,6 +33,9 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
     generation:
       resources:
         - kind: Widget
@@ -154,6 +157,9 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
     generation:
       resources:
         - kind: Widget

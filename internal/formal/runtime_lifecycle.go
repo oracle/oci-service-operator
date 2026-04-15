@@ -21,6 +21,14 @@ type RuntimeLifecycleListLookupSemantics = diagramListLookupSemantics
 // allowlists embedded in runtime-lifecycle.yaml.
 type RuntimeLifecycleMutationSemantics = diagramMutationSemantics
 
+// RuntimeLifecycleHookSemantics exposes repo-authored helper-hook overrides
+// embedded in runtime-lifecycle.yaml.
+type RuntimeLifecycleHookSemantics = diagramHookSemantics
+
+// RuntimeLifecycleFollowUpSemantics exposes repo-authored follow-up strategy
+// overrides embedded in runtime-lifecycle.yaml.
+type RuntimeLifecycleFollowUpSemantics = diagramFollowUpSemantics
+
 // LoadRuntimeLifecycle parses one repo-authored runtime-lifecycle.yaml file.
 func LoadRuntimeLifecycle(path string) (RuntimeLifecycleSpec, error) {
 	return loadDiagram(path)

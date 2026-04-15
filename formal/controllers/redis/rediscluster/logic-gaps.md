@@ -29,6 +29,28 @@ gaps: []
   `freeformTags`, and `definedTags`. Changes to `compartmentId`,
   `softwareVersion`, or `subnetId` require replacement semantics and are
   rejected once a live OCI resource is bound.
-- Create and update rely on the standard generated-runtime read-after-write
-  path with `GetRedisCluster` or `ListRedisClusters`, while delete keeps the
-  finalizer until `DeleteRedisCluster` is confirmed.
+- Create, update, and delete are work-request-backed via the Redis service SDK.
+  The runtime stores the in-flight work request in `status.async.current`,
+  projects raw work-request ID, status, operation type, percent complete, and a
+  synthesized message for debugging, and resumes reconciliation from that
+  shared tracker instead of relying on helper-name drift.
+- Delete keeps the finalizer until the tracked Redis work request reaches a
+  terminal state and `GetRedisCluster` confirms the resource is gone. The
+  existing delete guard still blocks the initial delete request while OCI keeps
+  the cluster in `CREATING` or `UPDATING`, but it no longer suppresses
+  work-request polling after delete has started.
+
+## Authority and scoped cleanup
+
+- `formal/controllers/redis/rediscluster/*` is the authoritative formal path
+  for the promoted Redis work-request adapter contract.
+- `pkg/servicemanager/redis/rediscluster/rediscluster_runtime.go` and
+  `pkg/servicemanager/redis/rediscluster/rediscluster_delete_guard_client.go`
+  own live runtime behavior.
+  `pkg/servicemanager/redis/rediscluster/rediscluster_serviceclient.go`
+  still records the generated helper-hook baseline and should not be treated as
+  a second execution contract.
+- The disabled `service: workrequests` row in
+  `internal/generator/config/services.yaml` is a separate generator-contract
+  decision. Redis work-request polling does not publish or enable a standalone
+  `workrequests` API group.

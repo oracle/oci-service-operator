@@ -32,8 +32,13 @@ type defaultCompartmentServiceClient struct {
 
 func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "identity",
-		FormalSlug:        "compartment",
+		FormalService: "identity",
+		FormalSlug:    "compartment",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "none",

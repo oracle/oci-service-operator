@@ -20,12 +20,42 @@ type MapValue map[string]string
 // +kubebuilder:validation:MinLength=1
 type OCID string
 
+// +kubebuilder:validation:Enum=none;lifecycle;workrequest
+type OSOKAsyncSource string
+
+// +kubebuilder:validation:Enum=create;update;delete
+type OSOKAsyncPhase string
+
+// +kubebuilder:validation:Enum=pending;succeeded;failed;canceled;attention;unknown
+type OSOKAsyncNormalizedClass string
+
 const (
 	Provisioning OSOKConditionType = "Provisioning"
 	Active       OSOKConditionType = "Active"
 	Failed       OSOKConditionType = "Failed"
 	Terminating  OSOKConditionType = "Terminating"
 	Updating     OSOKConditionType = "Updating"
+)
+
+const (
+	OSOKAsyncSourceNone        OSOKAsyncSource = "none"
+	OSOKAsyncSourceLifecycle   OSOKAsyncSource = "lifecycle"
+	OSOKAsyncSourceWorkRequest OSOKAsyncSource = "workrequest"
+)
+
+const (
+	OSOKAsyncPhaseCreate OSOKAsyncPhase = "create"
+	OSOKAsyncPhaseUpdate OSOKAsyncPhase = "update"
+	OSOKAsyncPhaseDelete OSOKAsyncPhase = "delete"
+)
+
+const (
+	OSOKAsyncClassPending   OSOKAsyncNormalizedClass = "pending"
+	OSOKAsyncClassSucceeded OSOKAsyncNormalizedClass = "succeeded"
+	OSOKAsyncClassFailed    OSOKAsyncNormalizedClass = "failed"
+	OSOKAsyncClassCanceled  OSOKAsyncNormalizedClass = "canceled"
+	OSOKAsyncClassAttention OSOKAsyncNormalizedClass = "attention"
+	OSOKAsyncClassUnknown   OSOKAsyncNormalizedClass = "unknown"
 )
 
 type OSOKCondition struct {
@@ -36,15 +66,42 @@ type OSOKCondition struct {
 	Reason             string             `json:"reason,omitempty"`
 }
 
+type OSOKAsyncOperation struct {
+	Source           OSOKAsyncSource          `json:"source"`
+	Phase            OSOKAsyncPhase           `json:"phase"`
+	WorkRequestID    string                   `json:"workRequestId,omitempty"`
+	RawStatus        string                   `json:"rawStatus,omitempty"`
+	RawOperationType string                   `json:"rawOperationType,omitempty"`
+	NormalizedClass  OSOKAsyncNormalizedClass `json:"normalizedClass"`
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=100
+	PercentComplete *float32     `json:"percentComplete,omitempty"`
+	Message         string       `json:"message,omitempty"`
+	UpdatedAt       *metav1.Time `json:"updatedAt"`
+}
+
+type OSOKAsyncTracker struct {
+	Current *OSOKAsyncOperation `json:"current,omitempty"`
+}
+
 type OSOKStatus struct {
-	Conditions  []OSOKCondition `json:"conditions,omitempty"`
-	Ocid        OCID            `json:"ocid,omitempty"`
-	Message     string          `json:"message,omitempty"`
-	Reason      string          `json:"reason,omitempty"`
-	CreatedAt   *metav1.Time    `json:"createdAt,omitempty"`
-	UpdatedAt   *metav1.Time    `json:"updatedAt,omitempty"`
-	RequestedAt *metav1.Time    `json:"requestedAt,omitempty"`
-	DeletedAt   *metav1.Time    `json:"deletedAt,omitempty"`
+	Conditions []OSOKCondition `json:"conditions,omitempty"`
+	// Async is the canonical controller-owned async contract. Resource-local
+	// legacy work-request fields may remain as compatibility mirrors while
+	// follow-on migrations land, but new async state should project here first.
+	Async OSOKAsyncTracker `json:"async,omitempty"`
+	// OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+	// response or surfaced OCI service error that materially contributed to the
+	// current shared status projection. Headerless follow-up observations keep
+	// the last non-empty value intact.
+	OpcRequestID string       `json:"opcRequestId,omitempty"`
+	Ocid         OCID         `json:"ocid,omitempty"`
+	Message      string       `json:"message,omitempty"`
+	Reason       string       `json:"reason,omitempty"`
+	CreatedAt    *metav1.Time `json:"createdAt,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+	RequestedAt  *metav1.Time `json:"requestedAt,omitempty"`
+	DeletedAt    *metav1.Time `json:"deletedAt,omitempty"`
 }
 
 type TagResources struct {

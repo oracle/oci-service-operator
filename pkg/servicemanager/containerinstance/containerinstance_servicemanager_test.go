@@ -13,8 +13,10 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ocicontainerinstances "github.com/oracle/oci-go-sdk/v65/containerinstances"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	containerinstancemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/containerinstance"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -190,6 +192,7 @@ func TestCreateOrUpdateCreatePath(t *testing.T) {
 		},
 		createFn: func(context.Context, ocicontainerinstances.CreateContainerInstanceRequest) (ocicontainerinstances.CreateContainerInstanceResponse, error) {
 			return ocicontainerinstances.CreateContainerInstanceResponse{
+				OpcRequestId: common.String("opc-create-1"),
 				ContainerInstance: ocicontainerinstances.ContainerInstance{
 					Id:             common.String("ocid1.containerinstance.oc1..created"),
 					DisplayName:    common.String("test-ci"),
@@ -205,6 +208,7 @@ func TestCreateOrUpdateCreatePath(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.True(t, ociClient.createCalled)
+	assert.Equal(t, "opc-create-1", ci.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, "ocid1.containerinstance.oc1..created", string(ci.Status.OsokStatus.Ocid))
 }
 
@@ -318,6 +322,11 @@ func TestCreateOrUpdateTrackedInstanceUpdatesMutableFields(t *testing.T) {
 				},
 			}, nil
 		},
+		updateFn: func(context.Context, ocicontainerinstances.UpdateContainerInstanceRequest) (ocicontainerinstances.UpdateContainerInstanceResponse, error) {
+			return ocicontainerinstances.UpdateContainerInstanceResponse{
+				OpcRequestId: common.String("opc-update-1"),
+			}, nil
+		},
 	}
 	mgr := newTestManager(ociClient)
 	ci := makeContainerInstanceSpec("new-name")
@@ -327,11 +336,63 @@ func TestCreateOrUpdateTrackedInstanceUpdatesMutableFields(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.True(t, ociClient.updateCalled)
+	assert.Equal(t, "opc-update-1", ci.Status.OsokStatus.OpcRequestID)
 	if assert.NotNil(t, ociClient.updateRequest) {
 		assert.Equal(t, existingID, *ociClient.updateRequest.ContainerInstanceId)
 		assert.Equal(t, "new-name", *ociClient.updateRequest.UpdateContainerInstanceDetails.DisplayName)
 	}
 	assert.Equal(t, "new-name", ci.Status.DisplayName)
+}
+
+func TestCreateOrUpdateListServiceErrorCapturesOpcRequestID(t *testing.T) {
+	ociClient := &fakeOciClient{
+		listFn: func(context.Context, ocicontainerinstances.ListContainerInstancesRequest) (ocicontainerinstances.ListContainerInstancesResponse, error) {
+			return ocicontainerinstances.ListContainerInstancesResponse{}, errortest.NewServiceError(409, "IncorrectState", "list conflict")
+		},
+	}
+	mgr := newTestManager(ociClient)
+	ci := makeContainerInstanceSpec("test-ci")
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), ci, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, "opc-request-id", ci.Status.OsokStatus.OpcRequestID)
+}
+
+func TestCreateOrUpdateTrackedNotFoundFallsBackToCreate(t *testing.T) {
+	trackedID := "ocid1.containerinstance.oc1..tracked"
+	ociClient := &fakeOciClient{
+		getFn: func(context.Context, ocicontainerinstances.GetContainerInstanceRequest) (ocicontainerinstances.GetContainerInstanceResponse, error) {
+			return ocicontainerinstances.GetContainerInstanceResponse{}, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "tracked container instance missing")
+		},
+		listFn: func(context.Context, ocicontainerinstances.ListContainerInstancesRequest) (ocicontainerinstances.ListContainerInstancesResponse, error) {
+			return ocicontainerinstances.ListContainerInstancesResponse{
+				ContainerInstanceCollection: ocicontainerinstances.ContainerInstanceCollection{
+					Items: []ocicontainerinstances.ContainerInstanceSummary{},
+				},
+			}, nil
+		},
+		createFn: func(context.Context, ocicontainerinstances.CreateContainerInstanceRequest) (ocicontainerinstances.CreateContainerInstanceResponse, error) {
+			return ocicontainerinstances.CreateContainerInstanceResponse{
+				ContainerInstance: ocicontainerinstances.ContainerInstance{
+					Id:             common.String("ocid1.containerinstance.oc1..created"),
+					DisplayName:    common.String("test-ci"),
+					LifecycleState: ocicontainerinstances.ContainerInstanceLifecycleStateActive,
+				},
+			}, nil
+		},
+	}
+	mgr := newTestManager(ociClient)
+	ci := makeContainerInstanceSpec("test-ci")
+	ci.Status.Id = trackedID
+	ci.Status.OsokStatus.Ocid = shared.OCID(trackedID)
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), ci, ctrl.Request{})
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, ociClient.createCalled)
+	assert.Equal(t, "ocid1.containerinstance.oc1..created", ci.Status.Id)
+	assert.Equal(t, "ocid1.containerinstance.oc1..created", string(ci.Status.OsokStatus.Ocid))
 }
 
 func TestDeleteWithOCID(t *testing.T) {
@@ -365,6 +426,31 @@ func TestDeleteAlreadyDeleted(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, done)
 	assert.False(t, ociClient.deleteCalled)
+}
+
+func TestDeleteTreatsDeleteNotFoundAsDeleted(t *testing.T) {
+	ociClient := &fakeOciClient{
+		getFn: func(context.Context, ocicontainerinstances.GetContainerInstanceRequest) (ocicontainerinstances.GetContainerInstanceResponse, error) {
+			return ocicontainerinstances.GetContainerInstanceResponse{
+				ContainerInstance: ocicontainerinstances.ContainerInstance{
+					Id:             common.String("ocid1.containerinstance.oc1..del"),
+					LifecycleState: ocicontainerinstances.ContainerInstanceLifecycleStateActive,
+				},
+			}, nil
+		},
+		deleteFn: func(context.Context, ocicontainerinstances.DeleteContainerInstanceRequest) (ocicontainerinstances.DeleteContainerInstanceResponse, error) {
+			return ocicontainerinstances.DeleteContainerInstanceResponse{}, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "container instance already gone")
+		},
+	}
+	mgr := newTestManager(ociClient)
+	ci := makeContainerInstanceSpec("")
+	ci.Status.OsokStatus.Ocid = "ocid1.containerinstance.oc1..del"
+
+	done, err := mgr.Delete(context.Background(), ci)
+	assert.NoError(t, err)
+	assert.True(t, done)
+	assert.True(t, ociClient.deleteCalled)
+	assert.Equal(t, "opc-request-id", ci.Status.OsokStatus.OpcRequestID)
 }
 
 func TestDeleteError(t *testing.T) {

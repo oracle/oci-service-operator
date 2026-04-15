@@ -17,6 +17,7 @@ Manage OCI Redis clusters from Kubernetes.
 ## Notes
 
 - Current package scope is intentionally limited to RedisCluster.
+- RedisCluster is the work-request-backed Redis reference for the shared async tracker; standalone Redis WorkRequest resources are not published with this package.
 
 ## Exposed Resources
 

@@ -1,0 +1,117 @@
+# Shared Async Status Contract
+
+This document is the `oci-service-operator-6kv.2` contract for the shared
+async status surface published by OSOK CRDs.
+
+## Canonical Shared Shape
+
+The shared async tracker now lives at:
+
+- `.status.status.async.current.source`
+- `.status.status.async.current.phase`
+- `.status.status.async.current.workRequestId`
+- `.status.status.async.current.rawStatus`
+- `.status.status.async.current.rawOperationType`
+- `.status.status.async.current.normalizedClass`
+- `.status.status.async.current.percentComplete`
+- `.status.status.async.current.message`
+- `.status.status.async.current.updatedAt`
+- `.status.status.opcRequestId`
+
+The schema is OSOK-owned. Public status never exposes provider SDK enum types;
+raw provider values are preserved only as plain strings in `rawStatus` and
+`rawOperationType`.
+
+Each published CR embeds `shared.OSOKStatus` under the resource-specific
+status field named `status`, so the shared tracker is exposed on the CR at
+`.status.status.async.current.workRequestId`. Within the embedded shared
+status object itself, `status.async.current.workRequestId` is the canonical
+field name, and `status.opcRequestId` is the canonical OCI request-correlation
+field.
+
+## Request Correlation Rule
+
+`status.opcRequestId` means: the latest non-empty OCI request ID from a
+create, update, or delete response header, or from a surfaced OCI service
+error, that materially contributed to the current shared status mutation.
+
+For determinism:
+
+- Headerless follow-up observations preserve the last non-empty value.
+- Steady-state observe, list, and polling reads do not replace the field just
+  because they returned a fresh request ID.
+- A later mutating OCI response or surfaced OCI service error supersedes the
+  previous value when it carries a new non-empty request ID.
+
+## Shared Mapping Rules
+
+The controller-owned mapper in `pkg/servicemanager` is the only supported path
+from normalized async class plus phase into shared OSOK conditions:
+
+- `pending` + `create` => `Provisioning`, requeue
+- `pending` + `update` => `Updating`, requeue
+- `pending` + `delete` => `Terminating`, requeue
+- `succeeded` + `create|update` => `Active`, no requeue
+- `succeeded` + `delete` => `Terminating`, keep requeueing until delete
+  confirmation clears the finalizer path
+- `failed`, `canceled`, `attention`, and `unknown` => `Failed`, no requeue by
+  default
+
+Resource runtimes may still own provider-specific raw-status normalization, but
+they must not invent separate condition mappings once they have a normalized
+class plus phase.
+
+When a runtime has an explicit phase from the current OCI observation, that
+phase wins over any previously persisted `status.async.current.phase`.
+Persisted phase is only a fallback when the current observation cannot
+determine phase directly.
+
+## Header Capture Rules
+
+When an opening OCI create, update, or delete response carries
+`OpcRequestId`, the runtime should seed `status.opcRequestId` immediately,
+before later follow-up observations drop the header. New controller-backed
+resources should inherit this through `generatedruntime` by default, and any
+future handwritten runtime must mirror the same shared field explicitly.
+
+When an opening OCI create, update, or delete response carries
+`OpcWorkRequestId`, the runtime should seed
+`status.async.current.workRequestId` immediately, before later response
+projection or lifecycle rereads drop the header.
+
+That breadcrumb capture does not, by itself, promote a resource to
+`workrequest`. Lifecycle resources may still continue on read-after-write,
+lifecycle-state requeue, or confirm-delete follow-up behavior. Headerless
+in-flight follow-up observations should preserve the already seeded
+`workRequestId` until terminal completion or explicit tracker clear, just as
+headerless follow-up observations preserve the last non-empty
+`status.opcRequestId`.
+
+## Compatibility Window
+
+`shared.OSOKStatus.Async.Current` is canonical immediately.
+
+During the staged migration window:
+
+- Existing resource-local work-request ID fields may remain as compatibility
+  mirrors when a runtime still needs them for persisted resume behavior.
+- `queue/Queue` keeps `createWorkRequestId`, `updateWorkRequestId`, and
+  `deleteWorkRequestId` for resume parity, but it must mirror the same
+  in-flight operation into the shared tracker.
+- Lifecycle or read-after-write resources may project the shared breadcrumb
+  from an opening response header without adding new per-resource
+  compatibility fields or switching `async.strategy` to `workrequest`.
+- New async migrations must write the shared tracker first; they must not add
+  new per-resource work-request ID or raw-status fields to published status.
+- Retirement of legacy resource-local async fields is owned by the follow-on
+  resource children after live parity is proven.
+
+## Onboarding Defaults
+
+- Generated controllers inherit event-recorder RBAC
+  (`events create;patch`) through the shared default controller markers.
+- `generation.resources[].controller.extraRBACMarkers` should record only
+  non-default access such as secret reads or writes, not event-recorder
+  boilerplate.
+- Shared controller logs and Kubernetes Events remain secondary summaries; the
+  shared async tracker is the canonical persistence surface.

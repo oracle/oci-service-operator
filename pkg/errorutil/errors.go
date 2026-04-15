@@ -6,7 +6,11 @@
 package errorutil
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/common"
 )
 
@@ -26,6 +30,40 @@ func OciErrorTypeResponse(err error) (bool, error) {
 	return NewServiceFailureFromResponse(err.(common.ServiceError).GetCode(),
 		err.(common.ServiceError).GetHTTPStatusCode(), err.(common.ServiceError).GetOpcRequestID(),
 		err.(common.ServiceError).GetMessage())
+}
+
+func OpcRequestID(err error) string {
+	if err == nil {
+		return ""
+	}
+
+	var serviceErr common.ServiceError
+	if errors.As(err, &serviceErr) {
+		return strings.TrimSpace(serviceErr.GetOpcRequestID())
+	}
+
+	value := reflect.ValueOf(err)
+	if !value.IsValid() {
+		return ""
+	}
+	for value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return ""
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return ""
+	}
+
+	for _, fieldName := range []string{"OpcRequestID", "OpcRequestId"} {
+		field := value.FieldByName(fieldName)
+		if field.IsValid() && field.Kind() == reflect.String {
+			return strings.TrimSpace(field.String())
+		}
+	}
+
+	return ""
 }
 
 func NewServiceFailureFromResponse(code string, statusCode int, opcRequestId string, message string) (bool, error) {

@@ -131,6 +131,7 @@ func (m *FunctionsFunctionServiceManager) resolveFunctionForReconcile(
 		current, err := m.GetFunction(ctx, trackedID, nil)
 		if err != nil {
 			if !isFunctionsNotFound(err) {
+				servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 				m.Log.ErrorLog(err, "error while getting Function from tracked OCID")
 				return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
 			}
@@ -147,6 +148,7 @@ func (m *FunctionsFunctionServiceManager) resolveFunctionForReconcile(
 
 	current, err := m.FindFunction(ctx, resource)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 		m.Log.ErrorLog(err, "error while listing Functions")
 		return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
 	}
@@ -181,7 +183,7 @@ func (m *FunctionsFunctionServiceManager) Delete(ctx context.Context, obj runtim
 		return true, nil
 	}
 
-	if err := m.DeleteFunction(ctx, targetID); err != nil {
+	if err := m.DeleteFunction(ctx, resource, targetID); err != nil {
 		if isFunctionsNotFound(err) {
 			clearTrackedFunctionsStatus(resource)
 			if err := m.deleteFunctionSecret(ctx, resource); err != nil {
@@ -196,12 +198,14 @@ func (m *FunctionsFunctionServiceManager) Delete(ctx context.Context, obj runtim
 	current, err := m.GetFunction(ctx, targetID, nil)
 	if err != nil {
 		if isFunctionsNotFound(err) {
+			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 			clearTrackedFunctionsStatus(resource)
 			if err := m.deleteFunctionSecret(ctx, resource); err != nil {
 				return false, err
 			}
 			return true, nil
 		}
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 		return false, err
 	}
 	if err := projectFunctionsResponseIntoStatus(resource, current); err != nil {

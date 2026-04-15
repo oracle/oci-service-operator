@@ -94,7 +94,7 @@ resources:
     introduction: |
       The current OSOK Queue rollout promotes the top-level OCI `Queue` resource under `apiVersion: queue.oracle.com/v1beta1` and `kind: Queue`.
 
-      The published reconcile path is work-request-aware: create, update, and delete all reconcile against OCI work requests, Queue identity is recovered from work-request resources, and status mirrors both live Queue fields and work-request tracking data.
+      The published reconcile path is work-request-aware: create, update, and delete all reconcile against OCI work requests, Queue identity is recovered from work-request resources, and `status.async.current` is the canonical in-flight tracker while the legacy create, update, and delete work-request ID fields remain compatibility mirrors.
     postSections:
       - title: Update Behavior
         body: |
@@ -120,6 +120,7 @@ resources:
           - `WorkRequest`
           - `WorkRequestError`
           - `WorkRequestLog`
+          - top-level `workrequests` API group
 
   - group: streaming
     kind: Stream

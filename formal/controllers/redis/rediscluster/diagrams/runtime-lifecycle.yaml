@@ -9,7 +9,29 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: redis
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: redis
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: redis
+        action: DELETED
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
   - Bind through an explicit OCI identity first; otherwise adopt only a unique ListRedisClusters match on compartmentId plus displayName before create.
   - Mutable drift is limited to displayName, nodeCount, nodeMemoryInGBs, freeformTags, and definedTags; changes to compartmentId, softwareVersion, or subnetId are replacement-only.
-  - Create and update rely on the generated-runtime read-after-write path, and delete retains the finalizer until DeleteRedisCluster is confirmed.
+  - Create, update, and delete all track Redis service work requests through status.async.current, preserving raw work-request ID, status, operation type, and percent complete while the shared async mapper drives conditions and requeue.
+  - Delete retains the finalizer until the tracked work request is terminal and GetRedisCluster confirms the cluster is gone; the delete guard still blocks the first delete call while OCI keeps the cluster in CREATING or UPDATING.

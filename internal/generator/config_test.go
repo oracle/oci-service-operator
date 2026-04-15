@@ -412,6 +412,9 @@ services:
       mode: explicit
       includeKinds:
         - AutonomousDatabase
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
 `
 	if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
 		t.Fatalf("write temp config: %v", err)
@@ -611,6 +614,9 @@ services:
       mode: explicit
       includeKinds:
         - DbSystem
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
     generation:
       controller:
         strategy: manual
@@ -1151,7 +1157,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "database", "functions", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
 
 	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
@@ -1175,6 +1181,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
+	assertFunctionsRuntimeRolloutMetadata(t, services["functions"])
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
 	assertNoSQLRuntimeRolloutMetadata(t, services["nosql"])
 	assertPSQLRuntimeRolloutMetadata(t, services["psql"])
@@ -1359,6 +1366,436 @@ func selectionAll(enabled bool) SelectionConfig {
 	}
 }
 
+func TestValidateSelectedAsyncMetadataRequiresStrategyForOptedInSelectedKind(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "mysql",
+				SDKPackage:     "example/mysql",
+				Group:          "mysql",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "DbSystem"),
+				Generation: GenerationConfig{
+					Resources: []ResourceGenerationOverride{
+						{
+							Kind: "DbSystem",
+							Async: AsyncConfig{
+								Runtime: AsyncRuntimeGeneratedRuntime,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := cfg.Validate()
+	if err == nil {
+		t.Fatal("Validate() error = nil, want selected-kind async failure")
+	}
+	if !strings.Contains(err.Error(), `selected kind "DbSystem" async.strategy is required`) {
+		t.Fatalf("Validate() error = %v, want selected-kind strategy failure", err)
+	}
+}
+
+func TestValidateSelectedAsyncMetadataRequiresContractWithoutAsyncOptIn(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "containerengine",
+				SDKPackage:     "example/containerengine",
+				Group:          "containerengine",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "Cluster"),
+			},
+		},
+	}
+
+	err := cfg.Validate()
+	if err == nil {
+		t.Fatal("Validate() error = nil, want missing selected-kind async failure")
+	}
+	if !strings.Contains(err.Error(), `selected kind "Cluster" async.strategy is required`) {
+		t.Fatalf("Validate() error = %v, want selected-kind strategy failure", err)
+	}
+}
+
+func TestValidateSelectedAsyncMetadataRequiresContractForSelectedPackageSplitKinds(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "core",
+				SDKPackage:     "example/core",
+				Group:          "core",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "Instance"),
+				PackageSplits: []PackageSplitConfig{
+					{
+						Name:         "core-network",
+						IncludeKinds: []string{"Vcn"},
+					},
+				},
+				Generation: GenerationConfig{
+					Resources: []ResourceGenerationOverride{
+						{
+							Kind: "Instance",
+							Async: AsyncConfig{
+								Strategy: AsyncStrategyLifecycle,
+								Runtime:  AsyncRuntimeGeneratedRuntime,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := cfg.Validate()
+	if err == nil {
+		t.Fatal("Validate() error = nil, want package-split selected-kind async failure")
+	}
+	if !strings.Contains(err.Error(), `selected kind "Vcn" async.strategy is required`) {
+		t.Fatalf("Validate() error = %v, want package-split selected-kind failure", err)
+	}
+}
+
+func TestValidateSelectedAsyncMetadataAllowsResourceOverridesToClearInheritedWorkRequestDefaults(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "queue",
+				SDKPackage:     "example/queue",
+				Group:          "queue",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "Queue", "Stream"),
+				Async: AsyncConfig{
+					Strategy: AsyncStrategyWorkRequest,
+					Runtime:  AsyncRuntimeHandwritten,
+					WorkRequest: AsyncWorkRequestConfig{
+						Source: AsyncWorkRequestSourceServiceSDK,
+						Phases: []string{AsyncPhaseCreate, AsyncPhaseDelete},
+						LegacyFieldBridge: AsyncLegacyFieldBridge{
+							Create: "CreateWorkRequestId",
+							Delete: "DeleteWorkRequestId",
+						},
+					},
+				},
+				Generation: GenerationConfig{
+					Resources: []ResourceGenerationOverride{
+						{
+							Kind: "Queue",
+							Async: AsyncConfig{
+								Strategy: AsyncStrategyLifecycle,
+								Runtime:  AsyncRuntimeGeneratedRuntime,
+							},
+						},
+						{
+							Kind: "Stream",
+							Async: AsyncConfig{
+								Strategy: AsyncStrategyNone,
+								Runtime:  AsyncRuntimeGeneratedRuntime,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v, want nil", err)
+	}
+}
+
+func TestServiceConfigAsyncConfigForMergesServiceAndResourceOverrides(t *testing.T) {
+	t.Parallel()
+
+	service := ServiceConfig{
+		Service: "queue",
+		Async: AsyncConfig{
+			Strategy: AsyncStrategyLifecycle,
+			Runtime:  AsyncRuntimeGeneratedRuntime,
+		},
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind: "Queue",
+					Async: AsyncConfig{
+						Strategy: AsyncStrategyWorkRequest,
+						Runtime:  AsyncRuntimeHandwritten,
+						WorkRequest: AsyncWorkRequestConfig{
+							Source: AsyncWorkRequestSourceServiceSDK,
+							Phases: []string{AsyncPhaseCreate, AsyncPhaseDelete},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	queue := service.AsyncConfigFor("Queue")
+	if queue.Strategy != AsyncStrategyWorkRequest {
+		t.Fatalf("AsyncConfigFor(Queue).Strategy = %q, want %q", queue.Strategy, AsyncStrategyWorkRequest)
+	}
+	if queue.Runtime != AsyncRuntimeHandwritten {
+		t.Fatalf("AsyncConfigFor(Queue).Runtime = %q, want %q", queue.Runtime, AsyncRuntimeHandwritten)
+	}
+	if queue.FormalClassification != AsyncStrategyWorkRequest {
+		t.Fatalf("AsyncConfigFor(Queue).FormalClassification = %q, want %q", queue.FormalClassification, AsyncStrategyWorkRequest)
+	}
+	if queue.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("AsyncConfigFor(Queue).WorkRequest.Source = %q, want %q", queue.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(queue.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseDelete}) {
+		t.Fatalf("AsyncConfigFor(Queue).WorkRequest.Phases = %v", queue.WorkRequest.Phases)
+	}
+
+	fallback := service.AsyncConfigFor("Stream")
+	if fallback.Strategy != AsyncStrategyLifecycle {
+		t.Fatalf("AsyncConfigFor(Stream).Strategy = %q, want %q", fallback.Strategy, AsyncStrategyLifecycle)
+	}
+	if fallback.Runtime != AsyncRuntimeGeneratedRuntime {
+		t.Fatalf("AsyncConfigFor(Stream).Runtime = %q, want %q", fallback.Runtime, AsyncRuntimeGeneratedRuntime)
+	}
+	if fallback.FormalClassification != AsyncStrategyLifecycle {
+		t.Fatalf("AsyncConfigFor(Stream).FormalClassification = %q, want %q", fallback.FormalClassification, AsyncStrategyLifecycle)
+	}
+}
+
+func TestServiceConfigAsyncConfigForClearsInheritedWorkRequestDefaultsWhenStrategyChanges(t *testing.T) {
+	t.Parallel()
+
+	service := ServiceConfig{
+		Service: "queue",
+		Async: AsyncConfig{
+			Strategy: AsyncStrategyWorkRequest,
+			Runtime:  AsyncRuntimeHandwritten,
+			WorkRequest: AsyncWorkRequestConfig{
+				Source: AsyncWorkRequestSourceServiceSDK,
+				Phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete},
+				LegacyFieldBridge: AsyncLegacyFieldBridge{
+					Create: "CreateWorkRequestId",
+					Update: "UpdateWorkRequestId",
+					Delete: "DeleteWorkRequestId",
+				},
+			},
+		},
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind: "Queue",
+					Async: AsyncConfig{
+						Strategy: AsyncStrategyLifecycle,
+						Runtime:  AsyncRuntimeGeneratedRuntime,
+					},
+				},
+				{
+					Kind: "Stream",
+					Async: AsyncConfig{
+						Strategy: AsyncStrategyNone,
+						Runtime:  AsyncRuntimeGeneratedRuntime,
+					},
+				},
+			},
+		},
+	}
+
+	queue := service.AsyncConfigFor("Queue")
+	if queue.Strategy != AsyncStrategyLifecycle {
+		t.Fatalf("AsyncConfigFor(Queue).Strategy = %q, want %q", queue.Strategy, AsyncStrategyLifecycle)
+	}
+	if queue.Runtime != AsyncRuntimeGeneratedRuntime {
+		t.Fatalf("AsyncConfigFor(Queue).Runtime = %q, want %q", queue.Runtime, AsyncRuntimeGeneratedRuntime)
+	}
+	if queue.FormalClassification != AsyncStrategyLifecycle {
+		t.Fatalf("AsyncConfigFor(Queue).FormalClassification = %q, want %q", queue.FormalClassification, AsyncStrategyLifecycle)
+	}
+	if queue.WorkRequest.hasOverride() {
+		t.Fatalf("AsyncConfigFor(Queue).WorkRequest = %#v, want empty workRequest metadata", queue.WorkRequest)
+	}
+
+	stream := service.AsyncConfigFor("Stream")
+	if stream.Strategy != AsyncStrategyNone {
+		t.Fatalf("AsyncConfigFor(Stream).Strategy = %q, want %q", stream.Strategy, AsyncStrategyNone)
+	}
+	if stream.Runtime != AsyncRuntimeGeneratedRuntime {
+		t.Fatalf("AsyncConfigFor(Stream).Runtime = %q, want %q", stream.Runtime, AsyncRuntimeGeneratedRuntime)
+	}
+	if stream.FormalClassification != AsyncStrategyNone {
+		t.Fatalf("AsyncConfigFor(Stream).FormalClassification = %q, want %q", stream.FormalClassification, AsyncStrategyNone)
+	}
+	if stream.WorkRequest.hasOverride() {
+		t.Fatalf("AsyncConfigFor(Stream).WorkRequest = %#v, want empty workRequest metadata", stream.WorkRequest)
+	}
+
+	fallback := service.AsyncConfigFor("Topic")
+	if fallback.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("AsyncConfigFor(Topic).WorkRequest.Source = %q, want %q", fallback.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(fallback.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("AsyncConfigFor(Topic).WorkRequest.Phases = %v", fallback.WorkRequest.Phases)
+	}
+	if fallback.WorkRequest.LegacyFieldBridge.Create != "CreateWorkRequestId" {
+		t.Fatalf("AsyncConfigFor(Topic).WorkRequest.LegacyFieldBridge.Create = %q, want CreateWorkRequestId", fallback.WorkRequest.LegacyFieldBridge.Create)
+	}
+}
+
+func TestServiceConfigAsyncConfigForWorkRequestOverrideReplacesInheritedMetadata(t *testing.T) {
+	t.Parallel()
+
+	service := ServiceConfig{
+		Service: "queue",
+		Async: AsyncConfig{
+			Strategy: AsyncStrategyWorkRequest,
+			Runtime:  AsyncRuntimeHandwritten,
+			WorkRequest: AsyncWorkRequestConfig{
+				Source: AsyncWorkRequestSourceServiceSDK,
+				Phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate},
+				LegacyFieldBridge: AsyncLegacyFieldBridge{
+					Create: "CreateWorkRequestId",
+					Update: "UpdateWorkRequestId",
+				},
+			},
+		},
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind: "Queue",
+					Async: AsyncConfig{
+						WorkRequest: AsyncWorkRequestConfig{
+							Source: AsyncWorkRequestSourceProviderHelper,
+							Phases: []string{AsyncPhaseDelete},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	queue := service.AsyncConfigFor("Queue")
+	if queue.Strategy != AsyncStrategyWorkRequest {
+		t.Fatalf("AsyncConfigFor(Queue).Strategy = %q, want %q", queue.Strategy, AsyncStrategyWorkRequest)
+	}
+	if queue.Runtime != AsyncRuntimeHandwritten {
+		t.Fatalf("AsyncConfigFor(Queue).Runtime = %q, want %q", queue.Runtime, AsyncRuntimeHandwritten)
+	}
+	if queue.WorkRequest.Source != AsyncWorkRequestSourceProviderHelper {
+		t.Fatalf("AsyncConfigFor(Queue).WorkRequest.Source = %q, want %q", queue.WorkRequest.Source, AsyncWorkRequestSourceProviderHelper)
+	}
+	if !slices.Equal(queue.WorkRequest.Phases, []string{AsyncPhaseDelete}) {
+		t.Fatalf("AsyncConfigFor(Queue).WorkRequest.Phases = %v, want [%s]", queue.WorkRequest.Phases, AsyncPhaseDelete)
+	}
+	if queue.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("AsyncConfigFor(Queue).WorkRequest.LegacyFieldBridge = %#v, want empty legacy bridge", queue.WorkRequest.LegacyFieldBridge)
+	}
+}
+
+func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	services := make(map[string]*ServiceConfig, len(cfg.Services))
+	for i := range cfg.Services {
+		service := &cfg.Services[i]
+		services[service.Service] = service
+	}
+
+	expectedByService := map[string]struct {
+		strategy string
+		runtime  string
+	}{
+		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"functions":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"identity":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"keymanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mysql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"objectstorage":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"opensearch":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"psql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"queue":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
+		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
+		"streaming":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+	}
+
+	targets := defaultActiveExplicitSelectedKindTargets(cfg)
+	if len(targets) == 0 {
+		t.Fatal("defaultActiveExplicitSelectedKindTargets() returned no targets")
+	}
+
+	for _, target := range targets {
+		service := services[target.Service]
+		expected, ok := expectedByService[target.Service]
+		if !ok {
+			t.Fatalf("missing async expectation for default-active service %q", target.Service)
+		}
+		assertAsyncContract(t, service, target.Kind, expected.strategy, expected.runtime)
+	}
+
+	queue := assertAsyncContract(t, services["queue"], "Queue", AsyncStrategyWorkRequest, AsyncRuntimeHandwritten)
+	if queue.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("queue Queue workRequest.source = %q, want %q", queue.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(queue.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("queue Queue workRequest.phases = %v", queue.WorkRequest.Phases)
+	}
+	if queue.WorkRequest.LegacyFieldBridge.Create != "CreateWorkRequestId" {
+		t.Fatalf("queue Queue create bridge = %q, want CreateWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Create)
+	}
+	if queue.WorkRequest.LegacyFieldBridge.Update != "UpdateWorkRequestId" {
+		t.Fatalf("queue Queue update bridge = %q, want UpdateWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Update)
+	}
+	if queue.WorkRequest.LegacyFieldBridge.Delete != "DeleteWorkRequestId" {
+		t.Fatalf("queue Queue delete bridge = %q, want DeleteWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Delete)
+	}
+
+	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeHandwritten)
+	if redis.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("redis RedisCluster workRequest.source = %q, want %q", redis.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(redis.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("redis RedisCluster workRequest.phases = %v", redis.WorkRequest.Phases)
+	}
+	if redis.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("redis RedisCluster workRequest.legacyFieldBridge = %#v, want empty legacy bridge", redis.WorkRequest.LegacyFieldBridge)
+	}
+}
+
 func selectionExplicit(enabled bool, includeKinds ...string) SelectionConfig {
 	return SelectionConfig{
 		Enabled:      boolPtr(enabled),
@@ -1466,7 +1903,6 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 		override.Controller.ExtraRBACMarkers,
 		[]string{
 			`groups="",resources=secrets,verbs=get;list;watch`,
-			`groups="",resources=events,verbs=create;patch`,
 		},
 	) {
 		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
@@ -1491,6 +1927,41 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 	}
 	if override.Webhooks.Strategy != "" {
 		t.Fatalf("database resource webhook strategy = %q, want empty", override.Webhooks.Strategy)
+	}
+}
+
+func assertFunctionsRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyManual,
+		registration:   GenerationStrategyManual,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 2)
+
+	overrides := overridesByKind(service)
+	application, ok := overrides["Application"]
+	if !ok {
+		t.Fatal("functions does not define a generation override for Application")
+	}
+	if len(application.Controller.ExtraRBACMarkers) != 0 {
+		t.Fatalf("functions Application extra RBAC markers = %v, want no non-default markers", application.Controller.ExtraRBACMarkers)
+	}
+	if application.ServiceManager.PackagePath != "functions" {
+		t.Fatalf("functions Application packagePath = %q, want %q", application.ServiceManager.PackagePath, "functions")
+	}
+
+	function, ok := overrides["Function"]
+	if !ok {
+		t.Fatal("functions does not define a generation override for Function")
+	}
+	if !slices.Equal(function.Controller.ExtraRBACMarkers, []string{`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`}) {
+		t.Fatalf("functions Function extra RBAC markers = %v, want secret-side-effect permissions only", function.Controller.ExtraRBACMarkers)
+	}
+	if function.ServiceManager.PackagePath != "functions" {
+		t.Fatalf("functions Function packagePath = %q, want %q", function.ServiceManager.PackagePath, "functions")
 	}
 }
 
@@ -1527,8 +1998,8 @@ func assertNoSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	if !ok {
 		t.Fatal("nosql does not define a generation override for Table")
 	}
-	if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{`groups="",resources=events,verbs=create;patch`}) {
-		t.Fatalf("nosql Table extra RBAC markers = %v, want event recorder permissions only", override.Controller.ExtraRBACMarkers)
+	if len(override.Controller.ExtraRBACMarkers) != 0 {
+		t.Fatalf("nosql Table extra RBAC markers = %v, want no non-default markers", override.Controller.ExtraRBACMarkers)
 	}
 }
 
@@ -1544,10 +2015,9 @@ func assertPSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		override.Controller.ExtraRBACMarkers,
 		[]string{
 			`groups="",resources=secrets,verbs=get;list;watch`,
-			`groups="",resources=events,verbs=create;patch`,
 		},
 	) {
-		t.Fatalf("psql extra RBAC markers = %v, want secret read and event recorder markers", override.Controller.ExtraRBACMarkers)
+		t.Fatalf("psql extra RBAC markers = %v, want secret read markers only", override.Controller.ExtraRBACMarkers)
 	}
 	if len(override.SpecFields) != 2 {
 		t.Fatalf("psql specFields = %#v, want 2 secret-backed overrides", override.SpecFields)
@@ -1735,6 +2205,9 @@ func assertRedisRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		webhook:        GenerationStrategyNone,
 	})
 	assertPrimaryPortOverride(t, service, "RedisCluster", "rediscluster", "redis/rediscluster")
+	if override := overridesByKind(service)["RedisCluster"]; len(override.Controller.ExtraRBACMarkers) != 0 {
+		t.Fatalf("redis RedisCluster extra RBAC markers = %v, want no non-default markers", override.Controller.ExtraRBACMarkers)
+	}
 }
 
 func assertOpensearchRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
@@ -1881,6 +2354,7 @@ func TestCheckedInStreamingPackageInstallRoleNarrowsSecretVerbs(t *testing.T) {
 
 	rendered := string(content)
 	assertCoreResourceVerbs(t, rolePath, map[string][]string{
+		"events":  {"create", "patch"},
 		"secrets": {"create", "delete", "get", "list", "update", "watch"},
 	})
 	if strings.Contains(rendered, "  - secrets\n  verbs:\n  - create\n  - delete\n  - get\n  - list\n  - patch\n  - update\n  - watch\n") {

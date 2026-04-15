@@ -23,6 +23,7 @@ type QueueReconciler struct {
 // +kubebuilder:rbac:groups=queue.oracle.com,resources=queues,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=queue.oracle.com,resources=queues/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=queue.oracle.com,resources=queues/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete
 
 // Reconcile is part of the main Kubernetes reconciliation loop.

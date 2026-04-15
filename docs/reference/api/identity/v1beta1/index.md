@@ -72,14 +72,44 @@ CompartmentStatus defines the observed state of Compartment.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-compartment-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
 | [`conditions`](#kind-compartment-status-status-conditions) | - | `list[object]` | No | - | - |
 | `createdAt` | - | `string (date-time)` | No | - | - |
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-compartment-status-status-async"></a>
+##### Status.status.async
+
+[Back to Compartment status](#kind-compartment-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-compartment-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-compartment-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Compartment status](#kind-compartment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
 
 <a id="kind-compartment-status-status-conditions"></a>
 ##### Status.status.conditions[]

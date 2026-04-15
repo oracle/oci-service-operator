@@ -14,6 +14,11 @@ Manage OCI NoSQL tables from Kubernetes.
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-nosql-bundle:<version>` |
 | Setup Guide | [Open guide](../../../installation.md) |
 
+## Notes
+
+- Current package scope is intentionally limited to Table.
+- Table is the lifecycle-only reference for the shared async tracker; standalone NoSQL WorkRequest resources are not published with this package.
+
 ## Exposed Resources
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |

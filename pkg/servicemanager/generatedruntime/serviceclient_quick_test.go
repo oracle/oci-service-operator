@@ -14,6 +14,7 @@ import (
 	"testing"
 	"testing/quick"
 
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -209,12 +210,7 @@ func (env *streamMutationQuickEnv) createThing(_ context.Context, _ any) (any, e
 func (env *streamMutationQuickEnv) getThing(_ context.Context, _ any) (any, error) {
 	env.getCalls++
 	if env.tc.PreCreateReuse && env.tc.LiveGetMisses {
-		return nil, fakeServiceError{
-			code:       "NotAuthorizedOrNotFound",
-			message:    "thing not found",
-			statusCode: 404,
-			opcID:      "opc-test",
-		}
+		return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 	}
 	return fakeGetThingResponse{
 		Thing: fakeThing{
@@ -492,12 +488,7 @@ func (env *streamStaleTrackedIDQuickEnv) createThing(_ context.Context, _ any) (
 func (env *streamStaleTrackedIDQuickEnv) getThing(_ context.Context, request any) (any, error) {
 	env.getCalls++
 	env.getRequest = *request.(*fakeGetThingRequest)
-	return nil, fakeServiceError{
-		code:       "NotAuthorizedOrNotFound",
-		message:    "thing not found",
-		statusCode: 404,
-		opcID:      "opc-test",
-	}
+	return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 }
 
 func (env *streamStaleTrackedIDQuickEnv) listThing(_ context.Context, request any) (any, error) {

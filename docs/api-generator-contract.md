@@ -25,6 +25,9 @@ Each service record defines:
 | `selection.enabled` | Whether the service participates in the default active generator surface. |
 | `selection.mode` | Default selection contract for the service: `all` or `explicit`. |
 | `selection.includeKinds` | Optional non-empty kind list used only when `selection.mode=explicit`. |
+| `async.strategy` | Optional service-level default for published async behavior: `none`, `lifecycle`, or `workrequest`. |
+| `async.runtime` | Optional service-level default naming whether the active runtime owner is `generatedruntime` or a handwritten service package. |
+| `async.formalClassification` | Optional service-level default that keeps `formal/` classification aligned with the checked-in async posture. |
 | `formalSpec` | Optional controller slug from `formal/controller_manifest.tsv` when one formal row covers the service-level runtime contract. |
 | `observedState.sdkAliases` | Optional observed-state SDK struct aliases keyed by the discovered SDK resource family when status synthesis must read a differently named response model. |
 | `observedState.excludedFieldPaths` | Optional dot-separated observed-state field paths keyed by the discovered SDK resource family when sensitive or unsupported SDK fields must be omitted from generated status surfaces. |
@@ -34,9 +37,12 @@ Each service record defines:
 | `generation.webhooks.strategy` | Webhook ownership seam: `manual` or `none`. |
 | `generation.resources[]` | Per-kind overrides keyed by the current OSOK kind from the v2 contract. |
 | `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
+| `generation.resources[].async.strategy` | Optional per-kind async override when the selected kind's published behavior differs from the service default. |
+| `generation.resources[].async.runtime` | Optional per-kind runtime owner classification, typically `generatedruntime` or `handwritten`. |
+| `generation.resources[].async.formalClassification` | Optional per-kind formal async classification for the matching controller row. |
 | `generation.resources[].controller.strategy` | Optional per-kind controller rollout override: `none`, `manual`, or `generated`. When omitted, the kind inherits the service-level controller strategy. |
 | `generation.resources[].controller.maxConcurrentReconciles` | Optional controller concurrency override for one kind. |
-| `generation.resources[].controller.extraRBACMarkers` | Optional additional kubebuilder RBAC marker payloads for one kind. |
+| `generation.resources[].controller.extraRBACMarkers` | Optional non-default additional kubebuilder RBAC marker payloads for one kind. Generated controllers already include their API resource verbs plus `events create;patch`. |
 | `generation.resources[].serviceManager.strategy` | Optional per-kind service-manager rollout override: `none`, `manual`, or `generated`. When omitted, the kind inherits the service-level service-manager strategy. |
 | `generation.resources[].serviceManager.packagePath` | Optional existing package path relative to `pkg/servicemanager/` when a manual layout must be preserved. |
 | `generation.resources[].serviceManager.needsCredentialClient` | Optional flag that threads credential-client plumbing into a generated service-manager seam when repo-authored secret-backed fields need it. |
@@ -56,6 +62,9 @@ Rules:
 - `selection.mode=all` requires an empty `selection.includeKinds`.
 - `selection.mode=explicit` requires a non-empty `selection.includeKinds` list
   of current OSOK kinds.
+- Enabled selected kinds must resolve to explicit async metadata either from
+  service-level `async.*` defaults or resource-level
+  `generation.resources[].async.*` overrides.
 - Omitted `generation` fields default to controller, service-manager, and
   registration rollout `none`, with webhooks defaulting to `manual`.
 - `generation.resources[].kind` uses the current OSOK kind from the v2
@@ -68,6 +77,55 @@ Rules:
   belong in the mapping file, not in hardcoded generator branches.
 - Legacy overlay files and kind-remap layers are not part of the current
   generator contract.
+
+## Async Strategy Closeout
+
+The checked-in async contract is now explicit on the selected surface:
+
+- Selected kinds with lifecycle async metadata are
+  `containerengine/Cluster`, `containerinstances/ContainerInstance`,
+  `core/Instance`, `database/AutonomousDatabase`,
+  `functions/Application`, `functions/Function`, `identity/Compartment`,
+  `keymanagement/Vault`, `mysql/DbSystem`, `nosql/Table`,
+  `objectstorage/Bucket`, `opensearch/OpensearchCluster`,
+  `psql/DbSystem`, and `streaming/Stream`.
+- Selected kinds with workrequest async metadata are `queue/Queue` and
+  `redis/RedisCluster`.
+- `status.async.current` is the canonical in-flight tracker for the shared
+  async contract and for the reference migrations that already project it in
+  runtime today. Within the embedded shared OSOK status object, the canonical
+  field is `status.async.current.workRequestId`; on the CR it is exposed at
+  `.status.status.async.current.workRequestId`.
+- `status.opcRequestId` is the canonical shared OCI request-correlation field
+  for controller-backed resources. On the CR it is exposed at
+  `.status.status.opcRequestId`.
+- Lifecycle resources may seed that shared breadcrumb from opening create,
+  update, or delete responses carrying `OpcWorkRequestId` without changing
+  `async.strategy` to `workrequest`.
+- Generated service-manager scaffolds that use `generatedruntime` inherit
+  `status.opcRequestId` capture from the shared runtime automatically.
+  Handwritten runtimes must publish the same field explicitly from mutating
+  OCI response headers and surfaced OCI service errors; they must not invent
+  resource-local replacements.
+- `nosql/Table` is the lifecycle-only reference migration. `queue/Queue` and
+  `redis/RedisCluster` are the workrequest-backed reference migrations.
+- `queue/Queue` keeps its legacy work-request ID mirrors only for the current
+  compatibility window; new selected resources should not add Queue-style
+  compatibility fields by default.
+- Remaining lifecycle/manual selected kinds that still expose OCI
+  work-request APIs, including `psql/DbSystem`, are re-audited separately
+  under `oci-service-operator-0kb`; the metadata classification does not, by
+  itself, claim that those handwritten runtimes already project the Table
+  reference semantics or the shared tracker identically.
+- The disabled top-level `service: workrequests` row in
+  `internal/generator/config/services.yaml` is a separate rollout decision.
+  Setting `async.strategy=workrequest` on a published kind does not implicitly
+  enable or publish a standalone `workrequests` API group.
+- Scaffolded per-service `WorkRequest`, `WorkRequestError`, and
+  `WorkRequestLog` rows in `formal/controller_manifest.tsv` remain catalog-only
+  `stage=scaffold` entries until `oci-service-operator-9s2` resolves their
+  prune-or-promote path. They do not authorize `formalSpec`,
+  controller-backed runtime ownership, or package publication by themselves.
 
 ## Output Ownership
 
@@ -137,11 +195,15 @@ and service-manager generation is enabled.
 - Controller package name matches the group directory segment.
 - Default reconciler type name is `<kind>Reconciler`.
 - Default RBAC markers derive from the generated group, plural resource name,
-  status subresource, and finalizers.
+  status subresource, finalizers, and event-recorder access
+  (`events create;patch`).
 - `generation.resources[].controller.extraRBACMarkers` appends additional
-  kubebuilder RBAC marker payloads for one kind.
+  kubebuilder RBAC marker payloads for one kind when non-default access such
+  as secret reads or writes is still needed.
 - `generation.resources[].controller.maxConcurrentReconciles` overrides the
   generated controller option only when explicitly set.
+- New selected generated controllers should inherit event emission through the
+  shared default markers; event-only `extraRBACMarkers` are redundant.
 - A service may remain `manual` at the service level while recording resource
   overrides that later migration work will consume.
 

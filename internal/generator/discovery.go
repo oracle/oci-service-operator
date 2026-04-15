@@ -521,7 +521,11 @@ func attachResourceFormalModels(service ServiceConfig, pkg *PackageModel, catalo
 
 		pkg.Resources[index].Formal = model
 		if pkg.Resources[index].Runtime != nil {
-			pkg.Resources[index].Runtime.Semantics = buildRuntimeSemanticsModel(model, pkg.Resources[index].Runtime)
+			pkg.Resources[index].Runtime.Semantics = buildRuntimeSemanticsModelWithAsync(
+				model,
+				pkg.Resources[index].Runtime,
+				service.AsyncConfigFor(pkg.Resources[index].Kind),
+			)
 		}
 		formalByKind[pkg.Resources[index].Kind] = model
 	}

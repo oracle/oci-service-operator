@@ -125,15 +125,136 @@ func TestCheckedInFunctionsPackageRBACMatchesSecretAndEventRecorderSemantics(t *
 	)
 }
 
+func TestCheckedInGeneratedControllerPackagesGrantDefaultEventRecorderSemantics(t *testing.T) {
+	tests := []struct {
+		name            string
+		controllerPaths []string
+		rolePath        string
+		wantCoreVerbs   map[string][]string
+	}{
+		{
+			name:            "containerengine",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "containerengine", "cluster_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "containerengine", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name:            "containerinstances",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "containerinstances", "containerinstance_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "containerinstances", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name:            "core",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "core", "instance_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "core", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name: "core-network",
+			controllerPaths: []string{
+				filepath.Join(repoRoot(t), "controllers", "core", "drg_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "internetgateway_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "natgateway_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "networksecuritygroup_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "routetable_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "securitylist_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "servicegateway_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "subnet_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "core", "vcn_controller.go"),
+			},
+			rolePath: filepath.Join(repoRoot(t), "packages", "core-network", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name:            "keymanagement",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "keymanagement", "vault_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "keymanagement", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name:            "mysql",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "mysql", "dbsystem_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "mysql", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events":  {"create", "patch"},
+				"secrets": {"create", "delete", "get", "list", "update", "watch"},
+			},
+		},
+		{
+			name:            "objectstorage",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "objectstorage", "bucket_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "objectstorage", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name:            "opensearch",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "opensearch", "opensearchcluster_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "opensearch", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name:            "queue",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "queue", "queue_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "queue", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events":  {"create", "patch"},
+				"secrets": {"create", "delete", "get", "list", "update", "watch"},
+			},
+		},
+		{
+			name:            "streaming",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "streaming", "stream_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "streaming", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events":  {"create", "patch"},
+				"secrets": {"create", "delete", "get", "list", "update", "watch"},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for _, controllerPath := range test.controllerPaths {
+				assertControllerHasEventRecorderRBAC(t, controllerPath)
+			}
+			assertCoreResourceVerbs(t, test.rolePath, test.wantCoreVerbs)
+		})
+	}
+}
+
 func TestCheckedInIdentityPackageRBACUsesActualResourceNames(t *testing.T) {
 	assertFileContains(t, filepath.Join(repoRoot(t), "controllers", "identity", "compartment_controller.go"), []string{
 		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments,verbs=get;list;watch;create;update;patch;delete",
 		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments/status,verbs=get;update;patch",
 		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments/finalizers,verbs=update",
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 	})
 	assertFileDoesNotContain(t, filepath.Join(repoRoot(t), "controllers", "identity", "compartment_controller.go"), []string{
 		"// +kubebuilder:rbac:groups=identity.oracle.com,resources=compartmentes,verbs=get;list;watch;create;update;patch;delete",
 	})
+
+	assertCoreResourceVerbs(
+		t,
+		filepath.Join(repoRoot(t), "packages", "identity", "install", "generated", "rbac", "role.yaml"),
+		map[string][]string{
+			"events": {"create", "patch"},
+		},
+	)
 
 	assertAPIGroupResourceVerbs(
 		t,
@@ -145,6 +266,17 @@ func TestCheckedInIdentityPackageRBACUsesActualResourceNames(t *testing.T) {
 			"compartments/status":     {"get", "patch", "update"},
 		},
 	)
+}
+
+func assertControllerHasEventRecorderRBAC(t *testing.T, controllerPath string) {
+	t.Helper()
+
+	assertFileContains(t, controllerPath, []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+	})
+	assertFileDoesNotContain(t, controllerPath, []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=get;list;watch;create;update;patch;delete`,
+	})
 }
 
 func assertCoreResourceVerbs(t *testing.T, path string, want map[string][]string) {

@@ -81,6 +81,9 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
     generation:
       resources:
         - kind: Widget
@@ -139,6 +142,9 @@ services:
       mode: explicit
       includeKinds:
         - Widget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
     generation:
       resources:
         - kind: Widget
@@ -1126,7 +1132,6 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 				MaxConcurrentReconciles: 3,
 				ExtraRBACMarkers: []string{
 					`groups="",resources=secrets,verbs=get;list;watch`,
-					`groups="",resources=events,verbs=create;patch`,
 				},
 			},
 		},
@@ -1148,8 +1153,8 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems,verbs=get;list;watch;create;update;patch;delete",
 		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems/status,verbs=get;update;patch",
 		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems/finalizers,verbs=update",
-		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 		"builder = builder.WithOptions(controller.Options{MaxConcurrentReconciles: 3})",
 		"dbSystem := &mysqlv1beta1.DbSystem{}",
 		"return r.Reconciler.Reconcile(ctx, req, dbSystem)",
@@ -1588,8 +1593,13 @@ func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testin
 		SDKClientConstructor:     "NewExampleClientWithConfigurationProvider",
 		SDKClientConstructorKind: "provider",
 		Semantics: &RuntimeSemanticsModel{
-			FormalService:     "identity",
-			FormalSlug:        "user",
+			FormalService: "identity",
+			FormalSlug:    "user",
+			Async: &RuntimeAsyncModel{
+				Strategy:             "lifecycle",
+				Runtime:              "generatedruntime",
+				FormalClassification: "lifecycle",
+			},
 			StatusProjection:  "required",
 			SecretSideEffects: "none",
 			FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -1639,13 +1649,17 @@ func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testin
 	if err != nil {
 		t.Fatalf("renderServiceClientFile() error = %v", err)
 	}
+	content = normalizeGoForComparison(t, content)
 
 	assertContains(t, content, []string{
 		"func newThingRuntimeSemantics() *generatedruntime.Semantics {",
 		"return &generatedruntime.Semantics{",
 		"Semantics: newThingRuntimeSemantics(),",
-		`FormalService:     "identity"`,
-		`FormalSlug:        "user"`,
+		`FormalService: "identity"`,
+		`FormalSlug: "user"`,
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "lifecycle"`,
+		`Runtime: "generatedruntime"`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -1840,12 +1854,18 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "bootvolume", "bootvolume_serviceclient.go"),
 	})
 
-	instanceServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go"))
+	instanceServiceClient := normalizeGoForComparison(
+		t,
+		readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go")),
+	)
 	assertContains(t, instanceServiceClient, []string{
 		"func newInstanceRuntimeSemantics() *generatedruntime.Semantics {",
 		"Semantics: newInstanceRuntimeSemantics(),",
-		`FormalService:     "core"`,
-		`FormalSlug:        "instance"`,
+		`FormalService: "core"`,
+		`FormalSlug: "instance"`,
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "lifecycle"`,
+		`Runtime: "generatedruntime"`,
 		`ResponseItemsField: "Items"`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -1853,23 +1873,29 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		`Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}},`,
 	})
 
-	vcnServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"))
+	vcnServiceClient := normalizeGoForComparison(
+		t,
+		readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go")),
+	)
 	assertContains(t, vcnServiceClient, []string{
 		"func newVcnRuntimeSemantics() *generatedruntime.Semantics {",
 		"Semantics: newVcnRuntimeSemantics(),",
-		`FormalService:     "core"`,
-		`FormalSlug:        "vcn"`,
+		`FormalService: "core"`,
+		`FormalSlug: "vcn"`,
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "lifecycle"`,
+		`Runtime: "generatedruntime"`,
+		`FormalClassification: "lifecycle"`,
 		`ProvisioningStates: []string{"PROVISIONING"}`,
-		`UpdatingStates:     []string{"UPDATING"}`,
-		`ActiveStates:       []string{"AVAILABLE"}`,
-		`PendingStates:  []string{"TERMINATED", "TERMINATING"}`,
+		`UpdatingStates: []string{"UPDATING"}`,
+		`ActiveStates: []string{"AVAILABLE"}`,
+		`PendingStates: []string{"TERMINATED", "TERMINATING"}`,
 		`TerminalStates: []string{"NOT_FOUND"}`,
 		`ResponseItemsField: "Items"`,
-		`MatchFields:        []string{"compartmentId", "displayName", "id", "state"}`,
-		`Mutable:       []string{"definedTags", "displayName", "freeformTags"}`,
-		`ForceNew:      []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"}`,
+		`MatchFields: []string{"compartmentId", "displayName", "id", "state"}`,
+		`Mutable: []string{"definedTags", "displayName", "freeformTags"}`,
+		`ForceNew: []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"}`,
 		`ConflictsWith: map[string][]string{"cidrBlock": []string{"cidrBlocks"}, "cidrBlocks": []string{"cidrBlock"}}`,
-		`Helper: "tfresource.WaitForWorkRequestWithErrorHandling"`,
 		`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},`,
@@ -1877,6 +1903,7 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
+	assertNotContains(t, vcnServiceClient, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
 
 	coreFormalServiceClients := []struct {
 		path     string
@@ -1885,10 +1912,10 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		{
 			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "internetgateway", "internetgateway_serviceclient.go"),
 			contains: []string{
-				`FormalSlug:        "internetgateway"`,
-				`UpdatingStates:     []string{}`,
-				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
-				`Mutable:       []string{"definedTags", "displayName", "freeformTags", "isEnabled", "routeTableId"}`,
+				`FormalSlug: "internetgateway"`,
+				`UpdatingStates: []string{}`,
+				`MatchFields: []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable: []string{"definedTags", "displayName", "freeformTags", "isEnabled", "routeTableId"}`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "CreateInternetGatewayDetails", RequestName: "CreateInternetGatewayDetails", Contribution: "body", PreferResourceID: false}},`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true}},`,
 			},
@@ -1896,11 +1923,11 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		{
 			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "natgateway", "natgateway_serviceclient.go"),
 			contains: []string{
-				`FormalSlug:        "natgateway"`,
-				`UpdatingStates:     []string{}`,
-				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
-				`Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId"}`,
-				`ForceNew:      []string{"compartmentId", "publicIpId", "vcnId"}`,
+				`FormalSlug: "natgateway"`,
+				`UpdatingStates: []string{}`,
+				`MatchFields: []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable: []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId"}`,
+				`ForceNew: []string{"compartmentId", "publicIpId", "vcnId"}`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "CreateNatGatewayDetails", RequestName: "CreateNatGatewayDetails", Contribution: "body", PreferResourceID: false}},`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},`,
 			},
@@ -1908,10 +1935,10 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		{
 			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "networksecuritygroup", "networksecuritygroup_serviceclient.go"),
 			contains: []string{
-				`FormalSlug:        "networksecuritygroup"`,
-				`UpdatingStates:     []string{"UPDATING"}`,
-				`MatchFields:        []string{"compartmentId", "displayName", "state", "vcnId"}`,
-				`Mutable:       []string{"definedTags", "displayName", "freeformTags"}`,
+				`FormalSlug: "networksecuritygroup"`,
+				`UpdatingStates: []string{"UPDATING"}`,
+				`MatchFields: []string{"compartmentId", "displayName", "state", "vcnId"}`,
+				`Mutable: []string{"definedTags", "displayName", "freeformTags"}`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},`,
 			},
@@ -1919,10 +1946,10 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		{
 			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "routetable", "routetable_serviceclient.go"),
 			contains: []string{
-				`FormalSlug:        "routetable"`,
-				`UpdatingStates:     []string{"UPDATING"}`,
-				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
-				`Mutable:       []string{"definedTags", "displayName", "freeformTags", "routeRules"}`,
+				`FormalSlug: "routetable"`,
+				`UpdatingStates: []string{"UPDATING"}`,
+				`MatchFields: []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable: []string{"definedTags", "displayName", "freeformTags", "routeRules"}`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "CreateRouteTableDetails", RequestName: "CreateRouteTableDetails", Contribution: "body", PreferResourceID: false}},`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true}},`,
 			},
@@ -1930,10 +1957,10 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		{
 			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "securitylist", "securitylist_serviceclient.go"),
 			contains: []string{
-				`FormalSlug:        "securitylist"`,
-				`UpdatingStates:     []string{"UPDATING"}`,
-				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
-				`Mutable:       []string{"definedTags", "displayName", "egressSecurityRules", "freeformTags", "ingressSecurityRules"}`,
+				`FormalSlug: "securitylist"`,
+				`UpdatingStates: []string{"UPDATING"}`,
+				`MatchFields: []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable: []string{"definedTags", "displayName", "egressSecurityRules", "freeformTags", "ingressSecurityRules"}`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "CreateSecurityListDetails", RequestName: "CreateSecurityListDetails", Contribution: "body", PreferResourceID: false}},`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true}},`,
 			},
@@ -1941,10 +1968,10 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		{
 			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "servicegateway", "servicegateway_serviceclient.go"),
 			contains: []string{
-				`FormalSlug:        "servicegateway"`,
-				`UpdatingStates:     []string{}`,
-				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
-				`Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId", "services"}`,
+				`FormalSlug: "servicegateway"`,
+				`UpdatingStates: []string{}`,
+				`MatchFields: []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable: []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId", "services"}`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceGatewayDetails", RequestName: "CreateServiceGatewayDetails", Contribution: "body", PreferResourceID: false}},`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},`,
 			},
@@ -1952,30 +1979,34 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		{
 			path: filepath.Join(outputRoot, "pkg", "servicemanager", "core", "subnet", "subnet_serviceclient.go"),
 			contains: []string{
-				`FormalSlug:        "subnet"`,
-				`UpdatingStates:     []string{"UPDATING"}`,
-				`MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
-				`Mutable:       []string{"cidrBlock", "definedTags", "dhcpOptionsId", "displayName", "freeformTags", "ipv6CidrBlock", "ipv6CidrBlocks", "routeTableId", "securityListIds"}`,
-				`ForceNew:      []string{"availabilityDomain", "compartmentId", "dnsLabel", "prohibitInternetIngress", "prohibitPublicIpOnVnic", "vcnId"}`,
+				`FormalSlug: "subnet"`,
+				`UpdatingStates: []string{"UPDATING"}`,
+				`MatchFields: []string{"compartmentId", "displayName", "id", "state", "vcnId"}`,
+				`Mutable: []string{"cidrBlock", "definedTags", "dhcpOptionsId", "displayName", "freeformTags", "ipv6CidrBlock", "ipv6CidrBlocks", "routeTableId", "securityListIds"}`,
+				`ForceNew: []string{"availabilityDomain", "compartmentId", "dnsLabel", "prohibitInternetIngress", "prohibitPublicIpOnVnic", "vcnId"}`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "CreateSubnetDetails", RequestName: "CreateSubnetDetails", Contribution: "body", PreferResourceID: false}},`,
 				`Fields: []generatedruntime.RequestField{{FieldName: "SubnetId", RequestName: "subnetId", Contribution: "path", PreferResourceID: true}},`,
 			},
 		},
 	}
 	for _, test := range coreFormalServiceClients {
-		serviceClient := readFile(t, test.path)
+		serviceClient := normalizeGoForComparison(t, readFile(t, test.path))
 		assertContains(t, serviceClient, append([]string{
 			"RuntimeSemantics() *generatedruntime.Semantics {",
 			`Semantics: new`,
-			`FormalService:     "core"`,
+			`FormalService: "core"`,
+			`Async: &generatedruntime.AsyncSemantics{`,
+			`Strategy: "lifecycle"`,
+			`Runtime: "generatedruntime"`,
+			`FormalClassification: "lifecycle"`,
 			`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,
 			`ProvisioningStates: []string{"PROVISIONING"}`,
-			`PendingStates:  []string{"TERMINATED", "TERMINATING"}`,
+			`PendingStates: []string{"TERMINATED", "TERMINATING"}`,
 			`TerminalStates: []string{"NOT_FOUND"}`,
-			`Helper: "tfresource.WaitForWorkRequestWithErrorHandling"`,
 			`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
 			`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 		}, test.contains...))
+		assertNotContains(t, serviceClient, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
 	}
 
 	for _, sample := range []struct {
@@ -2156,23 +2187,24 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 		filepath.Join(outputRoot, "pkg", "servicemanager", "containerengine", "nodepool", "nodepool_serviceclient.go"),
 	})
 
-	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
+	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, serviceClientPath)))
 	assertContains(t, content, []string{
 		"func newClusterRuntimeSemantics() *generatedruntime.Semantics {",
 		"Semantics: newClusterRuntimeSemantics(),",
-		`FormalService:     "containerengine"`,
-		`FormalSlug:        "cluster"`,
+		`FormalService: "containerengine"`,
+		`FormalSlug: "cluster"`,
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "lifecycle"`,
+		`Runtime: "generatedruntime"`,
+		`FormalClassification: "lifecycle"`,
 		`ProvisioningStates: []string{"CREATING", "UPDATING"}`,
-		`UpdatingStates:     []string{"UPDATING"}`,
-		`PendingStates:  []string{"DELETING"}`,
+		`UpdatingStates: []string{"UPDATING"}`,
+		`PendingStates: []string{"DELETING"}`,
 		`TerminalStates: []string{"DELETED"}`,
 		`ResponseItemsField: "Items"`,
-		`MatchFields:        []string{"compartmentId", "lifecycleState", "name"}`,
-		`Mutable:       []string{"definedTags", "freeformTags", "imagePolicyConfig.isPolicyEnabled", "imagePolicyConfig.keyDetails.kmsKeyId", "kubernetesVersion", "name", "options.admissionControllerOptions.isPodSecurityPolicyEnabled", "options.persistentVolumeConfig.definedTags", "options.persistentVolumeConfig.freeformTags", "options.serviceLbConfig.definedTags", "options.serviceLbConfig.freeformTags", "type"}`,
-		`ForceNew:      []string{"clusterPodNetworkOptions.cniType", "clusterPodNetworkOptions.jsonData", "compartmentId", "endpointConfig.isPublicIpEnabled", "endpointConfig.nsgIds", "endpointConfig.subnetId", "kmsKeyId", "options.addOns.isKubernetesDashboardEnabled", "options.addOns.isTillerEnabled", "options.kubernetesNetworkConfig.podsCidr", "options.kubernetesNetworkConfig.servicesCidr", "options.serviceLbSubnetIds", "vcnId"}`,
-		`EntityType: "cluster", Action: "CREATED"`,
-		`EntityType: "cluster", Action: "UPDATED"`,
-		`EntityType: "cluster", Action: "DELETED"`,
+		`MatchFields: []string{"compartmentId", "lifecycleState", "name"}`,
+		`Mutable: []string{"definedTags", "freeformTags", "imagePolicyConfig.isPolicyEnabled", "imagePolicyConfig.keyDetails.kmsKeyId", "kubernetesVersion", "name", "options.admissionControllerOptions.isPodSecurityPolicyEnabled", "options.persistentVolumeConfig.definedTags", "options.persistentVolumeConfig.freeformTags", "options.serviceLbConfig.definedTags", "options.serviceLbConfig.freeformTags", "type"}`,
+		`ForceNew: []string{"clusterPodNetworkOptions.cniType", "clusterPodNetworkOptions.jsonData", "compartmentId", "endpointConfig.isPublicIpEnabled", "endpointConfig.nsgIds", "endpointConfig.subnetId", "kmsKeyId", "options.addOns.isKubernetesDashboardEnabled", "options.addOns.isTillerEnabled", "options.kubernetesNetworkConfig.podsCidr", "options.kubernetesNetworkConfig.servicesCidr", "options.serviceLbSubnetIds", "vcnId"}`,
 		`NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} }`,
 		`return sdkClient.ListClusters(ctx, *request.(*containerenginesdk.ListClustersRequest))`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},`,
@@ -2181,6 +2213,7 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
+	assertNotContains(t, content, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
 
 	clusterSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"))
 	assertContains(t, clusterSample, []string{
@@ -2219,6 +2252,145 @@ func TestCheckedInQueueSampleUsesPracticalOverride(t *testing.T) {
 		"timeoutInSeconds: 20",
 	})
 	assertNotContains(t, sampleContent, []string{"spec: {}"})
+}
+
+func TestCheckedInQueueWorkRequestAsyncContractRendersHandwrittenMetadata(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	queueService := serviceConfigsByName(t, cfg, "queue")["queue"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	result, err := New().Generate(context.Background(), cfg, []ServiceConfig{*queueService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "queue", "queue", "queue_serviceclient.go")))
+	assertContains(t, content, []string{
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "workrequest"`,
+		`Runtime: "handwritten"`,
+		`WorkRequest: &generatedruntime.WorkRequestSemantics{`,
+		`Source: "service-sdk"`,
+		`Phases: []string{"create", "update", "delete"}`,
+		`Create: "CreateWorkRequestId"`,
+		`Update: "UpdateWorkRequestId"`,
+		`Delete: "DeleteWorkRequestId"`,
+		`tfresource.WaitForWorkRequestWithErrorHandling`,
+	})
+}
+
+func TestCheckedInRedisWorkRequestAsyncContractRendersRepoAuthoredHooks(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	redisService := serviceConfigsByName(t, cfg, "redis")["redis"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	result, err := New().Generate(context.Background(), cfg, []ServiceConfig{*redisService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "redis", "rediscluster", "rediscluster_serviceclient.go")))
+	assertContains(t, content, []string{
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "workrequest"`,
+		`Runtime: "handwritten"`,
+		`WorkRequest: &generatedruntime.WorkRequestSemantics{`,
+		`Source: "service-sdk"`,
+		`Phases: []string{"create", "update", "delete"}`,
+		`{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "CREATED"}`,
+		`{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "UPDATED"}`,
+		`{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "DELETED"}`,
+	})
+	assertNotContains(t, content, []string{`EntityType: "template"`})
+}
+
+func TestCheckedInLifecycleAsyncContractsStripStaleWorkRequestHelpers(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	targetsByService := make(map[string][]selectedKindTarget)
+	for _, target := range defaultActiveLifecycleGeneratedRuntimeFormalTargets(cfg) {
+		targetsByService[target.Service] = append(targetsByService[target.Service], target)
+	}
+	if len(targetsByService) == 0 {
+		t.Fatal("defaultActiveLifecycleGeneratedRuntimeFormalTargets() returned no targets")
+	}
+
+	serviceNames := make([]string, 0, len(targetsByService))
+	for serviceName := range targetsByService {
+		serviceNames = append(serviceNames, serviceName)
+	}
+	slices.Sort(serviceNames)
+
+	for _, serviceName := range serviceNames {
+		targets := targetsByService[serviceName]
+		t.Run(serviceName, func(t *testing.T) {
+			services, err := cfg.SelectServices(serviceName, false)
+			if err != nil {
+				t.Fatalf("SelectServices(%q) error = %v", serviceName, err)
+			}
+			if len(services) != 1 {
+				t.Fatalf("SelectServices(%q) returned %d services, want 1", serviceName, len(services))
+			}
+
+			service := services[0]
+			outputRoot := t.TempDir()
+			seedSamplesKustomization(t, outputRoot)
+
+			result, err := New().Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+				OutputRoot: outputRoot,
+			})
+			if err != nil {
+				t.Fatalf("Generate() error = %v", err)
+			}
+			if len(result.Generated) != 1 {
+				t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+			}
+
+			for _, target := range targets {
+				stem := fileStem(target.Kind)
+				packagePath := service.ServiceManagerPackagePathFor(target.Kind, stem)
+				content := normalizeGoForComparison(
+					t,
+					readFile(
+						t,
+						filepath.Join(
+							outputRoot,
+							"pkg",
+							"servicemanager",
+							filepath.FromSlash(packagePath),
+							stem+"_serviceclient.go",
+						),
+					),
+				)
+				assertContains(t, content, []string{
+					`Async: &generatedruntime.AsyncSemantics{`,
+					`Strategy: "lifecycle"`,
+					`Runtime: "generatedruntime"`,
+					`FormalClassification: "lifecycle"`,
+				})
+				assertNotContains(t, content, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
+			}
+		})
+	}
 }
 
 func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testing.T) {
@@ -2268,12 +2440,13 @@ func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testin
 		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "user", "user_serviceclient.go"),
 	})
 
-	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
+	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, serviceClientPath)))
 	assertContains(t, content, []string{
 		"func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {",
 		"Semantics: newCompartmentRuntimeSemantics(),",
-		`FormalService:     "identity"`,
-		`FormalSlug:        "compartment"`,
+		`FormalService: "identity"`,
+		`FormalSlug: "compartment"`,
+		`Async: &generatedruntime.AsyncSemantics{`,
 		`ResponseItemsField: "Items"`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`Strategy: "read-after-write"`,
@@ -2302,10 +2475,11 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientChecks: []string{
 				"func newAutonomousDatabaseRuntimeSemantics() *generatedruntime.Semantics {",
 				"newAutonomousDatabaseRuntimeSemantics()",
-				`FormalService:     "database"`,
-				`FormalSlug:        "databaseautonomousdatabase"`,
+				`FormalService: "database"`,
+				`FormalSlug: "databaseautonomousdatabase"`,
+				`Async: &generatedruntime.AsyncSemantics{`,
 				`SecretSideEffects: "none"`,
-				`StatusProjection:  "required"`,
+				`StatusProjection: "required"`,
 				`CredentialClient: manager.CredentialClient,`,
 			},
 		},
@@ -2316,15 +2490,17 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
 			controllerPath:    "controllers/mysql/dbsystem_controller.go",
 			controllerContains: []string{
-				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
+				`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
 			},
 			serviceClientChecks: []string{
 				"func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {",
 				"newDbSystemRuntimeSemantics()",
-				`FormalService:     "mysql"`,
-				`FormalSlug:        "dbsystem"`,
+				`FormalService: "mysql"`,
+				`FormalSlug: "dbsystem"`,
+				`Async: &generatedruntime.AsyncSemantics{`,
 				`SecretSideEffects: "none"`,
-				`StatusProjection:  "required"`,
+				`StatusProjection: "required"`,
 				`CredentialClient: manager.CredentialClient,`,
 			},
 		},
@@ -2335,15 +2511,17 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/streaming/stream/stream_serviceclient.go",
 			controllerPath:    "controllers/streaming/stream_controller.go",
 			controllerContains: []string{
+				`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
 			},
 			serviceClientChecks: []string{
 				"func newStreamRuntimeSemantics() *generatedruntime.Semantics {",
 				"newStreamRuntimeSemantics()",
-				`FormalService:     "streaming"`,
-				`FormalSlug:        "stream"`,
+				`FormalService: "streaming"`,
+				`FormalSlug: "stream"`,
+				`Async: &generatedruntime.AsyncSemantics{`,
 				`SecretSideEffects: "ready-only"`,
-				`StatusProjection:  "required"`,
+				`StatusProjection: "required"`,
 			},
 		},
 	}
@@ -3178,7 +3356,7 @@ func assertPromotedRuntimeArtifactsCase(t *testing.T, cfg *Config, service *Serv
 		want.serviceClientPath,
 		want.controllerPath,
 	})
-	assertFileContains(t, filepath.Join(outputRoot, want.serviceClientPath), want.serviceClientChecks)
+	assertContains(t, normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, want.serviceClientPath))), want.serviceClientChecks)
 	assertFileContains(t, filepath.Join(outputRoot, want.controllerPath), want.controllerContains)
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, want.controllerPath), want.controllerExcludes)
 }
