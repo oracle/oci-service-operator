@@ -228,6 +228,39 @@ func ResolveAsyncPhase(status *shared.OSOKStatus, explicit shared.OSOKAsyncPhase
 	return ""
 }
 
+func NewLifecycleAsyncOperation(status *shared.OSOKStatus, lifecycleState string, message string, fallbackPhase shared.OSOKAsyncPhase) *shared.OSOKAsyncOperation {
+	state := strings.ToUpper(strings.TrimSpace(lifecycleState))
+	switch {
+	case state == "":
+		return nil
+	case strings.Contains(state, "FAIL"),
+		strings.Contains(state, "ERROR"),
+		strings.Contains(state, "INOPERABLE"):
+		return newLifecycleAsyncOperation(status, state, message, fallbackPhase, shared.OSOKAsyncClassFailed)
+	case strings.Contains(state, "NEEDS_ATTENTION"):
+		return newLifecycleAsyncOperation(status, state, message, fallbackPhase, shared.OSOKAsyncClassAttention)
+	case strings.Contains(state, "DELETED"),
+		strings.Contains(state, "TERMINATED"):
+		return newLifecycleAsyncOperation(status, state, message, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassSucceeded)
+	case strings.Contains(state, "DELET"),
+		strings.Contains(state, "TERMINAT"):
+		return newLifecycleAsyncOperation(status, state, message, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending)
+	case strings.Contains(state, "UPDAT"),
+		strings.Contains(state, "MODIFY"),
+		strings.Contains(state, "PATCH"):
+		return newLifecycleAsyncOperation(status, state, message, shared.OSOKAsyncPhaseUpdate, shared.OSOKAsyncClassPending)
+	case strings.Contains(state, "CREAT"),
+		strings.Contains(state, "PROVISION"),
+		strings.Contains(state, "PENDING"),
+		strings.Contains(state, "IN_PROGRESS"),
+		strings.Contains(state, "ACCEPT"),
+		strings.Contains(state, "START"):
+		return newLifecycleAsyncOperation(status, state, message, shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncClassPending)
+	default:
+		return nil
+	}
+}
+
 func conditionForAsyncPhase(phase shared.OSOKAsyncPhase) shared.OSOKConditionType {
 	switch phase {
 	case shared.OSOKAsyncPhaseUpdate:
@@ -285,4 +318,18 @@ func asyncTokenIn(token string, candidates []string) bool {
 
 func normalizeAsyncToken(value string) string {
 	return strings.ToUpper(strings.TrimSpace(value))
+}
+
+func newLifecycleAsyncOperation(status *shared.OSOKStatus, lifecycleState string, message string, phase shared.OSOKAsyncPhase, class shared.OSOKAsyncNormalizedClass) *shared.OSOKAsyncOperation {
+	resolvedPhase := ResolveAsyncPhase(status, phase)
+	if resolvedPhase == "" {
+		return nil
+	}
+	return &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           resolvedPhase,
+		RawStatus:       lifecycleState,
+		NormalizedClass: class,
+		Message:         strings.TrimSpace(message),
+	}
 }

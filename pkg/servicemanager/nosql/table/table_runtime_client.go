@@ -90,13 +90,13 @@ func (c *explicitTableServiceClient) CreateOrUpdate(
 	state := normalizeLifecycle(existing.lifecycleState)
 	switch state {
 	case string(nosqlsdk.TableLifecycleStateDeleted):
-		return c.markCondition(resource, shared.Terminating, defaultConditionMessage(shared.Terminating), true), nil
+		return c.finishWithLifecycle(resource, existing, shared.OSOKAsyncPhaseDelete), nil
 	case string(nosqlsdk.TableLifecycleStateFailed):
-		return c.markCondition(resource, shared.Failed, lifecycleMessage(existing.lifecycleDetails, existing.name, shared.Failed), false), nil
+		return c.finishWithLifecycle(resource, existing, currentTableAsyncPhase(resource, shared.OSOKAsyncPhaseCreate)), nil
 	case string(nosqlsdk.TableLifecycleStateCreating),
 		string(nosqlsdk.TableLifecycleStateUpdating),
 		string(nosqlsdk.TableLifecycleStateDeleting):
-		return c.finishWithLifecycle(resource, existing), nil
+		return c.finishWithLifecycle(resource, existing, tableLifecyclePhase(state)), nil
 	}
 
 	if err := c.validateForceNewFields(resource, existing); err != nil {
@@ -111,7 +111,7 @@ func (c *explicitTableServiceClient) CreateOrUpdate(
 		refreshed, err := c.readTable(ctx, resource, existing.id)
 		if err != nil {
 			if errors.Is(err, errTableNotFound) {
-				return c.markCondition(resource, shared.Updating, "OCI table compartment move request accepted", true), nil
+				return c.markPendingLifecycleOperation(resource, shared.OSOKAsyncPhaseUpdate, "OCI table compartment move request accepted", ""), nil
 			}
 			return c.fail(resource, fmt.Errorf("confirm Table compartment change: %w", err))
 		}
@@ -121,13 +121,13 @@ func (c *explicitTableServiceClient) CreateOrUpdate(
 
 		existing = refreshed
 		if normalizeLifecycle(existing.lifecycleState) != string(nosqlsdk.TableLifecycleStateActive) || existing.compartmentID != resource.Spec.CompartmentId {
-			return c.finishWithLifecycle(resource, existing), nil
+			return c.finishWithLifecycle(resource, existing, shared.OSOKAsyncPhaseUpdate), nil
 		}
 	}
 
 	updateDetails, updateNeeded := buildUpdateDetails(resource, existing)
 	if !updateNeeded {
-		return c.finishWithLifecycle(resource, existing), nil
+		return c.finishWithLifecycle(resource, existing, shared.OSOKAsyncPhaseUpdate), nil
 	}
 
 	if err := c.updateTable(ctx, existing.id, updateDetails); err != nil {
@@ -137,14 +137,14 @@ func (c *explicitTableServiceClient) CreateOrUpdate(
 	refreshed, err := c.readTable(ctx, resource, existing.id)
 	if err != nil {
 		if errors.Is(err, errTableNotFound) {
-			return c.markCondition(resource, shared.Updating, "OCI table update request accepted", true), nil
+			return c.markPendingLifecycleOperation(resource, shared.OSOKAsyncPhaseUpdate, "OCI table update request accepted", ""), nil
 		}
 		return c.fail(resource, fmt.Errorf("confirm Table update: %w", err))
 	}
 	if err := c.projectPayload(resource, refreshed.payload); err != nil {
 		return c.fail(resource, err)
 	}
-	return c.finishWithLifecycle(resource, refreshed), nil
+	return c.finishWithLifecycle(resource, refreshed, shared.OSOKAsyncPhaseUpdate), nil
 }
 
 func (c *explicitTableServiceClient) Delete(ctx context.Context, resource *nosqlv1beta1.Table) (bool, error) {
@@ -170,7 +170,7 @@ func (c *explicitTableServiceClient) Delete(ctx context.Context, resource *nosql
 		c.markDeleted(resource, "OCI table deleted")
 		return true, nil
 	case string(nosqlsdk.TableLifecycleStateDeleting):
-		c.markCondition(resource, shared.Terminating, defaultConditionMessage(shared.Terminating), true)
+		c.finishWithLifecycle(resource, target, shared.OSOKAsyncPhaseDelete)
 		return false, nil
 	}
 
@@ -202,7 +202,7 @@ func (c *explicitTableServiceClient) Delete(ctx context.Context, resource *nosql
 		return true, nil
 	}
 
-	c.markCondition(resource, shared.Terminating, defaultConditionMessage(shared.Terminating), true)
+	c.markPendingLifecycleOperation(resource, shared.OSOKAsyncPhaseDelete, "OCI table delete request accepted", refreshed.lifecycleState)
 	return false, nil
 }
 
@@ -265,14 +265,14 @@ func (c *explicitTableServiceClient) createTable(
 	refreshed, err := c.readTable(ctx, resource, "")
 	if err != nil {
 		if errors.Is(err, errTableNotFound) {
-			return c.markCondition(resource, shared.Provisioning, "OCI table create request accepted", true), nil
+			return c.markPendingLifecycleOperation(resource, shared.OSOKAsyncPhaseCreate, "OCI table create request accepted", ""), nil
 		}
 		return c.fail(resource, fmt.Errorf("confirm Table create: %w", err))
 	}
 	if err := c.projectPayload(resource, refreshed.payload); err != nil {
 		return c.fail(resource, err)
 	}
-	return c.finishWithLifecycle(resource, refreshed), nil
+	return c.finishWithLifecycle(resource, refreshed, shared.OSOKAsyncPhaseCreate), nil
 }
 
 func (c *explicitTableServiceClient) resolveExistingTable(
@@ -577,10 +577,13 @@ func (c *explicitTableServiceClient) projectPayload(resource *nosqlv1beta1.Table
 	return nil
 }
 
-func (c *explicitTableServiceClient) finishWithLifecycle(resource *nosqlv1beta1.Table, snapshot *tableSnapshot) servicemanager.OSOKResponse {
-	condition, shouldRequeue := classifyLifecycle(snapshot.lifecycleState)
-	message := lifecycleMessage(snapshot.lifecycleDetails, snapshot.name, condition)
-	return c.markCondition(resource, condition, message, shouldRequeue)
+func (c *explicitTableServiceClient) finishWithLifecycle(resource *nosqlv1beta1.Table, snapshot *tableSnapshot, fallbackPhase shared.OSOKAsyncPhase) servicemanager.OSOKResponse {
+	message := lifecycleMessage(snapshot.lifecycleDetails, snapshot.name, "OCI table is active")
+	current := servicemanager.NewLifecycleAsyncOperation(&resource.Status.OsokStatus, snapshot.lifecycleState, message, fallbackPhase)
+	if current != nil {
+		return c.markAsyncOperation(resource, current)
+	}
+	return c.markCondition(resource, shared.Active, message, false)
 }
 
 func (c *explicitTableServiceClient) markCondition(
@@ -600,6 +603,9 @@ func (c *explicitTableServiceClient) markCondition(
 	status.UpdatedAt = &now
 	status.Message = message
 	status.Reason = string(condition)
+	if condition == shared.Active {
+		servicemanager.ClearAsyncOperation(status)
+	}
 	conditionStatus := v1.ConditionTrue
 	if condition == shared.Failed {
 		conditionStatus = v1.ConditionFalse
@@ -613,6 +619,36 @@ func (c *explicitTableServiceClient) markCondition(
 	}
 }
 
+func (c *explicitTableServiceClient) markAsyncOperation(resource *nosqlv1beta1.Table, current *shared.OSOKAsyncOperation) servicemanager.OSOKResponse {
+	status := &resource.Status.OsokStatus
+	now := metav1.Now()
+	if resource.Status.Id != "" {
+		status.Ocid = shared.OCID(resource.Status.Id)
+	}
+	if status.Ocid != "" && status.CreatedAt == nil {
+		status.CreatedAt = &now
+	}
+	if current.UpdatedAt == nil {
+		current.UpdatedAt = &now
+	}
+	projection := servicemanager.ApplyAsyncOperation(status, current, c.log)
+	return servicemanager.OSOKResponse{
+		IsSuccessful:    projection.Condition != shared.Failed,
+		ShouldRequeue:   projection.ShouldRequeue,
+		RequeueDuration: tableRequeueDuration,
+	}
+}
+
+func (c *explicitTableServiceClient) markPendingLifecycleOperation(resource *nosqlv1beta1.Table, phase shared.OSOKAsyncPhase, message string, rawStatus string) servicemanager.OSOKResponse {
+	return c.markAsyncOperation(resource, &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           phase,
+		RawStatus:       normalizeLifecycle(rawStatus),
+		NormalizedClass: shared.OSOKAsyncClassPending,
+		Message:         strings.TrimSpace(message),
+	})
+}
+
 func (c *explicitTableServiceClient) markDeleted(resource *nosqlv1beta1.Table, message string) {
 	now := metav1.Now()
 	status := &resource.Status.OsokStatus
@@ -620,6 +656,7 @@ func (c *explicitTableServiceClient) markDeleted(resource *nosqlv1beta1.Table, m
 	status.UpdatedAt = &now
 	status.Message = message
 	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, c.log)
 }
 
@@ -633,6 +670,14 @@ func (c *explicitTableServiceClient) fail(
 		status.UpdatedAt = &now
 		status.Message = err.Error()
 		status.Reason = string(shared.Failed)
+		if status.Async.Current != nil {
+			current := *status.Async.Current
+			current.NormalizedClass = shared.OSOKAsyncClassFailed
+			current.Message = err.Error()
+			current.UpdatedAt = &now
+			_ = servicemanager.ApplyAsyncOperation(status, &current, c.log)
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
+		}
 		*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.log)
 	}
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
@@ -648,48 +693,40 @@ func currentTableID(resource *nosqlv1beta1.Table) string {
 	return resource.Status.Id
 }
 
-func classifyLifecycle(state string) (shared.OSOKConditionType, bool) {
-	switch normalizeLifecycle(state) {
-	case string(nosqlsdk.TableLifecycleStateFailed):
-		return shared.Failed, false
-	case string(nosqlsdk.TableLifecycleStateDeleting):
-		return shared.Terminating, true
-	case string(nosqlsdk.TableLifecycleStateUpdating):
-		return shared.Updating, true
-	case string(nosqlsdk.TableLifecycleStateCreating):
-		return shared.Provisioning, true
-	default:
-		return shared.Active, false
-	}
-}
-
 func normalizeLifecycle(state string) string {
 	return strings.ToUpper(strings.TrimSpace(state))
 }
 
-func lifecycleMessage(detail string, name string, condition shared.OSOKConditionType) string {
+func lifecycleMessage(detail string, name string, fallback string) string {
 	if strings.TrimSpace(detail) != "" {
 		return detail
 	}
 	if strings.TrimSpace(name) != "" {
 		return name
 	}
-	return defaultConditionMessage(condition)
+	return fallback
 }
 
-func defaultConditionMessage(condition shared.OSOKConditionType) string {
-	switch condition {
-	case shared.Provisioning:
-		return "OCI table provisioning is in progress"
-	case shared.Updating:
-		return "OCI table update is in progress"
-	case shared.Terminating:
-		return "OCI table delete is in progress"
-	case shared.Failed:
-		return "OCI table reconcile failed"
+func tableLifecyclePhase(state string) shared.OSOKAsyncPhase {
+	switch state {
+	case string(nosqlsdk.TableLifecycleStateUpdating):
+		return shared.OSOKAsyncPhaseUpdate
+	case string(nosqlsdk.TableLifecycleStateDeleting),
+		string(nosqlsdk.TableLifecycleStateDeleted):
+		return shared.OSOKAsyncPhaseDelete
 	default:
-		return "OCI table is active"
+		return shared.OSOKAsyncPhaseCreate
 	}
+}
+
+func currentTableAsyncPhase(resource *nosqlv1beta1.Table, fallback shared.OSOKAsyncPhase) shared.OSOKAsyncPhase {
+	if resource == nil {
+		return fallback
+	}
+	if resource.Status.OsokStatus.Async.Current != nil && resource.Status.OsokStatus.Async.Current.Phase != "" {
+		return resource.Status.OsokStatus.Async.Current.Phase
+	}
+	return fallback
 }
 
 func specTableLimits(spec nosqlv1beta1.TableLimits) *nosqlsdk.TableLimits {

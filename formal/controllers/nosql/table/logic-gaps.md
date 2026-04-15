@@ -22,9 +22,10 @@ metadata and regenerated diagrams.
   reuses only a single exact-name match, rereads that candidate through
   `GetTable`, and fails on ambiguous duplicate matches instead of guessing.
 - The runtime projects OCI lifecycle into OSOK status, mapping `CREATING`,
-  `UPDATING`, and `DELETING` into `Provisioning`, `Updating`, and
-  `Terminating` with one-minute requeues, while `ACTIVE` settles success and
-  `FAILED` becomes terminal without requeue.
+  `UPDATING`, `DELETING`, `FAILED`, and `DELETED` through the shared
+  lifecycle-backed `status.async.current` tracker; the centralized async
+  condition mapper then drives `Provisioning`, `Updating`, `Terminating`, and
+  terminal failure with the existing one-minute requeue policy.
 - Delete keeps the finalizer until `GetTable` or `ListTables` confirms the
   table is deleted or no longer exists.
 

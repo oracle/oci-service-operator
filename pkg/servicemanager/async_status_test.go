@@ -262,3 +262,75 @@ func TestResolveAsyncPhaseFallsBackToPersistedCurrent(t *testing.T) {
 		t.Fatalf("ResolveAsyncPhase() = %q, want %q", got, shared.OSOKAsyncPhaseDelete)
 	}
 }
+
+func TestNewLifecycleAsyncOperationPendingCreate(t *testing.T) {
+	t.Parallel()
+
+	current := NewLifecycleAsyncOperation(&shared.OSOKStatus{}, "creating", "table creating", shared.OSOKAsyncPhaseCreate)
+	if current == nil {
+		t.Fatalf("NewLifecycleAsyncOperation() = nil, want lifecycle tracker")
+	}
+	if current.Source != shared.OSOKAsyncSourceLifecycle {
+		t.Fatalf("current.source = %q, want %q", current.Source, shared.OSOKAsyncSourceLifecycle)
+	}
+	if current.Phase != shared.OSOKAsyncPhaseCreate {
+		t.Fatalf("current.phase = %q, want %q", current.Phase, shared.OSOKAsyncPhaseCreate)
+	}
+	if current.RawStatus != "CREATING" {
+		t.Fatalf("current.rawStatus = %q, want %q", current.RawStatus, "CREATING")
+	}
+	if current.NormalizedClass != shared.OSOKAsyncClassPending {
+		t.Fatalf("current.normalizedClass = %q, want %q", current.NormalizedClass, shared.OSOKAsyncClassPending)
+	}
+	if current.Message != "table creating" {
+		t.Fatalf("current.message = %q, want %q", current.Message, "table creating")
+	}
+}
+
+func TestNewLifecycleAsyncOperationFailureFallsBackToPersistedPhase(t *testing.T) {
+	t.Parallel()
+
+	status := &shared.OSOKStatus{
+		Async: shared.OSOKAsyncTracker{
+			Current: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceLifecycle,
+				Phase:           shared.OSOKAsyncPhaseUpdate,
+				NormalizedClass: shared.OSOKAsyncClassPending,
+			},
+		},
+	}
+
+	current := NewLifecycleAsyncOperation(status, "failed", "table failed", "")
+	if current == nil {
+		t.Fatalf("NewLifecycleAsyncOperation() = nil, want lifecycle tracker")
+	}
+	if current.Phase != shared.OSOKAsyncPhaseUpdate {
+		t.Fatalf("current.phase = %q, want %q", current.Phase, shared.OSOKAsyncPhaseUpdate)
+	}
+	if current.NormalizedClass != shared.OSOKAsyncClassFailed {
+		t.Fatalf("current.normalizedClass = %q, want %q", current.NormalizedClass, shared.OSOKAsyncClassFailed)
+	}
+}
+
+func TestNewLifecycleAsyncOperationDeletedUsesDeleteSuccess(t *testing.T) {
+	t.Parallel()
+
+	current := NewLifecycleAsyncOperation(&shared.OSOKStatus{}, "deleted", "", "")
+	if current == nil {
+		t.Fatalf("NewLifecycleAsyncOperation() = nil, want lifecycle tracker")
+	}
+	if current.Phase != shared.OSOKAsyncPhaseDelete {
+		t.Fatalf("current.phase = %q, want %q", current.Phase, shared.OSOKAsyncPhaseDelete)
+	}
+	if current.NormalizedClass != shared.OSOKAsyncClassSucceeded {
+		t.Fatalf("current.normalizedClass = %q, want %q", current.NormalizedClass, shared.OSOKAsyncClassSucceeded)
+	}
+}
+
+func TestNewLifecycleAsyncOperationReturnsNilForActive(t *testing.T) {
+	t.Parallel()
+
+	if current := NewLifecycleAsyncOperation(&shared.OSOKStatus{}, "ACTIVE", "", shared.OSOKAsyncPhaseCreate); current != nil {
+		t.Fatalf("NewLifecycleAsyncOperation() = %#v, want nil", current)
+	}
+}
