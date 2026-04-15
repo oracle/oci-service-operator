@@ -388,7 +388,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			APIErrorCoverageFamilyGeneratedRuntimeFollowUp,
 			deleteNotFoundGeneratedRuntime,
 			retryableConflictFollowUp,
-			"Create follow-up uses WaitForWorkRequestWithErrorHandling even though sibling Opensearch kinds remain explicit strategy:none exemptions.",
+			"Generated client keeps standard read-after-write create/update follow-up and confirm-delete while sibling Opensearch kinds remain explicit strategy:none exemptions.",
 		),
 		resourceKey("psql", "DbSystem"): reviewedRegistration(
 			"psql",
@@ -418,7 +418,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			APIErrorCoverageFamilyLegacyAdapter,
 			deleteNotFoundReadback,
 			"delete 409 conflicts reread live RedisCluster state before deciding retry or success",
-			"Delete wraps the generated client with a live-state delete guard while generated metadata still advertises work-request follow-up on create.",
+			"Create/update keep the generated read-after-write baseline, while delete wraps the generated client with a live-state delete guard before and after conflicts.",
 		),
 		resourceKey("streaming", "Stream"): reviewedRegistration(
 			"streaming",

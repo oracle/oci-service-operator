@@ -62,6 +62,16 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")
 }
 
+func TestReviewedAPIErrorCoverageRegistryAsyncDeviationsRemainExplicit(t *testing.T) {
+	t.Parallel()
+
+	assertReviewedDeviation(t, "opensearch/OpensearchCluster", "read-after-write")
+	assertReviewedDeviation(t, "psql/DbSystem", "readback adapter")
+	assertReviewedDeviation(t, "queue/Queue", "work-request")
+	assertReviewedDeviation(t, "redis/RedisCluster", "delete guard")
+	assertReviewedDeviation(t, "streaming/Stream", "WaitForUpdatedState")
+}
+
 func TestReviewedAPIErrorCoverageRegistrySplitCoreDeleteSemantics(t *testing.T) {
 	t.Parallel()
 
