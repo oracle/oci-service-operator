@@ -21,6 +21,12 @@ The schema is OSOK-owned. Public status never exposes provider SDK enum types;
 raw provider values are preserved only as plain strings in `rawStatus` and
 `rawOperationType`.
 
+Each published CR embeds `shared.OSOKStatus` under the resource-specific
+status field named `status`, so the shared tracker is exposed on the CR at
+`.status.status.async.current.workRequestId`. Within the embedded shared
+status object itself, `status.async.current.workRequestId` is the canonical
+field name.
+
 ## Shared Mapping Rules
 
 The controller-owned mapper in `pkg/servicemanager` is the only supported path
@@ -44,6 +50,19 @@ phase wins over any previously persisted `status.async.current.phase`.
 Persisted phase is only a fallback when the current observation cannot
 determine phase directly.
 
+## Header Capture Rule
+
+When an opening OCI create, update, or delete response carries
+`OpcWorkRequestId`, the runtime should seed
+`status.async.current.workRequestId` immediately, before later response
+projection or lifecycle rereads drop the header.
+
+That breadcrumb capture does not, by itself, promote a resource to
+`workrequest`. Lifecycle resources may still continue on read-after-write,
+lifecycle-state requeue, or confirm-delete follow-up behavior. Headerless
+in-flight follow-up observations should preserve the already seeded
+`workRequestId` until terminal completion or explicit tracker clear.
+
 ## Compatibility Window
 
 `shared.OSOKStatus.Async.Current` is canonical immediately.
@@ -55,7 +74,20 @@ During the staged migration window:
 - `queue/Queue` keeps `createWorkRequestId`, `updateWorkRequestId`, and
   `deleteWorkRequestId` for resume parity, but it must mirror the same
   in-flight operation into the shared tracker.
+- Lifecycle or read-after-write resources may project the shared breadcrumb
+  from an opening response header without adding new per-resource
+  compatibility fields or switching `async.strategy` to `workrequest`.
 - New async migrations must write the shared tracker first; they must not add
   new per-resource work-request ID or raw-status fields to published status.
 - Retirement of legacy resource-local async fields is owned by the follow-on
   resource children after live parity is proven.
+
+## Onboarding Defaults
+
+- Generated controllers inherit event-recorder RBAC
+  (`events create;patch`) through the shared default controller markers.
+- `generation.resources[].controller.extraRBACMarkers` should record only
+  non-default access such as secret reads or writes, not event-recorder
+  boilerplate.
+- Shared controller logs and Kubernetes Events remain secondary summaries; the
+  shared async tracker is the canonical persistence surface.

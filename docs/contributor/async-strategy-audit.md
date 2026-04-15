@@ -6,7 +6,9 @@ controller-backed surface in `internal/generator/config/services.yaml`.
 Current classifications used below:
 
 - `lifecycle`: read-after-write, lifecycle-state requeue, or confirm-delete
-  without explicit `GetWorkRequest` polling.
+  without explicit `GetWorkRequest` polling. Lifecycle resources may still
+  capture an opening-response `OpcWorkRequestId` into the shared tracker
+  without changing classification.
 - `workrequest`: persisted work-request IDs plus explicit
   `GetWorkRequest` resume or polling.
 - `none`: no selected kind currently proves this classification.
@@ -38,7 +40,9 @@ No selected kind currently proves a `none` classification.
 
 - `queue/Queue` is the workrequest reference. The live runtime persists and
   resumes OCI work requests, recovers the created Queue OCID from work-request
-  payloads, and keeps delete confirmation explicit.
+  payloads, keeps delete confirmation explicit, and retains its legacy
+  per-resource work-request ID fields only as a compatibility window around
+  the shared tracker.
 - `nosql/Table` is the lifecycle-only reference. Its handwritten runtime
   already owns read-after-write bind, lifecycle classification, and delete
   confirmation without any work-request dependency.
@@ -48,6 +52,19 @@ No selected kind currently proves a `none` classification.
   surface to justify adapter work in the epic.
 - Every other selected kind remains inventory coverage for this epic unless a
   correctness bug proves it needs promotion out of lifecycle handling.
+
+## Onboarding Defaults
+
+- New selected resources should write the shared tracker first. When an
+  opening OCI response carries `OpcWorkRequestId`, lifecycle resources may
+  still project that breadcrumb into the shared tracker without becoming
+  `workrequest` resources.
+- Generated selected controllers inherit event-recorder RBAC by default, so
+  event-only `extraRBACMarkers` are redundant rollout noise rather than an
+  onboarding prerequisite.
+- New selected resources should not add Queue-style per-resource work-request
+  ID fields unless a later compatibility requirement explicitly proves they are
+  needed.
 
 ## Drift Inventory
 

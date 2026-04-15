@@ -1157,7 +1157,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "database", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
+	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "database", "functions", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
 
 	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
@@ -1181,6 +1181,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
 	assertDatabaseRuntimeRolloutMetadata(t, services["database"])
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
+	assertFunctionsRuntimeRolloutMetadata(t, services["functions"])
 	assertMySQLRuntimeRolloutMetadata(t, services["mysql"])
 	assertNoSQLRuntimeRolloutMetadata(t, services["nosql"])
 	assertPSQLRuntimeRolloutMetadata(t, services["psql"])
@@ -1902,7 +1903,6 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 		override.Controller.ExtraRBACMarkers,
 		[]string{
 			`groups="",resources=secrets,verbs=get;list;watch`,
-			`groups="",resources=events,verbs=create;patch`,
 		},
 	) {
 		t.Fatalf("database extra RBAC markers = %v", override.Controller.ExtraRBACMarkers)
@@ -1927,6 +1927,41 @@ func assertDatabaseRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 	}
 	if override.Webhooks.Strategy != "" {
 		t.Fatalf("database resource webhook strategy = %q, want empty", override.Webhooks.Strategy)
+	}
+}
+
+func assertFunctionsRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyManual,
+		registration:   GenerationStrategyManual,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 2)
+
+	overrides := overridesByKind(service)
+	application, ok := overrides["Application"]
+	if !ok {
+		t.Fatal("functions does not define a generation override for Application")
+	}
+	if len(application.Controller.ExtraRBACMarkers) != 0 {
+		t.Fatalf("functions Application extra RBAC markers = %v, want no non-default markers", application.Controller.ExtraRBACMarkers)
+	}
+	if application.ServiceManager.PackagePath != "functions" {
+		t.Fatalf("functions Application packagePath = %q, want %q", application.ServiceManager.PackagePath, "functions")
+	}
+
+	function, ok := overrides["Function"]
+	if !ok {
+		t.Fatal("functions does not define a generation override for Function")
+	}
+	if !slices.Equal(function.Controller.ExtraRBACMarkers, []string{`groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete`}) {
+		t.Fatalf("functions Function extra RBAC markers = %v, want secret-side-effect permissions only", function.Controller.ExtraRBACMarkers)
+	}
+	if function.ServiceManager.PackagePath != "functions" {
+		t.Fatalf("functions Function packagePath = %q, want %q", function.ServiceManager.PackagePath, "functions")
 	}
 }
 
@@ -1963,8 +1998,8 @@ func assertNoSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	if !ok {
 		t.Fatal("nosql does not define a generation override for Table")
 	}
-	if !slices.Equal(override.Controller.ExtraRBACMarkers, []string{`groups="",resources=events,verbs=create;patch`}) {
-		t.Fatalf("nosql Table extra RBAC markers = %v, want event recorder permissions only", override.Controller.ExtraRBACMarkers)
+	if len(override.Controller.ExtraRBACMarkers) != 0 {
+		t.Fatalf("nosql Table extra RBAC markers = %v, want no non-default markers", override.Controller.ExtraRBACMarkers)
 	}
 }
 
@@ -1980,10 +2015,9 @@ func assertPSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		override.Controller.ExtraRBACMarkers,
 		[]string{
 			`groups="",resources=secrets,verbs=get;list;watch`,
-			`groups="",resources=events,verbs=create;patch`,
 		},
 	) {
-		t.Fatalf("psql extra RBAC markers = %v, want secret read and event recorder markers", override.Controller.ExtraRBACMarkers)
+		t.Fatalf("psql extra RBAC markers = %v, want secret read markers only", override.Controller.ExtraRBACMarkers)
 	}
 	if len(override.SpecFields) != 2 {
 		t.Fatalf("psql specFields = %#v, want 2 secret-backed overrides", override.SpecFields)
@@ -2171,6 +2205,9 @@ func assertRedisRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		webhook:        GenerationStrategyNone,
 	})
 	assertPrimaryPortOverride(t, service, "RedisCluster", "rediscluster", "redis/rediscluster")
+	if override := overridesByKind(service)["RedisCluster"]; len(override.Controller.ExtraRBACMarkers) != 0 {
+		t.Fatalf("redis RedisCluster extra RBAC markers = %v, want no non-default markers", override.Controller.ExtraRBACMarkers)
+	}
 }
 
 func assertOpensearchRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
@@ -2317,6 +2354,7 @@ func TestCheckedInStreamingPackageInstallRoleNarrowsSecretVerbs(t *testing.T) {
 
 	rendered := string(content)
 	assertCoreResourceVerbs(t, rolePath, map[string][]string{
+		"events":  {"create", "patch"},
 		"secrets": {"create", "delete", "get", "list", "update", "watch"},
 	})
 	if strings.Contains(rendered, "  - secrets\n  verbs:\n  - create\n  - delete\n  - get\n  - list\n  - patch\n  - update\n  - watch\n") {

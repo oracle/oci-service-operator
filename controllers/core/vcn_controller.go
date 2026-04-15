@@ -23,6 +23,7 @@ type VcnReconciler struct {
 // +kubebuilder:rbac:groups=core.oracle.com,resources=vcns,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core.oracle.com,resources=vcns/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core.oracle.com,resources=vcns/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *VcnReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

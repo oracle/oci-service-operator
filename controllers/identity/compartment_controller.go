@@ -23,6 +23,7 @@ type CompartmentReconciler struct {
 // +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=identity.oracle.com,resources=compartments/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *CompartmentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

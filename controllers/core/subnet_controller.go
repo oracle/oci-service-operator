@@ -23,6 +23,7 @@ type SubnetReconciler struct {
 // +kubebuilder:rbac:groups=core.oracle.com,resources=subnets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core.oracle.com,resources=subnets/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core.oracle.com,resources=subnets/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *SubnetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {

@@ -1132,7 +1132,6 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 				MaxConcurrentReconciles: 3,
 				ExtraRBACMarkers: []string{
 					`groups="",resources=secrets,verbs=get;list;watch`,
-					`groups="",resources=events,verbs=create;patch`,
 				},
 			},
 		},
@@ -1154,8 +1153,8 @@ func TestGenerateRendersControllerOutputs(t *testing.T) {
 		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems,verbs=get;list;watch;create;update;patch;delete",
 		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems/status,verbs=get;update;patch",
 		"// +kubebuilder:rbac:groups=mysql.oracle.com,resources=dbsystems/finalizers,verbs=update",
-		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+		`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 		"builder = builder.WithOptions(controller.Options{MaxConcurrentReconciles: 3})",
 		"dbSystem := &mysqlv1beta1.DbSystem{}",
 		"return r.Reconciler.Reconcile(ctx, req, dbSystem)",
@@ -2491,7 +2490,8 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go",
 			controllerPath:    "controllers/mysql/dbsystem_controller.go",
 			controllerContains: []string{
-				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
+				`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
 			},
 			serviceClientChecks: []string{
 				"func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {",
@@ -2511,6 +2511,7 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 			serviceClientPath: "pkg/servicemanager/streaming/stream/stream_serviceclient.go",
 			controllerPath:    "controllers/streaming/stream_controller.go",
 			controllerContains: []string{
+				`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
 			},
 			serviceClientChecks: []string{

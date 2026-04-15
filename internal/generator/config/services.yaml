@@ -578,7 +578,6 @@ services:
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
-              - groups="",resources=events,verbs=create;patch
           specFields:
             - name: AdminPassword
               type: shared.PasswordSource
@@ -665,9 +664,6 @@ services:
             strategy: lifecycle
             runtime: handwritten
             formalClassification: lifecycle
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
           serviceManager:
             packagePath: functions
         - kind: Function
@@ -678,7 +674,6 @@ services:
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-              - groups="",resources=events,verbs=create;patch
           serviceManager:
             packagePath: functions
 
@@ -1047,9 +1042,6 @@ services:
             strategy: lifecycle
             runtime: handwritten
             formalClassification: lifecycle
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
     observedState:
       sdkAliases:
         WorkRequestLog:
@@ -1202,7 +1194,6 @@ services:
           controller:
             extraRBACMarkers:
               - groups="",resources=secrets,verbs=get;list;watch
-              - groups="",resources=events,verbs=create;patch
           specFields:
             - name: AdminUsername
               type: shared.UsernameSource
@@ -1378,9 +1369,6 @@ services:
                 - create
                 - update
                 - delete
-          controller:
-            extraRBACMarkers:
-              - groups="",resources=events,verbs=create;patch
           serviceManager:
             packagePath: redis/rediscluster
 

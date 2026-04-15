@@ -42,7 +42,7 @@ Each service record defines:
 | `generation.resources[].async.formalClassification` | Optional per-kind formal async classification for the matching controller row. |
 | `generation.resources[].controller.strategy` | Optional per-kind controller rollout override: `none`, `manual`, or `generated`. When omitted, the kind inherits the service-level controller strategy. |
 | `generation.resources[].controller.maxConcurrentReconciles` | Optional controller concurrency override for one kind. |
-| `generation.resources[].controller.extraRBACMarkers` | Optional additional kubebuilder RBAC marker payloads for one kind. |
+| `generation.resources[].controller.extraRBACMarkers` | Optional non-default additional kubebuilder RBAC marker payloads for one kind. Generated controllers already include their API resource verbs plus `events create;patch`. |
 | `generation.resources[].serviceManager.strategy` | Optional per-kind service-manager rollout override: `none`, `manual`, or `generated`. When omitted, the kind inherits the service-level service-manager strategy. |
 | `generation.resources[].serviceManager.packagePath` | Optional existing package path relative to `pkg/servicemanager/` when a manual layout must be preserved. |
 | `generation.resources[].serviceManager.needsCredentialClient` | Optional flag that threads credential-client plumbing into a generated service-manager seam when repo-authored secret-backed fields need it. |
@@ -93,9 +93,17 @@ The checked-in async contract is now explicit on the selected surface:
   `redis/RedisCluster`.
 - `status.async.current` is the canonical in-flight tracker for the shared
   async contract and for the reference migrations that already project it in
-  runtime today.
+  runtime today. Within the embedded shared OSOK status object, the canonical
+  field is `status.async.current.workRequestId`; on the CR it is exposed at
+  `.status.status.async.current.workRequestId`.
+- Lifecycle resources may seed that shared breadcrumb from opening create,
+  update, or delete responses carrying `OpcWorkRequestId` without changing
+  `async.strategy` to `workrequest`.
 - `nosql/Table` is the lifecycle-only reference migration. `queue/Queue` and
   `redis/RedisCluster` are the workrequest-backed reference migrations.
+- `queue/Queue` keeps its legacy work-request ID mirrors only for the current
+  compatibility window; new selected resources should not add Queue-style
+  compatibility fields by default.
 - Remaining lifecycle/manual selected kinds that still expose OCI
   work-request APIs, including `psql/DbSystem`, are re-audited separately
   under `oci-service-operator-0kb`; the metadata classification does not, by
@@ -179,11 +187,15 @@ and service-manager generation is enabled.
 - Controller package name matches the group directory segment.
 - Default reconciler type name is `<kind>Reconciler`.
 - Default RBAC markers derive from the generated group, plural resource name,
-  status subresource, and finalizers.
+  status subresource, finalizers, and event-recorder access
+  (`events create;patch`).
 - `generation.resources[].controller.extraRBACMarkers` appends additional
-  kubebuilder RBAC marker payloads for one kind.
+  kubebuilder RBAC marker payloads for one kind when non-default access such
+  as secret reads or writes is still needed.
 - `generation.resources[].controller.maxConcurrentReconciles` overrides the
   generated controller option only when explicitly set.
+- New selected generated controllers should inherit event emission through the
+  shared default markers; event-only `extraRBACMarkers` are redundant.
 - A service may remain `manual` at the service level while recording resource
   overrides that later migration work will consume.
 
