@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "containerengine",
+  "kind": "NodePool",
+  "formalSlug": "nodepool",
+  "providerResource": "oci_containerengine_node_pool",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/containerengine_node_pool",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/containerengine_node_pool",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/containerengine/nodepool/page.html",
+  "bodySHA256": "e540c33f55a8c91c5ab9da59c2cc07cc4097e1a499baf1eaa180651df75eeecc",
+  "bodyBytes": 13228,
+  "fixtureBodyPath": "7.22.0/containerengine/nodepool/page.html"
+}

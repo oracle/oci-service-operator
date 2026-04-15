@@ -2221,7 +2221,8 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 
 	nodePoolContent := readFile(t, filepath.Join(outputRoot, nodePoolServiceClientPath))
 	assertContains(t, nodePoolContent, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newNodePoolRuntimeSemantics(),",
 		`FormalService:     "containerengine"`,
 		`FormalSlug:        "nodepool"`,
 		`ProvisioningStates: []string{"CREATING"}`,

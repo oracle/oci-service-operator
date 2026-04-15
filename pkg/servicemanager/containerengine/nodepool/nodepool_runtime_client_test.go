@@ -732,54 +732,7 @@ func newNodePoolRuntimeTestManager(cfg generatedruntime.Config[*containerenginev
 }
 
 func testNodePoolRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "clusterId", "name", "lifecycleState"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable: []string{
-				"definedTags",
-				"freeformTags",
-				"initialNodeLabels",
-				"kubernetesVersion",
-				"name",
-				"nodeConfigDetails",
-				"nodeEvictionNodePoolSettings",
-				"nodeMetadata",
-				"nodePoolCyclingDetails",
-				"nodeShape",
-				"nodeShapeConfig",
-				"nodeSourceDetails",
-				"sshPublicKey",
-			},
-			ForceNew: []string{
-				"clusterId",
-				"compartmentId",
-				"nodeImageName",
-			},
-			ConflictsWith: map[string][]string{},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-		},
-	}
+	return newNodePoolRuntimeSemantics()
 }
 
 func newNodePoolTestResource() *containerenginev1beta1.NodePool {

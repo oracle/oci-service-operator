@@ -30,59 +30,63 @@ type defaultNodePoolServiceClient struct {
 	generatedruntime.ServiceClient[*containerenginev1beta1.NodePool]
 }
 
+func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "containerengine",
+		FormalSlug:        "nodepool",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"clusterId", "compartmentId", "lifecycleState", "name"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags", "initialNodeLabels", "kubernetesVersion", "name", "nodeConfigDetails", "nodeEvictionNodePoolSettings", "nodeMetadata", "nodePoolCyclingDetails", "nodeShape", "nodeShapeConfig", "nodeSourceDetails", "quantityPerSubnet", "sshPublicKey", "subnetIds"},
+			ForceNew:      []string{"clusterId", "compartmentId", "nodeImageName"},
+			ConflictsWith: map[string][]string{"nodeConfigDetails": []string{"quantityPerSubnet", "subnetIds"}, "quantityPerSubnet": []string{"nodeConfigDetails"}, "subnetIds": []string{"nodeConfigDetails"}},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ NodePoolServiceClient = defaultNodePoolServiceClient{}
 
 var newNodePoolServiceClient = func(manager *NodePoolServiceManager) NodePoolServiceClient {
 	sdkClient, err := containerenginesdk.NewContainerEngineClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*containerenginev1beta1.NodePool]{
-		Kind:    "NodePool",
-		SDKName: "NodePool",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "containerengine",
-			FormalSlug:        "nodepool",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"CREATING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"DELETING"},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"clusterId", "compartmentId", "lifecycleState", "name"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "freeformTags", "initialNodeLabels", "kubernetesVersion", "name", "nodeConfigDetails", "nodeEvictionNodePoolSettings", "nodeMetadata", "nodePoolCyclingDetails", "nodeShape", "nodeShapeConfig", "nodeSourceDetails", "quantityPerSubnet", "sshPublicKey", "subnetIds"},
-				ForceNew:      []string{"clusterId", "compartmentId", "nodeImageName"},
-				ConflictsWith: map[string][]string{"nodeConfigDetails": []string{"quantityPerSubnet", "subnetIds"}, "quantityPerSubnet": []string{"nodeConfigDetails"}, "subnetIds": []string{"nodeConfigDetails"}},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "NodePool",
+		SDKName:   "NodePool",
+		Log:       manager.Log,
+		Semantics: newNodePoolRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &containerenginesdk.CreateNodePoolRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
