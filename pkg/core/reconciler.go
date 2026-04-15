@@ -7,11 +7,13 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,7 +70,13 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 		if controllerutil.ContainsFinalizer(obj, OSOKFinalizerName) {
 			r.Log.InfoLogWithFixedMessage(ctx, "The Deletion time is non zero. Deleting the resource")
 
+			oldObj := obj.DeepCopyObject().(client.Object)
 			delSuc, err := r.DeleteResource(ctx, obj, req)
+			if err != nil || !delSuc {
+				if patchErr := r.patchDeleteStatusIfChanged(ctx, oldObj, obj, req); patchErr != nil {
+					err = errors.Join(err, patchErr)
+				}
+			}
 			if err != nil {
 				r.Log.ErrorLogWithFixedMessage(ctx, err, "Requeuing object due to error during delete of CR")
 				r.Metrics.AddCRDeleteFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
@@ -205,6 +213,23 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 	}
 	// TODO Emit Delete Success metrics end
 	return delSucc, nil
+}
+
+func (r *BaseReconciler) patchDeleteStatusIfChanged(ctx context.Context, oldObj, obj client.Object, req ctrl.Request) error {
+	if equality.Semantic.DeepEqual(oldObj, obj) {
+		return nil
+	}
+
+	if err := r.Status().Patch(ctx, obj, client.MergeFrom(oldObj)); err != nil {
+		r.Log.ErrorLogWithFixedMessage(ctx, err, "Error updating the status of the Object during delete")
+		r.Metrics.AddCRDeleteFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
+			"Error updating the status of the CR during delete", req.Name, req.Namespace)
+		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
+			fmt.Sprintf("Failed to persist delete status: %s", err.Error()))
+		return err
+	}
+
+	return nil
 }
 
 func (r *BaseReconciler) addFinalizer(ctx context.Context, obj client.Object, finalizers ...string) error {

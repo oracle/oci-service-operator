@@ -4,6 +4,7 @@ EXTENDS ControllerLifecycleSpec
 (*
 Shared invariants captured from pkg/core/reconciler.go:
 - keep the OSOK finalizer until delete has been confirmed
+- delete-side status mutations persist before delete requeue or delete error returns
 - successful active reconciles do not requeue
 - provisioning, updating, and terminating states do requeue
 - RequestedAt must be present on projected status
@@ -14,6 +15,9 @@ VARIABLES
   deletionRequested,
   deleteConfirmed,
   finalizerPresent,
+  deleteStatusMutated,
+  deleteStatusPersisted,
+  deleteReturnedError,
   lifecycleCondition,
   shouldRequeue,
   requestedAtStamped,
@@ -21,6 +25,9 @@ VARIABLES
 
 FinalizerRetention ==
   deletionRequested /\ ~deleteConfirmed => finalizerPresent
+
+DeleteStatusPersistenceBeforeRetry ==
+  deletionRequested /\ finalizerPresent /\ ~deleteConfirmed /\ deleteStatusMutated /\ (shouldRequeue \/ deleteReturnedError) => deleteStatusPersisted
 
 SuccessNoImmediateRequeue ==
   lifecycleCondition = "Active" => ~shouldRequeue
@@ -36,6 +43,7 @@ SecretWritesNeedExplicitPolicy ==
 
 ContractInvariant ==
   /\ FinalizerRetention
+  /\ DeleteStatusPersistenceBeforeRetry
   /\ SuccessNoImmediateRequeue
   /\ RetryableConditionsRequeue
   /\ StatusProjectionStampsRequestedAt
