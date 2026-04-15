@@ -78,7 +78,7 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 				}
 			}
 			if err != nil {
-				r.Log.ErrorLogWithFixedMessage(ctx, err, "Requeuing object due to error during delete of CR")
+				r.Log.ErrorLogWithFixedMessage(ctx, err, r.messageWithAsyncBreadcrumb(obj, "Requeuing object due to error during delete of CR"))
 				r.Metrics.AddCRDeleteFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
 					"Requeuing object due to error during delete of CR", req.Name, req.Namespace)
 				return util.RequeueWithError(ctx, err, defaultRequeueTime, r.Log)
@@ -127,44 +127,70 @@ func (r *BaseReconciler) GetStatus(obj client.Object) (*shared.OSOKStatus, error
 	return status, nil
 }
 
+func (r *BaseReconciler) messageWithAsyncBreadcrumb(obj client.Object, message string) string {
+	if obj == nil {
+		return message
+	}
+
+	status, err := r.OSOKServiceManager.GetCrdStatus(obj)
+	if err != nil || status == nil || status.Async.Current == nil {
+		return message
+	}
+
+	breadcrumb := make([]string, 0, 2)
+	if phase := strings.TrimSpace(string(status.Async.Current.Phase)); phase != "" {
+		breadcrumb = append(breadcrumb, "async phase="+phase)
+	}
+	if workRequestID := strings.TrimSpace(status.Async.Current.WorkRequestID); workRequestID != "" {
+		breadcrumb = append(breadcrumb, "workRequestId="+workRequestID)
+	}
+	if len(breadcrumb) == 0 {
+		return message
+	}
+
+	return fmt.Sprintf("%s (%s)", message, strings.Join(breadcrumb, ", "))
+}
+
 func (r *BaseReconciler) ReconcileResource(ctx context.Context, obj client.Object, req ctrl.Request) (ctrl.Result, error) {
 	ctx = metrics.AddFixedLogMapEntries(ctx, req.Name, req.Namespace)
 
 	oldObj := obj.DeepCopyObject().(client.Object)
 	OSOKResponse, err := r.OSOKServiceManager.CreateOrUpdate(ctx, obj, req)
 	if err != nil {
-		r.Log.ErrorLogWithFixedMessage(ctx, err, "Create Or Update failed in the Service Manager with error")
+		r.Log.ErrorLogWithFixedMessage(ctx, err, r.messageWithAsyncBreadcrumb(obj, "Create Or Update failed in the Service Manager with error"))
 		r.Metrics.AddReconcileFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
 			"Create Or Update failed in the Service Manager", req.Name, req.Namespace)
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
-			fmt.Sprintf("Failed to create or update resource: %s", err.Error()))
+			r.messageWithAsyncBreadcrumb(obj, fmt.Sprintf("Failed to create or update resource: %s", err.Error())))
 	}
 
 	if err := r.Status().Patch(ctx, obj, client.MergeFrom(oldObj)); err != nil {
-		r.Log.ErrorLogWithFixedMessage(ctx, err, "Error updating the status of the Object")
+		r.Log.ErrorLogWithFixedMessage(ctx, err, r.messageWithAsyncBreadcrumb(obj, "Error updating the status of the Object"))
 		r.Metrics.AddReconcileFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
 			"Error updating the status of the CR", req.Name, req.Namespace)
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
-			fmt.Sprintf("Failed to create or update resource: %s", err.Error()))
+			r.messageWithAsyncBreadcrumb(obj, fmt.Sprintf("Failed to create or update resource: %s", err.Error())))
 		return util.RequeueWithError(ctx, err, defaultRequeueTime, r.Log)
 	}
 	r.Metrics.AddCRCountMetrics(ctx, r.Metrics.ServiceName, "Created an Custom resource "+r.Metrics.ServiceName,
 		req.Name, req.Namespace)
 
 	if OSOKResponse.IsSuccessful {
-		r.Log.InfoLogWithFixedMessage(ctx, "Reconcile Completed")
+		r.Log.InfoLogWithFixedMessage(ctx, r.messageWithAsyncBreadcrumb(obj, "Reconcile Completed"))
 		r.Metrics.AddReconcileSuccessMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
 			"Create or Update of resource succeeded", req.Name, req.Namespace)
-		r.Recorder.Event(obj, v1.EventTypeNormal, "Success", "Create or Update of resource succeeded")
+		r.Recorder.Event(obj, v1.EventTypeNormal, "Success",
+			r.messageWithAsyncBreadcrumb(obj, "Create or Update of resource succeeded"))
 		if OSOKResponse.ShouldRequeue {
 			return util.RequeueWithoutError(ctx, OSOKResponse.RequeueDuration, r.Log)
 		}
 		return util.DoNotRequeue()
 	} else {
-		r.Log.InfoLogWithFixedMessage(ctx, "Reconcile Failed")
+		r.Log.InfoLogWithFixedMessage(ctx, r.messageWithAsyncBreadcrumb(obj, "Reconcile Failed"))
 		r.Metrics.AddReconcileFaultMetrics(ctx, obj.GetObjectKind().GroupVersionKind().Kind,
 			"Failed to create or update resource", req.Name, req.Namespace)
-		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed", "Failed to create or update resource")
+		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
+			r.messageWithAsyncBreadcrumb(obj, "Failed to create or update resource"))
 		if OSOKResponse.ShouldRequeue {
 			return ctrl.Result{Requeue: true}, err
 		}
@@ -187,29 +213,30 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 			return true, nil
 		}
 		if classification.IsConflict() {
-			r.Log.InfoLogWithFixedMessage(ctx, "Delete is blocked and will be retried",
+			r.Log.InfoLogWithFixedMessage(ctx, r.messageWithAsyncBreadcrumb(obj, "Delete is blocked and will be retried"),
 				"oci_http_status_code", classification.HTTPStatusCodeString(),
 				"oci_error_code", classification.ErrorCodeString(),
 				"normalized_error_type", classification.NormalizedTypeString())
 			r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonBlocked,
-				fmt.Sprintf("Delete blocked and will be retried: %s", err.Error()))
+				r.messageWithAsyncBreadcrumb(obj, fmt.Sprintf("Delete blocked and will be retried: %s", err.Error())))
 			return false, nil
 		}
-		r.Log.ErrorLogWithFixedMessage(ctx, err, "Delete failed in the Service Manager with error", "name", req.Name,
+		r.Log.ErrorLogWithFixedMessage(ctx, err, r.messageWithAsyncBreadcrumb(obj, "Delete failed in the Service Manager with error"), "name", req.Name,
 			"namespace", req.Namespace, "namespacedName", req.String(),
 			"oci_http_status_code", classification.HTTPStatusCodeString(),
 			"oci_error_code", classification.ErrorCodeString(),
 			"normalized_error_type", classification.NormalizedTypeString())
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
-			fmt.Sprintf("Failed to delete resource: %s", err.Error()))
+			r.messageWithAsyncBreadcrumb(obj, fmt.Sprintf("Failed to delete resource: %s", err.Error())))
 		// TODO Emit Delete Fault metrics end
 		return false, err
 	}
 	if delSucc {
 		r.Log.InfoLogWithFixedMessage(ctx, "Delete Successful")
 	} else {
-		r.Log.InfoLogWithFixedMessage(ctx, "Delete is in progress and will be retried")
-		r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonInProgress, "Delete is in progress")
+		r.Log.InfoLogWithFixedMessage(ctx, r.messageWithAsyncBreadcrumb(obj, "Delete is in progress and will be retried"))
+		r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonInProgress,
+			r.messageWithAsyncBreadcrumb(obj, "Delete is in progress"))
 	}
 	// TODO Emit Delete Success metrics end
 	return delSucc, nil

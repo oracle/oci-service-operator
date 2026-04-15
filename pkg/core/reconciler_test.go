@@ -57,6 +57,34 @@ func TestReconcileDeleteErrorDoesNotEmitFinalizerRemovalFailure(t *testing.T) {
 	assertNoEventContains(t, events, "Failed to remove the finalizer")
 }
 
+func TestReconcileDeleteErrorLogsRequeueBreadcrumbWhenPresent(t *testing.T) {
+	t.Parallel()
+
+	sink := &collectingLogSink{}
+	reconciler, recorder, kubeClient := newDeleteReconcilerWithLogger(t, deleteBehavior{
+		err:    stderrors.New("delete failed"),
+		status: statusWithAsyncCurrent(shared.OSOKAsyncPhaseDelete, "wr-delete-reconcile"),
+	}, sink)
+
+	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
+	if err != nil {
+		t.Fatalf("Reconcile() error = %v, want nil", err)
+	}
+	if result.RequeueAfter != defaultRequeueTime {
+		t.Fatalf("Reconcile() requeueAfter = %v, want %v", result.RequeueAfter, defaultRequeueTime)
+	}
+
+	stored := kubeClient.StoredConfigMap()
+	if !HasFinalizer(stored, OSOKFinalizerName) {
+		t.Fatal("finalizer removed after delete error, want retained")
+	}
+
+	events := drainEvents(recorder)
+	assertContainsEvent(t, events, "Failed to delete resource: delete failed (async phase=delete, workRequestId=wr-delete-reconcile)")
+	assertAnyMessageContains(t, sink.errors, "Requeuing object due to error during delete of CR (async phase=delete, workRequestId=wr-delete-reconcile)")
+	assertNoEventContains(t, events, "Failed to remove the finalizer")
+}
+
 func TestReconcileConfirmedDeleteRemovesFinalizer(t *testing.T) {
 	t.Parallel()
 
@@ -409,6 +437,201 @@ func TestDeleteResourceLogsOCIClassificationOnDeleteNotFoundSuccess(t *testing.T
 	assertAnyMessageContains(t, sink.infos, "normalized_error_type: errorutil.NotFoundOciError")
 }
 
+func TestReconcileResourceSuccessBreadcrumbs(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		status         *shared.OSOKStatus
+		wantEvent      string
+		wantInfo       string
+		wantUnexpected string
+	}{
+		{
+			name:           "phase only",
+			status:         statusWithAsyncCurrent(shared.OSOKAsyncPhaseCreate, ""),
+			wantEvent:      "Create or Update of resource succeeded (async phase=create)",
+			wantInfo:       "Reconcile Completed (async phase=create)",
+			wantUnexpected: "workRequestId=",
+		},
+		{
+			name:      "no breadcrumb",
+			wantEvent: "Create or Update of resource succeeded",
+			wantInfo:  "Reconcile Completed",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			sink := &collectingLogSink{}
+			reconciler, recorder, kubeClient := newCreateOrUpdateReconcilerWithLogger(t, createOrUpdateBehavior{
+				response: servicemanager.OSOKResponse{IsSuccessful: true},
+				status:   tt.status,
+			}, sink)
+
+			result, err := reconciler.ReconcileResource(context.Background(), kubeClient.StoredConfigMap(), testRequestNamed("test-reconcile"))
+			if err != nil {
+				t.Fatalf("ReconcileResource() error = %v, want nil", err)
+			}
+			if result != (ctrl.Result{}) {
+				t.Fatalf("ReconcileResource() result = %#v, want empty result", result)
+			}
+
+			events := drainEvents(recorder)
+			assertContainsEvent(t, events, tt.wantEvent)
+			assertAnyMessageContains(t, sink.infos, tt.wantInfo)
+			if tt.wantUnexpected != "" {
+				assertNoEventContains(t, events, tt.wantUnexpected)
+				assertNoMessageContains(t, sink.infos, tt.wantUnexpected)
+				assertNoMessageContains(t, sink.errors, tt.wantUnexpected)
+			}
+		})
+	}
+}
+
+func TestReconcileResourceFailureIncludesAsyncBreadcrumbWhenPresent(t *testing.T) {
+	t.Parallel()
+
+	sink := &collectingLogSink{}
+	reconciler, recorder, kubeClient := newCreateOrUpdateReconcilerWithLogger(t, createOrUpdateBehavior{
+		err:    stderrors.New("apply failed"),
+		status: statusWithAsyncCurrent(shared.OSOKAsyncPhaseUpdate, "wr-update-1"),
+	}, sink)
+
+	result, err := reconciler.ReconcileResource(context.Background(), kubeClient.StoredConfigMap(), testRequestNamed("test-reconcile"))
+	if err != nil {
+		t.Fatalf("ReconcileResource() error = %v, want nil", err)
+	}
+	if result != (ctrl.Result{}) {
+		t.Fatalf("ReconcileResource() result = %#v, want empty result", result)
+	}
+
+	events := drainEvents(recorder)
+	assertContainsEvent(t, events, "Failed to create or update resource: apply failed (async phase=update, workRequestId=wr-update-1)")
+	assertContainsEvent(t, events, "Failed to create or update resource (async phase=update, workRequestId=wr-update-1)")
+	assertAnyMessageContains(t, sink.errors, "Create Or Update failed in the Service Manager with error (async phase=update, workRequestId=wr-update-1)")
+	assertAnyMessageContains(t, sink.infos, "Reconcile Failed (async phase=update, workRequestId=wr-update-1)")
+}
+
+func TestReconcileResourceStatusPatchFailureIncludesAsyncBreadcrumbWhenPresent(t *testing.T) {
+	t.Parallel()
+
+	sink := &collectingLogSink{}
+	reconciler, recorder, kubeClient := newCreateOrUpdateReconcilerWithLogger(t, createOrUpdateBehavior{
+		response: servicemanager.OSOKResponse{IsSuccessful: true},
+		status:   statusWithAsyncCurrent(shared.OSOKAsyncPhaseUpdate, "wr-update-patch"),
+	}, sink)
+	kubeClient.statusPatchErr = stderrors.New("status patch failed")
+
+	result, err := reconciler.ReconcileResource(context.Background(), kubeClient.StoredConfigMap(), testRequestNamed("test-reconcile"))
+	if err != nil {
+		t.Fatalf("ReconcileResource() error = %v, want nil", err)
+	}
+	if result.RequeueAfter != defaultRequeueTime {
+		t.Fatalf("ReconcileResource() requeueAfter = %v, want %v", result.RequeueAfter, defaultRequeueTime)
+	}
+
+	events := drainEvents(recorder)
+	assertContainsEvent(t, events, "Failed to create or update resource: status patch failed (async phase=update, workRequestId=wr-update-patch)")
+	assertAnyMessageContains(t, sink.errors, "Error updating the status of the Object (async phase=update, workRequestId=wr-update-patch)")
+	assertNoEventContains(t, events, "Create or Update of resource succeeded")
+	assertNoMessageContains(t, sink.infos, "Reconcile Completed")
+}
+
+func TestDeleteResourceBreadcrumbs(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		behavior       deleteBehavior
+		wantDone       bool
+		wantErr        bool
+		wantEvent      string
+		wantInfo       string
+		wantError      string
+		wantUnexpected string
+	}{
+		{
+			name: "blocked",
+			behavior: deleteBehavior{
+				err:    errortest.NewServiceError(409, errorutil.IncorrectState, "delete conflict"),
+				status: statusWithAsyncCurrent(shared.OSOKAsyncPhaseDelete, "wr-delete-1"),
+			},
+			wantDone:  false,
+			wantErr:   false,
+			wantEvent: "Delete blocked and will be retried: delete conflict (async phase=delete, workRequestId=wr-delete-1)",
+			wantInfo:  "Delete is blocked and will be retried (async phase=delete, workRequestId=wr-delete-1)",
+		},
+		{
+			name: "in progress",
+			behavior: deleteBehavior{
+				status: statusWithAsyncCurrent(shared.OSOKAsyncPhaseDelete, "wr-delete-2"),
+			},
+			wantDone:  false,
+			wantErr:   false,
+			wantEvent: "Delete is in progress (async phase=delete, workRequestId=wr-delete-2)",
+			wantInfo:  "Delete is in progress and will be retried (async phase=delete, workRequestId=wr-delete-2)",
+		},
+		{
+			name: "failure with breadcrumb",
+			behavior: deleteBehavior{
+				err:    stderrors.New("delete failed"),
+				status: statusWithAsyncCurrent(shared.OSOKAsyncPhaseDelete, "wr-delete-3"),
+			},
+			wantDone:  false,
+			wantErr:   true,
+			wantEvent: "Failed to delete resource: delete failed (async phase=delete, workRequestId=wr-delete-3)",
+			wantError: "Delete failed in the Service Manager with error (async phase=delete, workRequestId=wr-delete-3)",
+		},
+		{
+			name: "failure without breadcrumb",
+			behavior: deleteBehavior{
+				err: stderrors.New("delete failed"),
+			},
+			wantDone:       false,
+			wantErr:        true,
+			wantEvent:      "Failed to delete resource: delete failed",
+			wantError:      "Delete failed in the Service Manager with error",
+			wantUnexpected: "async phase=",
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			sink := &collectingLogSink{}
+			reconciler, recorder, kubeClient := newDeleteReconcilerWithLogger(t, tt.behavior, sink)
+
+			done, err := reconciler.DeleteResource(context.Background(), kubeClient.StoredConfigMap(), testRequest())
+			if done != tt.wantDone {
+				t.Fatalf("DeleteResource() done = %t, want %t", done, tt.wantDone)
+			}
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("DeleteResource() error = %v, wantErr %t", err, tt.wantErr)
+			}
+
+			events := drainEvents(recorder)
+			assertContainsEvent(t, events, tt.wantEvent)
+			if tt.wantInfo != "" {
+				assertAnyMessageContains(t, sink.infos, tt.wantInfo)
+			}
+			if tt.wantError != "" {
+				assertAnyMessageContains(t, sink.errors, tt.wantError)
+			}
+			if tt.wantUnexpected != "" {
+				assertNoEventContains(t, events, tt.wantUnexpected)
+				assertNoMessageContains(t, sink.infos, tt.wantUnexpected)
+				assertNoMessageContains(t, sink.errors, tt.wantUnexpected)
+			}
+		})
+	}
+}
+
 func newDeleteReconciler(t *testing.T, behavior deleteBehavior) (*BaseReconciler, *record.FakeRecorder, *memoryClient) {
 	return newDeleteReconcilerWithLogger(t, behavior, &collectingLogSink{})
 }
@@ -416,42 +639,38 @@ func newDeleteReconciler(t *testing.T, behavior deleteBehavior) (*BaseReconciler
 func newDeleteReconcilerWithLogger(t *testing.T, behavior deleteBehavior, sink *collectingLogSink) (*BaseReconciler, *record.FakeRecorder, *memoryClient) {
 	t.Helper()
 
+	return newTestReconcilerWithLogger(t, &stubServiceManager{deleteBehavior: behavior}, deletingTestConfigMap("test-delete"), sink)
+}
+
+func newCreateOrUpdateReconcilerWithLogger(t *testing.T, behavior createOrUpdateBehavior, sink *collectingLogSink) (*BaseReconciler, *record.FakeRecorder, *memoryClient) {
+	t.Helper()
+
+	return newTestReconcilerWithLogger(t, &stubServiceManager{createOrUpdateBehavior: behavior}, testConfigMap("test-reconcile"), sink)
+}
+
+func newTestReconcilerWithLogger(t *testing.T, serviceManager servicemanager.OSOKServiceManager, obj ctrlclient.Object, sink *collectingLogSink) (*BaseReconciler, *record.FakeRecorder, *memoryClient) {
+	t.Helper()
+
 	scheme := runtime.NewScheme()
 	if err := corev1.AddToScheme(scheme); err != nil {
 		t.Fatalf("AddToScheme() error = %v", err)
 	}
 
-	now := metav1.NewTime(time.Now())
-	configMap := &corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ConfigMap",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:              "test-delete",
-			Namespace:         "default",
-			Finalizers:        []string{OSOKFinalizerName},
-			DeletionTimestamp: &now,
-		},
-	}
+	kubeClient := newMemoryClient(scheme, obj)
 
-	kubeClient := newMemoryClient(scheme, configMap)
-
-	recorder := record.NewFakeRecorder(10)
+	recorder := record.NewFakeRecorder(20)
 	if sink == nil {
 		sink = &collectingLogSink{}
 	}
 	log := loggerutil.OSOKLogger{Logger: logr.New(sink)}
 
 	return &BaseReconciler{
-		Client: kubeClient,
-		OSOKServiceManager: deleteOnlyServiceManager{
-			deleteBehavior: behavior,
-		},
-		Log:      log,
-		Metrics:  &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
-		Recorder: recorder,
-		Scheme:   scheme,
+		Client:             kubeClient,
+		OSOKServiceManager: serviceManager,
+		Log:                log,
+		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "core", Logger: log},
+		Recorder:           recorder,
+		Scheme:             scheme,
 	}, recorder, kubeClient
 }
 
@@ -496,38 +715,105 @@ func assertAnyMessageContains(t *testing.T, messages []string, want string) {
 	t.Fatalf("messages %v do not contain %q", messages, want)
 }
 
+func assertNoMessageContains(t *testing.T, messages []string, unexpected string) {
+	t.Helper()
+	for _, message := range messages {
+		if strings.Contains(message, unexpected) {
+			t.Fatalf("messages %v unexpectedly contain %q", messages, unexpected)
+		}
+	}
+}
+
 func testRequest() ctrl.Request {
-	return ctrl.Request{NamespacedName: ctrlclient.ObjectKey{Name: "test-delete", Namespace: "default"}}
+	return testRequestNamed("test-delete")
+}
+
+func testRequestNamed(name string) ctrl.Request {
+	return ctrl.Request{NamespacedName: ctrlclient.ObjectKey{Name: name, Namespace: "default"}}
+}
+
+func testConfigMap(name string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "ConfigMap",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: "default",
+		},
+	}
+}
+
+func deletingTestConfigMap(name string) *corev1.ConfigMap {
+	configMap := testConfigMap(name)
+	now := metav1.NewTime(time.Now())
+	configMap.ObjectMeta.Finalizers = []string{OSOKFinalizerName}
+	configMap.ObjectMeta.DeletionTimestamp = &now
+	return configMap
+}
+
+func statusWithAsyncCurrent(phase shared.OSOKAsyncPhase, workRequestID string) *shared.OSOKStatus {
+	return &shared.OSOKStatus{
+		Async: shared.OSOKAsyncTracker{
+			Current: &shared.OSOKAsyncOperation{
+				Phase:         phase,
+				WorkRequestID: workRequestID,
+			},
+		},
+	}
+}
+
+type createOrUpdateBehavior struct {
+	response servicemanager.OSOKResponse
+	err      error
+	status   *shared.OSOKStatus
 }
 
 type deleteBehavior struct {
 	deleted bool
 	err     error
+	status  *shared.OSOKStatus
 	mutate  func(runtime.Object)
 }
 
-type deleteOnlyServiceManager struct {
-	deleteBehavior deleteBehavior
+type stubServiceManager struct {
+	createOrUpdateBehavior createOrUpdateBehavior
+	deleteBehavior         deleteBehavior
+	currentStatus          *shared.OSOKStatus
 }
 
-func (m deleteOnlyServiceManager) CreateOrUpdate(context.Context, runtime.Object, ctrl.Request) (servicemanager.OSOKResponse, error) {
-	return servicemanager.OSOKResponse{}, nil
+func (m *stubServiceManager) CreateOrUpdate(context.Context, runtime.Object, ctrl.Request) (servicemanager.OSOKResponse, error) {
+	m.currentStatus = cloneStatus(m.createOrUpdateBehavior.status)
+	return m.createOrUpdateBehavior.response, m.createOrUpdateBehavior.err
 }
 
-func (m deleteOnlyServiceManager) Delete(_ context.Context, obj runtime.Object) (bool, error) {
+func (m *stubServiceManager) Delete(_ context.Context, obj runtime.Object) (bool, error) {
 	if m.deleteBehavior.mutate != nil {
 		m.deleteBehavior.mutate(obj)
 	}
+	m.currentStatus = cloneStatus(m.deleteBehavior.status)
 	return m.deleteBehavior.deleted, m.deleteBehavior.err
 }
 
-func (m deleteOnlyServiceManager) GetCrdStatus(runtime.Object) (*shared.OSOKStatus, error) {
-	return &shared.OSOKStatus{}, nil
+func (m *stubServiceManager) GetCrdStatus(runtime.Object) (*shared.OSOKStatus, error) {
+	if m.currentStatus == nil {
+		return &shared.OSOKStatus{}, nil
+	}
+	return m.currentStatus, nil
+}
+
+func cloneStatus(status *shared.OSOKStatus) *shared.OSOKStatus {
+	if status == nil {
+		return nil
+	}
+	return status.DeepCopy()
 }
 
 type memoryClient struct {
 	ctrlclient.Client
-	stored ctrlclient.Object
+	stored         ctrlclient.Object
+	statusPatchErr error
 }
 
 func newMemoryClient(scheme *runtime.Scheme, obj ctrlclient.Object) *memoryClient {
@@ -554,6 +840,10 @@ func (c *memoryClient) Get(_ context.Context, key ctrlclient.ObjectKey, obj ctrl
 func (c *memoryClient) Update(_ context.Context, obj ctrlclient.Object, _ ...ctrlclient.UpdateOption) error {
 	c.stored = obj.DeepCopyObject().(ctrlclient.Object)
 	return nil
+}
+
+func (c *memoryClient) Status() ctrlclient.SubResourceWriter {
+	return memoryStatusWriter{client: c}
 }
 
 func (c *memoryClient) StoredConfigMap() *corev1.ConfigMap {
@@ -598,7 +888,7 @@ func newDeleteQueueReconciler(t *testing.T, behavior deleteBehavior) (*BaseRecon
 
 	return &BaseReconciler{
 		Client:             trackingClient,
-		OSOKServiceManager: deleteOnlyServiceManager{deleteBehavior: behavior},
+		OSOKServiceManager: &stubServiceManager{deleteBehavior: behavior},
 		Log:                log,
 		Metrics:            &metrics.Metrics{Name: "oci", ServiceName: "queue", Logger: log},
 		Recorder:           recorder,
@@ -723,6 +1013,28 @@ func assertQueueDeleteStatusPersisted(t *testing.T, stored *queuev1beta1.Queue, 
 	if stored.Status.OsokStatus.Async.Current.Message != message {
 		t.Fatalf("status.async.current.message = %q, want %q", stored.Status.OsokStatus.Async.Current.Message, message)
 	}
+}
+
+type memoryStatusWriter struct {
+	client *memoryClient
+}
+
+func (w memoryStatusWriter) Create(_ context.Context, obj ctrlclient.Object, _ ctrlclient.Object, _ ...ctrlclient.SubResourceCreateOption) error {
+	w.client.stored = obj.DeepCopyObject().(ctrlclient.Object)
+	return nil
+}
+
+func (w memoryStatusWriter) Update(_ context.Context, obj ctrlclient.Object, _ ...ctrlclient.SubResourceUpdateOption) error {
+	w.client.stored = obj.DeepCopyObject().(ctrlclient.Object)
+	return nil
+}
+
+func (w memoryStatusWriter) Patch(_ context.Context, obj ctrlclient.Object, _ ctrlclient.Patch, _ ...ctrlclient.SubResourcePatchOption) error {
+	if w.client.statusPatchErr != nil {
+		return w.client.statusPatchErr
+	}
+	w.client.stored = obj.DeepCopyObject().(ctrlclient.Object)
+	return nil
 }
 
 type collectingLogSink struct {
