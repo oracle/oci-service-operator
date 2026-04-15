@@ -46,6 +46,7 @@ func safeFunctionsString(value *string) string {
 
 func applyFunctionsCreateFailure(status *shared.OSOKStatus, err error, log loggerutil.OSOKLogger, kind string) {
 	now := metav1.Now()
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	status.UpdatedAt = &now
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)

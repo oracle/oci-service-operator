@@ -192,6 +192,7 @@ func TestCreateOrUpdateCreatePath(t *testing.T) {
 		},
 		createFn: func(context.Context, ocicontainerinstances.CreateContainerInstanceRequest) (ocicontainerinstances.CreateContainerInstanceResponse, error) {
 			return ocicontainerinstances.CreateContainerInstanceResponse{
+				OpcRequestId: common.String("opc-create-1"),
 				ContainerInstance: ocicontainerinstances.ContainerInstance{
 					Id:             common.String("ocid1.containerinstance.oc1..created"),
 					DisplayName:    common.String("test-ci"),
@@ -207,6 +208,7 @@ func TestCreateOrUpdateCreatePath(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.True(t, ociClient.createCalled)
+	assert.Equal(t, "opc-create-1", ci.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, "ocid1.containerinstance.oc1..created", string(ci.Status.OsokStatus.Ocid))
 }
 
@@ -320,6 +322,11 @@ func TestCreateOrUpdateTrackedInstanceUpdatesMutableFields(t *testing.T) {
 				},
 			}, nil
 		},
+		updateFn: func(context.Context, ocicontainerinstances.UpdateContainerInstanceRequest) (ocicontainerinstances.UpdateContainerInstanceResponse, error) {
+			return ocicontainerinstances.UpdateContainerInstanceResponse{
+				OpcRequestId: common.String("opc-update-1"),
+			}, nil
+		},
 	}
 	mgr := newTestManager(ociClient)
 	ci := makeContainerInstanceSpec("new-name")
@@ -329,11 +336,27 @@ func TestCreateOrUpdateTrackedInstanceUpdatesMutableFields(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.True(t, ociClient.updateCalled)
+	assert.Equal(t, "opc-update-1", ci.Status.OsokStatus.OpcRequestID)
 	if assert.NotNil(t, ociClient.updateRequest) {
 		assert.Equal(t, existingID, *ociClient.updateRequest.ContainerInstanceId)
 		assert.Equal(t, "new-name", *ociClient.updateRequest.UpdateContainerInstanceDetails.DisplayName)
 	}
 	assert.Equal(t, "new-name", ci.Status.DisplayName)
+}
+
+func TestCreateOrUpdateListServiceErrorCapturesOpcRequestID(t *testing.T) {
+	ociClient := &fakeOciClient{
+		listFn: func(context.Context, ocicontainerinstances.ListContainerInstancesRequest) (ocicontainerinstances.ListContainerInstancesResponse, error) {
+			return ocicontainerinstances.ListContainerInstancesResponse{}, errortest.NewServiceError(409, "IncorrectState", "list conflict")
+		},
+	}
+	mgr := newTestManager(ociClient)
+	ci := makeContainerInstanceSpec("test-ci")
+
+	resp, err := mgr.CreateOrUpdate(context.Background(), ci, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, "opc-request-id", ci.Status.OsokStatus.OpcRequestID)
 }
 
 func TestCreateOrUpdateTrackedNotFoundFallsBackToCreate(t *testing.T) {
@@ -427,6 +450,7 @@ func TestDeleteTreatsDeleteNotFoundAsDeleted(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, done)
 	assert.True(t, ociClient.deleteCalled)
+	assert.Equal(t, "opc-request-id", ci.Status.OsokStatus.OpcRequestID)
 }
 
 func TestDeleteError(t *testing.T) {

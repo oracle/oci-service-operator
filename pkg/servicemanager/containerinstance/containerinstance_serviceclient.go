@@ -15,6 +15,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	containerinstancessdk "github.com/oracle/oci-go-sdk/v65/containerinstances"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 )
@@ -218,12 +219,17 @@ func (c *ContainerInstanceServiceManager) UpdateContainerInstance(ctx context.Co
 		ContainerInstanceId:            common.String(targetID),
 		UpdateContainerInstanceDetails: updateDetails,
 	}
-	_, err = client.UpdateContainerInstance(ctx, req)
+	response, err := client.UpdateContainerInstance(ctx, req)
+	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&ci.Status.OsokStatus, err)
+		return err
+	}
+	servicemanager.RecordResponseOpcRequestID(&ci.Status.OsokStatus, response)
 	return err
 }
 
 // DeleteContainerInstance deletes the container instance for the given OCID.
-func (c *ContainerInstanceServiceManager) DeleteContainerInstance(ctx context.Context, ciID shared.OCID) error {
+func (c *ContainerInstanceServiceManager) DeleteContainerInstance(ctx context.Context, ci *containerinstancesv1beta1.ContainerInstance, ciID shared.OCID) error {
 	client, err := c.getOCIClient()
 	if err != nil {
 		return err
@@ -232,7 +238,14 @@ func (c *ContainerInstanceServiceManager) DeleteContainerInstance(ctx context.Co
 	req := containerinstancessdk.DeleteContainerInstanceRequest{
 		ContainerInstanceId: common.String(string(ciID)),
 	}
-	_, err = client.DeleteContainerInstance(ctx, req)
+	response, err := client.DeleteContainerInstance(ctx, req)
+	if ci != nil {
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&ci.Status.OsokStatus, err)
+		} else {
+			servicemanager.RecordResponseOpcRequestID(&ci.Status.OsokStatus, response)
+		}
+	}
 	return err
 }
 

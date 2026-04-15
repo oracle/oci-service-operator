@@ -34,6 +34,7 @@ func safeGatewayString(value *string) string {
 }
 
 func applyGatewayCreateFailure(status *shared.OSOKStatus, err error, log loggerutil.OSOKLogger, kind string) {
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), log)
 	if code, ok := apiGatewayBadRequestCode(err); ok {
 		status.Message = code

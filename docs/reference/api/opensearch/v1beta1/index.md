@@ -130,6 +130,7 @@ OpensearchClusterStatus defines the observed state of OpensearchCluster.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |

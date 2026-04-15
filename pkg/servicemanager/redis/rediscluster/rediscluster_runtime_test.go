@@ -13,6 +13,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	redissdk "github.com/oracle/oci-go-sdk/v65/redis"
 	redisv1beta1 "github.com/oracle/oci-service-operator/api/redis/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
@@ -71,9 +72,10 @@ func (f *fakeRedisOCIClient) GetWorkRequest(ctx context.Context, req redissdk.Ge
 }
 
 type fakeRedisServiceError struct {
-	statusCode int
-	code       string
-	message    string
+	statusCode   int
+	code         string
+	message      string
+	opcRequestID string
 }
 
 func (f fakeRedisServiceError) Error() string          { return f.message }
@@ -81,7 +83,7 @@ func (f fakeRedisServiceError) GetHTTPStatusCode() int { return f.statusCode }
 func (f fakeRedisServiceError) GetMessage() string     { return f.message }
 func (f fakeRedisServiceError) GetCode() string        { return f.code }
 func (f fakeRedisServiceError) GetOpcRequestID() string {
-	return ""
+	return f.opcRequestID
 }
 
 func newRedisTestManager(client redisOCIClient) *RedisClusterServiceManager {
@@ -332,6 +334,7 @@ func TestRedisCreateCapturesWorkRequestInSharedAsyncStatus(t *testing.T) {
 			assert.Equal(t, "ocid1.subnet.oc1..example", stringValue(req.CreateRedisClusterDetails.SubnetId))
 			return redissdk.CreateRedisClusterResponse{
 				RedisCluster:     makeSDKRedisCluster(clusterID, "redis-sample", redissdk.RedisClusterLifecycleStateCreating),
+				OpcRequestId:     common.String("opc-create-1"),
 				OpcWorkRequestId: common.String("wr-create-1"),
 			}, nil
 		},
@@ -354,6 +357,7 @@ func TestRedisCreateCapturesWorkRequestInSharedAsyncStatus(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, response.IsSuccessful)
 	assert.True(t, response.ShouldRequeue)
+	assert.Equal(t, "opc-create-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, clusterID, resource.Status.Id)
 	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
 		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
@@ -367,6 +371,30 @@ func TestRedisCreateCapturesWorkRequestInSharedAsyncStatus(t *testing.T) {
 			assert.Equal(t, float32(42), *resource.Status.OsokStatus.Async.Current.PercentComplete)
 		}
 	}
+}
+
+func TestRedisCreateErrorCapturesOpcRequestID(t *testing.T) {
+	t.Parallel()
+
+	manager := newRedisTestManager(&fakeRedisOCIClient{
+		createFn: func(_ context.Context, _ redissdk.CreateRedisClusterRequest) (redissdk.CreateRedisClusterResponse, error) {
+			return redissdk.CreateRedisClusterResponse{}, fakeRedisServiceError{
+				statusCode:   409,
+				code:         errorutil.IncorrectState,
+				message:      "create conflict",
+				opcRequestID: "opc-create-conflict",
+			}
+		},
+	})
+
+	resource := makeSpecRedisCluster()
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, response.IsSuccessful)
+	assert.Equal(t, "opc-create-conflict", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 }
 
 func TestRedisResumeCreateRecoversIdentityFromSucceededWorkRequest(t *testing.T) {

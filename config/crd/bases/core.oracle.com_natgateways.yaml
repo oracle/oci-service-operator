@@ -258,6 +258,13 @@ spec:
                     maxLength: 255
                     minLength: 1
                     type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
                   reason:
                     type: string
                   requestedAt:

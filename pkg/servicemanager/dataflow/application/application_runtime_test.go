@@ -223,7 +223,10 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 			app.OwnerUserName = common.String("example-user")
 			app.Parameters = []dataflowsdk.ApplicationParameter{{Name: common.String("input_file"), Value: common.String("data.csv")}}
 			app.WarehouseBucketUri = common.String("oci://bucket@app/warehouse/")
-			return dataflowsdk.CreateApplicationResponse{Application: app}, nil
+			return dataflowsdk.CreateApplicationResponse{
+				Application:  app,
+				OpcRequestId: common.String("opc-create-1"),
+			}, nil
 		},
 	})
 
@@ -251,6 +254,7 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
 	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, "opc-create-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, common.String("ocid1.compartment.oc1..example"), captured.CompartmentId)
 	assert.Equal(t, common.String("test-application"), captured.DisplayName)
 	assert.Equal(t, dataflowsdk.ApplicationLanguagePython, captured.Language)
@@ -290,7 +294,10 @@ func TestCreateOrUpdate_UpdateMutableFields(t *testing.T) {
 			app.PrivateEndpointId = common.String("ocid1.privateendpoint.oc1..new")
 			app.FreeformTags = map[string]string{"env": "dev"}
 			app.DefinedTags = map[string]map[string]interface{}{"Operations": {"CostCenter": "42"}}
-			return dataflowsdk.UpdateApplicationResponse{Application: app}, nil
+			return dataflowsdk.UpdateApplicationResponse{
+				Application:  app,
+				OpcRequestId: common.String("opc-update-1"),
+			}, nil
 		},
 	})
 
@@ -310,6 +317,7 @@ func TestCreateOrUpdate_UpdateMutableFields(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, "opc-update-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, "ocid1.dataflowapplication.oc1..existing", *captured.ApplicationId)
 	assert.Equal(t, "new-name", *captured.DisplayName)
 	assert.Equal(t, "VM.Standard.E5.Flex", *captured.DriverShape)
@@ -465,6 +473,7 @@ func TestCreateOrUpdate_UpdateConflictReturnsNormalizedConflictError(t *testing.
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
 	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 	assert.Equal(t, shared.OCID("ocid1.dataflowapplication.oc1..existing"), resource.Status.OsokStatus.Ocid)
 	errortest.AssertErrorType(t, err, "errorutil.ConflictOciError")
@@ -515,6 +524,7 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, done)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
@@ -537,6 +547,7 @@ func TestDelete_ConfirmsDeletionOnAuthShapedNotFound(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, done)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 	assert.Equal(t, "OCI resource deleted", resource.Status.OsokStatus.Message)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)

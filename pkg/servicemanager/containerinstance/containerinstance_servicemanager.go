@@ -101,8 +101,10 @@ func (c *ContainerInstanceServiceManager) Delete(ctx context.Context, obj runtim
 	current, err := c.GetContainerInstance(ctx, targetID, nil)
 	if err != nil {
 		if servicemanager.IsNotFoundServiceError(err) {
+			servicemanager.RecordErrorOpcRequestID(&ci.Status.OsokStatus, err)
 			return true, nil
 		}
+		servicemanager.RecordErrorOpcRequestID(&ci.Status.OsokStatus, err)
 		c.Log.ErrorLog(err, "Error while getting ContainerInstance before delete")
 		return false, err
 	}
@@ -115,7 +117,7 @@ func (c *ContainerInstanceServiceManager) Delete(ctx context.Context, obj runtim
 	}
 
 	c.Log.InfoLog(fmt.Sprintf("Deleting ContainerInstance %s", targetID))
-	if err := c.DeleteContainerInstance(ctx, targetID); err != nil {
+	if err := c.DeleteContainerInstance(ctx, ci, targetID); err != nil {
 		if servicemanager.IsNotFoundServiceError(err) {
 			return true, nil
 		}
@@ -173,6 +175,7 @@ func (c *ContainerInstanceServiceManager) lookupOrCreateContainerInstance(ctx co
 		if err != nil {
 			return nil, err
 		}
+		servicemanager.RecordResponseOpcRequestID(&ci.Status.OsokStatus, resp)
 		return &resp.ContainerInstance, nil
 	}
 
@@ -259,6 +262,7 @@ func (c *ContainerInstanceServiceManager) recordCreateOrUpdateError(status *shar
 			err = mappedErr
 		}
 	}
+	servicemanager.RecordErrorOpcRequestID(status, err)
 
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, reason, err.Error(), c.Log)
 	status.Message = err.Error()

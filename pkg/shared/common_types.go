@@ -89,14 +89,19 @@ type OSOKStatus struct {
 	// Async is the canonical controller-owned async contract. Resource-local
 	// legacy work-request fields may remain as compatibility mirrors while
 	// follow-on migrations land, but new async state should project here first.
-	Async       OSOKAsyncTracker `json:"async,omitempty"`
-	Ocid        OCID             `json:"ocid,omitempty"`
-	Message     string           `json:"message,omitempty"`
-	Reason      string           `json:"reason,omitempty"`
-	CreatedAt   *metav1.Time     `json:"createdAt,omitempty"`
-	UpdatedAt   *metav1.Time     `json:"updatedAt,omitempty"`
-	RequestedAt *metav1.Time     `json:"requestedAt,omitempty"`
-	DeletedAt   *metav1.Time     `json:"deletedAt,omitempty"`
+	Async OSOKAsyncTracker `json:"async,omitempty"`
+	// OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+	// response or surfaced OCI service error that materially contributed to the
+	// current shared status projection. Headerless follow-up observations keep
+	// the last non-empty value intact.
+	OpcRequestID string       `json:"opcRequestId,omitempty"`
+	Ocid         OCID         `json:"ocid,omitempty"`
+	Message      string       `json:"message,omitempty"`
+	Reason       string       `json:"reason,omitempty"`
+	CreatedAt    *metav1.Time `json:"createdAt,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+	RequestedAt  *metav1.Time `json:"requestedAt,omitempty"`
+	DeletedAt    *metav1.Time `json:"deletedAt,omitempty"`
 }
 
 type TagResources struct {

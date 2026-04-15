@@ -72,9 +72,10 @@ func (f *fakeQueueOCIClient) GetWorkRequest(ctx context.Context, req queuesdk.Ge
 }
 
 type fakeQueueServiceError struct {
-	statusCode int
-	code       string
-	message    string
+	statusCode   int
+	code         string
+	message      string
+	opcRequestID string
 }
 
 func (f fakeQueueServiceError) Error() string          { return f.message }
@@ -82,7 +83,7 @@ func (f fakeQueueServiceError) GetHTTPStatusCode() int { return f.statusCode }
 func (f fakeQueueServiceError) GetMessage() string     { return f.message }
 func (f fakeQueueServiceError) GetCode() string        { return f.code }
 func (f fakeQueueServiceError) GetOpcRequestID() string {
-	return ""
+	return f.opcRequestID
 }
 
 func newQueueTestManager(client queueOCIClient) *QueueServiceManager {
@@ -269,6 +270,7 @@ func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T)
 		createFn: func(_ context.Context, req queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
 			captured = req
 			return queuesdk.CreateQueueResponse{
+				OpcRequestId:     common.String("opc-create-1"),
 				OpcWorkRequestId: common.String("wr-create-1"),
 			}, nil
 		},
@@ -287,6 +289,7 @@ func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T)
 	assert.True(t, resp.IsSuccessful)
 	assert.True(t, resp.ShouldRequeue)
 	assert.Equal(t, queueRequeueDuration, resp.RequeueDuration)
+	assert.Equal(t, "opc-create-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.Equal(t, "wr-create-1", resource.Status.CreateWorkRequestId)
 	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
 		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
@@ -301,6 +304,30 @@ func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T)
 	assert.Equal(t, "queue-sample", *captured.DisplayName)
 	assert.Equal(t, "ocid1.compartment.oc1..example", *captured.CompartmentId)
 	assert.Equal(t, 1200, *captured.RetentionInSeconds)
+}
+
+func TestQueueRuntime_CreateErrorCapturesOpcRequestID(t *testing.T) {
+	t.Parallel()
+
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		createFn: func(_ context.Context, _ queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
+			return queuesdk.CreateQueueResponse{}, fakeQueueServiceError{
+				statusCode:   409,
+				code:         errorutil.IncorrectState,
+				message:      "create conflict",
+				opcRequestID: "opc-create-conflict",
+			}
+		},
+	})
+
+	resource := makeSpecQueue()
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Equal(t, "opc-create-conflict", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
+	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 }
 
 func TestQueueRuntime_ResumeCreateRecoversQueueIDAndProjectsStatus(t *testing.T) {

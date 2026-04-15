@@ -445,6 +445,7 @@ func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
+	c.seedOpeningRequestID(resource, response)
 	c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseUpdate)
 
 	response, err = c.followUpAfterWrite(ctx, resource, currentID, response, "update")
@@ -472,6 +473,7 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, 
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
+		c.seedOpeningRequestID(resource, response)
 		c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseCreate)
 
 		followUp, err := c.followUpAfterWrite(ctx, resource, responseID(response), response, "create")
@@ -535,11 +537,13 @@ func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T,
 	response, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{})
 	if err != nil {
 		if isDeleteNotFound(err) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
 	}
+	c.seedOpeningRequestID(resource, response)
 	c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseDelete)
 	return false, nil
 }
@@ -553,6 +557,7 @@ func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, res
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -701,6 +706,7 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resour
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -1482,6 +1488,7 @@ func (c ServiceClient[T]) markFailure(resource T, err error) error {
 	if statusErr != nil {
 		return err
 	}
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
 	now := metav1.Now()
@@ -2478,6 +2485,10 @@ func responseWorkRequestID(response any) string {
 	return ""
 }
 
+func responseRequestID(response any) string {
+	return servicemanager.ResponseOpcRequestID(response)
+}
+
 func isWorkRequestHeaderField(fieldType reflect.StructField) bool {
 	return fieldType.Name == "OpcWorkRequestId" ||
 		(fieldType.Tag.Get("presentIn") == "header" && fieldType.Tag.Get("name") == "opc-work-request-id")
@@ -2510,6 +2521,24 @@ func (c ServiceClient[T]) seedOpeningWorkRequestID(resource T, response any, pha
 		NormalizedClass: shared.OSOKAsyncClassPending,
 		UpdatedAt:       &now,
 	}, c.config.Log)
+}
+
+func (c ServiceClient[T]) seedOpeningRequestID(resource T, response any) {
+	status, err := osokStatus(resource)
+	if err != nil {
+		return
+	}
+
+	servicemanager.RecordResponseOpcRequestID(status, response)
+}
+
+func (c ServiceClient[T]) recordErrorRequestID(resource T, err error) {
+	status, statusErr := osokStatus(resource)
+	if statusErr != nil {
+		return
+	}
+
+	servicemanager.RecordErrorOpcRequestID(status, err)
 }
 
 type lifecycleAsyncEvaluation struct {

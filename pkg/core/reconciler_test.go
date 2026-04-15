@@ -214,11 +214,12 @@ func TestReconcileDeleteInProgressPersistsDeleteStatusMutations(t *testing.T) {
 
 	const (
 		workRequestID = "wr-delete-pending"
+		opcRequestID  = "opc-delete-pending"
 		message       = "OCI delete is in progress"
 	)
 
 	reconciler, recorder, kubeClient := newDeleteQueueReconciler(t, deleteBehavior{
-		mutate: mutateQueueDeleteStatus(t, workRequestID, message),
+		mutate: mutateQueueDeleteStatus(t, workRequestID, opcRequestID, message),
 	})
 
 	result, err := reconciler.Reconcile(context.Background(), testRequest(), &queuev1beta1.Queue{})
@@ -236,7 +237,7 @@ func TestReconcileDeleteInProgressPersistsDeleteStatusMutations(t *testing.T) {
 	if kubeClient.StatusPatchCount() != 1 {
 		t.Fatalf("Status().Patch() count = %d, want 1", kubeClient.StatusPatchCount())
 	}
-	assertQueueDeleteStatusPersisted(t, stored, workRequestID, message)
+	assertQueueDeleteStatusPersisted(t, stored, workRequestID, opcRequestID, message)
 
 	events := drainEvents(recorder)
 	assertContainsEvent(t, events, "Delete is in progress")
@@ -248,12 +249,13 @@ func TestReconcileDeleteErrorPersistsDeleteStatusMutations(t *testing.T) {
 
 	const (
 		workRequestID = "wr-delete-error"
+		opcRequestID  = "opc-delete-error"
 		message       = "OCI delete failed after work request submission"
 	)
 
 	reconciler, recorder, kubeClient := newDeleteQueueReconciler(t, deleteBehavior{
 		err:    stderrors.New("delete failed"),
-		mutate: mutateQueueDeleteStatus(t, workRequestID, message),
+		mutate: mutateQueueDeleteStatus(t, workRequestID, opcRequestID, message),
 	})
 
 	result, err := reconciler.Reconcile(context.Background(), testRequest(), &queuev1beta1.Queue{})
@@ -271,7 +273,7 @@ func TestReconcileDeleteErrorPersistsDeleteStatusMutations(t *testing.T) {
 	if kubeClient.StatusPatchCount() != 1 {
 		t.Fatalf("Status().Patch() count = %d, want 1", kubeClient.StatusPatchCount())
 	}
-	assertQueueDeleteStatusPersisted(t, stored, workRequestID, message)
+	assertQueueDeleteStatusPersisted(t, stored, workRequestID, opcRequestID, message)
 
 	events := drainEvents(recorder)
 	assertContainsEvent(t, events, "Failed to delete resource: delete failed")
@@ -283,12 +285,13 @@ func TestReconcileConfirmedDeleteRemovesFinalizerWithoutStatusPatch(t *testing.T
 
 	const (
 		workRequestID = "wr-delete-confirmed"
+		opcRequestID  = "opc-delete-confirmed"
 		message       = "OCI delete completed; waiting for final confirmation"
 	)
 
 	reconciler, recorder, kubeClient := newDeleteQueueReconciler(t, deleteBehavior{
 		deleted: true,
-		mutate:  mutateQueueDeleteStatus(t, workRequestID, message),
+		mutate:  mutateQueueDeleteStatus(t, workRequestID, opcRequestID, message),
 	})
 
 	result, err := reconciler.Reconcile(context.Background(), testRequest(), &queuev1beta1.Queue{})
@@ -957,7 +960,7 @@ func (w statusTrackingSubresourceWriter) Patch(_ context.Context, obj ctrlclient
 	return nil
 }
 
-func mutateQueueDeleteStatus(t *testing.T, workRequestID, message string) func(runtime.Object) {
+func mutateQueueDeleteStatus(t *testing.T, workRequestID, opcRequestID, message string) func(runtime.Object) {
 	t.Helper()
 
 	return func(obj runtime.Object) {
@@ -967,6 +970,7 @@ func mutateQueueDeleteStatus(t *testing.T, workRequestID, message string) func(r
 		}
 
 		queue.Status.OsokStatus.Message = message
+		queue.Status.OsokStatus.OpcRequestID = opcRequestID
 		queue.Status.DeleteWorkRequestId = workRequestID
 		queue.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
 			Source:           shared.OSOKAsyncSourceWorkRequest,
@@ -980,7 +984,7 @@ func mutateQueueDeleteStatus(t *testing.T, workRequestID, message string) func(r
 	}
 }
 
-func assertQueueDeleteStatusPersisted(t *testing.T, stored *queuev1beta1.Queue, workRequestID, message string) {
+func assertQueueDeleteStatusPersisted(t *testing.T, stored *queuev1beta1.Queue, workRequestID, opcRequestID, message string) {
 	t.Helper()
 
 	if stored.Status.DeleteWorkRequestId != workRequestID {
@@ -988,6 +992,9 @@ func assertQueueDeleteStatusPersisted(t *testing.T, stored *queuev1beta1.Queue, 
 	}
 	if stored.Status.OsokStatus.Message != message {
 		t.Fatalf("status.message = %q, want %q", stored.Status.OsokStatus.Message, message)
+	}
+	if stored.Status.OsokStatus.OpcRequestID != opcRequestID {
+		t.Fatalf("status.opcRequestId = %q, want %q", stored.Status.OsokStatus.OpcRequestID, opcRequestID)
 	}
 	if stored.Status.OsokStatus.Async.Current == nil {
 		t.Fatal("status.async.current = nil, want populated delete breadcrumb")

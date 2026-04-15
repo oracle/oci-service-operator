@@ -132,6 +132,7 @@ func (c *redisRuntimeClient) CreateOrUpdate(
 	if err != nil {
 		return c.fail(resource, normalizeRedisOCIError(err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -161,11 +162,15 @@ func (c *redisRuntimeClient) Delete(ctx context.Context, resource *redisv1beta1.
 	})
 	if err != nil {
 		if isRedisDeleteNotFoundOCI(err) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI RedisCluster no longer exists")
 			return true, nil
 		}
-		return false, normalizeRedisOCIError(err)
+		err = normalizeRedisOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -193,6 +198,7 @@ func (c *redisRuntimeClient) resolveOrCreate(ctx context.Context, resource *redi
 	if err != nil {
 		return c.fail(resource, normalizeRedisOCIError(err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	if response.RedisCluster.Id != nil {
 		if err := c.projectStatus(resource, response.RedisCluster); err != nil {
@@ -328,10 +334,13 @@ func (c *redisRuntimeClient) resumeDelete(
 			current, readErr := c.getRedisCluster(ctx, trackedID)
 			if readErr != nil {
 				if isRedisDeleteNotFoundOCI(readErr) {
+					c.recordErrorRequestID(resource, readErr)
 					c.markDeleted(resource, "OCI RedisCluster deleted")
 					return true, nil
 				}
-				return false, normalizeRedisOCIError(readErr)
+				readErr = normalizeRedisOCIError(readErr)
+				c.recordErrorRequestID(resource, readErr)
+				return false, readErr
 			}
 			if current.LifecycleState == redissdk.RedisClusterLifecycleStateDeleted {
 				c.markDeleted(resource, "OCI RedisCluster deleted")
@@ -340,7 +349,9 @@ func (c *redisRuntimeClient) resumeDelete(
 			c.markDeleteProgress(resource, fmt.Sprintf("RedisCluster delete work request %s is no longer readable; waiting for RedisCluster %s to disappear", workRequestID, trackedID))
 			return false, nil
 		}
-		return false, normalizeRedisOCIError(err)
+		err = normalizeRedisOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
 
 	currentAsync, err := redisWorkRequestAsyncOperation(resource, workRequest, shared.OSOKAsyncPhaseDelete)
@@ -368,6 +379,7 @@ func (c *redisRuntimeClient) resumeDelete(
 		current, err := c.getRedisCluster(ctx, trackedID)
 		if err != nil {
 			if isRedisDeleteNotFoundOCI(err) {
+				c.recordErrorRequestID(resource, err)
 				c.markDeleted(resource, "OCI RedisCluster deleted")
 				return true, nil
 			}
@@ -615,6 +627,7 @@ func (c *redisRuntimeClient) failAsyncOperation(
 	if current == nil {
 		return c.fail(resource, err)
 	}
+	c.recordErrorRequestID(resource, err)
 
 	class := current.NormalizedClass
 	switch class {
@@ -657,6 +670,7 @@ func (c *redisRuntimeClient) fail(
 	err error,
 ) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	now := metav1.Now()
 	status.UpdatedAt = &now
 	status.Message = err.Error()
@@ -671,6 +685,20 @@ func (c *redisRuntimeClient) fail(
 	}
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
+
+func (c *redisRuntimeClient) recordResponseRequestID(resource *redisv1beta1.RedisCluster, response any) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+}
+
+func (c *redisRuntimeClient) recordErrorRequestID(resource *redisv1beta1.RedisCluster, err error) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 }
 
 func (c *redisRuntimeClient) markDeleted(resource *redisv1beta1.RedisCluster, message string) {

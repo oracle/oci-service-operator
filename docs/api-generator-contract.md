@@ -96,9 +96,17 @@ The checked-in async contract is now explicit on the selected surface:
   runtime today. Within the embedded shared OSOK status object, the canonical
   field is `status.async.current.workRequestId`; on the CR it is exposed at
   `.status.status.async.current.workRequestId`.
+- `status.opcRequestId` is the canonical shared OCI request-correlation field
+  for controller-backed resources. On the CR it is exposed at
+  `.status.status.opcRequestId`.
 - Lifecycle resources may seed that shared breadcrumb from opening create,
   update, or delete responses carrying `OpcWorkRequestId` without changing
   `async.strategy` to `workrequest`.
+- Generated service-manager scaffolds that use `generatedruntime` inherit
+  `status.opcRequestId` capture from the shared runtime automatically.
+  Handwritten runtimes must publish the same field explicitly from mutating
+  OCI response headers and surfaced OCI service errors; they must not invent
+  resource-local replacements.
 - `nosql/Table` is the lifecycle-only reference migration. `queue/Queue` and
   `redis/RedisCluster` are the workrequest-backed reference migrations.
 - `queue/Queue` keeps its legacy work-request ID mirrors only for the current

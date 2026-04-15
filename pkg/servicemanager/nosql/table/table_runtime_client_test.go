@@ -14,6 +14,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	nosqlsdk "github.com/oracle/oci-go-sdk/v65/nosql"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -146,7 +147,7 @@ func TestExplicitTableServiceClientCreatesAndProjectsStatus(t *testing.T) {
 		},
 		createTableFn: func(_ context.Context, req nosqlsdk.CreateTableRequest) (nosqlsdk.CreateTableResponse, error) {
 			createRequest = req
-			return nosqlsdk.CreateTableResponse{}, nil
+			return nosqlsdk.CreateTableResponse{OpcRequestId: common.String("opc-create-1")}, nil
 		},
 		getTableFn: func(_ context.Context, req nosqlsdk.GetTableRequest) (nosqlsdk.GetTableResponse, error) {
 			if req.TableNameOrId == nil || *req.TableNameOrId != "orders" {
@@ -175,6 +176,9 @@ func TestExplicitTableServiceClientCreatesAndProjectsStatus(t *testing.T) {
 	if string(resource.Status.OsokStatus.Ocid) != "ocid1.table.oc1..created" {
 		t.Fatalf("status.ocid = %q, want created OCID", resource.Status.OsokStatus.Ocid)
 	}
+	if resource.Status.OsokStatus.OpcRequestID != "opc-create-1" {
+		t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-create-1")
+	}
 	if resource.Status.Id != "ocid1.table.oc1..created" {
 		t.Fatalf("status.id = %q, want created OCID", resource.Status.Id)
 	}
@@ -183,6 +187,28 @@ func TestExplicitTableServiceClientCreatesAndProjectsStatus(t *testing.T) {
 	}
 	if resource.Status.OsokStatus.Async.Current != nil {
 		t.Fatalf("status.async.current = %#v, want cleared tracker", resource.Status.OsokStatus.Async.Current)
+	}
+}
+
+func TestExplicitTableServiceClientCreateFailureCapturesOpcRequestID(t *testing.T) {
+	t.Parallel()
+
+	client := testTableClient(&fakeTableOCIClient{
+		createTableFn: func(_ context.Context, _ nosqlsdk.CreateTableRequest) (nosqlsdk.CreateTableResponse, error) {
+			return nosqlsdk.CreateTableResponse{}, errortest.NewServiceError(409, "IncorrectState", "create conflict")
+		},
+	})
+
+	resource := makeTableResource()
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want create failure")
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful response", response)
+	}
+	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
+		t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-request-id")
 	}
 }
 

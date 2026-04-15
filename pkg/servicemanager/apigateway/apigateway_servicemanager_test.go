@@ -12,6 +12,7 @@ import (
 	apigatewaysdk "github.com/oracle/oci-go-sdk/v65/apigateway"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	apigatewayv1beta1 "github.com/oracle/oci-service-operator/api/apigateway/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	smanager "github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -207,7 +208,10 @@ func TestGatewayCreateOrUpdateCreateSuccess(t *testing.T) {
 			return apigatewaysdk.ListGatewaysResponse{}, nil
 		},
 		createGatewayFn: func(_ context.Context, _ apigatewaysdk.CreateGatewayRequest) (apigatewaysdk.CreateGatewayResponse, error) {
-			return apigatewaysdk.CreateGatewayResponse{Gateway: apigatewaysdk.Gateway{Id: common.String(gatewayID)}}, nil
+			return apigatewaysdk.CreateGatewayResponse{
+				Gateway:      apigatewaysdk.Gateway{Id: common.String(gatewayID)},
+				OpcRequestId: common.String("opc-gateway-create-1"),
+			}, nil
 		},
 		getGatewayFn: func(_ context.Context, _ apigatewaysdk.GetGatewayRequest) (apigatewaysdk.GetGatewayResponse, error) {
 			return apigatewaysdk.GetGatewayResponse{
@@ -235,6 +239,7 @@ func TestGatewayCreateOrUpdateCreateSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, response.IsSuccessful)
 	assert.Equal(t, shared.OCID(gatewayID), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, "opc-gateway-create-1", resource.Status.OsokStatus.OpcRequestID)
 	assert.True(t, secretCreated)
 }
 
@@ -253,7 +258,7 @@ func TestGatewayCreateOrUpdateBindByID(t *testing.T) {
 			}, nil
 		},
 		updateGatewayFn: func(_ context.Context, _ apigatewaysdk.UpdateGatewayRequest) (apigatewaysdk.UpdateGatewayResponse, error) {
-			return apigatewaysdk.UpdateGatewayResponse{}, nil
+			return apigatewaysdk.UpdateGatewayResponse{OpcRequestId: common.String("opc-gateway-update-1")}, nil
 		},
 	}, &fakeCredentialClient{})
 
@@ -261,7 +266,7 @@ func TestGatewayCreateOrUpdateBindByID(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{Name: "bound-gw", Namespace: "default"},
 		Spec: apigatewayv1beta1.ApiGatewaySpec{
 			ApiGatewayId: "ocid1.apigateway.oc1..bound",
-			DisplayName:  "bound-gw",
+			DisplayName:  "bound-gw-updated",
 			EndpointType: "PUBLIC",
 			SubnetId:     "ocid1.subnet.oc1..example",
 		},
@@ -271,6 +276,32 @@ func TestGatewayCreateOrUpdateBindByID(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, response.IsSuccessful)
 	assert.Equal(t, shared.OCID(gatewayID), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, "opc-gateway-update-1", resource.Status.OsokStatus.OpcRequestID)
+}
+
+func TestGatewayCreateOrUpdateCreateFailureCapturesOpcRequestID(t *testing.T) {
+	manager := makeGatewayManager(&mockGatewayClient{
+		listGatewaysFn: func(_ context.Context, _ apigatewaysdk.ListGatewaysRequest) (apigatewaysdk.ListGatewaysResponse, error) {
+			return apigatewaysdk.ListGatewaysResponse{}, nil
+		},
+		createGatewayFn: func(_ context.Context, _ apigatewaysdk.CreateGatewayRequest) (apigatewaysdk.CreateGatewayResponse, error) {
+			return apigatewaysdk.CreateGatewayResponse{}, errortest.NewServiceError(409, "IncorrectState", "create conflict")
+		},
+	}, &fakeCredentialClient{})
+
+	resource := &apigatewayv1beta1.ApiGateway{
+		Spec: apigatewayv1beta1.ApiGatewaySpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			DisplayName:   "test-gw",
+			EndpointType:  "PUBLIC",
+			SubnetId:      "ocid1.subnet.oc1..example",
+		},
+	}
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	assert.Error(t, err)
+	assert.False(t, response.IsSuccessful)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
 }
 
 func TestGatewayDeleteUsesSpecID(t *testing.T) {
@@ -280,7 +311,7 @@ func TestGatewayDeleteUsesSpecID(t *testing.T) {
 	manager := makeGatewayManager(&mockGatewayClient{
 		deleteGatewayFn: func(_ context.Context, req apigatewaysdk.DeleteGatewayRequest) (apigatewaysdk.DeleteGatewayResponse, error) {
 			deletedID = *req.GatewayId
-			return apigatewaysdk.DeleteGatewayResponse{}, nil
+			return apigatewaysdk.DeleteGatewayResponse{OpcRequestId: common.String("opc-gateway-delete-1")}, nil
 		},
 		getGatewayFn: func(_ context.Context, req apigatewaysdk.GetGatewayRequest) (apigatewaysdk.GetGatewayResponse, error) {
 			return apigatewaysdk.GetGatewayResponse{
@@ -302,6 +333,7 @@ func TestGatewayDeleteUsesSpecID(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, done)
 	assert.Equal(t, gatewayID, deletedID)
+	assert.Equal(t, "opc-gateway-delete-1", resource.Status.OsokStatus.OpcRequestID)
 }
 
 func TestDeploymentCreateOrUpdateCreateSuccess(t *testing.T) {
@@ -312,7 +344,10 @@ func TestDeploymentCreateOrUpdateCreateSuccess(t *testing.T) {
 			return apigatewaysdk.ListDeploymentsResponse{}, nil
 		},
 		createDeploymentFn: func(_ context.Context, _ apigatewaysdk.CreateDeploymentRequest) (apigatewaysdk.CreateDeploymentResponse, error) {
-			return apigatewaysdk.CreateDeploymentResponse{Deployment: apigatewaysdk.Deployment{Id: common.String(deploymentID)}}, nil
+			return apigatewaysdk.CreateDeploymentResponse{
+				Deployment:   apigatewaysdk.Deployment{Id: common.String(deploymentID)},
+				OpcRequestId: common.String("opc-deployment-create-1"),
+			}, nil
 		},
 		getDeploymentFn: func(_ context.Context, _ apigatewaysdk.GetDeploymentRequest) (apigatewaysdk.GetDeploymentResponse, error) {
 			return apigatewaysdk.GetDeploymentResponse{
@@ -339,6 +374,7 @@ func TestDeploymentCreateOrUpdateCreateSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, response.IsSuccessful)
 	assert.Equal(t, shared.OCID(deploymentID), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, "opc-deployment-create-1", resource.Status.OsokStatus.OpcRequestID)
 }
 
 func TestDeploymentDeleteUsesSpecID(t *testing.T) {
@@ -348,7 +384,7 @@ func TestDeploymentDeleteUsesSpecID(t *testing.T) {
 	manager := makeDeploymentManager(&mockDeploymentClient{
 		deleteDeploymentFn: func(_ context.Context, req apigatewaysdk.DeleteDeploymentRequest) (apigatewaysdk.DeleteDeploymentResponse, error) {
 			deletedID = *req.DeploymentId
-			return apigatewaysdk.DeleteDeploymentResponse{}, nil
+			return apigatewaysdk.DeleteDeploymentResponse{OpcRequestId: common.String("opc-deployment-delete-1")}, nil
 		},
 		getDeploymentFn: func(_ context.Context, req apigatewaysdk.GetDeploymentRequest) (apigatewaysdk.GetDeploymentResponse, error) {
 			return apigatewaysdk.GetDeploymentResponse{
@@ -370,6 +406,7 @@ func TestDeploymentDeleteUsesSpecID(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, done)
 	assert.Equal(t, deploymentID, deletedID)
+	assert.Equal(t, "opc-deployment-delete-1", resource.Status.OsokStatus.OpcRequestID)
 }
 
 func TestGetCrdStatusWrongType(t *testing.T) {

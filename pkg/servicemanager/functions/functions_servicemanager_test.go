@@ -183,6 +183,7 @@ func TestFunctionsApplicationCreateOrUpdateTracked404FallsBackToCreate(t *testin
 				t.Fatalf("CreateApplicationDetails.DisplayName = %q, want sample-app", got)
 			}
 			return ocifunctions.CreateApplicationResponse{
+				OpcRequestId: common.String("opc-create-app-1"),
 				Application: ocifunctions.Application{
 					Id:             common.String("ocid1.application.oc1..created"),
 					DisplayName:    common.String("sample-app"),
@@ -219,6 +220,9 @@ func TestFunctionsApplicationCreateOrUpdateTracked404FallsBackToCreate(t *testin
 	}
 	if got := resource.Status.Id; got != "ocid1.application.oc1..created" {
 		t.Fatalf("status.id = %q, want created OCID", got)
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-create-app-1" {
+		t.Fatalf("status.opcRequestId = %q, want %q", got, "opc-create-app-1")
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Provisioning {
 		t.Fatalf("status.conditions = %#v, want trailing Provisioning condition", resource.Status.OsokStatus.Conditions)
@@ -275,6 +279,9 @@ func TestFunctionsApplicationDeleteTreatsRead404AsDeleted(t *testing.T) {
 	if resource.Status.OsokStatus.Ocid != "" {
 		t.Fatalf("status.ocid = %q, want cleared tracked ocid", resource.Status.OsokStatus.Ocid)
 	}
+	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
+		t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-request-id")
+	}
 }
 
 func TestFunctionsFunctionDeleteTreatsDelete404AsDeletedAndIgnoresMissingSecret(t *testing.T) {
@@ -328,6 +335,9 @@ func TestFunctionsFunctionDeleteTreatsDelete404AsDeletedAndIgnoresMissingSecret(
 	if resource.Status.OsokStatus.Ocid != "" {
 		t.Fatalf("status.ocid = %q, want cleared tracked ocid", resource.Status.OsokStatus.Ocid)
 	}
+	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
+		t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-request-id")
+	}
 }
 
 func TestFunctionsFunctionCreateOrUpdateBadRequestCapturesOCIErrorCode(t *testing.T) {
@@ -370,6 +380,9 @@ func TestFunctionsFunctionCreateOrUpdateBadRequestCapturesOCIErrorCode(t *testin
 	}
 	if got := resource.Status.OsokStatus.Message; got != "InvalidParameter" {
 		t.Fatalf("status.message = %q, want OCI error code InvalidParameter", got)
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-request-id" {
+		t.Fatalf("status.opcRequestId = %q, want %q", got, "opc-request-id")
 	}
 	if got := resource.Status.OsokStatus.Reason; got != string(shared.Failed) {
 		t.Fatalf("status.reason = %q, want Failed", got)

@@ -140,6 +140,7 @@ func (c *GatewayServiceManager) UpdateGateway(ctx context.Context, gw *apigatewa
 
 	existing, err := c.GetGateway(ctx, targetID, nil)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 		return err
 	}
 
@@ -149,14 +150,17 @@ func (c *GatewayServiceManager) UpdateGateway(ctx context.Context, gw *apigatewa
 
 	if gw.Spec.CompartmentId != "" &&
 		(existing.CompartmentId == nil || *existing.CompartmentId != string(gw.Spec.CompartmentId)) {
-		if _, err = client.ChangeGatewayCompartment(ctx, apigatewaysdk.ChangeGatewayCompartmentRequest{
+		response, err := client.ChangeGatewayCompartment(ctx, apigatewaysdk.ChangeGatewayCompartmentRequest{
 			GatewayId: common.String(string(targetID)),
 			ChangeGatewayCompartmentDetails: apigatewaysdk.ChangeGatewayCompartmentDetails{
 				CompartmentId: common.String(string(gw.Spec.CompartmentId)),
 			},
-		}); err != nil {
+		})
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
 			return err
 		}
+		servicemanager.RecordResponseOpcRequestID(&gw.Status.OsokStatus, response)
 	}
 
 	updateDetails, updateNeeded := buildGatewayUpdateDetails(gw, existing)
@@ -168,7 +172,12 @@ func (c *GatewayServiceManager) UpdateGateway(ctx context.Context, gw *apigatewa
 		GatewayId:            common.String(string(targetID)),
 		UpdateGatewayDetails: updateDetails,
 	}
-	_, err = client.UpdateGateway(ctx, req)
+	response, err := client.UpdateGateway(ctx, req)
+	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
+		return err
+	}
+	servicemanager.RecordResponseOpcRequestID(&gw.Status.OsokStatus, response)
 	return err
 }
 
@@ -245,7 +254,7 @@ func validateGatewayUnsupportedChanges(gw *apigatewayv1beta1.ApiGateway, existin
 }
 
 // DeleteGateway deletes the API Gateway for the given OCID.
-func (c *GatewayServiceManager) DeleteGateway(ctx context.Context, gatewayID shared.OCID) error {
+func (c *GatewayServiceManager) DeleteGateway(ctx context.Context, gw *apigatewayv1beta1.ApiGateway, gatewayID shared.OCID) error {
 	client, err := c.getGatewayClientOrCreate()
 	if err != nil {
 		return err
@@ -255,7 +264,14 @@ func (c *GatewayServiceManager) DeleteGateway(ctx context.Context, gatewayID sha
 		GatewayId: common.String(string(gatewayID)),
 	}
 
-	_, err = client.DeleteGateway(ctx, req)
+	response, err := client.DeleteGateway(ctx, req)
+	if gw != nil {
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&gw.Status.OsokStatus, err)
+		} else {
+			servicemanager.RecordResponseOpcRequestID(&gw.Status.OsokStatus, response)
+		}
+	}
 	return err
 }
 

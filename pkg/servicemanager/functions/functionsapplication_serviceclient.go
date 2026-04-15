@@ -14,6 +14,7 @@ import (
 	ocifunctions "github.com/oracle/oci-go-sdk/v65/functions"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	"github.com/oracle/oci-service-operator/pkg/shared"
 )
 
@@ -56,9 +57,15 @@ func (m *FunctionsApplicationServiceManager) CreateApplication(
 		return ocifunctions.CreateApplicationResponse{}, fmt.Errorf("build Functions Application create details: %w", err)
 	}
 
-	return client.CreateApplication(ctx, ocifunctions.CreateApplicationRequest{
+	response, err := client.CreateApplication(ctx, ocifunctions.CreateApplicationRequest{
 		CreateApplicationDetails: details,
 	})
+	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		return ocifunctions.CreateApplicationResponse{}, err
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+	return response, nil
 }
 
 func (m *FunctionsApplicationServiceManager) GetApplication(
@@ -163,12 +170,14 @@ func (m *FunctionsApplicationServiceManager) UpdateApplication(
 		UpdateApplicationDetails: details,
 	})
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 		return nil, false, err
 	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
 	return &response.Application, true, nil
 }
 
-func (m *FunctionsApplicationServiceManager) DeleteApplication(ctx context.Context, applicationID shared.OCID) error {
+func (m *FunctionsApplicationServiceManager) DeleteApplication(ctx context.Context, resource *functionsv1beta1.Application, applicationID shared.OCID) error {
 	if strings.TrimSpace(string(applicationID)) == "" {
 		return nil
 	}
@@ -178,8 +187,15 @@ func (m *FunctionsApplicationServiceManager) DeleteApplication(ctx context.Conte
 		return err
 	}
 
-	_, err = client.DeleteApplication(ctx, ocifunctions.DeleteApplicationRequest{
+	response, err := client.DeleteApplication(ctx, ocifunctions.DeleteApplicationRequest{
 		ApplicationId: common.String(string(applicationID)),
 	})
+	if resource != nil {
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		} else {
+			servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+		}
+	}
 	return err
 }

@@ -119,6 +119,7 @@ func (m *FunctionsApplicationServiceManager) resolveApplicationForReconcile(
 		current, err := m.GetApplication(ctx, trackedID, nil)
 		if err != nil {
 			if !isFunctionsNotFound(err) {
+				servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 				m.Log.ErrorLog(err, "error while getting Application from tracked OCID")
 				return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
 			}
@@ -135,6 +136,7 @@ func (m *FunctionsApplicationServiceManager) resolveApplicationForReconcile(
 
 	current, err := m.FindApplication(ctx, resource)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 		m.Log.ErrorLog(err, "error while listing Applications")
 		return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
 	}
@@ -166,7 +168,7 @@ func (m *FunctionsApplicationServiceManager) Delete(ctx context.Context, obj run
 		return true, nil
 	}
 
-	if err := m.DeleteApplication(ctx, targetID); err != nil {
+	if err := m.DeleteApplication(ctx, resource, targetID); err != nil {
 		if isFunctionsNotFound(err) {
 			clearTrackedFunctionsStatus(resource)
 			return true, nil
@@ -178,9 +180,11 @@ func (m *FunctionsApplicationServiceManager) Delete(ctx context.Context, obj run
 	current, err := m.GetApplication(ctx, targetID, nil)
 	if err != nil {
 		if isFunctionsNotFound(err) {
+			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 			clearTrackedFunctionsStatus(resource)
 			return true, nil
 		}
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 		return false, err
 	}
 	if err := projectFunctionsResponseIntoStatus(resource, current); err != nil {

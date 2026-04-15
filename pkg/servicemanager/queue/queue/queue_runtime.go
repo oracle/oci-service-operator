@@ -125,6 +125,7 @@ func (c *queueRuntimeClient) CreateOrUpdate(ctx context.Context, resource *queue
 	if err != nil {
 		return c.fail(resource, normalizeQueueOCIError(err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -155,11 +156,15 @@ func (c *queueRuntimeClient) Delete(ctx context.Context, resource *queuev1beta1.
 	})
 	if err != nil {
 		if isQueueDeleteNotFoundOCI(err) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
-		return false, normalizeQueueOCIError(err)
+		err = normalizeQueueOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID = strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -176,6 +181,7 @@ func (c *queueRuntimeClient) create(ctx context.Context, resource *queuev1beta1.
 	if err != nil {
 		return c.fail(resource, normalizeQueueOCIError(err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
 	if workRequestID == "" {
@@ -264,10 +270,13 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 			current, readErr := c.getQueue(ctx, trackedID)
 			if readErr != nil {
 				if isQueueDeleteNotFoundOCI(readErr) {
+					c.recordErrorRequestID(resource, readErr)
 					c.markDeleted(resource, "OCI Queue deleted")
 					return true, nil
 				}
-				return false, normalizeQueueOCIError(readErr)
+				readErr = normalizeQueueOCIError(readErr)
+				c.recordErrorRequestID(resource, readErr)
+				return false, readErr
 			}
 			if current.LifecycleState == queuesdk.QueueLifecycleStateDeleted {
 				c.markDeleted(resource, "OCI Queue deleted")
@@ -276,7 +285,9 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 			c.markDeleteProgress(resource, fmt.Sprintf("Queue delete work request %s is no longer readable; waiting for Queue %s to disappear", workRequestID, trackedID))
 			return false, nil
 		}
-		return false, normalizeQueueOCIError(err)
+		err = normalizeQueueOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
 
 	currentAsync, err := queueWorkRequestAsyncOperation(resource, workRequest, shared.OSOKAsyncPhaseDelete)
@@ -304,6 +315,7 @@ func (c *queueRuntimeClient) resumeDelete(ctx context.Context, resource *queuev1
 		current, err := c.getQueue(ctx, trackedID)
 		if err != nil {
 			if isQueueDeleteNotFoundOCI(err) {
+				c.recordErrorRequestID(resource, err)
 				c.markDeleted(resource, "OCI Queue deleted")
 				return true, nil
 			}
@@ -505,6 +517,7 @@ func (c *queueRuntimeClient) failAsyncOperation(resource *queuev1beta1.Queue, cu
 	if current == nil {
 		return c.fail(resource, err)
 	}
+	c.recordErrorRequestID(resource, err)
 
 	class := current.NormalizedClass
 	switch class {
@@ -528,6 +541,7 @@ func (c *queueRuntimeClient) markDeleteProgress(resource *queuev1beta1.Queue, me
 
 func (c *queueRuntimeClient) fail(resource *queuev1beta1.Queue, err error) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	now := metav1.Now()
 	status.UpdatedAt = &now
 	status.Message = err.Error()
@@ -542,6 +556,20 @@ func (c *queueRuntimeClient) fail(resource *queuev1beta1.Queue, err error) (serv
 	}
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
+
+func (c *queueRuntimeClient) recordResponseRequestID(resource *queuev1beta1.Queue, response any) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+}
+
+func (c *queueRuntimeClient) recordErrorRequestID(resource *queuev1beta1.Queue, err error) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 }
 
 func (c *queueRuntimeClient) markDeleted(resource *queuev1beta1.Queue, message string) {

@@ -104,7 +104,7 @@ func (c *explicitTableServiceClient) CreateOrUpdate(
 	}
 
 	if existing.compartmentID != "" && resource.Spec.CompartmentId != "" && resource.Spec.CompartmentId != existing.compartmentID {
-		if err := c.changeTableCompartment(ctx, existing.id, existing.compartmentID, resource.Spec.CompartmentId); err != nil {
+		if err := c.changeTableCompartment(ctx, resource, existing.id, existing.compartmentID, resource.Spec.CompartmentId); err != nil {
 			return c.fail(resource, err)
 		}
 
@@ -130,7 +130,7 @@ func (c *explicitTableServiceClient) CreateOrUpdate(
 		return c.finishWithLifecycle(resource, existing, shared.OSOKAsyncPhaseUpdate), nil
 	}
 
-	if err := c.updateTable(ctx, existing.id, updateDetails); err != nil {
+	if err := c.updateTable(ctx, resource, existing.id, updateDetails); err != nil {
 		return c.fail(resource, err)
 	}
 
@@ -154,6 +154,7 @@ func (c *explicitTableServiceClient) Delete(ctx context.Context, resource *nosql
 
 	target, err := c.resolveDeleteTarget(ctx, resource)
 	if err != nil {
+		c.recordErrorRequestID(resource, err)
 		return false, err
 	}
 	if target == nil {
@@ -177,7 +178,7 @@ func (c *explicitTableServiceClient) Delete(ctx context.Context, resource *nosql
 	if target.id == "" {
 		return false, fmt.Errorf("resolve Table delete target: missing table OCID")
 	}
-	if err := c.deleteTable(ctx, target.id); err != nil {
+	if err := c.deleteTable(ctx, resource, target.id); err != nil {
 		if errors.Is(err, errTableNotFound) {
 			c.markDeleted(resource, "OCI table no longer exists")
 			return true, nil
@@ -255,12 +256,15 @@ func (c *explicitTableServiceClient) createTable(
 	ctx context.Context,
 	resource *nosqlv1beta1.Table,
 ) (servicemanager.OSOKResponse, error) {
-	if _, err := c.oci.CreateTable(ctx, buildCreateRequest(resource)); err != nil {
+	response, err := c.oci.CreateTable(ctx, buildCreateRequest(resource))
+	if err != nil {
 		if isNotFoundErr(err) {
+			c.recordErrorRequestID(resource, err)
 			return c.fail(resource, errTableNotFound)
 		}
 		return c.fail(resource, fmt.Errorf("create Table: %w", err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	refreshed, err := c.readTable(ctx, resource, "")
 	if err != nil {
@@ -441,55 +445,63 @@ func (c *explicitTableServiceClient) findTableByName(
 
 func (c *explicitTableServiceClient) changeTableCompartment(
 	ctx context.Context,
+	resource *nosqlv1beta1.Table,
 	tableID string,
 	fromCompartmentID string,
 	toCompartmentID string,
 ) error {
-	_, err := c.oci.ChangeTableCompartment(ctx, nosqlsdk.ChangeTableCompartmentRequest{
+	response, err := c.oci.ChangeTableCompartment(ctx, nosqlsdk.ChangeTableCompartmentRequest{
 		TableNameOrId: common.String(tableID),
 		ChangeTableCompartmentDetails: nosqlsdk.ChangeTableCompartmentDetails{
 			ToCompartmentId:   common.String(toCompartmentID),
 			FromCompartmentId: optionalString(fromCompartmentID),
 		},
 	})
-	if err != nil && isNotFoundErr(err) {
-		return errTableNotFound
-	}
 	if err != nil {
+		c.recordErrorRequestID(resource, err)
+		if isNotFoundErr(err) {
+			return errTableNotFound
+		}
 		return fmt.Errorf("change Table compartment: %w", err)
 	}
+	c.recordResponseRequestID(resource, response)
 	return nil
 }
 
 func (c *explicitTableServiceClient) updateTable(
 	ctx context.Context,
+	resource *nosqlv1beta1.Table,
 	tableID string,
 	details nosqlsdk.UpdateTableDetails,
 ) error {
-	_, err := c.oci.UpdateTable(ctx, nosqlsdk.UpdateTableRequest{
+	response, err := c.oci.UpdateTable(ctx, nosqlsdk.UpdateTableRequest{
 		TableNameOrId:      common.String(tableID),
 		UpdateTableDetails: details,
 	})
-	if err != nil && isNotFoundErr(err) {
-		return errTableNotFound
-	}
 	if err != nil {
+		c.recordErrorRequestID(resource, err)
+		if isNotFoundErr(err) {
+			return errTableNotFound
+		}
 		return fmt.Errorf("update Table: %w", err)
 	}
+	c.recordResponseRequestID(resource, response)
 	return nil
 }
 
-func (c *explicitTableServiceClient) deleteTable(ctx context.Context, tableID string) error {
-	_, err := c.oci.DeleteTable(ctx, nosqlsdk.DeleteTableRequest{
+func (c *explicitTableServiceClient) deleteTable(ctx context.Context, resource *nosqlv1beta1.Table, tableID string) error {
+	response, err := c.oci.DeleteTable(ctx, nosqlsdk.DeleteTableRequest{
 		TableNameOrId: common.String(tableID),
 		IsIfExists:    common.Bool(true),
 	})
-	if err != nil && isNotFoundErr(err) {
-		return errTableNotFound
-	}
 	if err != nil {
+		c.recordErrorRequestID(resource, err)
+		if isNotFoundErr(err) {
+			return errTableNotFound
+		}
 		return fmt.Errorf("delete Table: %w", err)
 	}
+	c.recordResponseRequestID(resource, response)
 	return nil
 }
 
@@ -666,6 +678,7 @@ func (c *explicitTableServiceClient) fail(
 ) (servicemanager.OSOKResponse, error) {
 	if resource != nil {
 		status := &resource.Status.OsokStatus
+		servicemanager.RecordErrorOpcRequestID(status, err)
 		now := metav1.Now()
 		status.UpdatedAt = &now
 		status.Message = err.Error()
@@ -681,6 +694,20 @@ func (c *explicitTableServiceClient) fail(
 		*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.log)
 	}
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
+
+func (c *explicitTableServiceClient) recordResponseRequestID(resource *nosqlv1beta1.Table, response any) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+}
+
+func (c *explicitTableServiceClient) recordErrorRequestID(resource *nosqlv1beta1.Table, err error) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 }
 
 func currentTableID(resource *nosqlv1beta1.Table) string {

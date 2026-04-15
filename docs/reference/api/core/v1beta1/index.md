@@ -115,6 +115,7 @@ DrgDefaultDrgRouteTables defines nested fields for Drg.DefaultDrgRouteTables.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -637,6 +638,7 @@ InstanceSourceDetailsInstanceSourceImageFilterDetails defines nested fields for 
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -740,6 +742,7 @@ InternetGatewayStatus defines the observed state of InternetGateway.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -847,6 +850,7 @@ NatGatewayStatus defines the observed state of NatGateway.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -946,6 +950,7 @@ NetworkSecurityGroupStatus defines the observed state of NetworkSecurityGroup.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -1079,6 +1084,7 @@ RouteTableRouteRule defines nested fields for RouteTable.RouteRule.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -1590,6 +1596,7 @@ SecurityListIngressSecurityRuleUdpOptionsSourcePortRange defines nested fields f
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -1717,6 +1724,7 @@ ServiceGatewayService defines nested fields for ServiceGateway.Service.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -1840,6 +1848,7 @@ SubnetStatus defines the observed state of Subnet.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |
@@ -1966,6 +1975,7 @@ VcnStatus defines the observed state of Vcn.
 | `deletedAt` | - | `string (date-time)` | No | - | - |
 | `message` | - | `string` | No | - | - |
 | `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
 | `reason` | - | `string` | No | - | - |
 | `requestedAt` | - | `string (date-time)` | No | - | - |
 | `updatedAt` | - | `string (date-time)` | No | - | - |

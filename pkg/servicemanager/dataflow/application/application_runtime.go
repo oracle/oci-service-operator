@@ -92,6 +92,7 @@ func (c *applicationRuntimeClient) CreateOrUpdate(ctx context.Context, resource 
 		if err != nil {
 			return c.fail(resource, normalizeApplicationOCIError(err))
 		}
+		c.recordResponseRequestID(resource, response)
 		current = response.Application
 	}
 
@@ -117,19 +118,25 @@ func (c *applicationRuntimeClient) Delete(ctx context.Context, resource *dataflo
 	}
 	if _, err := c.client.DeleteApplication(ctx, deleteRequest); err != nil {
 		if isApplicationDeleteNotFoundOCI(err) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
-		return false, normalizeApplicationOCIError(err)
+		err = normalizeApplicationOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
 		if isApplicationDeleteNotFoundOCI(err) {
+			c.recordErrorRequestID(resource, err)
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
-		return false, normalizeApplicationOCIError(err)
+		err = normalizeApplicationOCIError(err)
+		c.recordErrorRequestID(resource, err)
+		return false, err
 	}
 
 	if err := c.projectStatus(resource, current); err != nil {
@@ -151,6 +158,7 @@ func (c *applicationRuntimeClient) create(ctx context.Context, resource *dataflo
 	if err != nil {
 		return c.fail(resource, normalizeApplicationOCIError(err))
 	}
+	c.recordResponseRequestID(resource, response)
 
 	if err := c.projectStatus(resource, response.Application); err != nil {
 		return c.fail(resource, err)
@@ -451,12 +459,27 @@ func (c *applicationRuntimeClient) applyLifecycle(resource *dataflowv1beta1.Appl
 
 func (c *applicationRuntimeClient) fail(resource *dataflowv1beta1.Application, err error) (servicemanager.OSOKResponse, error) {
 	status := &resource.Status.OsokStatus
+	servicemanager.RecordErrorOpcRequestID(status, err)
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
 	updatedAt := metav1Time(time.Now())
 	status.UpdatedAt = &updatedAt
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
+
+func (c *applicationRuntimeClient) recordResponseRequestID(resource *dataflowv1beta1.Application, response any) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+}
+
+func (c *applicationRuntimeClient) recordErrorRequestID(resource *dataflowv1beta1.Application, err error) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 }
 
 func (c *applicationRuntimeClient) markDeleted(resource *dataflowv1beta1.Application, message string) {

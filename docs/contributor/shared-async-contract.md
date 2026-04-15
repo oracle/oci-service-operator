@@ -16,6 +16,7 @@ The shared async tracker now lives at:
 - `.status.status.async.current.percentComplete`
 - `.status.status.async.current.message`
 - `.status.status.async.current.updatedAt`
+- `.status.status.opcRequestId`
 
 The schema is OSOK-owned. Public status never exposes provider SDK enum types;
 raw provider values are preserved only as plain strings in `rawStatus` and
@@ -25,7 +26,22 @@ Each published CR embeds `shared.OSOKStatus` under the resource-specific
 status field named `status`, so the shared tracker is exposed on the CR at
 `.status.status.async.current.workRequestId`. Within the embedded shared
 status object itself, `status.async.current.workRequestId` is the canonical
-field name.
+field name, and `status.opcRequestId` is the canonical OCI request-correlation
+field.
+
+## Request Correlation Rule
+
+`status.opcRequestId` means: the latest non-empty OCI request ID from a
+create, update, or delete response header, or from a surfaced OCI service
+error, that materially contributed to the current shared status mutation.
+
+For determinism:
+
+- Headerless follow-up observations preserve the last non-empty value.
+- Steady-state observe, list, and polling reads do not replace the field just
+  because they returned a fresh request ID.
+- A later mutating OCI response or surfaced OCI service error supersedes the
+  previous value when it carries a new non-empty request ID.
 
 ## Shared Mapping Rules
 
@@ -50,7 +66,13 @@ phase wins over any previously persisted `status.async.current.phase`.
 Persisted phase is only a fallback when the current observation cannot
 determine phase directly.
 
-## Header Capture Rule
+## Header Capture Rules
+
+When an opening OCI create, update, or delete response carries
+`OpcRequestId`, the runtime should seed `status.opcRequestId` immediately,
+before later follow-up observations drop the header. New controller-backed
+resources should inherit this through `generatedruntime` by default, and any
+future handwritten runtime must mirror the same shared field explicitly.
 
 When an opening OCI create, update, or delete response carries
 `OpcWorkRequestId`, the runtime should seed
@@ -61,7 +83,9 @@ That breadcrumb capture does not, by itself, promote a resource to
 `workrequest`. Lifecycle resources may still continue on read-after-write,
 lifecycle-state requeue, or confirm-delete follow-up behavior. Headerless
 in-flight follow-up observations should preserve the already seeded
-`workRequestId` until terminal completion or explicit tracker clear.
+`workRequestId` until terminal completion or explicit tracker clear, just as
+headerless follow-up observations preserve the last non-empty
+`status.opcRequestId`.
 
 ## Compatibility Window
 

@@ -102,6 +102,7 @@ type fakeCreateThingRequest struct {
 }
 
 type fakeCreateThingResponse struct {
+	OpcRequestId     *string   `presentIn:"header" name:"opc-request-id"`
 	OpcWorkRequestId *string   `presentIn:"header" name:"opc-work-request-id"`
 	Thing            fakeThing `presentIn:"body"`
 }
@@ -121,7 +122,8 @@ type fakeGetThingRequest struct {
 }
 
 type fakeGetThingResponse struct {
-	Thing fakeThing `presentIn:"body"`
+	OpcRequestId *string   `presentIn:"header" name:"opc-request-id"`
+	Thing        fakeThing `presentIn:"body"`
 }
 
 type FakeUpdateThingDetails struct {
@@ -138,6 +140,7 @@ type fakeUpdateThingRequest struct {
 }
 
 type fakeUpdateThingResponse struct {
+	OpcRequestId     *string   `presentIn:"header" name:"opc-request-id"`
 	OpcWorkRequestId *string   `presentIn:"header" name:"opc-work-request-id"`
 	Thing            fakeThing `presentIn:"body"`
 }
@@ -147,6 +150,7 @@ type fakeDeleteThingRequest struct {
 }
 
 type fakeDeleteThingResponse struct {
+	OpcRequestId     *string `presentIn:"header" name:"opc-request-id"`
 	OpcWorkRequestId *string `presentIn:"header" name:"opc-work-request-id"`
 }
 
@@ -215,6 +219,7 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 			Call: func(_ context.Context, request any) (any, error) {
 				createRequest = *request.(*fakeCreateThingRequest)
 				return fakeCreateThingResponse{
+					OpcRequestId: stringPtr("opc-create-1"),
 					Thing: fakeThing{
 						Id:             "ocid1.thing.oc1..create",
 						DisplayName:    "created-name",
@@ -253,6 +258,7 @@ func TestServiceClientCreateOrUpdateCreatesAndProjectsStatus(t *testing.T) {
 	requireCreateThingRequestMatchesSpec(t, createRequest, resource.Spec)
 	requireThingIDRequest(t, "get", getRequest.ThingId, "ocid1.thing.oc1..create")
 	requireStatusOCID(t, resource, "ocid1.thing.oc1..create")
+	requireStatusOpcRequestID(t, resource, "opc-create-1")
 	requireStringEqual(t, "status.id", resource.Status.Id, "ocid1.thing.oc1..create")
 	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "created-name")
 	requireStringEqual(t, "status.lifecycleState", resource.Status.LifecycleState, "ACTIVE")
@@ -307,6 +313,38 @@ func TestApplySuccessSetsLifecycleAsyncTrackerWhilePending(t *testing.T) {
 	if resource.Status.OsokStatus.Async.Current.NormalizedClass != shared.OSOKAsyncClassPending {
 		t.Fatalf("status.async.current.normalizedClass = %q, want %q", resource.Status.OsokStatus.Async.Current.NormalizedClass, shared.OSOKAsyncClassPending)
 	}
+}
+
+func TestServiceClientCreateOrUpdateCapturesOpcRequestIDFromOCIError(t *testing.T) {
+	t.Parallel()
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return nil, errortest.NewServiceError(409, "IncorrectState", "update conflict")
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..example",
+			DisplayName:   "desired-name",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want OCI failure")
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful response", response)
+	}
+	requireStatusOpcRequestID(t, resource, "opc-request-id")
+	requireTrailingCondition(t, resource, shared.Failed)
 }
 
 func TestApplySuccessClearsLifecycleAsyncTrackerWhenActive(t *testing.T) {
@@ -4117,6 +4155,20 @@ func TestResponseWorkRequestIDReadsOCIHeader(t *testing.T) {
 	}
 }
 
+func TestResponseRequestIDReadsOCIHeader(t *testing.T) {
+	t.Parallel()
+
+	if got := responseRequestID(fakeCreateThingResponse{
+		OpcRequestId: stringPtr("opc-create-1"),
+	}); got != "opc-create-1" {
+		t.Fatalf("responseRequestID(create) = %q, want %q", got, "opc-create-1")
+	}
+
+	if got := responseRequestID(fakeDeleteThingResponse{}); got != "" {
+		t.Fatalf("responseRequestID(delete) = %q, want empty string", got)
+	}
+}
+
 func requireCreateOrUpdateSuccess(t *testing.T, response servicemanager.OSOKResponse, err error) {
 	t.Helper()
 
@@ -4157,6 +4209,14 @@ func requireStatusOCID(t *testing.T, resource *fakeResource, want string) {
 
 	if got := string(resource.Status.OsokStatus.Ocid); got != want {
 		t.Fatalf("status.ocid = %q, want %q", got, want)
+	}
+}
+
+func requireStatusOpcRequestID(t *testing.T, resource *fakeResource, want string) {
+	t.Helper()
+
+	if got := resource.Status.OsokStatus.OpcRequestID; got != want {
+		t.Fatalf("status.opcRequestId = %q, want %q", got, want)
 	}
 }
 

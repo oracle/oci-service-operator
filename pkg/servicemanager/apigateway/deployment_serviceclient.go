@@ -179,6 +179,7 @@ func (c *DeploymentServiceManager) UpdateDeployment(ctx context.Context, dep *ap
 
 	existing, err := c.GetDeployment(ctx, targetID, nil)
 	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 		return err
 	}
 
@@ -188,14 +189,17 @@ func (c *DeploymentServiceManager) UpdateDeployment(ctx context.Context, dep *ap
 
 	if dep.Spec.CompartmentId != "" &&
 		(existing.CompartmentId == nil || *existing.CompartmentId != string(dep.Spec.CompartmentId)) {
-		if _, err = client.ChangeDeploymentCompartment(ctx, apigatewaysdk.ChangeDeploymentCompartmentRequest{
+		response, err := client.ChangeDeploymentCompartment(ctx, apigatewaysdk.ChangeDeploymentCompartmentRequest{
 			DeploymentId: common.String(string(targetID)),
 			ChangeDeploymentCompartmentDetails: apigatewaysdk.ChangeDeploymentCompartmentDetails{
 				CompartmentId: common.String(string(dep.Spec.CompartmentId)),
 			},
-		}); err != nil {
+		})
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
 			return err
 		}
+		servicemanager.RecordResponseOpcRequestID(&dep.Status.OsokStatus, response)
 	}
 
 	updateDetails, updateNeeded := buildDeploymentUpdateDetails(dep, existing)
@@ -207,7 +211,12 @@ func (c *DeploymentServiceManager) UpdateDeployment(ctx context.Context, dep *ap
 		DeploymentId:            common.String(string(targetID)),
 		UpdateDeploymentDetails: updateDetails,
 	}
-	_, err = client.UpdateDeployment(ctx, req)
+	response, err := client.UpdateDeployment(ctx, req)
+	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
+		return err
+	}
+	servicemanager.RecordResponseOpcRequestID(&dep.Status.OsokStatus, response)
 	return err
 }
 
@@ -250,7 +259,7 @@ func validateDeploymentUnsupportedChanges(dep *apigatewayv1beta1.ApiGatewayDeplo
 }
 
 // DeleteDeployment deletes the API Gateway Deployment for the given OCID.
-func (c *DeploymentServiceManager) DeleteDeployment(ctx context.Context, deploymentID shared.OCID) error {
+func (c *DeploymentServiceManager) DeleteDeployment(ctx context.Context, dep *apigatewayv1beta1.ApiGatewayDeployment, deploymentID shared.OCID) error {
 	client, err := c.getDeploymentClientOrCreate()
 	if err != nil {
 		return err
@@ -260,7 +269,14 @@ func (c *DeploymentServiceManager) DeleteDeployment(ctx context.Context, deploym
 		DeploymentId: common.String(string(deploymentID)),
 	}
 
-	_, err = client.DeleteDeployment(ctx, req)
+	response, err := client.DeleteDeployment(ctx, req)
+	if dep != nil {
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&dep.Status.OsokStatus, err)
+		} else {
+			servicemanager.RecordResponseOpcRequestID(&dep.Status.OsokStatus, response)
+		}
+	}
 	return err
 }
 
