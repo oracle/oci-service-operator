@@ -26,7 +26,7 @@ func TestServiceClientCreateFollowUpReadAfterWriteUsesMatrix(t *testing.T) {
 	focused := errortest.FocusedAsyncFollowUpCases(t)
 	cases := []errortest.AsyncFollowUpMatrixCase{
 		{Candidate: focused["notfound"], WantSuccessful: true},
-		{Candidate: focused["auth404"], WantSuccessful: true},
+		{Candidate: focused["auth404"], WantErrorType: focused["auth404"].NormalizedType},
 		{Candidate: focused["conflict"], WantErrorType: focused["conflict"].NormalizedType},
 		{Candidate: focused["internal"], WantErrorType: focused["internal"].NormalizedType},
 		{Candidate: focused["unavailable"], WantErrorType: focused["unavailable"].NormalizedType},
@@ -118,7 +118,7 @@ func TestServiceClientCreateWaitForWorkRequestFollowUpUsesMatrix(t *testing.T) {
 	focused := errortest.FocusedAsyncFollowUpCases(t)
 	cases := []errortest.AsyncFollowUpMatrixCase{
 		{Candidate: focused["notfound"], WantSuccessful: true},
-		{Candidate: focused["auth404"], WantSuccessful: true},
+		{Candidate: focused["auth404"], WantErrorType: focused["auth404"].NormalizedType},
 		{Candidate: focused["conflict"], WantErrorType: focused["conflict"].NormalizedType},
 		{Candidate: focused["internal"], WantErrorType: focused["internal"].NormalizedType},
 		{Candidate: focused["unavailable"], WantErrorType: focused["unavailable"].NormalizedType},
@@ -240,7 +240,7 @@ func TestServiceClientUpdateWaitForUpdatedStateFollowUpUsesMatrix(t *testing.T) 
 	focused := errortest.FocusedAsyncFollowUpCases(t)
 	cases := []errortest.AsyncFollowUpMatrixCase{
 		{Candidate: focused["notfound"], WantErrorSubstring: errResourceNotFound.Error()},
-		{Candidate: focused["auth404"], WantErrorSubstring: errResourceNotFound.Error()},
+		{Candidate: focused["auth404"], WantErrorType: focused["auth404"].NormalizedType},
 		{Candidate: focused["conflict"], WantErrorType: focused["conflict"].NormalizedType},
 		{Candidate: focused["internal"], WantErrorType: focused["internal"].NormalizedType},
 		{Candidate: focused["unavailable"], WantErrorType: focused["unavailable"].NormalizedType},

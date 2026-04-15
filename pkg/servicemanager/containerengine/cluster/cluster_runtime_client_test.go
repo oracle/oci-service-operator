@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	containerenginesdk "github.com/oracle/oci-go-sdk/v65/containerengine"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -357,7 +357,7 @@ func TestClusterCreateOrUpdateFallsBackFromStaleTrackedIDToListWithoutLifecycleQ
 				if gotClusterID != staleID {
 					t.Fatalf("get request clusterId = %q, want %q", gotClusterID, staleID)
 				}
-				return nil, fmt.Errorf("NotAuthorizedOrNotFound: cluster not found")
+				return nil, errortest.NewServiceError(404, "NotFound", "cluster not found")
 			},
 			Fields: clusterGetFields(),
 		},

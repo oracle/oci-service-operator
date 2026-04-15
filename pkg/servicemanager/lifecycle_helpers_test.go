@@ -2,9 +2,9 @@ package servicemanager
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
-	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,9 +64,9 @@ func TestIsNotFoundServiceErrorRecognizes404Only(t *testing.T) {
 		want bool
 	}{
 		{name: "nil", err: nil, want: false},
-		{name: "namespace not found", err: errortest.NewServiceError(404, "NamespaceNotFound", "namespace missing"), want: true},
-		{name: "auth-shaped not found", err: errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "missing"), want: true},
-		{name: "forbidden", err: errortest.NewServiceError(403, "NotAuthorized", "forbidden"), want: false},
+		{name: "namespace not found", err: newLifecycleTestServiceError(404, "NamespaceNotFound", "namespace missing"), want: true},
+		{name: "auth-shaped not found", err: newLifecycleTestServiceError(404, "NotAuthorizedOrNotFound", "missing"), want: true},
+		{name: "forbidden", err: newLifecycleTestServiceError(403, "NotAuthorized", "forbidden"), want: false},
 		{name: "generic", err: errors.New("boom"), want: false},
 	}
 
@@ -122,4 +122,41 @@ func TestIsSecretNotFoundErrorRecognizesKubernetesAndStringSignals(t *testing.T)
 	if IsSecretNotFoundError(errors.New("permission denied")) {
 		t.Fatal("IsSecretNotFoundError() should reject unrelated errors")
 	}
+}
+
+type lifecycleTestServiceError struct {
+	statusCode int
+	code       string
+	message    string
+}
+
+func newLifecycleTestServiceError(statusCode int, code string, message string) lifecycleTestServiceError {
+	if message == "" {
+		message = fmt.Sprintf("%d %s", statusCode, code)
+	}
+	return lifecycleTestServiceError{
+		statusCode: statusCode,
+		code:       code,
+		message:    message,
+	}
+}
+
+func (e lifecycleTestServiceError) Error() string {
+	return e.message
+}
+
+func (e lifecycleTestServiceError) GetHTTPStatusCode() int {
+	return e.statusCode
+}
+
+func (e lifecycleTestServiceError) GetMessage() string {
+	return e.message
+}
+
+func (e lifecycleTestServiceError) GetCode() string {
+	return e.code
+}
+
+func (e lifecycleTestServiceError) GetOpcRequestID() string {
+	return "opc-request-id"
 }

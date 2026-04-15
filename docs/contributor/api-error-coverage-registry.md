@@ -42,9 +42,9 @@ Each reviewed exception records:
 | --- | --- | --- |
 | `generatedruntime-plain` | shared generatedruntime CRUD with no special follow-up helper ownership | `core/Instance`, `database/AutonomousDatabase`, `mysql/DbSystem`, `objectstorage/Bucket` |
 | `generatedruntime-follow-up` | generatedruntime paths whose error handling depends on follow-up helpers such as `WaitForUpdatedState` or `WaitForWorkRequestWithErrorHandling` | `containerengine/Cluster`, `opensearch/OpensearchCluster`, `streaming/Stream` |
-| `generatedruntime-workrequest` | work-request-aware flows that keep explicit work-request tracking as the reviewed contract | `queue/Queue` |
+| `generatedruntime-workrequest` | work-request-aware flows that keep explicit work-request tracking as the reviewed contract, even when the polling adapter is handwritten | `queue/Queue`, `redis/RedisCluster` |
 | `manual-runtime` | direct handwritten runtimes whose primary OCI error handling stays in package-local create/update logic; per-resource delete/conflict semantics may still point at generatedruntime when delete is delegated there | `core/Vcn`, `core/InternetGateway`, `core/Subnet`, `core/SecurityList`, other active core-network runtimes |
-| `legacy-adapter` | helper and adapter paths that still own bespoke not-found, delete-guard, orphan-delete, pending-deletion, or create-fallback behavior | `containerinstances/ContainerInstance`, `functions/Application`, `functions/Function`, `keymanagement/Vault`, `nosql/Table`, `psql/DbSystem`, `identity/Compartment`, `redis/RedisCluster` |
+| `legacy-adapter` | helper and adapter paths that still own bespoke not-found, delete-guard, orphan-delete, pending-deletion, or create-fallback behavior | `containerinstances/ContainerInstance`, `functions/Application`, `functions/Function`, `keymanagement/Vault`, `nosql/Table`, `psql/DbSystem`, `identity/Compartment` |
 
 For the split-core parity clients, family and delete semantics are intentionally
 separate reviewed fields. `core/Vcn`, `core/InternetGateway`,
@@ -65,7 +65,9 @@ behavior that falls outside the base matrix:
   conflict means retry or success.
 - `nosql/Table` and `psql/DbSystem` keep adapter-level confirm-delete rereads
   explicit instead of pretending generatedruntime owns those delete semantics.
-- `redis/RedisCluster` keeps the live-state delete guard explicit so `409`
+- `redis/RedisCluster` now belongs to the work-request family because
+  create/update/delete all poll Redis work requests through a repo-owned
+  adapter, but it still keeps the live-state delete guard explicit so `409`
   delete conflicts reread the cluster lifecycle before finalizer removal.
 
 ## Current Explicit Exceptions

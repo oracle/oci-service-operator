@@ -56,6 +56,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")
@@ -70,6 +71,15 @@ func TestReviewedAPIErrorCoverageRegistryAsyncDeviationsRemainExplicit(t *testin
 	assertReviewedDeviation(t, "queue/Queue", "work-request")
 	assertReviewedDeviation(t, "redis/RedisCluster", "delete guard")
 	assertReviewedDeviation(t, "streaming/Stream", "WaitForUpdatedState")
+}
+
+func TestReviewedAPIErrorCoverageRegistryRedisWorkRequestSemantics(t *testing.T) {
+	t.Parallel()
+
+	assertReviewedDeleteSemantics(t, "redis/RedisCluster", deleteNotFoundReadback)
+	assertReviewedRetryableConflictContains(t, "redis/RedisCluster", "work-request")
+	assertReviewedRetryableConflictContains(t, "redis/RedisCluster", "reread live RedisCluster state")
+	assertReviewedDeviation(t, "redis/RedisCluster", "delete guard")
 }
 
 func TestReviewedAPIErrorCoverageRegistrySplitCoreDeleteSemantics(t *testing.T) {
@@ -145,12 +155,6 @@ func TestReviewedAPIErrorCoverageRegistryLegacyAdapterSemantics(t *testing.T) {
 			wantDelete:         deleteNotFoundReadback,
 			wantRetrySubstring: "helper-specific rereads or adapter state checks",
 			wantDeviation:      "readback adapter",
-		},
-		{
-			key:                "redis/RedisCluster",
-			wantDelete:         deleteNotFoundReadback,
-			wantRetrySubstring: "reread live RedisCluster state",
-			wantDeviation:      "delete guard",
 		},
 	}
 

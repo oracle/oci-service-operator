@@ -415,10 +415,10 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"redis",
 			apiErrorCoverageDefaultVersion,
 			"RedisCluster",
-			APIErrorCoverageFamilyLegacyAdapter,
+			APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
 			deleteNotFoundReadback,
-			"delete 409 conflicts reread live RedisCluster state before deciding retry or success",
-			"Create/update keep the generated read-after-write baseline, while delete wraps the generated client with a live-state delete guard before and after conflicts.",
+			"create/update conflicts and transient errors flow through explicit Redis work-request resume or polling, while delete 409 conflicts reread live RedisCluster state before deciding retry or success",
+			"Handwritten create/update/delete now own Redis work-request polling while delete still wraps the runtime with a live-state delete guard before and after conflicts.",
 		),
 		resourceKey("streaming", "Stream"): reviewedRegistration(
 			"streaming",
