@@ -6,6 +6,7 @@
 package servicemanager
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -20,6 +21,100 @@ type AsyncProjection struct {
 	ConditionStatus v1.ConditionStatus
 	ShouldRequeue   bool
 	DefaultMessage  string
+}
+
+type WorkRequestAsyncAdapter struct {
+	PendingStatusTokens   []string
+	SucceededStatusTokens []string
+	FailedStatusTokens    []string
+	CanceledStatusTokens  []string
+	AttentionStatusTokens []string
+	UnknownStatusTokens   []string
+	CreateActionTokens    []string
+	UpdateActionTokens    []string
+	DeleteActionTokens    []string
+}
+
+type WorkRequestAsyncInput struct {
+	RawStatus        string
+	RawAction        string
+	RawOperationType string
+	WorkRequestID    string
+	PercentComplete  *float32
+	Message          string
+	FallbackPhase    shared.OSOKAsyncPhase
+}
+
+func (a WorkRequestAsyncAdapter) Normalize(rawStatus string) (shared.OSOKAsyncNormalizedClass, error) {
+	statusToken := normalizeAsyncToken(rawStatus)
+	if statusToken == "" {
+		return "", fmt.Errorf("async status is empty")
+	}
+
+	switch {
+	case asyncTokenIn(statusToken, a.PendingStatusTokens):
+		return shared.OSOKAsyncClassPending, nil
+	case asyncTokenIn(statusToken, a.SucceededStatusTokens):
+		return shared.OSOKAsyncClassSucceeded, nil
+	case asyncTokenIn(statusToken, a.FailedStatusTokens):
+		return shared.OSOKAsyncClassFailed, nil
+	case asyncTokenIn(statusToken, a.CanceledStatusTokens):
+		return shared.OSOKAsyncClassCanceled, nil
+	case asyncTokenIn(statusToken, a.AttentionStatusTokens):
+		return shared.OSOKAsyncClassAttention, nil
+	case asyncTokenIn(statusToken, a.UnknownStatusTokens):
+		return shared.OSOKAsyncClassUnknown, nil
+	default:
+		return "", fmt.Errorf("unmodeled async status %q", rawStatus)
+	}
+}
+
+func (a WorkRequestAsyncAdapter) ResolvePhase(status *shared.OSOKStatus, rawAction string, fallback shared.OSOKAsyncPhase) (shared.OSOKAsyncPhase, error) {
+	expectedPhase := ResolveAsyncPhase(status, fallback)
+	actionToken := normalizeAsyncToken(rawAction)
+	if actionToken == "" {
+		if expectedPhase == "" {
+			return "", fmt.Errorf("async phase is unknown: no raw action or fallback phase is available")
+		}
+		return expectedPhase, nil
+	}
+
+	resolvedPhase, ok := a.phaseForAction(actionToken)
+	if !ok {
+		return "", fmt.Errorf("unmodeled async action %q", rawAction)
+	}
+	if expectedPhase != "" && expectedPhase != resolvedPhase {
+		return "", fmt.Errorf("async phase %q derived from action %q conflicts with expected phase %q", resolvedPhase, rawAction, expectedPhase)
+	}
+	return resolvedPhase, nil
+}
+
+func BuildWorkRequestAsyncOperation(status *shared.OSOKStatus, adapter WorkRequestAsyncAdapter, input WorkRequestAsyncInput) (*shared.OSOKAsyncOperation, error) {
+	class, err := adapter.Normalize(input.RawStatus)
+	if err != nil {
+		return nil, err
+	}
+
+	phase, err := adapter.ResolvePhase(status, input.RawAction, input.FallbackPhase)
+	if err != nil {
+		return nil, err
+	}
+
+	message := strings.TrimSpace(input.Message)
+	if message == "" {
+		message = ProjectAsyncCondition(class, phase).DefaultMessage
+	}
+
+	return &shared.OSOKAsyncOperation{
+		Source:           shared.OSOKAsyncSourceWorkRequest,
+		Phase:            phase,
+		WorkRequestID:    strings.TrimSpace(input.WorkRequestID),
+		RawStatus:        strings.TrimSpace(input.RawStatus),
+		RawOperationType: strings.TrimSpace(input.RawOperationType),
+		NormalizedClass:  class,
+		PercentComplete:  cloneFloat32Ptr(input.PercentComplete),
+		Message:          message,
+	}, nil
 }
 
 func ProjectAsyncCondition(class shared.OSOKAsyncNormalizedClass, phase shared.OSOKAsyncPhase) AsyncProjection {
@@ -164,4 +259,30 @@ func cloneFloat32Ptr(in *float32) *float32 {
 	out := new(float32)
 	*out = *in
 	return out
+}
+
+func (a WorkRequestAsyncAdapter) phaseForAction(actionToken string) (shared.OSOKAsyncPhase, bool) {
+	switch {
+	case asyncTokenIn(actionToken, a.CreateActionTokens):
+		return shared.OSOKAsyncPhaseCreate, true
+	case asyncTokenIn(actionToken, a.UpdateActionTokens):
+		return shared.OSOKAsyncPhaseUpdate, true
+	case asyncTokenIn(actionToken, a.DeleteActionTokens):
+		return shared.OSOKAsyncPhaseDelete, true
+	default:
+		return "", false
+	}
+}
+
+func asyncTokenIn(token string, candidates []string) bool {
+	for _, candidate := range candidates {
+		if normalizeAsyncToken(candidate) == token {
+			return true
+		}
+	}
+	return false
+}
+
+func normalizeAsyncToken(value string) string {
+	return strings.ToUpper(strings.TrimSpace(value))
 }

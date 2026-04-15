@@ -140,6 +140,93 @@ func TestApplyAsyncOperationUpdatesSharedStatus(t *testing.T) {
 	}
 }
 
+func TestBuildWorkRequestAsyncOperationUsesNormalizedMappings(t *testing.T) {
+	t.Parallel()
+
+	percent := float32(12)
+	current, err := BuildWorkRequestAsyncOperation(&shared.OSOKStatus{}, WorkRequestAsyncAdapter{
+		PendingStatusTokens:   []string{"ACCEPTED", "IN_PROGRESS"},
+		SucceededStatusTokens: []string{"SUCCEEDED"},
+		FailedStatusTokens:    []string{"FAILED"},
+		CanceledStatusTokens:  []string{"CANCELED"},
+		CreateActionTokens:    []string{"CREATED"},
+		UpdateActionTokens:    []string{"UPDATED"},
+		DeleteActionTokens:    []string{"DELETED"},
+	}, WorkRequestAsyncInput{
+		RawStatus:        "IN_PROGRESS",
+		RawAction:        "UPDATED",
+		RawOperationType: "UPDATE_QUEUE",
+		WorkRequestID:    "wr-update-1",
+		PercentComplete:  &percent,
+	})
+	if err != nil {
+		t.Fatalf("BuildWorkRequestAsyncOperation() error = %v", err)
+	}
+	if current.Source != shared.OSOKAsyncSourceWorkRequest {
+		t.Fatalf("current.source = %q, want %q", current.Source, shared.OSOKAsyncSourceWorkRequest)
+	}
+	if current.Phase != shared.OSOKAsyncPhaseUpdate {
+		t.Fatalf("current.phase = %q, want %q", current.Phase, shared.OSOKAsyncPhaseUpdate)
+	}
+	if current.WorkRequestID != "wr-update-1" {
+		t.Fatalf("current.workRequestId = %q, want %q", current.WorkRequestID, "wr-update-1")
+	}
+	if current.RawStatus != "IN_PROGRESS" {
+		t.Fatalf("current.rawStatus = %q, want %q", current.RawStatus, "IN_PROGRESS")
+	}
+	if current.RawOperationType != "UPDATE_QUEUE" {
+		t.Fatalf("current.rawOperationType = %q, want %q", current.RawOperationType, "UPDATE_QUEUE")
+	}
+	if current.NormalizedClass != shared.OSOKAsyncClassPending {
+		t.Fatalf("current.normalizedClass = %q, want %q", current.NormalizedClass, shared.OSOKAsyncClassPending)
+	}
+	if current.PercentComplete == nil || *current.PercentComplete != percent {
+		t.Fatalf("current.percentComplete = %v, want %v", current.PercentComplete, percent)
+	}
+	if current.Message != "OCI update is in progress" {
+		t.Fatalf("current.message = %q, want %q", current.Message, "OCI update is in progress")
+	}
+}
+
+func TestBuildWorkRequestAsyncOperationRejectsUnknownStatus(t *testing.T) {
+	t.Parallel()
+
+	_, err := BuildWorkRequestAsyncOperation(&shared.OSOKStatus{}, WorkRequestAsyncAdapter{
+		PendingStatusTokens: []string{"ACCEPTED"},
+		CreateActionTokens:  []string{"CREATED"},
+	}, WorkRequestAsyncInput{
+		RawStatus:     "WAITING",
+		RawAction:     "CREATED",
+		FallbackPhase: shared.OSOKAsyncPhaseCreate,
+	})
+	if err == nil {
+		t.Fatalf("BuildWorkRequestAsyncOperation() error = nil, want unknown status failure")
+	}
+	if err.Error() != `unmodeled async status "WAITING"` {
+		t.Fatalf("BuildWorkRequestAsyncOperation() error = %q, want %q", err.Error(), `unmodeled async status "WAITING"`)
+	}
+}
+
+func TestBuildWorkRequestAsyncOperationRejectsActionPhaseConflict(t *testing.T) {
+	t.Parallel()
+
+	_, err := BuildWorkRequestAsyncOperation(&shared.OSOKStatus{}, WorkRequestAsyncAdapter{
+		PendingStatusTokens: []string{"ACCEPTED"},
+		CreateActionTokens:  []string{"CREATED"},
+		DeleteActionTokens:  []string{"DELETED"},
+	}, WorkRequestAsyncInput{
+		RawStatus:     "ACCEPTED",
+		RawAction:     "DELETED",
+		FallbackPhase: shared.OSOKAsyncPhaseCreate,
+	})
+	if err == nil {
+		t.Fatalf("BuildWorkRequestAsyncOperation() error = nil, want phase conflict")
+	}
+	if err.Error() != `async phase "delete" derived from action "DELETED" conflicts with expected phase "create"` {
+		t.Fatalf("BuildWorkRequestAsyncOperation() error = %q, want %q", err.Error(), `async phase "delete" derived from action "DELETED" conflicts with expected phase "create"`)
+	}
+}
+
 func TestResolveAsyncPhasePrefersExplicitPhase(t *testing.T) {
 	t.Parallel()
 
