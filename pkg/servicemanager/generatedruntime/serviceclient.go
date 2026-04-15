@@ -361,7 +361,7 @@ func (c ServiceClient[T]) readResourceWithGetForExistingBeforeCreate(ctx context
 	if err == nil {
 		return state, response, true, false, nil
 	}
-	if !isNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.config.List == nil {
 		return state, nil, true, false, err
 	}
 
@@ -531,7 +531,7 @@ func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
 
 func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T, currentID string) (bool, error) {
 	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{}); err != nil {
-		if isNotFound(err) {
+		if isDeleteNotFound(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
@@ -548,7 +548,7 @@ func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, res
 
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -646,7 +646,7 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil, true
 		}
@@ -665,7 +665,7 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 }
 
 func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
-	if err == nil || !isConflict(err) {
+	if err == nil || !isRetryableDeleteConflict(err) {
 		return false
 	}
 	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
@@ -696,7 +696,7 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resour
 
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
-		if isNotFound(err) || errors.Is(err, errResourceNotFound) {
+		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.markDeleted(resource, "OCI resource deleted")
 			return true, nil
 		}
@@ -1171,7 +1171,7 @@ func (c ServiceClient[T]) readResourceForMutationValidation(ctx context.Context,
 
 	response, err := c.invoke(ctx, c.config.Get, resource, currentID, requestBuildOptions{})
 	if err != nil {
-		if isNotFound(err) {
+		if isReadNotFound(err) {
 			return nil, errResourceNotFound
 		}
 		return nil, err
@@ -1207,7 +1207,7 @@ func (c ServiceClient[T]) readResourceWithGet(ctx context.Context, resource T, s
 	if err == nil {
 		return state, response, true, nil
 	}
-	if !isNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.config.List == nil {
 		return state, nil, true, err
 	}
 
@@ -2931,49 +2931,33 @@ func normalizeOCIError(err error) error {
 	return err
 }
 
-func isNotFound(err error) bool {
+func isReadNotFound(err error) bool {
 	if errors.Is(err, errResourceNotFound) {
 		return true
 	}
-	var serviceErr common.ServiceError
-	if errors.As(err, &serviceErr) {
-		if serviceErr.GetHTTPStatusCode() == 404 {
-			return true
-		}
-		switch serviceErr.GetCode() {
-		case "NotFound", "NotAuthorizedOrNotFound":
-			return true
-		default:
-			return false
-		}
-	}
-
-	message := err.Error()
-	if strings.Contains(message, "http status code: 404") {
-		return true
-	}
-	if strings.Contains(message, "NotFound") || strings.Contains(message, "NotAuthorizedOrNotFound") {
-		return true
-	}
-	return false
+	return errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound()
 }
 
-func isConflict(err error) bool {
-	if err == nil {
+func isDeleteNotFound(err error) bool {
+	if errors.Is(err, errResourceNotFound) {
+		return true
+	}
+	classification := errorutil.ClassifyDeleteError(err)
+	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func isRetryableDeleteConflict(err error) bool {
+	classification := errorutil.ClassifyDeleteError(err)
+	if classification.HTTPStatusCode != 409 {
 		return false
 	}
 
-	var serviceErr common.ServiceError
-	if errors.As(err, &serviceErr) {
-		return serviceErr.GetHTTPStatusCode() == 409
-	}
-
-	var conflictErr errorutil.ConflictOciError
-	if errors.As(err, &conflictErr) {
+	switch classification.ErrorCode {
+	case errorutil.IncorrectState, "ExternalServerIncorrectState":
 		return true
+	default:
+		return false
 	}
-
-	return strings.Contains(err.Error(), "http status code: 409")
 }
 
 func (c ServiceClient[T]) selectListItem(body any, criteria map[string]any, preferredID string, phase readPhase) (any, error) {

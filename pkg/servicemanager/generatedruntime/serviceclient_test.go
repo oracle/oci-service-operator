@@ -3392,7 +3392,7 @@ func TestServiceClientCreateOrUpdateCreatesWhenLiveGetMissesAfterListReuse(t *te
 		Get: &Operation{
 			NewRequest: func() any { return &fakeGetThingRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
-				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
+				return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3490,7 +3490,7 @@ func TestServiceClientCreateOrUpdateRebindsWhenTrackedStatusIDIsStale(t *testing
 				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
 					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
 				}
-				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
+				return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
@@ -3599,7 +3599,7 @@ func TestServiceClientCreateOrUpdateCreatesWhenTrackedStatusIDIsStaleAndNoReplac
 				if request.(*fakeGetThingRequest).ThingId == nil || *request.(*fakeGetThingRequest).ThingId != "ocid1.thing.oc1..stale" {
 					t.Fatalf("get request thingId = %v, want stale tracked OCID", request.(*fakeGetThingRequest).ThingId)
 				}
-				return nil, errortest.NewServiceError(404, "NotAuthorizedOrNotFound", "thing not found")
+				return nil, errortest.NewServiceError(404, "NotFound", "thing not found")
 			},
 			Fields: []RequestField{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
