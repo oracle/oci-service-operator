@@ -51,13 +51,13 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
 :Reject drift before OCI mutation for force-new\nfields storage_tier;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateBucket only for mutable fields\nauto_tiering, compartment_id, defined_tags,\nfreeform_tags (+7 more);
+:Apply UpdateBucket only for mutable fields\nauto_tiering, compartment_id, defined_tags,\nfreeform_tags (+5 more);
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -90,7 +90,7 @@ requeue: updating, terminating
 provider states: create none; update none;
 delete none
 supported drift: auto_tiering, compartment_id,
-defined_tags, freeform_tags (+7 more)
+defined_tags, freeform_tags (+5 more)
 reject before mutate: force-new fields
 storage_tier
 create-only fields: none

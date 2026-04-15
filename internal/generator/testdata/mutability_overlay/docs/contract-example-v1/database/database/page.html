@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <main>
+      <h2 id="argument-reference">Argument Reference</h2>
+      <p>The following arguments are supported:</p>
+      <ul>
+        <li><code>display_name</code> - (Optional) (Updatable) A user-friendly display name.</li>
+        <li>
+          <code>db_home</code> - (Required) Database home configuration.
+          <ul>
+            <li>
+              <code>database</code> - (Required) Database details.
+              <ul>
+                <li><code>admin_password</code> - (Required) Updating this value after creation is not supported.</li>
+                <li><code>db_workload</code> - (Optional) Changing this value forces a new resource.</li>
+                <li><code>license_model</code> - (Optional) This field may be updated in place, or may require replacement depending on the workload.</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><code>defined_tags</code> - (Optional) Defined tags for this resource.</li>
+      </ul>
+    </main>
+  </body>
+</html>

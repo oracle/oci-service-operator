@@ -8,6 +8,20 @@ states:
   - active
   - updating
   - terminating
+repoAuthored:
+  mutation:
+    mutable:
+      - auto_tiering
+      - compartment_id
+      - defined_tags
+      - freeform_tags
+      - kms_key_id
+      - metadata
+      - object_events_enabled
+      - public_access_type
+      - versioning
+    forceNew:
+      - storage_tier
 notes:
   - The published Bucket kind reuses the Bucket SDK family and resolves namespaceName from observed status first, then through a GetNamespace lookup when spec.namespace is omitted.
   - Successful create and update responses without lifecycle fields are treated as synchronous success and projected directly into status, including status.status.ocid.

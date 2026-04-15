@@ -30,59 +30,63 @@ type defaultInstanceServiceClient struct {
 	generatedruntime.ServiceClient[*corev1beta1.Instance]
 }
 
+func newInstanceRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "core",
+		FormalSlug:        "instance",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"PROVISIONING", "STARTING"},
+			UpdatingStates:     []string{"MOVING", "STOPPING"},
+			ActiveStates:       []string{"RUNNING", "STOPPED"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"TERMINATING"},
+			TerminalStates: []string{"NOT_FOUND", "TERMINATED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"availabilityDomain", "compartmentId", "displayName", "lifecycleState"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"availabilityDomain", "compartmentId", "shape", "shapeConfig", "sourceDetails", "subnetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ InstanceServiceClient = defaultInstanceServiceClient{}
 
 var newInstanceServiceClient = func(manager *InstanceServiceManager) InstanceServiceClient {
 	sdkClient, err := coresdk.NewComputeClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*corev1beta1.Instance]{
-		Kind:    "Instance",
-		SDKName: "Instance",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "core",
-			FormalSlug:        "instance",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING", "STARTING"},
-				UpdatingStates:     []string{"MOVING", "STOPPING"},
-				ActiveStates:       []string{"RUNNING", "STOPPED"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND", "TERMINATED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"availabilityDomain", "compartmentId", "displayName", "lifecycleState"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-				ForceNew:      []string{"availabilityDomain", "compartmentId", "shape", "shapeConfig", "sourceDetails", "subnetId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "Instance",
+		SDKName:   "Instance",
+		Log:       manager.Log,
+		Semantics: newInstanceRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.LaunchInstanceRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

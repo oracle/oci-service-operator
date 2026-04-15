@@ -555,13 +555,27 @@ func resourceFormalModel(catalog *formal.Catalog, service ServiceConfig, kind st
 		)
 	}
 
+	diagramFiles := formal.DiagramFilesForRow(binding.Manifest)
+	runtimeLifecycle, err := formal.LoadRuntimeLifecycle(filepath.Join(catalog.Root, filepath.FromSlash(diagramFiles.RuntimeLifecyclePath)))
+	if err != nil {
+		return nil, fmt.Errorf(
+			"service %q kind %q formalSpec %q runtime lifecycle %q: %w",
+			service.Service,
+			kind,
+			slug,
+			diagramFiles.RuntimeLifecyclePath,
+			err,
+		)
+	}
+
 	return &FormalModel{
 		Reference: FormalReferenceModel{
 			Service: service.Service,
 			Slug:    slug,
 		},
-		Binding:  binding,
-		Diagrams: formal.DiagramFilesForRow(binding.Manifest),
+		Binding:          binding,
+		Diagrams:         diagramFiles,
+		RuntimeLifecycle: &runtimeLifecycle,
 	}, nil
 }
 

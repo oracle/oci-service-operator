@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "nosql",
+  "kind": "Table",
+  "formalSlug": "table",
+  "providerResource": "oci_nosql_table",
+  "terraformDocsVersion": "contract-example-v1",
+  "registryPath": "providers/oracle/oci/contract-example-v1/docs/resources/nosql_table",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/contract-example-v1/docs/resources/nosql_table",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:contract-example-v1/nosql/table/page.html",
+  "bodySHA256": "4b3e4687c7c540fb5e383bf983a79852a0c94299ef76250c12e580f07d62d485",
+  "bodyBytes": 193,
+  "fixtureBodyPath": "contract-example-v1/nosql/table/page.html"
+}

@@ -91,9 +91,10 @@ func newVaultRuntimeConfig(log loggerutil.OSOKLogger, sdkClient vaultOCIClient) 
 				MatchFields:        []string{"compartmentId", "displayName", "vaultType"},
 			},
 			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-				ForceNew:      []string{"compartmentId", "externalKeyManagerMetadata", "vaultType"},
-				ConflictsWith: map[string][]string{},
+				UpdateCandidate: []string{"definedTags", "displayName", "freeformTags"},
+				Mutable:         []string{"definedTags", "displayName", "freeformTags"},
+				ForceNew:        []string{"compartmentId", "externalKeyManagerMetadata", "vaultType"},
+				ConflictsWith:   map[string][]string{},
 			},
 			CreateFollowUp: generatedruntime.FollowUpSemantics{
 				Strategy: "read-after-write",

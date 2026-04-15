@@ -79,6 +79,8 @@ remains opt-in and non-destructive.
 | `internal/generator/config/services.yaml` | Manual source-of-truth | Edited by hand when onboarding, reclassifying, or rolling out services. |
 | `cmd/generator/**` | Manual implementation | Canonical user-facing generator entrypoint. |
 | `internal/generator/**` Go code | Manual implementation | Reads the service map, discovers SDK resources, and renders outputs. |
+| `internal/generator/generated/mutability_overlay/<service>/*.json` | generator | Conservative AST+docs mutability artifacts for the selected formal-backed resources. Emitted only by `cmd/generator`, not by manual edits. |
+| `internal/generator/generated/vap_update_policy/<service>/*.json` | generator | ValidatingAdmissionPolicy-oriented update-policy inputs derived only from the merged mutability artifact `finalPolicy` surface. Refreshed only by `cmd/generator`, not by manual edits. |
 | `api/<group>/<version>/groupversion_info.go` | generator | Derived from `group`, `version`, and repo domain. |
 | `api/<group>/<version>/*_types.go` | generator | Top-level kinds, spec/status types, kubebuilder markers, and imports. |
 | `api/<group>/<version>/zz_generated.deepcopy.go` | `controller-gen` | Rebuilt after generated API types change. This file is generated but not hand-authored and not directly owned by the generator. |
@@ -392,6 +394,7 @@ from scaffold coverage into generated runtime:
    go run ./hack/update_validator_registries.go --write
    make generated-coverage-gate
    make generated-runtime-gate
+   make generated-mutability-gate
    ```
 
 7. Move a service from `crd-only` to `controller-backed` in `services.yaml`
@@ -446,12 +449,16 @@ Expected regeneration and validation flow:
    coverage is expected, `make formal-scaffold-verify
    FORMAL_PROVIDER_PATH=/path/to/terraform-provider-oci`.
 3. Run `go run ./cmd/generator ...` to emit API packages, sample manifests,
-   sample kustomization, and package scaffolding for the selected services.
+   sample kustomization, package scaffolding, the pinned mutability overlay
+   artifacts, and the derived VAP update-policy input artifacts for the
+   selected services.
    Generator-owned spec, helper, sample, and package artifacts regenerate
    directly from `services.yaml` and the current v2 contract; there is no
    legacy-preservation mode in the generator. With `--all --overwrite`, the
    generator performs a full-sync cleanup that removes stale generator-owned
    outputs under `api/`, `controllers/`, `pkg/servicemanager/`,
+   `internal/generator/generated/mutability_overlay/`,
+   `internal/generator/generated/vap_update_policy/`,
    `internal/registrations/`, `packages/`, and `config/samples/` when they no
    longer belong to the active surface.
 4. When deepcopy output and CRD manifests also need refresh, run `make generate`
@@ -469,10 +476,18 @@ Expected regeneration and validation flow:
    generator config (by default `internal/generator/config/services.yaml`).
    Override `GENERATED_RUNTIME_CONFIG` when staging an alternate rollout config
    ahead of promotion.
-8. Run `make fmt`.
-9. Run `make vet`.
-10. Run `make test`.
-11. Run `make build`.
+8. Run `make generated-mutability-gate` to keep the pinned mutability overlay
+   and derived VAP update-policy decisions from regressing on the
+   fixture-backed validation surface defined in
+   `internal/generator/config/mutability_validation_services.yaml`. When the
+   pinned Terraform docs version changes, refresh the checked-in docs fixtures
+   first with `make mutability-docs-refresh`, review the new mutability report,
+   and only then refresh
+   `internal/generator/config/generated_mutability_baseline.json` intentionally.
+9. Run `make fmt`.
+10. Run `make vet`.
+11. Run `make test`.
+12. Run `make build`.
 
 The checked-in generator emits API/package outputs for all enabled services in
 the default active surface and can also emit controller, service-manager, and

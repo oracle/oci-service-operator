@@ -30,59 +30,63 @@ type defaultClusterServiceClient struct {
 	generatedruntime.ServiceClient[*containerenginev1beta1.Cluster]
 }
 
+func newClusterRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "containerengine",
+		FormalSlug:        "cluster",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING", "UPDATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags", "imagePolicyConfig.isPolicyEnabled", "imagePolicyConfig.keyDetails.kmsKeyId", "kubernetesVersion", "name", "options.admissionControllerOptions.isPodSecurityPolicyEnabled", "options.persistentVolumeConfig.definedTags", "options.persistentVolumeConfig.freeformTags", "options.serviceLbConfig.definedTags", "options.serviceLbConfig.freeformTags", "type"},
+			ForceNew:      []string{"clusterPodNetworkOptions.cniType", "clusterPodNetworkOptions.jsonData", "compartmentId", "endpointConfig.isPublicIpEnabled", "endpointConfig.nsgIds", "endpointConfig.subnetId", "kmsKeyId", "options.addOns.isKubernetesDashboardEnabled", "options.addOns.isTillerEnabled", "options.kubernetesNetworkConfig.podsCidr", "options.kubernetesNetworkConfig.servicesCidr", "options.serviceLbSubnetIds", "vcnId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ ClusterServiceClient = defaultClusterServiceClient{}
 
 var newClusterServiceClient = func(manager *ClusterServiceManager) ClusterServiceClient {
 	sdkClient, err := containerenginesdk.NewContainerEngineClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*containerenginev1beta1.Cluster]{
-		Kind:    "Cluster",
-		SDKName: "Cluster",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "containerengine",
-			FormalSlug:        "cluster",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"CREATING", "UPDATING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"DELETING"},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "freeformTags", "imagePolicyConfig.isPolicyEnabled", "imagePolicyConfig.keyDetails.kmsKeyId", "kubernetesVersion", "name", "options.admissionControllerOptions.isPodSecurityPolicyEnabled", "options.persistentVolumeConfig.definedTags", "options.persistentVolumeConfig.freeformTags", "options.serviceLbConfig.definedTags", "options.serviceLbConfig.freeformTags", "type"},
-				ForceNew:      []string{"clusterPodNetworkOptions.cniType", "clusterPodNetworkOptions.jsonData", "compartmentId", "endpointConfig.isPublicIpEnabled", "endpointConfig.nsgIds", "endpointConfig.subnetId", "kmsKeyId", "options.addOns.isKubernetesDashboardEnabled", "options.addOns.isTillerEnabled", "options.kubernetesNetworkConfig.podsCidr", "options.kubernetesNetworkConfig.servicesCidr", "options.serviceLbSubnetIds", "vcnId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "CREATED"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "UPDATED"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "cluster", Action: "DELETED"}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "Cluster",
+		SDKName:   "Cluster",
+		Log:       manager.Log,
+		Semantics: newClusterRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &containerenginesdk.CreateClusterRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

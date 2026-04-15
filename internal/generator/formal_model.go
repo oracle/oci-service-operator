@@ -15,7 +15,8 @@ type FormalReferenceModel struct {
 
 // FormalModel joins a generator model to one typed formal controller binding.
 type FormalModel struct {
-	Reference FormalReferenceModel
-	Binding   formal.ControllerBinding
-	Diagrams  formal.DiagramFiles
+	Reference        FormalReferenceModel
+	Binding          formal.ControllerBinding
+	Diagrams         formal.DiagramFiles
+	RuntimeLifecycle *formal.RuntimeLifecycleSpec
 }

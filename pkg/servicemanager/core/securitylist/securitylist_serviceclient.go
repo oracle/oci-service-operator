@@ -30,59 +30,63 @@ type defaultSecurityListServiceClient struct {
 	generatedruntime.ServiceClient[*corev1beta1.SecurityList]
 }
 
+func newSecurityListRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "core",
+		FormalSlug:        "securitylist",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"PROVISIONING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"AVAILABLE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"TERMINATED", "TERMINATING"},
+			TerminalStates: []string{"NOT_FOUND"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "egressSecurityRules", "freeformTags", "ingressSecurityRules"},
+			ForceNew:      []string{"compartmentId", "vcnId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ SecurityListServiceClient = defaultSecurityListServiceClient{}
 
 var newSecurityListServiceClient = func(manager *SecurityListServiceManager) SecurityListServiceClient {
 	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*corev1beta1.SecurityList]{
-		Kind:    "SecurityList",
-		SDKName: "SecurityList",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "core",
-			FormalSlug:        "securitylist",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"AVAILABLE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATED", "TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "egressSecurityRules", "freeformTags", "ingressSecurityRules"},
-				ForceNew:      []string{"compartmentId", "vcnId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "SecurityList",
+		SDKName:   "SecurityList",
+		Log:       manager.Log,
+		Semantics: newSecurityListRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &coresdk.CreateSecurityListRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

@@ -30,6 +30,54 @@ type defaultAutonomousDatabaseServiceClient struct {
 	generatedruntime.ServiceClient[*databasev1beta1.AutonomousDatabase]
 }
 
+func newAutonomousDatabaseRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "database",
+		FormalSlug:        "databaseautonomousdatabase",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"PROVISIONING", "STARTING"},
+			UpdatingStates:     []string{"MAINTENANCE_IN_PROGRESS", "PROVISIONING", "RESTARTING", "SCALE_IN_PROGRESS", "STARTING", "TRANSPORTING", "UNAVAILABLE", "UPDATING", "UPGRADING"},
+			ActiveStates:       []string{"AVAILABLE", "STANDBY"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"TERMINATING", "UNAVAILABLE"},
+			TerminalStates: []string{"TERMINATED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"adminPassword", "arePrimaryWhitelistedIpsUsed", "autoRefreshFrequencyInSeconds", "autoRefreshPointLagInSeconds", "autonomousDatabaseMaintenanceWindow.dayOfWeek.name", "autonomousDatabaseMaintenanceWindow.maintenanceEndTime", "autonomousDatabaseMaintenanceWindow.maintenanceStartTime", "autonomousMaintenanceScheduleType", "backupRetentionPeriodInDays", "byolComputeCountLimit", "compartmentId", "computeCount", "computeModel", "cpuCoreCount", "customerContacts.email", "dataSafeStatus", "dataStorageSizeInGb", "dataStorageSizeInTbs", "databaseEdition", "databaseManagementStatus", "dbName", "dbToolsDetails.computeCount", "dbToolsDetails.isEnabled", "dbToolsDetails.maxIdleTimeInMinutes", "dbToolsDetails.name", "dbVersion", "dbWorkload", "definedTags", "displayName", "enableDeleteScheduledOperations", "encryptionKey.arnRole", "encryptionKey.autonomousDatabaseProvider", "encryptionKey.certificateDirectoryName", "encryptionKey.certificateId", "encryptionKey.directoryName", "encryptionKey.externalId", "encryptionKey.keyArn", "encryptionKey.keyName", "encryptionKey.keyRing", "encryptionKey.kmsKeyId", "encryptionKey.kmsRestEndpoint", "encryptionKey.location", "encryptionKey.okvKmsKey", "encryptionKey.okvUri", "encryptionKey.project", "encryptionKey.serviceEndpointUri", "encryptionKey.vaultId", "encryptionKey.vaultUri", "freeformTags", "inMemoryPercentage", "isAccessControlEnabled", "isAutoScalingEnabled", "isAutoScalingForStorageEnabled", "isBackupRetentionLocked", "isDataGuardEnabled", "isDevTier", "isDisableDbVersionUpgradeSchedule", "isDisconnectPeer", "isFreeTier", "isLocalDataGuardEnabled", "isMtlsConnectionRequired", "isRefreshableClone", "isReplicateAutomaticBackups", "isScheduleDbVersionUpgradeToEarliest", "isShrinkOnly", "keyVersionId", "kmsKeyId", "licenseModel", "localAdgAutoFailoverMaxDataLossLimit", "localAdgResourcePoolLeaderId", "longTermBackupSchedule.isDisabled", "longTermBackupSchedule.repeatCadence", "longTermBackupSchedule.retentionPeriodInDays", "longTermBackupSchedule.timeOfBackup", "maxCpuCoreCount", "nsgIds", "ocpuCount", "openMode", "operationsInsightsStatus", "peerDbId", "permissionLevel", "privateEndpointIp", "privateEndpointLabel", "refreshableMode", "resourcePoolLeaderId", "resourcePoolSummary.availableStorageCapacityInTbs", "resourcePoolSummary.isDisabled", "resourcePoolSummary.poolSize", "resourcePoolSummary.poolStorageSizeInTbs", "rotateKeyTrigger", "scheduledOperations.dayOfWeek.name", "scheduledOperations.scheduledStartTime", "scheduledOperations.scheduledStopTime", "secretId", "secretVersionNumber", "securityAttributes", "standbyWhitelistedIps", "state", "subnetId", "subscriptionId", "switchoverTo", "switchoverToRemotePeerId", "timeMaintenancePauseUntil", "timeOfAutoRefreshStart", "timeScheduledDbVersionUpgrade", "transportableTablespace.ttsBundleUrl", "vanityUrlDetails.apiGatewayId", "vanityUrlDetails.isDisabled", "vanityUrlDetails.vanityUrlHostName", "vaultId", "whitelistedIps"},
+			ForceNew:      []string{"autonomousContainerDatabaseId", "autonomousDatabaseBackupId", "autonomousDatabaseId", "characterSet", "cloneTableSpaceList", "cloneType", "disasterRecoveryType", "isDedicated", "isPreviewVersionWithServiceTermsAccepted", "ncharacterSet", "remoteDisasterRecoveryType", "shrinkAdbTrigger", "source", "sourceId", "timestamp", "useLatestAvailableBackupTimeStamp"},
+			ConflictsWith: map[string][]string{"isShrinkOnly": []string{"shrinkAdbTrigger"}},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ AutonomousDatabaseServiceClient = defaultAutonomousDatabaseServiceClient{}
 
 var newAutonomousDatabaseServiceClient = func(manager *AutonomousDatabaseServiceManager) AutonomousDatabaseServiceClient {
@@ -39,51 +87,7 @@ var newAutonomousDatabaseServiceClient = func(manager *AutonomousDatabaseService
 		SDKName:          "AutonomousDatabase",
 		Log:              manager.Log,
 		CredentialClient: manager.CredentialClient,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "database",
-			FormalSlug:        "databaseautonomousdatabase",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING", "STARTING"},
-				UpdatingStates:     []string{"MAINTENANCE_IN_PROGRESS", "PROVISIONING", "RESTARTING", "SCALE_IN_PROGRESS", "STARTING", "TRANSPORTING", "UNAVAILABLE", "UPDATING", "UPGRADING"},
-				ActiveStates:       []string{"AVAILABLE", "STANDBY"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATING", "UNAVAILABLE"},
-				TerminalStates: []string{"TERMINATED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"adminPassword", "arePrimaryWhitelistedIpsUsed", "autoRefreshFrequencyInSeconds", "autoRefreshPointLagInSeconds", "autonomousDatabaseMaintenanceWindow.dayOfWeek.name", "autonomousDatabaseMaintenanceWindow.maintenanceEndTime", "autonomousDatabaseMaintenanceWindow.maintenanceStartTime", "autonomousMaintenanceScheduleType", "backupRetentionPeriodInDays", "byolComputeCountLimit", "compartmentId", "computeCount", "computeModel", "cpuCoreCount", "customerContacts.email", "dataSafeStatus", "dataStorageSizeInGb", "dataStorageSizeInTbs", "databaseEdition", "databaseManagementStatus", "dbName", "dbToolsDetails.computeCount", "dbToolsDetails.isEnabled", "dbToolsDetails.maxIdleTimeInMinutes", "dbToolsDetails.name", "dbVersion", "dbWorkload", "definedTags", "displayName", "enableDeleteScheduledOperations", "encryptionKey.arnRole", "encryptionKey.autonomousDatabaseProvider", "encryptionKey.certificateDirectoryName", "encryptionKey.certificateId", "encryptionKey.directoryName", "encryptionKey.externalId", "encryptionKey.keyArn", "encryptionKey.keyName", "encryptionKey.keyRing", "encryptionKey.kmsKeyId", "encryptionKey.kmsRestEndpoint", "encryptionKey.location", "encryptionKey.okvKmsKey", "encryptionKey.okvUri", "encryptionKey.project", "encryptionKey.serviceEndpointUri", "encryptionKey.vaultId", "encryptionKey.vaultUri", "freeformTags", "inMemoryPercentage", "isAccessControlEnabled", "isAutoScalingEnabled", "isAutoScalingForStorageEnabled", "isBackupRetentionLocked", "isDataGuardEnabled", "isDevTier", "isDisableDbVersionUpgradeSchedule", "isDisconnectPeer", "isFreeTier", "isLocalDataGuardEnabled", "isMtlsConnectionRequired", "isRefreshableClone", "isReplicateAutomaticBackups", "isScheduleDbVersionUpgradeToEarliest", "isShrinkOnly", "keyVersionId", "kmsKeyId", "licenseModel", "localAdgAutoFailoverMaxDataLossLimit", "localAdgResourcePoolLeaderId", "longTermBackupSchedule.isDisabled", "longTermBackupSchedule.repeatCadence", "longTermBackupSchedule.retentionPeriodInDays", "longTermBackupSchedule.timeOfBackup", "maxCpuCoreCount", "nsgIds", "ocpuCount", "openMode", "operationsInsightsStatus", "peerDbId", "permissionLevel", "privateEndpointIp", "privateEndpointLabel", "refreshableMode", "resourcePoolLeaderId", "resourcePoolSummary.availableStorageCapacityInTbs", "resourcePoolSummary.isDisabled", "resourcePoolSummary.poolSize", "resourcePoolSummary.poolStorageSizeInTbs", "rotateKeyTrigger", "scheduledOperations.dayOfWeek.name", "scheduledOperations.scheduledStartTime", "scheduledOperations.scheduledStopTime", "secretId", "secretVersionNumber", "securityAttributes", "standbyWhitelistedIps", "state", "subnetId", "subscriptionId", "switchoverTo", "switchoverToRemotePeerId", "timeMaintenancePauseUntil", "timeOfAutoRefreshStart", "timeScheduledDbVersionUpgrade", "transportableTablespace.ttsBundleUrl", "vanityUrlDetails.apiGatewayId", "vanityUrlDetails.isDisabled", "vanityUrlDetails.vanityUrlHostName", "vaultId", "whitelistedIps"},
-				ForceNew:      []string{"autonomousContainerDatabaseId", "autonomousDatabaseBackupId", "autonomousDatabaseId", "characterSet", "cloneTableSpaceList", "cloneType", "disasterRecoveryType", "isDedicated", "isPreviewVersionWithServiceTermsAccepted", "ncharacterSet", "remoteDisasterRecoveryType", "shrinkAdbTrigger", "source", "sourceId", "timestamp", "useLatestAvailableBackupTimeStamp"},
-				ConflictsWith: map[string][]string{"isShrinkOnly": []string{"shrinkAdbTrigger"}},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Semantics:        newAutonomousDatabaseRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &databasesdk.CreateAutonomousDatabaseRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

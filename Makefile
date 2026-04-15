@@ -241,6 +241,20 @@ GENERATED_RUNTIME_KEEP_SNAPSHOT ?=
 GENERATED_RUNTIME_SERVICE_ARG = $(if $(strip $(GENERATED_RUNTIME_SERVICE)),--service $(GENERATED_RUNTIME_SERVICE),--all)
 GENERATED_RUNTIME_SNAPSHOT_ARG = $(if $(strip $(GENERATED_RUNTIME_SNAPSHOT_DIR)),--snapshot-dir $(GENERATED_RUNTIME_SNAPSHOT_DIR),)
 GENERATED_RUNTIME_KEEP_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_RUNTIME_KEEP_SNAPSHOT)),--keep-snapshot,)
+GENERATED_MUTABILITY_CONFIG ?= internal/generator/config/mutability_validation_services.yaml
+GENERATED_MUTABILITY_REPORT ?= generated-mutability-report.json
+GENERATED_MUTABILITY_SERVICE ?=
+GENERATED_MUTABILITY_SNAPSHOT_DIR ?=
+GENERATED_MUTABILITY_KEEP_SNAPSHOT ?=
+GENERATED_MUTABILITY_BASELINE ?= internal/generator/config/generated_mutability_baseline.json
+GENERATED_MUTABILITY_SERVICE_ARG = $(if $(strip $(GENERATED_MUTABILITY_SERVICE)),--service $(GENERATED_MUTABILITY_SERVICE),--all)
+GENERATED_MUTABILITY_SNAPSHOT_ARG = $(if $(strip $(GENERATED_MUTABILITY_SNAPSHOT_DIR)),--snapshot-dir $(GENERATED_MUTABILITY_SNAPSHOT_DIR),)
+GENERATED_MUTABILITY_KEEP_ARG = $(if $(filter 1 true TRUE yes YES,$(GENERATED_MUTABILITY_KEEP_SNAPSHOT)),--keep-snapshot,)
+GENERATED_MUTABILITY_BASELINE_ARG = $(if $(strip $(GENERATED_MUTABILITY_BASELINE)),--baseline $(GENERATED_MUTABILITY_BASELINE),)
+MUTABILITY_DOCS_CONFIG ?= $(GENERATED_MUTABILITY_CONFIG)
+MUTABILITY_DOCS_SERVICE ?=
+MUTABILITY_DOCS_FIXTURE_ROOT ?= internal/generator/testdata/mutability_overlay/docs
+MUTABILITY_DOCS_SERVICE_ARG = $(if $(strip $(MUTABILITY_DOCS_SERVICE)),--service $(MUTABILITY_DOCS_SERVICE),--all)
 
 generated-coverage-report: controller-gen ## Generate APIs in a snapshot tree, run validator coverage, and write a JSON summary.
 	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-coverage --config $(EFFECTIVE_GENERATOR_CONFIG) $(GENERATED_COVERAGE_SERVICE_ARG) --top $(GENERATED_COVERAGE_TOP) --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_COVERAGE_REPORT) $(GENERATED_COVERAGE_SNAPSHOT_ARG) $(GENERATED_COVERAGE_KEEP_ARG) $(GENERATED_COVERAGE_VALIDATOR_JSON_ARG)
@@ -263,7 +277,23 @@ generated-runtime-gate: controller-gen ## Fail when generated controller/service
 	"$(CONTROLLER_GEN_RUNNER)" go run ./cmd/osok-generated-runtime-check --config $(GENERATED_RUNTIME_CONFIG) --all --controller-gen $(CONTROLLER_GEN) --report-out $(GENERATED_RUNTIME_REPORT) $(GENERATED_RUNTIME_SNAPSHOT_ARG) $(GENERATED_RUNTIME_KEEP_ARG)
 	@echo "Generated runtime gate passed; report at $(GENERATED_RUNTIME_REPORT)"
 
-generator-validation: generated-coverage-gate generated-runtime-gate ## Run generator regression gates for API coverage and generated runtime outputs.
+generated-mutability-report: ## Generate a mutability overlay/VAP validation report from the fixture-backed validation config.
+	go run ./cmd/osok-generated-mutability-check --config $(GENERATED_MUTABILITY_CONFIG) $(GENERATED_MUTABILITY_SERVICE_ARG) --report-out $(GENERATED_MUTABILITY_REPORT) $(GENERATED_MUTABILITY_SNAPSHOT_ARG) $(GENERATED_MUTABILITY_KEEP_ARG)
+	@echo "Wrote generated mutability report to $(GENERATED_MUTABILITY_REPORT)"
+
+generated-mutability-baseline: ## Refresh the checked-in mutability validation baseline intentionally.
+	go run ./cmd/osok-generated-mutability-check --config $(GENERATED_MUTABILITY_CONFIG) --all --report-out $(GENERATED_MUTABILITY_REPORT) --write-baseline $(GENERATED_MUTABILITY_BASELINE) $(GENERATED_MUTABILITY_SNAPSHOT_ARG) $(GENERATED_MUTABILITY_KEEP_ARG)
+	@echo "Wrote generated mutability report to $(GENERATED_MUTABILITY_REPORT)"
+	@echo "Updated generated mutability baseline at $(GENERATED_MUTABILITY_BASELINE)"
+
+generated-mutability-gate: ## Fail when mutability overlay/VAP decisions regress compared to the checked-in baseline.
+	go run ./cmd/osok-generated-mutability-check --config $(GENERATED_MUTABILITY_CONFIG) --all --report-out $(GENERATED_MUTABILITY_REPORT) $(GENERATED_MUTABILITY_BASELINE_ARG) --fail-on-regression $(GENERATED_MUTABILITY_SNAPSHOT_ARG) $(GENERATED_MUTABILITY_KEEP_ARG)
+	@echo "Generated mutability gate passed; report at $(GENERATED_MUTABILITY_REPORT)"
+
+mutability-docs-refresh: ## Refresh checked-in mutability docs fixtures for the validation surface.
+	go run ./cmd/osok-mutability-docs-refresh --config $(MUTABILITY_DOCS_CONFIG) $(MUTABILITY_DOCS_SERVICE_ARG) --fixture-root $(MUTABILITY_DOCS_FIXTURE_ROOT)
+
+generator-validation: generated-coverage-gate generated-runtime-gate generated-mutability-gate ## Run generator regression gates for API coverage, generated runtime outputs, and mutability policy artifacts.
 	@echo "Generator validation passed."
 
 BASH ?= /bin/bash
@@ -276,17 +306,55 @@ ENVTEST_CACHE_DIR ?= $(ENVTEST_HOME)/.cache
 ENVTEST_CONFIG_DIR ?= $(ENVTEST_HOME)/.config
 ENVTEST_K8S_VERSION ?= 1.28.0
 ENVTEST_ENV ?= HOME=$(ENVTEST_HOME) XDG_CACHE_HOME=$(ENVTEST_CACHE_DIR) XDG_CONFIG_HOME=$(ENVTEST_CONFIG_DIR)
+ENVTEST_INSTALLED_ONLY ?=
+ENVTEST_USE_ENV ?=
+ENVTEST_LEGACY_GOMODCACHE ?= $(CURDIR)/.envtest-home/.gomodcache
 SETUP_ENVTEST_GOPATH ?= $(ENVTEST_ROOT)/gopath
 SETUP_ENVTEST_ENV ?= env -u GOMODCACHE $(ENVTEST_ENV) GOPATH=$(SETUP_ENVTEST_GOPATH)
 # setup-envtest is published from a separate tool module; pin the release-0.17-compatible revision.
 SETUP_ENVTEST_VERSION ?= v0.0.0-20240812162837-9557f1031fe4
 SETUP_ENVTEST_GOFLAGS ?= $(strip $(filter-out -mod=%,$(GOFLAGS)) -mod=mod)
-SETUP_ENVTEST ?= $(SETUP_ENVTEST_ENV) GOFLAGS="$(SETUP_ENVTEST_GOFLAGS)" go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION) use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR) --use-deprecated-gcs=false
+SETUP_ENVTEST_RUN ?= $(SETUP_ENVTEST_ENV) GOFLAGS="$(SETUP_ENVTEST_GOFLAGS)" go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(SETUP_ENVTEST_VERSION)
+SETUP_ENVTEST ?= $(SETUP_ENVTEST_RUN) use $(ENVTEST_K8S_VERSION) -p path --bin-dir $(ENVTEST_ASSETS_DIR) --use-deprecated-gcs=false
+ENVTEST_PREPARE_DIRS = rm -rf $(ENVTEST_LEGACY_GOMODCACHE); mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR) $(SETUP_ENVTEST_GOPATH)
+
+define ENVTEST_RESOLVE_ASSETS
+is_true() { case "$$1" in 1|true|TRUE|yes|YES) return 0 ;; *) return 1 ;; esac; }; \
+has_envtest_assets() { \
+	test -x "$(ENVTEST_ASSETS_DIR)/kube-apiserver" && \
+	test -x "$(ENVTEST_ASSETS_DIR)/etcd"; \
+}; \
+if is_true "$(ENVTEST_USE_ENV)"; then \
+	if [ -z "$${KUBEBUILDER_ASSETS:-}" ]; then \
+		echo "ENVTEST_USE_ENV=true requires KUBEBUILDER_ASSETS to point at an envtest asset directory." >&2; \
+		exit 1; \
+	fi; \
+	envtest_assets="$$KUBEBUILDER_ASSETS"; \
+elif has_envtest_assets; then \
+	envtest_assets="$(ENVTEST_ASSETS_DIR)"; \
+elif is_true "$(ENVTEST_INSTALLED_ONLY)"; then \
+	echo "No installed envtest assets were found in $(ENVTEST_ASSETS_DIR)." >&2; \
+	echo "Run make envtest while network access is available, or set KUBEBUILDER_ASSETS and ENVTEST_USE_ENV=true." >&2; \
+	exit 1; \
+else \
+	if ! envtest_assets="$$( $(SETUP_ENVTEST) )"; then \
+		echo "envtest bootstrap failed before package tests started." >&2; \
+		echo "Run make envtest while network access is available, then rerun ENVTEST_INSTALLED_ONLY=true make test." >&2; \
+		echo "If you already have an asset bundle, set KUBEBUILDER_ASSETS=/path and ENVTEST_USE_ENV=true." >&2; \
+		exit 1; \
+	fi; \
+fi
+endef
+
+envtest: ## Download and cache the pinned envtest assets for later installed-only test runs.
+	$(ENVTEST_PREPARE_DIRS)
+	@envtest_assets="$$( $(SETUP_ENVTEST) )"; \
+		echo "Envtest assets available at $$envtest_assets"
 
 test: manifests generate fmt vet ## Run tests.
-	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR) $(SETUP_ENVTEST_GOPATH)
+	$(ENVTEST_PREPARE_DIRS)
 	$(BASH) -o pipefail -ec '\
-		envtest_assets="$$( $(SETUP_ENVTEST) )"; \
+		$(ENVTEST_RESOLVE_ASSETS); \
 		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test ./... -coverprofile cover.out | tee unittests.cover'
 	go tool cover -func cover.out | grep total | awk '{print substr($$3, 1, length($$3)-1)}' > unittests.percent
 
@@ -296,9 +364,9 @@ functionaltest: ## Run functionaltest (placeholder — no functional tests yet).
 ##@ Build Service
 
 test-sample: fmt vet ## Run tests.
-	mkdir -p $(ENVTEST_ASSETS_DIR) $(ENVTEST_CACHE_DIR) $(ENVTEST_CONFIG_DIR) $(SETUP_ENVTEST_GOPATH)
+	$(ENVTEST_PREPARE_DIRS)
 	$(BASH) -o pipefail -ec '\
-		envtest_assets="$$( $(SETUP_ENVTEST) )"; \
+		$(ENVTEST_RESOLVE_ASSETS); \
 		$(ENVTEST_ENV) KUBEBUILDER_ASSETS="$$envtest_assets" go test -v ./... -coverprofile cover.out -args -ginkgo.v'
 
 docker-build-sample: ## Build docker image with the manager.

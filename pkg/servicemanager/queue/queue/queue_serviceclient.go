@@ -30,59 +30,63 @@ type defaultQueueServiceClient struct {
 	generatedruntime.ServiceClient[*queuev1beta1.Queue]
 }
 
+func newQueueRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "queue",
+		FormalSlug:        "queue",
+		StatusProjection:  "required",
+		SecretSideEffects: "ready-only",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING", "UPDATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "id", "lifecycleState"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
+			ForceNew:      []string{"compartmentId", "retentionInSeconds"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "UPDATED"}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "DELETED"}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "UPDATED"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "DELETED"}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ QueueServiceClient = defaultQueueServiceClient{}
 
 var newQueueServiceClient = func(manager *QueueServiceManager) QueueServiceClient {
 	sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*queuev1beta1.Queue]{
-		Kind:    "Queue",
-		SDKName: "Queue",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "queue",
-			FormalSlug:        "queue",
-			StatusProjection:  "required",
-			SecretSideEffects: "ready-only",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"CREATING", "UPDATING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"DELETING"},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "lifecycleState"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
-				ForceNew:      []string{"compartmentId", "retentionInSeconds"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "UPDATED"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "DELETED"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "UPDATED"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "DELETED"}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "Queue",
+		SDKName:   "Queue",
+		Log:       manager.Log,
+		Semantics: newQueueRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &queuesdk.CreateQueueRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

@@ -31,6 +31,28 @@ git commit --signoff
 Only pull requests from committers that can be verified as having signed the OCA
 can be accepted.
 
+## Local validation
+
+The standard repo gate order is:
+
+1. `make fmt`
+1. `make vet`
+1. `make test`
+1. `make build`
+
+`make test` uses envtest assets rooted under `$(TMPDIR)/oci-service-operator-envtest`
+by default. In environments where outbound fetches are unreliable:
+
+1. Run `make envtest` once while network access is available to preseed the
+   pinned envtest bundle and setup cache.
+1. Reuse the preseeded bundle with `ENVTEST_INSTALLED_ONLY=true make test`.
+1. If you already have a compatible asset bundle elsewhere, run
+   `KUBEBUILDER_ASSETS=/path/to/bin ENVTEST_USE_ENV=true make test`.
+
+When local Go cache paths are not writable, prefix the commands above with
+explicit temp-rooted cache directories such as
+`GOCACHE=/tmp/osok-gocache GOTMPDIR=/tmp/osok-gotmp TMPDIR=/tmp`.
+
 ## Pull request process
 
 1. Ensure there is an issue created to track and discuss the fix or enhancement

@@ -24,6 +24,7 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 	}
 
 	binding := formalModel.Binding
+	mutation := runtimeMutationPaths(formalModel)
 	semantics := &RuntimeSemanticsModel{
 		FormalService:     formalModel.Reference.Service,
 		FormalSlug:        formalModel.Reference.Slug,
@@ -44,8 +45,8 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 			TerminalStates: normalizeFormalStates(binding.Import.DeleteConfirmation.Target),
 		},
 		Mutation: RuntimeMutationModel{
-			Mutable:       normalizeFormalPaths(binding.Import.Mutation.Mutable),
-			ForceNew:      normalizeFormalPaths(binding.Import.Mutation.ForceNew),
+			Mutable:       normalizeFormalPaths(mutation.Mutable),
+			ForceNew:      normalizeFormalPaths(mutation.ForceNew),
 			ConflictsWith: normalizeFormalConflicts(binding.Import.Mutation.ConflictsWith),
 		},
 		Hooks: RuntimeHookSetModel{
@@ -66,6 +67,29 @@ func buildRuntimeSemanticsModel(formalModel *FormalModel, runtime *RuntimeModel)
 	semantics.UpdateFollowUp = buildWriteFollowUpModel(semantics.Hooks.Update, runtime)
 	semantics.DeleteFollowUp = buildDeleteFollowUpModel(semantics.Hooks.Delete, semantics.Delete, runtime)
 	return semantics
+}
+
+type runtimeMutationPathSet struct {
+	Mutable  []string
+	ForceNew []string
+}
+
+func runtimeMutationPaths(formalModel *FormalModel) runtimeMutationPathSet {
+	if formalModel == nil {
+		return runtimeMutationPathSet{}
+	}
+	if formalModel.RuntimeLifecycle != nil &&
+		formalModel.RuntimeLifecycle.RepoAuthored != nil &&
+		formalModel.RuntimeLifecycle.RepoAuthored.Mutation != nil {
+		return runtimeMutationPathSet{
+			Mutable:  append([]string(nil), formalModel.RuntimeLifecycle.RepoAuthored.Mutation.Mutable...),
+			ForceNew: append([]string(nil), formalModel.RuntimeLifecycle.RepoAuthored.Mutation.ForceNew...),
+		}
+	}
+	return runtimeMutationPathSet{
+		Mutable:  append([]string(nil), formalModel.Binding.Import.Mutation.Mutable...),
+		ForceNew: append([]string(nil), formalModel.Binding.Import.Mutation.ForceNew...),
+	}
 }
 
 func buildWriteFollowUpModel(hooks []RuntimeHookModel, runtime *RuntimeModel) RuntimeFollowUpModel {

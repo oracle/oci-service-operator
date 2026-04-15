@@ -30,59 +30,63 @@ type defaultOpensearchClusterServiceClient struct {
 	generatedruntime.ServiceClient[*opensearchv1beta1.OpensearchCluster]
 }
 
+func newOpensearchClusterRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "opensearch",
+		FormalSlug:        "opensearchopensearchcluster",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"PROVISIONING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"displayName"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ OpensearchClusterServiceClient = defaultOpensearchClusterServiceClient{}
 
 var newOpensearchClusterServiceClient = func(manager *OpensearchClusterServiceManager) OpensearchClusterServiceClient {
 	sdkClient, err := opensearchsdk.NewOpensearchClusterClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*opensearchv1beta1.OpensearchCluster]{
-		Kind:    "OpensearchCluster",
-		SDKName: "OpensearchCluster",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "opensearch",
-			FormalSlug:        "opensearchopensearchcluster",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"DELETING"},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "state"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"displayName"},
-				ForceNew:      []string{"compartmentId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "OpensearchCluster",
+		SDKName:   "OpensearchCluster",
+		Log:       manager.Log,
+		Semantics: newOpensearchClusterRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &opensearchsdk.CreateOpensearchClusterRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

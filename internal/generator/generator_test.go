@@ -1641,7 +1641,9 @@ func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testin
 	}
 
 	assertContains(t, content, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newThingRuntimeSemantics() *generatedruntime.Semantics {",
+		"return &generatedruntime.Semantics{",
+		"Semantics: newThingRuntimeSemantics(),",
 		`FormalService:     "identity"`,
 		`FormalSlug:        "user"`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
@@ -1840,7 +1842,8 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 
 	instanceServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go"))
 	assertContains(t, instanceServiceClient, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newInstanceRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newInstanceRuntimeSemantics(),",
 		`FormalService:     "core"`,
 		`FormalSlug:        "instance"`,
 		`ResponseItemsField: "Items"`,
@@ -1852,7 +1855,8 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 
 	vcnServiceClient := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"))
 	assertContains(t, vcnServiceClient, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newVcnRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newVcnRuntimeSemantics(),",
 		`FormalService:     "core"`,
 		`FormalSlug:        "vcn"`,
 		`ProvisioningStates: []string{"PROVISIONING"}`,
@@ -1961,7 +1965,8 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	for _, test := range coreFormalServiceClients {
 		serviceClient := readFile(t, test.path)
 		assertContains(t, serviceClient, append([]string{
-			"Semantics: &generatedruntime.Semantics{",
+			"RuntimeSemantics() *generatedruntime.Semantics {",
+			`Semantics: new`,
 			`FormalService:     "core"`,
 			`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,
 			`ProvisioningStates: []string{"PROVISIONING"}`,
@@ -2153,7 +2158,8 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newClusterRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newClusterRuntimeSemantics(),",
 		`FormalService:     "containerengine"`,
 		`FormalSlug:        "cluster"`,
 		`ProvisioningStates: []string{"CREATING", "UPDATING"}`,
@@ -2264,7 +2270,8 @@ func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testin
 
 	content := readFile(t, filepath.Join(outputRoot, serviceClientPath))
 	assertContains(t, content, []string{
-		"Semantics: &generatedruntime.Semantics{",
+		"func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newCompartmentRuntimeSemantics(),",
 		`FormalService:     "identity"`,
 		`FormalSlug:        "compartment"`,
 		`ResponseItemsField: "Items"`,
@@ -2293,7 +2300,8 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 				`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 			},
 			serviceClientChecks: []string{
-				"Semantics: &generatedruntime.Semantics{",
+				"func newAutonomousDatabaseRuntimeSemantics() *generatedruntime.Semantics {",
+				"newAutonomousDatabaseRuntimeSemantics()",
 				`FormalService:     "database"`,
 				`FormalSlug:        "databaseautonomousdatabase"`,
 				`SecretSideEffects: "none"`,
@@ -2311,7 +2319,8 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch`,
 			},
 			serviceClientChecks: []string{
-				"Semantics: &generatedruntime.Semantics{",
+				"func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {",
+				"newDbSystemRuntimeSemantics()",
 				`FormalService:     "mysql"`,
 				`FormalSlug:        "dbsystem"`,
 				`SecretSideEffects: "none"`,
@@ -2329,7 +2338,8 @@ func TestCheckedInPromotedRuntimeArtifactsMatchGenerator(t *testing.T) {
 				`// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;delete`,
 			},
 			serviceClientChecks: []string{
-				"Semantics: &generatedruntime.Semantics{",
+				"func newStreamRuntimeSemantics() *generatedruntime.Semantics {",
+				"newStreamRuntimeSemantics()",
 				`FormalService:     "streaming"`,
 				`FormalSlug:        "stream"`,
 				`SecretSideEffects: "ready-only"`,
@@ -2754,6 +2764,46 @@ func TestCheckedInRedisClusterFormalBindingMatchesDiscovery(t *testing.T) {
 		if resource.Kind == "RedisRedisCluster" {
 			t.Fatal("discovered RedisRedisCluster resource kind, want published RedisCluster only")
 		}
+	}
+}
+
+func TestCheckedInBucketFormalBindingUsesRepoAuthoredMutationSurface(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var objectStorageService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "objectstorage" {
+			objectStorageService = &cfg.Services[i]
+			break
+		}
+	}
+	if objectStorageService == nil {
+		t.Fatal("objectstorage service was not found in services.yaml")
+	}
+	if got := objectStorageService.FormalSpecFor("Bucket"); got != "objectstoragebucket" {
+		t.Fatalf("objectstorage Bucket formalSpec = %q, want %q", got, "objectstoragebucket")
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *objectStorageService)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	bucket := findResource(t, pkg.Resources, "Bucket")
+	if bucket.Runtime == nil || bucket.Runtime.Semantics == nil {
+		t.Fatal("Bucket runtime semantics were not attached")
+	}
+	if got := bucket.Runtime.Semantics.Mutation.Mutable; !slices.Equal(got, []string{"autoTiering", "compartmentId", "definedTags", "freeformTags", "kmsKeyId", "metadata", "objectEventsEnabled", "publicAccessType", "versioning"}) {
+		t.Fatalf("Bucket mutable fields = %v, want conservative merged mutable surface", got)
+	}
+	if got := bucket.Runtime.Semantics.Mutation.ForceNew; !slices.Equal(got, []string{"storageTier"}) {
+		t.Fatalf("Bucket force-new fields = %v, want [storageTier]", got)
 	}
 }
 

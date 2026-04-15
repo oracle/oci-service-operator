@@ -42,7 +42,11 @@ var (
 
 type createContextKey string
 
-const skipExistingBeforeCreateContextKey createContextKey = "generatedruntime/skip-existing-before-create"
+const (
+	skipExistingBeforeCreateContextKey createContextKey = "generatedruntime/skip-existing-before-create"
+	lookupSpecRootKey                                   = "__generatedruntime_lookup_spec_root__"
+	lookupStatusRootKey                                 = "__generatedruntime_lookup_status_root__"
+)
 
 type Operation struct {
 	NewRequest func() any
@@ -93,9 +97,10 @@ type ListSemantics struct {
 }
 
 type MutationSemantics struct {
-	Mutable       []string
-	ForceNew      []string
-	ConflictsWith map[string][]string
+	UpdateCandidate []string
+	Mutable         []string
+	ForceNew        []string
+	ConflictsWith   map[string][]string
 }
 
 type AuxiliaryOperation struct {
@@ -230,26 +235,118 @@ func (c ServiceClient[T]) prepareCreateOrUpdateState(ctx context.Context, resour
 
 func (c ServiceClient[T]) resolveCurrentResource(ctx context.Context, resource T) (string, any, bool, error) {
 	currentID := c.currentID(resource)
-	existingResponse, err := c.resolveExistingBeforeCreate(ctx, resource)
+	existingResponse, trackedIDStale, err := c.resolveExistingBeforeCreate(ctx, resource)
 	if err != nil {
 		return "", nil, false, err
 	}
 
-	currentID, resolvedBeforeCreate := c.resolveTrackedCurrentID(resource, currentID, existingResponse)
+	currentID, resolvedBeforeCreate := c.resolveTrackedCurrentID(resource, currentID, existingResponse, trackedIDStale)
 	return currentID, existingResponse, resolvedBeforeCreate, nil
 }
 
-func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, existingResponse any) (string, bool) {
+func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, existingResponse any, trackedIDStale bool) (string, bool) {
 	originalCurrentID := currentID
-	resolvedBeforeCreate := currentID == "" && existingResponse != nil
-	if c.shouldResolveExistingBeforeCreate() && c.usesStatusOnlyCurrentID(resource, currentID) {
-		currentID = ""
-		resolvedBeforeCreate = existingResponse != nil && responseID(existingResponse) != originalCurrentID
+	if existingResponse != nil {
+		resolvedID := responseID(existingResponse)
+		if currentID == "" && resolvedID != "" {
+			return resolvedID, true
+		}
+		if trackedIDStale && resolvedID != "" && resolvedID != originalCurrentID {
+			return resolvedID, true
+		}
 	}
-	if currentID == "" && existingResponse != nil {
-		currentID = responseID(existingResponse)
+	if trackedIDStale {
+		return "", false
 	}
-	return currentID, resolvedBeforeCreate
+	return currentID, false
+}
+
+func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T, preferredID string) bool {
+	if preferredID == "" || !c.usesStatusOnlyCurrentID(resource, preferredID) || c.config.Get == nil {
+		return false
+	}
+
+	values, err := lookupValues(resource)
+	if err != nil {
+		return false
+	}
+
+	if len(c.config.Get.Fields) > 0 {
+		for _, field := range c.config.Get.Fields {
+			if !requestFieldRequiresResourceID(field, c.idFieldAliases()) {
+				continue
+			}
+			if _, ok := explicitRequestValue(values, field, preferredID); ok {
+				return true
+			}
+		}
+		return false
+	}
+
+	requestStruct, ok := operationRequestStruct(c.config.Get.NewRequest)
+	if !ok {
+		return false
+	}
+	for i := 0; i < requestStruct.NumField(); i++ {
+		fieldType, inspect := heuristicGetField(requestStruct, i)
+		if !inspect {
+			continue
+		}
+		if containsString(c.idFieldAliases(), requestLookupKey(fieldType)) {
+			return true
+		}
+	}
+	return false
+}
+
+func (c ServiceClient[T]) readResourceForExistingBeforeCreate(ctx context.Context, resource T) (any, bool, error) {
+	state, err := c.prepareReadResourceState(resource, "")
+	if err != nil {
+		return nil, false, err
+	}
+
+	state, response, handled, trackedIDStale, err := c.readResourceWithGetForExistingBeforeCreate(ctx, resource, state)
+	if handled {
+		return response, trackedIDStale, err
+	}
+
+	response, err = c.readResourceWithList(ctx, resource, state, readPhaseCreate)
+	return response, trackedIDStale, err
+}
+
+func (c ServiceClient[T]) readResourceWithGetForExistingBeforeCreate(ctx context.Context, resource T, state readResourceState) (readResourceState, any, bool, bool, error) {
+	if c.config.Get == nil || !c.canInvokeGet(resource, state.readID) {
+		return state, nil, false, false, nil
+	}
+
+	trackedIDStale := c.trackedStatusIDCanBeClearedAfterGetNotFound(resource, state.readID)
+	response, err := c.invoke(ctx, c.config.Get, resource, state.readID, requestBuildOptions{})
+	if err == nil {
+		return state, response, true, false, nil
+	}
+	if !isNotFound(err) || c.config.List == nil {
+		return state, nil, true, false, err
+	}
+
+	return c.fallbackReadResourceState(resource, state, readPhaseCreate), nil, false, trackedIDStale, nil
+}
+
+func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T) (any, bool, error) {
+	if skipExistingBeforeCreate(ctx) {
+		return nil, false, nil
+	}
+	if !c.shouldResolveExistingBeforeCreate() {
+		return nil, false, nil
+	}
+
+	response, trackedIDStale, err := c.readResourceForExistingBeforeCreate(ctx, resource)
+	if err == nil {
+		return response, trackedIDStale, nil
+	}
+	if errors.Is(err, errResourceNotFound) {
+		return nil, trackedIDStale, nil
+	}
+	return nil, false, err
 }
 
 func (c ServiceClient[T]) loadLiveMutationResponse(ctx context.Context, resource T, currentID string, existingResponse any, resolvedBeforeCreate bool) (string, any, error) {
@@ -630,24 +727,6 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 	}
 	_ = mergeResponseIntoStatus(resource, response)
 	return currentID, nil
-}
-
-func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T) (any, error) {
-	if skipExistingBeforeCreate(ctx) {
-		return nil, nil
-	}
-	if !c.shouldResolveExistingBeforeCreate() {
-		return nil, nil
-	}
-
-	response, err := c.readResource(ctx, resource, "", readPhaseCreate)
-	if err == nil {
-		return response, nil
-	}
-	if errors.Is(err, errResourceNotFound) {
-		return nil, nil
-	}
-	return nil, err
 }
 
 func skipExistingBeforeCreate(ctx context.Context) bool {
@@ -1761,8 +1840,16 @@ func lookupValues(resource any) (map[string]any, error) {
 	}
 
 	values := make(map[string]any)
-	mergeJSONMap(values, fieldInterface(resourceValue, "Spec"))
-	mergeJSONMap(values, fieldInterface(resourceValue, "Status"))
+	specValue := fieldInterface(resourceValue, "Spec")
+	if specRoot := jsonMap(specValue); specRoot != nil {
+		values[lookupSpecRootKey] = specRoot
+	}
+	mergeJSONMap(values, specValue)
+	statusValue := fieldInterface(resourceValue, "Status")
+	if statusRoot := jsonMap(statusValue); statusRoot != nil {
+		values[lookupStatusRootKey] = statusRoot
+	}
+	mergeJSONMap(values, statusValue)
 	if statusField, ok := fieldValue(resourceValue, "Status"); ok {
 		mergeJSONMap(values, fieldInterface(statusField, "OsokStatus"))
 	}
@@ -3231,8 +3318,42 @@ func lookupValueByPath(values map[string]any, path string) (any, bool) {
 		return nil, false
 	}
 
-	current := any(values)
-	for _, segment := range strings.Split(path, ".") {
+	segments := strings.Split(path, ".")
+	if current, ok := lookupRootScopedValue(values, segments); ok {
+		return current, true
+	}
+	return lookupValueBySegments(values, segments)
+}
+
+func lookupRootScopedValue(values map[string]any, segments []string) (any, bool) {
+	if len(segments) == 0 {
+		return nil, false
+	}
+
+	switch normalizePathSegment(segments[0]) {
+	case "spec":
+		return lookupNamedRootValue(values, lookupSpecRootKey, segments[1:])
+	case "status":
+		return lookupNamedRootValue(values, lookupStatusRootKey, segments[1:])
+	default:
+		return nil, false
+	}
+}
+
+func lookupNamedRootValue(values map[string]any, rootKey string, segments []string) (any, bool) {
+	root, ok := values[rootKey].(map[string]any)
+	if !ok {
+		return nil, false
+	}
+	if len(segments) == 0 {
+		return root, true
+	}
+	return lookupValueBySegments(root, segments)
+}
+
+func lookupValueBySegments(root map[string]any, segments []string) (any, bool) {
+	current := any(root)
+	for _, segment := range segments {
 		segment = strings.TrimSpace(segment)
 		if segment == "" {
 			return nil, false

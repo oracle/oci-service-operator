@@ -30,59 +30,63 @@ type defaultCompartmentServiceClient struct {
 	generatedruntime.ServiceClient[*identityv1beta1.Compartment]
 }
 
+func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "identity",
+		FormalSlug:        "compartment",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "none",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "best-effort",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "freeformTags", "name"},
+			ForceNew:      []string{"compartmentId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ CompartmentServiceClient = defaultCompartmentServiceClient{}
 
 var newCompartmentServiceClient = func(manager *CompartmentServiceManager) CompartmentServiceClient {
 	sdkClient, err := identitysdk.NewIdentityClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*identityv1beta1.Compartment]{
-		Kind:    "Compartment",
-		SDKName: "Compartment",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "identity",
-			FormalSlug:        "compartment",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "none",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"CREATING"},
-				UpdatingStates:     []string{},
-				ActiveStates:       []string{"ACTIVE", "INACTIVE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "best-effort",
-				PendingStates:  []string{"DELETING"},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "description", "freeformTags", "name"},
-				ForceNew:      []string{"compartmentId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "Compartment",
+		SDKName:   "Compartment",
+		Log:       manager.Log,
+		Semantics: newCompartmentRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &identitysdk.CreateCompartmentRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

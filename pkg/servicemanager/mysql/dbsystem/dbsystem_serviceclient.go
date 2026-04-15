@@ -30,6 +30,54 @@ type defaultDbSystemServiceClient struct {
 	generatedruntime.ServiceClient[*mysqlv1beta1.DbSystem]
 }
 
+func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "mysql",
+		FormalSlug:        "dbsystem",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING", "UPDATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "configurationId", "databaseManagement", "dbSystemId", "displayName", "isHeatWaveClusterAttached", "isUpToDate", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"accessMode", "backupPolicy.copyPolicies.backupCopyRetentionInDays", "backupPolicy.copyPolicies.copyToRegion", "backupPolicy.definedTags", "backupPolicy.freeformTags", "backupPolicy.isEnabled", "backupPolicy.pitrPolicy.isEnabled", "backupPolicy.retentionInDays", "backupPolicy.softDelete", "backupPolicy.windowStartTime", "configurationId", "crashRecovery", "customerContacts.email", "dataStorage.isAutoExpandStorageEnabled", "dataStorage.maxStorageSizeInGbs", "dataStorageSizeInGb", "databaseConsole.port", "databaseConsole.status", "databaseManagement", "databaseMode", "definedTags", "deletionPolicy.automaticBackupRetention", "deletionPolicy.finalBackup", "deletionPolicy.isDeleteProtected", "description", "displayName", "encryptData.keyGenerationType", "encryptData.keyId", "freeformTags", "hostnameLabel", "isHighlyAvailable", "maintenance.maintenanceDisabledWindows.timeEnd", "maintenance.maintenanceDisabledWindows.timeStart", "maintenance.maintenanceScheduleType", "maintenance.versionPreference", "maintenance.versionTrackPreference", "maintenance.windowStartTime", "nsgIds", "readEndpoint.excludeIps", "readEndpoint.isEnabled", "readEndpoint.readEndpointHostnameLabel", "readEndpoint.readEndpointIpAddress", "rest.configuration", "rest.port", "secureConnections.certificateGenerationType", "secureConnections.certificateId", "securityAttributes", "shapeName", "shutdownType", "state", "telemetryConfiguration.logs.destination", "telemetryConfiguration.logs.destinationConfigurations.key", "telemetryConfiguration.logs.destinationConfigurations.value", "telemetryConfiguration.logs.logTypes"},
+			ForceNew:      []string{"adminPassword", "adminUsername", "availabilityDomain", "compartmentId", "faultDomain", "ipAddress", "mysqlVersion", "port", "portX", "source", "source.backupId", "source.dbSystemId", "source.recoveryPoint", "source.sourceType", "source.sourceUrl", "subnetId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ DbSystemServiceClient = defaultDbSystemServiceClient{}
 
 var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
@@ -39,51 +87,7 @@ var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemSer
 		SDKName:          "DbSystem",
 		Log:              manager.Log,
 		CredentialClient: manager.CredentialClient,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "mysql",
-			FormalSlug:        "dbsystem",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"CREATING", "UPDATING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"DELETING"},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "configurationId", "databaseManagement", "dbSystemId", "displayName", "isHeatWaveClusterAttached", "isUpToDate", "state"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"accessMode", "backupPolicy.copyPolicies.backupCopyRetentionInDays", "backupPolicy.copyPolicies.copyToRegion", "backupPolicy.definedTags", "backupPolicy.freeformTags", "backupPolicy.isEnabled", "backupPolicy.pitrPolicy.isEnabled", "backupPolicy.retentionInDays", "backupPolicy.softDelete", "backupPolicy.windowStartTime", "configurationId", "crashRecovery", "customerContacts.email", "dataStorage.isAutoExpandStorageEnabled", "dataStorage.maxStorageSizeInGbs", "dataStorageSizeInGb", "databaseConsole.port", "databaseConsole.status", "databaseManagement", "databaseMode", "definedTags", "deletionPolicy.automaticBackupRetention", "deletionPolicy.finalBackup", "deletionPolicy.isDeleteProtected", "description", "displayName", "encryptData.keyGenerationType", "encryptData.keyId", "freeformTags", "hostnameLabel", "isHighlyAvailable", "maintenance.maintenanceDisabledWindows.timeEnd", "maintenance.maintenanceDisabledWindows.timeStart", "maintenance.maintenanceScheduleType", "maintenance.versionPreference", "maintenance.versionTrackPreference", "maintenance.windowStartTime", "nsgIds", "readEndpoint.excludeIps", "readEndpoint.isEnabled", "readEndpoint.readEndpointHostnameLabel", "readEndpoint.readEndpointIpAddress", "rest.configuration", "rest.port", "secureConnections.certificateGenerationType", "secureConnections.certificateId", "securityAttributes", "shapeName", "shutdownType", "state", "telemetryConfiguration.logs.destination", "telemetryConfiguration.logs.destinationConfigurations.key", "telemetryConfiguration.logs.destinationConfigurations.value", "telemetryConfiguration.logs.logTypes"},
-				ForceNew:      []string{"adminPassword", "adminUsername", "availabilityDomain", "compartmentId", "faultDomain", "ipAddress", "mysqlVersion", "port", "portX", "source", "source.backupId", "source.dbSystemId", "source.recoveryPoint", "source.sourceType", "source.sourceUrl", "subnetId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Semantics:        newDbSystemRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

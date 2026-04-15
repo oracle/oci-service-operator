@@ -1025,6 +1025,58 @@ type {{ .DefaultClientTypeName }} struct {
 	generatedruntime.ServiceClient[*{{ .APIImportAlias }}.{{ .Kind }}]
 }
 
+{{- if .Semantics }}
+func new{{ .Kind }}RuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "{{ .Semantics.FormalService }}",
+		FormalSlug:        "{{ .Semantics.FormalSlug }}",
+		StatusProjection:  "{{ .Semantics.StatusProjection }}",
+		SecretSideEffects: "{{ .Semantics.SecretSideEffects }}",
+		FinalizerPolicy:   "{{ .Semantics.FinalizerPolicy }}",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: {{ stringSliceLiteral .Semantics.Lifecycle.ProvisioningStates }},
+			UpdatingStates:     {{ stringSliceLiteral .Semantics.Lifecycle.UpdatingStates }},
+			ActiveStates:       {{ stringSliceLiteral .Semantics.Lifecycle.ActiveStates }},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "{{ .Semantics.Delete.Policy }}",
+			PendingStates:  {{ stringSliceLiteral .Semantics.Delete.PendingStates }},
+			TerminalStates: {{ stringSliceLiteral .Semantics.Delete.TerminalStates }},
+		},
+{{- if .Semantics.List }}
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "{{ .Semantics.List.ResponseItemsField }}",
+			MatchFields:        {{ stringSliceLiteral .Semantics.List.MatchFields }},
+		},
+{{- end }}
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       {{ stringSliceLiteral .Semantics.Mutation.Mutable }},
+			ForceNew:      {{ stringSliceLiteral .Semantics.Mutation.ForceNew }},
+			ConflictsWith: {{ stringSliceMapLiteral .Semantics.Mutation.ConflictsWith }},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: {{ runtimeHooksLiteral .Semantics.Hooks.Create }},
+			Update: {{ runtimeHooksLiteral .Semantics.Hooks.Update }},
+			Delete: {{ runtimeHooksLiteral .Semantics.Hooks.Delete }},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "{{ .Semantics.CreateFollowUp.Strategy }}",
+			Hooks:    {{ runtimeHooksLiteral .Semantics.CreateFollowUp.Hooks }},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "{{ .Semantics.UpdateFollowUp.Strategy }}",
+			Hooks:    {{ runtimeHooksLiteral .Semantics.UpdateFollowUp.Hooks }},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "{{ .Semantics.DeleteFollowUp.Strategy }}",
+			Hooks:    {{ runtimeHooksLiteral .Semantics.DeleteFollowUp.Hooks }},
+		},
+		AuxiliaryOperations: {{ runtimeAuxOpsLiteral .Semantics.AuxiliaryOperations }},
+		Unsupported:         {{ runtimeGapsLiteral .Semantics.OpenGaps }},
+	}
+}
+
+{{- end }}
 var _ {{ .ClientInterfaceName }} = {{ .DefaultClientTypeName }}{}
 
 var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .ClientInterfaceName }} {
@@ -1049,53 +1101,7 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 		CredentialClient: manager.CredentialClient,
 {{- end }}
 {{- if .Semantics }}
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "{{ .Semantics.FormalService }}",
-			FormalSlug:        "{{ .Semantics.FormalSlug }}",
-			StatusProjection:  "{{ .Semantics.StatusProjection }}",
-			SecretSideEffects: "{{ .Semantics.SecretSideEffects }}",
-			FinalizerPolicy:   "{{ .Semantics.FinalizerPolicy }}",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: {{ stringSliceLiteral .Semantics.Lifecycle.ProvisioningStates }},
-				UpdatingStates:     {{ stringSliceLiteral .Semantics.Lifecycle.UpdatingStates }},
-				ActiveStates:       {{ stringSliceLiteral .Semantics.Lifecycle.ActiveStates }},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "{{ .Semantics.Delete.Policy }}",
-				PendingStates:  {{ stringSliceLiteral .Semantics.Delete.PendingStates }},
-				TerminalStates: {{ stringSliceLiteral .Semantics.Delete.TerminalStates }},
-			},
-{{- if .Semantics.List }}
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "{{ .Semantics.List.ResponseItemsField }}",
-				MatchFields:        {{ stringSliceLiteral .Semantics.List.MatchFields }},
-			},
-{{- end }}
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       {{ stringSliceLiteral .Semantics.Mutation.Mutable }},
-				ForceNew:      {{ stringSliceLiteral .Semantics.Mutation.ForceNew }},
-				ConflictsWith: {{ stringSliceMapLiteral .Semantics.Mutation.ConflictsWith }},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: {{ runtimeHooksLiteral .Semantics.Hooks.Create }},
-				Update: {{ runtimeHooksLiteral .Semantics.Hooks.Update }},
-				Delete: {{ runtimeHooksLiteral .Semantics.Hooks.Delete }},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "{{ .Semantics.CreateFollowUp.Strategy }}",
-				Hooks:    {{ runtimeHooksLiteral .Semantics.CreateFollowUp.Hooks }},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "{{ .Semantics.UpdateFollowUp.Strategy }}",
-				Hooks:    {{ runtimeHooksLiteral .Semantics.UpdateFollowUp.Hooks }},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "{{ .Semantics.DeleteFollowUp.Strategy }}",
-				Hooks:    {{ runtimeHooksLiteral .Semantics.DeleteFollowUp.Hooks }},
-			},
-			AuxiliaryOperations: {{ runtimeAuxOpsLiteral .Semantics.AuxiliaryOperations }},
-			Unsupported:         {{ runtimeGapsLiteral .Semantics.OpenGaps }},
-		},
+		Semantics: new{{ .Kind }}RuntimeSemantics(),
 {{- end }}
 {{- if .CreateOperation }}
 		Create: &generatedruntime.Operation{

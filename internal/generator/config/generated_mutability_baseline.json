@@ -1,0 +1,455 @@
+{
+  "aggregate": {
+    "services": 3,
+    "resources": 3,
+    "overlayArtifacts": 3,
+    "vapArtifacts": 3,
+    "fields": 31,
+    "allowInPlaceCount": 16,
+    "denyInPlaceCount": 2,
+    "replacementRequiredCount": 9,
+    "unknownPolicyCount": 4,
+    "docsDeniedCount": 2,
+    "unresolvedJoinCount": 0,
+    "ambiguousJoinCount": 0,
+    "mergeConflictCount": 0
+  },
+  "services": [
+    {
+      "service": "core",
+      "resources": 1,
+      "fields": 9,
+      "allowInPlaceCount": 1,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 6,
+      "unknownPolicyCount": 2,
+      "docsDeniedCount": 0,
+      "unresolvedJoinCount": 0,
+      "ambiguousJoinCount": 0,
+      "mergeConflictCount": 0
+    },
+    {
+      "service": "nosql",
+      "resources": 1,
+      "fields": 10,
+      "allowInPlaceCount": 6,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 2,
+      "unknownPolicyCount": 2,
+      "docsDeniedCount": 0,
+      "unresolvedJoinCount": 0,
+      "ambiguousJoinCount": 0,
+      "mergeConflictCount": 0
+    },
+    {
+      "service": "objectstorage",
+      "resources": 1,
+      "fields": 12,
+      "allowInPlaceCount": 9,
+      "denyInPlaceCount": 2,
+      "replacementRequiredCount": 1,
+      "unknownPolicyCount": 0,
+      "docsDeniedCount": 2,
+      "unresolvedJoinCount": 0,
+      "ambiguousJoinCount": 0,
+      "mergeConflictCount": 0
+    }
+  ],
+  "resources": [
+    {
+      "service": "core",
+      "kind": "Instance",
+      "formalSlug": "instance",
+      "providerResource": "oci_core_instance",
+      "terraformDocsVersion": "7.22.0",
+      "overlayPath": "internal/generator/generated/mutability_overlay/core/instance.json",
+      "vapPath": "internal/generator/generated/vap_update_policy/core/instance.json",
+      "fields": 9,
+      "allowInPlaceCount": 1,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 6,
+      "unknownPolicyCount": 2,
+      "allowInPlacePaths": [
+        "displayName"
+      ],
+      "decisions": [
+        {
+          "fieldPath": "availabilityDomain",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "compartmentId",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "definedTags",
+          "finalPolicy": "unknown",
+          "joinStatus": "matched",
+          "mergeCase": "unknown",
+          "docsEvidenceState": "unknown"
+        },
+        {
+          "fieldPath": "displayName",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "freeformTags",
+          "finalPolicy": "unknown",
+          "joinStatus": "matched",
+          "mergeCase": "unknown",
+          "docsEvidenceState": "unknown"
+        },
+        {
+          "fieldPath": "shape",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "shapeConfig",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "sourceDetails",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "subnetId",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ],
+      "unknownFields": [
+        "definedTags",
+        "freeformTags"
+      ],
+      "denyRules": [
+        {
+          "fieldPath": "availabilityDomain",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "compartmentId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "definedTags",
+          "decision": "unknown",
+          "mergeCase": "unknown",
+          "docsEvidenceState": "unknown"
+        },
+        {
+          "fieldPath": "freeformTags",
+          "decision": "unknown",
+          "mergeCase": "unknown",
+          "docsEvidenceState": "unknown"
+        },
+        {
+          "fieldPath": "shape",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "shapeConfig",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "sourceDetails",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "subnetId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ]
+    },
+    {
+      "service": "nosql",
+      "kind": "Table",
+      "formalSlug": "table",
+      "providerResource": "oci_nosql_table",
+      "terraformDocsVersion": "7.22.0",
+      "overlayPath": "internal/generator/generated/mutability_overlay/nosql/table.json",
+      "vapPath": "internal/generator/generated/vap_update_policy/nosql/table.json",
+      "fields": 10,
+      "allowInPlaceCount": 6,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 2,
+      "unknownPolicyCount": 2,
+      "allowInPlacePaths": [
+        "compartmentId",
+        "ddlStatement",
+        "tableLimits.capacityMode",
+        "tableLimits.maxReadUnits",
+        "tableLimits.maxStorageInGbs",
+        "tableLimits.maxWriteUnits"
+      ],
+      "decisions": [
+        {
+          "fieldPath": "compartmentId",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "ddlStatement",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "definedTags",
+          "finalPolicy": "unknown",
+          "joinStatus": "matched",
+          "mergeCase": "astOnlyCandidate",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "freeformTags",
+          "finalPolicy": "unknown",
+          "joinStatus": "matched",
+          "mergeCase": "astOnlyCandidate",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "isAutoReclaimable",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "name",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "tableLimits.capacityMode",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "tableLimits.maxReadUnits",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "tableLimits.maxStorageInGbs",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "tableLimits.maxWriteUnits",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        }
+      ],
+      "unknownFields": [
+        "definedTags",
+        "freeformTags"
+      ],
+      "denyRules": [
+        {
+          "fieldPath": "definedTags",
+          "decision": "unknown",
+          "mergeCase": "astOnlyCandidate",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "freeformTags",
+          "decision": "unknown",
+          "mergeCase": "astOnlyCandidate",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "isAutoReclaimable",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "name",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ]
+    },
+    {
+      "service": "objectstorage",
+      "kind": "Bucket",
+      "formalSlug": "objectstoragebucket",
+      "providerResource": "oci_objectstorage_bucket",
+      "terraformDocsVersion": "7.22.0",
+      "overlayPath": "internal/generator/generated/mutability_overlay/objectstorage/objectstoragebucket.json",
+      "vapPath": "internal/generator/generated/vap_update_policy/objectstorage/objectstoragebucket.json",
+      "fields": 12,
+      "allowInPlaceCount": 9,
+      "denyInPlaceCount": 2,
+      "replacementRequiredCount": 1,
+      "unknownPolicyCount": 0,
+      "allowInPlacePaths": [
+        "autoTiering",
+        "compartmentId",
+        "definedTags",
+        "freeformTags",
+        "kmsKeyId",
+        "metadata",
+        "objectEventsEnabled",
+        "publicAccessType",
+        "versioning"
+      ],
+      "decisions": [
+        {
+          "fieldPath": "autoTiering",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "compartmentId",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "definedTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "freeformTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "kmsKeyId",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "metadata",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "name",
+          "finalPolicy": "denyInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsDeniedCandidate",
+          "docsEvidenceState": "deniedUpdatable"
+        },
+        {
+          "fieldPath": "namespace",
+          "finalPolicy": "denyInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsDeniedCandidate",
+          "docsEvidenceState": "deniedUpdatable"
+        },
+        {
+          "fieldPath": "objectEventsEnabled",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "publicAccessType",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "storageTier",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "versioning",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        }
+      ],
+      "docsDeniedFields": [
+        "name",
+        "namespace"
+      ],
+      "denyRules": [
+        {
+          "fieldPath": "name",
+          "decision": "denyInPlaceUpdate",
+          "mergeCase": "docsDeniedCandidate",
+          "docsEvidenceState": "deniedUpdatable"
+        },
+        {
+          "fieldPath": "namespace",
+          "decision": "denyInPlaceUpdate",
+          "mergeCase": "docsDeniedCandidate",
+          "docsEvidenceState": "deniedUpdatable"
+        },
+        {
+          "fieldPath": "storageTier",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ]
+    }
+  ]
+}
