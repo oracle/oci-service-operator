@@ -37,6 +37,20 @@ services:
         - kind: Instance
           formalSpec: instance
 
+  - service: dataflow
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
+    group: dataflow
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+    generation:
+      resources:
+        - kind: Application
+          formalSpec: application
+
   - service: nosql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/nosql
     group: nosql

@@ -1,13 +1,13 @@
 {
   "aggregate": {
-    "services": 4,
-    "resources": 4,
-    "overlayArtifacts": 4,
-    "vapArtifacts": 4,
-    "fields": 49,
-    "allowInPlaceCount": 30,
+    "services": 5,
+    "resources": 5,
+    "overlayArtifacts": 5,
+    "vapArtifacts": 5,
+    "fields": 77,
+    "allowInPlaceCount": 56,
     "denyInPlaceCount": 2,
-    "replacementRequiredCount": 12,
+    "replacementRequiredCount": 14,
     "unknownPolicyCount": 5,
     "docsDeniedCount": 2,
     "unresolvedJoinCount": 0,
@@ -36,6 +36,19 @@
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 6,
       "unknownPolicyCount": 2,
+      "docsDeniedCount": 0,
+      "unresolvedJoinCount": 0,
+      "ambiguousJoinCount": 0,
+      "mergeConflictCount": 0
+    },
+    {
+      "service": "dataflow",
+      "resources": 1,
+      "fields": 28,
+      "allowInPlaceCount": 26,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 2,
+      "unknownPolicyCount": 0,
       "docsDeniedCount": 0,
       "unresolvedJoinCount": 0,
       "ambiguousJoinCount": 0,
@@ -386,6 +399,260 @@
         },
         {
           "fieldPath": "subnetId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ]
+    },
+    {
+      "service": "dataflow",
+      "kind": "Application",
+      "formalSlug": "application",
+      "providerResource": "oci_dataflow_application",
+      "terraformDocsVersion": "7.22.0",
+      "overlayPath": "internal/generator/generated/mutability_overlay/dataflow/application.json",
+      "vapPath": "internal/generator/generated/vap_update_policy/dataflow/application.json",
+      "fields": 28,
+      "allowInPlaceCount": 26,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 2,
+      "unknownPolicyCount": 0,
+      "allowInPlacePaths": [
+        "applicationLogConfig",
+        "archiveUri",
+        "arguments",
+        "className",
+        "configuration",
+        "definedTags",
+        "description",
+        "displayName",
+        "driverShape",
+        "driverShapeConfig",
+        "execute",
+        "executorShape",
+        "executorShapeConfig",
+        "fileUri",
+        "freeformTags",
+        "idleTimeoutInMinutes",
+        "language",
+        "logsBucketUri",
+        "maxDurationInMinutes",
+        "metastoreId",
+        "numExecutors",
+        "parameters",
+        "poolId",
+        "privateEndpointId",
+        "sparkVersion",
+        "warehouseBucketUri"
+      ],
+      "decisions": [
+        {
+          "fieldPath": "applicationLogConfig",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "archiveUri",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "arguments",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "className",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "compartmentId",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "configuration",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "definedTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "description",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "displayName",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "driverShape",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "driverShapeConfig",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "execute",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "executorShape",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "executorShapeConfig",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "fileUri",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "freeformTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "idleTimeoutInMinutes",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "language",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "logsBucketUri",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "maxDurationInMinutes",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "metastoreId",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "numExecutors",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "parameters",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "poolId",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "privateEndpointId",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "sparkVersion",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "type",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "warehouseBucketUri",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        }
+      ],
+      "denyRules": [
+        {
+          "fieldPath": "compartmentId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "type",
           "decision": "replacementRequired",
           "mergeCase": "replacementRequired",
           "docsEvidenceState": "notDocumented"

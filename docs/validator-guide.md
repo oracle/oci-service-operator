@@ -337,6 +337,7 @@ input for this gate. Today that validation surface covers:
 
 - `containerengine/NodePool`
 - `core/Instance`
+- `dataflow/Application`
 - `nosql/Table`
 - `objectstorage/Bucket`
 
