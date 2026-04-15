@@ -65,7 +65,7 @@ if ("Supported mutable drift detected?") then (yes)
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=redis action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=redis action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=redis action=DELETED when the matching\nfield-driven path executes;
 :Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
@@ -114,8 +114,16 @@ nodeCount, nodeMemoryInGBs, freeformTags, and
 definedTags; changes to compartmentId,
 softwareVersion, or subnetId are
 replacement-only.
-Create and update rely on the generated-runtime
-read-after-write path, and delete retains the
-finalizer until DeleteRedisCluster is confirmed.
+Create, update, and delete all track Redis
+service work requests through
+status.async.current, preserving raw
+work-request ID, status, operation type, and
+percent complete while the shared async mapper
+drives conditions and requeue.
+Delete retains the finalizer until the tracked
+work request is terminal and GetRedisCluster
+confirms the cluster is gone; the delete guard
+still blocks the first delete call while OCI
+keeps the cluster in CREATING or UPDATING.
 end note
 @enduml

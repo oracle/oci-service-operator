@@ -20,13 +20,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-func init() {
-	generatedFactory := newRedisClusterServiceClient
-	newRedisClusterServiceClient = func(manager *RedisClusterServiceManager) RedisClusterServiceClient {
-		return newRedisDeleteGuardClient(manager, generatedFactory(manager))
-	}
-}
-
 type redisDeleteGuardClient struct {
 	delegate         RedisClusterServiceClient
 	loadRedisCluster func(context.Context, shared.OCID) (*redissdk.RedisCluster, error)
@@ -64,6 +57,9 @@ func (c redisDeleteGuardClient) CreateOrUpdate(
 func (c redisDeleteGuardClient) Delete(ctx context.Context, resource *redisv1beta1.RedisCluster) (bool, error) {
 	if c.delegate == nil {
 		return false, fmt.Errorf("redis delete guard delegate is not configured")
+	}
+	if redisClusterDeleteGuardHasTrackedDeleteWorkRequest(resource) {
+		return c.delegate.Delete(ctx, resource)
 	}
 
 	clusterID := redisClusterDeleteGuardCurrentID(resource)
@@ -115,6 +111,16 @@ func redisClusterDeleteGuardCurrentID(resource *redisv1beta1.RedisCluster) strin
 		return ocid
 	}
 	return strings.TrimSpace(resource.Status.Id)
+}
+
+func redisClusterDeleteGuardHasTrackedDeleteWorkRequest(resource *redisv1beta1.RedisCluster) bool {
+	if resource == nil || resource.Status.OsokStatus.Async.Current == nil {
+		return false
+	}
+	current := resource.Status.OsokStatus.Async.Current
+	return current.Source == shared.OSOKAsyncSourceWorkRequest &&
+		current.Phase == shared.OSOKAsyncPhaseDelete &&
+		strings.TrimSpace(current.WorkRequestID) != ""
 }
 
 func shouldDelayRedisDelete(state redissdk.RedisClusterLifecycleStateEnum) bool {

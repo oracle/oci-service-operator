@@ -1369,9 +1369,15 @@ services:
         - kind: RedisCluster
           formalSpec: rediscluster
           async:
-            strategy: lifecycle
-            runtime: generatedruntime
-            formalClassification: lifecycle
+            strategy: workrequest
+            runtime: handwritten
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
           controller:
             extraRBACMarkers:
               - groups="",resources=events,verbs=create;patch

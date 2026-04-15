@@ -145,6 +145,38 @@ func TestRedisDeleteGuardTreatsConflictAsRetryWhileClusterTransitions(t *testing
 	}
 }
 
+func TestRedisDeleteGuardDelegatesWhenDeleteWorkRequestIsTracked(t *testing.T) {
+	t.Parallel()
+
+	delegate := &fakeRedisDeleteGuardDelegate{}
+	client := redisDeleteGuardClient{
+		delegate: delegate,
+		loadRedisCluster: func(context.Context, shared.OCID) (*redissdk.RedisCluster, error) {
+			t.Fatal("loadRedisCluster() should be skipped once delete work request tracking exists")
+			return nil, nil
+		},
+	}
+
+	resource := testRedisDeleteGuardResource()
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceWorkRequest,
+		Phase:           shared.OSOKAsyncPhaseDelete,
+		WorkRequestID:   "wr-delete-1",
+		NormalizedClass: shared.OSOKAsyncClassPending,
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() should keep finalizer removal delegated until the runtime confirms delete")
+	}
+	if delegate.deleteCalls != 1 {
+		t.Fatalf("delegate Delete() calls = %d, want 1", delegate.deleteCalls)
+	}
+}
+
 type fakeRedisDeleteGuardDelegate struct {
 	deleteCalls int
 	deleteOK    bool

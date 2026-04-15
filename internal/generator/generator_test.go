@@ -2289,6 +2289,40 @@ func TestCheckedInQueueWorkRequestAsyncContractRendersHandwrittenMetadata(t *tes
 	})
 }
 
+func TestCheckedInRedisWorkRequestAsyncContractRendersRepoAuthoredHooks(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	redisService := serviceConfigsByName(t, cfg, "redis")["redis"]
+
+	outputRoot := t.TempDir()
+	seedSamplesKustomization(t, outputRoot)
+
+	result, err := New().Generate(context.Background(), cfg, []ServiceConfig{*redisService}, Options{
+		OutputRoot: outputRoot,
+	})
+	if err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+	if len(result.Generated) != 1 {
+		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
+	}
+
+	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "redis", "rediscluster", "rediscluster_serviceclient.go")))
+	assertContains(t, content, []string{
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "workrequest"`,
+		`Runtime: "handwritten"`,
+		`WorkRequest: &generatedruntime.WorkRequestSemantics{`,
+		`Source: "service-sdk"`,
+		`Phases: []string{"create", "update", "delete"}`,
+		`{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "CREATED"}`,
+		`{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "UPDATED"}`,
+		`{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "DELETED"}`,
+	})
+	assertNotContains(t, content, []string{`EntityType: "template"`})
+}
+
 func TestCheckedInLifecycleAsyncContractsStripStaleWorkRequestHelpers(t *testing.T) {
 	t.Parallel()
 
