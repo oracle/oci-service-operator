@@ -14,6 +14,11 @@ Manage OCI Queue service queues from Kubernetes.
 | Bundle Image Pattern | `ghcr.io/<REPOSITORY_OWNER>/oci-service-operator-queue-bundle:<version>` |
 | Setup Guide | [Open guide](../../../queue.md) |
 
+## Notes
+
+- Current package scope is intentionally limited to Queue.
+- Queue is the work-request reference for the shared async tracker; standalone Queue WorkRequest resources and the generic workrequests API group are not published with this package.
+
 ## Exposed Resources
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |

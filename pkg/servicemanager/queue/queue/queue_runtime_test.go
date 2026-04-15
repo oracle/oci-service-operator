@@ -707,6 +707,50 @@ func TestQueueRuntime_MutableUpdateDriftTriggersWorkRequestAndClearCustomEncrypt
 	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
 }
 
+func TestQueueRuntime_UpdateAcceptedPersistsLegacyMirrorAndSharedAsyncTracker(t *testing.T) {
+	var captured queuesdk.UpdateQueueRequest
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			return queuesdk.GetQueueResponse{
+				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "old-name", queuesdk.QueueLifecycleStateActive),
+			}, nil
+		},
+		updateFn: func(_ context.Context, req queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+			captured = req
+			return queuesdk.UpdateQueueResponse{
+				OpcWorkRequestId: common.String("wr-update-pending"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-pending", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-update-pending", queuesdk.OperationStatusInProgress, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Spec.DisplayName = "queue-sample"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, resp.ShouldRequeue)
+	assert.Equal(t, "ocid1.queue.oc1..existing", *captured.QueueId)
+	assert.Equal(t, "wr-update-pending", resource.Status.UpdateWorkRequestId)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseUpdate, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-update-pending", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "IN_PROGRESS", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "UPDATE_QUEUE", resource.Status.OsokStatus.Async.Current.RawOperationType)
+		assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+	}
+}
+
 func TestQueueRuntime_MutableUpdateDriftPreservesExplicitZeroValues(t *testing.T) {
 	var captured queuesdk.UpdateQueueRequest
 	getCalls := 0
@@ -822,6 +866,41 @@ func TestQueueRuntime_DeletePendingWorkRequestKeepsTerminating(t *testing.T) {
 		assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
 		assert.Equal(t, "wr-delete-1", resource.Status.OsokStatus.Async.Current.WorkRequestID)
 		assert.Equal(t, "IN_PROGRESS", resource.Status.OsokStatus.Async.Current.RawStatus)
+	}
+}
+
+func TestQueueRuntime_DeleteAcceptedPersistsLegacyMirrorAndSharedAsyncTracker(t *testing.T) {
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		deleteFn: func(_ context.Context, req queuesdk.DeleteQueueRequest) (queuesdk.DeleteQueueResponse, error) {
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			return queuesdk.DeleteQueueResponse{
+				OpcWorkRequestId: common.String("wr-delete-pending"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-delete-pending", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-delete-pending", queuesdk.OperationStatusAccepted, queuesdk.ActionTypeDeleted, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+
+	deleted, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, deleted)
+	assert.Equal(t, "wr-delete-pending", resource.Status.DeleteWorkRequestId)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+		assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+		assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+		assert.Equal(t, "wr-delete-pending", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+		assert.Equal(t, "ACCEPTED", resource.Status.OsokStatus.Async.Current.RawStatus)
+		assert.Equal(t, "DELETE_QUEUE", resource.Status.OsokStatus.Async.Current.RawOperationType)
+		assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
 	}
 }
 
