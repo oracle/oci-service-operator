@@ -29,6 +29,24 @@ metadata and regenerated diagrams.
 - Delete keeps the finalizer until `GetTable` or `ListTables` confirms the
   table is deleted or no longer exists.
 
+## Authority and scoped cleanup
+
+- `formal/controllers/nosql/table/*` is the authoritative formal path for the
+  lifecycle-only Table reference contract.
+- `formal/controllers/nosql/workrequest/logic-gaps.md`,
+  `formal/controllers/nosql/workrequesterror/logic-gaps.md`, and
+  `formal/controllers/nosql/workrequestlog/logic-gaps.md` remain
+  scaffold-only placeholders outside the promoted `Table` contract and are
+  tracked separately under `oci-service-operator-9s2`.
+- `Table` intentionally stays lifecycle-backed after the async migration. It
+  does not reopen the disabled top-level `service: workrequests` decision and
+  it does not imply promotion of the scaffolded NoSQL `WorkRequest*` rows under
+  `formal/controller_manifest.tsv`.
+- Remaining lifecycle/manual selected resources that still expose OCI
+  work-request APIs are re-audited separately under `oci-service-operator-0kb`;
+  `Table` is the lifecycle reference, not a proxy for adapter promotion
+  elsewhere.
+
 ## Shared generated-runtime baseline
 
 - Use the [shared generated-runtime baseline](../../../shared/generated-runtime-baseline.md)

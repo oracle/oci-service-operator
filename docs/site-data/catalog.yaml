@@ -141,6 +141,9 @@ packages:
     supportStatus: preview
     customerVisible: true
     guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Table.
+      - Table is the lifecycle-only reference for the shared async tracker; standalone NoSQL WorkRequest resources are not published with this package.
     kindOverrides:
       - group: nosql
         kind: Table
@@ -189,6 +192,9 @@ packages:
     supportStatus: preview
     customerVisible: true
     guidePath: docs/queue.md
+    packageNotes:
+      - Current package scope is intentionally limited to Queue.
+      - Queue is the work-request reference for the shared async tracker; standalone Queue WorkRequest resources and the generic workrequests API group are not published with this package.
     kindOverrides:
       - group: queue
         kind: Queue
@@ -202,6 +208,7 @@ packages:
     guidePath: docs/installation.md
     packageNotes:
       - Current package scope is intentionally limited to RedisCluster.
+      - RedisCluster is the work-request-backed Redis reference for the shared async tracker; standalone Redis WorkRequest resources are not published with this package.
     kindOverrides:
       - group: redis
         kind: RedisCluster

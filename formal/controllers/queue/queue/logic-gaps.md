@@ -18,6 +18,22 @@ gaps: []
 - Delete confirmation is required, not best-effort. The runtime does not report success until `GetQueue` confirms the tracked Queue is gone or exposes lifecycle state `DELETED`, even when work-request reads become unavailable.
 - Secret side effects are explicit repo-authored behavior. A package-local companion writes or updates the same-name endpoint Secret only after ACTIVE when `messagesEndpoint` is present, adopts only unlabeled matching Secrets, uses guarded updates/deletes for owned Secrets, and skips missing or unowned Secrets during delete cleanup.
 
+## Authority and scoped cleanup
+
+- `formal/controllers/queue/queue/*` is the authoritative formal path for the
+  promoted Queue runtime contract.
+- `pkg/servicemanager/queue/queue/queue_serviceclient.go` still records the
+  generated helper-hook baseline, but the live execution contract is owned by
+  `pkg/servicemanager/queue/queue/queue_runtime.go` plus the endpoint Secret
+  companion.
+- The disabled `service: workrequests` row in
+  `internal/generator/config/services.yaml` is a separate generator-contract
+  decision. Queue's work-request-backed async path does not publish or enable a
+  standalone `workrequests` API group.
+
 ## Out of scope follow-on work
 
-- `Channel`, `Message`, `Stats`, and `WorkRequest*` remain scaffolded Queue resources outside this first Queue rollout. Their formal rows and runtime semantics are follow-on work, not implied by the promoted `Queue` contract here.
+- `Channel`, `Message`, `Stats`, and `WorkRequest*` remain scaffold-only
+  Queue-family surfaces outside this first Queue rollout. Their future
+  prune-or-promote decision is separate from the promoted `Queue` contract and
+  is not implied by Queue's async adapter.

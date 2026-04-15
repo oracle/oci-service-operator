@@ -39,3 +39,18 @@ gaps: []
   existing delete guard still blocks the initial delete request while OCI keeps
   the cluster in `CREATING` or `UPDATING`, but it no longer suppresses
   work-request polling after delete has started.
+
+## Authority and scoped cleanup
+
+- `formal/controllers/redis/rediscluster/*` is the authoritative formal path
+  for the promoted Redis work-request adapter contract.
+- `pkg/servicemanager/redis/rediscluster/rediscluster_runtime.go` and
+  `pkg/servicemanager/redis/rediscluster/rediscluster_delete_guard_client.go`
+  own live runtime behavior.
+  `pkg/servicemanager/redis/rediscluster/rediscluster_serviceclient.go`
+  still records the generated helper-hook baseline and should not be treated as
+  a second execution contract.
+- The disabled `service: workrequests` row in
+  `internal/generator/config/services.yaml` is a separate generator-contract
+  decision. Redis work-request polling does not publish or enable a standalone
+  `workrequests` API group.
