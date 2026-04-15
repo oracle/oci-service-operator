@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>application_log_config</code> - (Optional) (Updatable) Logging details of Application logs for Data Flow Run.
+        <ul>
+          <li><code>log_group_id</code> - (Required) (Updatable) The log group id for where log objects will be for Data Flow Runs.</li>
+          <li><code>log_id</code> - (Required) (Updatable) The log id of the log object the Application Logs of Data Flow Run will be shipped to.</li>
+        </ul>
+      </li>
+      <li><code>archive_uri</code> - (Optional) (Updatable) A comma separated list of one or more archive files as Oracle Cloud Infrastructure URIs. For example, <code></code>oci://path/to/a.zip,oci://path/to/b.zip<code></code>. An Oracle Cloud Infrastructure URI of an archive.zip file containing custom dependencies that may be used to support the execution of a Python, Java, or Scala application. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.</li>
+      <li><code>arguments</code> - (Optional) (Updatable) The arguments passed to the running application as command line arguments.  An argument is either a plain text or a placeholder. Placeholders are replaced using values from the parameters map.  Each placeholder specified must be represented in the parameters map else the request (POST or PUT) will fail with a HTTP 400 status code.  Placeholders are specified as <code>Service Api Spec</code>, where <code>name</code> is the name of the parameter. Example:  <code>[ &#34;--input&#34;, &#34;${input_file}&#34;, &#34;--name&#34;, &#34;John Doe&#34; ]</code> If &#34;input_file&#34; has a value of &#34;mydata.xml&#34;, then the value above will be translated to <code>--input mydata.xml --name &#34;John Doe&#34;</code></li>
+      <li><code>class_name</code> - (Optional) (Updatable) The class for the application.</li>
+      <li><code>compartment_id</code> - (Required) (Updatable) The OCID of a compartment.</li>
+      <li><code>configuration</code> - (Optional) (Updatable) The Spark configuration passed to the running process. See https://spark.apache.org/docs/latest/configuration.html#available-properties. Example: { &#34;spark.app.name&#34; : &#34;My App Name&#34;, &#34;spark.shuffle.io.maxRetries&#34; : &#34;4&#34; } Note: Not all Spark properties are permitted to be set.  Attempting to set a property that is not allowed to be overwritten will cause a 400 status to be returned.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: <code>{&#34;Operations.CostCenter&#34;: &#34;42&#34;}</code></li>
+      <li><code>description</code> - (Optional) (Updatable) A user-friendly description. Avoid entering confidential information.</li>
+      <li><code>display_name</code> - (Required) (Updatable) A user-friendly name. It does not have to be unique. Avoid entering confidential information.</li>
+      <li><code>driver_shape</code> - (Required) (Updatable) The VM shape for the driver. Sets the driver cores and memory.</li>
+      <li><code>driver_shape_config</code> - (Optional) (Updatable) This is used to configure the shape of the driver or executor if a flexible shape is used.
+        <ul>
+          <li><code>memory_in_gbs</code> - (Optional) (Updatable) The amount of memory used for the driver or executors.</li>
+          <li><code>ocpus</code> - (Optional) (Updatable) The total number of OCPUs used for the driver or executors. See [here](https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.</li>
+        </ul>
+      </li>
+      <li><code>execute</code> - (Optional) (Updatable) The input used for spark-submit command. For more details see https://spark.apache.org/docs/latest/submitting-applications.html#launching-applications-with-spark-submit. Supported options include <code></code>--class<code></code>, <code></code>--file<code></code>, <code></code>--jars<code></code>, <code></code>--conf<code></code>, <code></code>--py-files<code></code>, and main application file with arguments. Example: <code></code>--jars oci://path/to/a.jar,oci://path/to/b.jar --files oci://path/to/a.json,oci://path/to/b.csv --py-files oci://path/to/a.py,oci://path/to/b.py --conf spark.sql.crossJoin.enabled=true --class org.apache.spark.examples.SparkPi oci://path/to/main.jar 10<code></code> Note: If execute is specified together with applicationId, className, configuration, fileUri, language, arguments, parameters during application create/update, or run create/submit, Data Flow service will use derived information from execute input only.</li>
+      <li><code>executor_shape</code> - (Required) (Updatable) The VM shape for the executors. Sets the executor cores and memory.</li>
+      <li><code>executor_shape_config</code> - (Optional) (Updatable) This is used to configure the shape of the driver or executor if a flexible shape is used.
+        <ul>
+          <li><code>memory_in_gbs</code> - (Optional) (Updatable) The amount of memory used for the driver or executors.</li>
+          <li><code>ocpus</code> - (Optional) (Updatable) The total number of OCPUs used for the driver or executors. See [here](https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.</li>
+        </ul>
+      </li>
+      <li><code>file_uri</code> - (Optional) (Updatable) An Oracle Cloud Infrastructure URI of the file containing the application to execute. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: <code>{&#34;Department&#34;: &#34;Finance&#34;}</code></li>
+      <li><code>idle_timeout_in_minutes</code> - (Optional) (Updatable) The timeout value in minutes used to manage Runs. A Run would be stopped after inactivity for this amount of time period. Note: This parameter is currently only applicable for Runs of type <code>SESSION</code>. Default value is 2880 minutes (2 days)</li>
+      <li><code>language</code> - (Required) (Updatable) The Spark language.</li>
+      <li><code>logs_bucket_uri</code> - (Optional) (Updatable) An Oracle Cloud Infrastructure URI of the bucket where the Spark job logs are to be uploaded. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.</li>
+      <li><code>max_duration_in_minutes</code> - (Optional) (Updatable) The maximum duration in minutes for which an Application should run. Data Flow Run would be terminated once it reaches this duration from the time it transitions to <code>IN_PROGRESS</code> state.</li>
+      <li><code>metastore_id</code> - (Optional) (Updatable) The OCID of Oracle Cloud Infrastructure Hive Metastore.</li>
+      <li><code>num_executors</code> - (Required) (Updatable) The number of executor VMs requested.</li>
+      <li><code>parameters</code> - (Optional) (Updatable) An array of name/value pairs used to fill placeholders found in properties like <code>Application.arguments</code>.  The name must be a string of one or more word characters (a-z, A-Z, 0-9, _).  The value can be a string of 0 or more characters of any kind. Example:  [ { name: &#34;iterations&#34;, value: &#34;10&#34;}, { name: &#34;input_file&#34;, value: &#34;mydata.xml&#34; }, { name: &#34;variable_x&#34;, value: &#34;${x}&#34;} ]
+        <ul>
+          <li><code>name</code> - (Required) (Updatable) The name of the parameter.  It must be a string of one or more word characters (a-z, A-Z, 0-9, _). Examples: &#34;iterations&#34;, &#34;input_file&#34;</li>
+          <li><code>value</code> - (Required) (Updatable) The value of the parameter. It must be a string of 0 or more characters of any kind. Examples: &#34;&#34; (empty string), &#34;10&#34;, &#34;mydata.xml&#34;, &#34;${x}&#34;</li>
+        </ul>
+      </li>
+      <li><code>pool_id</code> - (Optional) (Updatable) The OCID of a pool. Unique Id to indentify a dataflow pool resource.</li>
+      <li><code>private_endpoint_id</code> - (Optional) (Updatable) The OCID of a private endpoint.</li>
+      <li><code>spark_version</code> - (Required) (Updatable) The Spark version utilized to run the application.</li>
+      <li><code>type</code> - (Optional) The Spark application processing type.</li>
+      <li><code>warehouse_bucket_uri</code> - (Optional) (Updatable) An Oracle Cloud Infrastructure URI of the bucket to be used as default warehouse directory for BATCH SQL runs. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.</li>
+      <li><code>terminate_runs_on_deletion</code> - (Optional) A boolean flag which indicates whether related non-terminal Run(s) for the Application should be terminated along with Application deletion or not. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

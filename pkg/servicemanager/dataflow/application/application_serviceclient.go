@@ -30,59 +30,63 @@ type defaultApplicationServiceClient struct {
 	generatedruntime.ServiceClient[*dataflowv1beta1.Application]
 }
 
+func newApplicationRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService:     "dataflow",
+		FormalSlug:        "application",
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "displayNameStartsWith", "ownerPrincipalId", "sparkVersion"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"applicationLogConfig", "archiveUri", "arguments", "className", "configuration", "definedTags", "description", "displayName", "driverShape", "driverShapeConfig", "execute", "executorShape", "executorShapeConfig", "fileUri", "freeformTags", "idleTimeoutInMinutes", "language", "logsBucketUri", "maxDurationInMinutes", "metastoreId", "numExecutors", "parameters", "poolId", "privateEndpointId", "sparkVersion", "warehouseBucketUri"},
+			ForceNew:      []string{"compartmentId", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ ApplicationServiceClient = defaultApplicationServiceClient{}
 
 var newApplicationServiceClient = func(manager *ApplicationServiceManager) ApplicationServiceClient {
 	sdkClient, err := dataflowsdk.NewDataFlowClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*dataflowv1beta1.Application]{
-		Kind:    "Application",
-		SDKName: "Application",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService:     "dataflow",
-			FormalSlug:        "application",
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{},
-				UpdatingStates:     []string{},
-				ActiveStates:       []string{"ACTIVE", "INACTIVE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "displayNameStartsWith", "ownerPrincipalId", "sparkVersion"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"applicationLogConfig", "archiveUri", "arguments", "className", "configuration", "definedTags", "description", "displayName", "driverShape", "driverShapeConfig", "execute", "executorShape", "executorShapeConfig", "fileUri", "freeformTags", "idleTimeoutInMinutes", "language", "logsBucketUri", "maxDurationInMinutes", "metastoreId", "numExecutors", "parameters", "poolId", "privateEndpointId", "sparkVersion", "warehouseBucketUri"},
-				ForceNew:      []string{"compartmentId", "type"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-			},
-			AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-			Unsupported:         []generatedruntime.UnsupportedSemantic{},
-		},
+		Kind:      "Application",
+		SDKName:   "Application",
+		Log:       manager.Log,
+		Semantics: newApplicationRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &dataflowsdk.CreateApplicationRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

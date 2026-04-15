@@ -106,84 +106,24 @@ func newApplicationRuntimeClient(
 }
 
 func applicationGeneratedSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService:     "dataflow",
-		FormalSlug:        "application",
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ActiveStates: []string{"ACTIVE", "INACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			TerminalStates: []string{"DELETED"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       applicationGeneratedMutablePaths(),
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{
-				{Helper: "tfresource.CreateResource"},
-				{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "template", Action: "CREATED"},
-			},
-			Update: []generatedruntime.Hook{
-				{Helper: "tfresource.UpdateResource"},
-			},
-			Delete: []generatedruntime.Hook{
-				{Helper: "tfresource.DeleteResource"},
-			},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "",
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "",
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks: []generatedruntime.Hook{
-				{Helper: "tfresource.DeleteResource"},
-			},
-		},
-	}
-}
+	semantics := newApplicationRuntimeSemantics()
 
-func applicationGeneratedMutablePaths() []string {
 	// The package-local update builder still owns create-only drift checks for
 	// compartmentId and type. Including them here suppresses generic unsupported
 	// drift failures so the wrapper can preserve the existing explicit error path.
-	return []string{
-		"applicationLogConfig",
-		"archiveUri",
-		"arguments",
-		"className",
-		"compartmentId",
-		"configuration",
-		"definedTags",
-		"description",
-		"displayName",
-		"driverShape",
-		"driverShapeConfig",
-		"execute",
-		"executorShape",
-		"executorShapeConfig",
-		"fileUri",
-		"freeformTags",
-		"idleTimeoutInMinutes",
-		"language",
-		"logsBucketUri",
-		"maxDurationInMinutes",
-		"metastoreId",
-		"numExecutors",
-		"parameters",
-		"poolId",
-		"privateEndpointId",
-		"sparkVersion",
-		"type",
-		"warehouseBucketUri",
-	}
+	semantics.Mutation.Mutable = append(
+		append([]string(nil), semantics.Mutation.Mutable...),
+		semantics.Mutation.ForceNew...,
+	)
+	semantics.Mutation.ForceNew = nil
+
+	// The handwritten runtime still projects status from the write responses and
+	// intentionally bypasses list-based reuse.
+	semantics.CreateFollowUp = generatedruntime.FollowUpSemantics{}
+	semantics.UpdateFollowUp = generatedruntime.FollowUpSemantics{}
+	semantics.List = nil
+
+	return semantics
 }
 
 func (c *applicationRuntimeClient) CreateOrUpdate(ctx context.Context, resource *dataflowv1beta1.Application, req ctrl.Request) (servicemanager.OSOKResponse, error) {

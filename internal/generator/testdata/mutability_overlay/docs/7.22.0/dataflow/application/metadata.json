@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "dataflow",
+  "kind": "Application",
+  "formalSlug": "application",
+  "providerResource": "oci_dataflow_application",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/dataflow_application",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/dataflow_application",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/dataflow/application/page.html",
+  "bodySHA256": "d999773a815f9c05621aa9049c4aa276b341a3a7fa15e87146f03a2e02f35a65",
+  "bodyBytes": 9414,
+  "fixtureBodyPath": "7.22.0/dataflow/application/page.html"
+}
