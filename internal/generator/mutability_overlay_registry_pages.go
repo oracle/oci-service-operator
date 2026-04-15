@@ -35,13 +35,15 @@ type mutabilityOverlayDocsContract struct {
 // the exact versioned Terraform Registry resource page that should be used as
 // downstream docs input.
 type mutabilityOverlayRegistryPageTarget struct {
-	Service              string
-	Kind                 string
-	FormalSlug           string
-	ProviderResource     string
-	TerraformDocsVersion string
-	RegistryPath         string
-	RegistryURL          string
+	Service                string
+	Kind                   string
+	FormalSlug             string
+	ProviderResource       string
+	ProviderSourcePath     string
+	ProviderSourceRevision string
+	TerraformDocsVersion   string
+	RegistryPath           string
+	RegistryURL            string
 }
 
 // mutabilityOverlayRegistryPageMappingError captures an explicit discovery

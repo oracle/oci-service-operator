@@ -9,6 +9,20 @@ packageProfiles:
     description: Fixture-backed validation surface for mutability overlay and VAP regression gates.
 
 services:
+  - service: containerengine
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
+    group: containerengine
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - NodePool
+    generation:
+      resources:
+        - kind: NodePool
+          formalSpec: nodepool
+
   - service: core
     sdkPackage: github.com/oracle/oci-go-sdk/v65/core
     group: core

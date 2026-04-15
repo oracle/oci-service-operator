@@ -12,7 +12,7 @@
   "pageShape": "argumentReferenceHTML",
   "inputSource": "fixture",
   "inputIdentity": "fixture:7.22.0/containerengine/nodepool/page.html",
-  "bodySHA256": "e540c33f55a8c91c5ab9da59c2cc07cc4097e1a499baf1eaa180651df75eeecc",
-  "bodyBytes": 13228,
+  "bodySHA256": "892a0187731f3900f6ca28ba458e2f8e9c979986366ef2b4aff6f4c9b320d1b4",
+  "bodyBytes": 11081,
   "fixtureBodyPath": "7.22.0/containerengine/nodepool/page.html"
 }

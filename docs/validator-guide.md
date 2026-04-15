@@ -335,6 +335,7 @@ The checked-in fixture set under
 `internal/generator/testdata/mutability_overlay/docs/7.22.0/` is the pinned
 input for this gate. Today that validation surface covers:
 
+- `containerengine/NodePool`
 - `core/Instance`
 - `nosql/Table`
 - `objectstorage/Bucket`

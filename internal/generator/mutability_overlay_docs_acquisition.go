@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"mime"
 	"net/http"
@@ -235,6 +236,15 @@ func acquireMutabilityOverlayDocsInputs(
 
 		input, err := classifyMutabilityOverlayDocsResponse(target, resp)
 		if err != nil {
+			fallbackInput, ok, fallbackErr := tryAcquireMutabilityOverlayDocsInputFromProviderMarkdown(ctx, target, fetcher, err)
+			switch {
+			case ok && fallbackErr == nil:
+				inputs = append(inputs, fallbackInput)
+				continue
+			case ok && fallbackErr != nil:
+				errs = append(errs, errors.Join(err, fallbackErr))
+				continue
+			}
 			errs = append(errs, err)
 			continue
 		}
@@ -556,6 +566,431 @@ func newMutabilityOverlayDocsInput(
 		Metadata: metadata,
 		Body:     body,
 	}, nil
+}
+
+func tryAcquireMutabilityOverlayDocsInputFromProviderMarkdown(
+	ctx context.Context,
+	target mutabilityOverlayRegistryPageTarget,
+	fetcher mutabilityOverlayDocsFetcher,
+	cause error,
+) (mutabilityOverlayDocsInput, bool, error) {
+	var acquisitionErr *mutabilityOverlayDocsAcquisitionError
+	if !errors.As(cause, &acquisitionErr) || acquisitionErr.Reason != mutabilityOverlayDocsErrorJavaScriptOnlyPage {
+		return mutabilityOverlayDocsInput{}, false, nil
+	}
+
+	rawURL, ok := mutabilityOverlayProviderMarkdownRawURL(target)
+	if !ok {
+		return mutabilityOverlayDocsInput{}, false, nil
+	}
+
+	resp, err := fetcher.Fetch(ctx, rawURL)
+	if err != nil {
+		return mutabilityOverlayDocsInput{}, true, &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorAvailabilityFailure,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      rawURL,
+			Detail:           fmt.Sprintf("fetch fallback provider markdown: %v", err),
+		}
+	}
+
+	markdown, contentType, err := classifyMutabilityOverlayDocsMarkdownResponse(target, rawURL, resp)
+	if err != nil {
+		return mutabilityOverlayDocsInput{}, true, err
+	}
+	rendered, err := renderMutabilityOverlayDocsMarkdownArgumentReference(markdown)
+	if err != nil {
+		return mutabilityOverlayDocsInput{}, true, &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorStructurallyMissingPage,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      rawURL,
+			StatusCode:       resp.StatusCode,
+			ContentType:      contentType,
+			Detail:           err.Error(),
+		}
+	}
+
+	input, err := newMutabilityOverlayDocsInput(
+		target,
+		mutabilityOverlayDocsInputSourceLive,
+		"fetch:"+rawURL,
+		"",
+		"text/html; charset=utf-8",
+		rendered,
+	)
+	if err != nil {
+		return mutabilityOverlayDocsInput{}, true, err
+	}
+	return input, true, nil
+}
+
+func mutabilityOverlayProviderMarkdownRawURL(target mutabilityOverlayRegistryPageTarget) (string, bool) {
+	sourcePath := strings.TrimSpace(target.ProviderSourcePath)
+	revision := strings.TrimSpace(target.ProviderSourceRevision)
+	providerResource := strings.TrimSpace(target.ProviderResource)
+	if sourcePath == "" || revision == "" || providerResource == "" {
+		return "", false
+	}
+
+	sourcePath = strings.TrimPrefix(sourcePath, "https://")
+	sourcePath = strings.TrimPrefix(sourcePath, "http://")
+	if strings.HasPrefix(sourcePath, "github.com/") {
+		sourcePath = strings.TrimPrefix(sourcePath, "github.com/")
+	}
+	if strings.Count(sourcePath, "/") != 1 {
+		return "", false
+	}
+
+	resourceName := strings.TrimPrefix(providerResource, mutabilityOverlayProviderResourcePrefix)
+	if resourceName == "" || resourceName == providerResource {
+		return "", false
+	}
+
+	return fmt.Sprintf(
+		"https://raw.githubusercontent.com/%s/%s/website/docs/r/%s.html.markdown",
+		sourcePath,
+		revision,
+		resourceName,
+	), true
+}
+
+func classifyMutabilityOverlayDocsMarkdownResponse(
+	target mutabilityOverlayRegistryPageTarget,
+	sourceURL string,
+	resp mutabilityOverlayDocsHTTPResponse,
+) (string, string, error) {
+	switch {
+	case resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone:
+		return "", "", &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorMissingPage,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      sourceURL,
+			StatusCode:       resp.StatusCode,
+			Detail:           "fallback provider markdown does not exist for the pinned source revision",
+		}
+	case resp.StatusCode >= 300 && resp.StatusCode < 400:
+		return "", "", &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorRedirectedPage,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      sourceURL,
+			StatusCode:       resp.StatusCode,
+			Location:         strings.TrimSpace(resp.Location),
+			Detail:           "fallback provider markdown redirected unexpectedly",
+		}
+	case resp.StatusCode == http.StatusTooManyRequests:
+		return "", "", &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorRateLimited,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      sourceURL,
+			StatusCode:       resp.StatusCode,
+			Detail:           "fallback provider markdown fetch was rate limited",
+		}
+	case resp.StatusCode < 200 || resp.StatusCode >= 300:
+		return "", "", &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorAvailabilityFailure,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      sourceURL,
+			StatusCode:       resp.StatusCode,
+			Detail:           "fallback provider markdown returned an unavailable or unexpected status",
+		}
+	}
+
+	mediaType, canonicalContentType, err := canonicalizeMutabilityOverlayDocsContentType(resp.ContentType)
+	if err != nil || !isMutabilityOverlayMarkdownMediaType(mediaType) {
+		detail := "expected markdown or plain text from the pinned provider docs source"
+		if err != nil {
+			detail = err.Error()
+		}
+		return "", "", &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorUnexpectedContentType,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      sourceURL,
+			StatusCode:       resp.StatusCode,
+			ContentType:      strings.TrimSpace(resp.ContentType),
+			Detail:           detail,
+		}
+	}
+
+	body := normalizeMutabilityOverlayDocsBody(resp.Body)
+	if strings.TrimSpace(body) == "" {
+		return "", "", &mutabilityOverlayDocsAcquisitionError{
+			Reason:           mutabilityOverlayDocsErrorStructurallyMissingPage,
+			Service:          target.Service,
+			Kind:             target.Kind,
+			FormalSlug:       target.FormalSlug,
+			ProviderResource: target.ProviderResource,
+			RegistryURL:      sourceURL,
+			StatusCode:       resp.StatusCode,
+			ContentType:      canonicalContentType,
+			Detail:           "fallback provider markdown body is empty",
+		}
+	}
+
+	return body, canonicalContentType, nil
+}
+
+func isMutabilityOverlayMarkdownMediaType(mediaType string) bool {
+	switch strings.TrimSpace(strings.ToLower(mediaType)) {
+	case "text/markdown", "text/plain", "text/x-markdown":
+		return true
+	default:
+		return false
+	}
+}
+
+func renderMutabilityOverlayDocsMarkdownArgumentReference(markdown string) (string, error) {
+	body, err := extractMutabilityOverlayDocsMarkdownSection(markdown, mutabilityOverlayDocsSectionArgumentReference)
+	if err != nil {
+		return "", err
+	}
+
+	introLines, listLines := splitMutabilityOverlayDocsMarkdownIntroAndList(body)
+	items := parseMutabilityOverlayDocsMarkdownList(listLines)
+	if len(items) == 0 {
+		return "", errors.New("provider markdown Argument Reference section did not contain any list items")
+	}
+
+	var rendered strings.Builder
+	rendered.WriteString("<!DOCTYPE html>\n")
+	rendered.WriteString("<html>\n")
+	rendered.WriteString("  <body>\n")
+	rendered.WriteString(`    <h2 id="argument-reference">Argument Reference</h2>` + "\n")
+	for _, paragraph := range renderMutabilityOverlayDocsMarkdownParagraphs(introLines) {
+		rendered.WriteString("    ")
+		rendered.WriteString(paragraph)
+		rendered.WriteByte('\n')
+	}
+	renderMutabilityOverlayDocsMarkdownList(&rendered, items, "    ")
+	rendered.WriteString("  </body>\n")
+	rendered.WriteString("</html>\n")
+	return rendered.String(), nil
+}
+
+func extractMutabilityOverlayDocsMarkdownSection(markdown string, title string) (string, error) {
+	lines := strings.Split(normalizeMutabilityOverlayDocsBody([]byte(markdown)), "\n")
+	title = strings.TrimSpace(title)
+	if title == "" {
+		return "", errors.New("markdown section title is required")
+	}
+
+	start := -1
+	level := 0
+	for i, line := range lines {
+		headingLevel, headingTitle, ok := mutabilityOverlayDocsMarkdownHeading(line)
+		if ok && headingTitle == title {
+			start = i + 1
+			level = headingLevel
+			break
+		}
+	}
+	if start == -1 {
+		return "", fmt.Errorf("provider markdown does not contain a %q heading", title)
+	}
+
+	end := len(lines)
+	for i := start; i < len(lines); i++ {
+		headingLevel, _, ok := mutabilityOverlayDocsMarkdownHeading(lines[i])
+		if ok && headingLevel <= level {
+			end = i
+			break
+		}
+	}
+
+	section := strings.TrimSpace(strings.Join(lines[start:end], "\n"))
+	if section == "" {
+		return "", fmt.Errorf("provider markdown section %q is empty", title)
+	}
+	return section, nil
+}
+
+func mutabilityOverlayDocsMarkdownHeading(line string) (int, string, bool) {
+	trimmed := strings.TrimSpace(line)
+	if trimmed == "" || !strings.HasPrefix(trimmed, "#") {
+		return 0, "", false
+	}
+
+	level := 0
+	for level < len(trimmed) && trimmed[level] == '#' {
+		level++
+	}
+	if level == 0 || level == len(trimmed) || trimmed[level] != ' ' {
+		return 0, "", false
+	}
+	return level, strings.TrimSpace(trimmed[level:]), true
+}
+
+type mutabilityOverlayDocsMarkdownListItem struct {
+	Text     string
+	Children []*mutabilityOverlayDocsMarkdownListItem
+}
+
+func splitMutabilityOverlayDocsMarkdownIntroAndList(section string) ([]string, []string) {
+	lines := strings.Split(section, "\n")
+	firstBullet := len(lines)
+	for i, line := range lines {
+		if _, _, ok := parseMutabilityOverlayDocsMarkdownBullet(line); ok {
+			firstBullet = i
+			break
+		}
+	}
+	return lines[:firstBullet], lines[firstBullet:]
+}
+
+func renderMutabilityOverlayDocsMarkdownParagraphs(lines []string) []string {
+	var paragraphs []string
+	var current []string
+	flush := func() {
+		if len(current) == 0 {
+			return
+		}
+		paragraphs = append(paragraphs, "<p>"+renderMutabilityOverlayDocsMarkdownInline(strings.Join(current, " "))+"</p>")
+		current = nil
+	}
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			flush()
+			continue
+		}
+		current = append(current, trimmed)
+	}
+	flush()
+	return paragraphs
+}
+
+func parseMutabilityOverlayDocsMarkdownList(lines []string) []*mutabilityOverlayDocsMarkdownListItem {
+	var (
+		root    []*mutabilityOverlayDocsMarkdownListItem
+		parents []*mutabilityOverlayDocsMarkdownListItem
+	)
+	for _, line := range lines {
+		indent, text, ok := parseMutabilityOverlayDocsMarkdownBullet(line)
+		if ok {
+			item := &mutabilityOverlayDocsMarkdownListItem{Text: strings.TrimSpace(text)}
+			if indent <= 0 || len(parents) == 0 {
+				root = append(root, item)
+				parents = parents[:0]
+			} else {
+				if indent > len(parents) {
+					indent = len(parents)
+				}
+				parents = parents[:indent]
+				parent := parents[len(parents)-1]
+				parent.Children = append(parent.Children, item)
+			}
+			parents = append(parents, item)
+			continue
+		}
+
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || len(parents) == 0 {
+			continue
+		}
+		current := parents[len(parents)-1]
+		if current.Text != "" {
+			current.Text += " "
+		}
+		current.Text += trimmed
+	}
+	return root
+}
+
+func parseMutabilityOverlayDocsMarkdownBullet(line string) (int, string, bool) {
+	indent := 0
+	for len(line) != 0 {
+		switch {
+		case strings.HasPrefix(line, "\t"):
+			indent++
+			line = line[1:]
+		case strings.HasPrefix(line, "    "):
+			indent++
+			line = line[4:]
+		default:
+			goto parsed
+		}
+	}
+
+parsed:
+	line = strings.TrimLeft(line, " ")
+	if !strings.HasPrefix(line, "* ") {
+		return 0, "", false
+	}
+	return indent, strings.TrimSpace(line[2:]), true
+}
+
+func renderMutabilityOverlayDocsMarkdownList(
+	b *strings.Builder,
+	items []*mutabilityOverlayDocsMarkdownListItem,
+	indent string,
+) {
+	if len(items) == 0 {
+		return
+	}
+
+	b.WriteString(indent)
+	b.WriteString("<ul>\n")
+	for _, item := range items {
+		b.WriteString(indent)
+		b.WriteString("  <li>")
+		b.WriteString(renderMutabilityOverlayDocsMarkdownInline(item.Text))
+		if len(item.Children) != 0 {
+			b.WriteByte('\n')
+			renderMutabilityOverlayDocsMarkdownList(b, item.Children, indent+"    ")
+			b.WriteString(indent)
+			b.WriteString("  ")
+		}
+		b.WriteString("</li>\n")
+	}
+	b.WriteString(indent)
+	b.WriteString("</ul>\n")
+}
+
+func renderMutabilityOverlayDocsMarkdownInline(text string) string {
+	var rendered strings.Builder
+	for len(text) != 0 {
+		start := strings.IndexByte(text, '`')
+		if start == -1 {
+			rendered.WriteString(html.EscapeString(text))
+			break
+		}
+
+		rendered.WriteString(html.EscapeString(text[:start]))
+		text = text[start+1:]
+		end := strings.IndexByte(text, '`')
+		if end == -1 {
+			rendered.WriteString("`")
+			rendered.WriteString(html.EscapeString(text))
+			break
+		}
+
+		rendered.WriteString("<code>")
+		rendered.WriteString(html.EscapeString(text[:end]))
+		rendered.WriteString("</code>")
+		text = text[end+1:]
+	}
+	return rendered.String()
 }
 
 func validateMutabilityOverlayDocsFixtureInput(

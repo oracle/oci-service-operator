@@ -262,6 +262,68 @@ func TestRefreshMutabilityOverlayDocsFixturesWritesAndLoadsDeterministicLayout(t
 	}
 }
 
+func TestAcquireMutabilityOverlayDocsInputsFallsBackToPinnedProviderMarkdown(t *testing.T) {
+	t.Parallel()
+
+	target := newMutabilityOverlayDocsTargetForTest(
+		"containerengine",
+		"NodePool",
+		"nodepool",
+		"oci_containerengine_node_pool",
+		"7.22.0",
+		"https://registry.example.test/providers/oracle/oci/7.22.0/docs/resources/containerengine_node_pool",
+	)
+	target.ProviderSourcePath = "github.com/oracle/terraform-provider-oci"
+	target.ProviderSourceRevision = "test-provider-revision"
+	rawURL, ok := mutabilityOverlayProviderMarkdownRawURL(target)
+	if !ok {
+		t.Fatal("mutabilityOverlayProviderMarkdownRawURL() unexpectedly returned !ok")
+	}
+
+	fetcher := stubMutabilityOverlayDocsFetcher{
+		responses: map[string]mutabilityOverlayDocsHTTPResponse{
+			target.RegistryURL: {
+				StatusCode:  http.StatusOK,
+				ContentType: "text/html; charset=utf-8",
+				Body:        []byte("<html><body>Please enable JavaScript to continue.</body></html>"),
+			},
+			rawURL: {
+				StatusCode:  http.StatusOK,
+				ContentType: "text/plain; charset=utf-8",
+				Body:        []byte("## Argument Reference\n\nThe following arguments are supported:\n\n* `name` - (Required) (Updatable) Display name.\n* `subnet_ids` - (Optional) (Updatable) Set of subnet identifiers.\n"),
+			},
+		},
+	}
+
+	inputs, err := acquireMutabilityOverlayDocsInputs(context.Background(), []mutabilityOverlayRegistryPageTarget{target}, fetcher)
+	if err != nil {
+		t.Fatalf("acquireMutabilityOverlayDocsInputs() error = %v", err)
+	}
+	if len(inputs) != 1 {
+		t.Fatalf("acquireMutabilityOverlayDocsInputs() returned %d inputs, want 1", len(inputs))
+	}
+	if got := inputs[0].Metadata.InputIdentity; got != "fetch:"+rawURL {
+		t.Fatalf("inputs[0].Metadata.InputIdentity = %q, want %q", got, "fetch:"+rawURL)
+	}
+	if !strings.Contains(inputs[0].Body, "<h2 id=\"argument-reference\">Argument Reference</h2>") {
+		t.Fatalf("inputs[0].Body = %q, want rendered Argument Reference heading", inputs[0].Body)
+	}
+
+	parsed, err := parseMutabilityOverlayDocsArgumentReference(inputs[0])
+	if err != nil {
+		t.Fatalf("parseMutabilityOverlayDocsArgumentReference() error = %v", err)
+	}
+	if len(parsed.Fields) != 2 {
+		t.Fatalf("parseMutabilityOverlayDocsArgumentReference() returned %d fields, want 2", len(parsed.Fields))
+	}
+	if parsed.Fields[0].FieldPath != "name" {
+		t.Fatalf("parsed.Fields[0].FieldPath = %q, want %q", parsed.Fields[0].FieldPath, "name")
+	}
+	if parsed.Fields[0].EvidenceState != mutabilityOverlayDocsStateConfirmedUpdatable {
+		t.Fatalf("parsed.Fields[0].EvidenceState = %q, want %q", parsed.Fields[0].EvidenceState, mutabilityOverlayDocsStateConfirmedUpdatable)
+	}
+}
+
 func TestLoadCheckedInMutabilityOverlayDocsFixture(t *testing.T) {
 	t.Parallel()
 

@@ -43,6 +43,7 @@ type mutabilityOverlaySourceLockFile struct {
 
 type mutabilityOverlaySourceLockEntry struct {
 	Name     string `json:"name"`
+	Path     string `json:"path,omitempty"`
 	Revision string `json:"revision"`
 }
 
@@ -271,6 +272,23 @@ func mutabilityOverlayNeedsDocs(fields []mutabilityOverlayASTFieldInput) bool {
 }
 
 func loadMutabilityOverlaySourceRevisions(formalRoot string) (map[string]string, error) {
+	entries, err := loadMutabilityOverlaySourceEntries(formalRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	revisions := make(map[string]string, len(entries))
+	for name, entry := range entries {
+		revision := strings.TrimSpace(entry.Revision)
+		if revision == "" {
+			continue
+		}
+		revisions[name] = revision
+	}
+	return revisions, nil
+}
+
+func loadMutabilityOverlaySourceEntries(formalRoot string) (map[string]mutabilityOverlaySourceLockEntry, error) {
 	formalRoot = strings.TrimSpace(formalRoot)
 	if formalRoot == "" {
 		return nil, fmt.Errorf("formal root is required to load mutability overlay source pins")
@@ -286,16 +304,18 @@ func loadMutabilityOverlaySourceRevisions(formalRoot string) (map[string]string,
 		return nil, fmt.Errorf("decode formal sources.lock: %w", err)
 	}
 
-	revisions := make(map[string]string, len(lockFile.Sources))
+	entries := make(map[string]mutabilityOverlaySourceLockEntry, len(lockFile.Sources))
 	for _, source := range lockFile.Sources {
 		name := strings.TrimSpace(source.Name)
-		revision := strings.TrimSpace(source.Revision)
-		if name == "" || revision == "" {
+		if name == "" {
 			continue
 		}
-		revisions[name] = revision
+		source.Name = name
+		source.Path = strings.TrimSpace(source.Path)
+		source.Revision = strings.TrimSpace(source.Revision)
+		entries[name] = source
 	}
-	return revisions, nil
+	return entries, nil
 }
 
 func mutabilityOverlaySourceRevisionForResource(
@@ -306,10 +326,7 @@ func mutabilityOverlaySourceRevisionForResource(
 		return "", errors.New("mutability overlay source revision requires a formal model")
 	}
 
-	sourceRef := strings.TrimSpace(resource.Formal.Binding.Import.SourceRef)
-	if sourceRef == "" {
-		sourceRef = mutabilityOverlayProviderSourceRef
-	}
+	sourceRef := mutabilityOverlaySourceRefForResource(resource)
 	revision := strings.TrimSpace(revisions[sourceRef])
 	if revision != "" {
 		return revision, nil
@@ -323,6 +340,18 @@ func mutabilityOverlaySourceRevisionForResource(
 		ProviderResource: strings.TrimSpace(resource.Formal.Binding.Import.ProviderResource),
 		Detail:           fmt.Sprintf("sources.lock does not pin a revision for sourceRef %q", sourceRef),
 	}
+}
+
+func mutabilityOverlaySourceRefForResource(resource ResourceModel) string {
+	if resource.Formal == nil {
+		return ""
+	}
+
+	sourceRef := strings.TrimSpace(resource.Formal.Binding.Import.SourceRef)
+	if sourceRef == "" {
+		sourceRef = mutabilityOverlayProviderSourceRef
+	}
+	return sourceRef
 }
 
 func buildMutabilityOverlayDocument(
