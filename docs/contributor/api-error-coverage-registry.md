@@ -44,7 +44,7 @@ Each reviewed exception records:
 | `generatedruntime-follow-up` | generatedruntime paths whose error handling depends on follow-up helpers such as `WaitForUpdatedState` or `WaitForWorkRequestWithErrorHandling` | `containerengine/Cluster`, `opensearch/OpensearchCluster`, `streaming/Stream` |
 | `generatedruntime-workrequest` | work-request-aware flows that keep explicit work-request tracking as the reviewed contract | `queue/Queue` |
 | `manual-runtime` | direct handwritten runtimes whose primary OCI error handling stays in package-local create/update logic; per-resource delete/conflict semantics may still point at generatedruntime when delete is delegated there | `core/Vcn`, `core/InternetGateway`, `core/Subnet`, `core/SecurityList`, other active core-network runtimes |
-| `legacy-adapter` | helper and adapter paths that still own bespoke not-found, delete-guard, orphan-delete, pending-deletion, or create-fallback behavior | `containerinstances/ContainerInstance`, `functions/Application`, `functions/Function`, `keymanagement/Vault`, `nosql/Table`, `psql/DbSystem`, `identity/Compartment` |
+| `legacy-adapter` | helper and adapter paths that still own bespoke not-found, delete-guard, orphan-delete, pending-deletion, or create-fallback behavior | `containerinstances/ContainerInstance`, `functions/Application`, `functions/Function`, `keymanagement/Vault`, `nosql/Table`, `psql/DbSystem`, `identity/Compartment`, `redis/RedisCluster` |
 
 For the split-core parity clients, family and delete semantics are intentionally
 separate reviewed fields. `core/Vcn`, `core/InternetGateway`,
@@ -53,6 +53,20 @@ in the `manual-runtime` family because create/update ownership is handwritten,
 but their registry entries record generatedruntime delete semantics because
 `Delete` delegates to serviceclients with `DeleteFollowUp.Strategy =
 "confirm-delete"`.
+
+Legacy-adapter registrations are also intentionally explicit about the helper
+behavior that falls outside the base matrix:
+
+- Functions and shared lifecycle helpers treat OCI `404` responses broadly,
+  including `NamespaceNotFound` and auth-shaped `NotAuthorizedOrNotFound`, as
+  not-found during tracked rereads and delete confirmation.
+- `identity/Compartment` keeps orphan-delete success separate from plain delete
+  semantics by rereading lifecycle state before deciding whether a `409`
+  conflict means retry or success.
+- `nosql/Table` and `psql/DbSystem` keep adapter-level confirm-delete rereads
+  explicit instead of pretending generatedruntime owns those delete semantics.
+- `redis/RedisCluster` keeps the live-state delete guard explicit so `409`
+  delete conflicts reread the cluster lifecycle before finalizer removal.
 
 ## Current Explicit Exceptions
 

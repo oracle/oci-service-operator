@@ -85,6 +85,77 @@ func TestReviewedAPIErrorCoverageRegistrySplitCoreDeleteSemantics(t *testing.T) 
 	}
 }
 
+func TestReviewedAPIErrorCoverageRegistryLegacyAdapterSemantics(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		key                string
+		wantDelete         string
+		wantRetrySubstring string
+		wantDeviation      string
+	}{
+		{
+			key:                "containerinstances/ContainerInstance",
+			wantDelete:         deleteNotFoundManualRuntime,
+			wantRetrySubstring: "helper-specific rereads or adapter state checks",
+			wantDeviation:      "create-or-bind lookup",
+		},
+		{
+			key:                "functions/Application",
+			wantDelete:         deleteNotFoundManualRuntime,
+			wantRetrySubstring: "helper-specific rereads or adapter state checks",
+			wantDeviation:      "delete helpers",
+		},
+		{
+			key:                "functions/Function",
+			wantDelete:         deleteNotFoundManualRuntime,
+			wantRetrySubstring: "helper-specific rereads or adapter state checks",
+			wantDeviation:      "endpoint-secret side effects",
+		},
+		{
+			key:                "identity/Compartment",
+			wantDelete:         deleteNotFoundPendingDeletion,
+			wantRetrySubstring: "helper-specific rereads or adapter state checks",
+			wantDeviation:      "Orphan-delete helper",
+		},
+		{
+			key:                "keymanagement/Vault",
+			wantDelete:         deleteNotFoundPendingDeletion,
+			wantRetrySubstring: "pending-deletion lifecycle and scheduled-delete handling",
+			wantDeviation:      "schedule deletion windows",
+		},
+		{
+			key:                "nosql/Table",
+			wantDelete:         deleteNotFoundReadback,
+			wantRetrySubstring: "helper-specific rereads or adapter state checks",
+			wantDeviation:      "errTableNotFound",
+		},
+		{
+			key:                "psql/DbSystem",
+			wantDelete:         deleteNotFoundReadback,
+			wantRetrySubstring: "helper-specific rereads or adapter state checks",
+			wantDeviation:      "readback adapter",
+		},
+		{
+			key:                "redis/RedisCluster",
+			wantDelete:         deleteNotFoundReadback,
+			wantRetrySubstring: "reread live RedisCluster state",
+			wantDeviation:      "delete guard",
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.key, func(t *testing.T) {
+			t.Parallel()
+
+			assertReviewedDeleteSemantics(t, tc.key, tc.wantDelete)
+			assertReviewedRetryableConflictContains(t, tc.key, tc.wantRetrySubstring)
+			assertReviewedDeviation(t, tc.key, tc.wantDeviation)
+		})
+	}
+}
+
 func inventoryByKey(inventory []APIErrorCoverageInventoryItem) map[string]APIErrorCoverageInventoryItem {
 	items := make(map[string]APIErrorCoverageInventoryItem, len(inventory))
 	for _, item := range inventory {
@@ -204,6 +275,30 @@ func assertReviewedSemantics(
 	}
 	if registration.RetryableConflictSemantics != wantRetryableConflict {
 		t.Fatalf("%s retryableConflictSemantics = %q, want %q", key, registration.RetryableConflictSemantics, wantRetryableConflict)
+	}
+}
+
+func assertReviewedDeleteSemantics(t *testing.T, key string, wantDeleteNotFound string) {
+	t.Helper()
+
+	registration, ok := ReviewedAPIErrorCoverageRegistry.Registrations[key]
+	if !ok {
+		t.Fatalf("reviewed registration %q was not found", key)
+	}
+	if registration.DeleteNotFoundSemantics != wantDeleteNotFound {
+		t.Fatalf("%s deleteNotFoundSemantics = %q, want %q", key, registration.DeleteNotFoundSemantics, wantDeleteNotFound)
+	}
+}
+
+func assertReviewedRetryableConflictContains(t *testing.T, key string, wantSubstring string) {
+	t.Helper()
+
+	registration, ok := ReviewedAPIErrorCoverageRegistry.Registrations[key]
+	if !ok {
+		t.Fatalf("reviewed registration %q was not found", key)
+	}
+	if !strings.Contains(registration.RetryableConflictSemantics, wantSubstring) {
+		t.Fatalf("%s retryableConflictSemantics = %q, want substring %q", key, registration.RetryableConflictSemantics, wantSubstring)
 	}
 }
 
