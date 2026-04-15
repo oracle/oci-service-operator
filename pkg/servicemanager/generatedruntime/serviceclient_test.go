@@ -102,7 +102,8 @@ type fakeCreateThingRequest struct {
 }
 
 type fakeCreateThingResponse struct {
-	Thing fakeThing `presentIn:"body"`
+	OpcWorkRequestId *string   `presentIn:"header" name:"opc-work-request-id"`
+	Thing            fakeThing `presentIn:"body"`
 }
 
 type FakeCreateThingWithSecretDetails struct {
@@ -137,14 +138,17 @@ type fakeUpdateThingRequest struct {
 }
 
 type fakeUpdateThingResponse struct {
-	Thing fakeThing `presentIn:"body"`
+	OpcWorkRequestId *string   `presentIn:"header" name:"opc-work-request-id"`
+	Thing            fakeThing `presentIn:"body"`
 }
 
 type fakeDeleteThingRequest struct {
 	ThingId *string `contributesTo:"path" name:"thingId"`
 }
 
-type fakeDeleteThingResponse struct{}
+type fakeDeleteThingResponse struct {
+	OpcWorkRequestId *string `presentIn:"header" name:"opc-work-request-id"`
+}
 
 type fakeListThingRequest struct {
 	CompartmentId string `contributesTo:"query" name:"compartmentId"`
@@ -4099,6 +4103,20 @@ func TestValidateFormalSemanticsBlocksAuxiliaryOperations(t *testing.T) {
 	}
 }
 
+func TestResponseWorkRequestIDReadsOCIHeader(t *testing.T) {
+	t.Parallel()
+
+	if got := responseWorkRequestID(fakeCreateThingResponse{
+		OpcWorkRequestId: stringPtr("wr-create-1"),
+	}); got != "wr-create-1" {
+		t.Fatalf("responseWorkRequestID(create) = %q, want %q", got, "wr-create-1")
+	}
+
+	if got := responseWorkRequestID(fakeDeleteThingResponse{}); got != "" {
+		t.Fatalf("responseWorkRequestID(delete) = %q, want empty string", got)
+	}
+}
+
 func requireCreateOrUpdateSuccess(t *testing.T, response servicemanager.OSOKResponse, err error) {
 	t.Helper()
 
@@ -4159,6 +4177,39 @@ func requireTrailingCondition(t *testing.T, resource *fakeResource, want shared.
 	}
 }
 
+func requireCurrentWorkRequestID(t *testing.T, resource *fakeResource, want string) {
+	t.Helper()
+
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want populated tracker")
+	}
+	if got := resource.Status.OsokStatus.Async.Current.WorkRequestID; got != want {
+		t.Fatalf("status.async.current.workRequestId = %q, want %q", got, want)
+	}
+}
+
+func requireCurrentAsyncSource(t *testing.T, resource *fakeResource, want shared.OSOKAsyncSource) {
+	t.Helper()
+
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want populated tracker")
+	}
+	if got := resource.Status.OsokStatus.Async.Current.Source; got != want {
+		t.Fatalf("status.async.current.source = %q, want %q", got, want)
+	}
+}
+
+func requireCurrentAsyncPhase(t *testing.T, resource *fakeResource, want shared.OSOKAsyncPhase) {
+	t.Helper()
+
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want populated tracker")
+	}
+	if got := resource.Status.OsokStatus.Async.Current.Phase; got != want {
+		t.Fatalf("status.async.current.phase = %q, want %q", got, want)
+	}
+}
+
 func requireStringEqual(t *testing.T, fieldName string, got string, want string) {
 	t.Helper()
 
@@ -4173,4 +4224,8 @@ func requireTrue(t *testing.T, got bool, message string) {
 	if !got {
 		t.Fatal(message)
 	}
+}
+
+func stringPtr(value string) *string {
+	return &value
 }

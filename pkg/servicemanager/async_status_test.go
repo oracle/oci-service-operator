@@ -140,6 +140,112 @@ func TestApplyAsyncOperationUpdatesSharedStatus(t *testing.T) {
 	}
 }
 
+func TestApplyAsyncOperationPreservesWorkRequestIDOnlyWhileInFlight(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		existing      *shared.OSOKAsyncOperation
+		current       *shared.OSOKAsyncOperation
+		wantID        string
+		wantCondition shared.OSOKConditionType
+		wantRequeue   bool
+	}{
+		{
+			name: "open keeps fresh work request id",
+			current: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceWorkRequest,
+				Phase:           shared.OSOKAsyncPhaseCreate,
+				WorkRequestID:   "wr-create-open",
+				NormalizedClass: shared.OSOKAsyncClassPending,
+			},
+			wantID:        "wr-create-open",
+			wantCondition: shared.Provisioning,
+			wantRequeue:   true,
+		},
+		{
+			name: "pending follow-up preserves seeded work request id",
+			existing: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceWorkRequest,
+				Phase:           shared.OSOKAsyncPhaseUpdate,
+				WorkRequestID:   "wr-update-seeded",
+				NormalizedClass: shared.OSOKAsyncClassPending,
+			},
+			current: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceLifecycle,
+				Phase:           shared.OSOKAsyncPhaseUpdate,
+				RawStatus:       "UPDATING",
+				NormalizedClass: shared.OSOKAsyncClassPending,
+			},
+			wantID:        "wr-update-seeded",
+			wantCondition: shared.Updating,
+			wantRequeue:   true,
+		},
+		{
+			name: "delete success waiting for confirmation preserves seeded work request id",
+			existing: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceWorkRequest,
+				Phase:           shared.OSOKAsyncPhaseDelete,
+				WorkRequestID:   "wr-delete-seeded",
+				NormalizedClass: shared.OSOKAsyncClassPending,
+			},
+			current: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceLifecycle,
+				Phase:           shared.OSOKAsyncPhaseDelete,
+				RawStatus:       "DELETED",
+				NormalizedClass: shared.OSOKAsyncClassSucceeded,
+			},
+			wantID:        "wr-delete-seeded",
+			wantCondition: shared.Terminating,
+			wantRequeue:   true,
+		},
+		{
+			name: "terminal update success does not preserve seeded work request id",
+			existing: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceWorkRequest,
+				Phase:           shared.OSOKAsyncPhaseUpdate,
+				WorkRequestID:   "wr-update-seeded",
+				NormalizedClass: shared.OSOKAsyncClassPending,
+			},
+			current: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceLifecycle,
+				Phase:           shared.OSOKAsyncPhaseUpdate,
+				RawStatus:       "AVAILABLE",
+				NormalizedClass: shared.OSOKAsyncClassSucceeded,
+			},
+			wantCondition: shared.Active,
+			wantRequeue:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			status := &shared.OSOKStatus{}
+			if tt.existing != nil {
+				existing := *tt.existing
+				status.Async.Current = &existing
+			}
+
+			projection := ApplyAsyncOperation(status, tt.current, loggerutil.OSOKLogger{})
+			if projection.Condition != tt.wantCondition {
+				t.Fatalf("projection condition = %q, want %q", projection.Condition, tt.wantCondition)
+			}
+			if projection.ShouldRequeue != tt.wantRequeue {
+				t.Fatalf("projection shouldRequeue = %t, want %t", projection.ShouldRequeue, tt.wantRequeue)
+			}
+			if status.Async.Current == nil {
+				t.Fatal("status.async.current = nil, want populated tracker")
+			}
+			if status.Async.Current.WorkRequestID != tt.wantID {
+				t.Fatalf("status.async.current.workRequestId = %q, want %q", status.Async.Current.WorkRequestID, tt.wantID)
+			}
+		})
+	}
+}
+
 func TestBuildWorkRequestAsyncOperationUsesNormalizedMappings(t *testing.T) {
 	t.Parallel()
 

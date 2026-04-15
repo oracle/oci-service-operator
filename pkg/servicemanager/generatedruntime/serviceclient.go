@@ -445,6 +445,7 @@ func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
+	c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseUpdate)
 
 	response, err = c.followUpAfterWrite(ctx, resource, currentID, response, "update")
 	if err != nil {
@@ -471,6 +472,7 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, 
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
+		c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseCreate)
 
 		followUp, err := c.followUpAfterWrite(ctx, resource, responseID(response), response, "create")
 		if err != nil {
@@ -530,13 +532,15 @@ func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
 }
 
 func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T, currentID string) (bool, error) {
-	if _, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{}); err != nil {
+	response, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{})
+	if err != nil {
 		if isDeleteNotFound(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
 	}
+	c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseDelete)
 	return false, nil
 }
 
@@ -2449,6 +2453,63 @@ func responseID(response any) string {
 	}
 	values := jsonMap(body)
 	return firstNonEmpty(values, "id", "ocid")
+}
+
+func responseWorkRequestID(response any) string {
+	if response == nil {
+		return ""
+	}
+
+	value, ok := indirectValue(reflect.ValueOf(response))
+	if !ok || value.Kind() != reflect.Struct {
+		return ""
+	}
+
+	typ := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		fieldType := typ.Field(i)
+		if !fieldType.IsExported() || !isWorkRequestHeaderField(fieldType) {
+			continue
+		}
+		if workRequestID := stringFieldValue(value.Field(i)); workRequestID != "" {
+			return workRequestID
+		}
+	}
+	return ""
+}
+
+func isWorkRequestHeaderField(fieldType reflect.StructField) bool {
+	return fieldType.Name == "OpcWorkRequestId" ||
+		(fieldType.Tag.Get("presentIn") == "header" && fieldType.Tag.Get("name") == "opc-work-request-id")
+}
+
+func stringFieldValue(value reflect.Value) string {
+	value, ok := indirectValue(value)
+	if !ok || value.Kind() != reflect.String {
+		return ""
+	}
+	return strings.TrimSpace(value.String())
+}
+
+func (c ServiceClient[T]) seedOpeningWorkRequestID(resource T, response any, phase shared.OSOKAsyncPhase) {
+	workRequestID := responseWorkRequestID(response)
+	if workRequestID == "" || phase == "" {
+		return
+	}
+
+	status, err := osokStatus(resource)
+	if err != nil {
+		return
+	}
+
+	now := metav1.Now()
+	_ = servicemanager.ApplyAsyncOperation(status, &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceWorkRequest,
+		Phase:           phase,
+		WorkRequestID:   workRequestID,
+		NormalizedClass: shared.OSOKAsyncClassPending,
+		UpdatedAt:       &now,
+	}, c.config.Log)
 }
 
 type lifecycleAsyncEvaluation struct {

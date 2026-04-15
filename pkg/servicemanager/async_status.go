@@ -185,6 +185,10 @@ func ApplyAsyncOperation(status *shared.OSOKStatus, current *shared.OSOKAsyncOpe
 	if message == "" {
 		message = projection.DefaultMessage
 	}
+	workRequestID := strings.TrimSpace(current.WorkRequestID)
+	if workRequestID == "" {
+		workRequestID = preservedInFlightWorkRequestID(status.Async.Current, current, projection)
+	}
 
 	updatedAt := current.UpdatedAt
 	if updatedAt == nil {
@@ -195,7 +199,7 @@ func ApplyAsyncOperation(status *shared.OSOKStatus, current *shared.OSOKAsyncOpe
 	status.Async.Current = &shared.OSOKAsyncOperation{
 		Source:           current.Source,
 		Phase:            current.Phase,
-		WorkRequestID:    strings.TrimSpace(current.WorkRequestID),
+		WorkRequestID:    workRequestID,
 		RawStatus:        strings.TrimSpace(current.RawStatus),
 		RawOperationType: strings.TrimSpace(current.RawOperationType),
 		NormalizedClass:  current.NormalizedClass,
@@ -209,6 +213,18 @@ func ApplyAsyncOperation(status *shared.OSOKStatus, current *shared.OSOKAsyncOpe
 	*status = util.UpdateOSOKStatusCondition(*status, projection.Condition, projection.ConditionStatus, "", message, log)
 
 	return projection
+}
+
+func preservedInFlightWorkRequestID(previous *shared.OSOKAsyncOperation, current *shared.OSOKAsyncOperation, projection AsyncProjection) string {
+	if previous == nil || current == nil || !projection.ShouldRequeue {
+		return ""
+	}
+
+	workRequestID := strings.TrimSpace(previous.WorkRequestID)
+	if workRequestID == "" || previous.Phase == "" || previous.Phase != current.Phase {
+		return ""
+	}
+	return workRequestID
 }
 
 func ClearAsyncOperation(status *shared.OSOKStatus) {
