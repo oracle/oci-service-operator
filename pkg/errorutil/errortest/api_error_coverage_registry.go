@@ -190,6 +190,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			retryableConflictFollowUp,
 			"Generated serviceclient uses WaitForWorkRequestWithErrorHandling for create, update, and delete follow-up.",
 		),
+		resourceKey("containerengine", "NodePool"): reviewedRegistration(
+			"containerengine",
+			"containerengine",
+			apiErrorCoverageDefaultVersion,
+			"NodePool",
+			APIErrorCoverageFamilyGeneratedRuntimeFollowUp,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictFollowUp,
+			"Generated serviceclient uses WaitForWorkRequestWithErrorHandling for create, update, and delete follow-up.",
+		),
 		resourceKey("containerinstances", "ContainerInstance"): reviewedRegistration(
 			"containerinstances",
 			"containerinstances",
@@ -309,6 +319,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			deleteNotFoundGeneratedRuntime,
 			retryableConflictGeneratedRuntime,
 			"",
+		),
+		resourceKey("dataflow", "Application"): reviewedRegistration(
+			"dataflow",
+			"dataflow",
+			apiErrorCoverageDefaultVersion,
+			"Application",
+			APIErrorCoverageFamilyManualRuntime,
+			deleteNotFoundManualRuntime,
+			retryableConflictManualRuntime,
+			"Handwritten Application runtime keeps generatedruntime CRUD delegation for create and update body execution, but owns tracked-identity recreation, OCI error normalization, status projection, and direct delete confirmation without follow-up helpers.",
 		),
 		resourceKey("functions", "Application"): reviewedRegistration(
 			"functions",
