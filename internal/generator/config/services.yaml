@@ -618,7 +618,7 @@ services:
           formalSpec: application
           async:
             strategy: lifecycle
-            runtime: generatedruntime
+            runtime: handwritten
             formalClassification: lifecycle
           serviceManager:
             packagePath: dataflow/application

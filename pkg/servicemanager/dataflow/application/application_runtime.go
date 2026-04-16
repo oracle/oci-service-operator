@@ -108,6 +108,13 @@ func newApplicationRuntimeClient(
 func applicationGeneratedSemantics() *generatedruntime.Semantics {
 	semantics := newApplicationRuntimeSemantics()
 
+	// The package-local wrapper is the checked-in runtime owner, but the embedded
+	// generated delegate still validates its own semantics as a generatedruntime
+	// client before it can be used for create/update/observe execution.
+	if semantics.Async != nil {
+		semantics.Async.Runtime = "generatedruntime"
+	}
+
 	// The package-local update builder still owns create-only drift checks for
 	// compartmentId and type. Including them here suppresses generic unsupported
 	// drift failures so the wrapper can preserve the existing explicit error path.

@@ -60,7 +60,7 @@ services:
           formalSpec: application
           async:
             strategy: lifecycle
-            runtime: generatedruntime
+            runtime: handwritten
             formalClassification: lifecycle
 
   - service: nosql
