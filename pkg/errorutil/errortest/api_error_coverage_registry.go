@@ -188,7 +188,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			APIErrorCoverageFamilyGeneratedRuntimePlain,
 			deleteNotFoundGeneratedRuntime,
 			retryableConflictGeneratedRuntime,
-			"Generated scaffold keeps create and update on plain generatedruntime CRUD while delete uses confirm-delete follow-up and auxiliary update operations remain for follow-on runtime hardening.",
+			"Handwritten update-body shaping narrows AnalyticsInstance updates to UpdateAnalyticsInstanceDetails fields while create, read, and delete OCI errors still flow through shared generatedruntime CRUD and confirm-delete handling.",
 		),
 		resourceKey("containerengine", "Cluster"): reviewedRegistration(
 			"containerengine",
