@@ -86,15 +86,10 @@
       "network_endpoint_details.whitelisted_ips",
       "network_endpoint_details.whitelisted_services",
       "network_endpoint_details.whitelisted_vcns.id",
-      "network_endpoint_details.whitelisted_vcns.whitelisted_ips",
-      "state",
-      "update_channel"
+      "network_endpoint_details.whitelisted_vcns.whitelisted_ips"
     ],
     "forceNew": [
-      "admin_user",
       "capacity.capacity_type",
-      "domain_id",
-      "feature_bundle",
       "feature_set",
       "name",
       "network_endpoint_details.network_endpoint_type"
@@ -139,6 +134,7 @@
     ]
   },
   "notes": [
-    "Scaffold placeholder for analytics/analyticsinstance; replace imported facts before promoting this row beyond scaffold."
+    "Provider mutation facts are narrowed to fields that exist on the published SDK-derived AnalyticsInstance surface.",
+    "Provider-only fields admin_user, domain_id, feature_bundle, state, and update_channel remain out of scope for the generated controller-backed scaffold."
   ]
 }

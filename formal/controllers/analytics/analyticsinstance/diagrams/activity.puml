@@ -57,11 +57,11 @@ endif
 partition "Ready and Drift Handling" {
 :Compare live OCI state against the imported\nfield surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields admin_user, capacity.capacity_type,\ndomain_id, feature_bundle (+3 more);
+:Reject drift before OCI mutation for force-new\nfields capacity.capacity_type, feature_set,\nname,\nnetwork_endpoint_details.network_endpoint_type;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply ChangeAnalyticsInstanceCompartment,\nChangeAnalyticsInstanceNetworkEndpoint,\nScaleAnalyticsInstance (+1 more) only for\nmutable fields capacity.capacity_value,\ncompartment_id, defined_tags, description (+14\nmore);
+:Apply ChangeAnalyticsInstanceCompartment,\nChangeAnalyticsInstanceNetworkEndpoint,\nScaleAnalyticsInstance (+1 more) only for\nmutable fields capacity.capacity_value,\ncompartment_id, defined_tags, description (+12\nmore);
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -94,11 +94,11 @@ requeue: provisioning, updating, terminating
 provider states: create CREATING; update none;
 delete DELETING
 supported drift: capacity.capacity_value,
-compartment_id, defined_tags, description (+14
+compartment_id, defined_tags, description (+12
 more)
 reject before mutate: force-new fields
-admin_user, capacity.capacity_type, domain_id,
-feature_bundle (+3 more)
+capacity.capacity_type, feature_set, name,
+network_endpoint_details.network_endpoint_type
 create-only fields: none
 list lookup: oci_analytics_analytics_instances
 filters capacity_type, compartment_id,

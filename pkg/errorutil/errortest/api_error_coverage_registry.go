@@ -180,6 +180,16 @@ type APIErrorCoverageRegistry struct {
 // explicit exemptions.
 var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 	Registrations: map[string]APIErrorCoverageRegistration{
+		resourceKey("analytics", "AnalyticsInstance"): reviewedRegistration(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"AnalyticsInstance",
+			APIErrorCoverageFamilyGeneratedRuntimePlain,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"Generated scaffold keeps create and update on plain generatedruntime CRUD while delete uses confirm-delete follow-up and auxiliary update operations remain for follow-on runtime hardening.",
+		),
 		resourceKey("containerengine", "Cluster"): reviewedRegistration(
 			"containerengine",
 			"containerengine",
@@ -452,6 +462,41 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 		),
 	},
 	Exceptions: map[string]APIErrorCoverageException{
+		resourceKey("analytics", "PrivateAccessChannel"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"PrivateAccessChannel",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "VanityUrl"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"VanityUrl",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "WorkRequest"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequest",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "WorkRequestError"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestError",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "WorkRequestLog"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestLog",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
 		resourceKey("keymanagement", "Key"): reviewedException(
 			"keymanagement",
 			"keymanagement",

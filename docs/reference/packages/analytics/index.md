@@ -2,7 +2,7 @@
 
 # Analytics
 
-Publish OCI Analytics instances as an API-first CRD package from Kubernetes.
+Manage OCI Analytics instances from Kubernetes with a generated controller-backed scaffold.
 
 | Field | Value |
 | --- | --- |
@@ -16,7 +16,7 @@ Publish OCI Analytics instances as an API-first CRD package from Kubernetes.
 
 ## Notes
 
-- Analytics is currently published as a `crd-only` API-first package while controller-backed rollout lands in follow-on stories.
+- Analytics currently ships a generated controller-backed scaffold for `AnalyticsInstance`; follow-on runtime work will harden the emitted service-manager seam before release promotion.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 

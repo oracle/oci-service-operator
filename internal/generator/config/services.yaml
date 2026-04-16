@@ -25,7 +25,7 @@ services:
     group: analytics
     version: v1beta1
     phase: data-and-storage
-    packageProfile: crd-only
+    packageProfile: controller-backed
     selection:
       enabled: true
       mode: explicit
@@ -33,19 +33,22 @@ services:
         - AnalyticsInstance
     generation:
       controller:
-        strategy: none
+        strategy: generated
       serviceManager:
-        strategy: none
+        strategy: generated
       registration:
-        strategy: none
+        strategy: generated
       webhooks:
         strategy: none
       resources:
         - kind: AnalyticsInstance
+          formalSpec: analyticsinstance
           async:
             strategy: lifecycle
             runtime: generatedruntime
             formalClassification: lifecycle
+          serviceManager:
+            packagePath: analytics/analyticsinstance
         - kind: PrivateAccessChannel
           controller:
             strategy: none

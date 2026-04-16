@@ -2857,8 +2857,20 @@ func TestCheckedInAnalyticsServicePublishesOnlyAnalyticsInstance(t *testing.T) {
 	if analyticsInstance.Runtime == nil {
 		t.Fatal("AnalyticsInstance runtime model was not attached")
 	}
-	if analyticsInstance.Formal != nil {
-		t.Fatal("AnalyticsInstance formal model = non-nil, want no bound formalSpec yet")
+	if analyticsInstance.Formal == nil {
+		t.Fatal("AnalyticsInstance formal model was not attached")
+	}
+	if analyticsInstance.Formal.Reference.Service != "analytics" {
+		t.Fatalf("AnalyticsInstance formal service = %q, want %q", analyticsInstance.Formal.Reference.Service, "analytics")
+	}
+	if analyticsInstance.Formal.Reference.Slug != "analyticsinstance" {
+		t.Fatalf("AnalyticsInstance formal slug = %q, want %q", analyticsInstance.Formal.Reference.Slug, "analyticsinstance")
+	}
+	if analyticsInstance.Formal.Binding.Spec.Kind != "AnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance formal kind = %q, want %q", analyticsInstance.Formal.Binding.Spec.Kind, "AnalyticsInstance")
+	}
+	if analyticsInstance.Formal.Binding.Import.ProviderResource != "oci_analytics_analytics_instance" {
+		t.Fatalf("AnalyticsInstance provider resource = %q, want %q", analyticsInstance.Formal.Binding.Import.ProviderResource, "oci_analytics_analytics_instance")
 	}
 	if analyticsInstance.Runtime.Create == nil || analyticsInstance.Runtime.Create.MethodName != "CreateAnalyticsInstance" {
 		t.Fatalf("AnalyticsInstance create method = %#v, want CreateAnalyticsInstance", analyticsInstance.Runtime.Create)
