@@ -1224,8 +1224,8 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
-	assertFormalSpecFor(t, serviceConfigsByName(t, cfg, "analytics")["analytics"], "AnalyticsInstance", "")
+	services := serviceConfigsByName(t, cfg, "analytics", "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	assertFormalSpecFor(t, services["analytics"], "AnalyticsInstance", "analyticsinstance")
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
@@ -1260,8 +1260,9 @@ func TestCheckedInConfigCoordinatesPrimaryPortPackagePaths(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "core", "dataflow", "database", "identity", "keymanagement", "mysql", "objectstorage", "opensearch", "psql", "redis")
+	services := serviceConfigsByName(t, cfg, "analytics", "containerengine", "containerinstances", "core", "dataflow", "database", "identity", "keymanagement", "mysql", "objectstorage", "opensearch", "psql", "redis")
 
+	assertPrimaryPortOverride(t, services["analytics"], "AnalyticsInstance", "analyticsinstance", "analytics/analyticsinstance")
 	assertContainerengineRuntimeRolloutMetadata(t, services["containerengine"])
 	assertContainerInstancesRuntimeRolloutMetadata(t, services["containerinstances"])
 	assertPrimaryPortOverride(t, services["core"], "Instance", "instance", "core/instance")
@@ -1811,23 +1812,23 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 }
 
-func TestCheckedInAnalyticsConfigStaysAPIFirst(t *testing.T) {
+func TestCheckedInAnalyticsConfigPromotesControllerBackedRollout(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
 	service := serviceConfigsByName(t, cfg, "analytics")["analytics"]
 
-	if service.PackageProfile != PackageProfileCRDOnly {
-		t.Fatalf("analytics packageProfile = %q, want %q", service.PackageProfile, PackageProfileCRDOnly)
+	if service.PackageProfile != PackageProfileControllerBacked {
+		t.Fatalf("analytics packageProfile = %q, want %q", service.PackageProfile, PackageProfileControllerBacked)
 	}
 	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
-		controller:     GenerationStrategyNone,
-		serviceManager: GenerationStrategyNone,
-		registration:   GenerationStrategyNone,
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
 	assertResourceOverrideCount(t, service, 6)
-	assertFormalSpecFor(t, service, "AnalyticsInstance", "")
+	assertPrimaryPortOverride(t, service, "AnalyticsInstance", "analyticsinstance", "analytics/analyticsinstance")
 	if got := service.AsyncConfigFor("AnalyticsInstance"); got.Strategy != AsyncStrategyLifecycle || got.Runtime != AsyncRuntimeGeneratedRuntime || got.FormalClassification != AsyncStrategyLifecycle {
 		t.Fatalf("analytics AnalyticsInstance async = %#v, want lifecycle/generatedruntime", got)
 	}

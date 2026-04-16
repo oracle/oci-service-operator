@@ -40,7 +40,7 @@ observe --> retryable : OCI state in CREATING,\nDELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ncapacity.capacity_value,\ncompartment_id, defined_tags\n(+15 more)
+evaluate_ready --> apply_update : supported mutable drift for\ncapacity.capacity_value,\ncompartment_id, defined_tags\n(+13 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -72,11 +72,11 @@ requeue: provisioning, updating, terminating
 provider states: create CREATING; update none;
 delete DELETING
 supported drift: capacity.capacity_value,
-compartment_id, defined_tags, description (+14
+compartment_id, defined_tags, description (+12
 more)
 reject before mutate: force-new fields
-admin_user, capacity.capacity_type, domain_id,
-feature_bundle (+3 more)
+capacity.capacity_type, feature_set, name,
+network_endpoint_details.network_endpoint_type
 create-only fields: none
 list lookup: oci_analytics_analytics_instances
 filters capacity_type, compartment_id,

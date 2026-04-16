@@ -69,10 +69,11 @@ group Drift handling
 note over ServiceManager,OCI
 Supported update surface:
 capacity.capacity_value, compartment_id,
-defined_tags, description (+14 more)
+defined_tags, description (+12 more)
 Reject before mutate: force-new fields
-admin_user, capacity.capacity_type,
-domain_id, feature_bundle (+3 more)
+capacity.capacity_type, feature_set,
+name,
+network_endpoint_details.network_endpoint_type
 Lookup filters: capacity_type,
 compartment_id, feature_set, name (+1
 more)
@@ -81,7 +82,7 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply\nChangeAnalyticsInstanceCompartment,\nChangeAnalyticsInstanceNetworkEndpoint,\nScaleAnalyticsInstance (+1 more)\nonly for mutable fields\ncapacity.capacity_value,\ncompartment_id, defined_tags,\ndescription (+14 more)
+ServiceManager -> OCI: Apply\nChangeAnalyticsInstanceCompartment,\nChangeAnalyticsInstanceNetworkEndpoint,\nScaleAnalyticsInstance (+1 more)\nonly for mutable fields\ncapacity.capacity_value,\ncompartment_id, defined_tags,\ndescription (+12 more)
 end
 ServiceManager -> OCI: run helper hooks\ndelete=tfresource.DeleteResource
 end
@@ -113,11 +114,11 @@ requeue: provisioning, updating, terminating
 provider states: create CREATING; update none;
 delete DELETING
 supported drift: capacity.capacity_value,
-compartment_id, defined_tags, description (+14
+compartment_id, defined_tags, description (+12
 more)
 reject before mutate: force-new fields
-admin_user, capacity.capacity_type, domain_id,
-feature_bundle (+3 more)
+capacity.capacity_type, feature_set, name,
+network_endpoint_details.network_endpoint_type
 create-only fields: none
 list lookup: oci_analytics_analytics_instances
 filters capacity_type, compartment_id,
