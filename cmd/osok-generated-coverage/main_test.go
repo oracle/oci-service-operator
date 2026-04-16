@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-service-operator/internal/generator"
+	"github.com/oracle/oci-service-operator/internal/validator/metrics"
 )
 
 func TestNormalizeCoverageOptionsDefaultsBlankSelectionToAll(t *testing.T) {
@@ -80,6 +81,55 @@ func TestLoadCoverageSelectedServicesAllowsExplicitDisabledService(t *testing.T)
 	}
 	if services[0].SelectedKinds() != nil {
 		t.Fatalf("identity SelectedKinds() = %v, want nil", services[0].SelectedKinds())
+	}
+}
+
+func TestCheckedInGeneratedCoverageBaselineMatchesDefaultActiveServiceSurface(t *testing.T) {
+	t.Parallel()
+
+	repoRoot, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+
+	configPath := filepath.Join(repoRoot, "internal", "generator", "config", "services.yaml")
+	baselinePath := filepath.Join(repoRoot, "internal", "generator", "config", "generated_coverage_baseline.json")
+
+	_, services, err := loadCoverageSelectedServices(configPath, "", false)
+	if err != nil {
+		t.Fatalf("loadCoverageSelectedServices() error = %v", err)
+	}
+	baseline, err := metrics.LoadBaseline(baselinePath)
+	if err != nil {
+		t.Fatalf("LoadBaseline(%q) error = %v", baselinePath, err)
+	}
+
+	wantNames := serviceNames(services)
+	wantSpecs := make(map[string]int, len(services))
+	wantAggregateSpecs := 0
+	for _, service := range services {
+		specCount := len(service.SelectedKinds())
+		wantSpecs[service.Service] = specCount
+		wantAggregateSpecs += specCount
+	}
+
+	gotNames := make([]string, 0, len(baseline.Services))
+	for _, service := range baseline.Services {
+		gotNames = append(gotNames, service.Service)
+		wantSpecCount, ok := wantSpecs[service.Service]
+		if !ok {
+			t.Fatalf("baseline service %q is not in the current default-active surface", service.Service)
+		}
+		if service.Specs != wantSpecCount {
+			t.Fatalf("baseline service %q specs = %d, want %d selected kinds", service.Service, service.Specs, wantSpecCount)
+		}
+	}
+
+	if !slices.Equal(gotNames, wantNames) {
+		t.Fatalf("baseline services = %v, want default-active services %v", gotNames, wantNames)
+	}
+	if baseline.Aggregate.Specs != wantAggregateSpecs {
+		t.Fatalf("baseline aggregate specs = %d, want %d selected kinds", baseline.Aggregate.Specs, wantAggregateSpecs)
 	}
 }
 

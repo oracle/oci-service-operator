@@ -289,6 +289,40 @@ func TestBuildReportMarksExplicitlyExcludedMappingsAsIntentional(t *testing.T) {
 	}
 }
 
+func TestCheckedInCollectionWrapperMappingsAreExplicitlyExcluded(t *testing.T) {
+	t.Parallel()
+
+	want := map[string]string{
+		"ContainerinstancesContainerInstance": "containerinstances.ContainerInstanceCollection",
+		"OpensearchOpensearchCluster":         "opensearch.OpensearchClusterCollection",
+		"RedisRedisCluster":                   "redis.RedisClusterCollection",
+	}
+
+	for _, target := range Targets() {
+		sdkStruct, ok := want[target.Name]
+		if !ok {
+			continue
+		}
+
+		found := false
+		for _, mapping := range target.SDKMappings {
+			if mapping.SDKStruct != sdkStruct {
+				continue
+			}
+			found = true
+			if !mapping.Exclude {
+				t.Fatalf("%s mapping for %s must be excluded", target.Name, sdkStruct)
+			}
+			if !strings.Contains(mapping.Reason, "collection responses do not map") {
+				t.Fatalf("%s mapping reason = %q, want collection-wrapper explanation", target.Name, mapping.Reason)
+			}
+		}
+		if !found {
+			t.Fatalf("%s mapping for %s was not found", target.Name, sdkStruct)
+		}
+	}
+}
+
 type testStatusMarker struct{}
 
 type testWidgetStatus struct {

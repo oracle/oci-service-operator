@@ -524,6 +524,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceSummary",
@@ -565,6 +567,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "opensearch.OpensearchClusterCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "opensearch.OpensearchClusterSummary",
@@ -587,6 +591,8 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "redis.RedisClusterCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
 			},
 			{
 				SDKStruct: "redis.RedisClusterSummary",

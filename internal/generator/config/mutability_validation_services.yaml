@@ -62,6 +62,10 @@ services:
       resources:
         - kind: Instance
           formalSpec: instance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: dataflow
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow

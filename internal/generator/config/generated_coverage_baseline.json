@@ -70,6 +70,20 @@
       "mandatoryCoveragePercent": 100
     },
     {
+      "service": "core",
+      "specs": 10,
+      "mappings": 30,
+      "trackedMappings": 30,
+      "untrackedMappings": 0,
+      "presentFields": 280,
+      "missingFields": 0,
+      "mandatoryPresentFields": 87,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 43,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
+    },
+    {
       "service": "database",
       "specs": 1,
       "mappings": 4,
