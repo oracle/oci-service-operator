@@ -1129,29 +1129,95 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"analytics", "containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
+	wantActiveServices := []string{
+		"analytics",
+		"containerengine",
+		"containerinstances",
+		"core",
+		"dataflow",
+		"database",
+		"email",
+		"functions",
+		"generativeai",
+		"identity",
+		"keymanagement",
+		"loadbalancer",
+		"logging",
+		"monitoring",
+		"marketplace",
+		"mysql",
+		"nosql",
+		"objectstorage",
+		"ocvp",
+		"oda",
+		"opensearch",
+		"psql",
+		"queue",
+		"redis",
+		"streaming",
+		"usageapi",
+	}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "analytics", "containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	services := requireServices(
+		t,
+		cfg,
+		"analytics",
+		"containerengine",
+		"containerinstances",
+		"core",
+		"dataflow",
+		"database",
+		"email",
+		"functions",
+		"generativeai",
+		"identity",
+		"keymanagement",
+		"loadbalancer",
+		"logging",
+		"monitoring",
+		"marketplace",
+		"mysql",
+		"nosql",
+		"objectstorage",
+		"ocvp",
+		"oda",
+		"opensearch",
+		"psql",
+		"queue",
+		"redis",
+		"streaming",
+		"usageapi",
+		"vault",
+	)
 	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
+	assertServiceSelection(t, services["email"], true, SelectionModeExplicit, []string{"Dkim", "EmailDomain", "Sender", "Suppression", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
+	assertServiceSelection(t, services["generativeai"], true, SelectionModeExplicit, []string{"DedicatedAiCluster", "Endpoint", "Model", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["keymanagement"], true, SelectionModeExplicit, []string{"Vault"})
+	assertServiceSelection(t, services["loadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendHealth", "BackendSet", "BackendSetHealth", "Certificate", "HealthChecker", "Hostname", "Listener", "ListenerRule", "LoadBalancer", "LoadBalancerHealth", "LoadBalancerShape", "NetworkSecurityGroup", "PathRouteSet", "Policy", "Protocol", "RoutingPolicy", "RuleSet", "SSLCipherSuite", "Shape", "WorkRequest"})
+	assertServiceSelection(t, services["logging"], true, SelectionModeExplicit, []string{"Log", "LogGroup", "LogSavedSearch", "Service", "UnifiedAgentConfiguration", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
+	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmHistory", "AlarmStatus", "AlarmSuppression", "Metric"})
+	assertServiceSelection(t, services["marketplace"], true, SelectionModeExplicit, []string{"AcceptedAgreement", "Agreement", "Category", "LaunchEligibility", "Listing", "Package", "Publication", "PublicationPackage", "Publisher", "Report", "ReportType", "Tax", "ThirdPartyPaidListingEligibility", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
 	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
+	assertServiceSelection(t, services["ocvp"], true, SelectionModeExplicit, []string{"Cluster", "EsxiHost", "Sddc", "SupportedCommitment", "SupportedHostShape", "SupportedVmwareSoftwareVersion", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
+	assertServiceSelection(t, services["oda"], true, SelectionModeExplicit, []string{"AuthenticationProvider", "Channel", "DigitalAssistant", "DigitalAssistantParameter", "ImportedPackage", "OdaInstance", "OdaInstanceAttachment", "OdaPrivateEndpoint", "OdaPrivateEndpointAttachment", "OdaPrivateEndpointScanProxy", "Package", "Skill", "SkillParameter", "Translator", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["queue"], true, SelectionModeExplicit, []string{"Queue"})
 	assertServiceSelection(t, services["redis"], true, SelectionModeExplicit, []string{"RedisCluster"})
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
+	assertServiceSelection(t, services["usageapi"], true, SelectionModeExplicit, []string{"CustomTable", "Query", "Schedule", "ScheduledRun", "UsageCarbonEmissionsQuery"})
 	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
 }
 
@@ -1756,17 +1822,26 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"email":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"functions":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"generativeai":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"identity":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"keymanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"loadbalancer":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"logging":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"marketplace":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"monitoring":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"mysql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"ocvp":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"objectstorage":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"oda":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"opensearch":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"psql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"queue":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
 		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
 		"streaming":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"usageapi":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)
@@ -1836,6 +1911,8 @@ func TestCheckedInAnalyticsConfigPromotesControllerBackedRollout(t *testing.T) {
 	for _, kind := range []string{"PrivateAccessChannel", "VanityUrl", "WorkRequest", "WorkRequestError", "WorkRequestLog"} {
 		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
 	}
+}
+
 func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	t.Parallel()
 

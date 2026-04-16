@@ -1,0 +1,214 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: loadbalancerhealths.loadbalancer.oracle.com
+spec:
+  group: loadbalancer.oracle.com
+  names:
+    kind: LoadBalancerHealth
+    listKind: LoadBalancerHealthList
+    plural: loadbalancerhealths
+    singular: loadbalancerhealth
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the LoadBalancerHealth
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the LoadBalancerHealth
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: LoadBalancerHealth is the Schema for the loadbalancerhealths
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LoadBalancerHealthSpec defines the desired state of LoadBalancerHealth.
+            type: object
+          status:
+            description: LoadBalancerHealthStatus defines the observed state of LoadBalancerHealth.
+            properties:
+              criticalStateBackendSetNames:
+                description: |-
+                  A list of backend sets that are currently in the `CRITICAL` health state. The list identifies each backend set by the
+                  friendly name you assigned when you created it.
+                  Example: `example_backend_set`
+                items:
+                  type: string
+                type: array
+              loadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the load balancer the health status is associated with.
+                type: string
+              sdkStatus:
+                description: |-
+                  The overall health status of the load balancer.
+                  *  **OK:** All backend sets associated with the load balancer return a status of `OK`.
+                  *  **WARNING:** At least one of the backend sets associated with the load balancer returns a status of `WARNING`,
+                  no backend sets return a status of `CRITICAL`, and the load balancer life cycle state is `ACTIVE`.
+                  *  **CRITICAL:** One or more of the backend sets associated with the load balancer return a status of `CRITICAL`.
+                  *  **UNKNOWN:** If any one of the following conditions is true:
+                      *  The load balancer life cycle state is not `ACTIVE`.
+                      *  No backend sets are defined for the load balancer.
+                      *  More than half of the backend sets associated with the load balancer return a status of `UNKNOWN`, none of the backend
+                         sets return a status of `WARNING` or `CRITICAL`, and the load balancer life cycle state is `ACTIVE`.
+                      *  The system could not retrieve metrics for any reason.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              totalBackendSetCount:
+                description: |-
+                  The total number of backend sets associated with this load balancer.
+                  Example: `4`
+                type: integer
+              unknownStateBackendSetNames:
+                description: |-
+                  A list of backend sets that are currently in the `UNKNOWN` health state. The list identifies each backend set by the
+                  friendly name you assigned when you created it.
+                  Example: `example_backend_set2`
+                items:
+                  type: string
+                type: array
+              warningStateBackendSetNames:
+                description: |-
+                  A list of backend sets that are currently in the `WARNING` health state. The list identifies each backend set by the
+                  friendly name you assigned when you created it.
+                  Example: `example_backend_set3`
+                items:
+                  type: string
+                type: array
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,347 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: odainstances.oda.oracle.com
+spec:
+  group: oda.oracle.com
+  names:
+    kind: OdaInstance
+    listKind: OdaInstanceList
+    plural: odainstances
+    singular: odainstance
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the OdaInstance
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the OdaInstance
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: OdaInstance is the Schema for the odainstances API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OdaInstanceSpec defines the desired state of OdaInstance.
+            properties:
+              compartmentId:
+                description: Identifier of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the Digital Assistant instance.
+                type: string
+              displayName:
+                description: User-friendly name for the instance. Avoid entering confidential
+                  information. You can change this value anytime.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              identityDomain:
+                description: If isRoleBasedAccess is set to true, this property specifies
+                  the identity domain that is to be used to implement this type of
+                  authorzation. Digital Assistant will create an Identity Application
+                  instance and Application Roles within this identity domain. The
+                  caller may then perform and user roll mappings they like to grant
+                  access to users within the identity domain.
+                type: string
+              isRoleBasedAccess:
+                description: Should this Digital Assistant instance use role-based
+                  authorization via an identity domain (true) or use the default policy-based
+                  authorization via IAM policies (false)
+                type: boolean
+              shapeName:
+                description: Shape or size of the instance.
+                type: string
+            required:
+            - compartmentId
+            - shapeName
+            type: object
+          status:
+            description: OdaInstanceStatus defines the observed state of OdaInstance.
+            properties:
+              attachmentIds:
+                description: A list of attachment identifiers for this instance (if
+                  any). Use GetOdaInstanceAttachment to get the details of the attachments.
+                items:
+                  type: string
+                type: array
+              attachmentTypes:
+                description: A list of attachment types for this instance (if any).
+                  Use attachmentIds to get the details of the attachments.
+                items:
+                  type: string
+                type: array
+              compartmentId:
+                description: Identifier of the compartment that the instance belongs
+                  to.
+                type: string
+              connectorUrl:
+                description: URL for the connector's endpoint.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the Digital Assistant instance.
+                type: string
+              displayName:
+                description: |-
+                  User-defined name for the Digital Assistant instance. Avoid entering confidential information.
+                  You can change this value.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique immutable identifier that was assigned when the
+                  instance was created.
+                type: string
+              identityAppConsoleUrl:
+                description: If isRoleBasedAccess is set to true, this property specifies
+                  the URL for the administration console used to manage the Identity
+                  Application instance Digital Assistant has created inside the user-specified
+                  identity domain.
+                type: string
+              identityAppGuid:
+                description: If isRoleBasedAccess is set to true, this property specifies
+                  the GUID of the Identity Application instance Digital Assistant
+                  has created inside the user-specified identity domain. This identity
+                  application instance may be used to host user roll mappings to grant
+                  access to this Digital Assistant instance for users within the identity
+                  domain.
+                type: string
+              identityDomain:
+                description: If isRoleBasedAccess is set to true, this property specifies
+                  the identity domain that is to be used to implement this type of
+                  authorzation. Digital Assistant will create an Identity Application
+                  instance and Application Roles within this identity domain. The
+                  caller may then perform and user roll mappings they like to grant
+                  access to users within the identity domain.
+                type: string
+              importedPackageIds:
+                description: A list of package ids imported into this instance (if
+                  any). Use GetImportedPackage to get the details of the imported
+                  packages.
+                items:
+                  type: string
+                type: array
+              importedPackageNames:
+                description: A list of package names imported into this instance (if
+                  any). Use importedPackageIds field to get the details of the imported
+                  packages.
+                items:
+                  type: string
+                type: array
+              isRoleBasedAccess:
+                description: Should this Digital Assistant instance use role-based
+                  authorization via an identity domain (true) or use the default policy-based
+                  authorization via IAM policies (false)
+                type: boolean
+              lifecycleState:
+                description: The current state of the Digital Assistant instance.
+                type: string
+              lifecycleSubState:
+                description: The current sub-state of the Digital Assistant instance.
+                type: string
+              restrictedOperations:
+                description: A list of restricted operations (across all attachments)
+                  for this instance (if any). Use GetOdaInstanceAttachment to get
+                  the details of the attachments.
+                items:
+                  description: OdaInstanceRestrictedOperation defines nested fields
+                    for OdaInstance.RestrictedOperation.
+                  properties:
+                    operationName:
+                      description: Name of the restricted operation.
+                      type: string
+                    restrictingService:
+                      description: Name of the service restricting the operation.
+                      type: string
+                  type: object
+                type: array
+              shapeName:
+                description: Shape or size of the instance.
+                type: string
+              stateMessage:
+                description: |-
+                  A message that describes the current state in more detail.
+                  For example, actionable information about an instance that's in the `FAILED` state.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: When the Digital Assistant instance was created. A date-time
+                  string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339),
+                  section 14.29.
+                type: string
+              timeUpdated:
+                description: When the Digital Assistance instance was last updated.
+                  A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339),
+                  section 14.29.
+                type: string
+              webAppUrl:
+                description: URL for the Digital Assistant web application that's
+                  associated with the instance.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

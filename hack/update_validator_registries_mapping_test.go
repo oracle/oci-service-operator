@@ -48,56 +48,37 @@ func TestBuildSDKMappingsSupportsExplicitSurfaceAndExclusionOverrides(t *testing
 		"UpdateLoadBalancerShapeDetails",
 		"ShapeDetails",
 		"LoadBalancerShape",
-	}, false, specTarget{})
-
-	shapeByStruct := make(map[string]sdkMapping, len(loadBalancerShape))
-	for _, mapping := range loadBalancerShape {
-		shapeByStruct[mapping.SDKStruct] = mapping
-	}
-	if !shapeByStruct["loadbalancer.UpdateLoadBalancerShapeDetails"].Exclude {
-		t.Fatal("loadbalancer.UpdateLoadBalancerShapeDetails should be excluded")
-	}
-	if shapeByStruct["loadbalancer.UpdateLoadBalancerShapeDetails"].Reason == "" {
-		t.Fatal("loadbalancer.UpdateLoadBalancerShapeDetails should carry an exclusion reason")
-	}
-	for _, sdkStruct := range []string{"loadbalancer.ShapeDetails", "loadbalancer.LoadBalancerShape"} {
-		mapping := shapeByStruct[sdkStruct]
-		if !mapping.Exclude {
-			t.Fatalf("%s Exclude = false, want true", sdkStruct)
-		}
-		if mapping.Reason == "" {
-			t.Fatalf("%s Reason = %q, want non-empty exclusion reason", sdkStruct, mapping.Reason)
-		}
+	}, false, specTarget{
+		SDKMappings: []sdkMapping{
+			{SDKStruct: "loadbalancer.UpdateLoadBalancerShapeDetails", Exclude: true, Reason: "stale excluded mapping"},
+			{SDKStruct: "loadbalancer.ShapeDetails", Exclude: true, Reason: "stale excluded mapping"},
+			{SDKStruct: "loadbalancer.LoadBalancerShape", Exclude: true, Reason: "stale excluded mapping"},
+		},
+	})
+	if len(loadBalancerShape) != 0 {
+		t.Fatalf("len(loadBalancerShape) = %d, want 0 reviewed-untracked mappings", len(loadBalancerShape))
 	}
 
 	loadBalancerPolicy := buildSDKMappings("loadbalancer", "Policy", []string{
 		"LoadBalancerPolicy",
-	}, false, specTarget{})
-
-	policyByStruct := make(map[string]sdkMapping, len(loadBalancerPolicy))
-	for _, mapping := range loadBalancerPolicy {
-		policyByStruct[mapping.SDKStruct] = mapping
-	}
-	if !policyByStruct["loadbalancer.LoadBalancerPolicy"].Exclude {
-		t.Fatal("loadbalancer.LoadBalancerPolicy should be excluded")
-	}
-	if policyByStruct["loadbalancer.LoadBalancerPolicy"].Reason == "" {
-		t.Fatal("loadbalancer.LoadBalancerPolicy exclusion should carry a reason")
+	}, false, specTarget{
+		SDKMappings: []sdkMapping{
+			{SDKStruct: "loadbalancer.LoadBalancerPolicy", Exclude: true, Reason: "stale excluded mapping"},
+		},
+	})
+	if len(loadBalancerPolicy) != 0 {
+		t.Fatalf("len(loadBalancerPolicy) = %d, want 0 reviewed-untracked mappings", len(loadBalancerPolicy))
 	}
 
 	loadBalancerProtocol := buildSDKMappings("loadbalancer", "Protocol", []string{
 		"LoadBalancerProtocol",
-	}, false, specTarget{})
-
-	protocolByStruct := make(map[string]sdkMapping, len(loadBalancerProtocol))
-	for _, mapping := range loadBalancerProtocol {
-		protocolByStruct[mapping.SDKStruct] = mapping
-	}
-	if !protocolByStruct["loadbalancer.LoadBalancerProtocol"].Exclude {
-		t.Fatal("loadbalancer.LoadBalancerProtocol should be excluded")
-	}
-	if protocolByStruct["loadbalancer.LoadBalancerProtocol"].Reason == "" {
-		t.Fatal("loadbalancer.LoadBalancerProtocol exclusion should carry a reason")
+	}, false, specTarget{
+		SDKMappings: []sdkMapping{
+			{SDKStruct: "loadbalancer.LoadBalancerProtocol", Exclude: true, Reason: "stale excluded mapping"},
+		},
+	})
+	if len(loadBalancerProtocol) != 0 {
+		t.Fatalf("len(loadBalancerProtocol) = %d, want 0 reviewed-untracked mappings", len(loadBalancerProtocol))
 	}
 
 	containerEngineCluster := buildSDKMappings("containerengine", "Cluster", []string{

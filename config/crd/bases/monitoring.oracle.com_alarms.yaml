@@ -1,0 +1,533 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: alarms.monitoring.oracle.com
+spec:
+  group: monitoring.oracle.com
+  names:
+    kind: Alarm
+    listKind: AlarmList
+    plural: alarms
+    singular: alarm
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Alarm
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Alarm
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Alarm is the Schema for the alarms API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlarmSpec defines the desired state of Alarm.
+            properties:
+              body:
+                description: |-
+                  The human-readable content of the delivered alarm notification. Oracle recommends providing guidance
+                  to operators for resolving the alarm condition. Consider adding links to standard runbook
+                  practices. Avoid entering confidential information.
+                  Example: `High CPU usage alert. Follow runbook instructions for resolution.`
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the alarm.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              destinations:
+                description: |-
+                  A list of destinations for alarm notifications.
+                  Each destination is represented by the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of a related resource, such as a NotificationTopic.
+                  Supported destination services: Notifications, Streaming.
+                  Limit: One destination per supported destination service.
+                items:
+                  type: string
+                type: array
+              displayName:
+                description: |-
+                  A user-friendly name for the alarm. It does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  This value determines the title of each alarm notification.
+                  Example: `High CPU Utilization`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isEnabled:
+                description: |-
+                  Whether the alarm is enabled.
+                  Example: `true`
+                type: boolean
+              isNotificationsPerMetricDimensionEnabled:
+                description: |-
+                  When set to `true`, splits alarm notifications per metric stream.
+                  When set to `false`, groups alarm notifications across metric streams.
+                  Example: `true`
+                type: boolean
+              messageFormat:
+                description: |-
+                  The format to use for alarm notifications. The formats are:
+                  * `RAW` - Raw JSON blob. Default value. When the `destinations` attribute specifies `Streaming`, all alarm notifications use this format.
+                  * `PRETTY_JSON`: JSON with new lines and indents. Available when the `destinations` attribute specifies `Notifications` only.
+                  * `ONS_OPTIMIZED`: Simplified, user-friendly layout. Available when the `destinations` attribute specifies `Notifications` only. Applies to Email subscription types only.
+                type: string
+              metricCompartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
+                  being evaluated by the alarm.
+                type: string
+              metricCompartmentIdInSubtree:
+                description: |-
+                  When true, the alarm evaluates metrics from all compartments and subcompartments. The parameter can
+                  only be set to true when metricCompartmentId is the tenancy OCID (the tenancy is the root compartment).
+                  A true value requires the user to have tenancy-level permissions. If this requirement is not met,
+                  then the call is rejected. When false, the alarm evaluates metrics from only the compartment specified
+                  in metricCompartmentId. Default is false.
+                  Example: `true`
+                type: boolean
+              namespace:
+                description: |-
+                  The source service or application emitting the metric that is evaluated by the alarm.
+                  Example: `oci_computeagent`
+                type: string
+              pendingDuration:
+                description: |-
+                  The period of time that the condition defined in the alarm must persist before the alarm state
+                  changes from "OK" to "FIRING". For example, a value of 5 minutes means that the
+                  alarm must persist in breaching the condition for five minutes before the alarm updates its
+                  state to "FIRING".
+                  The duration is specified as a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+                  for one hour). Minimum: PT1M. Maximum: PT1H. Default: PT1M.
+                  Under the default value of PT1M, the first evaluation that breaches the alarm updates the
+                  state to "FIRING".
+                  The alarm updates its status to "OK" when the breaching condition has been clear for
+                  the most recent minute.
+                  Example: `PT5M`
+                type: string
+              query:
+                description: |-
+                  The Monitoring Query Language (MQL) expression to evaluate for the alarm. The Alarms feature of
+                  the Monitoring service interprets results for each returned time series as Boolean values,
+                  where zero represents false and a non-zero value represents true. A true value means that the trigger
+                  rule condition has been met. The query must specify a metric, statistic, interval, and trigger
+                  rule (threshold or absence). Supported values for interval depend on the specified time range. More
+                  interval values are supported for smaller time ranges. You can optionally
+                  specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+                  For information about writing MQL expressions, see
+                  Editing the MQL Expression for a Query (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
+                  For details about MQL, see
+                  Monitoring Query Language (MQL) Reference (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
+                  For available dimensions, review the metric definition for the supported service. See
+                  Supported Services (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
+                  Example of threshold alarm:
+                    -----
+                      CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
+                    -----
+                  Example of absence alarm:
+                    -----
+                      CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent()
+                    -----
+                type: string
+              repeatNotificationDuration:
+                description: |-
+                  The frequency for re-submitting alarm notifications, if the alarm keeps firing without
+                  interruption. Format defined by ISO 8601. For example, `PT4H` indicates four hours.
+                  Minimum: PT1M. Maximum: P30D.
+                  Default value: null (notifications are not re-submitted).
+                  Example: `PT2H`
+                type: string
+              resolution:
+                description: 'The time between calculated aggregation windows for
+                  the alarm. Supported value: `1m`'
+                type: string
+              resourceGroup:
+                description: |-
+                  Resource group that you want to match. A null value returns only metric data that has no resource groups. The alarm retrieves metric data associated with the specified resource group only. Only one resource group can be applied per metric.
+                  A valid resourceGroup value starts with an alphabetical character and includes only alphanumeric characters, periods (.), underscores (_), hyphens (-), and dollar signs ($).
+                  Avoid entering confidential information.
+                  Example: `frontend-fleet`
+                type: string
+              severity:
+                description: |-
+                  The perceived type of response required when the alarm is in the "FIRING" state.
+                  Example: `CRITICAL`
+                type: string
+              suppression:
+                description: The configuration details for suppressing an alarm.
+                properties:
+                  description:
+                    description: |-
+                      Human-readable reason for suppressing alarm notifications.
+                      It does not have to be unique, and it's changeable.
+                      Avoid entering confidential information.
+                      Oracle recommends including tracking information for the event or associated work,
+                      such as a ticket number.
+                      Example: `Planned outage due to change IT-1234.`
+                    type: string
+                  timeSuppressFrom:
+                    description: |-
+                      The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                      Example: `2023-02-01T01:02:29.600Z`
+                    type: string
+                  timeSuppressUntil:
+                    description: |-
+                      The end date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                      Example: `2023-02-01T02:02:29.600Z`
+                    type: string
+                required:
+                - timeSuppressFrom
+                - timeSuppressUntil
+                type: object
+            required:
+            - compartmentId
+            - destinations
+            - displayName
+            - isEnabled
+            - metricCompartmentId
+            - namespace
+            - query
+            - severity
+            type: object
+          status:
+            description: AlarmObservedState defines the observed state of Alarm.
+            properties:
+              body:
+                description: |-
+                  The human-readable content of the delivered alarm notification. Oracle recommends providing guidance
+                  to operators for resolving the alarm condition. Consider adding links to standard runbook
+                  practices. Avoid entering confidential information.
+                  Example: `High CPU usage alert. Follow runbook instructions for resolution.`
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the alarm.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              destinations:
+                description: |-
+                  A list of destinations for alarm notifications.
+                  Each destination is represented by the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of a related resource, such as a NotificationTopic.
+                  Supported destination services: Notifications, Streaming.
+                  Limit: One destination per supported destination service.
+                items:
+                  type: string
+                type: array
+              displayName:
+                description: |-
+                  A user-friendly name for the alarm. It does not have to be unique, and it's changeable.
+                  This value determines the title of each alarm notification.
+                  Example: `High CPU Utilization`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the alarm.
+                type: string
+              isEnabled:
+                description: |-
+                  Whether the alarm is enabled.
+                  Example: `true`
+                type: boolean
+              isNotificationsPerMetricDimensionEnabled:
+                description: |-
+                  When set to `true`, splits alarm notifications per metric stream.
+                  When set to `false`, groups alarm notifications across metric streams.
+                type: boolean
+              lifecycleState:
+                description: |-
+                  The current lifecycle state of the alarm.
+                  Example: `DELETED`
+                type: string
+              messageFormat:
+                description: |-
+                  The format to use for alarm notifications. The formats are:
+                  * `RAW` - Raw JSON blob. Default value. When the `destinations` attribute specifies `Streaming`, all alarm notifications use this format.
+                  * `PRETTY_JSON`: JSON with new lines and indents. Available when the `destinations` attribute specifies `Notifications` only.
+                  * `ONS_OPTIMIZED`: Simplified, user-friendly layout. Available when the `destinations` attribute specifies `Notifications` only. Applies to Email subscription types only.
+                type: string
+              metricCompartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
+                  being evaluated by the alarm.
+                type: string
+              metricCompartmentIdInSubtree:
+                description: |-
+                  When true, the alarm evaluates metrics from all compartments and subcompartments. The parameter can
+                  only be set to true when metricCompartmentId is the tenancy OCID (the tenancy is the root compartment).
+                  A true value requires the user to have tenancy-level permissions. If this requirement is not met,
+                  then the call is rejected. When false, the alarm evaluates metrics from only the compartment specified
+                  in metricCompartmentId. Default is false.
+                  Example: `true`
+                type: boolean
+              namespace:
+                description: |-
+                  The source service or application emitting the metric that is evaluated by the alarm.
+                  Example: `oci_computeagent`
+                type: string
+              pendingDuration:
+                description: |-
+                  The period of time that the condition defined in the alarm must persist before the alarm state
+                  changes from "OK" to "FIRING". For example, a value of 5 minutes means that the
+                  alarm must persist in breaching the condition for five minutes before the alarm updates its
+                  state to "FIRING".
+                  The duration is specified as a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+                  for one hour). Minimum: PT1M. Maximum: PT1H. Default: PT1M.
+                  Under the default value of PT1M, the first evaluation that breaches the alarm updates the
+                  state to "FIRING".
+                  The alarm updates its status to "OK" when the breaching condition has been clear for
+                  the most recent minute.
+                  Example: `PT5M`
+                type: string
+              query:
+                description: |-
+                  The Monitoring Query Language (MQL) expression to evaluate for the alarm. The Alarms feature of
+                  the Monitoring service interprets results for each returned time series as Boolean values,
+                  where zero represents false and a non-zero value represents true. A true value means that the trigger
+                  rule condition has been met. The query must specify a metric, statistic, interval, and trigger
+                  rule (threshold or absence). Supported values for interval depend on the specified time range. More
+                  interval values are supported for smaller time ranges. You can optionally
+                  specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+                  For information about writing MQL expressions, see
+                  Editing the MQL Expression for a Query (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
+                  For details about MQL, see
+                  Monitoring Query Language (MQL) Reference (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
+                  For available dimensions, review the metric definition for the supported service. See
+                  Supported Services (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
+                  Example of threshold alarm:
+                    -----
+                      CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
+                    -----
+                  Example of absence alarm:
+                    -----
+                      CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent()
+                    -----
+                type: string
+              repeatNotificationDuration:
+                description: |-
+                  The frequency for re-submitting alarm notifications, if the alarm keeps firing without
+                  interruption. Format defined by ISO 8601. For example, `PT4H` indicates four hours.
+                  Minimum: PT1M. Maximum: P30D.
+                  Default value: null (notifications are not re-submitted).
+                  Example: `PT2H`
+                type: string
+              resolution:
+                description: 'The time between calculated aggregation windows for
+                  the alarm. Supported value: `1m`'
+                type: string
+              resourceGroup:
+                description: |-
+                  Resource group to match for metric data retrieved by the alarm. A resource group is a custom string that you can match when retrieving custom metrics. Only one resource group can be applied per metric.
+                  A valid resourceGroup value starts with an alphabetical character and includes only alphanumeric characters, periods (.), underscores (_), hyphens (-), and dollar signs ($).
+                  Example: `frontend-fleet`
+                type: string
+              severity:
+                description: |-
+                  The perceived type of response required when the alarm is in the "FIRING" state.
+                  Example: `CRITICAL`
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              suppression:
+                description: The configuration details for suppressing an alarm.
+                properties:
+                  description:
+                    description: |-
+                      Human-readable reason for suppressing alarm notifications.
+                      It does not have to be unique, and it's changeable.
+                      Avoid entering confidential information.
+                      Oracle recommends including tracking information for the event or associated work,
+                      such as a ticket number.
+                      Example: `Planned outage due to change IT-1234.`
+                    type: string
+                  timeSuppressFrom:
+                    description: |-
+                      The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                      Example: `2023-02-01T01:02:29.600Z`
+                    type: string
+                  timeSuppressUntil:
+                    description: |-
+                      The end date and time for the suppression to take place, inclusive. Format defined by RFC3339.
+                      Example: `2023-02-01T02:02:29.600Z`
+                    type: string
+                required:
+                - timeSuppressFrom
+                - timeSuppressUntil
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the alarm was created. Format defined by RFC3339.
+                  Example: `2023-02-01T01:02:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time the alarm was last updated. Format defined by RFC3339.
+                  Example: `2023-02-03T01:02:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -731,6 +731,37 @@ services:
         ZoneRecord:
           - Record
 
+  - service: email
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/email
+    group: email
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Dkim
+        - EmailDomain
+        - Sender
+        - Suppression
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: events
     sdkPackage: github.com/oracle/oci-go-sdk/v65/events
     group: events
@@ -789,6 +820,36 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
           serviceManager:
             packagePath: functions
+
+  - service: generativeai
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeai
+    group: generativeai
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DedicatedAiCluster
+        - Endpoint
+        - Model
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: identity
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
@@ -964,8 +1025,34 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Backend
+        - BackendHealth
+        - BackendSet
+        - BackendSetHealth
+        - Certificate
+        - HealthChecker
+        - Hostname
+        - Listener
+        - ListenerRule
+        - LoadBalancer
+        - LoadBalancerHealth
+        - LoadBalancerShape
+        - NetworkSecurityGroup
+        - PathRouteSet
+        - Policy
+        - Protocol
+        - RoutingPolicy
+        - RuleSet
+        - SSLCipherSuite
+        - Shape
+        - WorkRequest
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -983,8 +1070,21 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Log
+        - LogGroup
+        - LogSavedSearch
+        - Service
+        - UnifiedAgentConfiguration
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1002,8 +1102,18 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Alarm
+        - AlarmHistory
+        - AlarmStatus
+        - AlarmSuppression
+        - Metric
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1017,6 +1127,46 @@ services:
       sdkAliases:
         AlarmHistory:
           - AlarmHistoryCollection
+
+  - service: marketplace
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplace
+    group: marketplace
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AcceptedAgreement
+        - Agreement
+        - Category
+        - LaunchEligibility
+        - Listing
+        - Package
+        - Publication
+        - PublicationPackage
+        - Publisher
+        - Report
+        - ReportType
+        - Tax
+        - ThirdPartyPaidListingEligibility
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -1193,6 +1343,80 @@ services:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
+
+  - service: ocvp
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ocvp
+    group: ocvp
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Cluster
+        - EsxiHost
+        - Sddc
+        - SupportedCommitment
+        - SupportedHostShape
+        - SupportedVmwareSoftwareVersion
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: oda
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/oda
+    group: oda
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AuthenticationProvider
+        - Channel
+        - DigitalAssistant
+        - DigitalAssistantParameter
+        - ImportedPackage
+        - OdaInstance
+        - OdaInstanceAttachment
+        - OdaPrivateEndpoint
+        - OdaPrivateEndpointAttachment
+        - OdaPrivateEndpointScanProxy
+        - Package
+        - Skill
+        - SkillParameter
+        - Translator
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: opensearch
     sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
@@ -1546,6 +1770,35 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           serviceManager:
             packagePath: streaming/stream
+
+  - service: usageapi
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/usageapi
+    group: usageapi
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - CustomTable
+        - Query
+        - Schedule
+        - ScheduledRun
+        - UsageCarbonEmissionsQuery
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

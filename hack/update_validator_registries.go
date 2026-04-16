@@ -813,6 +813,9 @@ func buildSDKTargets(targets []specTarget, _ []sdkTarget, _ []configuredService)
 
 func buildSDKMappings(service, spec string, candidates []string, _ bool, existing specTarget) []sdkMapping {
 	override := explicitAPITargetOverrides[service+"."+spec]
+	if override.EmptySDKMappings {
+		return nil
+	}
 	existingByType := existingSDKMappingsByType(service, existing.SDKMappings)
 	order := sdkMappingOrder(service, candidates, existing.SDKMappings, override)
 
@@ -929,6 +932,7 @@ func scanSDKStructNames(dir string) map[string]bool {
 type apiTargetOverride struct {
 	SDKTypes         []string
 	UseStatus        bool
+	EmptySDKMappings bool
 	MappingOverrides map[string]mappingOverride
 }
 
@@ -1440,34 +1444,13 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 	"loadbalancer.LoadBalancer":         {MappingOverrides: statusMappingOverrides("LoadBalancer")},
 	"loadbalancer.NetworkSecurityGroup": {SDKTypes: []string{"UpdateNetworkSecurityGroupsDetails"}},
 	"loadbalancer.PathRouteSet":         {MappingOverrides: specMappingOverrides("PathRouteSet")},
-	"loadbalancer.Policy": {MappingOverrides: excludedMappingOverrides(
-		"Intentionally untracked: policy catalog entries are read-only reference data and this CRD does not expose a meaningful singular status surface.",
-		"LoadBalancerPolicy",
-	)},
-	"loadbalancer.Protocol": {MappingOverrides: excludedMappingOverrides(
-		"Intentionally untracked: protocol catalog entries are read-only reference data and this CRD does not expose a meaningful singular status surface.",
-		"LoadBalancerProtocol",
-	)},
-	"loadbalancer.RoutingPolicy":  {MappingOverrides: specMappingOverrides("RoutingPolicy")},
-	"loadbalancer.RuleSet":        {MappingOverrides: specMappingOverrides("RuleSet")},
-	"loadbalancer.SSLCipherSuite": {MappingOverrides: specMappingOverrides("SslCipherSuite")},
-	"loadbalancer.Shape": {
-		MappingOverrides: map[string]mappingOverride{
-			"LoadBalancerShape": {
-				Exclude: true,
-				Reason:  "Intentionally untracked: shape catalog entries are read-only reference data; load balancer shape mutation parity is tracked on LoadBalancerLoadBalancerShape.",
-			},
-			"ShapeDetails": {
-				Exclude: true,
-				Reason:  "Intentionally untracked: shape catalog entries are read-only reference data; load balancer shape mutation parity is tracked on LoadBalancerLoadBalancerShape.",
-			},
-			"UpdateLoadBalancerShapeDetails": {
-				Exclude: true,
-				Reason:  "Intentionally untracked: duplicate desired-state payload is already tracked on LoadBalancerLoadBalancerShape.",
-			},
-		},
-	},
-	"logging.Log": {MappingOverrides: statusMappingOverrides("LogSummary")},
+	"loadbalancer.Policy":               {EmptySDKMappings: true},
+	"loadbalancer.Protocol":             {EmptySDKMappings: true},
+	"loadbalancer.RoutingPolicy":        {MappingOverrides: specMappingOverrides("RoutingPolicy")},
+	"loadbalancer.RuleSet":              {MappingOverrides: specMappingOverrides("RuleSet")},
+	"loadbalancer.SSLCipherSuite":       {MappingOverrides: specMappingOverrides("SslCipherSuite")},
+	"loadbalancer.Shape":                {EmptySDKMappings: true},
+	"logging.Log":                       {MappingOverrides: statusMappingOverrides("LogSummary")},
 	"logging.LogGroup": {MappingOverrides: statusMappingOverrides(
 		"LogGroup",
 		"LogGroupSummary",
@@ -2189,16 +2172,22 @@ func reportDiff(path string, next []byte) {
 func makeTargetName(group, spec string) string {
 	prefix := map[string]string{
 		"database":               "",
+		"email":                  "Email",
+		"generativeai":           "GenerativeAI",
 		"mysql":                  "MySql",
 		"streaming":              "",
 		"queue":                  "",
 		"functions":              "Functions",
 		"nosql":                  "NoSQL",
 		"objectstorage":          "ObjectStorage",
+		"ocvp":                   "OCVP",
+		"oda":                    "ODA",
 		"ons":                    "Notification",
 		"logging":                "Logging",
 		"psql":                   "PSQL",
+		"usageapi":               "UsageAPI",
 		"events":                 "Events",
+		"marketplace":            "Marketplace",
 		"monitoring":             "Monitoring",
 		"dns":                    "DNS",
 		"loadbalancer":           "LoadBalancer",
@@ -2238,15 +2227,21 @@ func pascal(s string) string {
 func serviceComment(group string) string {
 	labels := map[string]string{
 		"database":               "Autonomous Database",
+		"email":                  "Email",
+		"generativeai":           "Generative AI",
 		"mysql":                  "MySQL DB System",
 		"streaming":              "Streaming",
 		"queue":                  "Queue",
 		"functions":              "Functions",
+		"marketplace":            "Marketplace",
 		"nosql":                  "NoSQL",
 		"objectstorage":          "Object Storage",
+		"ocvp":                   "OCVP",
+		"oda":                    "ODA",
 		"ons":                    "Notifications (ONS)",
 		"logging":                "Logging",
 		"psql":                   "PostgreSQL",
+		"usageapi":               "Usage API",
 		"events":                 "Events",
 		"monitoring":             "Monitoring",
 		"dns":                    "DNS",
@@ -2271,7 +2266,7 @@ func serviceComment(group string) string {
 
 func groupOrder(group string) int {
 	order := []string{
-		"database", "mysql", "streaming", "queue", "functions", "nosql", "objectstorage", "ons", "logging", "psql", "events", "monitoring", "dns", "loadbalancer", "networkloadbalancer", "artifacts", "certificates", "certificatesmanagement", "containerengine", "identity", "keymanagement", "limits", "secrets", "vault", "core",
+		"database", "email", "generativeai", "mysql", "streaming", "queue", "functions", "marketplace", "nosql", "objectstorage", "ocvp", "oda", "ons", "logging", "psql", "usageapi", "events", "monitoring", "dns", "loadbalancer", "networkloadbalancer", "artifacts", "certificates", "certificatesmanagement", "containerengine", "identity", "keymanagement", "limits", "secrets", "vault", "core",
 	}
 	for i, g := range order {
 		if g == group {

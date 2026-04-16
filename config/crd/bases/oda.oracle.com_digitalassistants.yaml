@@ -1,0 +1,306 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: digitalassistants.oda.oracle.com
+spec:
+  group: oda.oracle.com
+  names:
+    kind: DigitalAssistant
+    listKind: DigitalAssistantList
+    plural: digitalassistants
+    singular: digitalassistant
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the DigitalAssistant
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DigitalAssistant
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DigitalAssistant is the Schema for the digitalassistants API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DigitalAssistantSpec defines the desired state of DigitalAssistant.
+            properties:
+              category:
+                description: The resource's category.  This is used to group resource's
+                  together.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A short description of the resource.
+                type: string
+              displayName:
+                description: The resource's display name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The unique identifier of the Digital Assistant to create
+                  a new version of.
+                type: string
+              jsonData:
+                type: string
+              kind:
+                type: string
+              multilingualMode:
+                description: The multilingual mode for the resource.
+                type: string
+              name:
+                description: The reource's name. The name can contain only letters,
+                  numbers, periods, and underscores. The name must begin with a letter.
+                type: string
+              nativeLanguageTags:
+                description: A list of native languages supported by this resource.
+                items:
+                  type: string
+                type: array
+              platformVersion:
+                description: The ODA Platform Version for this resource.
+                type: string
+              primaryLanguageTag:
+                description: The primary language for the resource.
+                type: string
+              version:
+                description: The resource's version. The version can only contain
+                  numbers, letters, periods, underscores, dashes or spaces.  The version
+                  must begin with a letter or a number.
+                type: string
+            type: object
+          status:
+            description: DigitalAssistantStatus defines the observed state of DigitalAssistant.
+            properties:
+              baseId:
+                description: The unique identifier for the base reource (when this
+                  resource extends another).
+                type: string
+              category:
+                description: The resource's category.  This is used to group resource's
+                  together.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A short description of the resource.
+                type: string
+              dialogVersion:
+                description: The resource's dialog version.
+                type: string
+              displayName:
+                description: The resource's display name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique immutable identifier that was assigned when the
+                  resource was created.
+                type: string
+              lifecycleDetails:
+                description: The resource's publish state.
+                type: string
+              lifecycleState:
+                description: The resource's current state.
+                type: string
+              multilingualMode:
+                description: The multilingual mode for the resource.
+                type: string
+              name:
+                description: The reource's name. The name can contain only letters,
+                  numbers, periods, and underscores. The name must begin with a letter.
+                type: string
+              namespace:
+                description: The resource's namespace.
+                type: string
+              nativeLanguageTags:
+                description: A list of native languages supported by this resource.
+                items:
+                  type: string
+                type: array
+              platformVersion:
+                description: The ODA Platform Version for this resource.
+                type: string
+              primaryLanguageTag:
+                description: The primary language for the resource.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: When the resource was created. A date-time string as
+                  described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section
+                  14.29.
+                type: string
+              timeUpdated:
+                description: When the resource was last updated. A date-time string
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section
+                  14.29.
+                type: string
+              version:
+                description: The resource's version. The version can only contain
+                  numbers, letters, periods, underscores, dashes or spaces.  The version
+                  must begin with a letter or a number.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

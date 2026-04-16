@@ -1,0 +1,601 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: rulesets.loadbalancer.oracle.com
+spec:
+  group: loadbalancer.oracle.com
+  names:
+    kind: RuleSet
+    listKind: RuleSetList
+    plural: rulesets
+    singular: ruleset
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the RuleSet
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the RuleSet
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: RuleSet is the Schema for the rulesets API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RuleSetSpec defines the desired state of RuleSet.
+            properties:
+              items:
+                description: An array of rules that compose the rule set.
+                items:
+                  description: RuleSetItem defines nested fields for RuleSet.Item.
+                  properties:
+                    action:
+                      type: string
+                    allowedMethods:
+                      description: |-
+                        The list of HTTP methods allowed for this listener.
+                        By default, you can specify only the standard HTTP methods defined in the
+                        HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also
+                        see a list of supported standard HTTP methods in the Load Balancing service documentation at
+                        Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm).
+                        Your backend application must be able to handle the methods specified in this list.
+                        The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
+                        My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
+                        Example: ["GET", "PUT", "POST", "PROPFIND"]
+                      items:
+                        type: string
+                      type: array
+                    areInvalidCharactersAllowed:
+                      description: |-
+                        Indicates whether or not invalid characters in client header fields will be allowed.
+                        Valid names are composed of English letters, digits, hyphens and underscores.
+                        If "true", invalid characters are allowed in the HTTP header.
+                        If "false", invalid characters are not allowed in the HTTP header
+                      type: boolean
+                    conditions:
+                      items:
+                        description: RuleSetItemCondition defines nested fields for
+                          RuleSet.Item.Condition.
+                        properties:
+                          attributeName:
+                            type: string
+                          attributeValue:
+                            description: |-
+                              The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
+                              must match.
+                              You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
+                              **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
+                              matches all incoming traffic in the specified VCN.
+                            type: string
+                          jsonData:
+                            type: string
+                          operator:
+                            description: |-
+                              A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the
+                              incoming URI.
+                              *  **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string.
+                              *  **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best,
+                                 longest match of the beginning portion of the incoming URI path.
+                              *  **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the
+                                 `attributeValue` string.
+                              *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
+                                 string.
+                            type: string
+                        type: object
+                      type: array
+                    description:
+                      description: |-
+                        A brief description of the access control rule. Avoid entering confidential information.
+                        example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
+                      type: string
+                    header:
+                      description: |-
+                        A header name that conforms to RFC 7230.
+                        Example: `example_header_name`
+                      type: string
+                    httpLargeHeaderSizeInKB:
+                      description: |-
+                        The maximum size of each buffer used for reading http client request header.
+                        This value indicates the maximum size allowed for each buffer.
+                        The allowed values for buffer size are 8, 16, 32 and 64.
+                      type: integer
+                    jsonData:
+                      type: string
+                    prefix:
+                      description: |-
+                        A string to prepend to the header value. The resulting header value must conform to RFC 7230.
+                        With the following exceptions:
+                        *  value cannot contain `$`
+                        *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+                        Example: `example_prefix_value`
+                      type: string
+                    redirectUri:
+                      description: RuleSetItemRedirectUri defines nested fields for
+                        RuleSet.Item.RedirectUri.
+                      properties:
+                        host:
+                          description: |-
+                            The valid domain name (hostname) or IP address to use in the redirect URI.
+                            When this value is null, not set, or set to `{host}`, the service preserves the original domain name from the
+                            incoming HTTP request URI.
+                            All RedirectUri tokens are valid for this property. You can use any token more than once.
+                            Curly braces are valid in this property only to surround tokens, such as `{host}`
+                            Examples:
+                            *  **example.com** appears as `example.com` in the redirect URI.
+                            *  **in{host}** appears as `inexample.com` in the redirect URI if `example.com` is the hostname in the
+                               incoming HTTP request URI.
+                            *  **{port}{host}** appears as `8081example.com` in the redirect URI if `example.com` is the hostname and
+                               the port is `8081` in the incoming HTTP request URI.
+                          type: string
+                        path:
+                          description: |-
+                            The HTTP URI path to use in the redirect URI.
+                            When this value is null, not set, or set to `{path}`, the service preserves the original path from the
+                            incoming HTTP request URI. To omit the path from the redirect URI, set this value to an empty string, "".
+                            All RedirectUri tokens are valid for this property. You can use any token more than once.
+                            The path string must begin with `/` if it does not begin with the `{path}` token.
+                            Examples:
+                            *  __/example/video/123__ appears as `/example/video/123` in the redirect URI.
+                            *  __/example{path}__ appears as `/example/video/123` in the redirect URI if `/video/123` is the path in the
+                               incoming HTTP request URI.
+                            *  __{path}/123__ appears as `/example/video/123` in the redirect URI if `/example/video` is the path in the
+                               incoming HTTP request URI.
+                            *  __{path}123__ appears as `/example/video123` in the redirect URI if `/example/video` is the path in the
+                               incoming HTTP request URI.
+                            *  __/{host}/123__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname
+                               in the incoming HTTP request URI.
+                            *  __/{host}/{port}__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname and
+                               `123` is the port in the incoming HTTP request URI.
+                            *  __/{query}__ appears as `/lang=en` in the redirect URI if the query is `lang=en` in the incoming HTTP
+                               request URI.
+                          type: string
+                        port:
+                          description: |-
+                            The communication port to use in the redirect URI.
+                            Valid values include integers from 1 to 65535.
+                            When this value is null, the service preserves the original port from the incoming HTTP request URI.
+                            Example: `8081`
+                          type: integer
+                        protocol:
+                          description: |-
+                            The HTTP protocol to use in the redirect URI.
+                            When this value is null, not set, or set to `{protocol}`, the service preserves the original protocol from the
+                            incoming HTTP request URI. Allowed values are:
+                            *  HTTP
+                            *  HTTPS
+                            *  {protocol}
+                            `{protocol}` is the only valid token for this property. It can appear only once in the value string.
+                            Example: `HTTPS`
+                          type: string
+                        query:
+                          description: |-
+                            The query string to use in the redirect URI.
+                            When this value is null, not set, or set to `{query}`, the service preserves the original query parameters
+                            from the incoming HTTP request URI.
+                            All `RedirectUri` tokens are valid for this property. You can use any token more than once.
+                            If the query string does not begin with the `{query}` token, it must begin with the question mark (?) character.
+                            You can specify multiple query parameters as a single string. Separate each query parameter with an ampersand
+                            (&) character. To omit all incoming query parameters from the redirect URI, set this value to an empty
+                            string, "".
+                            If the specified query string results in a redirect URI ending with `?` or `&`, the last character is truncated.
+                            For example, if the incoming URI is `http://host.com:8080/documents` and the query property value is
+                            `?lang=en&{query}`, the redirect URI is `http://host.com:8080/documents?lang=en`. The system
+                            truncates the final ampersand (&) because the incoming URI included no value to replace the {query} token.
+                            Examples:
+                            * **lang=en&time_zone=PST** appears as `lang=en&time_zone=PST` in the redirect URI.
+                            * **{query}** appears as `lang=en&time_zone=PST` in the redirect URI if `lang=en&time_zone=PST` is the query
+                              string in the incoming HTTP request. If the incoming HTTP request has no query parameters, the `{query}`
+                              token renders as an empty string.
+                            * **lang=en&{query}&time_zone=PST** appears as `lang=en&country=us&time_zone=PST` in the redirect URI if
+                              `country=us` is the query string in the incoming HTTP request. If the incoming HTTP request has no query
+                              parameters, this value renders as `lang=en&time_zone=PST`.
+                            *  **protocol={protocol}&hostname={host}** appears as `protocol=http&hostname=example.com` in the redirect
+                               URI if the protocol is `HTTP` and the hostname is `example.com` in the incoming HTTP request.
+                            *  **port={port}&hostname={host}** appears as `port=8080&hostname=example.com` in the redirect URI if the
+                               port is `8080` and the hostname is `example.com` in the incoming HTTP request URI.
+                          type: string
+                      type: object
+                    responseCode:
+                      description: |-
+                        The HTTP status code to return when the incoming request is redirected.
+                        The status line returned with the code is mapped from the standard HTTP specification. Valid response
+                        codes for redirection are:
+                        *  301
+                        *  302
+                        *  303
+                        *  307
+                        *  308
+                        The default value is `302` (Found).
+                        Example: `301`
+                      type: integer
+                    statusCode:
+                      description: |-
+                        The HTTP status code to return when the requested HTTP method is not in the list of allowed methods.
+                        The associated status line returned with the code is mapped from the standard HTTP specification. The
+                        default value is `405 (Method Not Allowed)`.
+                        Example: 403
+                      type: integer
+                    suffix:
+                      description: |-
+                        A string to append to the header value. The resulting header value must conform to RFC 7230.
+                        With the following exceptions:
+                        *  value cannot contain `$`
+                        *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+                        Example: `example_suffix_value`
+                      type: string
+                    value:
+                      description: |-
+                        A header value that conforms to RFC 7230. With the following exceptions:
+                        *  value cannot contain `$`
+                        *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+                        Example: `example_value`
+                      type: string
+                  type: object
+                type: array
+              name:
+                description: |-
+                  The name for this set of rules. It must be unique and it cannot be changed. Avoid entering
+                  confidential information.
+                  Example: `example_rule_set`
+                type: string
+            required:
+            - items
+            - name
+            type: object
+          status:
+            description: RuleSetStatus defines the observed state of RuleSet.
+            properties:
+              items:
+                description: An array of rules that compose the rule set.
+                items:
+                  description: RuleSetItem defines nested fields for RuleSet.Item.
+                  properties:
+                    action:
+                      type: string
+                    allowedMethods:
+                      description: |-
+                        The list of HTTP methods allowed for this listener.
+                        By default, you can specify only the standard HTTP methods defined in the
+                        HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also
+                        see a list of supported standard HTTP methods in the Load Balancing service documentation at
+                        Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm).
+                        Your backend application must be able to handle the methods specified in this list.
+                        The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
+                        My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
+                        Example: ["GET", "PUT", "POST", "PROPFIND"]
+                      items:
+                        type: string
+                      type: array
+                    areInvalidCharactersAllowed:
+                      description: |-
+                        Indicates whether or not invalid characters in client header fields will be allowed.
+                        Valid names are composed of English letters, digits, hyphens and underscores.
+                        If "true", invalid characters are allowed in the HTTP header.
+                        If "false", invalid characters are not allowed in the HTTP header
+                      type: boolean
+                    conditions:
+                      items:
+                        description: RuleSetItemCondition defines nested fields for
+                          RuleSet.Item.Condition.
+                        properties:
+                          attributeName:
+                            type: string
+                          attributeValue:
+                            description: |-
+                              The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
+                              must match.
+                              You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
+                              **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
+                              matches all incoming traffic in the specified VCN.
+                            type: string
+                          jsonData:
+                            type: string
+                          operator:
+                            description: |-
+                              A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the
+                              incoming URI.
+                              *  **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string.
+                              *  **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best,
+                                 longest match of the beginning portion of the incoming URI path.
+                              *  **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the
+                                 `attributeValue` string.
+                              *  **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue`
+                                 string.
+                            type: string
+                        type: object
+                      type: array
+                    description:
+                      description: |-
+                        A brief description of the access control rule. Avoid entering confidential information.
+                        example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
+                      type: string
+                    header:
+                      description: |-
+                        A header name that conforms to RFC 7230.
+                        Example: `example_header_name`
+                      type: string
+                    httpLargeHeaderSizeInKB:
+                      description: |-
+                        The maximum size of each buffer used for reading http client request header.
+                        This value indicates the maximum size allowed for each buffer.
+                        The allowed values for buffer size are 8, 16, 32 and 64.
+                      type: integer
+                    jsonData:
+                      type: string
+                    prefix:
+                      description: |-
+                        A string to prepend to the header value. The resulting header value must conform to RFC 7230.
+                        With the following exceptions:
+                        *  value cannot contain `$`
+                        *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+                        Example: `example_prefix_value`
+                      type: string
+                    redirectUri:
+                      description: RuleSetItemRedirectUri defines nested fields for
+                        RuleSet.Item.RedirectUri.
+                      properties:
+                        host:
+                          description: |-
+                            The valid domain name (hostname) or IP address to use in the redirect URI.
+                            When this value is null, not set, or set to `{host}`, the service preserves the original domain name from the
+                            incoming HTTP request URI.
+                            All RedirectUri tokens are valid for this property. You can use any token more than once.
+                            Curly braces are valid in this property only to surround tokens, such as `{host}`
+                            Examples:
+                            *  **example.com** appears as `example.com` in the redirect URI.
+                            *  **in{host}** appears as `inexample.com` in the redirect URI if `example.com` is the hostname in the
+                               incoming HTTP request URI.
+                            *  **{port}{host}** appears as `8081example.com` in the redirect URI if `example.com` is the hostname and
+                               the port is `8081` in the incoming HTTP request URI.
+                          type: string
+                        path:
+                          description: |-
+                            The HTTP URI path to use in the redirect URI.
+                            When this value is null, not set, or set to `{path}`, the service preserves the original path from the
+                            incoming HTTP request URI. To omit the path from the redirect URI, set this value to an empty string, "".
+                            All RedirectUri tokens are valid for this property. You can use any token more than once.
+                            The path string must begin with `/` if it does not begin with the `{path}` token.
+                            Examples:
+                            *  __/example/video/123__ appears as `/example/video/123` in the redirect URI.
+                            *  __/example{path}__ appears as `/example/video/123` in the redirect URI if `/video/123` is the path in the
+                               incoming HTTP request URI.
+                            *  __{path}/123__ appears as `/example/video/123` in the redirect URI if `/example/video` is the path in the
+                               incoming HTTP request URI.
+                            *  __{path}123__ appears as `/example/video123` in the redirect URI if `/example/video` is the path in the
+                               incoming HTTP request URI.
+                            *  __/{host}/123__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname
+                               in the incoming HTTP request URI.
+                            *  __/{host}/{port}__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname and
+                               `123` is the port in the incoming HTTP request URI.
+                            *  __/{query}__ appears as `/lang=en` in the redirect URI if the query is `lang=en` in the incoming HTTP
+                               request URI.
+                          type: string
+                        port:
+                          description: |-
+                            The communication port to use in the redirect URI.
+                            Valid values include integers from 1 to 65535.
+                            When this value is null, the service preserves the original port from the incoming HTTP request URI.
+                            Example: `8081`
+                          type: integer
+                        protocol:
+                          description: |-
+                            The HTTP protocol to use in the redirect URI.
+                            When this value is null, not set, or set to `{protocol}`, the service preserves the original protocol from the
+                            incoming HTTP request URI. Allowed values are:
+                            *  HTTP
+                            *  HTTPS
+                            *  {protocol}
+                            `{protocol}` is the only valid token for this property. It can appear only once in the value string.
+                            Example: `HTTPS`
+                          type: string
+                        query:
+                          description: |-
+                            The query string to use in the redirect URI.
+                            When this value is null, not set, or set to `{query}`, the service preserves the original query parameters
+                            from the incoming HTTP request URI.
+                            All `RedirectUri` tokens are valid for this property. You can use any token more than once.
+                            If the query string does not begin with the `{query}` token, it must begin with the question mark (?) character.
+                            You can specify multiple query parameters as a single string. Separate each query parameter with an ampersand
+                            (&) character. To omit all incoming query parameters from the redirect URI, set this value to an empty
+                            string, "".
+                            If the specified query string results in a redirect URI ending with `?` or `&`, the last character is truncated.
+                            For example, if the incoming URI is `http://host.com:8080/documents` and the query property value is
+                            `?lang=en&{query}`, the redirect URI is `http://host.com:8080/documents?lang=en`. The system
+                            truncates the final ampersand (&) because the incoming URI included no value to replace the {query} token.
+                            Examples:
+                            * **lang=en&time_zone=PST** appears as `lang=en&time_zone=PST` in the redirect URI.
+                            * **{query}** appears as `lang=en&time_zone=PST` in the redirect URI if `lang=en&time_zone=PST` is the query
+                              string in the incoming HTTP request. If the incoming HTTP request has no query parameters, the `{query}`
+                              token renders as an empty string.
+                            * **lang=en&{query}&time_zone=PST** appears as `lang=en&country=us&time_zone=PST` in the redirect URI if
+                              `country=us` is the query string in the incoming HTTP request. If the incoming HTTP request has no query
+                              parameters, this value renders as `lang=en&time_zone=PST`.
+                            *  **protocol={protocol}&hostname={host}** appears as `protocol=http&hostname=example.com` in the redirect
+                               URI if the protocol is `HTTP` and the hostname is `example.com` in the incoming HTTP request.
+                            *  **port={port}&hostname={host}** appears as `port=8080&hostname=example.com` in the redirect URI if the
+                               port is `8080` and the hostname is `example.com` in the incoming HTTP request URI.
+                          type: string
+                      type: object
+                    responseCode:
+                      description: |-
+                        The HTTP status code to return when the incoming request is redirected.
+                        The status line returned with the code is mapped from the standard HTTP specification. Valid response
+                        codes for redirection are:
+                        *  301
+                        *  302
+                        *  303
+                        *  307
+                        *  308
+                        The default value is `302` (Found).
+                        Example: `301`
+                      type: integer
+                    statusCode:
+                      description: |-
+                        The HTTP status code to return when the requested HTTP method is not in the list of allowed methods.
+                        The associated status line returned with the code is mapped from the standard HTTP specification. The
+                        default value is `405 (Method Not Allowed)`.
+                        Example: 403
+                      type: integer
+                    suffix:
+                      description: |-
+                        A string to append to the header value. The resulting header value must conform to RFC 7230.
+                        With the following exceptions:
+                        *  value cannot contain `$`
+                        *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+                        Example: `example_suffix_value`
+                      type: string
+                    value:
+                      description: |-
+                        A header value that conforms to RFC 7230. With the following exceptions:
+                        *  value cannot contain `$`
+                        *  value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid.
+                        Example: `example_value`
+                      type: string
+                  type: object
+                type: array
+              name:
+                description: |-
+                  The name for this set of rules. It must be unique and it cannot be changed. Avoid entering
+                  confidential information.
+                  Example: `example_rule_set`
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,342 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: authenticationproviders.oda.oracle.com
+spec:
+  group: oda.oracle.com
+  names:
+    kind: AuthenticationProvider
+    listKind: AuthenticationProviderList
+    plural: authenticationproviders
+    singular: authenticationprovider
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the AuthenticationProvider
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AuthenticationProvider
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AuthenticationProvider is the Schema for the authenticationproviders
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AuthenticationProviderSpec defines the desired state of AuthenticationProvider.
+            properties:
+              authorizationEndpointUrl:
+                description: The IDPs URL for the page that users authenticate with
+                  by entering the user name and password.
+                type: string
+              clientId:
+                description: |-
+                  The client ID for the IDP application (OAuth Client) that was registered as described in Identity Provider Registration.
+                  With Microsoft identity platform, use the application ID.
+                type: string
+              clientSecret:
+                description: |-
+                  The client secret for the IDP application (OAuth Client) that was registered as described in Identity Provider
+                  Registration. With Microsoft identity platform, use the application secret.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              grantType:
+                description: The grant type for the Authentication Provider.
+                type: string
+              identityProvider:
+                description: Which type of Identity Provider (IDP) you are using.
+                type: string
+              isVisible:
+                description: Whether this Authentication Provider is visible in the
+                  ODA UI.
+                type: boolean
+              name:
+                description: A name to identify the Authentication Provider.
+                type: string
+              redirectUrl:
+                description: The OAuth Redirect URL.
+                type: string
+              refreshTokenRetentionPeriodInDays:
+                description: The number of days to keep the refresh token in the Digital
+                  Assistant cache.
+                type: integer
+              revokeTokenEndpointUrl:
+                description: |-
+                  If you want to revoke all the refresh tokens and access tokens of the logged-in user from a dialog flow, then
+                  you need the IDP's revoke refresh token URL. If you provide this URL, then you can use the System.OAuth2ResetTokens
+                  component to revoke the user's tokens for this service.
+                type: string
+              scopes:
+                description: |-
+                  A space-separated list of the scopes that must be included when Digital Assistant requests an access token from
+                  the provider. Include all the scopes that are required to access the resources. If refresh tokens are enabled,
+                  include the scope that’s necessary to get the refresh token (typically offline_access).
+                type: string
+              shortAuthorizationCodeRequestUrl:
+                description: |-
+                  A shortened version of the authorization URL, which you can get from a URL shortener service (one that allows
+                  you to send query parameters).  You might need this because the generated authorization-code-request URL
+                  could be too long for SMS and older smart phones.
+                type: string
+              subjectClaim:
+                description: The access-token profile claim to use to identify the
+                  user.
+                type: string
+              tokenEndpointUrl:
+                description: The IDPs URL for requesting access tokens.
+                type: string
+            required:
+            - clientId
+            - clientSecret
+            - grantType
+            - identityProvider
+            - name
+            - scopes
+            - tokenEndpointUrl
+            type: object
+          status:
+            description: AuthenticationProviderStatus defines the observed state of
+              AuthenticationProvider.
+            properties:
+              authorizationEndpointUrl:
+                description: The IDPs URL for the page that users authenticate with
+                  by entering the user name and password.
+                type: string
+              clientId:
+                description: |-
+                  The client ID for the IDP application (OAuth Client) that was registered as described in Identity Provider Registration.
+                  With Microsoft identity platform, use the application ID.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              grantType:
+                description: The grant type for the Authentication Provider.
+                type: string
+              id:
+                description: Unique immutable identifier that was assigned when the
+                  Authentication Provider was created.
+                type: string
+              identityProvider:
+                description: Which type of Identity Provider (IDP) you are using.
+                type: string
+              isVisible:
+                description: Whether this Authentication Provider is visible in the
+                  ODA UI.
+                type: boolean
+              lifecycleState:
+                description: The Authentication Provider's current state.
+                type: string
+              name:
+                description: A name to identify the Authentication Provider.
+                type: string
+              redirectUrl:
+                description: The OAuth Redirect URL.
+                type: string
+              refreshTokenRetentionPeriodInDays:
+                description: The number of days to keep the refresh token in the Digital
+                  Assistant cache.
+                type: integer
+              revokeTokenEndpointUrl:
+                description: |-
+                  If you want to revoke all the refresh tokens and access tokens of the logged-in user from a dialog flow, then
+                  you need the IDP's revoke refresh token URL. If you provide this URL, then you can use the System.OAuth2ResetTokens
+                  component to revoke the user's tokens for this service.
+                type: string
+              scopes:
+                description: |-
+                  A space-separated list of the scopes that must be included when Digital Assistant requests an access token from
+                  the provider. Include all the scopes that are required to access the resources. If refresh tokens are enabled,
+                  include the scope that’s necessary to get the refresh token (typically offline_access).
+                type: string
+              shortAuthorizationCodeRequestUrl:
+                description: |-
+                  A shortened version of the authorization URL, which you can get from a URL shortener service (one that allows
+                  you to send query parameters).  You might need this because the generated authorization-code-request URL
+                  could be too long for SMS and older smart phones.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subjectClaim:
+                description: The access-token profile claim to use to identify the
+                  user.
+                type: string
+              timeCreated:
+                description: When the resource was created. A date-time string as
+                  described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section
+                  14.29.
+                type: string
+              timeUpdated:
+                description: When the resource was last updated. A date-time string
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section
+                  14.29.
+                type: string
+              tokenEndpointUrl:
+                description: The IDPs URL for requesting access tokens.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

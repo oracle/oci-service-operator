@@ -135,17 +135,26 @@ nav:
           - core.oracle.com/v1beta1: reference/api/core/v1beta1/index.md
           - database.oracle.com/v1beta1: reference/api/database/v1beta1/index.md
           - dataflow.oracle.com/v1beta1: reference/api/dataflow/v1beta1/index.md
+          - email.oracle.com/v1beta1: reference/api/email/v1beta1/index.md
           - functions.oracle.com/v1beta1: reference/api/functions/v1beta1/index.md
+          - generativeai.oracle.com/v1beta1: reference/api/generativeai/v1beta1/index.md
           - identity.oracle.com/v1beta1: reference/api/identity/v1beta1/index.md
           - keymanagement.oracle.com/v1beta1: reference/api/keymanagement/v1beta1/index.md
+          - loadbalancer.oracle.com/v1beta1: reference/api/loadbalancer/v1beta1/index.md
+          - logging.oracle.com/v1beta1: reference/api/logging/v1beta1/index.md
+          - marketplace.oracle.com/v1beta1: reference/api/marketplace/v1beta1/index.md
+          - monitoring.oracle.com/v1beta1: reference/api/monitoring/v1beta1/index.md
           - mysql.oracle.com/v1beta1: reference/api/mysql/v1beta1/index.md
           - nosql.oracle.com/v1beta1: reference/api/nosql/v1beta1/index.md
           - objectstorage.oracle.com/v1beta1: reference/api/objectstorage/v1beta1/index.md
+          - ocvp.oracle.com/v1beta1: reference/api/ocvp/v1beta1/index.md
+          - oda.oracle.com/v1beta1: reference/api/oda/v1beta1/index.md
           - opensearch.oracle.com/v1beta1: reference/api/opensearch/v1beta1/index.md
           - psql.oracle.com/v1beta1: reference/api/psql/v1beta1/index.md
           - queue.oracle.com/v1beta1: reference/api/queue/v1beta1/index.md
           - redis.oracle.com/v1beta1: reference/api/redis/v1beta1/index.md
           - streaming.oracle.com/v1beta1: reference/api/streaming/v1beta1/index.md
+          - usageapi.oracle.com/v1beta1: reference/api/usageapi/v1beta1/index.md
       # END GENERATED API VERSION NAV
   - Contributor Docs:
       - contributor/index.md

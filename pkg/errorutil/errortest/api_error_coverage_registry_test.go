@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 43; got != want {
+	if got, want := len(inventory), 137; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 28; got != want {
+	if got, want := countRegistrations(inventory), 122; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 15; got != want {
@@ -29,13 +29,19 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "marketplace/Package", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 
 	assertInventoryRegistration(t, byKey, "analytics/AnalyticsInstance")
 	assertInventoryException(t, byKey, "analytics/PrivateAccessChannel", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "loadbalancer/LoadBalancer")
+	assertInventoryRegistration(t, byKey, "marketplace/Package")
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
 }
 

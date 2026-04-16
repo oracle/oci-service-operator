@@ -4,7 +4,13 @@ import "strings"
 
 const intentionalUntrackedPrefix = "Intentionally untracked: "
 
-var reviewedUntrackedReasons = map[string]string{}
+var reviewedUntrackedReasons = map[string]string{
+	"LoadBalancerPolicy":   readOnlyResponseReason("loadbalancer.LoadBalancerPolicy"),
+	"LoadBalancerProtocol": readOnlyResponseReason("loadbalancer.LoadBalancerProtocol"),
+	"LoadBalancerShape": intentionalUntrackedPrefix +
+		"spec is empty and the SDK only exposes read-only shape catalog payloads like loadbalancer.LoadBalancerShape; desired-state mutation parity is tracked on LoadBalancerLoadBalancerShape.",
+	"MarketplacePackage": readOnlyResponseReason("marketplace.ListingPackageSummary"),
+}
 
 func reviewedUntrackedReason(targetName string) string {
 	return reviewedUntrackedReasons[strings.TrimSpace(targetName)]

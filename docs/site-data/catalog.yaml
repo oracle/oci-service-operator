@@ -100,6 +100,13 @@ packages:
         kind: Application
         summary: Manage OCI Data Flow applications.
 
+  - package: email
+    displayName: Email
+    summary: Manage OCI Email Delivery resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: functions
     displayName: Functions
     summary: Manage OCI Functions applications and functions from Kubernetes.
@@ -113,6 +120,13 @@ packages:
       - group: functions
         kind: Function
         summary: Manage OCI Functions function definitions and images.
+
+  - package: generativeai
+    displayName: Generative AI
+    summary: Manage OCI Generative AI resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: identity
     displayName: Identity
@@ -139,6 +153,34 @@ packages:
       - group: keymanagement
         kind: Vault
         summary: Manage OCI Vault resources and their scheduled deletion lifecycle.
+
+  - package: loadbalancer
+    displayName: Load Balancer
+    summary: Manage OCI Load Balancer resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: logging
+    displayName: Logging
+    summary: Manage OCI Logging resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: marketplace
+    displayName: Marketplace
+    summary: Manage OCI Marketplace resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: monitoring
+    displayName: Monitoring
+    summary: Manage OCI Monitoring resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: mysql
     displayName: MySQL
@@ -177,6 +219,20 @@ packages:
       - group: objectstorage
         kind: Bucket
         summary: Manage OCI Object Storage buckets.
+
+  - package: ocvp
+    displayName: Oracle Cloud VMware Solution
+    summary: Manage OCI Oracle Cloud VMware Solution resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: oda
+    displayName: Oracle Digital Assistant
+    summary: Manage OCI Digital Assistant resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: opensearch
     displayName: OpenSearch
@@ -242,3 +298,10 @@ packages:
       - group: streaming
         kind: Stream
         summary: Manage OCI Streaming streams.
+
+  - package: usageapi
+    displayName: Usage API
+    summary: Manage OCI Usage API resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md

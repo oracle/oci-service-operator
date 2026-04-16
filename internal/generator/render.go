@@ -400,7 +400,7 @@ func renderControllerFile(pkg *PackageModel, controller ControllerModel) (string
 		Version        string
 		ControllerModel
 	}{
-		PackageName:     pkg.Service.Group,
+		PackageName:     safeGoIdentifier(pkg.Service.Group),
 		APIImportAlias:  fmt.Sprintf("%s%s", pkg.Service.Group, pkg.Version),
 		Group:           pkg.Service.Group,
 		Version:         pkg.Version,

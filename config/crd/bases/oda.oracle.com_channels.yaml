@@ -1,0 +1,566 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: channels.oda.oracle.com
+spec:
+  group: oda.oracle.com
+  names:
+    kind: Channel
+    listKind: ChannelList
+    plural: channels
+    singular: channel
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Channel
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Channel
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Channel is the Schema for the channels API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ChannelSpec defines the desired state of Channel.
+            properties:
+              accountSID:
+                description: The Account SID for the Twilio number.
+                type: string
+              allowedDomains:
+                description: |-
+                  A comma-delimited whitelist of allowed domains.
+
+                  The channel will only communicate with the sites from the domains that you add to this list.
+                  For example, *.corp.example.com, *.hdr.example.com. Entering a single asterisk (*) allows unrestricted access
+                  to the channel from any domain.
+
+                  Typically, you'd only enter a single asterisk during development. For production, you would add an allowlist of domains.
+                type: string
+              appSecret:
+                description: The app secret for your Facebook app.
+                type: string
+              authErrorUrl:
+                description: The URL to redirect to when authentication is unsuccessful.
+                type: string
+              authSuccessUrl:
+                description: The URL to redirect to when authentication is successful.
+                type: string
+              authToken:
+                description: The authentication token to use when connecting to the
+                  Oracle Streaming Service.
+                type: string
+              authenticationProviderName:
+                description: The name of the Authentication Provider to use to authenticate
+                  the user.
+                type: string
+              bootstrapServers:
+                description: The Oracle Streaming Service bootstrap servers.
+                type: string
+              botId:
+                description: The ID of the Skill or Digital Assistant that the Channel
+                  is routed to.
+                type: string
+              channelService:
+                description: The type of OSVC service.
+                type: string
+              clientId:
+                description: The Slack Client Id for the Slack app.
+                type: string
+              clientSecret:
+                description: The Client Secret for the Slack App.
+                type: string
+              clientType:
+                description: The type of Service Cloud client.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A short description of the Channel.
+                type: string
+              domainName:
+                description: |-
+                  The domain name.
+
+                  If you have access to Oracle B2C Service, you can derive this value from the URL that you use to launch the
+                  Agent Browser User Interface. For example, if the URL is sitename.exampledomain.com, then the host name prefix
+                  is sitename and the domain name is exampledomain.com.
+
+                  If the channel is connecting to Oracle B2C Service version 19A or later, and you have multiple interfaces,
+                  then you must include the interface ID in the host (site) name . For example, for the interface that has an ID of 2, you would use something like sitename-2.exampledomain.com.
+                type: string
+              eventSinkBotIds:
+                description: The IDs of the Skills and Digital Assistants that the
+                  Channel is routed to.
+                items:
+                  type: string
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              host:
+                description: |-
+                  The host.
+
+                  For OSVC, you can derive these values from the URL that you use to launch the Agent Browser User Interface
+                  or the chat launch page. For example, if the URL is https://sitename.exampledomain.com/app/chat/chat_launch,
+                  then the host is sitename.exampledomain.com.
+
+                  For FUSION, this is the host portion of your Oracle Applications Cloud (Fusion) instance's URL.
+                  For example: sitename.exampledomain.com.
+                type: string
+              hostNamePrefix:
+                description: |-
+                  The host prefix.
+
+                  If you have access to Oracle B2C Service, you can derive this value from the URL that you use to launch the
+                  Agent Browser User Interface. For example, if the URL is sitename.exampledomain.com, then the host name prefix
+                  is sitename and the domain name is exampledomain.com.
+
+                  If the channel is connecting to Oracle B2C Service version 19A or later, and you have multiple interfaces,
+                  then you must include the interface ID in the host (site) name . For example, for the interface that has an ID of 2, you would use something like sitename-2.exampledomain.com.
+                type: string
+              inboundMessageTopic:
+                description: The topic inbound messages are received on.
+                type: string
+              isAuthenticatedUserId:
+                description: True if the user id in the AIC message should be treated
+                  as an authenticated user id.
+                type: boolean
+              isClientAuthenticationEnabled:
+                description: Whether client authentication is enabled or not.
+                type: boolean
+              isMmsEnabled:
+                description: Whether MMS is enabled for this channel or not.
+                type: boolean
+              jsonData:
+                type: string
+              maxTokenExpirationTimeInMinutes:
+                description: The maximum time until the token expires (in minutes).
+                format: int64
+                type: integer
+              msaAppId:
+                description: The Microsoft App ID that you obtained when you created
+                  your bot registration in Azure.
+                type: string
+              msaAppPassword:
+                description: The client secret that you obtained from your bot registration.
+                type: string
+              name:
+                description: The Channel's name. The name can contain only letters,
+                  numbers, periods, and underscores. The name must begin with a letter.
+                type: string
+              originalConnectorsUrl:
+                description: The original connectors URL (used for backward compatibility).
+                type: string
+              outboundMessageTopic:
+                description: The topic outbound messages are sent on.
+                type: string
+              outboundUrl:
+                description: The URL to send response and error messages to.
+                type: string
+              pageAccessToken:
+                description: The page access token that you generated for your Facebook
+                  page.
+                type: string
+              password:
+                description: The password for the Oracle B2C Service staff member
+                  who has the necessary profile permissions.
+                type: string
+              payloadVersion:
+                description: The version for payloads.
+                type: string
+              phoneNumber:
+                description: The Twilio phone number.
+                type: string
+              port:
+                description: The port.
+                type: string
+              saslMechanism:
+                description: The SASL mechanmism to use when conecting to the Oracle
+                  Streaming Service. See Oracle Streaming Service documentation for
+                  a list of valid values.
+                type: string
+              securityProtocol:
+                description: The security protocol to use when conecting to the Oracle
+                  Streaming Service. See Oracle Streaming Service documentation for
+                  a list of valid values.
+                type: string
+              sessionExpiryDurationInMilliseconds:
+                description: The number of milliseconds before a session expires.
+                format: int64
+                type: integer
+              signingSecret:
+                description: The Signing Secret for the Slack App.
+                type: string
+              streamPoolId:
+                description: The stream pool OCI to use when connecting to the Oracle
+                  Streaming Service.
+                type: string
+              tenancyName:
+                description: The tenancy to use when connecting to the Oracle Streaming
+                  Service.
+                type: string
+              totalSessionCount:
+                description: The total session count.
+                type: integer
+              type:
+                type: string
+              userName:
+                description: The user name for an Oracle B2C Service staff member
+                  who has the necessary profile permissions.
+                type: string
+            required:
+            - name
+            type: object
+          status:
+            description: ChannelStatus defines the observed state of Channel.
+            properties:
+              accountSID:
+                description: The Account SID for the Twilio number.
+                type: string
+              allowedDomains:
+                description: |-
+                  A comma-delimited whitelist of allowed domains.
+
+                  The channel will only communicate with the sites from the domains that you add to this list.
+                  For example, *.corp.example.com, *.hdr.example.com. Entering a single asterisk (*) allows unrestricted access
+                  to the channel from any domain.
+
+                  Typically, you'd only enter a single asterisk during development. For production, you would add an allowlist of domains.
+                type: string
+              authErrorUrl:
+                description: The URL to redirect to when authentication is unsuccessful.
+                type: string
+              authSuccessUrl:
+                description: The URL to redirect to when authentication is successful.
+                type: string
+              authenticationProviderName:
+                description: The name of the Authentication Provider to use to authenticate
+                  the user.
+                type: string
+              bootstrapServers:
+                description: The Oracle Streaming Service bootstrap servers.
+                type: string
+              botId:
+                description: The ID of the Skill or Digital Assistant that the Channel
+                  is routed to.
+                type: string
+              category:
+                description: The category of the Channel.
+                type: string
+              channelService:
+                description: The type of OSVC service.
+                type: string
+              clientId:
+                description: The Slack Client Id for the Slack app.
+                type: string
+              clientType:
+                description: The type of Service Cloud client.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A short description of the Channel.
+                type: string
+              domainName:
+                description: |-
+                  The domain name.
+
+                  If you have access to Oracle B2C Service, you can derive this value from the URL that you use to launch the
+                  Agent Browser User Interface. For example, if the URL is sitename.exampledomain.com, then the host name prefix
+                  is sitename and the domain name is exampledomain.com.
+
+                  If the channel is connecting to Oracle B2C Service version 19A or later, and you have multiple interfaces,
+                  then you must include the interface ID in the host (site) name . For example, for the interface that has an ID of 2, you would use something like sitename-2.exampledomain.com.
+                type: string
+              eventSinkBotIds:
+                description: The IDs of the Skills and Digital Assistants that the
+                  Channel is routed to.
+                items:
+                  type: string
+                type: array
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              host:
+                description: |-
+                  The host.
+
+                  For OSVC, you can derive these values from the URL that you use to launch the Agent Browser User Interface
+                  or the chat launch page. For example, if the URL is https://sitename.exampledomain.com/app/chat/chat_launch,
+                  then the host is sitename.exampledomain.com.
+
+                  For FUSION, this is the host portion of your Oracle Applications Cloud (Fusion) instance's URL.
+                  For example: sitename.exampledomain.com.
+                type: string
+              hostNamePrefix:
+                description: |-
+                  The host prefix.
+
+                  If you have access to Oracle B2C Service, you can derive this value from the URL that you use to launch the
+                  Agent Browser User Interface. For example, if the URL is sitename.exampledomain.com, then the host name prefix
+                  is sitename and the domain name is exampledomain.com.
+
+                  If the channel is connecting to Oracle B2C Service version 19A or later, and you have multiple interfaces,
+                  then you must include the interface ID in the host (site) name . For example, for the interface that has an ID of 2, you would use something like sitename-2.exampledomain.com.
+                type: string
+              id:
+                description: Unique immutable identifier that was assigned when the
+                  Channel was created.
+                type: string
+              inboundMessageTopic:
+                description: The topic inbound messages are received on.
+                type: string
+              isAuthenticatedUserId:
+                description: True if the user id in the AIC message should be treated
+                  as an authenticated user id.
+                type: boolean
+              isClientAuthenticationEnabled:
+                description: Whether client authentication is enabled or not.
+                type: boolean
+              isMmsEnabled:
+                description: Whether MMS is enabled for this channel or not.
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleState:
+                description: The Channel's current state.
+                type: string
+              maxTokenExpirationTimeInMinutes:
+                description: The maximum time until the token expires (in minutes).
+                format: int64
+                type: integer
+              msaAppId:
+                description: The Microsoft App ID that you obtained when you created
+                  your bot registration in Azure.
+                type: string
+              name:
+                description: The Channel's name. The name can contain only letters,
+                  numbers, periods, and underscores. The name must begin with a letter.
+                type: string
+              originalConnectorsUrl:
+                description: The original connectors URL (used for backward compatibility).
+                type: string
+              outboundMessageTopic:
+                description: The topic outbound messages are sent on.
+                type: string
+              outboundUrl:
+                description: The URL for sending errors and responses to.
+                type: string
+              payloadVersion:
+                description: The version for payloads.
+                type: string
+              phoneNumber:
+                description: The Twilio phone number.
+                type: string
+              port:
+                description: The port.
+                type: string
+              saslMechanism:
+                description: The SASL mechanmism to use when conecting to the Oracle
+                  Streaming Service. See Oracle Streaming Service documentation for
+                  a list of valid values.
+                type: string
+              securityProtocol:
+                description: The security protocol to use when conecting to the Oracle
+                  Streaming Service. See Oracle Streaming Service documentation for
+                  a list of valid values.
+                type: string
+              sessionExpiryDurationInMilliseconds:
+                description: The number of milliseconds before a session expires.
+                format: int64
+                type: integer
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              streamPoolId:
+                description: The stream pool OCI to use when connecting to the Oracle
+                  Streaming Service.
+                type: string
+              tenancyName:
+                description: The tenancy to use when connecting to the Oracle Streaming
+                  Service.
+                type: string
+              timeCreated:
+                description: When the resource was created. A date-time string as
+                  described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section
+                  14.29.
+                type: string
+              timeUpdated:
+                description: When the resource was last updated. A date-time string
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section
+                  14.29.
+                type: string
+              totalSessionCount:
+                description: The total session count.
+                type: integer
+              type:
+                type: string
+              userName:
+                description: The user name for the digital-assistant agent.
+                type: string
+              webhookUrl:
+                description: |-
+                  The URL to use to send messages to this channel.
+                  This will be generally be used to configure a webhook in a 3rd party messaging system to send messages to this channel.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

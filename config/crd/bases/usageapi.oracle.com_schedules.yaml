@@ -1,0 +1,555 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: schedules.usageapi.oracle.com
+spec:
+  group: usageapi.oracle.com
+  names:
+    kind: Schedule
+    listKind: ScheduleList
+    plural: schedules
+    singular: schedule
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Schedule
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Schedule
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Schedule is the Schema for the schedules API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ScheduleSpec defines the desired state of Schedule.
+            properties:
+              compartmentId:
+                description: The customer tenancy.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: 'Defined tags for this resource. Each key is predefined
+                  and scoped to a namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`'
+                type: object
+              description:
+                description: The description of the schedule.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}`
+                type: object
+              name:
+                description: The unique name of the user-created schedule.
+                type: string
+              outputFileFormat:
+                description: Specifies the supported output file format.
+                type: string
+              queryProperties:
+                description: ScheduleQueryProperties defines nested fields for Schedule.QueryProperties.
+                properties:
+                  compartmentDepth:
+                    description: The depth level of the compartment.
+                    type: number
+                  dateRange:
+                    description: ScheduleQueryPropertiesDateRange defines nested fields
+                      for Schedule.QueryProperties.DateRange.
+                    properties:
+                      dateRangeType:
+                        type: string
+                      dynamicDateRangeType:
+                        type: string
+                      jsonData:
+                        type: string
+                      timeUsageEnded:
+                        description: The usage end time.
+                        type: string
+                      timeUsageStarted:
+                        description: The usage start time.
+                        type: string
+                    type: object
+                  filter:
+                    description: ScheduleQueryPropertiesFilter defines nested fields
+                      for Schedule.QueryProperties.Filter.
+                    properties:
+                      dimensions:
+                        description: The dimensions to filter on.
+                        items:
+                          description: ScheduleQueryPropertiesFilterDimension defines
+                            nested fields for Schedule.QueryProperties.Filter.Dimension.
+                          properties:
+                            key:
+                              description: The dimension key.
+                              type: string
+                            value:
+                              description: The dimension value.
+                              type: string
+                          required:
+                          - key
+                          - value
+                          type: object
+                        type: array
+                      operator:
+                        description: 'The filter operator. Example: ''AND'', ''OR'',
+                          ''NOT''.'
+                        type: string
+                      tags:
+                        description: The tags to filter on.
+                        items:
+                          description: ScheduleQueryPropertiesFilterTag defines nested
+                            fields for Schedule.QueryProperties.Filter.Tag.
+                          properties:
+                            key:
+                              description: The tag key.
+                              type: string
+                            namespace:
+                              description: The tag namespace.
+                              type: string
+                            value:
+                              description: The tag value.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  granularity:
+                    description: |-
+                      The usage granularity. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation.
+                      Allowed values are:
+                        DAILY
+                        MONTHLY
+                    type: string
+                  groupBy:
+                    description: 'Aggregate the result by. For example: [ "tagNamespace",
+                      "tagKey", "tagValue", "service", "skuName", "skuPartNumber",
+                      "unit", "compartmentName", "compartmentPath", "compartmentId",
+                      "platform", "region", "logicalAd", "resourceId", "tenantId",
+                      "tenantName" ]'
+                    items:
+                      type: string
+                    type: array
+                  groupByTag:
+                    description: 'GroupBy a specific tagKey. Provide the tagNamespace
+                      and tagKey in the tag object. Only supports one tag in the list.
+                      For example: [ { "namespace": "oracle", "key": "createdBy" ]'
+                    items:
+                      description: ScheduleQueryPropertiesGroupByTag defines nested
+                        fields for Schedule.QueryProperties.GroupByTag.
+                      properties:
+                        key:
+                          description: The tag key.
+                          type: string
+                        namespace:
+                          description: The tag namespace.
+                          type: string
+                        value:
+                          description: The tag value.
+                          type: string
+                      type: object
+                    type: array
+                  isAggregateByTime:
+                    description: Specifies whether aggregated by time. If isAggregateByTime
+                      is true, all usage or cost over the query time period will be
+                      added up.
+                    type: boolean
+                  queryType:
+                    description: |-
+                      The query usage type. COST by default if it is missing. Usage - Query the usage data. Cost - Query the cost/billing data.
+                      Allowed values are:
+                        USAGE
+                        COST
+                        USAGE_AND_COST
+                    type: string
+                required:
+                - dateRange
+                - granularity
+                type: object
+              resultLocation:
+                description: ScheduleResultLocation defines nested fields for Schedule.ResultLocation.
+                properties:
+                  bucketName:
+                    description: The bucket name where usage or cost CSVs will be
+                      uploaded.
+                    type: string
+                  jsonData:
+                    type: string
+                  locationType:
+                    type: string
+                  namespace:
+                    description: The namespace needed to determine the object storage
+                      bucket.
+                    type: string
+                  region:
+                    description: The destination Object Store Region specified by
+                      the customer.
+                    type: string
+                type: object
+              savedReportId:
+                description: The saved report ID which can also be used to generate
+                  a query.
+                type: string
+              scheduleRecurrences:
+                description: |-
+                  Specifies the frequency according to when the schedule will be run,
+                  in the x-obmcs-recurring-time format described in RFC 5545 section 3.3.10 (https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10).
+                  Supported values are : ONE_TIME, DAILY, WEEKLY and MONTHLY.
+                type: string
+              timeScheduled:
+                description: The date and time of the first time job execution.
+                type: string
+            required:
+            - compartmentId
+            - name
+            - resultLocation
+            - scheduleRecurrences
+            - timeScheduled
+            type: object
+          status:
+            description: ScheduleStatus defines the observed state of Schedule.
+            properties:
+              compartmentId:
+                description: The customer tenancy.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: 'Defined tags for this resource. Each key is predefined
+                  and scoped to a namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`'
+                type: object
+              description:
+                description: The description of the schedule.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID representing a unique shedule.
+                type: string
+              lifecycleState:
+                description: The schedule lifecycle state.
+                type: string
+              name:
+                description: The unique name of the schedule created by the user.
+                type: string
+              outputFileFormat:
+                description: Specifies the supported output file format.
+                type: string
+              queryProperties:
+                description: ScheduleQueryProperties defines nested fields for Schedule.QueryProperties.
+                properties:
+                  compartmentDepth:
+                    description: The depth level of the compartment.
+                    type: number
+                  dateRange:
+                    description: ScheduleQueryPropertiesDateRange defines nested fields
+                      for Schedule.QueryProperties.DateRange.
+                    properties:
+                      dateRangeType:
+                        type: string
+                      dynamicDateRangeType:
+                        type: string
+                      jsonData:
+                        type: string
+                      timeUsageEnded:
+                        description: The usage end time.
+                        type: string
+                      timeUsageStarted:
+                        description: The usage start time.
+                        type: string
+                    type: object
+                  filter:
+                    description: ScheduleQueryPropertiesFilter defines nested fields
+                      for Schedule.QueryProperties.Filter.
+                    properties:
+                      dimensions:
+                        description: The dimensions to filter on.
+                        items:
+                          description: ScheduleQueryPropertiesFilterDimension defines
+                            nested fields for Schedule.QueryProperties.Filter.Dimension.
+                          properties:
+                            key:
+                              description: The dimension key.
+                              type: string
+                            value:
+                              description: The dimension value.
+                              type: string
+                          required:
+                          - key
+                          - value
+                          type: object
+                        type: array
+                      operator:
+                        description: 'The filter operator. Example: ''AND'', ''OR'',
+                          ''NOT''.'
+                        type: string
+                      tags:
+                        description: The tags to filter on.
+                        items:
+                          description: ScheduleQueryPropertiesFilterTag defines nested
+                            fields for Schedule.QueryProperties.Filter.Tag.
+                          properties:
+                            key:
+                              description: The tag key.
+                              type: string
+                            namespace:
+                              description: The tag namespace.
+                              type: string
+                            value:
+                              description: The tag value.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  granularity:
+                    description: |-
+                      The usage granularity. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation.
+                      Allowed values are:
+                        DAILY
+                        MONTHLY
+                    type: string
+                  groupBy:
+                    description: 'Aggregate the result by. For example: [ "tagNamespace",
+                      "tagKey", "tagValue", "service", "skuName", "skuPartNumber",
+                      "unit", "compartmentName", "compartmentPath", "compartmentId",
+                      "platform", "region", "logicalAd", "resourceId", "tenantId",
+                      "tenantName" ]'
+                    items:
+                      type: string
+                    type: array
+                  groupByTag:
+                    description: 'GroupBy a specific tagKey. Provide the tagNamespace
+                      and tagKey in the tag object. Only supports one tag in the list.
+                      For example: [ { "namespace": "oracle", "key": "createdBy" ]'
+                    items:
+                      description: ScheduleQueryPropertiesGroupByTag defines nested
+                        fields for Schedule.QueryProperties.GroupByTag.
+                      properties:
+                        key:
+                          description: The tag key.
+                          type: string
+                        namespace:
+                          description: The tag namespace.
+                          type: string
+                        value:
+                          description: The tag value.
+                          type: string
+                      type: object
+                    type: array
+                  isAggregateByTime:
+                    description: Specifies whether aggregated by time. If isAggregateByTime
+                      is true, all usage or cost over the query time period will be
+                      added up.
+                    type: boolean
+                  queryType:
+                    description: |-
+                      The query usage type. COST by default if it is missing. Usage - Query the usage data. Cost - Query the cost/billing data.
+                      Allowed values are:
+                        USAGE
+                        COST
+                        USAGE_AND_COST
+                    type: string
+                required:
+                - dateRange
+                - granularity
+                type: object
+              resultLocation:
+                description: ScheduleResultLocation defines nested fields for Schedule.ResultLocation.
+                properties:
+                  bucketName:
+                    description: The bucket name where usage or cost CSVs will be
+                      uploaded.
+                    type: string
+                  jsonData:
+                    type: string
+                  locationType:
+                    type: string
+                  namespace:
+                    description: The namespace needed to determine the object storage
+                      bucket.
+                    type: string
+                  region:
+                    description: The destination Object Store Region specified by
+                      the customer.
+                    type: string
+                type: object
+              savedReportId:
+                description: The saved report ID which can also be used to generate
+                  a query.
+                type: string
+              scheduleRecurrences:
+                description: |-
+                  Specifies the frequency according to when the schedule will be run,
+                  in the x-obmcs-recurring-time format described in RFC 5545 section 3.3.10 (https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10).
+                  Supported values are : ONE_TIME, DAILY, WEEKLY and MONTHLY.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: 'Usage of system tag keys. These predefined keys are
+                  scoped to namespaces. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`'
+                type: object
+              timeCreated:
+                description: The date and time the schedule was created.
+                type: string
+              timeNextRun:
+                description: The date and time of the next job execution.
+                type: string
+              timeScheduled:
+                description: The date and time of the first time job execution.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1699,6 +1699,49 @@ func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
 	assertContains(t, serviceManagerContent, []string{"package dbsystem"})
 }
 
+func TestBuildControllerOutputModelSanitizesKeywordResourceVariable(t *testing.T) {
+	t.Parallel()
+
+	service := testServiceConfig(PackageProfileControllerBacked)
+	service.Generation.Controller.Strategy = GenerationStrategyGenerated
+
+	output := buildControllerOutputModel(service, "oracle.com", []ResourceModel{{
+		Kind:     "Package",
+		FileStem: "package",
+	}})
+	if len(output.Resources) != 1 {
+		t.Fatalf("len(buildControllerOutputModel().Resources) = %d, want 1", len(output.Resources))
+	}
+	if got := output.Resources[0].ResourceVariable; got != "package_" {
+		t.Fatalf("ResourceVariable = %q, want %q", got, "package_")
+	}
+}
+
+func TestBuildServiceManagerModelsSanitizesKeywordPackageName(t *testing.T) {
+	t.Parallel()
+
+	service := testServiceConfig(PackageProfileControllerBacked)
+	service.Generation.ServiceManager.Strategy = GenerationStrategyGenerated
+
+	serviceManagers, err := buildServiceManagerModels(service, "v1beta1", []ResourceModel{{
+		Kind:     "Package",
+		FileStem: "package",
+		Runtime:  &RuntimeModel{},
+	}})
+	if err != nil {
+		t.Fatalf("buildServiceManagerModels() error = %v", err)
+	}
+	if len(serviceManagers) != 1 {
+		t.Fatalf("len(buildServiceManagerModels()) = %d, want 1", len(serviceManagers))
+	}
+	if got := serviceManagers[0].PackageName; got != "package_" {
+		t.Fatalf("PackageName = %q, want %q", got, "package_")
+	}
+	if got := serviceManagers[0].PackagePath; got != "mysql/package" {
+		t.Fatalf("PackagePath = %q, want %q", got, "mysql/package")
+	}
+}
+
 func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 	cfg := &Config{
 		Domain:         "oracle.com",

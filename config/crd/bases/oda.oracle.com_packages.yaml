@@ -1,0 +1,258 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: packages.oda.oracle.com
+spec:
+  group: oda.oracle.com
+  names:
+    kind: Package
+    listKind: PackageList
+    plural: packages
+    singular: package
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the Package
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Package
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Package is the Schema for the packages API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PackageSpec defines the desired state of Package.
+            type: object
+          status:
+            description: PackageStatus defines the observed state of Package.
+            properties:
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the package.
+                type: string
+              displayName:
+                description: Display name for the package (displayed in UI and user-facing
+                  applications).
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique immutable identifier that was assigned when the
+                  Package was registered.
+                type: string
+              name:
+                description: Name of package.
+                type: string
+              publisherId:
+                description: ID of the publisher providing the package.
+                type: string
+              publisherMetadata:
+                description: A map of metadata key/value pairs that further describes
+                  the publisher and the platform in which the package might be used.
+                items:
+                  description: PackagePublisherMetadata defines nested fields for
+                    Package.PublisherMetadata.
+                  properties:
+                    name:
+                      description: Name of property.
+                      type: string
+                    value:
+                      description: Value for the property.
+                      type: string
+                  type: object
+                type: array
+              resourceTypes:
+                description: A list of resource types describing the content of the
+                  package.
+                items:
+                  type: string
+                type: array
+              resourceTypesMetadata:
+                description: A map of resource type to metadata key/value map that
+                  further describes the content for the resource types in this package..
+                  Keys are resource type names, values are a map of name/value pairs
+                  per resource type.
+                items:
+                  description: PackageResourceTypesMetadata defines nested fields
+                    for Package.ResourceTypesMetadata.
+                  properties:
+                    properties:
+                      description: Any properties needed to describe the content and
+                        its usage for this resource type, and within the containing
+                        package.
+                      items:
+                        description: PackageResourceTypesMetadataProperty defines
+                          nested fields for Package.ResourceTypesMetadata.Property.
+                        properties:
+                          name:
+                            description: Name of property.
+                            type: string
+                          value:
+                            description: Value for the property.
+                            type: string
+                        type: object
+                      type: array
+                    resourceType:
+                      description: The type of the resource described by this metadata
+                        object.
+                      type: string
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timePublished:
+                description: When the package was last published. A date-time string
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section
+                  14.29.
+                type: string
+              version:
+                description: Version of the package.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

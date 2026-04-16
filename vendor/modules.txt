@@ -159,18 +159,23 @@ github.com/oracle/oci-go-sdk/v65/core
 github.com/oracle/oci-go-sdk/v65/database
 github.com/oracle/oci-go-sdk/v65/dataflow
 github.com/oracle/oci-go-sdk/v65/dns
+github.com/oracle/oci-go-sdk/v65/email
 github.com/oracle/oci-go-sdk/v65/events
 github.com/oracle/oci-go-sdk/v65/functions
+github.com/oracle/oci-go-sdk/v65/generativeai
 github.com/oracle/oci-go-sdk/v65/identity
 github.com/oracle/oci-go-sdk/v65/keymanagement
 github.com/oracle/oci-go-sdk/v65/limits
 github.com/oracle/oci-go-sdk/v65/loadbalancer
 github.com/oracle/oci-go-sdk/v65/logging
+github.com/oracle/oci-go-sdk/v65/marketplace
 github.com/oracle/oci-go-sdk/v65/monitoring
 github.com/oracle/oci-go-sdk/v65/mysql
 github.com/oracle/oci-go-sdk/v65/networkloadbalancer
 github.com/oracle/oci-go-sdk/v65/nosql
 github.com/oracle/oci-go-sdk/v65/objectstorage
+github.com/oracle/oci-go-sdk/v65/ocvp
+github.com/oracle/oci-go-sdk/v65/oda
 github.com/oracle/oci-go-sdk/v65/ons
 github.com/oracle/oci-go-sdk/v65/opensearch
 github.com/oracle/oci-go-sdk/v65/psql
@@ -178,6 +183,7 @@ github.com/oracle/oci-go-sdk/v65/queue
 github.com/oracle/oci-go-sdk/v65/redis
 github.com/oracle/oci-go-sdk/v65/secrets
 github.com/oracle/oci-go-sdk/v65/streaming
+github.com/oracle/oci-go-sdk/v65/usageapi
 github.com/oracle/oci-go-sdk/v65/vault
 github.com/oracle/oci-go-sdk/v65/workrequests
 # github.com/pkg/errors v0.9.1

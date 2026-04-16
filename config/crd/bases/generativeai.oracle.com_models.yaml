@@ -1,0 +1,438 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: models.generativeai.oracle.com
+spec:
+  group: generativeai.oracle.com
+  names:
+    kind: Model
+    listKind: ModelList
+    plural: models
+    singular: model
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Model
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Model
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Model is the Schema for the models API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ModelSpec defines the desired state of Model.
+            properties:
+              baseModelId:
+                description: The OCID of the base model that's used for fine-tuning.
+                type: string
+              compartmentId:
+                description: The compartment OCID for fine-tuned models. For pretrained
+                  models, this value is null.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: An optional description of the model.
+                type: string
+              displayName:
+                description: A user-friendly name.
+                type: string
+              fineTuneDetails:
+                description: ModelFineTuneDetails defines nested fields for Model.FineTuneDetails.
+                properties:
+                  dedicatedAiClusterId:
+                    description: The OCID of the dedicated AI cluster this fine-tuning
+                      runs on.
+                    type: string
+                  trainingConfig:
+                    description: ModelFineTuneDetailsTrainingConfig defines nested
+                      fields for Model.FineTuneDetails.TrainingConfig.
+                    properties:
+                      earlyStoppingPatience:
+                        description: Stop training if the loss metric does not improve
+                          beyond 'early_stopping_threshold' for this many times of
+                          evaluation.
+                        type: integer
+                      earlyStoppingThreshold:
+                        description: How much the loss must improve to prevent early
+                          stopping.
+                        type: number
+                      jsonData:
+                        type: string
+                      learningRate:
+                        description: The initial learning rate to be used during training
+                        type: number
+                      logModelMetricsIntervalInSteps:
+                        description: |-
+                          Determines how frequently to log model metrics.
+                          Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics.
+                        type: integer
+                      numOfLastLayers:
+                        description: The number of last layers to be fine-tuned.
+                        type: integer
+                      totalTrainingEpochs:
+                        description: The maximum number of training epochs to run
+                          for.
+                        type: integer
+                      trainingBatchSize:
+                        description: The batch size used during training.
+                        type: integer
+                      trainingConfigType:
+                        type: string
+                    type: object
+                  trainingDataset:
+                    description: ModelFineTuneDetailsTrainingDataset defines nested
+                      fields for Model.FineTuneDetails.TrainingDataset.
+                    properties:
+                      bucketName:
+                        description: The Object Storage bucket name.
+                        type: string
+                      datasetType:
+                        type: string
+                      jsonData:
+                        type: string
+                      namespaceName:
+                        description: The Object Storage namespace.
+                        type: string
+                      objectName:
+                        description: The Object Storage object name.
+                        type: string
+                    type: object
+                required:
+                - dedicatedAiClusterId
+                - trainingDataset
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              vendor:
+                description: The provider of the model.
+                type: string
+              version:
+                description: The version of the model.
+                type: string
+            required:
+            - baseModelId
+            - compartmentId
+            - fineTuneDetails
+            type: object
+          status:
+            description: ModelStatus defines the observed state of Model.
+            properties:
+              baseModelId:
+                description: The OCID of the base model that's used for fine-tuning.
+                  For pretrained models, the value is null.
+                type: string
+              capabilities:
+                description: Describes what this model can be used for.
+                items:
+                  type: string
+                type: array
+              compartmentId:
+                description: The compartment OCID for fine-tuned models. For pretrained
+                  models, this value is null.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: An optional description of the model.
+                type: string
+              displayName:
+                description: A user-friendly name.
+                type: string
+              fineTuneDetails:
+                description: ModelFineTuneDetails defines nested fields for Model.FineTuneDetails.
+                properties:
+                  dedicatedAiClusterId:
+                    description: The OCID of the dedicated AI cluster this fine-tuning
+                      runs on.
+                    type: string
+                  trainingConfig:
+                    description: ModelFineTuneDetailsTrainingConfig defines nested
+                      fields for Model.FineTuneDetails.TrainingConfig.
+                    properties:
+                      earlyStoppingPatience:
+                        description: Stop training if the loss metric does not improve
+                          beyond 'early_stopping_threshold' for this many times of
+                          evaluation.
+                        type: integer
+                      earlyStoppingThreshold:
+                        description: How much the loss must improve to prevent early
+                          stopping.
+                        type: number
+                      jsonData:
+                        type: string
+                      learningRate:
+                        description: The initial learning rate to be used during training
+                        type: number
+                      logModelMetricsIntervalInSteps:
+                        description: |-
+                          Determines how frequently to log model metrics.
+                          Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics.
+                        type: integer
+                      numOfLastLayers:
+                        description: The number of last layers to be fine-tuned.
+                        type: integer
+                      totalTrainingEpochs:
+                        description: The maximum number of training epochs to run
+                          for.
+                        type: integer
+                      trainingBatchSize:
+                        description: The batch size used during training.
+                        type: integer
+                      trainingConfigType:
+                        type: string
+                    type: object
+                  trainingDataset:
+                    description: ModelFineTuneDetailsTrainingDataset defines nested
+                      fields for Model.FineTuneDetails.TrainingDataset.
+                    properties:
+                      bucketName:
+                        description: The Object Storage bucket name.
+                        type: string
+                      datasetType:
+                        type: string
+                      jsonData:
+                        type: string
+                      namespaceName:
+                        description: The Object Storage namespace.
+                        type: string
+                      objectName:
+                        description: The Object Storage object name.
+                        type: string
+                    type: object
+                required:
+                - dedicatedAiClusterId
+                - trainingDataset
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: An ID that uniquely identifies a pretrained or fine-tuned
+                  model.
+                type: string
+              isLongTermSupported:
+                description: Whether a model is supported long-term. Only applicable
+                  to base models.
+                type: boolean
+              lifecycleDetails:
+                description: A message describing the current state of the model in
+                  more detail that can provide actionable information.
+                type: string
+              lifecycleState:
+                description: The lifecycle state of the model.
+                type: string
+              modelMetrics:
+                description: ModelMetrics defines nested fields for Model.ModelMetrics.
+                properties:
+                  finalAccuracy:
+                    description: Fine-tuned model accuracy.
+                    type: number
+                  finalLoss:
+                    description: Fine-tuned model loss.
+                    type: number
+                  jsonData:
+                    type: string
+                  modelMetricsType:
+                    type: string
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The date and time that the model was created in the format
+                  of an RFC3339 datetime string.
+                type: string
+              timeDeprecated:
+                description: Corresponds to the time when the custom model and its
+                  associated foundation model will be deprecated.
+                type: string
+              timeUpdated:
+                description: The date and time that the model was updated in the format
+                  of an RFC3339 datetime string.
+                type: string
+              type:
+                description: The model type indicating whether this is a pretrained/base
+                  model or a custom/fine-tuned model.
+                type: string
+              vendor:
+                description: The provider of the base model.
+                type: string
+              version:
+                description: The version of the model.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

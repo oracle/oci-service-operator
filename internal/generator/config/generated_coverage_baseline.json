@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 28,
-    "mappings": 103,
-    "trackedMappings": 103,
-    "untrackedMappings": 0,
-    "presentFields": 1565,
-    "missingFields": 3,
-    "mandatoryPresentFields": 401,
-    "mandatoryMissingFields": 3,
-    "extraSpecFields": 173,
-    "overallCoveragePercent": 99.80867346938776,
-    "mandatoryCoveragePercent": 99.25742574257426
+    "specs": 122,
+    "mappings": 369,
+    "trackedMappings": 365,
+    "untrackedMappings": 4,
+    "presentFields": 3275,
+    "missingFields": 49,
+    "mandatoryPresentFields": 1187,
+    "mandatoryMissingFields": 49,
+    "extraSpecFields": 295,
+    "overallCoveragePercent": 98.52587244283995,
+    "mandatoryCoveragePercent": 96.03559870550163
   },
   "services": [
     {
@@ -44,28 +44,14 @@
     {
       "service": "containerinstances",
       "specs": 1,
-      "mappings": 5,
-      "trackedMappings": 5,
+      "mappings": 4,
+      "trackedMappings": 4,
       "untrackedMappings": 0,
       "presentFields": 59,
-      "missingFields": 1,
-      "mandatoryPresentFields": 28,
-      "mandatoryMissingFields": 1,
-      "extraSpecFields": 12,
-      "overallCoveragePercent": 98.33333333333333,
-      "mandatoryCoveragePercent": 96.55172413793103
-    },
-    {
-      "service": "core",
-      "specs": 10,
-      "mappings": 30,
-      "trackedMappings": 30,
-      "untrackedMappings": 0,
-      "presentFields": 280,
       "missingFields": 0,
-      "mandatoryPresentFields": 87,
+      "mandatoryPresentFields": 28,
       "mandatoryMissingFields": 0,
-      "extraSpecFields": 43,
+      "extraSpecFields": 12,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
     },
@@ -112,6 +98,20 @@
       "mandatoryCoveragePercent": 100
     },
     {
+      "service": "email",
+      "specs": 7,
+      "mappings": 23,
+      "trackedMappings": 23,
+      "untrackedMappings": 0,
+      "presentFields": 122,
+      "missingFields": 6,
+      "mandatoryPresentFields": 46,
+      "mandatoryMissingFields": 6,
+      "extraSpecFields": 6,
+      "overallCoveragePercent": 95.3125,
+      "mandatoryCoveragePercent": 88.46153846153845
+    },
+    {
       "service": "functions",
       "specs": 2,
       "mappings": 8,
@@ -124,6 +124,20 @@
       "extraSpecFields": 7,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "generativeai",
+      "specs": 6,
+      "mappings": 21,
+      "trackedMappings": 21,
+      "untrackedMappings": 0,
+      "presentFields": 158,
+      "missingFields": 7,
+      "mandatoryPresentFields": 65,
+      "mandatoryMissingFields": 7,
+      "extraSpecFields": 9,
+      "overallCoveragePercent": 95.75757575757575,
+      "mandatoryCoveragePercent": 90.27777777777779
     },
     {
       "service": "identity",
@@ -150,6 +164,62 @@
       "mandatoryPresentFields": 20,
       "mandatoryMissingFields": 0,
       "extraSpecFields": 5,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "loadbalancer",
+      "specs": 21,
+      "mappings": 53,
+      "trackedMappings": 50,
+      "untrackedMappings": 3,
+      "presentFields": 234,
+      "missingFields": 0,
+      "mandatoryPresentFields": 124,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 26,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "logging",
+      "specs": 8,
+      "mappings": 22,
+      "trackedMappings": 22,
+      "untrackedMappings": 0,
+      "presentFields": 168,
+      "missingFields": 1,
+      "mandatoryPresentFields": 68,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 4,
+      "overallCoveragePercent": 99.40828402366864,
+      "mandatoryCoveragePercent": 98.55072463768117
+    },
+    {
+      "service": "marketplace",
+      "specs": 16,
+      "mappings": 31,
+      "trackedMappings": 30,
+      "untrackedMappings": 1,
+      "presentFields": 189,
+      "missingFields": 7,
+      "mandatoryPresentFields": 53,
+      "mandatoryMissingFields": 7,
+      "extraSpecFields": 9,
+      "overallCoveragePercent": 96.42857142857143,
+      "mandatoryCoveragePercent": 88.33333333333333
+    },
+    {
+      "service": "monitoring",
+      "specs": 5,
+      "mappings": 10,
+      "trackedMappings": 10,
+      "untrackedMappings": 0,
+      "presentFields": 123,
+      "missingFields": 0,
+      "mandatoryPresentFields": 63,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 0,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
     },
@@ -196,18 +266,46 @@
       "mandatoryCoveragePercent": 100
     },
     {
+      "service": "ocvp",
+      "specs": 9,
+      "mappings": 26,
+      "trackedMappings": 26,
+      "untrackedMappings": 0,
+      "presentFields": 222,
+      "missingFields": 10,
+      "mandatoryPresentFields": 95,
+      "mandatoryMissingFields": 10,
+      "extraSpecFields": 22,
+      "overallCoveragePercent": 95.6896551724138,
+      "mandatoryCoveragePercent": 90.47619047619048
+    },
+    {
+      "service": "oda",
+      "specs": 17,
+      "mappings": 60,
+      "trackedMappings": 60,
+      "untrackedMappings": 0,
+      "presentFields": 414,
+      "missingFields": 13,
+      "mandatoryPresentFields": 219,
+      "mandatoryMissingFields": 13,
+      "extraSpecFields": 36,
+      "overallCoveragePercent": 96.95550351288055,
+      "mandatoryCoveragePercent": 94.39655172413794
+    },
+    {
       "service": "opensearch",
       "specs": 1,
-      "mappings": 5,
-      "trackedMappings": 5,
+      "mappings": 4,
+      "trackedMappings": 4,
       "untrackedMappings": 0,
       "presentFields": 88,
-      "missingFields": 1,
+      "missingFields": 0,
       "mandatoryPresentFields": 52,
-      "mandatoryMissingFields": 1,
+      "mandatoryMissingFields": 0,
       "extraSpecFields": 20,
-      "overallCoveragePercent": 98.87640449438202,
-      "mandatoryCoveragePercent": 98.11320754716981
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
     },
     {
       "service": "psql",
@@ -240,16 +338,16 @@
     {
       "service": "redis",
       "specs": 1,
-      "mappings": 5,
-      "trackedMappings": 5,
+      "mappings": 4,
+      "trackedMappings": 4,
       "untrackedMappings": 0,
       "presentFields": 50,
-      "missingFields": 1,
+      "missingFields": 0,
       "mandatoryPresentFields": 29,
-      "mandatoryMissingFields": 1,
+      "mandatoryMissingFields": 0,
       "extraSpecFields": 3,
-      "overallCoveragePercent": 98.0392156862745,
-      "mandatoryCoveragePercent": 96.66666666666667
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
     },
     {
       "service": "streaming",
@@ -264,6 +362,20 @@
       "extraSpecFields": 4,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "usageapi",
+      "specs": 5,
+      "mappings": 23,
+      "trackedMappings": 23,
+      "untrackedMappings": 0,
+      "presentFields": 80,
+      "missingFields": 5,
+      "mandatoryPresentFields": 53,
+      "mandatoryMissingFields": 5,
+      "extraSpecFields": 10,
+      "overallCoveragePercent": 94.11764705882352,
+      "mandatoryCoveragePercent": 91.37931034482759
     }
   ]
 }

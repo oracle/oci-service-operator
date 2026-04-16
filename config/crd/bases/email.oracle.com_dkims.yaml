@@ -1,0 +1,297 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: dkims.email.oracle.com
+spec:
+  group: email.oracle.com
+  names:
+    kind: Dkim
+    listKind: DkimList
+    plural: dkims
+    singular: dkim
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Dkim
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Dkim
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Dkim is the Schema for the dkims API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DkimSpec defines the desired state of Dkim.
+            properties:
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: |-
+                  A string that describes the details about the DKIM. It does not have to be unique,
+                  and you can change it. Avoid entering confidential information.
+                type: string
+              emailDomainId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the EmailDomain for this DKIM.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              name:
+                description: |-
+                  The DKIM selector. This selector is required to be globally unique for this email domain.
+                  If you do not provide the selector, we will generate one for you.
+                  If you do provide the selector, we suggest adding a short region indicator
+                  to differentiate from your signing of emails in other regions you may be subscribed to.
+                  Selectors limited to ASCII characters may use alphanumeric, dash ("-"), and dot (".") characters.
+                  Non-ASCII selector names should adopt IDNA2008 normalization (RFC 5891-5892).
+                  Avoid entering confidential information.
+                  Example: `mydomain-phx-20210228`
+                type: string
+            required:
+            - emailDomainId
+            type: object
+          status:
+            description: DkimStatus defines the observed state of Dkim.
+            properties:
+              cnameRecordValue:
+                description: The DNS CNAME record value to provision to the DKIM DNS
+                  subdomain, when using the CNAME method for DKIM setup (preferred).
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains this DKIM.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the DKIM. Avoid entering confidential
+                  information.
+                type: string
+              dnsSubdomainName:
+                description: |-
+                  The name of the DNS subdomain that must be provisioned to enable email recipients to verify DKIM signatures.
+                  It is usually created with a CNAME record set to the cnameRecordValue
+                type: string
+              emailDomainId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain
+                  that this DKIM belongs to.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the DKIM.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a resource.
+                type: string
+              lifecycleState:
+                description: The current state of the DKIM.
+                type: string
+              name:
+                description: |-
+                  The DKIM selector.
+                  If the same domain is managed in more than one region, each region must use different selectors.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: |-
+                  The time the DKIM was created.
+                  Times are expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format, "YYYY-MM-ddThh:mmZ".
+                  Example: `2021-02-12T22:47:12.613Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The time of the last change to the DKIM configuration, due to a state change or
+                  an update operation.
+                  Times are expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format, "YYYY-MM-ddThh:mmZ".
+                type: string
+              txtRecordValue:
+                description: |-
+                  The DNS TXT record value to provision to the DKIM DNS subdomain in place of using a CNAME record.
+                  This is used in cases where a CNAME can not be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry.
+                  This can also be used by customers who have an existing procedure to directly provision TXT records for DKIM.
+                  Be aware that many DNS APIs will require you to break this string into segments of less than 255 characters.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
