@@ -4,12 +4,12 @@ schemaVersion: v1alpha1
 packages:
   - package: analytics
     displayName: Analytics
-    summary: Manage OCI Analytics instances from Kubernetes with a generated controller-backed scaffold.
+    summary: Manage OCI Analytics instances from Kubernetes with a reviewed controller-backed runtime.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Analytics currently ships a generated controller-backed scaffold for `AnalyticsInstance`; follow-on runtime work will harden the emitted service-manager seam before release promotion.
+      - Analytics ships a reviewed controller-backed runtime for `AnalyticsInstance` in the current checked-in package surface.
     kindOverrides:
       - group: analytics
         kind: AnalyticsInstance
@@ -33,16 +33,19 @@ packages:
 
   - package: containerengine
     displayName: Container Engine for Kubernetes
-    summary: Manage OCI Container Engine for Kubernetes clusters from Kubernetes.
+    summary: Manage OCI Container Engine for Kubernetes clusters and node pools from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope is intentionally limited to Cluster.
+      - Current package scope includes `Cluster` and `NodePool`.
     kindOverrides:
       - group: containerengine
         kind: Cluster
         summary: Manage OCI Container Engine for Kubernetes clusters.
+      - group: containerengine
+        kind: NodePool
+        summary: Manage OCI Container Engine for Kubernetes node pools.
 
   - package: containerinstances
     displayName: Container Instances

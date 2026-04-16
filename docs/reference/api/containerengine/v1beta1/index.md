@@ -422,7 +422,7 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 <a id="kind-nodepool"></a>
 ## NodePool
 
-NodePool is the Schema for the nodepools API.
+Manage OCI Container Engine for Kubernetes node pools.
 
 - `Plural`: `nodepools`
 - `Scope`: `Namespaced`
