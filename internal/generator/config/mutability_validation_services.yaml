@@ -22,6 +22,10 @@ services:
       resources:
         - kind: Instance
           formalSpec: instance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: nosql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/nosql
@@ -36,6 +40,10 @@ services:
       resources:
         - kind: Table
           formalSpec: table
+          async:
+            strategy: lifecycle
+            runtime: handwritten
+            formalClassification: lifecycle
 
   - service: objectstorage
     sdkPackage: github.com/oracle/oci-go-sdk/v65/objectstorage
@@ -50,3 +58,7 @@ services:
       resources:
         - kind: Bucket
           formalSpec: objectstoragebucket
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
