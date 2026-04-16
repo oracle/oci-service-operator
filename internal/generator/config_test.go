@@ -1796,6 +1796,26 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 }
 
+func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "mutability_validation_services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	services := serviceConfigsByName(t, cfg, "core", "nosql", "objectstorage")
+
+	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
+	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
+	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
+
+	assertAsyncContract(t, services["core"], "Instance", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+	assertAsyncContract(t, services["nosql"], "Table", AsyncStrategyLifecycle, AsyncRuntimeHandwritten)
+	assertAsyncContract(t, services["objectstorage"], "Bucket", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+}
+
 func selectionExplicit(enabled bool, includeKinds ...string) SelectionConfig {
 	return SelectionConfig{
 		Enabled:      boolPtr(enabled),
