@@ -45,6 +45,7 @@ func (g *Generator) RefreshMutabilityOverlayFixtures(
 	}
 
 	targets := make([]mutabilityOverlayRegistryPageTarget, 0)
+	sourceEntries, _ := loadMutabilityOverlaySourceEntries(cfg.FormalRoot())
 	for _, pkg := range packages {
 		if pkg == nil {
 			continue
@@ -59,6 +60,10 @@ func (g *Generator) RefreshMutabilityOverlayFixtures(
 			target, err := resolveMutabilityOverlayRegistryPageTarget(pkg.Service.Service, resource, contract, nil)
 			if err != nil {
 				return MutabilityFixtureRefreshResult{}, err
+			}
+			if entry, ok := sourceEntries[mutabilityOverlaySourceRefForResource(resource)]; ok {
+				target.ProviderSourcePath = strings.TrimSpace(entry.Path)
+				target.ProviderSourceRevision = strings.TrimSpace(entry.Revision)
 			}
 			targets = append(targets, target)
 		}

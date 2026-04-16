@@ -2,7 +2,7 @@
 
 # Container Engine for Kubernetes
 
-Manage OCI Container Engine for Kubernetes clusters from Kubernetes.
+Manage OCI Container Engine for Kubernetes clusters and node pools from Kubernetes.
 
 | Field | Value |
 | --- | --- |
@@ -16,7 +16,7 @@ Manage OCI Container Engine for Kubernetes clusters from Kubernetes.
 
 ## Notes
 
-- Current package scope is intentionally limited to Cluster.
+- Current package scope includes `Cluster` and `NodePool`.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
@@ -25,3 +25,4 @@ Manage OCI Container Engine for Kubernetes clusters from Kubernetes.
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `containerengine/Cluster` | `containerengine.oracle.com/v1beta1` | Manage OCI Container Engine for Kubernetes clusters. | — | [Sample](../../samples/containerengine/v1beta1/cluster.md) | [Reference](../../api/containerengine/v1beta1/index.md#kind-cluster) |
+| `containerengine/NodePool` | `containerengine.oracle.com/v1beta1` | Manage OCI Container Engine for Kubernetes node pools. | — | [Sample](../../samples/containerengine/v1beta1/nodepool.md) | [Reference](../../api/containerengine/v1beta1/index.md#kind-nodepool) |

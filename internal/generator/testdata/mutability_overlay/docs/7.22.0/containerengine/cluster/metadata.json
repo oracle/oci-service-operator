@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "containerengine",
+  "kind": "Cluster",
+  "formalSlug": "cluster",
+  "providerResource": "oci_containerengine_cluster",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/containerengine_cluster",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/containerengine_cluster",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/containerengine/cluster/page.html",
+  "bodySHA256": "0bbbfbeacdbe496bc4634135e85dc8404eaca0960725904a5a1e9748e0c27f57",
+  "bodyBytes": 13273,
+  "fixtureBodyPath": "7.22.0/containerengine/cluster/page.html"
+}

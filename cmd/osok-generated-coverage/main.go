@@ -983,6 +983,7 @@ func snapshotCommandEnv(snapshotRoot string) []string {
 	env = setEnv(env, "GOCACHE", filepath.Join(snapshotRoot, ".gocache"))
 	env = setEnv(env, "GOMODCACHE", filepath.Join(snapshotRoot, ".gomodcache"))
 	env = setEnv(env, "GOFLAGS", appendBuildVCSFlag(os.Getenv("GOFLAGS")))
+	env = setEnv(env, "GODEBUG", withGoDebugSetting(os.Getenv("GODEBUG"), "gotypesalias", "1"))
 	return env
 }
 
@@ -1005,6 +1006,28 @@ func setEnv(env []string, key, value string) []string {
 		}
 	}
 	return append(env, prefix+value)
+}
+
+func withGoDebugSetting(current string, name string, value string) string {
+	current = strings.TrimSpace(current)
+	name = strings.TrimSpace(name)
+	value = strings.TrimSpace(value)
+	if name == "" {
+		return current
+	}
+
+	parts := make([]string, 0)
+	for _, part := range strings.Split(current, ",") {
+		part = strings.TrimSpace(part)
+		if part == "" || strings.HasPrefix(part, name+"=") {
+			continue
+		}
+		parts = append(parts, part)
+	}
+	if value != "" {
+		parts = append(parts, name+"="+value)
+	}
+	return strings.Join(parts, ",")
 }
 
 func runCommand(dir string, env []string, name string, args ...string) error {

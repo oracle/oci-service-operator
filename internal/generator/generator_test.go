@@ -2139,7 +2139,7 @@ func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	}
 }
 
-func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *testing.T) {
+func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services, err := cfg.SelectServices("containerengine", false)
 	if err != nil {
@@ -2149,10 +2149,11 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 		t.Fatalf("SelectServices(--service containerengine) returned %d services, want 1", len(services))
 	}
 	containerengineService := services[0]
-	if got := containerengineService.SelectedKinds(); !slices.Equal(got, []string{"Cluster"}) {
-		t.Fatalf("containerengine SelectedKinds() = %v, want [Cluster]", got)
+	if got := containerengineService.SelectedKinds(); !slices.Equal(got, []string{"Cluster", "NodePool"}) {
+		t.Fatalf("containerengine SelectedKinds() = %v, want [Cluster NodePool]", got)
 	}
 	assertServiceFormalSpec(t, &containerengineService, "Cluster", "cluster")
+	assertServiceFormalSpec(t, &containerengineService, "NodePool", "nodepool")
 
 	outputRoot := t.TempDir()
 	seedSamplesKustomization(t, outputRoot)
@@ -2170,21 +2171,24 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 
 	serviceClientPath := "pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go"
 	serviceManagerPath := "pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go"
+	nodePoolServiceClientPath := "pkg/servicemanager/containerengine/nodepool/nodepool_serviceclient.go"
+	nodePoolServiceManagerPath := "pkg/servicemanager/containerengine/nodepool/nodepool_servicemanager.go"
+	registrationPath := filepath.Join(outputRoot, "internal", "registrations", "containerengine_generated.go")
 	assertPathsExist(t, []string{
 		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "groupversion_info.go"),
 		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "cluster_types.go"),
+		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "nodepool_types.go"),
 		filepath.Join(outputRoot, "controllers", "containerengine", "cluster_controller.go"),
+		filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"),
 		filepath.Join(outputRoot, serviceClientPath),
 		filepath.Join(outputRoot, serviceManagerPath),
-		filepath.Join(outputRoot, "internal", "registrations", "containerengine_generated.go"),
+		filepath.Join(outputRoot, nodePoolServiceClientPath),
+		filepath.Join(outputRoot, nodePoolServiceManagerPath),
+		registrationPath,
 		filepath.Join(outputRoot, "packages", "containerengine", "metadata.env"),
 		filepath.Join(outputRoot, "packages", "containerengine", "install", "kustomization.yaml"),
 		filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"),
-	})
-	assertPathsNotExist(t, []string{
-		filepath.Join(outputRoot, "api", "containerengine", "v1beta1", "nodepool_types.go"),
-		filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"),
-		filepath.Join(outputRoot, "pkg", "servicemanager", "containerengine", "nodepool", "nodepool_serviceclient.go"),
+		filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_nodepool.yaml"),
 	})
 
 	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, serviceClientPath)))
@@ -2214,6 +2218,44 @@ func TestExplicitContainerengineClusterRuntimeArtifactsGenerateFromConfig(t *tes
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
 	assertNotContains(t, content, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
+
+	nodePoolContent := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, nodePoolServiceClientPath)))
+	assertContains(t, nodePoolContent, []string{
+		"func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {",
+		"Semantics: newNodePoolRuntimeSemantics(),",
+		`FormalService: "containerengine"`,
+		`FormalSlug: "nodepool"`,
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "lifecycle"`,
+		`Runtime: "generatedruntime"`,
+		`FormalClassification: "lifecycle"`,
+		`ProvisioningStates: []string{"CREATING"}`,
+		`UpdatingStates: []string{"UPDATING"}`,
+		`ActiveStates: []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"}`,
+		`PendingStates: []string{"DELETING"}`,
+		`TerminalStates: []string{"DELETED"}`,
+		`ResponseItemsField: "Items"`,
+		`MatchFields: []string{"clusterId", "compartmentId", "lifecycleState", "name"}`,
+		`Mutable: []string{"definedTags", "freeformTags", "initialNodeLabels", "kubernetesVersion", "name", "nodeConfigDetails", "nodeEvictionNodePoolSettings", "nodeMetadata", "nodePoolCyclingDetails", "nodeShape", "nodeShapeConfig", "nodeSourceDetails", "quantityPerSubnet", "sshPublicKey", "subnetIds"}`,
+		`ForceNew: []string{"clusterId", "compartmentId", "nodeImageName"}`,
+		`NewRequest: func() any { return &containerenginesdk.ListNodePoolsRequest{} }`,
+		`return sdkClient.ListNodePools(ctx, *request.(*containerenginesdk.ListNodePoolsRequest))`,
+		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
+	})
+	assertNotContains(t, nodePoolContent, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
+
+	registration := readFile(t, registrationPath)
+	assertContains(t, registration, []string{
+		"NodePoolReconciler",
+		"setup NodePool controller",
+		"containerenginenodepoolservicemanager",
+	})
+	nodePoolController := readFile(t, filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"))
+	assertContains(t, nodePoolController, []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
+	})
 
 	clusterSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"))
 	assertContains(t, clusterSample, []string{
@@ -2733,6 +2775,120 @@ func TestCheckedInConfigIncludesObjectStorageObservedStateAlias(t *testing.T) {
 	}
 }
 
+func TestCheckedInAnalyticsSDKDiscoveryFindsAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var analyticsService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "analytics" {
+			analyticsService = &cfg.Services[i]
+			break
+		}
+	}
+	if analyticsService == nil {
+		t.Fatal("analytics service was not found in services.yaml")
+	}
+
+	index, err := NewDiscoverer().sdkIndex().Package(context.Background(), analyticsService.SDKPackage)
+	if err != nil {
+		t.Fatalf("Package(%q) error = %v", analyticsService.SDKPackage, err)
+	}
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{"AnalyticsInstance", "PrivateAccessChannel", "VanityUrl", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("analytics discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
+}
+
+func TestCheckedInAnalyticsServicePublishesOnlyAnalyticsInstance(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var analyticsService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "analytics" {
+			analyticsService = &cfg.Services[i]
+			break
+		}
+	}
+	if analyticsService == nil {
+		t.Fatal("analytics service was not found in services.yaml")
+	}
+
+	selected, err := cfg.SelectServices("analytics", false)
+	if err != nil {
+		t.Fatalf("SelectServices(analytics) error = %v", err)
+	}
+	if len(selected) != 1 {
+		t.Fatalf("SelectServices(analytics) returned %d services, want 1", len(selected))
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, selected[0])
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	if len(pkg.Resources) != 1 {
+		t.Fatalf("analytics published resources = %d, want 1", len(pkg.Resources))
+	}
+
+	analyticsInstance := findResource(t, pkg.Resources, "AnalyticsInstance")
+	if analyticsInstance.Runtime == nil {
+		t.Fatal("AnalyticsInstance runtime model was not attached")
+	}
+	if analyticsInstance.Formal == nil {
+		t.Fatal("AnalyticsInstance formal model was not attached")
+	}
+	if analyticsInstance.Formal.Reference.Service != "analytics" {
+		t.Fatalf("AnalyticsInstance formal service = %q, want %q", analyticsInstance.Formal.Reference.Service, "analytics")
+	}
+	if analyticsInstance.Formal.Reference.Slug != "analyticsinstance" {
+		t.Fatalf("AnalyticsInstance formal slug = %q, want %q", analyticsInstance.Formal.Reference.Slug, "analyticsinstance")
+	}
+	if analyticsInstance.Formal.Binding.Spec.Kind != "AnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance formal kind = %q, want %q", analyticsInstance.Formal.Binding.Spec.Kind, "AnalyticsInstance")
+	}
+	if analyticsInstance.Formal.Binding.Import.ProviderResource != "oci_analytics_analytics_instance" {
+		t.Fatalf("AnalyticsInstance provider resource = %q, want %q", analyticsInstance.Formal.Binding.Import.ProviderResource, "oci_analytics_analytics_instance")
+	}
+	if analyticsInstance.Runtime.Create == nil || analyticsInstance.Runtime.Create.MethodName != "CreateAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance create method = %#v, want CreateAnalyticsInstance", analyticsInstance.Runtime.Create)
+	}
+	if analyticsInstance.Runtime.Get == nil || analyticsInstance.Runtime.Get.MethodName != "GetAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance get method = %#v, want GetAnalyticsInstance", analyticsInstance.Runtime.Get)
+	}
+	if analyticsInstance.Runtime.List == nil || analyticsInstance.Runtime.List.MethodName != "ListAnalyticsInstances" {
+		t.Fatalf("AnalyticsInstance list method = %#v, want ListAnalyticsInstances", analyticsInstance.Runtime.List)
+	}
+	if analyticsInstance.Runtime.Update == nil || analyticsInstance.Runtime.Update.MethodName != "UpdateAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance update method = %#v, want UpdateAnalyticsInstance", analyticsInstance.Runtime.Update)
+	}
+	if analyticsInstance.Runtime.Delete == nil || analyticsInstance.Runtime.Delete.MethodName != "DeleteAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance delete method = %#v, want DeleteAnalyticsInstance", analyticsInstance.Runtime.Delete)
+	}
+}
+
 func TestCheckedInConfigIncludesQueueObservedStateAlias(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
@@ -3073,6 +3229,46 @@ func TestGenerateIncrementalSampleKustomizationKeepsExistingGeneratedServices(t 
 	}
 	if !slices.Equal(order, want) {
 		t.Fatalf("sample kustomization resources = %#v, want %#v", order, want)
+	}
+}
+
+func TestGenerateDoesNotAppendUnlistedSampleFiles(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := testServiceConfig(PackageProfileCRDOnly)
+	pipeline := newTestGenerator(t)
+
+	outputRoot := t.TempDir()
+	samplesDir := filepath.Join(outputRoot, "config", "samples")
+	if err := os.MkdirAll(samplesDir, 0o755); err != nil {
+		t.Fatalf("MkdirAll(%s) error = %v", samplesDir, err)
+	}
+	if err := os.WriteFile(filepath.Join(samplesDir, "dataflow_v1beta1_application.yaml"), []byte("apiVersion: dataflow.oracle.com/v1beta1\nkind: Application\nmetadata:\n  name: application-sample\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(dataflow_v1beta1_application.yaml) error = %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(samplesDir, "kustomization.yaml"), []byte("resources:\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile(kustomization.yaml) error = %v", err)
+	}
+
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	order, err := readSampleKustomizationOrder(filepath.Join(samplesDir, "kustomization.yaml"))
+	if err != nil {
+		t.Fatalf("readSampleKustomizationOrder(kustomization.yaml) error = %v", err)
+	}
+	if slices.Contains(order, "dataflow_v1beta1_application.yaml") {
+		t.Fatalf("sample kustomization unexpectedly included unrelated sample: %#v", order)
+	}
+	if !slices.Contains(order, "mysql_v1beta1_dbsystem.yaml") {
+		t.Fatalf("sample kustomization resources = %#v, want generated mysql sample", order)
 	}
 }
 

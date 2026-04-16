@@ -133,9 +133,20 @@ func TestCheckedInGeneratedControllerPackagesGrantDefaultEventRecorderSemantics(
 		wantCoreVerbs   map[string][]string
 	}{
 		{
-			name:            "containerengine",
-			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "containerengine", "cluster_controller.go")},
-			rolePath:        filepath.Join(repoRoot(t), "packages", "containerengine", "install", "generated", "rbac", "role.yaml"),
+			name:            "analytics",
+			controllerPaths: []string{filepath.Join(repoRoot(t), "controllers", "analytics", "analyticsinstance_controller.go")},
+			rolePath:        filepath.Join(repoRoot(t), "packages", "analytics", "install", "generated", "rbac", "role.yaml"),
+			wantCoreVerbs: map[string][]string{
+				"events": {"create", "patch"},
+			},
+		},
+		{
+			name: "containerengine",
+			controllerPaths: []string{
+				filepath.Join(repoRoot(t), "controllers", "containerengine", "cluster_controller.go"),
+				filepath.Join(repoRoot(t), "controllers", "containerengine", "nodepool_controller.go"),
+			},
+			rolePath: filepath.Join(repoRoot(t), "packages", "containerengine", "install", "generated", "rbac", "role.yaml"),
 			wantCoreVerbs: map[string][]string{
 				"events": {"create", "patch"},
 			},

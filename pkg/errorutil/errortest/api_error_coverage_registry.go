@@ -180,6 +180,16 @@ type APIErrorCoverageRegistry struct {
 // explicit exemptions.
 var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 	Registrations: map[string]APIErrorCoverageRegistration{
+		resourceKey("analytics", "AnalyticsInstance"): reviewedRegistration(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"AnalyticsInstance",
+			APIErrorCoverageFamilyGeneratedRuntimePlain,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"Handwritten update-body shaping narrows AnalyticsInstance updates to UpdateAnalyticsInstanceDetails fields while create, read, and delete OCI errors still flow through shared generatedruntime CRUD and confirm-delete handling.",
+		),
 		resourceKey("containerengine", "Cluster"): reviewedRegistration(
 			"containerengine",
 			"containerengine",
@@ -189,6 +199,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			deleteNotFoundGeneratedRuntime,
 			retryableConflictFollowUp,
 			"Generated serviceclient uses WaitForWorkRequestWithErrorHandling for create, update, and delete follow-up.",
+		),
+		resourceKey("containerengine", "NodePool"): reviewedRegistration(
+			"containerengine",
+			"containerengine",
+			apiErrorCoverageDefaultVersion,
+			"NodePool",
+			APIErrorCoverageFamilyGeneratedRuntimePlain,
+			deleteNotFoundGeneratedRuntime,
+			retryableConflictGeneratedRuntime,
+			"Handwritten request-body shaping still delegates create, update, and delete OCI errors to the shared generatedruntime CRUD and confirm-delete paths.",
 		),
 		resourceKey("containerinstances", "ContainerInstance"): reviewedRegistration(
 			"containerinstances",
@@ -309,6 +329,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			deleteNotFoundGeneratedRuntime,
 			retryableConflictGeneratedRuntime,
 			"",
+		),
+		resourceKey("dataflow", "Application"): reviewedRegistration(
+			"dataflow",
+			"dataflow",
+			apiErrorCoverageDefaultVersion,
+			"Application",
+			APIErrorCoverageFamilyManualRuntime,
+			deleteNotFoundManualRuntime,
+			retryableConflictManualRuntime,
+			"Handwritten Application runtime keeps generatedruntime CRUD delegation for create and update body execution, but owns tracked-identity recreation, OCI error normalization, status projection, and direct delete confirmation without follow-up helpers.",
 		),
 		resourceKey("functions", "Application"): reviewedRegistration(
 			"functions",
@@ -432,6 +462,41 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 		),
 	},
 	Exceptions: map[string]APIErrorCoverageException{
+		resourceKey("analytics", "PrivateAccessChannel"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"PrivateAccessChannel",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "VanityUrl"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"VanityUrl",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "WorkRequest"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequest",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "WorkRequestError"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestError",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("analytics", "WorkRequestLog"): reviewedException(
+			"analytics",
+			"analytics",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestLog",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
 		resourceKey("keymanagement", "Key"): reviewedException(
 			"keymanagement",
 			"keymanagement",

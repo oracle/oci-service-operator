@@ -15,6 +15,7 @@ rules:
   - containerengine.oracle.com
   resources:
   - clusters
+  - nodepools
   verbs:
   - create
   - delete
@@ -27,12 +28,14 @@ rules:
   - containerengine.oracle.com
   resources:
   - clusters/finalizers
+  - nodepools/finalizers
   verbs:
   - update
 - apiGroups:
   - containerengine.oracle.com
   resources:
   - clusters/status
+  - nodepools/status
   verbs:
   - get
   - patch

@@ -9,6 +9,42 @@ packageProfiles:
     description: Fixture-backed validation surface for mutability overlay and VAP regression gates.
 
 services:
+  - service: analytics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/analytics
+    group: analytics
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AnalyticsInstance
+    generation:
+      resources:
+        - kind: AnalyticsInstance
+          formalSpec: analyticsinstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+
+  - service: containerengine
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
+    group: containerengine
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - NodePool
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      resources:
+        - kind: NodePool
+          formalSpec: nodepool
+
   - service: core
     sdkPackage: github.com/oracle/oci-go-sdk/v65/core
     group: core
@@ -18,6 +54,10 @@ services:
       mode: explicit
       includeKinds:
         - Instance
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       resources:
         - kind: Instance
@@ -25,6 +65,24 @@ services:
           async:
             strategy: lifecycle
             runtime: generatedruntime
+            formalClassification: lifecycle
+
+  - service: dataflow
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataflow
+    group: dataflow
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+    generation:
+      resources:
+        - kind: Application
+          formalSpec: application
+          async:
+            strategy: lifecycle
+            runtime: handwritten
             formalClassification: lifecycle
 
   - service: nosql

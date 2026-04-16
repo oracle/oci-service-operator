@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "analytics",
+  "kind": "AnalyticsInstance",
+  "formalSlug": "analyticsinstance",
+  "providerResource": "oci_analytics_analytics_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/analytics_analytics_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/analytics_analytics_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/analytics/analyticsinstance/page.html",
+  "bodySHA256": "811a625c1d761251106db5339d5a5cccca400c89f874446fdb813099bbe1cf8f",
+  "bodyBytes": 4623,
+  "fixtureBodyPath": "7.22.0/analytics/analyticsinstance/page.html"
+}

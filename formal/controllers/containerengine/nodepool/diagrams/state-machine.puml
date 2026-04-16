@@ -32,15 +32,15 @@ state "Deleted" as deleted
 state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateNodePool
 observe --> resolve_by_lookup : tracked identity missing
-resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, INACTIVE,\nNEEDS_ATTENTION
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
-observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> evaluate_ready : OCI state in ACTIVE,\nINACTIVE, NEEDS_ATTENTION
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, freeform_tags,\ninitial_node_labels (+12\nmore)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,23 +69,41 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+supported drift: defined_tags, freeform_tags,
+initial_node_labels, kubernetes_version (+11
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_id, compartment_id, node_image_name and
+conflicts node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet -> node_config_details,
+subnet_ids -> node_config_details
 create-only fields: none
-list lookup: scaffold_containerengine_nodepool
-filters compartment_id, state
-conflicts: none
+list lookup: oci_containerengine_node_pools
+filters compartment_id, cluster_id,
+lifecycle_state, name
+conflicts: node_config_details ->
+quantity_per_subnet, subnet_ids,
+quantity_per_subnet -> node_config_details,
+subnet_ids -> node_config_details
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Ready state maps to OCI ACTIVE, INACTIVE, or
+NEEDS_ATTENTION.
+Requeue continues while OCI reports CREATING,
+UPDATING, or DELETING.
+Bind-before-create reuses only exact compartment
+and cluster matches that remain in ACTIVE,
+CREATING, UPDATING, INACTIVE, or
+NEEDS_ATTENTION.
+Delete completes after GetNodePool or
+ListNodePools returns DELETED or no longer finds
+the resource.
 end note
 note right of delete_pending
 delete policy: required
-delete observe: GetNodePool or ListNodePool
+delete observe: GetNodePool or ListNodePools
 delete targets: DELETED
 end note
 @enduml

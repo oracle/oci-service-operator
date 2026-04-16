@@ -3,10 +3,12 @@ package apispec
 import (
 	"reflect"
 
+	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
@@ -262,6 +264,27 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "ContainerEngineNodePool",
+		SpecType:   reflect.TypeOf(containerenginev1beta1.NodePoolSpec{}),
+		StatusType: reflect.TypeOf(containerenginev1beta1.NodePoolStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "containerengine.CreateNodePoolDetails",
+			},
+			{
+				SDKStruct: "containerengine.UpdateNodePoolDetails",
+			},
+			{
+				SDKStruct:  "containerengine.NodePool",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "containerengine.NodePoolSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "IdentityCompartment",
 		SpecType:   reflect.TypeOf(identityv1beta1.CompartmentSpec{}),
 		StatusType: reflect.TypeOf(identityv1beta1.CompartmentStatus{}),
@@ -467,6 +490,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "AnalyticsAnalyticsInstance",
+		SpecType:   reflect.TypeOf(analyticsv1beta1.AnalyticsInstanceSpec{}),
+		StatusType: reflect.TypeOf(analyticsv1beta1.AnalyticsInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "analytics.CreateAnalyticsInstanceDetails",
+			},
+			{
+				SDKStruct: "analytics.UpdateAnalyticsInstanceDetails",
+			},
+			{
+				SDKStruct: "analytics.AnalyticsInstance",
+			},
+			{
+				SDKStruct: "analytics.AnalyticsInstanceSummary",
+			},
+		},
+	},
+	{
 		Name:       "ContainerinstancesContainerInstance",
 		SpecType:   reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceSpec{}),
 		StatusType: reflect.TypeOf(containerinstancesv1beta1.ContainerInstanceStatus{}),
@@ -487,6 +529,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "DataflowApplication",
+		SpecType:   reflect.TypeOf(dataflowv1beta1.ApplicationSpec{}),
+		StatusType: reflect.TypeOf(dataflowv1beta1.ApplicationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dataflow.CreateApplicationDetails",
+			},
+			{
+				SDKStruct: "dataflow.UpdateApplicationDetails",
+			},
+			{
+				SDKStruct: "dataflow.Application",
+			},
+			{
+				SDKStruct: "dataflow.ApplicationSummary",
 			},
 		},
 	},

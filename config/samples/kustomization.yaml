@@ -5,14 +5,9 @@
 
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-- streaming_v1beta1_stream.yaml
-- nosql_v1beta1_table.yaml
-- psql_v1beta1_dbsystem.yaml
-- database_v1beta1_autonomousdatabase.yaml
-- mysql_v1beta1_dbsystem.yaml
-- identity_v1beta1_compartment.yaml
-- opensearch_v1beta1_opensearchcluster.yaml
-- redis_v1beta1_rediscluster.yaml
+- containerengine_v1beta1_cluster.yaml
+- containerengine_v1beta1_nodepool.yaml
+- containerinstances_v1beta1_containerinstance.yaml
 - core_v1beta1_drg.yaml
 - core_v1beta1_instance.yaml
 - core_v1beta1_internetgateway.yaml
@@ -23,11 +18,19 @@ resources:
 - core_v1beta1_servicegateway.yaml
 - core_v1beta1_subnet.yaml
 - core_v1beta1_vcn.yaml
-- queue_v1beta1_queue.yaml
 - functions_v1beta1_application.yaml
 - functions_v1beta1_function.yaml
-- objectstorage_v1beta1_bucket.yaml
-- containerinstances_v1beta1_containerinstance.yaml
+- identity_v1beta1_compartment.yaml
 - keymanagement_v1beta1_vault.yaml
-- containerengine_v1beta1_cluster.yaml
+- nosql_v1beta1_table.yaml
+- objectstorage_v1beta1_bucket.yaml
+- opensearch_v1beta1_opensearchcluster.yaml
+- psql_v1beta1_dbsystem.yaml
+- queue_v1beta1_queue.yaml
+- redis_v1beta1_rediscluster.yaml
+- database_v1beta1_autonomousdatabase.yaml
+- streaming_v1beta1_stream.yaml
+- mysql_v1beta1_dbsystem.yaml
+- dataflow_v1beta1_application.yaml
+- analytics_v1beta1_analyticsinstance.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

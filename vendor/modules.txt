@@ -145,6 +145,7 @@ github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
 # github.com/oracle/oci-go-sdk/v65 v65.61.1
 ## explicit; go 1.13
+github.com/oracle/oci-go-sdk/v65/analytics
 github.com/oracle/oci-go-sdk/v65/apigateway
 github.com/oracle/oci-go-sdk/v65/artifacts
 github.com/oracle/oci-go-sdk/v65/certificates

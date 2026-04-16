@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>cluster_id</code> - (Required) The OCID of the cluster to which this node pool is attached.</li>
+      <li><code>compartment_id</code> - (Required) The OCID of the compartment in which the node pool exists.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: <code>{&#34;Operations.CostCenter&#34;: &#34;42&#34;}</code></li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: <code>{&#34;Department&#34;: &#34;Finance&#34;}</code></li>
+      <li><code>initial_node_labels</code> - (Optional) (Updatable) A list of key/value pairs to add to nodes after they join the Kubernetes cluster.
+        <ul>
+          <li><code>key</code> - (Optional) (Updatable) The key of the pair.</li>
+          <li><code>value</code> - (Optional) (Updatable) The value of the pair.</li>
+        </ul>
+      </li>
+      <li><code>kubernetes_version</code> - (Optional) (Updatable) The version of Kubernetes to install on the nodes in the node pool.</li>
+      <li><code>name</code> - (Required) (Updatable) The name of the node pool. Avoid entering confidential information.</li>
+      <li><code>node_config_details</code> - (Optional) (Updatable) The configuration of nodes in the node pool. Exactly one of the subnetIds or nodeConfigDetails properties must be specified.
+        <ul>
+          <li><code>is_pv_encryption_in_transit_enabled</code> - (Optional) (Updatable) Whether to enable in-transit encryption for the data volume&#39;s paravirtualized attachment. This field applies to both block volumes and boot volumes. The default value is false.</li>
+          <li><code>kms_key_id</code> - (Optional) (Updatable) The OCID of the Key Management Service key assigned to the boot volume.</li>
+          <li><code>node_pool_pod_network_option_details</code> - (Optional) (Updatable) The CNI related configuration of pods in the node pool.
+            <ul>
+              <li><code>cni_type</code> - (Required) (Updatable) The CNI plugin used by this node pool</li>
+              <li><code>max_pods_per_node</code> - (Applicable when cni_type=OCI_VCN_IP_NATIVE) (Updatable) The max number of pods per node in the node pool. This value will be limited by the number of VNICs attachable to the node pool shape</li>
+              <li><code>pod_nsg_ids</code> - (Applicable when cni_type=OCI_VCN_IP_NATIVE) (Updatable) The OCIDs of the Network Security Group(s) to associate pods for this node pool with. For more information about NSGs, see [NetworkSecurityGroup](https://docs.cloud.oracle.com/iaas/api/#/en/iaas/20160918/NetworkSecurityGroup/).</li>
+              <li><code>pod_subnet_ids</code> - (Required when cni_type=OCI_VCN_IP_NATIVE) (Updatable) The OCIDs of the subnets in which to place pods for this node pool. This can be one of the node pool subnet IDs</li>
+            </ul>
+          </li>
+          <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: <code>{&#34;Operations.CostCenter&#34;: &#34;42&#34;}</code></li>
+          <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: <code>{&#34;Department&#34;: &#34;Finance&#34;}</code></li>
+          <li><code>nsg_ids</code> - (Optional) (Updatable) The OCIDs of the Network Security Group(s) to associate nodes for this node pool with. For more information about NSGs, see [NetworkSecurityGroup](https://docs.cloud.oracle.com/iaas/api/#/en/iaas/20160918/NetworkSecurityGroup/).</li>
+          <li><code>placement_configs</code> - (Required) (Updatable) The placement configurations for the node pool. Provide one placement configuration for each availability domain in which you intend to launch a node. To use the node pool with a regional subnet, provide a placement configuration for each availability domain, and include the regional subnet in each placement configuration.
+            <ul>
+              <li><code>availability_domain</code> - (Required) (Updatable) The availability domain in which to place nodes. Example: <code>Uocm:PHX-AD-1</code></li>
+              <li><code>capacity_reservation_id</code> - (Optional) (Updatable) The OCID of the compute capacity reservation in which to place the compute instance.</li>
+              <li><code>fault_domains</code> - (Optional) (Updatable) A list of fault domains in which to place nodes.</li>
+              <li><code>preemptible_node_config</code> - (Optional) (Updatable) Configuration options for preemptible nodes.
+                <ul>
+                  <li><code>preemption_action</code> - (Required) (Updatable) The action to run when the preemptible node is interrupted for eviction.
+                    <ul>
+                      <li><code>is_preserve_boot_volume</code> - (Optional) (Updatable) Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified.</li>
+                      <li><code>type</code> - (Required) (Updatable) The type of action to run when the instance is interrupted for eviction.</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li><code>subnet_id</code> - (Required) (Updatable) The OCID of the subnet in which to place nodes.</li>
+            </ul>
+          </li>
+          <li><code>size</code> - (Required) (Updatable) The number of nodes that should be in the node pool.</li>
+        </ul>
+      </li>
+      <li><code>node_eviction_node_pool_settings</code> - (Optional) (Updatable) Node Eviction Details configuration
+        <ul>
+          <li><code>eviction_grace_duration</code> - (Optional) (Updatable) Duration after which OKE will give up eviction of the pods on the node. PT0M will indicate you want to delete the node without cordon and drain. Default PT60M, Min PT0M, Max: PT60M. Format ISO 8601 e.g PT30M</li>
+          <li><code>is_force_action_after_grace_duration</code> - (Optional) (Updatable) If the node action should be performed if not all the pods can be evicted in the grace period</li>
+          <li><code>is_force_delete_after_grace_duration</code> - (Optional) (Updatable) If the underlying compute instance should be deleted if you cannot evict all the pods in grace period</li>
+        </ul>
+      </li>
+      <li><code>node_image_name</code> - (Optional) Deprecated. Use <code>nodeSourceDetails</code> instead. If you specify values for both, this value is ignored. The name of the image running on the nodes in the node pool. Cannot be used when <code>node_image_id</code> is specified.</li>
+      <li><code>node_metadata</code> - (Optional) (Updatable) A list of key/value pairs to add to each underlying Oracle Cloud Infrastructure instance in the node pool on launch.</li>
+      <li><code>node_pool_cycling_details</code> - (Optional) (Updatable) Node Pool Cycling Details
+        <ul>
+          <li><code>cycle_modes</code> - (Optional) (Updatable) An ordered list of cycle modes that should be performed on the OKE nodes.</li>
+          <li><code>is_node_cycling_enabled</code> - (Optional) (Updatable) If cycling operation should be performed on the nodes in the node pool.</li>
+          <li><code>maximum_surge</code> - (Optional) (Updatable) Maximum additional new compute instances that would be temporarily created and added to nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 1, Ranges from 0 to Nodepool size or 0% to 100%</li>
+          <li><code>maximum_unavailable</code> - (Optional) (Updatable) Maximum active nodes that would be terminated from nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 0, Ranges from 0 to Nodepool size or 0% to 100%</li>
+        </ul>
+      </li>
+      <li><code>node_shape</code> - (Required) (Updatable) The name of the node shape of the nodes in the node pool.</li>
+      <li><code>node_shape_config</code> - (Optional) (Updatable) Specify the configuration of the shape to launch nodes in the node pool.
+        <ul>
+          <li><code>memory_in_gbs</code> - (Optional) (Updatable) The total amount of memory available to each node, in gigabytes.</li>
+          <li><code>ocpus</code> - (Optional) (Updatable) The total number of OCPUs available to each node in the node pool. See [here](https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.</li>
+        </ul>
+      </li>
+      <li><code>node_source_details</code> - (Optional) (Updatable) Specify the source to use to launch nodes in the node pool. Currently, image is the only supported source.
+        <ul>
+          <li><code>boot_volume_size_in_gbs</code> - (Optional) (Updatable) The size of the boot volume in GBs. Minimum value is 50 GB. See [here](https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements.</li>
+          <li><code>image_id</code> - (Required) (Updatable) The OCID of the image used to boot the node.</li>
+          <li><code>source_type</code> - (Required) (Updatable) The source type for the node. Use <code>IMAGE</code> when specifying an OCID of an image.</li>
+        </ul>
+      </li>
+      <li><code>quantity_per_subnet</code> - (Optional) (Updatable) Optional, default to 1. The number of nodes to create in each subnet specified in subnetIds property. When used, subnetIds is required. This property is deprecated, use nodeConfigDetails instead.</li>
+      <li><code>ssh_public_key</code> - (Optional) (Updatable) The SSH public key on each node in the node pool on launch.</li>
+      <li><code>subnet_ids</code> - (Optional) (Updatable) The OCIDs of the subnets in which to place nodes for this node pool. When used, quantityPerSubnet can be provided. This property is deprecated, use nodeConfigDetails. Exactly one of the subnetIds or nodeConfigDetails properties must be specified. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

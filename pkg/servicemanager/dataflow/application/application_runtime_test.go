@@ -60,10 +60,7 @@ func newTestManager(client applicationOCIClient) *ApplicationServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewApplicationServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&applicationRuntimeClient{
-			manager: manager,
-			client:  client,
-		})
+		manager.WithClient(newApplicationRuntimeClient(manager, client, nil))
 	}
 	return manager
 }
@@ -450,6 +447,38 @@ func TestCreateOrUpdate_DoesNotRecreateOnAuthAmbiguity(t *testing.T) {
 	assert.Equal(t, err.Error(), resource.Status.OsokStatus.Message)
 	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 	errortest.AssertErrorType(t, err, "errorutil.UnauthorizedAndNotFoundOciError")
+}
+
+func TestCreateOrUpdate_RecreatesWhenTrackedResourceIsDeleted(t *testing.T) {
+	getCalls := 0
+	createCalls := 0
+	manager := newTestManager(&fakeApplicationOCIClient{
+		getFn: func(_ context.Context, _ dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			getCalls++
+			return dataflowsdk.GetApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..existing", "test-application", dataflowsdk.ApplicationLifecycleStateDeleted),
+			}, nil
+		},
+		createFn: func(_ context.Context, req dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error) {
+			createCalls++
+			assert.Equal(t, common.String("ocid1.compartment.oc1..example"), req.CompartmentId)
+			return dataflowsdk.CreateApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..recreated", "test-application", dataflowsdk.ApplicationLifecycleStateActive),
+			}, nil
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.Id = "ocid1.dataflowapplication.oc1..existing"
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, "ocid1.dataflowapplication.oc1..recreated", string(resource.Status.OsokStatus.Ocid))
 }
 
 func TestCreateOrUpdate_UpdateConflictReturnsNormalizedConflictError(t *testing.T) {

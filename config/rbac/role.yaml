@@ -24,6 +24,32 @@ rules:
   - update
   - watch
 - apiGroups:
+  - analytics.oracle.com
+  resources:
+  - analyticsinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - analytics.oracle.com
+  resources:
+  - analyticsinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - analytics.oracle.com
+  resources:
+  - analyticsinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - apigateway.oracle.com
   resources:
   - apigatewaydeployments
@@ -56,6 +82,7 @@ rules:
   - containerengine.oracle.com
   resources:
   - clusters
+  - nodepools
   verbs:
   - create
   - delete
@@ -68,12 +95,14 @@ rules:
   - containerengine.oracle.com
   resources:
   - clusters/finalizers
+  - nodepools/finalizers
   verbs:
   - update
 - apiGroups:
   - containerengine.oracle.com
   resources:
   - clusters/status
+  - nodepools/status
   verbs:
   - get
   - patch

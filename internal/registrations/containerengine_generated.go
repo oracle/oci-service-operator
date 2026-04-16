@@ -14,6 +14,7 @@ import (
 	containerenginecontrollers "github.com/oracle/oci-service-operator/controllers/containerengine"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	containerengineclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/containerengine/cluster"
+	containerenginenodepoolservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/containerengine/nodepool"
 )
 
 func init() {
@@ -31,6 +32,17 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Cluster controller: %w", err)
+			}
+			if err := (&containerenginecontrollers.NodePoolReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"NodePool",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return containerenginenodepoolservicemanager.NewNodePoolServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup NodePool controller: %w", err)
 			}
 			return nil
 		},

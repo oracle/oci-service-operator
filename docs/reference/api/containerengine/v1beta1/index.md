@@ -19,6 +19,7 @@ No customer-visible package currently exposes `containerengine.oracle.com/v1beta
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [Cluster](#kind-cluster) | Namespaced | [Sample](../../../samples/containerengine/v1beta1/cluster.md) | - |
+| [NodePool](#kind-nodepool) | Namespaced | [Sample](../../../samples/containerengine/v1beta1/nodepool.md) | - |
 
 <a id="kind-cluster"></a>
 ## Cluster
@@ -409,6 +410,459 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to Cluster status](#kind-cluster-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
+
+<a id="kind-nodepool"></a>
+## NodePool
+
+Manage OCI Container Engine for Kubernetes node pools.
+
+- `Plural`: `nodepools`
+- `Scope`: `Namespaced`
+- `APIVersion`: `containerengine.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/containerengine/v1beta1/nodepool.md) (`config/samples/containerengine_v1beta1_nodepool.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-nodepool-spec"></a>
+### Spec
+
+NodePoolSpec defines the desired state of NodePool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clusterId` | The OCID of the cluster to which this node pool is attached. | `string` | Yes | - | - |
+| `compartmentId` | The OCID of the compartment in which the node pool exists. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| [`initialNodeLabels`](#kind-nodepool-spec-initialnodelabels) | A list of key/value pairs to add to nodes after they join the Kubernetes cluster. | `list[object]` | No | - | - |
+| `kubernetesVersion` | The version of Kubernetes to install on the nodes in the node pool. | `string` | No | - | - |
+| `name` | The name of the node pool. Avoid entering confidential information. | `string` | Yes | - | - |
+| [`nodeConfigDetails`](#kind-nodepool-spec-nodeconfigdetails) | The configuration of nodes in the node pool. Exactly one of the subnetIds or nodeConfigDetails properties must be specified. | `object` | No | - | - |
+| [`nodeEvictionNodePoolSettings`](#kind-nodepool-spec-nodeevictionnodepoolsettings) | NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvictionNodePoolSettings. | `object` | No | - | - |
+| `nodeImageName` | Deprecated. Use `nodeSourceDetails` instead. If you specify values for both, this value is ignored. The name of the image running on the nodes in the node pool. | `string` | No | - | - |
+| `nodeMetadata` | A list of key/value pairs to add to each underlying OCI instance in the node pool on launch. | `map[string, string]` | No | - | - |
+| [`nodePoolCyclingDetails`](#kind-nodepool-spec-nodepoolcyclingdetails) | NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails. | `object` | No | - | - |
+| `nodeShape` | The name of the node shape of the nodes in the node pool. | `string` | Yes | - | - |
+| [`nodeShapeConfig`](#kind-nodepool-spec-nodeshapeconfig) | Specify the configuration of the shape to launch nodes in the node pool. | `object` | No | - | - |
+| [`nodeSourceDetails`](#kind-nodepool-spec-nodesourcedetails) | Specify the source to use to launch nodes in the node pool. Currently, image is the only supported source. | `object` | No | - | - |
+| `quantityPerSubnet` | Optional, default to 1. The number of nodes to create in each subnet specified in subnetIds property. When used, subnetIds is required. This property is deprecated, use nodeConfigDetails instead. | `integer` | No | - | - |
+| `sshPublicKey` | The SSH public key on each node in the node pool on launch. | `string` | No | - | - |
+| `subnetIds` | The OCIDs of the subnets in which to place nodes for this node pool. When used, quantityPerSubnet can be provided. This property is deprecated, use nodeConfigDetails. Exactly one of the subnetIds or nodeConfigDetails properties must be specified. | `list[string]` | No | - | - |
+
+<a id="kind-nodepool-spec-initialnodelabels"></a>
+#### Spec.initialNodeLabels[]
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+NodePoolInitialNodeLabel defines nested fields for NodePool.InitialNodeLabel.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The key of the pair. | `string` | No | - | - |
+| `value` | The value of the pair. | `string` | No | - | - |
+
+<a id="kind-nodepool-spec-nodeconfigdetails"></a>
+#### Spec.nodeConfigDetails
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+The configuration of nodes in the node pool. Exactly one of the subnetIds or nodeConfigDetails properties must be specified.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `isPvEncryptionInTransitEnabled` | Whether to enable in-transit encryption for the data volume's paravirtualized attachment. This field applies to both block volumes and boot volumes. The default value is false. | `boolean` | No | - | - |
+| `kmsKeyId` | The OCID of the Key Management Service key assigned to the boot volume. | `string` | No | - | - |
+| [`nodePoolPodNetworkOptionDetails`](#kind-nodepool-spec-nodeconfigdetails-nodepoolpodnetworkoptiondetails) | The CNI related configuration of pods in the node pool. | `object` | No | - | - |
+| `nsgIds` | The OCIDs of the Network Security Group(s) to associate nodes for this node pool with. For more information about NSGs, see NetworkSecurityGroup. | `list[string]` | No | - | - |
+| [`placementConfigs`](#kind-nodepool-spec-nodeconfigdetails-placementconfigs) | The placement configurations for the node pool. Provide one placement configuration for each availability domain in which you intend to launch a node. To use the node pool with a regional subnet, provide a placement configuration for each availability domain, and include the regional subnet in each placement configuration. | `list[object]` | Yes | - | - |
+| `size` | The number of nodes that should be in the node pool. | `integer` | Yes | - | - |
+
+<a id="kind-nodepool-spec-nodeconfigdetails-nodepoolpodnetworkoptiondetails"></a>
+##### Spec.nodeConfigDetails.nodePoolPodNetworkOptionDetails
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+The CNI related configuration of pods in the node pool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cniType` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `maxPodsPerNode` | The max number of pods per node in the node pool. This value will be limited by the number of VNICs attachable to the node pool shape | `integer` | No | - | - |
+| `podNsgIds` | The OCIDs of the Network Security Group(s) to associate pods for this node pool with. For more information about NSGs, see NetworkSecurityGroup. | `list[string]` | No | - | - |
+| `podSubnetIds` | The OCIDs of the subnets in which to place pods for this node pool. This can be one of the node pool subnet IDs | `list[string]` | No | - | - |
+
+<a id="kind-nodepool-spec-nodeconfigdetails-placementconfigs"></a>
+##### Spec.nodeConfigDetails.placementConfigs[]
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+NodePoolNodeConfigDetailsPlacementConfig defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `availabilityDomain` | The availability domain in which to place nodes. Example: `Uocm:PHX-AD-1` | `string` | Yes | - | - |
+| `capacityReservationId` | The OCID of the compute capacity reservation in which to place the compute instance. | `string` | No | - | - |
+| `faultDomains` | A list of fault domains in which to place nodes. | `list[string]` | No | - | - |
+| [`preemptibleNodeConfig`](#kind-nodepool-spec-nodeconfigdetails-placementconfigs-preemptiblenodeconfig) | NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig. | `object` | No | - | - |
+| `subnetId` | The OCID of the subnet in which to place nodes. | `string` | Yes | - | - |
+
+<a id="kind-nodepool-spec-nodeconfigdetails-placementconfigs-preemptiblenodeconfig"></a>
+###### Spec.nodeConfigDetails.placementConfigs[].preemptibleNodeConfig
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`preemptionAction`](#kind-nodepool-spec-nodeconfigdetails-placementconfigs-preemptiblenodeconfig-preemptionaction) | NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.PreemptionAction. | `object` | Yes | - | - |
+
+<a id="kind-nodepool-spec-nodeconfigdetails-placementconfigs-preemptiblenodeconfig-preemptionaction"></a>
+###### Spec.nodeConfigDetails.placementConfigs[].preemptibleNodeConfig.preemptionAction
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.PreemptionAction.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isPreserveBootVolume` | Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-nodepool-spec-nodeevictionnodepoolsettings"></a>
+#### Spec.nodeEvictionNodePoolSettings
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvictionNodePoolSettings.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `evictionGraceDuration` | Duration after which OKE will give up eviction of the pods on the node. PT0M will indicate you want to delete the node without cordon and drain. Default PT60M, Min PT0M, Max: PT60M. Format ISO 8601 e.g PT30M | `string` | No | - | - |
+| `isForceDeleteAfterGraceDuration` | If the underlying compute instance should be deleted if you cannot evict all the pods in grace period | `boolean` | No | - | - |
+
+<a id="kind-nodepool-spec-nodepoolcyclingdetails"></a>
+#### Spec.nodePoolCyclingDetails
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isNodeCyclingEnabled` | If nodes in the nodepool will be cycled to have new changes. | `boolean` | No | - | - |
+| `maximumSurge` | Maximum additional new compute instances that would be temporarily created and added to nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 1, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
+| `maximumUnavailable` | Maximum active nodes that would be terminated from nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 0, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
+
+<a id="kind-nodepool-spec-nodeshapeconfig"></a>
+#### Spec.nodeShapeConfig
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+Specify the configuration of the shape to launch nodes in the node pool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `memoryInGBs` | The total amount of memory available to each node, in gigabytes. | `number` | No | - | - |
+| `ocpus` | The total number of OCPUs available to each node in the node pool. See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details. | `number` | No | - | - |
+
+<a id="kind-nodepool-spec-nodesourcedetails"></a>
+#### Spec.nodeSourceDetails
+
+[Back to NodePool spec](#kind-nodepool-spec)
+
+Specify the source to use to launch nodes in the node pool. Currently, image is the only supported source.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `bootVolumeSizeInGBs` | The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements. | `integer (int64)` | No | - | - |
+| `imageId` | The OCID of the image used to boot the node. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `sourceType` | - | `string` | No | - | - |
+
+<a id="kind-nodepool-status"></a>
+### Status
+
+NodePoolStatus defines the observed state of NodePool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clusterId` | The OCID of the cluster to which this node pool is attached. | `string` | No | - | - |
+| `compartmentId` | The OCID of the compartment in which the node pool exists. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID of the node pool. | `string` | No | - | - |
+| [`initialNodeLabels`](#kind-nodepool-status-initialnodelabels) | A list of key/value pairs to add to nodes after they join the Kubernetes cluster. | `list[object]` | No | - | - |
+| `kubernetesVersion` | The version of Kubernetes running on the nodes in the node pool. | `string` | No | - | - |
+| `lifecycleDetails` | Details about the state of the nodepool. | `string` | No | - | - |
+| `lifecycleState` | The state of the nodepool. | `string` | No | - | - |
+| `name` | The name of the node pool. | `string` | No | - | - |
+| [`nodeConfigDetails`](#kind-nodepool-status-nodeconfigdetails) | The configuration of nodes in the node pool. | `object` | No | - | - |
+| [`nodeEvictionNodePoolSettings`](#kind-nodepool-status-nodeevictionnodepoolsettings) | NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvictionNodePoolSettings. | `object` | No | - | - |
+| `nodeImageId` | Deprecated. see `nodeSource`. The OCID of the image running on the nodes in the node pool. | `string` | No | - | - |
+| `nodeImageName` | Deprecated. see `nodeSource`. The name of the image running on the nodes in the node pool. | `string` | No | - | - |
+| `nodeMetadata` | A list of key/value pairs to add to each underlying OCI instance in the node pool on launch. | `map[string, string]` | No | - | - |
+| [`nodePoolCyclingDetails`](#kind-nodepool-status-nodepoolcyclingdetails) | NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails. | `object` | No | - | - |
+| `nodeShape` | The name of the node shape of the nodes in the node pool. | `string` | No | - | - |
+| [`nodeShapeConfig`](#kind-nodepool-status-nodeshapeconfig) | The shape configuration of the nodes. | `object` | No | - | - |
+| [`nodeSource`](#kind-nodepool-status-nodesource) | Deprecated. see `nodeSourceDetails`. Source running on the nodes in the node pool. | `object` | No | - | - |
+| [`nodeSourceDetails`](#kind-nodepool-status-nodesourcedetails) | Source running on the nodes in the node pool. | `object` | No | - | - |
+| [`nodes`](#kind-nodepool-status-nodes) | The nodes in the node pool. | `list[object]` | No | - | - |
+| `quantityPerSubnet` | The number of nodes in each subnet. | `integer` | No | - | - |
+| `sshPublicKey` | The SSH public key on each node in the node pool on launch. | `string` | No | - | - |
+| [`status`](#kind-nodepool-status-status) | - | `object` | Yes | - | - |
+| `subnetIds` | The OCIDs of the subnets in which to place nodes for this node pool. | `list[string]` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+
+<a id="kind-nodepool-status-initialnodelabels"></a>
+#### Status.initialNodeLabels[]
+
+[Back to NodePool status](#kind-nodepool-status)
+
+NodePoolInitialNodeLabel defines nested fields for NodePool.InitialNodeLabel.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The key of the pair. | `string` | No | - | - |
+| `value` | The value of the pair. | `string` | No | - | - |
+
+<a id="kind-nodepool-status-nodeconfigdetails"></a>
+#### Status.nodeConfigDetails
+
+[Back to NodePool status](#kind-nodepool-status)
+
+The configuration of nodes in the node pool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `isPvEncryptionInTransitEnabled` | Whether to enable in-transit encryption for the data volume's paravirtualized attachment. This field applies to both block volumes and boot volumes. The default value is false. | `boolean` | No | - | - |
+| `kmsKeyId` | The OCID of the Key Management Service key assigned to the boot volume. | `string` | No | - | - |
+| [`nodePoolPodNetworkOptionDetails`](#kind-nodepool-status-nodeconfigdetails-nodepoolpodnetworkoptiondetails) | The CNI related configuration of pods in the node pool. | `object` | No | - | - |
+| `nsgIds` | The OCIDs of the Network Security Group(s) to associate nodes for this node pool with. For more information about NSGs, see NetworkSecurityGroup. | `list[string]` | No | - | - |
+| [`placementConfigs`](#kind-nodepool-status-nodeconfigdetails-placementconfigs) | The placement configurations for the node pool. Provide one placement configuration for each availability domain in which you intend to launch a node. To use the node pool with a regional subnet, provide a placement configuration for each availability domain, and include the regional subnet in each placement configuration. | `list[object]` | Yes | - | - |
+| `size` | The number of nodes that should be in the node pool. | `integer` | Yes | - | - |
+
+<a id="kind-nodepool-status-nodeconfigdetails-nodepoolpodnetworkoptiondetails"></a>
+##### Status.nodeConfigDetails.nodePoolPodNetworkOptionDetails
+
+[Back to NodePool status](#kind-nodepool-status)
+
+The CNI related configuration of pods in the node pool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `cniType` | - | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `maxPodsPerNode` | The max number of pods per node in the node pool. This value will be limited by the number of VNICs attachable to the node pool shape | `integer` | No | - | - |
+| `podNsgIds` | The OCIDs of the Network Security Group(s) to associate pods for this node pool with. For more information about NSGs, see NetworkSecurityGroup. | `list[string]` | No | - | - |
+| `podSubnetIds` | The OCIDs of the subnets in which to place pods for this node pool. This can be one of the node pool subnet IDs | `list[string]` | No | - | - |
+
+<a id="kind-nodepool-status-nodeconfigdetails-placementconfigs"></a>
+##### Status.nodeConfigDetails.placementConfigs[]
+
+[Back to NodePool status](#kind-nodepool-status)
+
+NodePoolNodeConfigDetailsPlacementConfig defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `availabilityDomain` | The availability domain in which to place nodes. Example: `Uocm:PHX-AD-1` | `string` | Yes | - | - |
+| `capacityReservationId` | The OCID of the compute capacity reservation in which to place the compute instance. | `string` | No | - | - |
+| `faultDomains` | A list of fault domains in which to place nodes. | `list[string]` | No | - | - |
+| [`preemptibleNodeConfig`](#kind-nodepool-status-nodeconfigdetails-placementconfigs-preemptiblenodeconfig) | NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig. | `object` | No | - | - |
+| `subnetId` | The OCID of the subnet in which to place nodes. | `string` | Yes | - | - |
+
+<a id="kind-nodepool-status-nodeconfigdetails-placementconfigs-preemptiblenodeconfig"></a>
+###### Status.nodeConfigDetails.placementConfigs[].preemptibleNodeConfig
+
+[Back to NodePool status](#kind-nodepool-status)
+
+NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfig defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`preemptionAction`](#kind-nodepool-status-nodeconfigdetails-placementconfigs-preemptiblenodeconfig-preemptionaction) | NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.PreemptionAction. | `object` | Yes | - | - |
+
+<a id="kind-nodepool-status-nodeconfigdetails-placementconfigs-preemptiblenodeconfig-preemptionaction"></a>
+###### Status.nodeConfigDetails.placementConfigs[].preemptibleNodeConfig.preemptionAction
+
+[Back to NodePool status](#kind-nodepool-status)
+
+NodePoolNodeConfigDetailsPlacementConfigPreemptibleNodeConfigPreemptionAction defines nested fields for NodePool.NodeConfigDetails.PlacementConfig.PreemptibleNodeConfig.PreemptionAction.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isPreserveBootVolume` | Whether to preserve the boot volume that was used to launch the preemptible instance when the instance is terminated. Defaults to false if not specified. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-nodepool-status-nodeevictionnodepoolsettings"></a>
+#### Status.nodeEvictionNodePoolSettings
+
+[Back to NodePool status](#kind-nodepool-status)
+
+NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvictionNodePoolSettings.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `evictionGraceDuration` | Duration after which OKE will give up eviction of the pods on the node. PT0M will indicate you want to delete the node without cordon and drain. Default PT60M, Min PT0M, Max: PT60M. Format ISO 8601 e.g PT30M | `string` | No | - | - |
+| `isForceDeleteAfterGraceDuration` | If the underlying compute instance should be deleted if you cannot evict all the pods in grace period | `boolean` | No | - | - |
+
+<a id="kind-nodepool-status-nodepoolcyclingdetails"></a>
+#### Status.nodePoolCyclingDetails
+
+[Back to NodePool status](#kind-nodepool-status)
+
+NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isNodeCyclingEnabled` | If nodes in the nodepool will be cycled to have new changes. | `boolean` | No | - | - |
+| `maximumSurge` | Maximum additional new compute instances that would be temporarily created and added to nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 1, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
+| `maximumUnavailable` | Maximum active nodes that would be terminated from nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 0, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
+
+<a id="kind-nodepool-status-nodeshapeconfig"></a>
+#### Status.nodeShapeConfig
+
+[Back to NodePool status](#kind-nodepool-status)
+
+The shape configuration of the nodes.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `memoryInGBs` | The total amount of memory available to each node, in gigabytes. | `number` | No | - | - |
+| `ocpus` | The total number of OCPUs available to each node in the node pool. See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details. | `number` | No | - | - |
+
+<a id="kind-nodepool-status-nodesource"></a>
+#### Status.nodeSource
+
+[Back to NodePool status](#kind-nodepool-status)
+
+Deprecated. see `nodeSourceDetails`. Source running on the nodes in the node pool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `imageId` | The OCID of the image. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `sourceName` | The user-friendly name of the entity corresponding to the OCID. | `string` | No | - | - |
+| `sourceType` | - | `string` | No | - | - |
+
+<a id="kind-nodepool-status-nodesourcedetails"></a>
+#### Status.nodeSourceDetails
+
+[Back to NodePool status](#kind-nodepool-status)
+
+Source running on the nodes in the node pool.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `bootVolumeSizeInGBs` | The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements. | `integer (int64)` | No | - | - |
+| `imageId` | The OCID of the image used to boot the node. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `sourceType` | - | `string` | No | - | - |
+
+<a id="kind-nodepool-status-nodes"></a>
+#### Status.nodes[]
+
+[Back to NodePool status](#kind-nodepool-status)
+
+NodePoolNode defines nested fields for NodePool.Node.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `availabilityDomain` | The name of the availability domain in which this node is placed. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `faultDomain` | The fault domain of this node. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID of the compute instance backing this node. | `string` | No | - | - |
+| `kubernetesVersion` | The version of Kubernetes this node is running. | `string` | No | - | - |
+| `lifecycleDetails` | Details about the state of the node. | `string` | No | - | - |
+| `lifecycleState` | The state of the node. | `string` | No | - | - |
+| `name` | The name of the node. | `string` | No | - | - |
+| [`nodeError`](#kind-nodepool-status-nodes-nodeerror) | An error that may be associated with the node. | `object` | No | - | - |
+| `nodePoolId` | The OCID of the node pool to which this node belongs. | `string` | No | - | - |
+| `privateIp` | The private IP address of this node. | `string` | No | - | - |
+| `publicIp` | The public IP address of this node. | `string` | No | - | - |
+| `subnetId` | The OCID of the subnet in which this node is placed. | `string` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+
+<a id="kind-nodepool-status-nodes-nodeerror"></a>
+##### Status.nodes[].nodeError
+
+[Back to NodePool status](#kind-nodepool-status)
+
+An error that may be associated with the node.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `code` | A short error code that defines the upstream error, meant for programmatic parsing. See API Errors (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm). | `string` | No | - | - |
+| `message` | A human-readable error string of the upstream error. | `string` | No | - | - |
+| `opc-request-id` | Unique Oracle-assigned identifier for the upstream request. If you need to contact Oracle about a particular upstream request, please provide the request ID. | `string` | No | - | - |
+| `status` | The status of the HTTP response encountered in the upstream error. | `string` | No | - | - |
+
+<a id="kind-nodepool-status-status"></a>
+#### Status.status
+
+[Back to NodePool status](#kind-nodepool-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-nodepool-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-nodepool-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-nodepool-status-status-async"></a>
+##### Status.status.async
+
+[Back to NodePool status](#kind-nodepool-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-nodepool-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-nodepool-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to NodePool status](#kind-nodepool-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-nodepool-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to NodePool status](#kind-nodepool-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
