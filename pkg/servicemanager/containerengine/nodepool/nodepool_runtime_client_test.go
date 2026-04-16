@@ -631,6 +631,197 @@ func TestNodePoolCreateOrUpdateReusesListMatchesForSeededSuccessStates(t *testin
 	}
 }
 
+func TestNodePoolCreatePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
+	t.Parallel()
+
+	const createdID = "ocid1.nodepool.oc1..created"
+
+	resource := newNodePoolTestResource()
+	listCalls := 0
+
+	manager := newNodePoolRuntimeTestManager(generatedruntime.Config[*containerenginev1beta1.NodePool]{
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.CreateNodePoolRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return containerenginesdk.CreateNodePoolResponse{
+					OpcRequestId:     common.String("opc-create-1"),
+					OpcWorkRequestId: common.String("wr-create-1"),
+				}, nil
+			},
+			Fields: nodePoolCreateFields(),
+		},
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.GetNodePoolRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return containerenginesdk.GetNodePoolResponse{
+					NodePool: observedNodePoolFromSpec(createdID, resource.Spec, "CREATING"),
+				}, nil
+			},
+			Fields: nodePoolGetFields(),
+		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.ListNodePoolsRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				listCalls++
+				if listCalls == 1 {
+					return containerenginesdk.ListNodePoolsResponse{}, nil
+				}
+				return containerenginesdk.ListNodePoolsResponse{
+					Items: []containerenginesdk.NodePoolSummary{
+						observedNodePoolSummaryFromSpec(createdID, resource.Spec, "CREATING"),
+					},
+				}, nil
+			},
+			Fields: nodePoolListFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success while create follow-up observes CREATING")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should keep requeueing while create follow-up observes CREATING")
+	}
+	if listCalls < 2 {
+		t.Fatalf("ListNodePools() calls = %d, want create follow-up reread after initial empty lookup", listCalls)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != createdID {
+		t.Fatalf("status.ocid = %q, want %q", got, createdID)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Provisioning) {
+		t.Fatalf("status.reason = %q, want %q", got, shared.Provisioning)
+	}
+	requireNodePoolOpcRequestID(t, resource, "opc-create-1")
+	requireNodePoolAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, "CREATING", shared.OSOKAsyncClassPending, "wr-create-1")
+}
+
+func TestNodePoolUpdatePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.nodepool.oc1..existing"
+
+	resource := newExistingNodePoolTestResource(existingID)
+	currentSpec := newNodePoolTestResource().Spec
+	resource.Spec.NodeShape = "VM.Standard.E5.Flex"
+	getCalls := 0
+	var updateRequest containerenginesdk.UpdateNodePoolRequest
+
+	manager := newNodePoolRuntimeTestManager(generatedruntime.Config[*containerenginev1beta1.NodePool]{
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.GetNodePoolRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalls++
+				getRequest := request.(*containerenginesdk.GetNodePoolRequest)
+				if getRequest.NodePoolId == nil || *getRequest.NodePoolId != existingID {
+					t.Fatalf("GetNodePoolRequest.NodePoolId = %v, want %s", getRequest.NodePoolId, existingID)
+				}
+				spec := currentSpec
+				lifecycleState := "ACTIVE"
+				if getCalls > 1 {
+					spec = resource.Spec
+					lifecycleState = "UPDATING"
+				}
+				return containerenginesdk.GetNodePoolResponse{
+					NodePool: observedNodePoolFromSpec(existingID, spec, lifecycleState),
+				}, nil
+			},
+			Fields: nodePoolGetFields(),
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.UpdateNodePoolRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				updateRequest = *request.(*containerenginesdk.UpdateNodePoolRequest)
+				return containerenginesdk.UpdateNodePoolResponse{
+					OpcRequestId:     common.String("opc-update-1"),
+					OpcWorkRequestId: common.String("wr-update-1"),
+				}, nil
+			},
+			Fields: nodePoolUpdateFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success while update follow-up observes UPDATING")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should keep requeueing while update follow-up observes UPDATING")
+	}
+	if updateRequest.NodePoolId == nil || *updateRequest.NodePoolId != existingID {
+		t.Fatalf("UpdateNodePoolRequest.NodePoolId = %v, want %s", updateRequest.NodePoolId, existingID)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Updating) {
+		t.Fatalf("status.reason = %q, want %q", got, shared.Updating)
+	}
+	requireNodePoolOpcRequestID(t, resource, "opc-update-1")
+	requireNodePoolAsyncCurrent(t, resource, shared.OSOKAsyncPhaseUpdate, "UPDATING", shared.OSOKAsyncClassPending, "wr-update-1")
+}
+
+func TestNodePoolDeletePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.nodepool.oc1..existing"
+
+	resource := newExistingNodePoolTestResource(existingID)
+	getCalls := 0
+	var deleteRequest containerenginesdk.DeleteNodePoolRequest
+
+	manager := newNodePoolRuntimeTestManager(generatedruntime.Config[*containerenginev1beta1.NodePool]{
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.GetNodePoolRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getCalls++
+				getRequest := request.(*containerenginesdk.GetNodePoolRequest)
+				if getRequest.NodePoolId == nil || *getRequest.NodePoolId != existingID {
+					t.Fatalf("GetNodePoolRequest.NodePoolId = %v, want %s", getRequest.NodePoolId, existingID)
+				}
+				lifecycleState := "ACTIVE"
+				if getCalls > 1 {
+					lifecycleState = "DELETING"
+				}
+				return containerenginesdk.GetNodePoolResponse{
+					NodePool: observedNodePoolFromSpec(existingID, resource.Spec, lifecycleState),
+				}, nil
+			},
+			Fields: nodePoolGetFields(),
+		},
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &containerenginesdk.DeleteNodePoolRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				deleteRequest = *request.(*containerenginesdk.DeleteNodePoolRequest)
+				return containerenginesdk.DeleteNodePoolResponse{
+					OpcRequestId:     common.String("opc-delete-1"),
+					OpcWorkRequestId: common.String("wr-delete-1"),
+				}, nil
+			},
+			Fields: nodePoolDeleteFields(),
+		},
+	})
+
+	deleted, err := manager.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() deleted = true, want shared terminating requeue while confirm-delete observes DELETING")
+	}
+	if deleteRequest.NodePoolId == nil || *deleteRequest.NodePoolId != existingID {
+		t.Fatalf("DeleteNodePoolRequest.NodePoolId = %v, want %s", deleteRequest.NodePoolId, existingID)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Terminating) {
+		t.Fatalf("status.reason = %q, want %q", got, shared.Terminating)
+	}
+	requireNodePoolOpcRequestID(t, resource, "opc-delete-1")
+	requireNodePoolAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, "", shared.OSOKAsyncClassPending, "wr-delete-1")
+}
+
 func TestNewNodePoolServiceClientAllowsPrimaryListSemantics(t *testing.T) {
 	t.Parallel()
 
@@ -923,5 +1114,61 @@ func nodePoolListFields() []generatedruntime.RequestField {
 		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
 		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+	}
+}
+
+func nodePoolUpdateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "NodePoolId", RequestName: "nodePoolId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "OverrideEvictionGraceDuration", RequestName: "overrideEvictionGraceDuration", Contribution: "query"},
+		{FieldName: "IsForceDeletionAfterOverrideGraceDuration", RequestName: "isForceDeletionAfterOverrideGraceDuration", Contribution: "query"},
+		{FieldName: "UpdateNodePoolDetails", RequestName: "UpdateNodePoolDetails", Contribution: "body"},
+	}
+}
+
+func nodePoolDeleteFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "NodePoolId", RequestName: "nodePoolId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "OverrideEvictionGraceDuration", RequestName: "overrideEvictionGraceDuration", Contribution: "query"},
+		{FieldName: "IsForceDeletionAfterOverrideGraceDuration", RequestName: "isForceDeletionAfterOverrideGraceDuration", Contribution: "query"},
+	}
+}
+
+func requireNodePoolOpcRequestID(t *testing.T, resource *containerenginev1beta1.NodePool, want string) {
+	t.Helper()
+
+	if got := resource.Status.OsokStatus.OpcRequestID; got != want {
+		t.Fatalf("status.opcRequestId = %q, want %q", got, want)
+	}
+}
+
+func requireNodePoolAsyncCurrent(
+	t *testing.T,
+	resource *containerenginev1beta1.NodePool,
+	phase shared.OSOKAsyncPhase,
+	rawStatus string,
+	class shared.OSOKAsyncNormalizedClass,
+	workRequestID string,
+) {
+	t.Helper()
+
+	current := resource.Status.OsokStatus.Async.Current
+	if current == nil {
+		t.Fatal("status.async.current = nil, want lifecycle tracker")
+	}
+	if current.Source != shared.OSOKAsyncSourceLifecycle {
+		t.Fatalf("status.async.current.source = %q, want %q", current.Source, shared.OSOKAsyncSourceLifecycle)
+	}
+	if current.Phase != phase {
+		t.Fatalf("status.async.current.phase = %q, want %q", current.Phase, phase)
+	}
+	if current.RawStatus != rawStatus {
+		t.Fatalf("status.async.current.rawStatus = %q, want %q", current.RawStatus, rawStatus)
+	}
+	if current.NormalizedClass != class {
+		t.Fatalf("status.async.current.normalizedClass = %q, want %q", current.NormalizedClass, class)
+	}
+	if current.WorkRequestID != workRequestID {
+		t.Fatalf("status.async.current.workRequestId = %q, want %q", current.WorkRequestID, workRequestID)
 	}
 }

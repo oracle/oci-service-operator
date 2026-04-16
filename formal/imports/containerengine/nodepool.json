@@ -105,31 +105,16 @@
     "create": [
       {
         "helper": "tfresource.CreateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "nodepool",
-        "action": "CREATED"
       }
     ],
     "update": [
       {
         "helper": "tfresource.UpdateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "nodepool",
-        "action": "UPDATED"
       }
     ],
     "delete": [
       {
         "helper": "tfresource.DeleteResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "nodepool",
-        "action": "DELETED"
       }
     ]
   },
@@ -164,7 +149,7 @@
   "notes": [
     "Pinned OCI SDK contract: NodePool lifecycle exposes CREATING, ACTIVE, UPDATING, DELETING, DELETED, FAILED, INACTIVE, and NEEDS_ATTENTION. Repo-authored controller success is ACTIVE, INACTIVE, or NEEDS_ATTENTION, requeue covers CREATING and UPDATING, FAILED is terminal without requeue, and delete confirmation follows DELETING to DELETED.",
     "Pinned OCI SDK contract: UpdateNodePoolDetails exposes name, kubernetes_version, initial_node_labels, quantity_per_subnet, subnet_ids, node_config_details, node_metadata, node_source_details, ssh_public_key, node_shape, node_shape_config, freeform_tags, defined_tags, node_eviction_node_pool_settings, and node_pool_cycling_details as in-place update fields. Fields absent from UpdateNodePoolDetails remain create-only drift and must not open implicit replacement.",
-    "CreateNodePool, UpdateNodePool, and DeleteNodePool each return opc-work-request-id headers, so provider wait hooks are work-request-backed even though steady-state readiness is still classified from observed NodePool lifecycle states.",
+    "CreateNodePool, UpdateNodePool, and DeleteNodePool each return opc-work-request-id and opc-request-id headers. The refreshed generatedruntime client records those header breadcrumbs in shared status while lifecycle rereads, not helper-owned work-request waits, drive async.current and steady-state readiness.",
     "ListNodePoolsRequest filters by compartmentId, clusterId, lifecycleState, and name and returns Items []NodePoolSummary. Safe reusable matching is exact compartment_id plus cluster_id plus name, restricted to reusable ACTIVE, CREATING, UPDATING, INACTIVE, or NEEDS_ATTENTION candidates; duplicate exact-name matches must fail instead of guessing."
   ]
 }

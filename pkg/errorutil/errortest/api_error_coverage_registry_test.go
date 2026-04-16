@@ -48,7 +48,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	t.Parallel()
 
 	assertReviewedFamily(t, "containerengine/Cluster", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
-	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
+	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "core/Vcn", APIErrorCoverageFamilyManualRuntime)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyManualRuntime)
@@ -75,6 +75,14 @@ func TestReviewedAPIErrorCoverageRegistryAsyncDeviationsRemainExplicit(t *testin
 	assertReviewedDeviation(t, "queue/Queue", "work-request")
 	assertReviewedDeviation(t, "redis/RedisCluster", "delete guard")
 	assertReviewedDeviation(t, "streaming/Stream", "WaitForUpdatedState")
+}
+
+func TestReviewedAPIErrorCoverageRegistryNodePoolPlainSemantics(t *testing.T) {
+	t.Parallel()
+
+	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedSemantics(t, "containerengine/NodePool", deleteNotFoundGeneratedRuntime, retryableConflictGeneratedRuntime)
+	assertReviewedDeviation(t, "containerengine/NodePool", "request-body shaping")
 }
 
 func TestReviewedAPIErrorCoverageRegistryRedisWorkRequestSemantics(t *testing.T) {
