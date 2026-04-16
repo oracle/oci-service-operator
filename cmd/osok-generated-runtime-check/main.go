@@ -102,6 +102,7 @@ func run(ctx context.Context, opts options) (err error) {
 	snapshotDir, err := prepareSnapshot(
 		inputs.repoRoot,
 		inputs.selectedGroups,
+		inputs.selectedRegistrationGroups,
 		inputs.selectedServiceManagerRoots,
 		opts.snapshotDir,
 		opts.keepSnapshot,
@@ -374,7 +375,14 @@ func controllerGenPaths(groups []string) string {
 	return strings.Join(paths, ";")
 }
 
-func prepareSnapshot(repoRoot string, selectedGroups []string, selectedServiceManagerRoots []string, snapshotDir string, keepSnapshot bool) (snapshot, error) {
+func prepareSnapshot(
+	repoRoot string,
+	selectedGroups []string,
+	selectedRegistrationGroups []string,
+	selectedServiceManagerRoots []string,
+	snapshotDir string,
+	keepSnapshot bool,
+) (snapshot, error) {
 	if strings.TrimSpace(snapshotDir) == "" {
 		tempRoot, err := os.MkdirTemp("", "osok-generated-runtime-")
 		if err != nil {
@@ -385,7 +393,7 @@ func prepareSnapshot(repoRoot string, selectedGroups []string, selectedServiceMa
 			retained: keepSnapshot,
 			auto:     true,
 		}
-		if err := populateSnapshot(repoRoot, tempRoot, selectedGroups, selectedServiceManagerRoots); err != nil {
+		if err := populateSnapshot(repoRoot, tempRoot, selectedGroups, selectedRegistrationGroups, selectedServiceManagerRoots); err != nil {
 			return snapshot{}, err
 		}
 		return snap, nil
@@ -405,7 +413,7 @@ func prepareSnapshot(repoRoot string, selectedGroups []string, selectedServiceMa
 	if len(entries) > 0 {
 		return snapshot{}, fmt.Errorf("snapshot dir %q must be empty", absSnapshot)
 	}
-	if err := populateSnapshot(repoRoot, absSnapshot, selectedGroups, selectedServiceManagerRoots); err != nil {
+	if err := populateSnapshot(repoRoot, absSnapshot, selectedGroups, selectedRegistrationGroups, selectedServiceManagerRoots); err != nil {
 		return snapshot{}, err
 	}
 	return snapshot{
@@ -414,7 +422,12 @@ func prepareSnapshot(repoRoot string, selectedGroups []string, selectedServiceMa
 	}, nil
 }
 
-func populateSnapshot(repoRoot, snapshotRoot string, selectedGroups []string, selectedServiceManagerRoots []string) error {
+func populateSnapshot(
+	repoRoot, snapshotRoot string,
+	selectedGroups []string,
+	selectedRegistrationGroups []string,
+	selectedServiceManagerRoots []string,
+) error {
 	for _, entry := range []string{"go.mod", "go.sum", "hack", "vendor"} {
 		if err := symlinkIfPresent(filepath.Join(repoRoot, entry), filepath.Join(snapshotRoot, entry)); err != nil {
 			return err
@@ -433,7 +446,7 @@ func populateSnapshot(repoRoot, snapshotRoot string, selectedGroups []string, se
 	if err := populatePkg(repoRoot, snapshotRoot, selectedServiceManagerRoots); err != nil {
 		return err
 	}
-	if err := populateRegistrations(repoRoot, snapshotRoot, selectedGroups); err != nil {
+	if err := populateRegistrations(repoRoot, snapshotRoot, selectedRegistrationGroups); err != nil {
 		return err
 	}
 	if err := os.MkdirAll(filepath.Join(snapshotRoot, "config", "samples"), 0o755); err != nil {
@@ -568,7 +581,7 @@ func populateRegistrations(repoRoot, snapshotRoot string, selectedGroups []strin
 		return err
 	}
 	for _, entry := range entries {
-		if shouldSkipGeneratedRegistration(entry.Name(), selected) {
+		if !shouldPreserveRegistrationFile(entry.Name(), selected) {
 			continue
 		}
 		if err := symlink(filepath.Join(repoRoot, "internal", "registrations", entry.Name()), filepath.Join(registrationsRoot, entry.Name())); err != nil {
@@ -878,13 +891,38 @@ func hasGeneratedMarker(path string) bool {
 	return bytes.Contains(content, []byte(generatedFileMarker))
 }
 
-func shouldSkipGeneratedRegistration(name string, selected map[string]struct{}) bool {
-	if filepath.Ext(name) != ".go" || !strings.HasSuffix(name, "_generated.go") {
+func shouldPreserveRegistrationFile(name string, selected map[string]struct{}) bool {
+	if filepath.Ext(name) != ".go" || strings.HasSuffix(name, "_test.go") {
+		return true
+	}
+	group, generated, ok := registrationFileGroup(name)
+	if !ok {
+		return true
+	}
+	if !registrationFileMatchesSelectedGroup(group, selected) {
 		return false
 	}
-	group := strings.TrimSuffix(name, "_generated.go")
-	_, ok := selected[group]
-	return ok
+	return !generated
+}
+
+func registrationFileGroup(name string) (group string, generated bool, ok bool) {
+	switch {
+	case strings.HasSuffix(name, "_generated.go"):
+		return strings.TrimSuffix(name, "_generated.go"), true, true
+	case strings.HasSuffix(name, "_manual.go"):
+		return strings.TrimSuffix(name, "_manual.go"), false, true
+	default:
+		return "", false, false
+	}
+}
+
+func registrationFileMatchesSelectedGroup(group string, selected map[string]struct{}) bool {
+	for selectedGroup := range selected {
+		if group == selectedGroup || strings.HasPrefix(group, selectedGroup+"-") {
+			return true
+		}
+	}
+	return false
 }
 
 func compilePackageSet(dir string, env []string, label string, packages []string) error {
@@ -892,7 +930,7 @@ func compilePackageSet(dir string, env []string, label string, packages []string
 		return nil
 	}
 
-	args := append([]string{"test", "-run", "^$"}, packages...)
+	args := append([]string{"build"}, packages...)
 	if err := runCommand(dir, env, "go", args...); err != nil {
 		return fmt.Errorf("compile %s: %w", label, err)
 	}

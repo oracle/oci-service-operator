@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/oracle/oci-service-operator/internal/generator"
@@ -221,15 +222,48 @@ func TestPopulateSnapshotCarriesFormalRootAndLeavesSelectedFilesWritable(t *test
 		filepath.Join(repoRoot, "internal", "registrations", "events_generated.go"):   "package registrations\n",
 	})
 
-	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"database"}); err != nil {
+	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"database"}, []string{"database"}); err != nil {
 		t.Fatalf("populateSnapshot() error = %v", err)
 	}
 
 	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "formal"))
 	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "database_generated.go"))
-	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
 	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database"))
 	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity"))
+}
+
+func TestPopulateRegistrationsKeepsSharedAndSelectedCompanionsOnly(t *testing.T) {
+	t.Helper()
+
+	repoRoot := t.TempDir()
+	snapshotRoot := t.TempDir()
+
+	registrationSourceDir := filepath.Join(repoRoot, "internal", "registrations")
+	mustRuntimeCheckMkdirAll(t, registrationSourceDir)
+	writeRuntimeCheckFiles(t, map[string]string{
+		filepath.Join(registrationSourceDir, "registry.go"):                  "package registrations\n",
+		filepath.Join(registrationSourceDir, "manual_groups.go"):             "package registrations\n",
+		filepath.Join(registrationSourceDir, "registry_test.go"):             "package registrations\n",
+		filepath.Join(registrationSourceDir, "core_generated.go"):            generatedRegistrationSource(),
+		filepath.Join(registrationSourceDir, "core-network_generated.go"):    generatedRegistrationSource(),
+		filepath.Join(registrationSourceDir, "objectstorage_manual.go"):      "package registrations\n",
+		filepath.Join(registrationSourceDir, "containerinstances_manual.go"): "package registrations\n",
+		filepath.Join(registrationSourceDir, "events_generated.go"):          generatedRegistrationSource(),
+	})
+
+	if err := populateRegistrations(repoRoot, snapshotRoot, []string{"core", "objectstorage"}); err != nil {
+		t.Fatalf("populateRegistrations() error = %v", err)
+	}
+
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "registry.go"))
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "manual_groups.go"))
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "registry_test.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "core_generated.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "core-network_generated.go"))
+	assertRuntimeCheckSymlink(t, filepath.Join(snapshotRoot, "internal", "registrations", "objectstorage_manual.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "containerinstances_manual.go"))
+	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "internal", "registrations", "events_generated.go"))
 }
 
 func TestPreserveCheckedInCompanionFilesLinksCheckedInCompatibilityCompanions(t *testing.T) {
@@ -324,6 +358,47 @@ func TestPreserveCheckedInCompanionFilesSkipsExcludedGeneratedServiceManagerPack
 	assertRuntimeCheckSymlink(t, filepath.Join(snapshotSelectedDir, "legacy_servicemanager.go"))
 	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "dbsystem", "dbsystem_serviceclient.go"))
 	assertRuntimeCheckNotExists(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "database", "dbsystem", "dbsystem_servicemanager.go"))
+}
+
+func TestCompilePackageSetIgnoresBrokenLocalTests(t *testing.T) {
+	t.Helper()
+
+	root := t.TempDir()
+	pkgDir := filepath.Join(root, "pkg", "sample")
+	mustRuntimeCheckMkdirAll(t, pkgDir)
+
+	writeRuntimeCheckFiles(t, map[string]string{
+		filepath.Join(root, "go.mod"):                 "module example.com/runtimecheck\n\ngo 1.22\n",
+		filepath.Join(pkgDir, "sample.go"):            "package sample\n\nconst Value = 1\n",
+		filepath.Join(pkgDir, "sample_test.go"):       "package sample\n\nimport _ \"example.com/runtimecheck/does/not/exist\"\n",
+		filepath.Join(pkgDir, "sample_extra_test.go"): "package sample_test\n\nimport _ \"example.com/runtimecheck/also/missing\"\n",
+	})
+
+	if err := compilePackageSet(root, runtimeCheckCommandEnv(t, root), "sample package", []string{"./pkg/sample"}); err != nil {
+		t.Fatalf("compilePackageSet() error = %v, want nil", err)
+	}
+}
+
+func TestCompilePackageSetRejectsBrokenPackageImports(t *testing.T) {
+	t.Helper()
+
+	root := t.TempDir()
+	pkgDir := filepath.Join(root, "pkg", "sample")
+	mustRuntimeCheckMkdirAll(t, pkgDir)
+
+	writeRuntimeCheckFiles(t, map[string]string{
+		filepath.Join(root, "go.mod"):           "module example.com/runtimecheck\n\ngo 1.22\n",
+		filepath.Join(pkgDir, "sample.go"):      "package sample\n\nimport _ \"example.com/runtimecheck/does/not/exist\"\n",
+		filepath.Join(pkgDir, "sample_test.go"): "package sample\n\nfunc TestPlaceholder(*testing.T) {}\n",
+	})
+
+	err := compilePackageSet(root, runtimeCheckCommandEnv(t, root), "sample package", []string{"./pkg/sample"})
+	if err == nil {
+		t.Fatal("compilePackageSet() error = nil, want compile failure")
+	}
+	if !strings.Contains(err.Error(), "does/not/exist") {
+		t.Fatalf("compilePackageSet() error = %v, want missing package reference", err)
+	}
 }
 
 func writeRuntimeCheckFiles(t *testing.T, files map[string]string) {
@@ -453,4 +528,23 @@ func runtimeCheckServiceNames(services []generator.ServiceConfig) []string {
 		names = append(names, service.Service)
 	}
 	return names
+}
+
+func runtimeCheckCommandEnv(t *testing.T, root string) []string {
+	t.Helper()
+
+	gocache := filepath.Join(root, ".gocache")
+	gomodcache := filepath.Join(root, ".gomodcache")
+	gotmpdir := filepath.Join(root, ".gotmp")
+	for _, dir := range []string{gocache, gomodcache, gotmpdir} {
+		mustRuntimeCheckMkdirAll(t, dir)
+	}
+
+	env := append([]string{}, os.Environ()...)
+	env = setEnv(env, "GOCACHE", gocache)
+	env = setEnv(env, "GOMODCACHE", gomodcache)
+	env = setEnv(env, "GOTMPDIR", gotmpdir)
+	env = setEnv(env, "GOWORK", "off")
+	env = setEnv(env, "GOFLAGS", appendBuildVCSFlag(os.Getenv("GOFLAGS")))
+	return env
 }
