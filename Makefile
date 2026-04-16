@@ -132,6 +132,9 @@ generator-generate: ## Run the OSOK generator. Use GENERATOR_SERVICE=<service> o
 	config="$(EFFECTIVE_GENERATOR_CONFIG)"; \
 	output_root="$(EFFECTIVE_GENERATOR_OUTPUT_ROOT)"; \
 	overwrite="$(EFFECTIVE_GENERATOR_OVERWRITE)"; \
+	if [ "$$output_root" = "." ] && [ -z "$$overwrite" ]; then \
+		overwrite=true; \
+	fi; \
 	if [ -n "$$service" ] && is_true "$$all"; then \
 		echo "Use either GENERATOR_SERVICE=<service> or GENERATOR_ALL=true, not both."; \
 		exit 1; \

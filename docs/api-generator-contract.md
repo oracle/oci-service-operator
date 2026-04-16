@@ -513,7 +513,10 @@ Expected regeneration and validation flow:
 3. Run `go run ./cmd/generator ...` to emit API packages, sample manifests,
    sample kustomization, package scaffolding, the pinned mutability overlay
    artifacts, and the derived VAP update-policy input artifacts for the
-   selected services.
+   selected services. When regenerating directly into the checked-in repo
+   tree, pass `--overwrite`; the `make generator-generate` and
+   `make generator-refresh` wrappers do that automatically in their default
+   repo-root mode.
    Generator-owned spec, helper, sample, and package artifacts regenerate
    directly from `services.yaml` and the current v2 contract; there is no
    legacy-preservation mode in the generator. With `--all --overwrite`, the
