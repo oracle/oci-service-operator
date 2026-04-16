@@ -128,6 +128,7 @@ nav:
       - reference/api/index.md
       # BEGIN GENERATED API VERSION NAV
       - API Versions:
+          - analytics.oracle.com/v1beta1: reference/api/analytics/v1beta1/index.md
           - apigateway.oracle.com/v1beta1: reference/api/apigateway/v1beta1/index.md
           - containerengine.oracle.com/v1beta1: reference/api/containerengine/v1beta1/index.md
           - containerinstances.oracle.com/v1beta1: reference/api/containerinstances/v1beta1/index.md

@@ -1,0 +1,130 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - analytics/AnalyticsInstance
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired AnalyticsInstance spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetAnalyticsInstance;
+else (no)
+:Resolve an existing OCI resource through\nListAnalyticsInstances using filters\ncapacity_type, compartment_id, feature_set,\nname (+1 more);
+:Create the OCI resource via\nCreateAnalyticsInstance when no reusable match\nis found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteAnalyticsInstance with\nrequired via GetAnalyticsInstance or\nListAnalyticsInstances to DELETED confirmation;
+:Confirm deletion via GetAnalyticsInstance or\nListAnalyticsInstances until OCI reaches\nDELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nDELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields admin_user, capacity.capacity_type,\ndomain_id, feature_bundle (+3 more);
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply ChangeAnalyticsInstanceCompartment,\nChangeAnalyticsInstanceNetworkEndpoint,\nScaleAnalyticsInstance (+1 more) only for\nmutable fields capacity.capacity_value,\ncompartment_id, defined_tags, description (+14\nmore);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: analytics
+slug: analyticsinstance
+kind: AnalyticsInstance
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update none;
+delete DELETING
+supported drift: capacity.capacity_value,
+compartment_id, defined_tags, description (+14
+more)
+reject before mutate: force-new fields
+admin_user, capacity.capacity_type, domain_id,
+feature_bundle (+3 more)
+create-only fields: none
+list lookup: oci_analytics_analytics_instances
+filters capacity_type, compartment_id,
+feature_set, name (+1 more)
+conflicts: none
+open gaps: none
+Seeded AnalyticsInstance row covers the
+published API-first surface only; controller,
+service-manager, and registration rollout remain
+disabled until the controller-backed promotion
+story binds formalSpec.
+The provisional lifecycle mapping treats
+CREATING as provisioning, ACTIVE as success,
+UPDATING as updating, and DELETING as
+terminating; FAILED, INACTIVE, and DELETED stay
+explicit runtime states for the later
+controller-backed audit to classify.
+Create and delete responses expose work-request
+headers while the pinned provider implementation
+waits on GetWorkRequest; later runtime stories
+must decide whether that remains a lifecycle
+contract with breadcrumbs or becomes an explicit
+work-request adapter.
+PrivateAccessChannel, VanityUrl, and
+WorkRequest* stay out of the initial published
+surface even though the SDK and provider expose
+those auxiliary families.
+end note
+@enduml

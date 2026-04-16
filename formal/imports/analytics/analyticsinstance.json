@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "analytics",
+  "slug": "analyticsinstance",
+  "kind": "AnalyticsInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_analytics_analytics_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAnalyticsInstance",
+        "requestType": "analytics.CreateAnalyticsInstanceRequest",
+        "responseType": "analytics.CreateAnalyticsInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAnalyticsInstance",
+        "requestType": "analytics.GetAnalyticsInstanceRequest",
+        "responseType": "analytics.GetAnalyticsInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAnalyticsInstances",
+        "requestType": "analytics.ListAnalyticsInstancesRequest",
+        "responseType": "analytics.ListAnalyticsInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeAnalyticsInstanceCompartment",
+        "requestType": "analytics.ChangeAnalyticsInstanceCompartmentRequest",
+        "responseType": "analytics.ChangeAnalyticsInstanceCompartmentResponse"
+      },
+      {
+        "operation": "ChangeAnalyticsInstanceNetworkEndpoint",
+        "requestType": "analytics.ChangeAnalyticsInstanceNetworkEndpointRequest",
+        "responseType": "analytics.ChangeAnalyticsInstanceNetworkEndpointResponse"
+      },
+      {
+        "operation": "ScaleAnalyticsInstance",
+        "requestType": "analytics.ScaleAnalyticsInstanceRequest",
+        "responseType": "analytics.ScaleAnalyticsInstanceResponse"
+      },
+      {
+        "operation": "UpdateAnalyticsInstance",
+        "requestType": "analytics.UpdateAnalyticsInstanceRequest",
+        "responseType": "analytics.UpdateAnalyticsInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAnalyticsInstance",
+        "requestType": "analytics.DeleteAnalyticsInstanceRequest",
+        "responseType": "analytics.DeleteAnalyticsInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {}
+  },
+  "mutation": {
+    "mutable": [
+      "capacity.capacity_value",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "email_notification",
+      "freeform_tags",
+      "idcs_access_token",
+      "kms_key_id",
+      "license_type",
+      "network_endpoint_details.network_security_group_ids",
+      "network_endpoint_details.subnet_id",
+      "network_endpoint_details.vcn_id",
+      "network_endpoint_details.whitelisted_ips",
+      "network_endpoint_details.whitelisted_services",
+      "network_endpoint_details.whitelisted_vcns.id",
+      "network_endpoint_details.whitelisted_vcns.whitelisted_ips",
+      "state",
+      "update_channel"
+    ],
+    "forceNew": [
+      "admin_user",
+      "capacity.capacity_type",
+      "domain_id",
+      "feature_bundle",
+      "feature_set",
+      "name",
+      "network_endpoint_details.network_endpoint_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_analytics_analytics_instances",
+    "collectionField": "analytics_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "capacity_type",
+      "compartment_id",
+      "feature_set",
+      "name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/analytics/analyticsinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/analytics/analyticsinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for analytics/analyticsinstance; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -3,6 +3,7 @@ package apispec
 import (
 	"reflect"
 
+	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
@@ -485,6 +486,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "core.Vcn",
+			},
+		},
+	},
+	{
+		Name:       "AnalyticsAnalyticsInstance",
+		SpecType:   reflect.TypeOf(analyticsv1beta1.AnalyticsInstanceSpec{}),
+		StatusType: reflect.TypeOf(analyticsv1beta1.AnalyticsInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "analytics.CreateAnalyticsInstanceDetails",
+			},
+			{
+				SDKStruct: "analytics.UpdateAnalyticsInstanceDetails",
+			},
+			{
+				SDKStruct: "analytics.AnalyticsInstance",
+			},
+			{
+				SDKStruct: "analytics.AnalyticsInstanceSummary",
 			},
 		},
 	},

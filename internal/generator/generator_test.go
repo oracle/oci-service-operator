@@ -2775,6 +2775,108 @@ func TestCheckedInConfigIncludesObjectStorageObservedStateAlias(t *testing.T) {
 	}
 }
 
+func TestCheckedInAnalyticsSDKDiscoveryFindsAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var analyticsService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "analytics" {
+			analyticsService = &cfg.Services[i]
+			break
+		}
+	}
+	if analyticsService == nil {
+		t.Fatal("analytics service was not found in services.yaml")
+	}
+
+	index, err := NewDiscoverer().sdkIndex().Package(context.Background(), analyticsService.SDKPackage)
+	if err != nil {
+		t.Fatalf("Package(%q) error = %v", analyticsService.SDKPackage, err)
+	}
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{"AnalyticsInstance", "PrivateAccessChannel", "VanityUrl", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("analytics discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
+}
+
+func TestCheckedInAnalyticsServicePublishesOnlyAnalyticsInstance(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var analyticsService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "analytics" {
+			analyticsService = &cfg.Services[i]
+			break
+		}
+	}
+	if analyticsService == nil {
+		t.Fatal("analytics service was not found in services.yaml")
+	}
+
+	selected, err := cfg.SelectServices("analytics", false)
+	if err != nil {
+		t.Fatalf("SelectServices(analytics) error = %v", err)
+	}
+	if len(selected) != 1 {
+		t.Fatalf("SelectServices(analytics) returned %d services, want 1", len(selected))
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, selected[0])
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	if len(pkg.Resources) != 1 {
+		t.Fatalf("analytics published resources = %d, want 1", len(pkg.Resources))
+	}
+
+	analyticsInstance := findResource(t, pkg.Resources, "AnalyticsInstance")
+	if analyticsInstance.Runtime == nil {
+		t.Fatal("AnalyticsInstance runtime model was not attached")
+	}
+	if analyticsInstance.Formal != nil {
+		t.Fatal("AnalyticsInstance formal model = non-nil, want no bound formalSpec yet")
+	}
+	if analyticsInstance.Runtime.Create == nil || analyticsInstance.Runtime.Create.MethodName != "CreateAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance create method = %#v, want CreateAnalyticsInstance", analyticsInstance.Runtime.Create)
+	}
+	if analyticsInstance.Runtime.Get == nil || analyticsInstance.Runtime.Get.MethodName != "GetAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance get method = %#v, want GetAnalyticsInstance", analyticsInstance.Runtime.Get)
+	}
+	if analyticsInstance.Runtime.List == nil || analyticsInstance.Runtime.List.MethodName != "ListAnalyticsInstances" {
+		t.Fatalf("AnalyticsInstance list method = %#v, want ListAnalyticsInstances", analyticsInstance.Runtime.List)
+	}
+	if analyticsInstance.Runtime.Update == nil || analyticsInstance.Runtime.Update.MethodName != "UpdateAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance update method = %#v, want UpdateAnalyticsInstance", analyticsInstance.Runtime.Update)
+	}
+	if analyticsInstance.Runtime.Delete == nil || analyticsInstance.Runtime.Delete.MethodName != "DeleteAnalyticsInstance" {
+		t.Fatalf("AnalyticsInstance delete method = %#v, want DeleteAnalyticsInstance", analyticsInstance.Runtime.Delete)
+	}
+}
+
 func TestCheckedInConfigIncludesQueueObservedStateAlias(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)

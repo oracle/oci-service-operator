@@ -1129,12 +1129,13 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
+	wantActiveServices := []string{"analytics", "containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	services := requireServices(t, cfg, "analytics", "containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
@@ -1224,6 +1225,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 
 	cfg := loadCheckedInConfig(t)
 	services := serviceConfigsByName(t, cfg, "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	assertFormalSpecFor(t, serviceConfigsByName(t, cfg, "analytics")["analytics"], "AnalyticsInstance", "")
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
@@ -1747,6 +1749,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		strategy string
 		runtime  string
 	}{
+		"analytics":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -1805,6 +1808,32 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if redis.WorkRequest.LegacyFieldBridge.hasOverride() {
 		t.Fatalf("redis RedisCluster workRequest.legacyFieldBridge = %#v, want empty legacy bridge", redis.WorkRequest.LegacyFieldBridge)
+	}
+}
+
+func TestCheckedInAnalyticsConfigStaysAPIFirst(t *testing.T) {
+	t.Parallel()
+
+	cfg := loadCheckedInConfig(t)
+	service := serviceConfigsByName(t, cfg, "analytics")["analytics"]
+
+	if service.PackageProfile != PackageProfileCRDOnly {
+		t.Fatalf("analytics packageProfile = %q, want %q", service.PackageProfile, PackageProfileCRDOnly)
+	}
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyNone,
+		serviceManager: GenerationStrategyNone,
+		registration:   GenerationStrategyNone,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 6)
+	assertFormalSpecFor(t, service, "AnalyticsInstance", "")
+	if got := service.AsyncConfigFor("AnalyticsInstance"); got.Strategy != AsyncStrategyLifecycle || got.Runtime != AsyncRuntimeGeneratedRuntime || got.FormalClassification != AsyncStrategyLifecycle {
+		t.Fatalf("analytics AnalyticsInstance async = %#v, want lifecycle/generatedruntime", got)
+	}
+	overrides := overridesByKind(service)
+	for _, kind := range []string{"PrivateAccessChannel", "VanityUrl", "WorkRequest", "WorkRequestError", "WorkRequestLog"} {
+		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
 	}
 }
 
@@ -2325,11 +2354,11 @@ func TestCheckedInGeneratedServicesWithoutManualWebhooksUseSharedManagerRollout(
 		if _, ok := manualWebhookServices[service.Service]; ok {
 			continue
 		}
+		if service.PackageProfile != PackageProfileControllerBacked {
+			continue
+		}
 
 		promotedNames = append(promotedNames, service.Service)
-		if service.PackageProfile != PackageProfileControllerBacked {
-			t.Fatalf("%s packageProfile = %q, want %q", service.Service, service.PackageProfile, PackageProfileControllerBacked)
-		}
 		if got := service.ControllerGenerationStrategy(); got != GenerationStrategyGenerated {
 			t.Fatalf("%s controller strategy = %q, want %q", service.Service, got, GenerationStrategyGenerated)
 		}

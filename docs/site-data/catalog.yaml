@@ -2,6 +2,19 @@
 # or release history alone.
 schemaVersion: v1alpha1
 packages:
+  - package: analytics
+    displayName: Analytics
+    summary: Publish OCI Analytics instances as an API-first CRD package from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Analytics is currently published as a `crd-only` API-first package while controller-backed rollout lands in follow-on stories.
+    kindOverrides:
+      - group: analytics
+        kind: AnalyticsInstance
+        summary: Manage OCI Analytics instances.
+
   - package: apigateway
     displayName: API Gateway
     summary: Manage OCI API Gateway gateways and deployments from Kubernetes.
