@@ -1,5 +1,6 @@
 service	slug	kind	stage	surface	import	spec	logic_gaps	diagram_dir
 template	template	Template	scaffold	repo-authored-semantics	imports/template/template.json	controllers/template/spec.cfg	controllers/template/logic-gaps.md	controllers/template/diagrams
+analytics	analyticsinstance	AnalyticsInstance	seeded	repo-authored-semantics	imports/analytics/analyticsinstance.json	controllers/analytics/analyticsinstance/spec.cfg	controllers/analytics/analyticsinstance/logic-gaps.md	controllers/analytics/analyticsinstance/diagrams
 containerengine	addon	Addon	scaffold	repo-authored-semantics	imports/containerengine/addon.json	controllers/containerengine/addon/spec.cfg	controllers/containerengine/addon/logic-gaps.md	controllers/containerengine/addon/diagrams
 containerengine	addonoption	AddonOption	scaffold	repo-authored-semantics	imports/containerengine/addonoption.json	controllers/containerengine/addonoption/spec.cfg	controllers/containerengine/addonoption/logic-gaps.md	controllers/containerengine/addonoption/diagrams
 containerengine	cluster	Cluster	seeded	repo-authored-semantics	imports/containerengine/cluster.json	controllers/containerengine/cluster/spec.cfg	controllers/containerengine/cluster/logic-gaps.md	controllers/containerengine/cluster/diagrams

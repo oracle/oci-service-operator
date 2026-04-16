@@ -1,0 +1,26 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: analytics
+slug: analyticsinstance
+kind: AnalyticsInstance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+notes:
+  - Seeded AnalyticsInstance row covers the published API-first surface only;
+    controller, service-manager, and registration rollout remain disabled until
+    the controller-backed promotion story binds formalSpec.
+  - The provisional lifecycle mapping treats CREATING as provisioning, ACTIVE
+    as success, UPDATING as updating, and DELETING as terminating; FAILED,
+    INACTIVE, and DELETED stay explicit runtime states for the later
+    controller-backed audit to classify.
+  - Create and delete responses expose work-request headers while the pinned
+    provider implementation waits on GetWorkRequest; later runtime stories must
+    decide whether that remains a lifecycle contract with breadcrumbs or
+    becomes an explicit work-request adapter.
+  - PrivateAccessChannel, VanityUrl, and WorkRequest* stay out of the initial
+    published surface even though the SDK and provider expose those auxiliary
+    families.

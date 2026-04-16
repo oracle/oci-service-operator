@@ -20,6 +20,58 @@ packageProfiles:
     description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
 
 services:
+  - service: analytics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/analytics
+    group: analytics
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: crd-only
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AnalyticsInstance
+    generation:
+      controller:
+        strategy: none
+      serviceManager:
+        strategy: none
+      registration:
+        strategy: none
+      webhooks:
+        strategy: none
+      resources:
+        - kind: AnalyticsInstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: PrivateAccessChannel
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: VanityUrl
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: artifacts
     sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
     group: artifacts
