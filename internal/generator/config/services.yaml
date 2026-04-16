@@ -561,6 +561,10 @@ services:
       resources:
         - kind: Application
           formalSpec: application
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
           serviceManager:
             packagePath: dataflow/application
           sample:

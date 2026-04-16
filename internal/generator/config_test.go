@@ -1750,6 +1750,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"functions":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"identity":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
