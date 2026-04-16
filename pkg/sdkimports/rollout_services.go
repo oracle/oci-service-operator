@@ -8,6 +8,8 @@
 package sdkimports
 
 import (
+	_ "github.com/oracle/oci-go-sdk/v65/ailanguage"
+	_ "github.com/oracle/oci-go-sdk/v65/aivision"
 	_ "github.com/oracle/oci-go-sdk/v65/analytics"
 	_ "github.com/oracle/oci-go-sdk/v65/artifacts"
 	_ "github.com/oracle/oci-go-sdk/v65/certificates"
