@@ -137,6 +137,121 @@ func TestBuildAnalyticsInstanceUpdateBodySupportsClearingOptionalFields(t *testi
 	}
 }
 
+func TestAnalyticsInstanceCreatePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
+	t.Parallel()
+
+	const createdID = "ocid1.analyticsinstance.oc1..created"
+
+	resource := newAnalyticsInstanceTestResource()
+
+	manager := newAnalyticsInstanceRuntimeTestManager(generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.CreateAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				return analyticssdk.CreateAnalyticsInstanceResponse{
+					AnalyticsInstance: observedAnalyticsInstanceFromSpec(createdID, resource.Spec, "CREATING"),
+					OpcRequestId:      common.String("opc-create-1"),
+					OpcWorkRequestId:  common.String("wr-create-1"),
+				}, nil
+			},
+			Fields: analyticsInstanceCreateFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success while create response stays CREATING")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should keep requeueing while create response stays CREATING")
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != createdID {
+		t.Fatalf("status.ocid = %q, want %q", got, createdID)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Provisioning) {
+		t.Fatalf("status.reason = %q, want %q", got, shared.Provisioning)
+	}
+	requireAnalyticsInstanceOpcRequestID(t, resource, "opc-create-1")
+	requireAnalyticsInstanceAsyncCurrent(
+		t,
+		resource,
+		shared.OSOKAsyncPhaseCreate,
+		"CREATING",
+		shared.OSOKAsyncClassPending,
+		"wr-create-1",
+	)
+}
+
+func TestAnalyticsInstanceUpdatePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.analyticsinstance.oc1..existing"
+
+	resource := newExistingAnalyticsInstanceTestResource(existingID)
+	resource.Spec.Description = "updated analytics description"
+	var updateRequest analyticssdk.UpdateAnalyticsInstanceRequest
+
+	manager := newAnalyticsInstanceRuntimeTestManager(generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.GetAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				getRequest := request.(*analyticssdk.GetAnalyticsInstanceRequest)
+				if getRequest.AnalyticsInstanceId == nil || *getRequest.AnalyticsInstanceId != existingID {
+					t.Fatalf("GetAnalyticsInstanceRequest.AnalyticsInstanceId = %v, want %s", getRequest.AnalyticsInstanceId, existingID)
+				}
+				return analyticssdk.GetAnalyticsInstanceResponse{
+					AnalyticsInstance: observedAnalyticsInstanceFromSpec(
+						existingID,
+						newAnalyticsInstanceTestResource().Spec,
+						"ACTIVE",
+					),
+				}, nil
+			},
+			Fields: analyticsInstanceGetFields(),
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.UpdateAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				updateRequest = *request.(*analyticssdk.UpdateAnalyticsInstanceRequest)
+				return analyticssdk.UpdateAnalyticsInstanceResponse{
+					AnalyticsInstance: observedAnalyticsInstanceFromSpec(existingID, resource.Spec, "UPDATING"),
+					OpcRequestId:      common.String("opc-update-1"),
+				}, nil
+			},
+			Fields: analyticsInstanceUpdateFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success while update response stays UPDATING")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should keep requeueing while update response stays UPDATING")
+	}
+	if updateRequest.AnalyticsInstanceId == nil || *updateRequest.AnalyticsInstanceId != existingID {
+		t.Fatalf("UpdateAnalyticsInstanceRequest.AnalyticsInstanceId = %v, want %s", updateRequest.AnalyticsInstanceId, existingID)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Updating) {
+		t.Fatalf("status.reason = %q, want %q", got, shared.Updating)
+	}
+	requireAnalyticsInstanceOpcRequestID(t, resource, "opc-update-1")
+	requireAnalyticsInstanceAsyncCurrent(
+		t,
+		resource,
+		shared.OSOKAsyncPhaseUpdate,
+		"UPDATING",
+		shared.OSOKAsyncClassPending,
+		"",
+	)
+}
+
 func TestAnalyticsInstanceCreateOrUpdateClassifiesReviewedLifecycleStates(t *testing.T) {
 	t.Parallel()
 
@@ -210,7 +325,7 @@ func TestAnalyticsInstanceCreateOrUpdateClassifiesReviewedLifecycleStates(t *tes
 				}
 				return
 			}
-			requireAnalyticsInstanceAsyncCurrent(t, resource, *tc.wantAsync, tc.lifecycle, shared.OSOKAsyncClassPending)
+			requireAnalyticsInstanceAsyncCurrent(t, resource, *tc.wantAsync, tc.lifecycle, shared.OSOKAsyncClassPending, "")
 		})
 	}
 }
@@ -307,13 +422,14 @@ func TestAnalyticsInstanceCreateOrUpdateReusesInactiveListMatch(t *testing.T) {
 	}
 }
 
-func TestAnalyticsInstanceDeleteKeepsRequeueingWhileDeleting(t *testing.T) {
+func TestAnalyticsInstanceDeletePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
 	t.Parallel()
 
 	const existingID = "ocid1.analyticsinstance.oc1..existing"
 
 	resource := newExistingAnalyticsInstanceTestResource(existingID)
 	getCalls := 0
+	var deleteRequest analyticssdk.DeleteAnalyticsInstanceRequest
 
 	manager := newAnalyticsInstanceRuntimeTestManager(generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
 		Get: &generatedruntime.Operation{
@@ -332,8 +448,12 @@ func TestAnalyticsInstanceDeleteKeepsRequeueingWhileDeleting(t *testing.T) {
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &analyticssdk.DeleteAnalyticsInstanceRequest{} },
-			Call: func(_ context.Context, _ any) (any, error) {
-				return analyticssdk.DeleteAnalyticsInstanceResponse{}, nil
+			Call: func(_ context.Context, request any) (any, error) {
+				deleteRequest = *request.(*analyticssdk.DeleteAnalyticsInstanceRequest)
+				return analyticssdk.DeleteAnalyticsInstanceResponse{
+					OpcRequestId:     common.String("opc-delete-1"),
+					OpcWorkRequestId: common.String("wr-delete-1"),
+				}, nil
 			},
 			Fields: analyticsInstanceDeleteFields(),
 		},
@@ -346,25 +466,24 @@ func TestAnalyticsInstanceDeleteKeepsRequeueingWhileDeleting(t *testing.T) {
 	if deleted {
 		t.Fatal("Delete() deleted = true, want pending delete confirmation while lifecycle is DELETING")
 	}
+	if deleteRequest.AnalyticsInstanceId == nil || *deleteRequest.AnalyticsInstanceId != existingID {
+		t.Fatalf("DeleteAnalyticsInstanceRequest.AnalyticsInstanceId = %v, want %s", deleteRequest.AnalyticsInstanceId, existingID)
+	}
 	if resource.Status.OsokStatus.Reason != string(shared.Terminating) {
 		t.Fatalf("status reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Terminating)
 	}
 	if resource.Status.LifecycleState != "DELETING" {
 		t.Fatalf("status lifecycleState = %q, want %q", resource.Status.LifecycleState, "DELETING")
 	}
-	current := resource.Status.OsokStatus.Async.Current
-	if current == nil {
-		t.Fatal("status.async.current = nil, want delete-phase tracker")
-	}
-	if current.Source != shared.OSOKAsyncSourceLifecycle {
-		t.Fatalf("status.async.current.source = %q, want %q", current.Source, shared.OSOKAsyncSourceLifecycle)
-	}
-	if current.Phase != shared.OSOKAsyncPhaseDelete {
-		t.Fatalf("status.async.current.phase = %q, want %q", current.Phase, shared.OSOKAsyncPhaseDelete)
-	}
-	if current.NormalizedClass != shared.OSOKAsyncClassPending {
-		t.Fatalf("status.async.current.normalizedClass = %q, want %q", current.NormalizedClass, shared.OSOKAsyncClassPending)
-	}
+	requireAnalyticsInstanceOpcRequestID(t, resource, "opc-delete-1")
+	requireAnalyticsInstanceAsyncCurrent(
+		t,
+		resource,
+		shared.OSOKAsyncPhaseDelete,
+		"",
+		shared.OSOKAsyncClassPending,
+		"wr-delete-1",
+	)
 }
 
 type analyticsInstanceRequestBodyBuilder interface {
@@ -552,12 +671,21 @@ func observedAnalyticsInstanceNetworkEndpoint(
 	}
 }
 
+func requireAnalyticsInstanceOpcRequestID(t *testing.T, resource *analyticsv1beta1.AnalyticsInstance, want string) {
+	t.Helper()
+
+	if got := resource.Status.OsokStatus.OpcRequestID; got != want {
+		t.Fatalf("status.opcRequestId = %q, want %q", got, want)
+	}
+}
+
 func requireAnalyticsInstanceAsyncCurrent(
 	t *testing.T,
 	resource *analyticsv1beta1.AnalyticsInstance,
 	phase shared.OSOKAsyncPhase,
 	rawStatus string,
 	class shared.OSOKAsyncNormalizedClass,
+	workRequestID string,
 ) {
 	t.Helper()
 
@@ -570,6 +698,9 @@ func requireAnalyticsInstanceAsyncCurrent(
 	}
 	if current.Phase != phase {
 		t.Fatalf("status.async.current.phase = %q, want %q", current.Phase, phase)
+	}
+	if current.WorkRequestID != workRequestID {
+		t.Fatalf("status.async.current.workRequestId = %q, want %q", current.WorkRequestID, workRequestID)
 	}
 	if current.RawStatus != rawStatus {
 		t.Fatalf("status.async.current.rawStatus = %q, want %q", current.RawStatus, rawStatus)
