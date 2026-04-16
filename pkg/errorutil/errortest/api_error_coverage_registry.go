@@ -195,10 +195,10 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"containerengine",
 			apiErrorCoverageDefaultVersion,
 			"NodePool",
-			APIErrorCoverageFamilyGeneratedRuntimeFollowUp,
+			APIErrorCoverageFamilyGeneratedRuntimePlain,
 			deleteNotFoundGeneratedRuntime,
-			retryableConflictFollowUp,
-			"Generated serviceclient uses WaitForWorkRequestWithErrorHandling for create, update, and delete follow-up.",
+			retryableConflictGeneratedRuntime,
+			"Handwritten request-body shaping still delegates create, update, and delete OCI errors to the shared generatedruntime CRUD and confirm-delete paths.",
 		),
 		resourceKey("containerinstances", "ContainerInstance"): reviewedRegistration(
 			"containerinstances",
