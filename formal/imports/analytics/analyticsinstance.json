@@ -129,12 +129,14 @@
     "repoAuthoredLogicGapsPath": "controllers/analytics/analyticsinstance/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
-      "secret-output",
-      "delete-confirmation"
+      "mutation-policy",
+      "secret-output"
     ]
   },
   "notes": [
-    "Provider mutation facts are narrowed to fields that exist on the published SDK-derived AnalyticsInstance surface.",
-    "Provider-only fields admin_user, domain_id, feature_bundle, state, and update_channel remain out of scope for the generated controller-backed scaffold."
+    "Pinned OCI SDK contract: AnalyticsInstance lifecycle exposes CREATING, ACTIVE, UPDATING, DELETING, FAILED, INACTIVE, and DELETED. Repo-authored controller success is ACTIVE or INACTIVE, requeue covers CREATING and UPDATING, FAILED is terminal without requeue, and delete confirmation follows DELETING to DELETED or NotFound.",
+    "Pinned OCI SDK contract: UpdateAnalyticsInstanceDetails exposes description, email_notification, license_type, freeform_tags, and defined_tags as in-place update fields. Provider auxiliary mutators ChangeAnalyticsInstanceCompartment, ChangeAnalyticsInstanceNetworkEndpoint, ScaleAnalyticsInstance, and SetKmsKey stay outside the published runtime contract and are treated as explicit drift instead of implicit helper-owned updates.",
+    "CreateAnalyticsInstance and DeleteAnalyticsInstance return opc-work-request-id headers, while UpdateAnalyticsInstance returns only the resource body. The reviewed generatedruntime client records request and work-request breadcrumbs when present and relies on lifecycle projection plus confirm-delete rereads rather than service-local work-request polling.",
+    "ListAnalyticsInstancesRequest filters by compartmentId, name, capacityType, featureSet, and lifecycleState and returns Items []AnalyticsInstanceSummary. Safe reusable matching is exact compartment_id plus name plus feature_set plus capacity_type, restricted to reusable ACTIVE, CREATING, UPDATING, or INACTIVE candidates; duplicate exact matches fail instead of guessing."
   ]
 }
