@@ -9,6 +9,24 @@ packageProfiles:
     description: Fixture-backed validation surface for mutability overlay and VAP regression gates.
 
 services:
+  - service: analytics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/analytics
+    group: analytics
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AnalyticsInstance
+    generation:
+      resources:
+        - kind: AnalyticsInstance
+          formalSpec: analyticsinstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+
   - service: containerengine
     sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
     group: containerengine
