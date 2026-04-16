@@ -2,7 +2,7 @@
 
 # Analytics
 
-Manage OCI Analytics instances from Kubernetes with a generated controller-backed scaffold.
+Manage OCI Analytics instances from Kubernetes with a reviewed controller-backed runtime.
 
 | Field | Value |
 | --- | --- |
@@ -16,7 +16,7 @@ Manage OCI Analytics instances from Kubernetes with a generated controller-backe
 
 ## Notes
 
-- Analytics currently ships a generated controller-backed scaffold for `AnalyticsInstance`; follow-on runtime work will harden the emitted service-manager seam before release promotion.
+- Analytics ships a reviewed controller-backed runtime for `AnalyticsInstance` in the current checked-in package surface.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
