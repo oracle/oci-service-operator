@@ -32,8 +32,13 @@ type defaultNodePoolServiceClient struct {
 
 func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
-		FormalService:     "containerengine",
-		FormalSlug:        "nodepool",
+		FormalService: "containerengine",
+		FormalSlug:    "nodepool",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
 		StatusProjection:  "required",
 		SecretSideEffects: "none",
 		FinalizerPolicy:   "retain-until-confirmed-delete",
@@ -57,21 +62,21 @@ func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {
 			ConflictsWith: map[string][]string{"nodeConfigDetails": []string{"quantityPerSubnet", "subnetIds"}, "quantityPerSubnet": []string{"nodeConfigDetails"}, "subnetIds": []string{"nodeConfigDetails"}},
 		},
 		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "CREATED"}},
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
 		},
 		UpdateFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "UPDATED"}},
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
 		},
 		DeleteFollowUp: generatedruntime.FollowUpSemantics{
 			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "nodepool", Action: "DELETED"}},
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
 		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},

@@ -25,14 +25,15 @@ Package profiles:
 
 Current workflow:
 
-1. `go run ./cmd/generator --config internal/generator/config/services.yaml --service <service>`
-   or `go run ./cmd/generator --config internal/generator/config/services.yaml --all`
+1. `go run ./cmd/generator --config internal/generator/config/services.yaml --service <service> --overwrite`
+   or `go run ./cmd/generator --config internal/generator/config/services.yaml --all --overwrite`
    writes generated API packages, sample manifests, sample kustomization,
    per-group package scaffolding, and the configured controller,
    service-manager, and registration outputs from
-   `internal/generator/config/services.yaml`. `--all` targets only the
-   default-active first-wave surface; `--service <service>` is the explicit
-   backlog path for inactive-but-configured services.
+   `internal/generator/config/services.yaml` when you are writing back into
+   the checked-in repo tree. `--all` targets only the default-active
+   first-wave surface; `--service <service>` is the explicit backlog path for
+   inactive-but-configured services.
 2. Run `make generator-refresh GENERATOR_SERVICE=<service>` or
    `make generator-refresh GENERATOR_ALL=true` when the same refresh also needs
    `zz_generated.deepcopy.go` and `config/crd/` artifacts updated.

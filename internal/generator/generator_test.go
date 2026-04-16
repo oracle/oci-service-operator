@@ -2219,36 +2219,42 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 	})
 	assertNotContains(t, content, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
 
-	nodePoolContent := readFile(t, filepath.Join(outputRoot, nodePoolServiceClientPath))
+	nodePoolContent := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, nodePoolServiceClientPath)))
 	assertContains(t, nodePoolContent, []string{
 		"func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {",
 		"Semantics: newNodePoolRuntimeSemantics(),",
-		`FormalService:     "containerengine"`,
-		`FormalSlug:        "nodepool"`,
+		`FormalService: "containerengine"`,
+		`FormalSlug: "nodepool"`,
+		`Async: &generatedruntime.AsyncSemantics{`,
+		`Strategy: "lifecycle"`,
+		`Runtime: "generatedruntime"`,
+		`FormalClassification: "lifecycle"`,
 		`ProvisioningStates: []string{"CREATING"}`,
-		`UpdatingStates:     []string{"UPDATING"}`,
-		`ActiveStates:       []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"}`,
-		`PendingStates:  []string{"DELETING"}`,
+		`UpdatingStates: []string{"UPDATING"}`,
+		`ActiveStates: []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"}`,
+		`PendingStates: []string{"DELETING"}`,
 		`TerminalStates: []string{"DELETED"}`,
 		`ResponseItemsField: "Items"`,
-		`MatchFields:        []string{"clusterId", "compartmentId", "lifecycleState", "name"}`,
-		`Mutable:       []string{"definedTags", "freeformTags", "initialNodeLabels", "kubernetesVersion", "name", "nodeConfigDetails", "nodeEvictionNodePoolSettings", "nodeMetadata", "nodePoolCyclingDetails", "nodeShape", "nodeShapeConfig", "nodeSourceDetails", "quantityPerSubnet", "sshPublicKey", "subnetIds"}`,
-		`ForceNew:      []string{"clusterId", "compartmentId", "nodeImageName"}`,
-		`EntityType: "nodepool", Action: "CREATED"`,
-		`EntityType: "nodepool", Action: "UPDATED"`,
-		`EntityType: "nodepool", Action: "DELETED"`,
+		`MatchFields: []string{"clusterId", "compartmentId", "lifecycleState", "name"}`,
+		`Mutable: []string{"definedTags", "freeformTags", "initialNodeLabels", "kubernetesVersion", "name", "nodeConfigDetails", "nodeEvictionNodePoolSettings", "nodeMetadata", "nodePoolCyclingDetails", "nodeShape", "nodeShapeConfig", "nodeSourceDetails", "quantityPerSubnet", "sshPublicKey", "subnetIds"}`,
+		`ForceNew: []string{"clusterId", "compartmentId", "nodeImageName"}`,
 		`NewRequest: func() any { return &containerenginesdk.ListNodePoolsRequest{} }`,
 		`return sdkClient.ListNodePools(ctx, *request.(*containerenginesdk.ListNodePoolsRequest))`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
 	})
+	assertNotContains(t, nodePoolContent, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
 
 	registration := readFile(t, registrationPath)
 	assertContains(t, registration, []string{
 		"NodePoolReconciler",
 		"setup NodePool controller",
 		"containerenginenodepoolservicemanager",
+	})
+	nodePoolController := readFile(t, filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"))
+	assertContains(t, nodePoolController, []string{
+		`// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch`,
 	})
 
 	clusterSample := readFile(t, filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_cluster.yaml"))

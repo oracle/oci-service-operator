@@ -23,6 +23,7 @@ type NodePoolReconciler struct {
 // +kubebuilder:rbac:groups=containerengine.oracle.com,resources=nodepools,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=containerengine.oracle.com,resources=nodepools/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=containerengine.oracle.com,resources=nodepools/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // Reconcile is part of the main Kubernetes reconciliation loop.
 func (r *NodePoolReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
