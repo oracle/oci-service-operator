@@ -945,6 +945,198 @@ services:
               markers:
                 - +kubebuilder:validation:Optional
 
+  - service: databasetools
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/databasetools
+    group: databasetools
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DatabaseToolsConnection
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DatabaseToolsConnection
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: DatabaseToolsEndpointService
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: DatabaseToolsPrivateEndpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: datascience
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datascience
+    group: datascience
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: DataSciencePrivateEndpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: FastLaunchJobConfig
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Job
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobArtifact
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobArtifactContent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobRun
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobShape
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelArtifact
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelArtifactContent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelDeployment
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelDeploymentShape
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelProvenance
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelVersionSet
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: NotebookSession
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: NotebookSessionShape
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Pipeline
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: PipelineRun
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: StepArtifact
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: StepArtifactContent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
     group: dns

@@ -1129,12 +1129,12 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
-	wantActiveServices := []string{"aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
+	wantActiveServices := []string{"aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasetools", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming"}
 	if !slices.Equal(activeServices, wantActiveServices) {
 		t.Fatalf("DefaultActiveServices() = %v, want %v", activeServices, wantActiveServices)
 	}
 
-	services := requireServices(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
+	services := requireServices(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasetools", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "objectstorage", "opensearch", "psql", "queue", "redis", "streaming", "vault")
 	assertServiceSelection(t, services["aidocument"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["ailanguage"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["aivision"], true, SelectionModeExplicit, []string{"Project"})
@@ -1145,6 +1145,8 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
+	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
+	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
 	assertServiceSelection(t, services["keymanagement"], true, SelectionModeExplicit, []string{"Vault"})
@@ -1163,12 +1165,14 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "bds", "containerengine", "containerinstances", "dataflow", "database", "functions", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "bds", "containerengine", "containerinstances", "dataflow", "database", "databasetools", "datascience", "functions", "mysql", "nosql", "psql", "streaming", "core", "identity", "keymanagement", "redis")
 
 	assertAIDocumentRuntimeRolloutMetadata(t, services["aidocument"])
 	assertAILanguageRuntimeRolloutMetadata(t, services["ailanguage"])
 	assertAIVisionRuntimeRolloutMetadata(t, services["aivision"])
 	assertBDSRuntimeRolloutMetadata(t, services["bds"])
+	assertDatabaseToolsRuntimeRolloutMetadata(t, services["databasetools"])
+	assertDataScienceRuntimeRolloutMetadata(t, services["datascience"])
 
 	assertServiceGenerationStrategies(t, services["dataflow"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
@@ -1769,6 +1773,8 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"databasetools":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datascience":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"functions":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"identity":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"keymanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2256,6 +2262,72 @@ func assertBDSRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		"OsPatchDetail",
 		"Patch",
 		"PatchHistory",
+		"WorkRequest",
+		"WorkRequestError",
+		"WorkRequestLog",
+	} {
+		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
+	}
+}
+
+func assertDatabaseToolsRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 6)
+	assertAsyncContract(t, service, "DatabaseToolsConnection", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+
+	overrides := overridesByKind(service)
+	for _, kind := range []string{
+		"DatabaseToolsEndpointService",
+		"DatabaseToolsPrivateEndpoint",
+		"WorkRequest",
+		"WorkRequestError",
+		"WorkRequestLog",
+	} {
+		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
+	}
+}
+
+func assertDataScienceRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 24)
+	assertAsyncContract(t, service, "Project", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+
+	overrides := overridesByKind(service)
+	for _, kind := range []string{
+		"DataSciencePrivateEndpoint",
+		"FastLaunchJobConfig",
+		"Job",
+		"JobArtifact",
+		"JobArtifactContent",
+		"JobRun",
+		"JobShape",
+		"Model",
+		"ModelArtifact",
+		"ModelArtifactContent",
+		"ModelDeployment",
+		"ModelDeploymentShape",
+		"ModelProvenance",
+		"ModelVersionSet",
+		"NotebookSession",
+		"NotebookSessionShape",
+		"Pipeline",
+		"PipelineRun",
+		"StepArtifact",
+		"StepArtifactContent",
 		"WorkRequest",
 		"WorkRequestError",
 		"WorkRequestLog",

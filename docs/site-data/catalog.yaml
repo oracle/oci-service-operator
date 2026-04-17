@@ -141,6 +141,19 @@ packages:
         kind: AutonomousDatabase
         summary: Manage OCI Autonomous Database instances.
 
+  - package: databasetools
+    displayName: Database Tools
+    summary: Manage OCI Database Tools connections from Kubernetes with an initial controller-backed DatabaseToolsConnection rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DatabaseToolsConnection while the remaining Database Tools resource families stay unpublished.
+    kindOverrides:
+      - group: databasetools
+        kind: DatabaseToolsConnection
+        summary: Manage OCI Database Tools connections.
+
   - package: dataflow
     displayName: Data Flow
     summary: Manage OCI Data Flow applications from Kubernetes.
@@ -151,6 +164,19 @@ packages:
       - group: dataflow
         kind: Application
         summary: Manage OCI Data Flow applications.
+
+  - package: datascience
+    displayName: Data Science
+    summary: Manage OCI Data Science projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining Data Science resource families stay unpublished.
+    kindOverrides:
+      - group: datascience
+        kind: Project
+        summary: Manage OCI Data Science projects.
 
   - package: functions
     displayName: Functions

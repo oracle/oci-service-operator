@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 32,
-    "mappings": 119,
-    "trackedMappings": 119,
+    "specs": 34,
+    "mappings": 124,
+    "trackedMappings": 124,
     "untrackedMappings": 0,
-    "presentFields": 1715,
-    "missingFields": 3,
-    "mandatoryPresentFields": 458,
-    "mandatoryMissingFields": 3,
-    "extraSpecFields": 186,
-    "overallCoveragePercent": 99.82537834691502,
-    "mandatoryCoveragePercent": 99.34924078091106
+    "presentFields": 1744,
+    "missingFields": 4,
+    "mandatoryPresentFields": 471,
+    "mandatoryMissingFields": 4,
+    "extraSpecFields": 187,
+    "overallCoveragePercent": 99.77116704805492,
+    "mandatoryCoveragePercent": 99.1578947368421
   },
   "services": [
     {
@@ -140,6 +140,20 @@
       "mandatoryCoveragePercent": 100
     },
     {
+      "service": "databasetools",
+      "specs": 1,
+      "mappings": 1,
+      "trackedMappings": 1,
+      "untrackedMappings": 0,
+      "presentFields": 0,
+      "missingFields": 1,
+      "mandatoryPresentFields": 0,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 0,
+      "mandatoryCoveragePercent": 0
+    },
+    {
       "service": "dataflow",
       "specs": 1,
       "mappings": 4,
@@ -150,6 +164,20 @@
       "mandatoryPresentFields": 31,
       "mandatoryMissingFields": 0,
       "extraSpecFields": 2,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "datascience",
+      "specs": 1,
+      "mappings": 4,
+      "trackedMappings": 4,
+      "untrackedMappings": 0,
+      "presentFields": 29,
+      "missingFields": 0,
+      "mandatoryPresentFields": 13,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 1,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
     },

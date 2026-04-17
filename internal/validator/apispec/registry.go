@@ -12,7 +12,9 @@ import (
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	databasetoolsv1beta1 "github.com/oracle/oci-service-operator/api/databasetools/v1beta1"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
+	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
@@ -622,6 +624,16 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DatabasetoolsDatabaseToolsConnection",
+		SpecType:   reflect.TypeOf(databasetoolsv1beta1.DatabaseToolsConnectionSpec{}),
+		StatusType: reflect.TypeOf(databasetoolsv1beta1.DatabaseToolsConnectionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "databasetools.DatabaseToolsConnectionCollection",
+			},
+		},
+	},
+	{
 		Name:       "DataflowApplication",
 		SpecType:   reflect.TypeOf(dataflowv1beta1.ApplicationSpec{}),
 		StatusType: reflect.TypeOf(dataflowv1beta1.ApplicationStatus{}),
@@ -637,6 +649,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "dataflow.ApplicationSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatascienceProject",
+		SpecType:   reflect.TypeOf(datasciencev1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(datasciencev1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "datascience.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "datascience.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "datascience.Project",
+			},
+			{
+				SDKStruct: "datascience.ProjectSummary",
 			},
 		},
 	},
