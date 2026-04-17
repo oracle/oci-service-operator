@@ -19,6 +19,7 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
+	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -52,9 +53,11 @@ const (
 var errResourceNotFound = errors.New("generated runtime resource not found")
 
 var (
-	passwordSourceType         = reflect.TypeOf(shared.PasswordSource{})
-	usernameSourceType         = reflect.TypeOf(shared.UsernameSource{})
-	autonomousDatabaseBaseType = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
+	passwordSourceType                       = reflect.TypeOf(shared.PasswordSource{})
+	usernameSourceType                       = reflect.TypeOf(shared.UsernameSource{})
+	autonomousDatabaseBaseType               = reflect.TypeOf((*databasesdk.CreateAutonomousDatabaseBase)(nil)).Elem()
+	databaseToolsConnectionCreateDetailsType = reflect.TypeOf((*databasetoolssdk.CreateDatabaseToolsConnectionDetails)(nil)).Elem()
+	databaseToolsConnectionUpdateDetailsType = reflect.TypeOf((*databasetoolssdk.UpdateDatabaseToolsConnectionDetails)(nil)).Elem()
 )
 
 type createContextKey string
@@ -3393,6 +3396,22 @@ func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (
 		converted := reflect.New(targetType).Elem()
 		converted.Set(reflect.ValueOf(body))
 		return converted, true, nil
+	case databaseToolsConnectionCreateDetailsType:
+		body, err := convertDatabaseToolsConnectionCreateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
+	case databaseToolsConnectionUpdateDetailsType:
+		body, err := convertDatabaseToolsConnectionUpdateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
 	default:
 		return reflect.Value{}, false, nil
 	}
@@ -3442,6 +3461,80 @@ func autonomousDatabaseBaseConcreteType(source string) (reflect.Type, error) {
 		return reflect.TypeOf(databasesdk.CreateCrossRegionAutonomousDatabaseDataGuardDetails{}), nil
 	default:
 		return nil, fmt.Errorf("unsupported CreateAutonomousDatabaseBase source %q", source)
+	}
+}
+
+func convertDatabaseToolsConnectionCreateDetails(payload []byte) (databasetoolssdk.CreateDatabaseToolsConnectionDetails, error) {
+	concreteType, err := databaseToolsConnectionCreateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(databasetoolssdk.CreateDatabaseToolsConnectionDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved CreateDatabaseToolsConnectionDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
+func convertDatabaseToolsConnectionUpdateDetails(payload []byte) (databasetoolssdk.UpdateDatabaseToolsConnectionDetails, error) {
+	concreteType, err := databaseToolsConnectionUpdateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(databasetoolssdk.UpdateDatabaseToolsConnectionDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved UpdateDatabaseToolsConnectionDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
+func databaseToolsConnectionCreateConcreteType(payload []byte) (reflect.Type, error) {
+	connectionType, err := jsonFieldString(payload, "type")
+	if err != nil {
+		return nil, fmt.Errorf("decode DatabaseToolsConnection create type: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(connectionType)) {
+	case "GENERIC_JDBC":
+		return reflect.TypeOf(databasetoolssdk.CreateDatabaseToolsConnectionGenericJdbcDetails{}), nil
+	case "POSTGRESQL":
+		return reflect.TypeOf(databasetoolssdk.CreateDatabaseToolsConnectionPostgresqlDetails{}), nil
+	case "MYSQL":
+		return reflect.TypeOf(databasetoolssdk.CreateDatabaseToolsConnectionMySqlDetails{}), nil
+	case "ORACLE_DATABASE":
+		return reflect.TypeOf(databasetoolssdk.CreateDatabaseToolsConnectionOracleDatabaseDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported CreateDatabaseToolsConnectionDetails type %q", connectionType)
+	}
+}
+
+func databaseToolsConnectionUpdateConcreteType(payload []byte) (reflect.Type, error) {
+	connectionType, err := jsonFieldString(payload, "type")
+	if err != nil {
+		return nil, fmt.Errorf("decode DatabaseToolsConnection update type: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(connectionType)) {
+	case "GENERIC_JDBC":
+		return reflect.TypeOf(databasetoolssdk.UpdateDatabaseToolsConnectionGenericJdbcDetails{}), nil
+	case "POSTGRESQL":
+		return reflect.TypeOf(databasetoolssdk.UpdateDatabaseToolsConnectionPostgresqlDetails{}), nil
+	case "MYSQL":
+		return reflect.TypeOf(databasetoolssdk.UpdateDatabaseToolsConnectionMySqlDetails{}), nil
+	case "ORACLE_DATABASE":
+		return reflect.TypeOf(databasetoolssdk.UpdateDatabaseToolsConnectionOracleDatabaseDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported UpdateDatabaseToolsConnectionDetails type %q", connectionType)
 	}
 }
 

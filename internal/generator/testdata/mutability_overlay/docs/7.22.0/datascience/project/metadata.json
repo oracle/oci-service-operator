@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "datascience",
+  "kind": "Project",
+  "formalSlug": "project",
+  "providerResource": "oci_datascience_project",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/datascience_project",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/datascience_project",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/datascience/project/page.html",
+  "bodySHA256": "44d2153dd9d6101c8a657fd1d9e7563c538caf4358ea236baadf2dbe7572c1a8",
+  "bodyBytes": 1026,
+  "fixtureBodyPath": "7.22.0/datascience/project/page.html"
+}

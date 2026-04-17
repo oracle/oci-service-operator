@@ -3,12 +3,18 @@ package apispec
 import (
 	"reflect"
 
+	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
+	ailanguagev1beta1 "github.com/oracle/oci-service-operator/api/ailanguage/v1beta1"
+	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
+	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	databasetoolsv1beta1 "github.com/oracle/oci-service-operator/api/databasetools/v1beta1"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
+	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
@@ -490,6 +496,72 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "AidocumentProject",
+		SpecType:   reflect.TypeOf(aidocumentv1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(aidocumentv1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "aidocument.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "aidocument.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "aidocument.Project",
+			},
+			{
+				SDKStruct: "aidocument.ProjectCollection",
+			},
+			{
+				SDKStruct: "aidocument.ProjectSummary",
+			},
+		},
+	},
+	{
+		Name:       "AilanguageProject",
+		SpecType:   reflect.TypeOf(ailanguagev1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(ailanguagev1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "ailanguage.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "ailanguage.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "ailanguage.Project",
+			},
+			{
+				SDKStruct: "ailanguage.ProjectCollection",
+			},
+			{
+				SDKStruct: "ailanguage.ProjectSummary",
+			},
+		},
+	},
+	{
+		Name:       "AivisionProject",
+		SpecType:   reflect.TypeOf(aivisionv1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(aivisionv1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "aivision.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "aivision.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "aivision.Project",
+			},
+			{
+				SDKStruct: "aivision.ProjectCollection",
+			},
+			{
+				SDKStruct: "aivision.ProjectSummary",
+			},
+		},
+	},
+	{
 		Name:       "AnalyticsAnalyticsInstance",
 		SpecType:   reflect.TypeOf(analyticsv1beta1.AnalyticsInstanceSpec{}),
 		StatusType: reflect.TypeOf(analyticsv1beta1.AnalyticsInstanceStatus{}),
@@ -505,6 +577,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "analytics.AnalyticsInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "BdsBdsInstance",
+		SpecType:   reflect.TypeOf(bdsv1beta1.BdsInstanceSpec{}),
+		StatusType: reflect.TypeOf(bdsv1beta1.BdsInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "bds.CreateBdsInstanceDetails",
+			},
+			{
+				SDKStruct: "bds.UpdateBdsInstanceDetails",
+			},
+			{
+				SDKStruct: "bds.BdsInstance",
+			},
+			{
+				SDKStruct: "bds.BdsInstanceSummary",
 			},
 		},
 	},
@@ -533,6 +624,74 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DatabasetoolsDatabaseToolsConnection",
+		SpecType:   reflect.TypeOf(databasetoolsv1beta1.DatabaseToolsConnectionSpec{}),
+		StatusType: reflect.TypeOf(databasetoolsv1beta1.DatabaseToolsConnectionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionGenericJdbcDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionMySqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionOracleDatabaseDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionPostgresqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionGenericJdbcDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionMySqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionOracleDatabaseDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionPostgresqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.DatabaseToolsConnectionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbc",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionMySql",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabase",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresql",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbcSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionMySqlSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabaseSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresqlSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "DataflowApplication",
 		SpecType:   reflect.TypeOf(dataflowv1beta1.ApplicationSpec{}),
 		StatusType: reflect.TypeOf(dataflowv1beta1.ApplicationStatus{}),
@@ -548,6 +707,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "dataflow.ApplicationSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatascienceProject",
+		SpecType:   reflect.TypeOf(datasciencev1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(datasciencev1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "datascience.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "datascience.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "datascience.Project",
+			},
+			{
+				SDKStruct: "datascience.ProjectSummary",
 			},
 		},
 	},

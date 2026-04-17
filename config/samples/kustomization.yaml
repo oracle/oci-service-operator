@@ -33,4 +33,10 @@ resources:
 - mysql_v1beta1_dbsystem.yaml
 - dataflow_v1beta1_application.yaml
 - analytics_v1beta1_analyticsinstance.yaml
+- ailanguage_v1beta1_project.yaml
+- aivision_v1beta1_project.yaml
+- aidocument_v1beta1_project.yaml
+- bds_v1beta1_bdsinstance.yaml
+- datascience_v1beta1_project.yaml
+- databasetools_v1beta1_databasetoolsconnection.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

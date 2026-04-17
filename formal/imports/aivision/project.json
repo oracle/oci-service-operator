@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "aivision",
+  "slug": "project",
+  "kind": "Project",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_vision_project",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProject",
+        "requestType": "aivision.CreateProjectRequest",
+        "responseType": "aivision.CreateProjectResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProject",
+        "requestType": "aivision.GetProjectRequest",
+        "responseType": "aivision.GetProjectResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProjects",
+        "requestType": "aivision.ListProjectsRequest",
+        "responseType": "aivision.ListProjectsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateProject",
+        "requestType": "aivision.UpdateProjectRequest",
+        "responseType": "aivision.UpdateProjectResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProject",
+        "requestType": "aivision.DeleteProjectRequest",
+        "responseType": "aivision.DeleteProjectResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_ai_vision_projects",
+    "collectionField": "project_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/aivision/project/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/aivision/project/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: the provider resource exposes CreateProject, GetProject, UpdateProject, and DeleteProject, while the paired datasource oci_ai_vision_projects exposes ListProjects filters compartment_id, display_name, id, and state and returns project_collection.items from the SDK Items list.",
+    "Pinned provider implementation: create, update, and delete are work-request-backed, and compartment changes call ChangeProjectCompartment plus WaitForUpdatedState before UpdateProject. The reviewed generatedruntime client does not use provider work-request polling or ChangeProjectCompartment; it follows write calls with read-after-write or confirm-delete rereads instead.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses ListProjects with compartmentId, displayName, optional tracked id, and reusable lifecycle states to decide whether create is required, and delete fallback can use the same datasource shape when GetProject returns NotFound.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, freeformTags, and definedTags reconcile in place. Provider support for changing compartment_id remains out-of-scope drift because the published runtime treats compartmentId as replacement-only."
+  ]
+}

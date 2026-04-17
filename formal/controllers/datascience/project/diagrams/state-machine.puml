@@ -1,0 +1,110 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - datascience/Project
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateProject
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> retryable : OCI state in DELETING
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> retryable : OCI state in DELETING
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, description,\ndisplay_name (+1 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: datascience
+slug: project
+kind: Project
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_datascience_projects filters
+compartment_id, created_by, display_name, id (+1
+more)
+conflicts: none
+open gaps: none
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; successful create and
+update settle directly on `ACTIVE`, while
+`DELETING` keeps reconcile in the terminating
+bucket until `DELETED` or NotFound.
+Pre-create lookup queries `ListProjects` with
+`compartmentId`, `displayName`, and an optional
+tracked `id`; provider-exposed `lifecycleState`,
+`createdBy`, `sortBy`, `sortOrder`, `limit`, and
+`page` remain imported facts rather than
+repo-authored match rules.
+Only `displayName`, `description`,
+`freeformTags`, and `definedTags` reconcile in
+place. `compartmentId` remains replacement-only
+drift even though the provider also exposes
+`ChangeProjectCompartment`, and the runtime has
+no secret side effects.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetProject or ListProjects
+delete targets: DELETED
+end note
+@enduml

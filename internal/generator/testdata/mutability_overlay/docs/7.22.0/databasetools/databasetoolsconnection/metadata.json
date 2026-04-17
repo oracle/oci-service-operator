@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "databasetools",
+  "kind": "DatabaseToolsConnection",
+  "formalSlug": "databasetoolsconnection",
+  "providerResource": "oci_database_tools_database_tools_connection",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/database_tools_database_tools_connection",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/database_tools_database_tools_connection",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/databasetools/databasetoolsconnection/page.html",
+  "bodySHA256": "0f3ef5a48fdc2f86815353929534ebaba9d3f348aa87f52152a522ee40de986f",
+  "bodyBytes": 6601,
+  "fixtureBodyPath": "7.22.0/databasetools/databasetoolsconnection/page.html"
+}

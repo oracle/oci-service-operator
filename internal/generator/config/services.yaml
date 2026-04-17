@@ -20,6 +20,177 @@ packageProfiles:
     description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
 
 services:
+  - service: aidocument
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aidocument
+    group: aidocument
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          formalSpec: project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ProcessorJob
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: ailanguage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ailanguage
+    group: ailanguage
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          formalSpec: project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: Endpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: EvaluationResult
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelType
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: aivision
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aivision
+    group: aivision
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          formalSpec: project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: DocumentJob
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ImageJob
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: analytics
     sdkPackage: github.com/oracle/oci-go-sdk/v65/analytics
     group: analytics
@@ -93,6 +264,83 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+
+  - service: bds
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/bds
+    group: bds
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - BdsInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: BdsInstance
+          formalSpec: bdsinstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: AutoScalingConfiguration
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: BdsApiKey
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: BdsMetastoreConfiguration
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OsPatch
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OsPatchDetail
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Patch
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: PatchHistory
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
   - service: certificates
     sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates
@@ -700,6 +948,200 @@ services:
                 - The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
               markers:
                 - +kubebuilder:validation:Optional
+
+  - service: databasetools
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/databasetools
+    group: databasetools
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DatabaseToolsConnection
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DatabaseToolsConnection
+          formalSpec: databasetoolsconnection
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: DatabaseToolsEndpointService
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: DatabaseToolsPrivateEndpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: datascience
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datascience
+    group: datascience
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          formalSpec: project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: DataSciencePrivateEndpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: FastLaunchJobConfig
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Job
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobArtifact
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobArtifactContent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobRun
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: JobShape
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelArtifact
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelArtifactContent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelDeployment
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelDeploymentShape
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelProvenance
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelVersionSet
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: NotebookSession
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: NotebookSessionShape
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Pipeline
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: PipelineRun
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: StepArtifact
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: StepArtifactContent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns

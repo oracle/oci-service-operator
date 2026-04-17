@@ -1,0 +1,44 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datascience
+slug: project
+kind: Project
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+  - failed
+repoAuthored:
+  mutation:
+    mutable:
+      - defined_tags
+      - description
+      - display_name
+      - freeform_tags
+    forceNew:
+      - compartment_id
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Generated runtime uses read-after-write follow-up for create and update plus
+    confirm-delete for delete; successful create and update settle directly on
+    `ACTIVE`, while `DELETING` keeps reconcile in the terminating bucket until
+    `DELETED` or NotFound.
+  - Pre-create lookup queries `ListProjects` with `compartmentId`,
+    `displayName`, and an optional tracked `id`; provider-exposed
+    `lifecycleState`, `createdBy`, `sortBy`, `sortOrder`, `limit`, and `page`
+    remain imported facts rather than repo-authored match rules.
+  - Only `displayName`, `description`, `freeformTags`, and `definedTags`
+    reconcile in place. `compartmentId` remains replacement-only drift even
+    though the provider also exposes `ChangeProjectCompartment`, and the runtime
+    has no secret side effects.

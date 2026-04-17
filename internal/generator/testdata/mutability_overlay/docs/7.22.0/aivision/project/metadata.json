@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "aivision",
+  "kind": "Project",
+  "formalSlug": "project",
+  "providerResource": "oci_ai_vision_project",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/ai_vision_project",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/ai_vision_project",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/aivision/project/page.html",
+  "bodySHA256": "7a751c4f445a2efc817f1006267ba12bb888d4a450507e3cd40a13c48f08b153",
+  "bodyBytes": 995,
+  "fixtureBodyPath": "7.22.0/aivision/project/page.html"
+}

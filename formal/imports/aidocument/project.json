@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "aidocument",
+  "slug": "project",
+  "kind": "Project",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_document_project",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProject",
+        "requestType": "aidocument.CreateProjectRequest",
+        "responseType": "aidocument.CreateProjectResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProject",
+        "requestType": "aidocument.GetProjectRequest",
+        "responseType": "aidocument.GetProjectResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProjects",
+        "requestType": "aidocument.ListProjectsRequest",
+        "responseType": "aidocument.ListProjectsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeProjectCompartment",
+        "requestType": "aidocument.ChangeProjectCompartmentRequest",
+        "responseType": "aidocument.ChangeProjectCompartmentResponse"
+      },
+      {
+        "operation": "UpdateProject",
+        "requestType": "aidocument.UpdateProjectRequest",
+        "responseType": "aidocument.UpdateProjectResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProject",
+        "requestType": "aidocument.DeleteProjectRequest",
+        "responseType": "aidocument.DeleteProjectResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_ai_document_projects",
+    "collectionField": "project_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/aidocument/project/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/aidocument/project/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: the provider resource exposes CreateProject, GetProject, ChangeProjectCompartment, UpdateProject, and DeleteProject, while the paired datasource oci_ai_document_projects exposes ListProjects filters compartment_id, display_name, id, and state and returns project_collection.items from the SDK Items list.",
+    "Pinned provider implementation: create, update, and delete are work-request-backed, and compartment changes call ChangeProjectCompartment plus WaitForUpdatedState before UpdateProject. The reviewed generatedruntime client does not use provider work-request polling or ChangeProjectCompartment; it follows write calls with read-after-write or confirm-delete rereads instead.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses ListProjects with compartmentId, displayName, optional tracked id, and reusable lifecycle states to decide whether create is required, and delete fallback can use the same datasource shape when GetProject returns NotFound.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, freeformTags, and definedTags reconcile in place. Provider support for changing compartment_id remains out-of-scope drift because the published runtime treats compartmentId as replacement-only."
+  ]
+}

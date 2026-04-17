@@ -128,13 +128,19 @@ nav:
       - reference/api/index.md
       # BEGIN GENERATED API VERSION NAV
       - API Versions:
+          - aidocument.oracle.com/v1beta1: reference/api/aidocument/v1beta1/index.md
+          - ailanguage.oracle.com/v1beta1: reference/api/ailanguage/v1beta1/index.md
+          - aivision.oracle.com/v1beta1: reference/api/aivision/v1beta1/index.md
           - analytics.oracle.com/v1beta1: reference/api/analytics/v1beta1/index.md
           - apigateway.oracle.com/v1beta1: reference/api/apigateway/v1beta1/index.md
+          - bds.oracle.com/v1beta1: reference/api/bds/v1beta1/index.md
           - containerengine.oracle.com/v1beta1: reference/api/containerengine/v1beta1/index.md
           - containerinstances.oracle.com/v1beta1: reference/api/containerinstances/v1beta1/index.md
           - core.oracle.com/v1beta1: reference/api/core/v1beta1/index.md
           - database.oracle.com/v1beta1: reference/api/database/v1beta1/index.md
+          - databasetools.oracle.com/v1beta1: reference/api/databasetools/v1beta1/index.md
           - dataflow.oracle.com/v1beta1: reference/api/dataflow/v1beta1/index.md
+          - datascience.oracle.com/v1beta1: reference/api/datascience/v1beta1/index.md
           - functions.oracle.com/v1beta1: reference/api/functions/v1beta1/index.md
           - identity.oracle.com/v1beta1: reference/api/identity/v1beta1/index.md
           - keymanagement.oracle.com/v1beta1: reference/api/keymanagement/v1beta1/index.md

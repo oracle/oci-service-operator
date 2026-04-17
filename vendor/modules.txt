@@ -145,9 +145,13 @@ github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
 # github.com/oracle/oci-go-sdk/v65 v65.61.1
 ## explicit; go 1.13
+github.com/oracle/oci-go-sdk/v65/aidocument
+github.com/oracle/oci-go-sdk/v65/ailanguage
+github.com/oracle/oci-go-sdk/v65/aivision
 github.com/oracle/oci-go-sdk/v65/analytics
 github.com/oracle/oci-go-sdk/v65/apigateway
 github.com/oracle/oci-go-sdk/v65/artifacts
+github.com/oracle/oci-go-sdk/v65/bds
 github.com/oracle/oci-go-sdk/v65/certificates
 github.com/oracle/oci-go-sdk/v65/certificatesmanagement
 github.com/oracle/oci-go-sdk/v65/common
@@ -157,7 +161,9 @@ github.com/oracle/oci-go-sdk/v65/containerengine
 github.com/oracle/oci-go-sdk/v65/containerinstances
 github.com/oracle/oci-go-sdk/v65/core
 github.com/oracle/oci-go-sdk/v65/database
+github.com/oracle/oci-go-sdk/v65/databasetools
 github.com/oracle/oci-go-sdk/v65/dataflow
+github.com/oracle/oci-go-sdk/v65/datascience
 github.com/oracle/oci-go-sdk/v65/dns
 github.com/oracle/oci-go-sdk/v65/events
 github.com/oracle/oci-go-sdk/v65/functions
