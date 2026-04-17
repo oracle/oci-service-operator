@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>advanced_properties</code> - (Optional) (Updatable) The advanced connection properties key-value pair (e.g., <code>oracle.net.ssl_server_dn_match</code>).</li>
+      <li><code>compartment_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.</li>
+      <li><code>connection_string</code> - (Required when type=MYSQL | ORACLE_DATABASE | POSTGRESQL) (Updatable) The connect descriptor or Easy Connect Naming method use to connect to the database.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>display_name</code> - (Required) (Updatable) A user-friendly name. Does not have to be unique, and it&#39;s changeable. Avoid entering confidential information.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>key_stores</code> - (Optional) (Updatable) Oracle wallet or Java Keystores containing trusted certificates for authenticating the server&#39;s public certificate and the client private key and associated certificates required for client authentication.
+        <ul>
+          <li><code>key_store_content</code> - (Optional) (Updatable) The key store content.
+            <ul>
+              <li><code>secret_id</code> - (Optional) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store.</li>
+              <li><code>value_type</code> - (Required) (Updatable) The value type of the key store content.</li>
+            </ul>
+          </li>
+          <li><code>key_store_password</code> - (Optional) (Updatable) The key store password.
+            <ul>
+              <li><code>secret_id</code> - (Optional) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store password.</li>
+              <li><code>value_type</code> - (Required) (Updatable) The value type of the key store password.</li>
+            </ul>
+          </li>
+          <li><code>key_store_type</code> - (Optional) (Updatable) The key store type.</li>
+        </ul>
+      </li>
+      <li><code>locks</code> - (Optional) Locks associated with this resource.
+        <ul>
+          <li><code>message</code> - (Optional) A message added by the creator of the lock. This is typically used to give an indication of why the resource is locked.</li>
+          <li><code>related_resource_id</code> - (Optional) The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.</li>
+          <li><code>time_created</code> - (Optional) When the lock was created.</li>
+          <li><code>type</code> - (Required) Type of the lock.</li>
+        </ul>
+      </li>
+      <li><code>private_endpoint_id</code> - (Applicable when type=MYSQL | ORACLE_DATABASE | POSTGRESQL) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.</li>
+      <li><code>proxy_client</code> - (Applicable when type=ORACLE_DATABASE) (Updatable) The proxy client information.
+        <ul>
+          <li><code>proxy_authentication_type</code> - (Required) (Updatable) The proxy authentication type.</li>
+          <li><code>roles</code> - (Applicable when proxy_authentication_type=USER_NAME) (Updatable) A list of database roles for the client. These roles are enabled if the proxy is authorized to use the roles on behalf of the client.</li>
+          <li><code>user_name</code> - (Required when proxy_authentication_type=USER_NAME) (Updatable) The user name.</li>
+          <li><code>user_password</code> - (Applicable when proxy_authentication_type=USER_NAME) (Updatable) The database user password.
+            <ul>
+              <li><code>secret_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password.</li>
+              <li><code>value_type</code> - (Required) (Updatable) The value type of the user password.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>related_resource</code> - (Applicable when type=MYSQL | ORACLE_DATABASE | POSTGRESQL) (Updatable) The related resource
+        <ul>
+          <li><code>entity_type</code> - (Required when type=MYSQL | ORACLE_DATABASE | POSTGRESQL) (Updatable) The resource entity type.</li>
+          <li><code>identifier</code> - (Required when type=MYSQL | ORACLE_DATABASE | POSTGRESQL) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the related resource.</li>
+        </ul>
+      </li>
+      <li><code>runtime_identity</code> - (Optional) Specifies the identity used by the Database Tools service to issue requests to other Oracle Cloud Infrastructure services (e.g., Secrets in Vault).</li>
+      <li><code>runtime_support</code> - (Optional) Specifies whether this connection is supported by the Database Tools Runtime.</li>
+      <li><code>type</code> - (Required) (Updatable) The Database Tools connection type.</li>
+      <li><code>url</code> - (Required when type=GENERIC_JDBC) (Updatable) The JDBC URL used to connect to the Generic JDBC database system.</li>
+      <li><code>user_name</code> - (Required) (Updatable) The database user name.</li>
+      <li><code>user_password</code> - (Required) (Updatable) The database user password.
+        <ul>
+          <li><code>secret_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password.</li>
+          <li><code>value_type</code> - (Required) (Updatable) The value type of the user password. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>

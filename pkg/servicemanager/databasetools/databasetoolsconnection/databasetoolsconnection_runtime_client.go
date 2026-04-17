@@ -62,7 +62,7 @@ func newDatabaseToolsConnectionRuntimeConfig(
 		SDKName:          "DatabaseToolsConnection",
 		Log:              log,
 		CredentialClient: credentialClient,
-		Semantics:        newDatabaseToolsConnectionRuntimeSemantics(),
+		Semantics:        databaseToolsConnectionRuntimeSemantics(),
 		BuildCreateBody: func(
 			ctx context.Context,
 			resource *databasetoolsv1beta1.DatabaseToolsConnection,
@@ -116,7 +116,7 @@ func newDatabaseToolsConnectionRuntimeConfig(
 	}
 }
 
-func newDatabaseToolsConnectionRuntimeSemantics() *generatedruntime.Semantics {
+func databaseToolsConnectionRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "databasetools",
 		FormalSlug:    "databasetoolsconnection",

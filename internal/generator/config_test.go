@@ -1237,7 +1237,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "datascience", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "databasetools", "identity", "core", "dataflow", "database", "datascience", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
 	assertFormalSpecFor(t, services["aivision"], "Project", "project")
@@ -1246,6 +1246,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
+	assertFormalSpecFor(t, services["databasetools"], "DatabaseToolsConnection", "databasetoolsconnection")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
 	for _, formal := range []struct {
 		kind string

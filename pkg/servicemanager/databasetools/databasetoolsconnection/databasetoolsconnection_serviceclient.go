@@ -30,43 +30,102 @@ type defaultDatabaseToolsConnectionServiceClient struct {
 	generatedruntime.ServiceClient[*databasetoolsv1beta1.DatabaseToolsConnection]
 }
 
+func newDatabaseToolsConnectionRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "databasetools",
+		FormalSlug:    "databasetoolsconnection",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "relatedResourceIdentifier", "runtimeIdentity", "runtimeSupport", "state", "type"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"advancedProperties", "connectionString", "definedTags", "displayName", "freeformTags", "keyStores", "privateEndpointId", "proxyClient", "relatedResource", "url", "userName", "userPassword"},
+			ForceNew:      []string{"compartmentId", "runtimeSupport", "type"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeDatabaseToolsConnectionCompartment", RequestTypeName: "databasetools.ChangeDatabaseToolsConnectionCompartmentRequest", ResponseTypeName: "databasetools.ChangeDatabaseToolsConnectionCompartmentResponse"}},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{{Category: "drift-guard", StopCondition: "Close when the DatabaseToolsConnection runtime explicitly rejects post-create locks drift as replacement-only, or threads locks through update-body comparison and OCI mutation."}},
+	}
+}
+
 var _ DatabaseToolsConnectionServiceClient = defaultDatabaseToolsConnectionServiceClient{}
 
 var newDatabaseToolsConnectionServiceClient = func(manager *DatabaseToolsConnectionServiceManager) DatabaseToolsConnectionServiceClient {
 	sdkClient, err := databasetoolssdk.NewDatabaseToolsClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*databasetoolsv1beta1.DatabaseToolsConnection]{
-		Kind:    "DatabaseToolsConnection",
-		SDKName: "DatabaseToolsConnection",
-		Log:     manager.Log,
+		Kind:      "DatabaseToolsConnection",
+		SDKName:   "DatabaseToolsConnection",
+		Log:       manager.Log,
+		Semantics: newDatabaseToolsConnectionRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &databasetoolssdk.CreateDatabaseToolsConnectionRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.CreateDatabaseToolsConnectionRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateDatabaseToolsConnectionDetails", RequestName: "CreateDatabaseToolsConnectionDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &databasetoolssdk.GetDatabaseToolsConnectionRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.GetDatabaseToolsConnectionRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "DatabaseToolsConnectionId", RequestName: "databaseToolsConnectionId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &databasetoolssdk.ListDatabaseToolsConnectionsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListDatabaseToolsConnections(ctx, *request.(*databasetoolssdk.ListDatabaseToolsConnectionsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Type", RequestName: "type", Contribution: "query", PreferResourceID: false}, {FieldName: "RuntimeSupport", RequestName: "runtimeSupport", Contribution: "query", PreferResourceID: false}, {FieldName: "RelatedResourceIdentifier", RequestName: "relatedResourceIdentifier", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &databasetoolssdk.UpdateDatabaseToolsConnectionRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.UpdateDatabaseToolsConnectionRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "DatabaseToolsConnectionId", RequestName: "databaseToolsConnectionId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdateDatabaseToolsConnectionDetails", RequestName: "UpdateDatabaseToolsConnectionDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &databasetoolssdk.DeleteDatabaseToolsConnectionRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.DeleteDatabaseToolsConnectionRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "DatabaseToolsConnectionId", RequestName: "databaseToolsConnectionId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}},
 		},
 	}
 	if err != nil {

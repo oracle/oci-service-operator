@@ -5,7 +5,7 @@
   "slug": "databasetoolsconnection",
   "kind": "DatabaseToolsConnection",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_databasetools_databasetoolsconnection",
+  "providerResource": "oci_database_tools_database_tools_connection",
   "operations": {
     "create": [
       {
@@ -23,12 +23,17 @@
     ],
     "list": [
       {
-        "operation": "ListDatabaseToolsConnection",
-        "requestType": "databasetools.ListDatabaseToolsConnectionRequest",
-        "responseType": "databasetools.ListDatabaseToolsConnectionResponse"
+        "operation": "ListDatabaseToolsConnections",
+        "requestType": "databasetools.ListDatabaseToolsConnectionsRequest",
+        "responseType": "databasetools.ListDatabaseToolsConnectionsResponse"
       }
     ],
     "update": [
+      {
+        "operation": "ChangeDatabaseToolsConnectionCompartment",
+        "requestType": "databasetools.ChangeDatabaseToolsConnectionCompartmentRequest",
+        "responseType": "databasetools.ChangeDatabaseToolsConnectionCompartmentResponse"
+      },
       {
         "operation": "UpdateDatabaseToolsConnection",
         "requestType": "databasetools.UpdateDatabaseToolsConnectionRequest",
@@ -46,10 +51,11 @@
   "lifecycle": {
     "create": {
       "pending": [
-        "PROVISIONING"
+        "CREATING"
       ],
       "target": [
-        "ACTIVE"
+        "ACTIVE",
+        "INACTIVE"
       ]
     },
     "update": {
@@ -57,16 +63,46 @@
         "UPDATING"
       ],
       "target": [
-        "ACTIVE"
+        "ACTIVE",
+        "INACTIVE"
       ]
     }
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "advanced_properties",
+      "compartment_id",
+      "connection_string",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "key_stores.key_store_content.secret_id",
+      "key_stores.key_store_content.value_type",
+      "key_stores.key_store_password.secret_id",
+      "key_stores.key_store_password.value_type",
+      "key_stores.key_store_type",
+      "private_endpoint_id",
+      "proxy_client.proxy_authentication_type",
+      "proxy_client.roles",
+      "proxy_client.user_name",
+      "proxy_client.user_password.secret_id",
+      "proxy_client.user_password.value_type",
+      "related_resource.entity_type",
+      "related_resource.identifier",
+      "url",
+      "user_name",
+      "user_password.secret_id",
+      "user_password.value_type"
     ],
     "forceNew": [
-      "compartment_id"
+      "locks",
+      "locks.message",
+      "locks.related_resource_id",
+      "locks.time_created",
+      "locks.type",
+      "runtime_identity",
+      "runtime_support",
+      "type"
     ],
     "conflictsWith": {}
   },
@@ -74,11 +110,6 @@
     "create": [
       {
         "helper": "tfresource.CreateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "template",
-        "action": "CREATED"
       }
     ],
     "update": [
@@ -101,12 +132,17 @@
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_databasetools_databasetoolsconnection",
-    "collectionField": "databasetoolsconnection",
+    "datasource": "oci_database_tools_database_tools_connections",
+    "collectionField": "database_tools_connection_collection",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
-      "state"
+      "display_name",
+      "related_resource_identifier",
+      "runtime_identity",
+      "runtime_support",
+      "state",
+      "type"
     ]
   },
   "boundary": {
@@ -115,11 +151,21 @@
     "repoAuthoredLogicGapsPath": "controllers/databasetools/databasetoolsconnection/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
       "secret-output",
-      "delete-confirmation"
+      "delete-confirmation",
+      "waiter-work-request"
     ]
   },
   "notes": [
-    "Scaffold placeholder for databasetools/databasetoolsconnection; replace imported facts before promoting this row beyond scaffold."
+    "Pinned OCI SDK contract: the provider resource exposes CreateDatabaseToolsConnection, GetDatabaseToolsConnection, UpdateDatabaseToolsConnection, and DeleteDatabaseToolsConnection plus ChangeDatabaseToolsConnectionCompartment, while the paired datasource oci_database_tools_database_tools_connections filters compartment_id, display_name, related_resource_identifier, runtime_identity, runtime_support, state, and type and returns database_tools_connection_collection from the SDK Items list.",
+    "Pinned provider implementation: create and update populate top-level polymorphic request bodies from the selected connection type, the provider can move compartment_id through ChangeDatabaseToolsConnectionCompartment, and provider mutation facts include broader nested update candidates than the published runtime uses directly. The reviewed generatedruntime client does not adopt provider-owned work-request waiters; it follows plain write calls with read-after-write or confirm-delete rereads instead.",
+    "Repo-authored lifecycle classification stays explicit: runtime treats CREATING as provisioning, UPDATING as updating, ACTIVE and INACTIVE as success, FAILED as terminal without requeue, and delete confirmation follows DELETING to DELETED or NotFound.",
+    "Repo-authored bind-versus-create and list-lookup semantics stay explicit: pre-create lookup sends compartmentId, displayName, and optional relatedResourceIdentifier to ListDatabaseToolsConnections, then narrows candidates in memory with type-aware fields including type, connectionString or url, relatedResource.identifier, userName, privateEndpointId, and runtimeSupport before deciding whether create is required.",
+    "Repo-authored mutation policy stays explicit: only advancedProperties, connectionString, definedTags, displayName, freeformTags, keyStores, privateEndpointId, proxyClient, relatedResource, url, userName, and userPassword reconcile in place. compartmentId, runtimeSupport, and type remain replacement-only drift, and post-create locks drift stays an explicit gap until the runtime rejects or reconciles it.",
+    "Repo-authored status projection and secret behavior stay explicit: the generated runtime stamps OSOK lifecycle and async conditions plus the published status read-model fields from OCI responses, and the row has no Kubernetes secret side effects."
   ]
 }
