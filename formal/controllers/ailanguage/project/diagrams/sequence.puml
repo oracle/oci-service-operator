@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetProject
 else tracked identity is missing
-ServiceManager -> OCI: ListProject(filters: compartment_id,\nstate)
+ServiceManager -> OCI: ListProjects(filters:\ncompartment_id, display_name, id,\nstate)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateProject
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetProject
 end
 else reusable OCI resource already exists
@@ -52,9 +52,9 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteProject
-ServiceManager -> OCI: confirm delete via GetProject or\nListProject
+ServiceManager -> OCI: confirm delete via GetProject or\nListProjects
 loop delete pending DELETING
-ServiceManager -> OCI: GetProject or ListProject
+ServiceManager -> OCI: GetProject or ListProjects
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -63,25 +63,28 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface: defined_tags,
+description, display_name, freeform_tags
 Reject before mutate: force-new fields
 compartment_id
-Lookup filters: compartment_id, state
+Lookup filters: compartment_id,
+display_name, id, state
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateProject only for mutable\nfields display_name
+ServiceManager -> OCI: Apply ChangeProjectCompartment,\nUpdateProject only for mutable\nfields defined_tags, description,\ndisplay_name, freeform_tags
 loop update pending UPDATING
 ServiceManager -> OCI: GetProject
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +111,35 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
-list lookup: scaffold_ailanguage_project filters
-compartment_id, state
+list lookup: oci_ai_language_projects filters
+compartment_id, display_name, id, state
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `ACTIVE` to success, `UPDATING` to
+updating, and `DELETING` keeps reconcile in the
+terminating bucket until `DELETED` or NotFound.
+Pre-create lookup queries `ListProjects` with
+`compartmentId`, `displayName`, and an optional
+tracked `projectId`; delete fallback can
+re-resolve the tracked project through
+`ListProjects` when `GetProject` returns
+NotFound.
+Only `displayName`, `description`,
+`freeformTags`, and `definedTags` reconcile in
+place. `compartmentId` remains replacement-only
+drift and the runtime has no secret side
+effects.
 end note
 @enduml
