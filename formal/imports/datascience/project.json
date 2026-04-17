@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datascience",
+  "slug": "project",
+  "kind": "Project",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_datascience_project",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateProject",
+        "requestType": "datascience.CreateProjectRequest",
+        "responseType": "datascience.CreateProjectResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetProject",
+        "requestType": "datascience.GetProjectRequest",
+        "responseType": "datascience.GetProjectResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListProject",
+        "requestType": "datascience.ListProjectRequest",
+        "responseType": "datascience.ListProjectResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateProject",
+        "requestType": "datascience.UpdateProjectRequest",
+        "responseType": "datascience.UpdateProjectResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteProject",
+        "requestType": "datascience.DeleteProjectRequest",
+        "responseType": "datascience.DeleteProjectResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_datascience_project",
+    "collectionField": "project",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datascience/project/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datascience/project/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for datascience/project; replace imported facts before promoting this row beyond scaffold."
+  ]
+}
