@@ -1836,6 +1836,8 @@ func TestCheckedInAnalyticsConfigPromotesControllerBackedRollout(t *testing.T) {
 	for _, kind := range []string{"PrivateAccessChannel", "VanityUrl", "WorkRequest", "WorkRequestError", "WorkRequestLog"} {
 		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
 	}
+}
+
 func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	t.Parallel()
 
