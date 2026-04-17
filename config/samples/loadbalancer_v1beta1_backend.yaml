@@ -7,4 +7,12 @@ apiVersion: loadbalancer.oracle.com/v1beta1
 kind: Backend
 metadata:
   name: backend-sample
-spec: {}
+spec:
+  loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+  backendSetName: example_backend_set
+  ipAddress: "10.0.0.3"
+  port: 8080
+  weight: 1
+  backup: false
+  drain: false
+  offline: false

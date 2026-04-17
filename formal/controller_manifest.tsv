@@ -38,6 +38,7 @@ core	servicegateway	ServiceGateway	seeded	repo-authored-semantics	imports/core/s
 core	shape	Shape	scaffold	repo-authored-semantics	imports/core/shape.json	controllers/core/shape/spec.cfg	controllers/core/shape/logic-gaps.md	controllers/core/shape/diagrams
 core	subnet	Subnet	seeded	repo-authored-semantics	imports/core/subnet.json	controllers/core/subnet/spec.cfg	controllers/core/subnet/logic-gaps.md	controllers/core/subnet/diagrams
 core	vcn	Vcn	seeded	repo-authored-semantics	imports/core/vcn.json	controllers/core/vcn/spec.cfg	controllers/core/vcn/logic-gaps.md	controllers/core/vcn/diagrams
+loadbalancer	backend	Backend	seeded	repo-authored-semantics	imports/loadbalancer/backend.json	controllers/loadbalancer/backend/spec.cfg	controllers/loadbalancer/backend/logic-gaps.md	controllers/loadbalancer/backend/diagrams
 mysql	backup	Backup	scaffold	repo-authored-semantics	imports/mysql/backup.json	controllers/mysql/backup/spec.cfg	controllers/mysql/backup/logic-gaps.md	controllers/mysql/backup/diagrams
 mysql	channel	Channel	scaffold	repo-authored-semantics	imports/mysql/channel.json	controllers/mysql/channel/spec.cfg	controllers/mysql/channel/logic-gaps.md	controllers/mysql/channel/diagrams
 mysql	configuration	Configuration	scaffold	repo-authored-semantics	imports/mysql/configuration.json	controllers/mysql/configuration/spec.cfg	controllers/mysql/configuration/logic-gaps.md	controllers/mysql/configuration/diagrams

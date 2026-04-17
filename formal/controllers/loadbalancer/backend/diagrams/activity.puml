@@ -1,0 +1,117 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - loadbalancer/Backend
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Backend spec, tracked status, and\ndelete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetBackend;
+else (no)
+:Resolve an existing OCI resource through\nListBackends using filters ip_address, port;
+:Create the OCI resource via CreateBackend when\nno reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteBackend with required\nvia GetBackend or ListBackends to DELETED\nconfirmation;
+:Confirm deletion via GetBackend or\nListBackends until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields backend_set_name, ip_address,\nload_balancer_id, port;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateBackend only for mutable fields\nbackup, drain, offline, weight;
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: loadbalancer
+slug: backend
+kind: Backend
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create none; update none;
+delete none
+supported drift: backup, drain, offline, weight
+reject before mutate: force-new fields
+backend_set_name, ip_address, load_balancer_id,
+port
+create-only fields: none
+list lookup: oci_load_balancer_backends filters
+ip_address, port
+conflicts: none
+open gaps: none
+The published Backend runtime keeps request-path
+identity under
+pkg/servicemanager/loadbalancer/backend by
+resolving loadBalancerId, backendSetName, and
+the derived backend name locally.
+Create first probes GetBackend on the
+deterministic backend path; a matching backend
+binds into observe or update, while 404 falls
+through to CreateBackend.
+Create and update use read-after-write
+follow-up, then settle through the next observe
+because Backend payloads do not expose lifecycle
+fields. Delete retains the finalizer until
+GetBackend or list fallback confirms the backend
+is gone.
+end note
+@enduml

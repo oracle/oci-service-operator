@@ -1122,6 +1122,51 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Backend
+          formalSpec: backend
+          specFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId"'
+              comments:
+                - "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer associated with the backend set and server."
+              markers:
+                - +kubebuilder:validation:Required
+            - name: BackendSetName
+              type: string
+              tag: 'json:"backendSetName"'
+              comments:
+                - "The name of the backend set associated with the backend server."
+                - "Example: `example_backend_set`"
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId,omitempty"'
+              comments:
+                - The bound load balancer OCID used to address this backend.
+            - name: BackendSetName
+              type: string
+              tag: 'json:"backendSetName,omitempty"'
+              comments:
+                - The bound backend set name used to address this backend.
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: Backend
+              metadata:
+                name: backend-sample
+              spec:
+                loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+                backendSetName: example_backend_set
+                ipAddress: "10.0.0.3"
+                port: 8080
+                weight: 1
+                backup: false
+                drain: false
+                offline: false
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging

@@ -52,6 +52,11 @@ spec:
           spec:
             description: BackendSpec defines the desired state of Backend.
             properties:
+              backendSetName:
+                description: |-
+                  The name of the backend set associated with the backend server.
+                  Example: `example_backend_set`
+                type: string
               backup:
                 description: |-
                   Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
@@ -69,6 +74,10 @@ spec:
                 description: |-
                   The IP address of the backend server.
                   Example: `10.0.0.3`
+                type: string
+              loadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the load balancer associated with the backend set and server.
                 type: string
               offline:
                 description: |-
@@ -91,12 +100,17 @@ spec:
                   Example: `3`
                 type: integer
             required:
+            - backendSetName
             - ipAddress
+            - loadBalancerId
             - port
             type: object
           status:
             description: BackendStatus defines the observed state of Backend.
             properties:
+              backendSetName:
+                description: The bound backend set name used to address this backend.
+                type: string
               backup:
                 description: |-
                   Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
@@ -114,6 +128,9 @@ spec:
                 description: |-
                   The IP address of the backend server.
                   Example: `10.0.0.3`
+                type: string
+              loadBalancerId:
+                description: The bound load balancer OCID used to address this backend.
                 type: string
               name:
                 description: |-

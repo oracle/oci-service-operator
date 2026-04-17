@@ -30,43 +30,102 @@ type defaultBackendServiceClient struct {
 	generatedruntime.ServiceClient[*loadbalancerv1beta1.Backend]
 }
 
+func newBackendRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "loadbalancer",
+		FormalSlug:    "backend",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"ipAddress", "port"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"backup", "drain", "offline", "weight"},
+			ForceNew:      []string{"backendSetName", "ipAddress", "loadBalancerId", "port"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ BackendServiceClient = defaultBackendServiceClient{}
 
 var newBackendServiceClient = func(manager *BackendServiceManager) BackendServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*loadbalancerv1beta1.Backend]{
-		Kind:    "Backend",
-		SDKName: "Backend",
-		Log:     manager.Log,
+		Kind:      "Backend",
+		SDKName:   "Backend",
+		Log:       manager.Log,
+		Semantics: newBackendRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.CreateBackendRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateBackend(ctx, *request.(*loadbalancersdk.CreateBackendRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBackendDetails", RequestName: "CreateBackendDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.GetBackendRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetBackend(ctx, *request.(*loadbalancersdk.GetBackendRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.ListBackendsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListBackends(ctx, *request.(*loadbalancersdk.ListBackendsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.UpdateBackendRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateBackend(ctx, *request.(*loadbalancersdk.UpdateBackendRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateBackendDetails", RequestName: "UpdateBackendDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.DeleteBackendRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteBackend(ctx, *request.(*loadbalancersdk.DeleteBackendRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
 		},
 	}
 	if err != nil {

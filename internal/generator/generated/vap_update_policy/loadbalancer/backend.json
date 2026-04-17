@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "loadbalancer",
+    "apiVersion": "loadbalancer.oracle.com/v1beta1",
+    "kind": "Backend",
+    "formalSlug": "backend",
+    "providerResource": "oci_load_balancer_backend",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "backup",
+      "drain",
+      "offline",
+      "weight"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "backendSetName",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "ipAddress",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "loadBalancerId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "port",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}
