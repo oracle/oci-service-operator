@@ -51,6 +51,7 @@ mysql	version	Version	scaffold	repo-authored-semantics	imports/mysql/version.jso
 mysql	workrequest	WorkRequest	scaffold	repo-authored-semantics	imports/mysql/workrequest.json	controllers/mysql/workrequest/spec.cfg	controllers/mysql/workrequest/logic-gaps.md	controllers/mysql/workrequest/diagrams
 mysql	workrequesterror	WorkRequestError	scaffold	repo-authored-semantics	imports/mysql/workrequesterror.json	controllers/mysql/workrequesterror/spec.cfg	controllers/mysql/workrequesterror/logic-gaps.md	controllers/mysql/workrequesterror/diagrams
 mysql	workrequestlog	WorkRequestLog	scaffold	repo-authored-semantics	imports/mysql/workrequestlog.json	controllers/mysql/workrequestlog/spec.cfg	controllers/mysql/workrequestlog/logic-gaps.md	controllers/mysql/workrequestlog/diagrams
+monitoring	alarm	Alarm	seeded	repo-authored-semantics	imports/monitoring/alarm.json	controllers/monitoring/alarm/spec.cfg	controllers/monitoring/alarm/logic-gaps.md	controllers/monitoring/alarm/diagrams
 nosql	index	Index	scaffold	repo-authored-semantics	imports/nosql/index.json	controllers/nosql/index/spec.cfg	controllers/nosql/index/logic-gaps.md	controllers/nosql/index/diagrams
 nosql	replica	Replica	scaffold	repo-authored-semantics	imports/nosql/replica.json	controllers/nosql/replica/spec.cfg	controllers/nosql/replica/logic-gaps.md	controllers/nosql/replica/diagrams
 nosql	row	Row	scaffold	repo-authored-semantics	imports/nosql/row.json	controllers/nosql/row/spec.cfg	controllers/nosql/row/logic-gaps.md	controllers/nosql/row/diagrams

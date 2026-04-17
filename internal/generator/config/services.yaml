@@ -1260,6 +1260,30 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Alarm
+          formalSpec: alarm
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCIDs and destination OCID below before running e2e.
+              # Update spec.displayName or spec.query if you want to force a fresh create instead of
+              # binding to an existing Alarm with the same compartment and display name.
+              #
+              apiVersion: monitoring.oracle.com/v1beta1
+              kind: Alarm
+              metadata:
+                name: alarm-sample
+              spec:
+                displayName: osok-alarm-sample
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                metricCompartmentId: ocid1.compartment.oc1..exampleuniqueID
+                namespace: oci_computeagent
+                query: CpuUtilization[1m].mean() > 85
+                severity: CRITICAL
+                destinations:
+                  - ocid1.onstopic.oc1..exampleuniqueID
+                isEnabled: true
     observedState:
       sdkAliases:
         AlarmHistory:

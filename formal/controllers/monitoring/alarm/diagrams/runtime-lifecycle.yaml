@@ -1,0 +1,16 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: monitoring
+slug: alarm
+kind: Alarm
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+  - failed
+notes:
+  - The generated runtime scopes ListAlarms by compartmentId plus displayName before create and only reuses a unique active match; duplicate display-name matches fail instead of guessing.
+  - Create and update use read-after-write follow-up and treat ACTIVE as the steady-state success target; there are no separate provisioning or updating lifecycle enums in the vendored SDK.
+  - Mutable drift is limited to the reviewed UpdateAlarm surface, while compartmentId remains replacement-only until a monitoring/alarm-specific move contract is proven.
+  - Delete retains the finalizer until GetAlarm or list fallback confirms DELETED or not found, and no Kubernetes secret side effects are part of this path.

@@ -3396,6 +3396,55 @@ func TestCheckedInBucketFormalBindingUsesRepoAuthoredMutationSurface(t *testing.
 	}
 }
 
+func TestCheckedInAlarmFormalBindingUsesRepoAuthoredMutationSurface(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var monitoringService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "monitoring" {
+			monitoringService = &cfg.Services[i]
+			break
+		}
+	}
+	if monitoringService == nil {
+		t.Fatal("monitoring service was not found in services.yaml")
+	}
+	if got := monitoringService.FormalSpecFor("Alarm"); got != "alarm" {
+		t.Fatalf("monitoring Alarm formalSpec = %q, want %q", got, "alarm")
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *monitoringService)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	alarm := findResource(t, pkg.Resources, "Alarm")
+	if alarm.Runtime == nil || alarm.Runtime.Semantics == nil {
+		t.Fatal("Alarm runtime semantics were not attached")
+	}
+	if got := alarm.Runtime.Semantics.List.MatchFields; !slices.Equal(got, []string{"compartmentId", "displayName", "lifecycleState"}) {
+		t.Fatalf("Alarm list match fields = %v, want explicit bind lookup surface", got)
+	}
+	if got := alarm.Runtime.Semantics.Mutation.ForceNew; !slices.Equal(got, []string{"compartmentId"}) {
+		t.Fatalf("Alarm force-new fields = %v, want [compartmentId]", got)
+	}
+	if !slices.Contains(alarm.Runtime.Semantics.Mutation.Mutable, "body") {
+		t.Fatalf("Alarm mutable fields = %v, want body in mutable surface", alarm.Runtime.Semantics.Mutation.Mutable)
+	}
+	if alarm.Runtime.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		t.Fatalf("Alarm delete follow-up = %q, want %q", alarm.Runtime.Semantics.DeleteFollowUp.Strategy, "confirm-delete")
+	}
+	if alarm.Runtime.Semantics.FinalizerPolicy != "retain-until-confirmed-delete" {
+		t.Fatalf("Alarm finalizer policy = %q, want %q", alarm.Runtime.Semantics.FinalizerPolicy, "retain-until-confirmed-delete")
+	}
+}
+
 func TestGeneratePreservesExistingSampleKustomizationEntries(t *testing.T) {
 	t.Parallel()
 
