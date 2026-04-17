@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetDatabaseToolsConnection
 else tracked identity is missing
-ServiceManager -> OCI: ListDatabaseToolsConnection(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListDatabaseToolsConnections(filters:\ncompartment_id, display_name,\nrelated_resource_identifier,\nruntime_identity (+3 more))
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateDatabaseToolsConnection
-loop create pending PROVISIONING
+loop create pending CREATING
 ServiceManager -> OCI: GetDatabaseToolsConnection
 end
 else reusable OCI resource already exists
@@ -52,9 +52,9 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteDatabaseToolsConnection
-ServiceManager -> OCI: confirm delete via\nGetDatabaseToolsConnection or\nListDatabaseToolsConnection
+ServiceManager -> OCI: confirm delete via\nGetDatabaseToolsConnection or\nListDatabaseToolsConnections
 loop delete pending DELETING
-ServiceManager -> OCI: GetDatabaseToolsConnection or\nListDatabaseToolsConnection
+ServiceManager -> OCI: GetDatabaseToolsConnection or\nListDatabaseToolsConnections
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -63,25 +63,31 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+advanced_properties, connection_string,
+defined_tags, display_name (+8 more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+compartment_id, runtime_support, type
+Lookup filters: compartment_id,
+display_name,
+related_resource_identifier,
+runtime_identity (+3 more)
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateDatabaseToolsConnection\nonly for mutable fields display_name
+ServiceManager -> OCI: Apply\nChangeDatabaseToolsConnectionCompartment,\nUpdateDatabaseToolsConnection only\nfor mutable fields\nadvanced_properties,\nconnection_string, defined_tags,\ndisplay_name (+8 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetDatabaseToolsConnection
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,19 +114,43 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: advanced_properties,
+connection_string, defined_tags, display_name
+(+8 more)
 reject before mutate: force-new fields
-compartment_id
+compartment_id, runtime_support, type
 create-only fields: none
 list lookup:
-scaffold_databasetools_databasetoolsconnection
-filters compartment_id, state
+oci_database_tools_database_tools_connections
+filters compartment_id, display_name,
+related_resource_identifier, runtime_identity
+(+3 more)
 conflicts: none
-open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+open gaps: drift-guard
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `UPDATING` to updating, `ACTIVE`
+and `INACTIVE` to success, `DELETING` to
+terminating, and `FAILED` to the terminal failed
+bucket.
+Pre-create lookup queries
+`ListDatabaseToolsConnections` with
+`compartmentId`, `displayName`, and optional
+`relatedResourceIdentifier`; reusable matches
+are narrowed in memory with `type`,
+`connectionString` or `url`,
+`relatedResource.identifier`, `userName`,
+`privateEndpointId`, and `runtimeSupport`.
+Only the mutable fields above reconcile in
+place. `compartmentId`, `runtimeSupport`, and
+`type` remain replacement-only drift even though
+the provider exposes broader update paths;
+post-create `locks` drift stays explicit as an
+open repo-authored gap.
 end note
 @enduml

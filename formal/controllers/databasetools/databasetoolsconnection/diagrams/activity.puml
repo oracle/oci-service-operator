@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via\nGetDatabaseToolsConnection;
 else (no)
-:Resolve an existing OCI resource through\nListDatabaseToolsConnection using filters\ncompartment_id, state;
+:Resolve an existing OCI resource through\nListDatabaseToolsConnections using filters\ncompartment_id, display_name,\nrelated_resource_identifier, runtime_identity\n(+3 more);
 :Create the OCI resource via\nCreateDatabaseToolsConnection when no reusable\nmatch is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteDatabaseToolsConnection\nwith required via GetDatabaseToolsConnection\nor ListDatabaseToolsConnection to DELETED\nconfirmation;
-:Confirm deletion via\nGetDatabaseToolsConnection or\nListDatabaseToolsConnection until OCI reaches\nDELETED;
+:Delete path uses DeleteDatabaseToolsConnection\nwith required via GetDatabaseToolsConnection\nor ListDatabaseToolsConnections to DELETED\nconfirmation;
+:Confirm deletion via\nGetDatabaseToolsConnection or\nListDatabaseToolsConnections until OCI reaches\nDELETED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -46,29 +46,31 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
-:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
 stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields compartment_id, runtime_support, type;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateDatabaseToolsConnection only for\nmutable fields display_name;
+:Apply\nChangeDatabaseToolsConnectionCompartment,\nUpdateDatabaseToolsConnection only for mutable\nfields advanced_properties, connection_string,\ndefined_tags, display_name (+8 more);
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Return success for the ACTIVE success state;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
+:Keep promotion blocked on drift-guard;
 }
 endif
 stop
@@ -91,19 +93,43 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: advanced_properties,
+connection_string, defined_tags, display_name
+(+8 more)
 reject before mutate: force-new fields
-compartment_id
+compartment_id, runtime_support, type
 create-only fields: none
 list lookup:
-scaffold_databasetools_databasetoolsconnection
-filters compartment_id, state
+oci_database_tools_database_tools_connections
+filters compartment_id, display_name,
+related_resource_identifier, runtime_identity
+(+3 more)
 conflicts: none
-open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+open gaps: drift-guard
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `UPDATING` to updating, `ACTIVE`
+and `INACTIVE` to success, `DELETING` to
+terminating, and `FAILED` to the terminal failed
+bucket.
+Pre-create lookup queries
+`ListDatabaseToolsConnections` with
+`compartmentId`, `displayName`, and optional
+`relatedResourceIdentifier`; reusable matches
+are narrowed in memory with `type`,
+`connectionString` or `url`,
+`relatedResource.identifier`, `userName`,
+`privateEndpointId`, and `runtimeSupport`.
+Only the mutable fields above reconcile in
+place. `compartmentId`, `runtimeSupport`, and
+`type` remain replacement-only drift even though
+the provider exposes broader update paths;
+post-create `locks` drift stays explicit as an
+open repo-authored gap.
 end note
 @enduml

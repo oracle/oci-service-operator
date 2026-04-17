@@ -971,6 +971,7 @@ services:
         strategy: none
       resources:
         - kind: DatabaseToolsConnection
+          formalSpec: databasetoolsconnection
           async:
             strategy: lifecycle
             runtime: generatedruntime
