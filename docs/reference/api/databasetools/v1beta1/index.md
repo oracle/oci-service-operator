@@ -81,6 +81,7 @@ DatabaseToolsConnectionKeyStoreKeyStoreContent defines nested fields for Databas
 | `jsonData` | - | `string` | No | - | - |
 | `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the key store. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
+
 <a id="kind-databasetoolsconnection-spec-keystores-keystorepassword"></a>
 ##### Spec.keyStores[].keyStorePassword
 
@@ -357,3 +358,4 @@ DatabaseToolsConnectionUserPassword defines nested fields for DatabaseToolsConne
 | `jsonData` | - | `string` | No | - | - |
 | `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
+
