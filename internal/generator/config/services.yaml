@@ -2033,6 +2033,35 @@ services:
                       key: createdBy
                   compartmentDepth: 2
                   version: 1
+        - kind: Query
+          formalSpec: query
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.queryDefinition.displayName if you want to force a
+              # fresh create instead of binding to an existing Query with the same saved
+              # definition in the same compartment.
+              #
+              apiVersion: usageapi.oracle.com/v1beta1
+              kind: Query
+              metadata:
+                name: query-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                queryDefinition:
+                  displayName: "query-sample"
+                  reportQuery:
+                    tenantId: ocid1.tenancy.oc1..exampleuniqueID
+                    granularity: MONTHLY
+                    queryType: COST
+                    groupBy:
+                      - service
+                    dateRangeName: LAST_THREE_MONTHS
+                  costAnalysisUI:
+                    graph: BARS
+                    isCumulativeGraph: false
+                  version: 1
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

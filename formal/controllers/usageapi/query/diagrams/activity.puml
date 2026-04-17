@@ -1,0 +1,122 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - usageapi/Query
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Query spec, tracked status, and\ndelete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetQuery;
+else (no)
+:Resolve an existing OCI resource through\nListQueries using filters\nquery_definition.display_name,\nquery_definition.version,\nquery_definition.report_query.tenant_id,\nquery_definition.report_query.granularity (+16\nmore);
+:Create the OCI resource via CreateQuery when\nno reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteQuery with required via\nGetQuery or ListQueries to DELETED\nconfirmation;
+:Confirm deletion via GetQuery or ListQueries\nuntil OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the imported\nfield surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateQuery only for mutable fields\nquery_definition;
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: usageapi
+slug: query
+kind: Query
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift: query_definition
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_usage_queries filters
+query_definition.display_name,
+query_definition.version,
+query_definition.report_query.tenant_id,
+query_definition.report_query.granularity (+16
+more)
+conflicts: none
+open gaps: none
+The generated runtime reuses an existing query
+by listing on the required compartmentId request
+scope, then matching the returned
+queryDefinition payload on displayName, version,
+report inputs, and any populated costAnalysisUI
+fields.
+The SDK surface does not expose lifecycle states
+on Query bodies, so create and update settle
+through read-after-write GetQuery confirmation
+instead of lifecycle polling; a service-local
+wrapper converts that confirmed reread into
+settled Active status.
+In-place updates are limited to queryDefinition;
+compartmentId requires replacement and is
+rejected before OCI mutation.
+Delete retains the finalizer until GetQuery
+confirms the query no longer exists.
+end note
+@enduml
