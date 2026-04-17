@@ -20,5 +20,13 @@ apiVersion: loadbalancer.oracle.com/v1beta1
 kind: LoadBalancer
 metadata:
   name: loadbalancer-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..<unique_ID>
+  displayName: example_load_balancer
+  shapeName: Flexible
+  subnetIds:
+    - ocid1.subnet.oc1..<unique_ID>
+  shapeDetails:
+    minimumBandwidthInMbps: 10
+    maximumBandwidthInMbps: 10
 ```

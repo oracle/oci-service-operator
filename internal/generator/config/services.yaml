@@ -1279,6 +1279,23 @@ services:
                 defaultBackendSetName: example_backend_set
                 port: 80
                 protocol: HTTP
+        - kind: LoadBalancer
+          formalSpec: loadbalancer
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: LoadBalancer
+              metadata:
+                name: loadbalancer-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..<unique_ID>
+                displayName: example_load_balancer
+                shapeName: Flexible
+                subnetIds:
+                  - ocid1.subnet.oc1..<unique_ID>
+                shapeDetails:
+                  minimumBandwidthInMbps: 10
+                  maximumBandwidthInMbps: 10
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
