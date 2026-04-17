@@ -4,9 +4,11 @@ import (
 	"path"
 	"reflect"
 
+	"github.com/oracle/oci-go-sdk/v65/aidocument"
 	"github.com/oracle/oci-go-sdk/v65/ailanguage"
 	"github.com/oracle/oci-go-sdk/v65/aivision"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
+	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
@@ -140,6 +142,13 @@ var seedTargets = []Target{
 	newTarget("core", "Vcn", reflect.TypeOf(core.Vcn{})),
 	newTarget("core", "InstanceSummary", reflect.TypeOf(core.InstanceSummary{})),
 
+	// Aidocument CRD support
+	newTarget("aidocument", "CreateProjectDetails", reflect.TypeOf(aidocument.CreateProjectDetails{})),
+	newTarget("aidocument", "UpdateProjectDetails", reflect.TypeOf(aidocument.UpdateProjectDetails{})),
+	newTarget("aidocument", "Project", reflect.TypeOf(aidocument.Project{})),
+	newTarget("aidocument", "ProjectCollection", reflect.TypeOf(aidocument.ProjectCollection{})),
+	newTarget("aidocument", "ProjectSummary", reflect.TypeOf(aidocument.ProjectSummary{})),
+
 	// Ailanguage CRD support
 	newTarget("ailanguage", "CreateProjectDetails", reflect.TypeOf(ailanguage.CreateProjectDetails{})),
 	newTarget("ailanguage", "UpdateProjectDetails", reflect.TypeOf(ailanguage.UpdateProjectDetails{})),
@@ -159,6 +168,12 @@ var seedTargets = []Target{
 	newTarget("analytics", "UpdateAnalyticsInstanceDetails", reflect.TypeOf(analytics.UpdateAnalyticsInstanceDetails{})),
 	newTarget("analytics", "AnalyticsInstance", reflect.TypeOf(analytics.AnalyticsInstance{})),
 	newTarget("analytics", "AnalyticsInstanceSummary", reflect.TypeOf(analytics.AnalyticsInstanceSummary{})),
+
+	// Bds CRD support
+	newTarget("bds", "CreateBdsInstanceDetails", reflect.TypeOf(bds.CreateBdsInstanceDetails{})),
+	newTarget("bds", "UpdateBdsInstanceDetails", reflect.TypeOf(bds.UpdateBdsInstanceDetails{})),
+	newTarget("bds", "BdsInstance", reflect.TypeOf(bds.BdsInstance{})),
+	newTarget("bds", "BdsInstanceSummary", reflect.TypeOf(bds.BdsInstanceSummary{})),
 
 	// Containerinstances CRD support
 	newTarget("containerinstances", "CreateContainerInstanceDetails", reflect.TypeOf(containerinstances.CreateContainerInstanceDetails{})),

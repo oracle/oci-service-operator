@@ -2,6 +2,19 @@
 # or release history alone.
 schemaVersion: v1alpha1
 packages:
+  - package: aidocument
+    displayName: AI Document
+    summary: Manage OCI AI Document projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining AI Document resource families stay unpublished.
+    kindOverrides:
+      - group: aidocument
+        kind: Project
+        summary: Manage OCI AI Document projects.
+
   - package: ailanguage
     displayName: AI Language
     summary: Manage OCI AI Language projects from Kubernetes with an initial controller-backed Project rollout.
@@ -56,6 +69,19 @@ packages:
       - group: apigateway
         kind: ApiGatewayDeployment
         summary: Manage OCI API Gateway deployment routes and backend bindings.
+
+  - package: bds
+    displayName: Big Data Service
+    summary: Manage OCI Big Data Service instances from Kubernetes with an initial controller-backed BdsInstance rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to BdsInstance while the remaining Big Data Service resource families stay unpublished.
+    kindOverrides:
+      - group: bds
+        kind: BdsInstance
+        summary: Manage OCI Big Data Service instances.
 
   - package: containerengine
     displayName: Container Engine for Kubernetes

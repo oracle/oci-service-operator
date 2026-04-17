@@ -2996,6 +2996,27 @@ func TestCheckedInAIVisionProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) 
 	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
 }
 
+func TestCheckedInAIDocumentSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/aidocument")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{"Model", "ProcessorJob", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("aidocument discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
+}
+
 func TestCheckedInAIDocumentProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
 	t.Parallel()
 
@@ -3026,6 +3047,39 @@ func TestCheckedInAIDocumentProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T
 	assertRuntimeMethodName(t, project.Runtime.Update, "UpdateProject")
 	assertRuntimeMethodName(t, project.Runtime.Delete, "DeleteProject")
 	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
+}
+
+func TestCheckedInBDSSDKDiscoveryFindsBdsInstanceAndAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/bds")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{
+		"AutoScalingConfiguration",
+		"BdsApiKey",
+		"BdsInstance",
+		"BdsMetastoreConfiguration",
+		"OsPatch",
+		"OsPatchDetail",
+		"Patch",
+		"PatchHistory",
+		"WorkRequest",
+		"WorkRequestError",
+		"WorkRequestLog",
+	}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("bds discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
 }
 
 func TestCheckedInBDSBdsInstanceRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {

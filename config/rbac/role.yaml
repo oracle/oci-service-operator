@@ -24,6 +24,7 @@ rules:
   - update
   - watch
 - apiGroups:
+  - aidocument.oracle.com
   - ailanguage.oracle.com
   - aivision.oracle.com
   resources:
@@ -37,6 +38,7 @@ rules:
   - update
   - watch
 - apiGroups:
+  - aidocument.oracle.com
   - ailanguage.oracle.com
   - aivision.oracle.com
   resources:
@@ -44,6 +46,7 @@ rules:
   verbs:
   - update
 - apiGroups:
+  - aidocument.oracle.com
   - ailanguage.oracle.com
   - aivision.oracle.com
   resources:
@@ -103,6 +106,32 @@ rules:
   resources:
   - apigatewaydeployments/status
   - apigateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - bds.oracle.com
+  resources:
+  - bdsinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bds.oracle.com
+  resources:
+  - bdsinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - bds.oracle.com
+  resources:
+  - bdsinstances/status
   verbs:
   - get
   - patch

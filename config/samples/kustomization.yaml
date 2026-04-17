@@ -35,4 +35,6 @@ resources:
 - analytics_v1beta1_analyticsinstance.yaml
 - ailanguage_v1beta1_project.yaml
 - aivision_v1beta1_project.yaml
+- aidocument_v1beta1_project.yaml
+- bds_v1beta1_bdsinstance.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
