@@ -11,6 +11,7 @@ codex-session.log
 bin/
 testbin/
 .envtest-home/
+.tmp/
 bundle/
 
 # This is to remediate SCA findings wrt downloads from dockerfiles present in go vendor tree
