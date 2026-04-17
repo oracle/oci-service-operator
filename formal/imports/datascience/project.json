@@ -5,7 +5,7 @@
   "slug": "project",
   "kind": "Project",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_datascience_project",
+  "providerResource": "oci_datascience_project",
   "operations": {
     "create": [
       {
@@ -23,12 +23,17 @@
     ],
     "list": [
       {
-        "operation": "ListProject",
-        "requestType": "datascience.ListProjectRequest",
-        "responseType": "datascience.ListProjectResponse"
+        "operation": "ListProjects",
+        "requestType": "datascience.ListProjectsRequest",
+        "responseType": "datascience.ListProjectsResponse"
       }
     ],
     "update": [
+      {
+        "operation": "ChangeProjectCompartment",
+        "requestType": "datascience.ChangeProjectCompartmentRequest",
+        "responseType": "datascience.ChangeProjectCompartmentResponse"
+      },
       {
         "operation": "UpdateProject",
         "requestType": "datascience.UpdateProjectRequest",
@@ -45,45 +50,35 @@
   },
   "lifecycle": {
     "create": {
-      "pending": [
-        "PROVISIONING"
-      ],
       "target": [
         "ACTIVE"
       ]
     },
-    "update": {
-      "pending": [
-        "UPDATING"
-      ],
-      "target": [
-        "ACTIVE"
-      ]
-    }
+    "update": {}
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
     ],
-    "forceNew": [
-      "compartment_id"
-    ],
+    "forceNew": null,
     "conflictsWith": {}
   },
   "hooks": {
     "create": [
       {
         "helper": "tfresource.CreateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "template",
-        "action": "CREATED"
       }
     ],
     "update": [
       {
         "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
       }
     ],
     "delete": [
@@ -101,11 +96,14 @@
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_datascience_project",
-    "collectionField": "project",
+    "datasource": "oci_datascience_projects",
+    "collectionField": "projects",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
+      "created_by",
+      "display_name",
+      "id",
       "state"
     ]
   },
@@ -115,11 +113,18 @@
     "repoAuthoredLogicGapsPath": "controllers/datascience/project/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
       "secret-output",
-      "delete-confirmation"
+      "delete-confirmation",
+      "waiter-work-request"
     ]
   },
   "notes": [
-    "Scaffold placeholder for datascience/project; replace imported facts before promoting this row beyond scaffold."
+    "Pinned OCI SDK contract: the provider resource exposes CreateProject, GetProject, ChangeProjectCompartment, UpdateProject, and DeleteProject, while the paired datasource oci_datascience_projects exposes ListProjects filters compartment_id, created_by, display_name, id, and state and returns projects.items from the SDK Items list.",
+    "Pinned provider implementation: update can change compartment_id through ChangeProjectCompartment plus WaitForUpdatedState before UpdateProject. The reviewed generatedruntime client does not use provider waiters or compartment-move helpers; it follows write calls with read-after-write or confirm-delete rereads instead.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses ListProjects with compartmentId, displayName, optional tracked id, and reusable lifecycle states to decide whether create is required, and delete fallback can use the same request shape when GetProject returns NotFound.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, freeformTags, and definedTags reconcile in place. Provider support for changing compartment_id remains out-of-scope drift because the published runtime treats compartmentId as replacement-only."
   ]
 }

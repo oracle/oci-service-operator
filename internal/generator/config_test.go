@@ -1237,7 +1237,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "datascience", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
 	assertFormalSpecFor(t, services["aivision"], "Project", "project")
@@ -1265,6 +1265,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	}
 	assertFormalSpecFor(t, services["dataflow"], "Application", "application")
 	assertFormalSpecFor(t, services["database"], "AutonomousDatabase", "databaseautonomousdatabase")
+	assertFormalSpecFor(t, services["datascience"], "Project", "project")
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
 	assertFormalSpecFor(t, services["opensearch"], "OpensearchCluster", "opensearchopensearchcluster")
