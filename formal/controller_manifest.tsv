@@ -82,3 +82,4 @@ redis	rediscluster	RedisCluster	seeded	repo-authored-semantics	imports/redis/red
 streaming	stream	Stream	seeded	repo-authored-semantics	imports/streaming/stream.json	controllers/streaming/stream/spec.cfg	controllers/streaming/stream/logic-gaps.md	controllers/streaming/stream/diagrams
 usageapi	customtable	CustomTable	seeded	repo-authored-semantics	imports/usageapi/customtable.json	controllers/usageapi/customtable/spec.cfg	controllers/usageapi/customtable/logic-gaps.md	controllers/usageapi/customtable/diagrams
 usageapi	query	Query	seeded	repo-authored-semantics	imports/usageapi/query.json	controllers/usageapi/query/spec.cfg	controllers/usageapi/query/logic-gaps.md	controllers/usageapi/query/diagrams
+usageapi	schedule	Schedule	seeded	repo-authored-semantics	imports/usageapi/schedule.json	controllers/usageapi/schedule/spec.cfg	controllers/usageapi/schedule/logic-gaps.md	controllers/usageapi/schedule/diagrams

@@ -1,0 +1,15 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: usageapi
+slug: schedule
+kind: Schedule
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+notes:
+  - The generated runtime reuses an existing schedule by listing on the required compartmentId request scope plus the exact schedule name, then binding on that unique name before GetSchedule loads the full payload for drift evaluation.
+  - The Usage API exposes lifecycleState on Schedule bodies, so create and update settle without a service-local synchronous wrapper; both ACTIVE and INACTIVE are modeled as steady resource-exists states.
+  - In-place updates are limited to description, outputFileFormat, resultLocation, freeformTags, and definedTags; name, compartmentId, scheduleRecurrences, timeScheduled, savedReportId, and queryProperties require replacement and are rejected before OCI mutation.
+  - Delete retains the finalizer until GetSchedule confirms the schedule no longer exists.

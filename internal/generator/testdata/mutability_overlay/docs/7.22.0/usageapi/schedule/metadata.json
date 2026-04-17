@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "usageapi",
+  "kind": "Schedule",
+  "formalSlug": "schedule",
+  "providerResource": "oci_usage_schedule",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/usage_schedule",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/usage_schedule",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/usageapi/schedule/page.html",
+  "bodySHA256": "fb69da0f9e906a604d51ca8816b9411fe661f7afc3c188c4032634b415301afb",
+  "bodyBytes": 1301,
+  "fixtureBodyPath": "7.22.0/usageapi/schedule/page.html"
+}

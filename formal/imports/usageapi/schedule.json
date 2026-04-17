@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageapi",
+  "slug": "schedule",
+  "kind": "Schedule",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_usage_schedule",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSchedule",
+        "requestType": "usageapi.CreateScheduleRequest",
+        "responseType": "usageapi.CreateScheduleResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSchedule",
+        "requestType": "usageapi.GetScheduleRequest",
+        "responseType": "usageapi.GetScheduleResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSchedules",
+        "requestType": "usageapi.ListSchedulesRequest",
+        "responseType": "usageapi.ListSchedulesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSchedule",
+        "requestType": "usageapi.UpdateScheduleRequest",
+        "responseType": "usageapi.UpdateScheduleResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSchedule",
+        "requestType": "usageapi.DeleteScheduleRequest",
+        "responseType": "usageapi.DeleteScheduleResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "freeform_tags",
+      "output_file_format",
+      "result_location"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "name",
+      "query_properties",
+      "saved_report_id",
+      "schedule_recurrences",
+      "time_scheduled"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_usage_schedules",
+    "collectionField": "schedules",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageapi/schedule/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageapi/schedule/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded from the OCI Usage API Schedule SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available."
+  ]
+}

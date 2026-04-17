@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "usageapi",
+    "apiVersion": "usageapi.oracle.com/v1beta1",
+    "kind": "Schedule",
+    "formalSlug": "schedule",
+    "providerResource": "oci_usage_schedule",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "definedTags",
+      "description",
+      "freeformTags",
+      "outputFileFormat",
+      "resultLocation"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "name",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "queryProperties",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "savedReportId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "scheduleRecurrences",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "timeScheduled",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}
