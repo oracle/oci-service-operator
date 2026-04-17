@@ -1130,6 +1130,38 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Log
+          formalSpec: log
+          specFields:
+            - name: LogGroupId
+              type: string
+              tag: 'json:"logGroupId"'
+              comments:
+                - The OCID of the log group that owns this log.
+              markers:
+                - +kubebuilder:validation:Required
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers and logging source values below before running e2e.
+              #
+              apiVersion: logging.oracle.com/v1beta1
+              kind: Log
+              metadata:
+                name: log-sample
+              spec:
+                logGroupId: ocid1.loggroup.oc1..exampleuniqueID
+                displayName: log-sample
+                logType: SERVICE
+                isEnabled: true
+                retentionDuration: 30
+                configuration:
+                  source:
+                    sourceType: OCISERVICE
+                    service: service_name
+                    resource: ocid1.resource.oc1..exampleuniqueID
+                    category: category_name
 
   - service: monitoring
     sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring

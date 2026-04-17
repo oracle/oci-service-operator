@@ -126,6 +126,9 @@ spec:
               isEnabled:
                 description: Whether or not this resource is currently enabled.
                 type: boolean
+              logGroupId:
+                description: The OCID of the log group that owns this log.
+                type: string
               logType:
                 description: The logType that the log object is for, whether custom
                   or service.
@@ -136,6 +139,7 @@ spec:
                 type: integer
             required:
             - displayName
+            - logGroupId
             - logType
             type: object
           status:

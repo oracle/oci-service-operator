@@ -39,6 +39,9 @@ type LogSpec struct {
 	// Log retention duration in 30-day increments (30, 60, 90 and so on until 180).
 	// +kubebuilder:validation:Optional
 	RetentionDuration int `json:"retentionDuration,omitempty"`
+	// The OCID of the log group that owns this log.
+	// +kubebuilder:validation:Required
+	LogGroupId string `json:"logGroupId"`
 }
 
 // LogConfigurationSource defines nested fields for Log.Configuration.Source.

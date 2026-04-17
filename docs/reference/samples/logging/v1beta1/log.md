@@ -16,9 +16,23 @@ This page is generated from the checked-in sample manifest at `config/samples/lo
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers and logging source values below before running e2e.
+#
 apiVersion: logging.oracle.com/v1beta1
 kind: Log
 metadata:
   name: log-sample
-spec: {}
+spec:
+  logGroupId: ocid1.loggroup.oc1..exampleuniqueID
+  displayName: log-sample
+  logType: SERVICE
+  isEnabled: true
+  retentionDuration: 30
+  configuration:
+    source:
+      sourceType: OCISERVICE
+      service: service_name
+      resource: ocid1.resource.oc1..exampleuniqueID
+      category: category_name
 ```

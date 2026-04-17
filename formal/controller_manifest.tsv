@@ -25,6 +25,7 @@ email	emaildomain	EmailDomain	seeded	repo-authored-semantics	imports/email/email
 email	sender	Sender	seeded	repo-authored-semantics	imports/email/sender.json	controllers/email/sender/spec.cfg	controllers/email/sender/logic-gaps.md	controllers/email/sender/diagrams
 identity	compartment	Compartment	seeded	repo-authored-semantics	imports/identity/compartment.json	controllers/identity/compartment/spec.cfg	controllers/identity/compartment/logic-gaps.md	controllers/identity/compartment/diagrams
 identity	user	User	promotable	repo-authored-semantics	imports/identity/user.json	controllers/identity/user/spec.cfg	controllers/identity/user/logic-gaps.md	controllers/identity/user/diagrams
+logging	log	Log	seeded	repo-authored-semantics	imports/logging/log.json	controllers/logging/log/spec.cfg	controllers/logging/log/logic-gaps.md	controllers/logging/log/diagrams
 core	internetgateway	InternetGateway	seeded	repo-authored-semantics	imports/core/internetgateway.json	controllers/core/internetgateway/spec.cfg	controllers/core/internetgateway/logic-gaps.md	controllers/core/internetgateway/diagrams
 core	instance	Instance	seeded	repo-authored-semantics	imports/core/instance.json	controllers/core/instance/spec.cfg	controllers/core/instance/logic-gaps.md	controllers/core/instance/diagrams
 core	natgateway	NatGateway	seeded	repo-authored-semantics	imports/core/natgateway.json	controllers/core/natgateway/spec.cfg	controllers/core/natgateway/logic-gaps.md	controllers/core/natgateway/diagrams

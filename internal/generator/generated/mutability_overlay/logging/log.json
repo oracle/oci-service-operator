@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "sourceContract": {
+    "astPrimaryFacts": [
+      "forceNew",
+      "conflictsWith",
+      "lifecycle",
+      "hooks",
+      "crud",
+      "listLookup"
+    ],
+    "astMutableAlias": "updateCandidate",
+    "docsOverlayScope": "terraform-argument-reference-for-ast-update-candidate-fields",
+    "docsEvidenceSource": "terraform-argument-reference"
+  },
+  "resource": {
+    "service": "logging",
+    "kind": "Log",
+    "formalSlug": "log",
+    "providerResource": "oci_logging_log",
+    "repoAuthoredSpecPath": "controllers/logging/log/spec.cfg",
+    "formalImportPath": "imports/logging/log.json"
+  },
+  "fields": [
+    {
+      "astFieldPath": "configuration",
+      "terraformFieldPath": "configuration",
+      "canonicalJoinKey": "configuration",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "definedTags",
+      "terraformFieldPath": "defined_tags",
+      "canonicalJoinKey": "definedTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "displayName",
+      "terraformFieldPath": "display_name",
+      "canonicalJoinKey": "displayName",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "freeformTags",
+      "terraformFieldPath": "freeform_tags",
+      "canonicalJoinKey": "freeformTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "isEnabled",
+      "terraformFieldPath": "is_enabled",
+      "canonicalJoinKey": "isEnabled",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "logGroupId",
+      "terraformFieldPath": "logGroupId",
+      "canonicalJoinKey": "logGroupId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "logType",
+      "terraformFieldPath": "logType",
+      "canonicalJoinKey": "logType",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "retentionDuration",
+      "terraformFieldPath": "retention_duration",
+      "canonicalJoinKey": "retentionDuration",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/logging/log.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "logging_log#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    }
+  ]
+}

@@ -50,6 +50,7 @@ LogSpec defines the desired state of Log.
 | `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | Yes | - | - |
 | `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `isEnabled` | Whether or not this resource is currently enabled. | `boolean` | No | - | - |
+| `logGroupId` | The OCID of the log group that owns this log. | `string` | Yes | - | - |
 | `logType` | The logType that the log object is for, whether custom or service. | `string` | Yes | - | - |
 | `retentionDuration` | Log retention duration in 30-day increments (30, 60, 90 and so on until 180). | `integer` | No | - | - |
 

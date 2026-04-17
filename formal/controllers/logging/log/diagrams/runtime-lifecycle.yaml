@@ -1,0 +1,16 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: logging
+slug: log
+kind: Log
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - The generated runtime creates or binds logs under spec.logGroupId, then uses status.logGroupId for tracked read, update, and delete operations so immutable path drift cannot redirect delete cleanup.
+  - Bind lookup stays within the target log group and matches on displayName, logType, sourceService, and sourceResource before create; duplicate matches fail.
+  - In-place updates are limited to displayName, isEnabled, freeformTags, definedTags, and retentionDuration. Delete retains the finalizer until GetLog or list fallback confirms the tracked log is gone.
