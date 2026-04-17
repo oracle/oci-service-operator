@@ -9,5 +9,45 @@ states:
   - active
   - updating
   - terminating
+  - failed
+repoAuthored:
+  mutation:
+    mutable:
+      - bootstrap_script_url
+      - defined_tags
+      - display_name
+      - freeform_tags
+      - kms_key_id
+    forceNew:
+      - cluster_profile
+      - cluster_version
+      - compartment_id
+      - is_high_availability
+      - is_secure
+      - network_config
+      - nodes
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - Generated runtime uses read-after-write follow-up for create and update plus
+    confirm-delete for delete; `CREATING` maps to provisioning,
+    `UPDATING`/`SUSPENDING`/`RESUMING` to updating, `ACTIVE`/`INACTIVE`/`SUSPENDED`
+    to success, `DELETING` to terminating, and `FAILED` to the terminal failed
+    bucket.
+  - Pre-create lookup queries `ListBdsInstances` with `compartmentId` and
+    `displayName`; delete fallback can re-resolve the tracked cluster through
+    `ListBdsInstances` when `GetBdsInstance` stops finding the resource.
+  - Only `displayName`, `bootstrapScriptUrl`, `freeformTags`, `definedTags`,
+    and `kmsKeyId` reconcile in place. `compartmentId`, `clusterVersion`,
+    `isHighAvailability`, `isSecure`, `clusterProfile`, `networkConfig`, and
+    `nodes` remain replacement-only drift, while the runtime has no secret side
+    effects.

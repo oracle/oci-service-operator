@@ -114,79 +114,33 @@ func newBdsInstanceRuntimeConfig(
 }
 
 func reviewedBdsInstanceRuntimeSemantics() *generatedruntime.Semantics {
-	createHooks := []generatedruntime.Hook{
-		{Helper: "tfresource.CreateResource"},
+	semantics := newBdsInstanceRuntimeSemantics()
+	semantics.List = &generatedruntime.ListSemantics{
+		ResponseItemsField: "Items",
+		MatchFields:        []string{"compartmentId", "displayName"},
 	}
-	updateHooks := []generatedruntime.Hook{
-		{Helper: "tfresource.UpdateResource"},
+	semantics.AuxiliaryOperations = nil
+	semantics.Mutation = generatedruntime.MutationSemantics{
+		// Cover the full observed create surface so the generic runtime does not
+		// reject BDS node and network projections before the reviewed update
+		// builder can apply the service-specific mutable-vs-immutable rules.
+		Mutable: []string{
+			"compartmentId",
+			"displayName",
+			"clusterVersion",
+			"isHighAvailability",
+			"isSecure",
+			"nodes",
+			"networkConfig",
+			"bootstrapScriptUrl",
+			"freeformTags",
+			"definedTags",
+			"kmsKeyId",
+			"clusterProfile",
+		},
+		ConflictsWith: map[string][]string{},
 	}
-	deleteHooks := []generatedruntime.Hook{
-		{Helper: "tfresource.DeleteResource"},
-	}
-
-	return &generatedruntime.Semantics{
-		FormalService: "bds",
-		FormalSlug:    "bdsinstance",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{"UPDATING", "SUSPENDING", "RESUMING"},
-			ActiveStates:       []string{"ACTIVE", "INACTIVE", "SUSPENDED"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			// Cover the full observed create surface so the generic runtime does not
-			// reject BDS node and network projections before the reviewed update
-			// builder can apply the service-specific mutable-vs-immutable rules.
-			Mutable: []string{
-				"compartmentId",
-				"displayName",
-				"clusterVersion",
-				"isHighAvailability",
-				"isSecure",
-				"nodes",
-				"networkConfig",
-				"bootstrapScriptUrl",
-				"freeformTags",
-				"definedTags",
-				"kmsKeyId",
-				"clusterProfile",
-			},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: createHooks,
-			Update: updateHooks,
-			Delete: deleteHooks,
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    createHooks,
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    updateHooks,
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    deleteHooks,
-		},
-	}
+	return semantics
 }
 
 func buildBdsInstanceUpdateBody(

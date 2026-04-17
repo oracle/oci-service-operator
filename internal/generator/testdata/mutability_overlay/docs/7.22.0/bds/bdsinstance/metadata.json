@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "bds",
+  "kind": "BdsInstance",
+  "formalSlug": "bdsinstance",
+  "providerResource": "oci_bds_bds_instance",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/bds_bds_instance",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/bds_bds_instance",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/bds/bdsinstance/page.html",
+  "bodySHA256": "6a7814bf3d032ab83f778b8cd9b457eb95c5a15a006737b49a5f9be1dd51d001",
+  "bodyBytes": 13014,
+  "fixtureBodyPath": "7.22.0/bds/bdsinstance/page.html"
+}

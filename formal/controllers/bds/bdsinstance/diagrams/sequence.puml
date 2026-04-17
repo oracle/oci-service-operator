@@ -38,10 +38,10 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetBdsInstance
 else tracked identity is missing
-ServiceManager -> OCI: ListBdsInstance(filters:\ncompartment_id, state)
+ServiceManager -> OCI: ListBdsInstances(filters:\ncompartment_id, display_name, state)
 alt reusable OCI resource is not found
-ServiceManager -> OCI: CreateBdsInstance
-loop create pending PROVISIONING
+ServiceManager -> OCI: AddKafka, AddWorkerNodes,\nCreateBdsInstance
+loop create pending CREATING
 ServiceManager -> OCI: GetBdsInstance
 end
 else reusable OCI resource already exists
@@ -52,9 +52,9 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteBdsInstance
-ServiceManager -> OCI: confirm delete via GetBdsInstance or\nListBdsInstance
+ServiceManager -> OCI: confirm delete via GetBdsInstance or\nListBdsInstances
 loop delete pending DELETING
-ServiceManager -> OCI: GetBdsInstance or ListBdsInstance
+ServiceManager -> OCI: GetBdsInstance or ListBdsInstances
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -63,25 +63,31 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, RESUMING, SUSPENDING,\nUPDATING (+1 more)
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+bootstrap_script_url, defined_tags,
+display_name, freeform_tags (+1 more)
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+cluster_profile, cluster_version,
+compartment_id, is_high_availability (+3
+more)
+Lookup filters: compartment_id,
+display_name, state
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateBdsInstance only for\nmutable fields display_name
-loop update pending UPDATING
+ServiceManager -> OCI: Apply AddBlockStorage, AddKafka,\nAddMasterNodes (+7 more) only for\nmutable fields bootstrap_script_url,\ndefined_tags, display_name,\nfreeform_tags (+1 more)
+loop update pending RESUMING, SUSPENDING,\nUPDATING
 ServiceManager -> OCI: GetBdsInstance
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -108,18 +114,39 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create CREATING; update
+RESUMING, SUSPENDING, UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: bootstrap_script_url,
+defined_tags, display_name, freeform_tags (+1
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_profile, cluster_version,
+compartment_id, is_high_availability (+3 more)
 create-only fields: none
-list lookup: scaffold_bds_bdsinstance filters
-compartment_id, state
+list lookup: oci_bds_bds_instances filters
+compartment_id, display_name, state
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `UPDATING`/`SUSPENDING`/`RESUMING`
+to updating, `ACTIVE`/`INACTIVE`/`SUSPENDED` to
+success, `DELETING` to terminating, and `FAILED`
+to the terminal failed bucket.
+Pre-create lookup queries `ListBdsInstances`
+with `compartmentId` and `displayName`; delete
+fallback can re-resolve the tracked cluster
+through `ListBdsInstances` when `GetBdsInstance`
+stops finding the resource.
+Only `displayName`, `bootstrapScriptUrl`,
+`freeformTags`, `definedTags`, and `kmsKeyId`
+reconcile in place. `compartmentId`,
+`clusterVersion`, `isHighAvailability`,
+`isSecure`, `clusterProfile`, `networkConfig`,
+and `nodes` remain replacement-only drift, while
+the runtime has no secret side effects.
 end note
 @enduml
