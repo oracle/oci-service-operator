@@ -16,9 +16,37 @@ This page is generated from the checked-in sample manifest at `config/samples/oc
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers and SSH key material below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create instead of
+# binding to an existing SDDC with the same displayName in the same compartment.
+# Replace the nested initialConfiguration subnet and VLAN OCIDs with values valid for the
+# target environment before running this sample.
+#
 apiVersion: ocvp.oracle.com/v1beta1
 kind: Sddc
 metadata:
   name: sddc-sample
-spec: {}
+spec:
+  displayName: "sddc-sample"
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  vmwareSoftwareVersion: "7.0.0"
+  hcxMode: DISABLED
+  sshAuthorizedKeys: |
+    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCexampleReplaceMe user@example
+  initialConfiguration:
+    initialClusterConfigurations:
+      - displayName: "management-cluster"
+        vsphereType: MANAGEMENT
+        computeAvailabilityDomain: "Uocm:PHX-AD-1"
+        esxiHostsCount: 3
+        networkConfiguration:
+          provisioningSubnetId: ocid1.subnet.oc1..exampleuniqueID
+          vmotionVlanId: ocid1.vlan.oc1..exampleuniqueID
+          vsanVlanId: ocid1.vlan.oc1..exampleuniqueID
+          nsxVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
+          nsxEdgeVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
+          vsphereVlanId: ocid1.vlan.oc1..exampleuniqueID
+          nsxEdgeUplink1VlanId: ocid1.vlan.oc1..exampleuniqueID
+          nsxEdgeUplink2VlanId: ocid1.vlan.oc1..exampleuniqueID
 ```

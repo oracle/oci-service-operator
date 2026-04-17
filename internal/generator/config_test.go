@@ -1318,6 +1318,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["mysql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["objectstorage"], "Bucket", "objectstoragebucket")
 	assertFormalSpecFor(t, services["ocvp"], "Cluster", "cluster")
+	assertFormalSpecFor(t, services["ocvp"], "Sddc", "sddc")
 	assertFormalSpecFor(t, services["opensearch"], "OpensearchCluster", "opensearchopensearchcluster")
 	assertFormalSpecFor(t, services["psql"], "DbSystem", "dbsystem")
 	assertFormalSpecFor(t, services["redis"], "RedisCluster", "rediscluster")
@@ -2378,9 +2379,11 @@ func assertOCVPRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 1)
+	assertResourceOverrideCount(t, service, 2)
 	assertPrimaryPortOverride(t, service, "Cluster", "cluster", "ocvp/cluster")
 	assertSampleOverrideContains(t, service, "Cluster", "displayName:", "sddcId:", "networkConfiguration:")
+	assertPrimaryPortOverride(t, service, "Sddc", "sddc", "ocvp/sddc")
+	assertSampleOverrideContains(t, service, "Sddc", "displayName:", "compartmentId:", "initialConfiguration:")
 }
 
 func assertPackageSplitContainsKind(t *testing.T, service *ServiceConfig, splitName string, wantKind string) {

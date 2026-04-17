@@ -3250,6 +3250,112 @@ func TestCheckedInOCVPClusterFormalBindingMatchesDiscovery(t *testing.T) {
 	}
 }
 
+func TestCheckedInOCVPSddcFormalBindingMatchesDiscovery(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var ocvpService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "ocvp" {
+			ocvpService = &cfg.Services[i]
+			break
+		}
+	}
+	if ocvpService == nil {
+		t.Fatal("ocvp service was not found in services.yaml")
+	}
+	if got := ocvpService.FormalSpecFor("Sddc"); got != "sddc" {
+		t.Fatalf("ocvp Sddc formalSpec = %q, want %q", got, "sddc")
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *ocvpService)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	sddc := findResource(t, pkg.Resources, "Sddc")
+	if sddc.SDKName != "Sddc" {
+		t.Fatalf("Sddc SDK name = %q, want %q", sddc.SDKName, "Sddc")
+	}
+	if sddc.Formal == nil {
+		t.Fatal("Sddc formal model was not attached")
+	}
+	if sddc.Formal.Reference.Service != "ocvp" {
+		t.Fatalf("Sddc formal service = %q, want %q", sddc.Formal.Reference.Service, "ocvp")
+	}
+	if sddc.Formal.Reference.Slug != "sddc" {
+		t.Fatalf("Sddc formal slug = %q, want %q", sddc.Formal.Reference.Slug, "sddc")
+	}
+	if sddc.Formal.Binding.Spec.Kind != "Sddc" {
+		t.Fatalf("Sddc formal kind = %q, want %q", sddc.Formal.Binding.Spec.Kind, "Sddc")
+	}
+	if sddc.Formal.Binding.Import.ProviderResource != "oci_ocvp_sddc" {
+		t.Fatalf("Sddc provider resource = %q, want %q", sddc.Formal.Binding.Import.ProviderResource, "oci_ocvp_sddc")
+	}
+	if sddc.Runtime == nil {
+		t.Fatal("Sddc runtime model was not attached")
+	}
+	if sddc.Runtime.Create == nil || sddc.Runtime.Create.MethodName != "CreateSddc" {
+		t.Fatalf("Sddc create method = %#v, want CreateSddc", sddc.Runtime.Create)
+	}
+	if sddc.Runtime.Get == nil || sddc.Runtime.Get.MethodName != "GetSddc" {
+		t.Fatalf("Sddc get method = %#v, want GetSddc", sddc.Runtime.Get)
+	}
+	if sddc.Runtime.List == nil || sddc.Runtime.List.MethodName != "ListSddcs" {
+		t.Fatalf("Sddc list method = %#v, want ListSddcs", sddc.Runtime.List)
+	}
+	if sddc.Runtime.Update == nil || sddc.Runtime.Update.MethodName != "UpdateSddc" {
+		t.Fatalf("Sddc update method = %#v, want UpdateSddc", sddc.Runtime.Update)
+	}
+	if sddc.Runtime.Delete == nil || sddc.Runtime.Delete.MethodName != "DeleteSddc" {
+		t.Fatalf("Sddc delete method = %#v, want DeleteSddc", sddc.Runtime.Delete)
+	}
+	if sddc.Runtime.Semantics == nil {
+		t.Fatal("Sddc runtime semantics were not attached")
+	}
+	if got := sddc.Runtime.Semantics.Async; got == nil {
+		t.Fatal("Sddc async semantics were not attached")
+	} else {
+		if got.Strategy != "lifecycle" {
+			t.Fatalf("Sddc async.strategy = %q, want %q", got.Strategy, "lifecycle")
+		}
+		if got.Runtime != "generatedruntime" {
+			t.Fatalf("Sddc async.runtime = %q, want %q", got.Runtime, "generatedruntime")
+		}
+		if got.FormalClassification != "lifecycle" {
+			t.Fatalf("Sddc async.formalClassification = %q, want %q", got.FormalClassification, "lifecycle")
+		}
+	}
+	if got := sddc.Runtime.Semantics.List; got == nil {
+		t.Fatal("Sddc list semantics were not attached")
+	} else if !slices.Equal(got.MatchFields, []string{"compartmentId", "displayName", "lifecycleState"}) {
+		t.Fatalf("Sddc list match fields = %v, want [compartmentId displayName lifecycleState]", got.MatchFields)
+	}
+	if got := sddc.Runtime.Semantics.Mutation.Mutable; !slices.Equal(got, []string{"definedTags", "displayName", "esxiSoftwareVersion", "freeformTags", "sshAuthorizedKeys", "vmwareSoftwareVersion"}) {
+		t.Fatalf("Sddc mutable fields = %v, want reviewed mutable surface", got)
+	}
+	if got := sddc.Runtime.Semantics.Mutation.ForceNew; !slices.Equal(got, []string{"compartmentId", "hcxMode", "initialConfiguration", "isSingleHostSddc"}) {
+		t.Fatalf("Sddc force-new fields = %v, want reviewed replacement surface", got)
+	}
+	if sddc.Runtime.Semantics.CreateFollowUp.Strategy != "read-after-write" {
+		t.Fatalf("Sddc create follow-up = %q, want %q", sddc.Runtime.Semantics.CreateFollowUp.Strategy, "read-after-write")
+	}
+	if sddc.Runtime.Semantics.UpdateFollowUp.Strategy != "read-after-write" {
+		t.Fatalf("Sddc update follow-up = %q, want %q", sddc.Runtime.Semantics.UpdateFollowUp.Strategy, "read-after-write")
+	}
+	if sddc.Runtime.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		t.Fatalf("Sddc delete follow-up = %q, want %q", sddc.Runtime.Semantics.DeleteFollowUp.Strategy, "confirm-delete")
+	}
+	if len(sddc.Runtime.Semantics.OpenGaps) != 0 {
+		t.Fatalf("Sddc open gaps = %v, want none", sddc.Runtime.Semantics.OpenGaps)
+	}
+}
+
 func TestCheckedInBucketFormalBindingUsesRepoAuthoredMutationSurface(t *testing.T) {
 	t.Parallel()
 
