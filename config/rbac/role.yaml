@@ -24,6 +24,41 @@ rules:
   - update
   - watch
 - apiGroups:
+  - aidocument.oracle.com
+  - ailanguage.oracle.com
+  - aivision.oracle.com
+  - datascience.oracle.com
+  resources:
+  - projects
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aidocument.oracle.com
+  - ailanguage.oracle.com
+  - aivision.oracle.com
+  - datascience.oracle.com
+  resources:
+  - projects/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - aidocument.oracle.com
+  - ailanguage.oracle.com
+  - aivision.oracle.com
+  - datascience.oracle.com
+  resources:
+  - projects/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - analytics.oracle.com
   resources:
   - analyticsinstances
@@ -74,6 +109,32 @@ rules:
   resources:
   - apigatewaydeployments/status
   - apigateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - bds.oracle.com
+  resources:
+  - bdsinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bds.oracle.com
+  resources:
+  - bdsinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - bds.oracle.com
+  resources:
+  - bdsinstances/status
   verbs:
   - get
   - patch
@@ -208,6 +269,32 @@ rules:
   - database.oracle.com
   resources:
   - autonomousdatabases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - databasetools.oracle.com
+  resources:
+  - databasetoolsconnections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - databasetools.oracle.com
+  resources:
+  - databasetoolsconnections/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - databasetools.oracle.com
+  resources:
+  - databasetoolsconnections/status
   verbs:
   - get
   - patch

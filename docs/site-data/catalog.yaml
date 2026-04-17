@@ -2,6 +2,45 @@
 # or release history alone.
 schemaVersion: v1alpha1
 packages:
+  - package: aidocument
+    displayName: AI Document
+    summary: Manage OCI AI Document projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining AI Document resource families stay unpublished.
+    kindOverrides:
+      - group: aidocument
+        kind: Project
+        summary: Manage OCI AI Document projects.
+
+  - package: ailanguage
+    displayName: AI Language
+    summary: Manage OCI AI Language projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining AI Language resource families stay unpublished.
+    kindOverrides:
+      - group: ailanguage
+        kind: Project
+        summary: Manage OCI AI Language projects.
+
+  - package: aivision
+    displayName: AI Vision
+    summary: Manage OCI AI Vision projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining AI Vision resource families stay unpublished.
+    kindOverrides:
+      - group: aivision
+        kind: Project
+        summary: Manage OCI AI Vision projects.
+
   - package: analytics
     displayName: Analytics
     summary: Manage OCI Analytics instances from Kubernetes with a reviewed controller-backed runtime.
@@ -30,6 +69,19 @@ packages:
       - group: apigateway
         kind: ApiGatewayDeployment
         summary: Manage OCI API Gateway deployment routes and backend bindings.
+
+  - package: bds
+    displayName: Big Data Service
+    summary: Manage OCI Big Data Service instances from Kubernetes with an initial controller-backed BdsInstance rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to BdsInstance while the remaining Big Data Service resource families stay unpublished.
+    kindOverrides:
+      - group: bds
+        kind: BdsInstance
+        summary: Manage OCI Big Data Service instances.
 
   - package: containerengine
     displayName: Container Engine for Kubernetes
@@ -89,6 +141,19 @@ packages:
         kind: AutonomousDatabase
         summary: Manage OCI Autonomous Database instances.
 
+  - package: databasetools
+    displayName: Database Tools
+    summary: Manage OCI Database Tools connections from Kubernetes with an initial controller-backed DatabaseToolsConnection rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DatabaseToolsConnection while the remaining Database Tools resource families stay unpublished.
+    kindOverrides:
+      - group: databasetools
+        kind: DatabaseToolsConnection
+        summary: Manage OCI Database Tools connections.
+
   - package: dataflow
     displayName: Data Flow
     summary: Manage OCI Data Flow applications from Kubernetes.
@@ -99,6 +164,19 @@ packages:
       - group: dataflow
         kind: Application
         summary: Manage OCI Data Flow applications.
+
+  - package: datascience
+    displayName: Data Science
+    summary: Manage OCI Data Science projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining Data Science resource families stay unpublished.
+    kindOverrides:
+      - group: datascience
+        kind: Project
+        summary: Manage OCI Data Science projects.
 
   - package: email
     displayName: Email

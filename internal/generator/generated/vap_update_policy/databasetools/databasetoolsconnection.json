@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "databasetools",
+    "apiVersion": "databasetools.oracle.com/v1beta1",
+    "kind": "DatabaseToolsConnection",
+    "formalSlug": "databasetoolsconnection",
+    "providerResource": "oci_database_tools_database_tools_connection",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "advancedProperties",
+      "connectionString",
+      "definedTags",
+      "displayName",
+      "freeformTags",
+      "keyStores",
+      "privateEndpointId",
+      "proxyClient",
+      "relatedResource",
+      "url",
+      "userName",
+      "userPassword"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "runtimeSupport",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "type",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

@@ -1195,6 +1195,42 @@ var explicitAPITargetOverrides = map[string]apiTargetOverride{
 		statusDetailsExcludedReason,
 		"VmClusterUpdateDetails",
 	)},
+	"databasetools.DatabaseToolsConnection": {
+		SDKTypes: []string{
+			"CreateDatabaseToolsConnectionGenericJdbcDetails",
+			"CreateDatabaseToolsConnectionMySqlDetails",
+			"CreateDatabaseToolsConnectionOracleDatabaseDetails",
+			"CreateDatabaseToolsConnectionPostgresqlDetails",
+			"UpdateDatabaseToolsConnectionGenericJdbcDetails",
+			"UpdateDatabaseToolsConnectionMySqlDetails",
+			"UpdateDatabaseToolsConnectionOracleDatabaseDetails",
+			"UpdateDatabaseToolsConnectionPostgresqlDetails",
+			"DatabaseToolsConnectionGenericJdbc",
+			"DatabaseToolsConnectionMySql",
+			"DatabaseToolsConnectionOracleDatabase",
+			"DatabaseToolsConnectionPostgresql",
+			"DatabaseToolsConnectionGenericJdbcSummary",
+			"DatabaseToolsConnectionMySqlSummary",
+			"DatabaseToolsConnectionOracleDatabaseSummary",
+			"DatabaseToolsConnectionPostgresqlSummary",
+		},
+		MappingOverrides: mergeMappingOverrides(
+			statusMappingOverrides(
+				"DatabaseToolsConnectionGenericJdbc",
+				"DatabaseToolsConnectionMySql",
+				"DatabaseToolsConnectionOracleDatabase",
+				"DatabaseToolsConnectionPostgresql",
+				"DatabaseToolsConnectionGenericJdbcSummary",
+				"DatabaseToolsConnectionMySqlSummary",
+				"DatabaseToolsConnectionOracleDatabaseSummary",
+				"DatabaseToolsConnectionPostgresqlSummary",
+			),
+			excludedMappingOverrides(
+				collectionResponseExcludedReason,
+				"DatabaseToolsConnectionCollection",
+			),
+		),
+	},
 	"core.AllDrgAttachment":                   {SDKTypes: []string{"DrgAttachmentInfo"}, UseStatus: true},
 	"core.AllowedPeerRegionsForRemotePeering": {SDKTypes: []string{"PeerRegionForRemotePeering"}, UseStatus: true},
 	"core.AppCatalogListingAgreement":         {SDKTypes: []string{"AppCatalogListingResourceVersionAgreements"}},
@@ -2054,6 +2090,7 @@ func sdkRegistryGroups(targets []sdkTarget) []string {
 		groups[t.Group] = true
 	}
 	groups["mysql"] = true // required for interfaceImplementations map below.
+	groups["databasetools"] = true
 
 	sdkGroups := make([]string, 0, len(groups))
 	for g := range groups {
@@ -2110,13 +2147,286 @@ func renderSDKSeedTargets(b *strings.Builder, sdkGroups []string, byGroup map[st
 }
 
 func renderSDKRegistryHelpers(b *strings.Builder) {
+	type sdkInterfaceImplementation struct {
+		group string
+		iface string
+		impls []string
+	}
+
+	knownInterfaceImplementations := []sdkInterfaceImplementation{
+		{
+			group: "mysql",
+			iface: "CreateDbSystemSourceDetails",
+			impls: []string{
+				"CreateDbSystemSourceFromBackupDetails",
+				"CreateDbSystemSourceFromNoneDetails",
+				"CreateDbSystemSourceFromPitrDetails",
+				"CreateDbSystemSourceImportFromUrlDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "CreateDatabaseToolsConnectionDetails",
+			impls: []string{
+				"CreateDatabaseToolsConnectionGenericJdbcDetails",
+				"CreateDatabaseToolsConnectionMySqlDetails",
+				"CreateDatabaseToolsConnectionOracleDatabaseDetails",
+				"CreateDatabaseToolsConnectionPostgresqlDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "UpdateDatabaseToolsConnectionDetails",
+			impls: []string{
+				"UpdateDatabaseToolsConnectionGenericJdbcDetails",
+				"UpdateDatabaseToolsConnectionMySqlDetails",
+				"UpdateDatabaseToolsConnectionOracleDatabaseDetails",
+				"UpdateDatabaseToolsConnectionPostgresqlDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsConnection",
+			impls: []string{
+				"DatabaseToolsConnectionGenericJdbc",
+				"DatabaseToolsConnectionMySql",
+				"DatabaseToolsConnectionOracleDatabase",
+				"DatabaseToolsConnectionPostgresql",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsConnectionSummary",
+			impls: []string{
+				"DatabaseToolsConnectionGenericJdbcSummary",
+				"DatabaseToolsConnectionMySqlSummary",
+				"DatabaseToolsConnectionOracleDatabaseSummary",
+				"DatabaseToolsConnectionPostgresqlSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsConnectionOracleDatabaseProxyClient",
+			impls: []string{
+				"DatabaseToolsConnectionOracleDatabaseProxyClientNoProxy",
+				"DatabaseToolsConnectionOracleDatabaseProxyClientUserName",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsConnectionOracleDatabaseProxyClientDetails",
+			impls: []string{
+				"DatabaseToolsConnectionOracleDatabaseProxyClientNoProxyDetails",
+				"DatabaseToolsConnectionOracleDatabaseProxyClientUserNameDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsConnectionOracleDatabaseProxyClientSummary",
+			impls: []string{
+				"DatabaseToolsConnectionOracleDatabaseProxyClientNoProxySummary",
+				"DatabaseToolsConnectionOracleDatabaseProxyClientUserNameSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContent",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretId",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentDetails",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentSummary",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentGenericJdbc",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdGenericJdbc",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentGenericJdbcDetails",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdGenericJdbcDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentGenericJdbcSummary",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdGenericJdbcSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentMySql",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdMySql",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentMySqlDetails",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdMySqlDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentMySqlSummary",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdMySqlSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentPostgresql",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdPostgresql",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentPostgresqlDetails",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdPostgresqlDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStoreContentPostgresqlSummary",
+			impls: []string{
+				"DatabaseToolsKeyStoreContentSecretIdPostgresqlSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePassword",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretId",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordDetails",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordSummary",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordGenericJdbc",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdGenericJdbc",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordGenericJdbcDetails",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdGenericJdbcDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordGenericJdbcSummary",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdGenericJdbcSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordMySql",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdMySql",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordMySqlDetails",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdMySqlDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordMySqlSummary",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdMySqlSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordPostgresql",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdPostgresql",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordPostgresqlDetails",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdPostgresqlDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsKeyStorePasswordPostgresqlSummary",
+			impls: []string{
+				"DatabaseToolsKeyStorePasswordSecretIdPostgresqlSummary",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsUserPassword",
+			impls: []string{
+				"DatabaseToolsUserPasswordSecretId",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsUserPasswordDetails",
+			impls: []string{
+				"DatabaseToolsUserPasswordSecretIdDetails",
+			},
+		},
+		{
+			group: "databasetools",
+			iface: "DatabaseToolsUserPasswordSummary",
+			impls: []string{
+				"DatabaseToolsUserPasswordSecretIdSummary",
+			},
+		},
+	}
+
 	b.WriteString("var interfaceImplementations = map[string][]reflect.Type{\n")
-	b.WriteString("\tqualifiedTypeName(reflect.TypeOf((*mysql.CreateDbSystemSourceDetails)(nil)).Elem()): {\n")
-	b.WriteString("\t\treflect.TypeOf(mysql.CreateDbSystemSourceFromBackupDetails{}),\n")
-	b.WriteString("\t\treflect.TypeOf(mysql.CreateDbSystemSourceFromNoneDetails{}),\n")
-	b.WriteString("\t\treflect.TypeOf(mysql.CreateDbSystemSourceFromPitrDetails{}),\n")
-	b.WriteString("\t\treflect.TypeOf(mysql.CreateDbSystemSourceImportFromUrlDetails{}),\n")
-	b.WriteString("\t},\n")
+	for _, known := range knownInterfaceImplementations {
+		fmt.Fprintf(b, "\tqualifiedTypeName(reflect.TypeOf((*%s.%s)(nil)).Elem()): {\n", known.group, known.iface)
+		for _, impl := range known.impls {
+			fmt.Fprintf(b, "\t\treflect.TypeOf(%s.%s{}),\n", known.group, impl)
+		}
+		b.WriteString("\t},\n")
+	}
 	b.WriteString("}\n\n")
 
 	b.WriteString("func SeedTargets() []Target {\n")

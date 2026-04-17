@@ -1,0 +1,145 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - ailanguage/Project
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Project reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Project
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetProject
+else tracked identity is missing
+ServiceManager -> OCI: ListProjects(filters:\ncompartment_id, display_name, id,\nstate)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateProject
+loop create pending CREATING
+ServiceManager -> OCI: GetProject
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetProject
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteProject
+ServiceManager -> OCI: confirm delete via GetProject or\nListProjects
+loop delete pending DELETING
+ServiceManager -> OCI: GetProject or ListProjects
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: defined_tags,
+description, display_name, freeform_tags
+Reject before mutate: force-new fields
+compartment_id
+Lookup filters: compartment_id,
+display_name, id, state
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply ChangeProjectCompartment,\nUpdateProject only for mutable\nfields defined_tags, description,\ndisplay_name, freeform_tags
+loop update pending UPDATING
+ServiceManager -> OCI: GetProject
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: ailanguage
+slug: project
+kind: Project
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_ai_language_projects filters
+compartment_id, display_name, id, state
+conflicts: none
+open gaps: none
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `ACTIVE` to success, `UPDATING` to
+updating, and `DELETING` keeps reconcile in the
+terminating bucket until `DELETED` or NotFound.
+Pre-create lookup queries `ListProjects` with
+`compartmentId`, `displayName`, and an optional
+tracked `projectId`; delete fallback can
+re-resolve the tracked project through
+`ListProjects` when `GetProject` returns
+NotFound.
+Only `displayName`, `description`,
+`freeformTags`, and `definedTags` reconcile in
+place. `compartmentId` remains replacement-only
+drift and the runtime has no secret side
+effects.
+end note
+@enduml

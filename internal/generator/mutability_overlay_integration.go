@@ -219,8 +219,7 @@ func mutabilityOverlayASTFields(resource ResourceModel) []mutabilityOverlayASTFi
 		return nil
 	}
 
-	updateCandidates := normalizeFormalPaths(resource.Formal.Binding.Import.Mutation.Mutable)
-	forceNew := normalizeFormalPaths(resource.Formal.Binding.Import.Mutation.ForceNew)
+	updateCandidates, forceNew := mutabilityOverlayMutationPaths(resource)
 	if len(updateCandidates) == 0 && len(forceNew) == 0 {
 		return nil
 	}
@@ -260,6 +259,20 @@ func mutabilityOverlayASTFields(resource ResourceModel) []mutabilityOverlayASTFi
 		return fields[i].FieldPath < fields[j].FieldPath
 	})
 	return fields
+}
+
+func mutabilityOverlayMutationPaths(resource ResourceModel) ([]string, []string) {
+	if resource.Formal == nil {
+		return nil, nil
+	}
+	if resource.Formal.RuntimeLifecycle != nil &&
+		resource.Formal.RuntimeLifecycle.RepoAuthored != nil &&
+		resource.Formal.RuntimeLifecycle.RepoAuthored.Mutation != nil {
+		return normalizeFormalPaths(resource.Formal.RuntimeLifecycle.RepoAuthored.Mutation.Mutable),
+			normalizeFormalPaths(resource.Formal.RuntimeLifecycle.RepoAuthored.Mutation.ForceNew)
+	}
+	return normalizeFormalPaths(resource.Formal.Binding.Import.Mutation.Mutable),
+		normalizeFormalPaths(resource.Formal.Binding.Import.Mutation.ForceNew)
 }
 
 func mutabilityOverlayNeedsDocs(fields []mutabilityOverlayASTFieldInput) bool {

@@ -5,6 +5,8 @@ validation, and repository-owned documentation flows.
 
 ## Maintainer References
 
+- [AI Language Onboarding Audit](ailanguage-onboarding-audit.md)
+- [AI Vision Onboarding Audit](aivision-onboarding-audit.md)
 - [API Error Coverage Registry](api-error-coverage-registry.md)
 - [Analytics Onboarding Audit](analytics-onboarding-audit.md)
 - [Generator Contract](../api-generator-contract.md)

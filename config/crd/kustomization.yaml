@@ -10,9 +10,13 @@ kind: Kustomization
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
+- bases/aidocument.oracle.com_projects.yaml
+- bases/ailanguage.oracle.com_projects.yaml
+- bases/aivision.oracle.com_projects.yaml
 - bases/analytics.oracle.com_analyticsinstances.yaml
 - bases/apigateway.oracle.com_apigatewaydeployments.yaml
 - bases/apigateway.oracle.com_apigateways.yaml
+- bases/bds.oracle.com_bdsinstances.yaml
 - bases/containerengine.oracle.com_clusters.yaml
 - bases/containerengine.oracle.com_nodepools.yaml
 - bases/containerinstances.oracle.com_containerinstances.yaml
@@ -27,7 +31,9 @@ resources:
 - bases/core.oracle.com_subnets.yaml
 - bases/core.oracle.com_vcns.yaml
 - bases/database.oracle.com_autonomousdatabases.yaml
+- bases/databasetools.oracle.com_databasetoolsconnections.yaml
 - bases/dataflow.oracle.com_applications.yaml
+- bases/datascience.oracle.com_projects.yaml
 - bases/email.oracle.com_dkims.yaml
 - bases/email.oracle.com_emaildomains.yaml
 - bases/email.oracle.com_senders.yaml

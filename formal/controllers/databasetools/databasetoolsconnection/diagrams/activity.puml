@@ -1,0 +1,135 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - databasetools/DatabaseToolsConnection
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired DatabaseToolsConnection spec,\ntracked status, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetDatabaseToolsConnection;
+else (no)
+:Resolve an existing OCI resource through\nListDatabaseToolsConnections using filters\ncompartment_id, display_name,\nrelated_resource_identifier, runtime_identity\n(+3 more);
+:Create the OCI resource via\nCreateDatabaseToolsConnection when no reusable\nmatch is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteDatabaseToolsConnection\nwith required via GetDatabaseToolsConnection\nor ListDatabaseToolsConnections to DELETED\nconfirmation;
+:Confirm deletion via\nGetDatabaseToolsConnection or\nListDatabaseToolsConnections until OCI reaches\nDELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, runtime_support, type;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply\nChangeDatabaseToolsConnectionCompartment,\nUpdateDatabaseToolsConnection only for mutable\nfields advanced_properties, connection_string,\ndefined_tags, display_name (+8 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
+:Return success for the ACTIVE, INACTIVE\nsuccess state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+:Keep promotion blocked on drift-guard;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: databasetools
+slug: databasetoolsconnection
+kind: DatabaseToolsConnection
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: advanced_properties,
+connection_string, defined_tags, display_name
+(+8 more)
+reject before mutate: force-new fields
+compartment_id, runtime_support, type
+create-only fields: none
+list lookup:
+oci_database_tools_database_tools_connections
+filters compartment_id, display_name,
+related_resource_identifier, runtime_identity
+(+3 more)
+conflicts: none
+open gaps: drift-guard
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `UPDATING` to updating, `ACTIVE`
+and `INACTIVE` to success, `DELETING` to
+terminating, and `FAILED` to the terminal failed
+bucket.
+Pre-create lookup queries
+`ListDatabaseToolsConnections` with
+`compartmentId`, `displayName`, and optional
+`relatedResourceIdentifier`; reusable matches
+are narrowed in memory with `type`,
+`connectionString` or `url`,
+`relatedResource.identifier`, `userName`,
+`privateEndpointId`, and `runtimeSupport`.
+Only the mutable fields above reconcile in
+place. `compartmentId`, `runtimeSupport`, and
+`type` remain replacement-only drift even though
+the provider exposes broader update paths;
+post-create `locks` drift stays explicit as an
+open repo-authored gap.
+end note
+@enduml

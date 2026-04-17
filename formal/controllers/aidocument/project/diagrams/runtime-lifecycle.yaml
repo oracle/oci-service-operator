@@ -1,0 +1,43 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: aidocument
+slug: project
+kind: Project
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  mutation:
+    mutable:
+      - defined_tags
+      - description
+      - display_name
+      - freeform_tags
+    forceNew:
+      - compartment_id
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Generated runtime uses read-after-write follow-up for create and update plus
+    confirm-delete for delete; `CREATING` maps to provisioning, `ACTIVE` to
+    success, `UPDATING` to updating, and `DELETING` keeps reconcile in the
+    terminating bucket until `DELETED` or NotFound.
+  - Pre-create lookup queries `ListProjects` with `compartmentId`,
+    `displayName`, and an optional tracked `id`; delete fallback can re-resolve
+    the tracked project through `ListProjects` when `GetProject` returns
+    NotFound.
+  - Only `displayName`, `description`, `freeformTags`, and `definedTags`
+    reconcile in place. `compartmentId` remains replacement-only drift and the
+    runtime has no secret side effects.

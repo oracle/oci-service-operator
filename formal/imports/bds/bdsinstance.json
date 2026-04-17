@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "bds",
+  "slug": "bdsinstance",
+  "kind": "BdsInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_bds_bds_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "AddKafka",
+        "requestType": "bds.AddKafkaRequest",
+        "responseType": "bds.AddKafkaResponse"
+      },
+      {
+        "operation": "AddWorkerNodes",
+        "requestType": "bds.AddWorkerNodesRequest",
+        "responseType": "bds.AddWorkerNodesResponse"
+      },
+      {
+        "operation": "CreateBdsInstance",
+        "requestType": "bds.CreateBdsInstanceRequest",
+        "responseType": "bds.CreateBdsInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBdsInstance",
+        "requestType": "bds.GetBdsInstanceRequest",
+        "responseType": "bds.GetBdsInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBdsInstances",
+        "requestType": "bds.ListBdsInstancesRequest",
+        "responseType": "bds.ListBdsInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "AddBlockStorage",
+        "requestType": "bds.AddBlockStorageRequest",
+        "responseType": "bds.AddBlockStorageResponse"
+      },
+      {
+        "operation": "AddKafka",
+        "requestType": "bds.AddKafkaRequest",
+        "responseType": "bds.AddKafkaResponse"
+      },
+      {
+        "operation": "AddMasterNodes",
+        "requestType": "bds.AddMasterNodesRequest",
+        "responseType": "bds.AddMasterNodesResponse"
+      },
+      {
+        "operation": "AddUtilityNodes",
+        "requestType": "bds.AddUtilityNodesRequest",
+        "responseType": "bds.AddUtilityNodesResponse"
+      },
+      {
+        "operation": "AddWorkerNodes",
+        "requestType": "bds.AddWorkerNodesRequest",
+        "responseType": "bds.AddWorkerNodesResponse"
+      },
+      {
+        "operation": "ChangeBdsInstanceCompartment",
+        "requestType": "bds.ChangeBdsInstanceCompartmentRequest",
+        "responseType": "bds.ChangeBdsInstanceCompartmentResponse"
+      },
+      {
+        "operation": "ChangeShape",
+        "requestType": "bds.ChangeShapeRequest",
+        "responseType": "bds.ChangeShapeResponse"
+      },
+      {
+        "operation": "ExecuteBootstrapScript",
+        "requestType": "bds.ExecuteBootstrapScriptRequest",
+        "responseType": "bds.ExecuteBootstrapScriptResponse"
+      },
+      {
+        "operation": "RemoveKafka",
+        "requestType": "bds.RemoveKafkaRequest",
+        "responseType": "bds.RemoveKafkaResponse"
+      },
+      {
+        "operation": "UpdateBdsInstance",
+        "requestType": "bds.UpdateBdsInstanceRequest",
+        "responseType": "bds.UpdateBdsInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBdsInstance",
+        "requestType": "bds.DeleteBdsInstanceRequest",
+        "responseType": "bds.DeleteBdsInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE",
+        "SUSPENDED"
+      ]
+    },
+    "update": {
+      "pending": [
+        "RESUMING",
+        "SUSPENDING",
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE",
+        "SUSPENDED"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "bootstrap_script_url",
+      "cloud_sql_details.shape",
+      "compartment_id",
+      "compute_only_worker_node.block_volume_size_in_gbs",
+      "compute_only_worker_node.number_of_nodes",
+      "compute_only_worker_node.shape",
+      "compute_only_worker_node.shape_config.memory_in_gbs",
+      "compute_only_worker_node.shape_config.nvmes",
+      "compute_only_worker_node.shape_config.ocpus",
+      "compute_only_worker_node.subnet_id",
+      "defined_tags",
+      "display_name",
+      "edge_node.block_volume_size_in_gbs",
+      "edge_node.number_of_nodes",
+      "edge_node.shape",
+      "edge_node.shape_config.memory_in_gbs",
+      "edge_node.shape_config.nvmes",
+      "edge_node.shape_config.ocpus",
+      "edge_node.subnet_id",
+      "freeform_tags",
+      "ignore_existing_nodes_shape",
+      "is_cloud_sql_configured",
+      "is_force_remove_enabled",
+      "is_force_stop_jobs",
+      "is_kafka_configured",
+      "kafka_broker_node.block_volume_size_in_gbs",
+      "kafka_broker_node.number_of_kafka_nodes",
+      "kafka_broker_node.shape",
+      "kafka_broker_node.shape_config.memory_in_gbs",
+      "kafka_broker_node.shape_config.nvmes",
+      "kafka_broker_node.shape_config.ocpus",
+      "kafka_broker_node.subnet_id",
+      "kms_key_id",
+      "master_node.number_of_nodes",
+      "master_node.shape",
+      "master_node.shape_config.memory_in_gbs",
+      "master_node.shape_config.nvmes",
+      "master_node.shape_config.ocpus",
+      "network_config.cidr_block",
+      "network_config.is_nat_gateway_required",
+      "os_patch_version",
+      "remove_node",
+      "start_cluster_shape_configs.node_type_shape_configs.node_type",
+      "start_cluster_shape_configs.node_type_shape_configs.shape",
+      "state",
+      "util_node.number_of_nodes",
+      "util_node.shape",
+      "util_node.shape_config.memory_in_gbs",
+      "util_node.shape_config.nvmes",
+      "util_node.shape_config.ocpus",
+      "worker_node.block_volume_size_in_gbs",
+      "worker_node.number_of_nodes",
+      "worker_node.shape",
+      "worker_node.shape_config.memory_in_gbs",
+      "worker_node.shape_config.nvmes",
+      "worker_node.shape_config.ocpus"
+    ],
+    "forceNew": [
+      "bds_cluster_version_summary",
+      "bds_cluster_version_summary.bds_version",
+      "bds_cluster_version_summary.odh_version",
+      "cluster_admin_password",
+      "cluster_profile",
+      "cluster_public_key",
+      "cluster_version",
+      "is_high_availability",
+      "is_secure",
+      "kerberos_realm_name",
+      "master_node",
+      "master_node.block_volume_size_in_gbs",
+      "master_node.subnet_id",
+      "util_node",
+      "util_node.block_volume_size_in_gbs",
+      "util_node.subnet_id",
+      "worker_node.subnet_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.WaitForUpdatedState"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_bds_bds_instances",
+    "collectionField": "bds_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/bds/bdsinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/bds/bdsinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: the provider resource exposes CreateBdsInstance, GetBdsInstance, ListBdsInstances, UpdateBdsInstance, and DeleteBdsInstance plus auxiliary Add*, Change*, ExecuteBootstrapScript, and RemoveKafka mutations; the paired datasource oci_bds_bds_instances filters compartment_id, display_name, and state and returns bds_instances from the SDK Items list.",
+    "Pinned provider implementation: create and update paths use WaitForUpdatedState and expose a broader mutable surface than the published runtime, including compartment moves, node-shape growth, network updates, state transitions, and trigger-style helper actions. The reviewed generatedruntime client does not run those provider-owned waiters or auxiliary mutators; it follows plain write calls with read-after-write or confirm-delete rereads instead.",
+    "Repo-authored lifecycle classification stays explicit: runtime treats CREATING as provisioning, UPDATING/SUSPENDING/RESUMING as updating, ACTIVE/INACTIVE/SUSPENDED as success, FAILED as terminal without requeue, and delete confirmation follows DELETING to DELETED or NotFound.",
+    "Repo-authored bind-versus-create and mutation policy stay explicit: pre-create lookup matches exact compartmentId plus displayName; only displayName, bootstrapScriptUrl, freeformTags, definedTags, and kmsKeyId reconcile in place. CompartmentId, clusterVersion, isHighAvailability, isSecure, clusterProfile, networkConfig, and nodes remain replacement-only drift, while clusterAdminPassword, clusterPublicKey, and kerberosRealmName stay create-time inputs."
+  ]
+}

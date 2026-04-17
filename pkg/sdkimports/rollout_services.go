@@ -8,12 +8,18 @@
 package sdkimports
 
 import (
+	_ "github.com/oracle/oci-go-sdk/v65/aidocument"
+	_ "github.com/oracle/oci-go-sdk/v65/ailanguage"
+	_ "github.com/oracle/oci-go-sdk/v65/aivision"
 	_ "github.com/oracle/oci-go-sdk/v65/analytics"
 	_ "github.com/oracle/oci-go-sdk/v65/artifacts"
+	_ "github.com/oracle/oci-go-sdk/v65/bds"
 	_ "github.com/oracle/oci-go-sdk/v65/certificates"
 	_ "github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	_ "github.com/oracle/oci-go-sdk/v65/containerengine"
 	_ "github.com/oracle/oci-go-sdk/v65/core"
+	_ "github.com/oracle/oci-go-sdk/v65/databasetools"
+	_ "github.com/oracle/oci-go-sdk/v65/datascience"
 	_ "github.com/oracle/oci-go-sdk/v65/dns"
 	_ "github.com/oracle/oci-go-sdk/v65/events"
 	_ "github.com/oracle/oci-go-sdk/v65/functions"

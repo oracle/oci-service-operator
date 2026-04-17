@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/oracle/oci-service-operator/internal/formal"
+	"github.com/oracle/oci-service-operator/internal/ocisdk"
 )
 
 func TestBuildPackageModelDiscoversResources(t *testing.T) {
@@ -2932,6 +2933,320 @@ func TestCheckedInAnalyticsServicePublishesOnlyAnalyticsInstance(t *testing.T) {
 	}
 }
 
+func TestCheckedInAILanguageSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/ailanguage")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{"Endpoint", "EvaluationResult", "Model", "ModelType", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("ailanguage discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
+}
+
+func TestCheckedInAILanguageProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/ailanguage"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	project, err := buildResourceModel(index, ServiceConfig{
+		Service:        "ailanguage",
+		SDKPackage:     sdkPackage,
+		Group:          "ailanguage",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "Project"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(Project) error = %v", err)
+	}
+
+	if project.Runtime == nil {
+		t.Fatal("Project runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, project.Runtime.Create, "CreateProject")
+	assertRuntimeMethodName(t, project.Runtime.Get, "GetProject")
+	assertRuntimeMethodName(t, project.Runtime.List, "ListProjects")
+	assertRuntimeMethodName(t, project.Runtime.Update, "UpdateProject")
+	assertRuntimeMethodName(t, project.Runtime.Delete, "DeleteProject")
+	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "ProjectId"})
+}
+
+func TestCheckedInAIVisionSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/aivision")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{"DocumentJob", "ImageJob", "Model", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("aivision discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
+}
+
+func TestCheckedInAIVisionProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/aivision"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	project, err := buildResourceModel(index, ServiceConfig{
+		Service:        "aivision",
+		SDKPackage:     sdkPackage,
+		Group:          "aivision",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "Project"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(Project) error = %v", err)
+	}
+
+	if project.Runtime == nil {
+		t.Fatal("Project runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, project.Runtime.Create, "CreateProject")
+	assertRuntimeMethodName(t, project.Runtime.Get, "GetProject")
+	assertRuntimeMethodName(t, project.Runtime.List, "ListProjects")
+	assertRuntimeMethodName(t, project.Runtime.Update, "UpdateProject")
+	assertRuntimeMethodName(t, project.Runtime.Delete, "DeleteProject")
+	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
+}
+
+func TestCheckedInAIDocumentSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/aidocument")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{"Model", "ProcessorJob", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("aidocument discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
+}
+
+func TestCheckedInAIDocumentProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/aidocument"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	project, err := buildResourceModel(index, ServiceConfig{
+		Service:        "aidocument",
+		SDKPackage:     sdkPackage,
+		Group:          "aidocument",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "Project"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(Project) error = %v", err)
+	}
+
+	if project.Runtime == nil {
+		t.Fatal("Project runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, project.Runtime.Create, "CreateProject")
+	assertRuntimeMethodName(t, project.Runtime.Get, "GetProject")
+	assertRuntimeMethodName(t, project.Runtime.List, "ListProjects")
+	assertRuntimeMethodName(t, project.Runtime.Update, "UpdateProject")
+	assertRuntimeMethodName(t, project.Runtime.Delete, "DeleteProject")
+	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
+}
+
+func TestCheckedInDataScienceSDKDiscoveryFindsProjectAndWorkRequestFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/datascience")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	assertDiscoveredKindsInclude(t, candidates, []string{"Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
+}
+
+func TestCheckedInDataScienceProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/datascience"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	project, err := buildResourceModel(index, ServiceConfig{
+		Service:        "datascience",
+		SDKPackage:     sdkPackage,
+		Group:          "datascience",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "Project"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(Project) error = %v", err)
+	}
+
+	if project.Runtime == nil {
+		t.Fatal("Project runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, project.Runtime.Create, "CreateProject")
+	assertRuntimeMethodName(t, project.Runtime.Get, "GetProject")
+	assertRuntimeMethodName(t, project.Runtime.List, "ListProjects")
+	assertRuntimeMethodName(t, project.Runtime.Update, "UpdateProject")
+	assertRuntimeMethodName(t, project.Runtime.Delete, "DeleteProject")
+	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
+}
+
+func TestCheckedInDatabaseToolsSDKDiscoveryFindsConnectionAndWorkRequestFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/databasetools")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	assertDiscoveredKindsInclude(t, candidates, []string{"DatabaseToolsConnection", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
+}
+
+func TestCheckedInDatabaseToolsConnectionRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/databasetools"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	databaseToolsConnection, err := buildResourceModel(index, ServiceConfig{
+		Service:        "databasetools",
+		SDKPackage:     sdkPackage,
+		Group:          "databasetools",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "DatabaseToolsConnection"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(DatabaseToolsConnection) error = %v", err)
+	}
+
+	if databaseToolsConnection.Runtime == nil {
+		t.Fatal("DatabaseToolsConnection runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Create, "CreateDatabaseToolsConnection")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Get, "GetDatabaseToolsConnection")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.List, "ListDatabaseToolsConnections")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Update, "UpdateDatabaseToolsConnection")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Delete, "DeleteDatabaseToolsConnection")
+	assertRuntimeRequestFieldNamesInclude(t, databaseToolsConnection.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Type", "RuntimeSupport", "RelatedResourceIdentifier"})
+}
+
+func TestCheckedInBDSSDKDiscoveryFindsBdsInstanceAndAuxiliaryFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/bds")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	gotKinds := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		gotKinds = append(gotKinds, candidate.rawName)
+	}
+
+	wantKinds := []string{
+		"AutoScalingConfiguration",
+		"BdsApiKey",
+		"BdsInstance",
+		"BdsMetastoreConfiguration",
+		"OsPatch",
+		"OsPatchDetail",
+		"Patch",
+		"PatchHistory",
+		"WorkRequest",
+		"WorkRequestError",
+		"WorkRequestLog",
+	}
+	if !slices.Equal(gotKinds, wantKinds) {
+		t.Fatalf("bds discovered kinds = %v, want %v", gotKinds, wantKinds)
+	}
+}
+
+func TestCheckedInBDSBdsInstanceRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/bds"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	bdsInstance, err := buildResourceModel(index, ServiceConfig{
+		Service:        "bds",
+		SDKPackage:     sdkPackage,
+		Group:          "bds",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "BdsInstance"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(BdsInstance) error = %v", err)
+	}
+
+	if bdsInstance.Runtime == nil {
+		t.Fatal("BdsInstance runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Create, "CreateBdsInstance")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Get, "GetBdsInstance")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.List, "ListBdsInstances")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Update, "UpdateBdsInstance")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Delete, "DeleteBdsInstance")
+	assertRuntimeRequestFieldNamesInclude(t, bdsInstance.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName"})
+}
+
 func TestCheckedInConfigIncludesQueueObservedStateAlias(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
@@ -3969,6 +4284,19 @@ func findResource(t *testing.T, resources []ResourceModel, kind string) Resource
 	return ResourceModel{}
 }
 
+func findResourceCandidate(t *testing.T, candidates []resourceCandidate, rawName string) resourceCandidate {
+	t.Helper()
+
+	for _, candidate := range candidates {
+		if candidate.rawName == rawName {
+			return candidate
+		}
+	}
+
+	t.Fatalf("resource candidate %q was not found in %#v", rawName, candidates)
+	return resourceCandidate{}
+}
+
 func findFieldModel(t *testing.T, fields []FieldModel, name string) FieldModel {
 	t.Helper()
 
@@ -4006,6 +4334,62 @@ func findServiceManagerModel(t *testing.T, serviceManagers []ServiceManagerModel
 
 	t.Fatalf("service manager kind %q was not found in %#v", kind, serviceManagers)
 	return ServiceManagerModel{}
+}
+
+func loadCheckedInSDKPackage(t *testing.T, importPath string) *ocisdk.Package {
+	t.Helper()
+
+	index, err := NewDiscoverer().sdkIndex().Package(context.Background(), importPath)
+	if err != nil {
+		t.Fatalf("Package(%q) error = %v", importPath, err)
+	}
+
+	return index
+}
+
+func assertRuntimeMethodName(t *testing.T, operation *RuntimeOperationModel, want string) {
+	t.Helper()
+
+	if operation == nil {
+		t.Fatalf("runtime operation for %q was nil", want)
+	}
+	if operation.MethodName != want {
+		t.Fatalf("runtime method = %q, want %q", operation.MethodName, want)
+	}
+}
+
+func assertRuntimeRequestFieldNamesInclude(t *testing.T, operation *RuntimeOperationModel, want []string) {
+	t.Helper()
+
+	if operation == nil {
+		t.Fatal("runtime operation was nil")
+	}
+
+	got := make([]string, 0, len(operation.RequestFields))
+	for _, field := range operation.RequestFields {
+		got = append(got, field.FieldName)
+	}
+
+	for _, fieldName := range want {
+		if !slices.Contains(got, fieldName) {
+			t.Fatalf("runtime request fields = %v, want to contain %q", got, fieldName)
+		}
+	}
+}
+
+func assertDiscoveredKindsInclude(t *testing.T, candidates []resourceCandidate, want []string) {
+	t.Helper()
+
+	got := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		got = append(got, candidate.rawName)
+	}
+
+	for _, kind := range want {
+		if !slices.Contains(got, kind) {
+			t.Fatalf("discovered kinds = %v, want to contain %q", got, kind)
+		}
+	}
 }
 
 func generatorTestDir(t *testing.T) string {

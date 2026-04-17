@@ -8,13 +8,19 @@ This landing page is generated from the checked-in package and release inventory
 
 | API version | Resources | Packages |
 | --- | --- | --- |
+| [aidocument.oracle.com/v1beta1](aidocument/v1beta1/index.md) | [Project](aidocument/v1beta1/index.md#kind-project) | - |
+| [ailanguage.oracle.com/v1beta1](ailanguage/v1beta1/index.md) | [Project](ailanguage/v1beta1/index.md#kind-project) | - |
+| [aivision.oracle.com/v1beta1](aivision/v1beta1/index.md) | [Project](aivision/v1beta1/index.md#kind-project) | - |
 | [analytics.oracle.com/v1beta1](analytics/v1beta1/index.md) | [AnalyticsInstance](analytics/v1beta1/index.md#kind-analyticsinstance) | - |
 | [apigateway.oracle.com/v1beta1](apigateway/v1beta1/index.md) | [ApiGateway](apigateway/v1beta1/index.md#kind-apigateway), [ApiGatewayDeployment](apigateway/v1beta1/index.md#kind-apigatewaydeployment) | API Gateway (`v2.0.0-alpha`) |
+| [bds.oracle.com/v1beta1](bds/v1beta1/index.md) | [BdsInstance](bds/v1beta1/index.md#kind-bdsinstance) | - |
 | [containerengine.oracle.com/v1beta1](containerengine/v1beta1/index.md) | [Cluster](containerengine/v1beta1/index.md#kind-cluster), [NodePool](containerengine/v1beta1/index.md#kind-nodepool) | - |
 | [containerinstances.oracle.com/v1beta1](containerinstances/v1beta1/index.md) | [ContainerInstance](containerinstances/v1beta1/index.md#kind-containerinstance) | Container Instances (`v2.0.0-alpha`) |
 | [core.oracle.com/v1beta1](core/v1beta1/index.md) | [Drg](core/v1beta1/index.md#kind-drg), [Instance](core/v1beta1/index.md#kind-instance), [InternetGateway](core/v1beta1/index.md#kind-internetgateway), [NatGateway](core/v1beta1/index.md#kind-natgateway), [NetworkSecurityGroup](core/v1beta1/index.md#kind-networksecuritygroup), [RouteTable](core/v1beta1/index.md#kind-routetable), [SecurityList](core/v1beta1/index.md#kind-securitylist), [ServiceGateway](core/v1beta1/index.md#kind-servicegateway), [Subnet](core/v1beta1/index.md#kind-subnet), [Vcn](core/v1beta1/index.md#kind-vcn) | Core Compute (`Not yet released`), Core Networking (`v2.0.0-alpha`) |
 | [database.oracle.com/v1beta1](database/v1beta1/index.md) | [AutonomousDatabase](database/v1beta1/index.md#kind-autonomousdatabase) | Autonomous Database (`v2.0.0-alpha`) |
+| [databasetools.oracle.com/v1beta1](databasetools/v1beta1/index.md) | [DatabaseToolsConnection](databasetools/v1beta1/index.md#kind-databasetoolsconnection) | - |
 | [dataflow.oracle.com/v1beta1](dataflow/v1beta1/index.md) | [Application](dataflow/v1beta1/index.md#kind-application) | Data Flow (`v2.0.0-alpha`) |
+| [datascience.oracle.com/v1beta1](datascience/v1beta1/index.md) | [Project](datascience/v1beta1/index.md#kind-project) | - |
 | [email.oracle.com/v1beta1](email/v1beta1/index.md) | [Dkim](email/v1beta1/index.md#kind-dkim), [EmailDomain](email/v1beta1/index.md#kind-emaildomain), [Sender](email/v1beta1/index.md#kind-sender), [Suppression](email/v1beta1/index.md#kind-suppression), [WorkRequest](email/v1beta1/index.md#kind-workrequest), [WorkRequestError](email/v1beta1/index.md#kind-workrequesterror), [WorkRequestLog](email/v1beta1/index.md#kind-workrequestlog) | - |
 | [functions.oracle.com/v1beta1](functions/v1beta1/index.md) | [Application](functions/v1beta1/index.md#kind-application), [Function](functions/v1beta1/index.md#kind-function) | Functions (`v2.0.0-alpha`) |
 | [generativeai.oracle.com/v1beta1](generativeai/v1beta1/index.md) | [DedicatedAiCluster](generativeai/v1beta1/index.md#kind-dedicatedaicluster), [Endpoint](generativeai/v1beta1/index.md#kind-endpoint), [Model](generativeai/v1beta1/index.md#kind-model), [WorkRequest](generativeai/v1beta1/index.md#kind-workrequest), [WorkRequestError](generativeai/v1beta1/index.md#kind-workrequesterror), [WorkRequestLog](generativeai/v1beta1/index.md#kind-workrequestlog) | - |
