@@ -20,5 +20,10 @@ apiVersion: loadbalancer.oracle.com/v1beta1
 kind: Listener
 metadata:
   name: listener-sample
-spec: {}
+spec:
+  loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+  name: example_listener
+  defaultBackendSetName: example_backend_set
+  port: 80
+  protocol: HTTP
 ```

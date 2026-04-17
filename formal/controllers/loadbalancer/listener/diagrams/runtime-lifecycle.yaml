@@ -1,0 +1,31 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loadbalancer
+slug: listener
+kind: Listener
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  mutation:
+    mutable:
+      - connection_configuration
+      - default_backend_set_name
+      - hostname_names
+      - path_route_set_name
+      - port
+      - protocol
+      - routing_policy_name
+      - rule_set_names
+      - ssl_configuration
+    forceNew:
+      - load_balancer_id
+      - name
+notes:
+  - The published Listener runtime keeps request-path lookup under pkg/servicemanager/loadbalancer/listener by resolving loadBalancerId from status or spec and listener name from status.name, spec.name, or the Kubernetes object name.
+  - Because OCI exposes no standalone GetListener or ListListeners API, read, bind, and delete confirmation all project the named listener from GetLoadBalancer on the owning load balancer.
+  - Create and update use read-after-write follow-up, then settle through the next observe because Listener payloads do not expose a standalone lifecycle field. Delete retains the finalizer until the named listener disappears from the parent listeners map.

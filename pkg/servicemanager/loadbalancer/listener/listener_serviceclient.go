@@ -30,31 +30,84 @@ type defaultListenerServiceClient struct {
 	generatedruntime.ServiceClient[*loadbalancerv1beta1.Listener]
 }
 
+func newListenerRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "loadbalancer",
+		FormalSlug:    "listener",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"DELETED"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"connectionConfiguration", "defaultBackendSetName", "hostnameNames", "pathRouteSetName", "port", "protocol", "routingPolicyName", "ruleSetNames", "sslConfiguration"},
+			ForceNew:      []string{"loadBalancerId", "name"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "none",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "none",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "none",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ ListenerServiceClient = defaultListenerServiceClient{}
 
 var newListenerServiceClient = func(manager *ListenerServiceManager) ListenerServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*loadbalancerv1beta1.Listener]{
-		Kind:    "Listener",
-		SDKName: "Listener",
-		Log:     manager.Log,
+		Kind:      "Listener",
+		SDKName:   "Listener",
+		Log:       manager.Log,
+		Semantics: newListenerRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.CreateListenerRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateListener(ctx, *request.(*loadbalancersdk.CreateListenerRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateListenerDetails", RequestName: "CreateListenerDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.UpdateListenerRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateListener(ctx, *request.(*loadbalancersdk.UpdateListenerRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateListenerDetails", RequestName: "UpdateListenerDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.DeleteListenerRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteListener(ctx, *request.(*loadbalancersdk.DeleteListenerRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}},
 		},
 	}
 	if err != nil {

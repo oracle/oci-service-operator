@@ -87,6 +87,10 @@ spec:
                 items:
                   type: string
                 type: array
+              loadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the load balancer that owns this listener.
+                type: string
               name:
                 description: |-
                   A friendly name for the listener. It must be unique and it cannot be changed.
@@ -213,6 +217,7 @@ spec:
                 type: object
             required:
             - defaultBackendSetName
+            - loadBalancerId
             - name
             - port
             - protocol
@@ -251,6 +256,9 @@ spec:
                 items:
                   type: string
                 type: array
+              loadBalancerId:
+                description: The bound load balancer OCID used to address this listener.
+                type: string
               name:
                 description: |-
                   A friendly name for the listener. It must be unique and it cannot be changed.

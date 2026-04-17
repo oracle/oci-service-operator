@@ -1251,6 +1251,34 @@ services:
                   urlPath: /healthz
                   port: 8080
                   returnCode: 200
+        - kind: Listener
+          formalSpec: listener
+          specFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId"'
+              comments:
+                - "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this listener."
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId,omitempty"'
+              comments:
+                - The bound load balancer OCID used to address this listener.
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: Listener
+              metadata:
+                name: listener-sample
+              spec:
+                loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+                name: example_listener
+                defaultBackendSetName: example_backend_set
+                port: 80
+                protocol: HTTP
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging

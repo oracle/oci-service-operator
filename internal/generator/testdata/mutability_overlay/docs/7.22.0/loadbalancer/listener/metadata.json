@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "loadbalancer",
+  "kind": "Listener",
+  "formalSlug": "listener",
+  "providerResource": "oci_load_balancer_listener",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/load_balancer_listener",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/load_balancer_listener",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/loadbalancer/listener/page.html",
+  "bodySHA256": "9b70cfc1dcdf9dff2abdb17d4d4683c43c8d0c50f15ddd7fa9439316b8922afb",
+  "bodyBytes": 796,
+  "fixtureBodyPath": "7.22.0/loadbalancer/listener/page.html"
+}

@@ -1,0 +1,117 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - loadbalancer/Listener
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired Listener spec, tracked status,\nand delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Use the tracked OCI identity for follow-up\nreconciliation;
+else (no)
+:Create the OCI resource via CreateListener\nwhen no tracked identity is present;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteListener with required\nvia repo-authored delete observe path to\nDELETED confirmation;
+:Confirm deletion via repo-authored delete\nobserve path until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields load_balancer_id, name;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateListener only for mutable fields\nconnection_configuration,\ndefault_backend_set_name, hostname_names,\npath_route_set_name (+5 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: loadbalancer
+slug: listener
+kind: Listener
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create none; update none;
+delete none
+supported drift: connection_configuration,
+default_backend_set_name, hostname_names,
+path_route_set_name (+5 more)
+reject before mutate: force-new fields
+load_balancer_id, name
+create-only fields: none
+list lookup: none
+conflicts: none
+open gaps: none
+The published Listener runtime keeps
+request-path lookup under
+pkg/servicemanager/loadbalancer/listener by
+resolving loadBalancerId from status or spec and
+listener name from status.name, spec.name, or
+the Kubernetes object name.
+Because OCI exposes no standalone GetListener or
+ListListeners API, read, bind, and delete
+confirmation all project the named listener from
+GetLoadBalancer on the owning load balancer.
+Create and update use read-after-write
+follow-up, then settle through the next observe
+because Listener payloads do not expose a
+standalone lifecycle field. Delete retains the
+finalizer until the named listener disappears
+from the parent listeners map.
+end note
+@enduml

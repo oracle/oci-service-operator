@@ -916,6 +916,7 @@ ListenerSpec defines the desired state of Listener.
 | [`connectionConfiguration`](#kind-listener-spec-connectionconfiguration) | ListenerConnectionConfiguration defines nested fields for Listener.ConnectionConfiguration. | `object` | No | - | - |
 | `defaultBackendSetName` | The name of the associated backend set. Example: `example_backend_set` | `string` | Yes | - | - |
 | `hostnameNames` | An array of hostname resource names. | `list[string]` | No | - | - |
+| `loadBalancerId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this listener. | `string` | Yes | - | - |
 | `name` | A friendly name for the listener. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_listener` | `string` | Yes | - | - |
 | `pathRouteSetName` | Deprecated. Please use `routingPolicies` instead. The name of the set of path-based routing rules, PathRouteSet, applied to this listener's traffic. Example: `example_path_route_set` | `string` | No | - | - |
 | `port` | The communication port for the listener. Example: `80` | `integer` | Yes | - | - |
@@ -964,6 +965,7 @@ ListenerStatus defines the observed state of Listener.
 | [`connectionConfiguration`](#kind-listener-status-connectionconfiguration) | ListenerConnectionConfiguration defines nested fields for Listener.ConnectionConfiguration. | `object` | No | - | - |
 | `defaultBackendSetName` | The name of the associated backend set. Example: `example_backend_set` | `string` | No | - | - |
 | `hostnameNames` | An array of hostname resource names. | `list[string]` | No | - | - |
+| `loadBalancerId` | The bound load balancer OCID used to address this listener. | `string` | No | - | - |
 | `name` | A friendly name for the listener. It must be unique and it cannot be changed. Example: `example_listener` | `string` | No | - | - |
 | `pathRouteSetName` | Deprecated. Please use `routingPolicies` instead. The name of the set of path-based routing rules, PathRouteSet, applied to this listener's traffic. Example: `example_path_route_set` | `string` | No | - | - |
 | `port` | The communication port for the listener. Example: `80` | `integer` | No | - | - |

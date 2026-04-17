@@ -54,6 +54,9 @@ type ListenerSpec struct {
 	// Example: ["example_rule_set"]
 	// +kubebuilder:validation:Optional
 	RuleSetNames []string `json:"ruleSetNames,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this listener.
+	// +kubebuilder:validation:Required
+	LoadBalancerId string `json:"loadBalancerId"`
 }
 
 // ListenerSslConfiguration defines nested fields for Listener.SslConfiguration.
@@ -176,6 +179,8 @@ type ListenerStatus struct {
 	// The name of the routing policy applied to this listener's traffic.
 	// Example: `example_routing_policy_name`
 	RoutingPolicyName string `json:"routingPolicyName,omitempty"`
+	// The bound load balancer OCID used to address this listener.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

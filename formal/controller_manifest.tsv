@@ -43,6 +43,7 @@ core	subnet	Subnet	seeded	repo-authored-semantics	imports/core/subnet.json	contr
 core	vcn	Vcn	seeded	repo-authored-semantics	imports/core/vcn.json	controllers/core/vcn/spec.cfg	controllers/core/vcn/logic-gaps.md	controllers/core/vcn/diagrams
 loadbalancer	backend	Backend	seeded	repo-authored-semantics	imports/loadbalancer/backend.json	controllers/loadbalancer/backend/spec.cfg	controllers/loadbalancer/backend/logic-gaps.md	controllers/loadbalancer/backend/diagrams
 loadbalancer	backendset	BackendSet	seeded	repo-authored-semantics	imports/loadbalancer/backendset.json	controllers/loadbalancer/backendset/spec.cfg	controllers/loadbalancer/backendset/logic-gaps.md	controllers/loadbalancer/backendset/diagrams
+loadbalancer	listener	Listener	seeded	repo-authored-semantics	imports/loadbalancer/listener.json	controllers/loadbalancer/listener/spec.cfg	controllers/loadbalancer/listener/logic-gaps.md	controllers/loadbalancer/listener/diagrams
 mysql	backup	Backup	scaffold	repo-authored-semantics	imports/mysql/backup.json	controllers/mysql/backup/spec.cfg	controllers/mysql/backup/logic-gaps.md	controllers/mysql/backup/diagrams
 mysql	channel	Channel	scaffold	repo-authored-semantics	imports/mysql/channel.json	controllers/mysql/channel/spec.cfg	controllers/mysql/channel/logic-gaps.md	controllers/mysql/channel/diagrams
 mysql	configuration	Configuration	scaffold	repo-authored-semantics	imports/mysql/configuration.json	controllers/mysql/configuration/spec.cfg	controllers/mysql/configuration/logic-gaps.md	controllers/mysql/configuration/diagrams
