@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageapi",
+  "slug": "query",
+  "kind": "Query",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_usage_query",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateQuery",
+        "requestType": "usageapi.CreateQueryRequest",
+        "responseType": "usageapi.CreateQueryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetQuery",
+        "requestType": "usageapi.GetQueryRequest",
+        "responseType": "usageapi.GetQueryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListQueries",
+        "requestType": "usageapi.ListQueriesRequest",
+        "responseType": "usageapi.ListQueriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateQuery",
+        "requestType": "usageapi.UpdateQueryRequest",
+        "responseType": "usageapi.UpdateQueryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteQuery",
+        "requestType": "usageapi.DeleteQueryRequest",
+        "responseType": "usageapi.DeleteQueryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "query_definition"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_usage_queries",
+    "collectionField": "queries",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "query_definition.display_name",
+      "query_definition.version",
+      "query_definition.report_query.tenant_id",
+      "query_definition.report_query.granularity",
+      "query_definition.report_query.time_usage_started",
+      "query_definition.report_query.time_usage_ended",
+      "query_definition.report_query.is_aggregate_by_time",
+      "query_definition.report_query.forecast.time_forecast_ended",
+      "query_definition.report_query.forecast.forecast_type",
+      "query_definition.report_query.forecast.time_forecast_started",
+      "query_definition.report_query.query_type",
+      "query_definition.report_query.group_by",
+      "query_definition.report_query.group_by_tag",
+      "query_definition.report_query.compartment_depth",
+      "query_definition.report_query.filter.operator",
+      "query_definition.report_query.filter.dimensions",
+      "query_definition.report_query.filter.tags",
+      "query_definition.report_query.date_range_name",
+      "query_definition.cost_analysis_ui.graph",
+      "query_definition.cost_analysis_ui.is_cumulative_graph"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageapi/query/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageapi/query/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "synchronous-write-success",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded from the OCI Usage API Query SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available."
+  ]
+}

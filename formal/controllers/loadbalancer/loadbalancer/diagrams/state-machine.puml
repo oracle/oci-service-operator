@@ -1,0 +1,105 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - loadbalancer/LoadBalancer
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateLoadBalancer
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, display_name,\nfreeform_tags
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: loadbalancer
+slug: loadbalancer
+kind: LoadBalancer
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, terminating
+provider states: create none; update none;
+delete none
+supported drift: defined_tags, display_name,
+freeform_tags
+reject before mutate: force-new fields
+backend_sets, certificates, compartment_id,
+hostnames (+11 more)
+create-only fields: none
+list lookup: oci_load_balancer_load_balancers
+filters display_name, compartment_id
+conflicts: none
+open gaps: none
+The published LoadBalancer runtime keeps
+bind-versus-create local to
+pkg/servicemanager/loadbalancer/loadbalancer by
+listing exact compartmentId plus displayName
+before CreateLoadBalancer when no tracked OCI ID
+is present.
+Create and update use GetLoadBalancer-backed
+read-after-write follow-up until OCI returns
+ACTIVE, while delete retains the finalizer until
+GetLoadBalancer or list fallback confirms the
+load balancer is gone or terminally DELETED.
+Only displayName and tag fields stay mutable
+through UpdateLoadBalancer; desired-state drift
+for networking, shape, and nested child maps is
+rejected before OCI mutation as create-only
+replacement drift.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetLoadBalancer or
+ListLoadBalancers
+delete targets: DELETED
+end note
+@enduml

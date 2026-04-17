@@ -4,12 +4,12 @@
     "resources": 6,
     "overlayArtifacts": 6,
     "vapArtifacts": 6,
-    "fields": 97,
-    "allowInPlaceCount": 63,
-    "denyInPlaceCount": 2,
+    "fields": 94,
+    "allowInPlaceCount": 62,
+    "denyInPlaceCount": 0,
     "replacementRequiredCount": 18,
     "unknownPolicyCount": 14,
-    "docsDeniedCount": 2,
+    "docsDeniedCount": 0,
     "unresolvedJoinCount": 0,
     "ambiguousJoinCount": 0,
     "mergeConflictCount": 0
@@ -70,8 +70,8 @@
     {
       "service": "nosql",
       "resources": 1,
-      "fields": 10,
-      "allowInPlaceCount": 6,
+      "fields": 9,
+      "allowInPlaceCount": 5,
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 2,
       "unknownPolicyCount": 2,
@@ -83,12 +83,12 @@
     {
       "service": "objectstorage",
       "resources": 1,
-      "fields": 12,
+      "fields": 10,
       "allowInPlaceCount": 9,
-      "denyInPlaceCount": 2,
+      "denyInPlaceCount": 0,
       "replacementRequiredCount": 1,
       "unknownPolicyCount": 0,
-      "docsDeniedCount": 2,
+      "docsDeniedCount": 0,
       "unresolvedJoinCount": 0,
       "ambiguousJoinCount": 0,
       "mergeConflictCount": 0
@@ -936,14 +936,13 @@
       "terraformDocsVersion": "7.22.0",
       "overlayPath": "internal/generator/generated/mutability_overlay/nosql/table.json",
       "vapPath": "internal/generator/generated/vap_update_policy/nosql/table.json",
-      "fields": 10,
-      "allowInPlaceCount": 6,
+      "fields": 9,
+      "allowInPlaceCount": 5,
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 2,
       "unknownPolicyCount": 2,
       "allowInPlacePaths": [
         "compartmentId",
-        "ddlStatement",
         "tableLimits.capacityMode",
         "tableLimits.maxReadUnits",
         "tableLimits.maxStorageInGbs",
@@ -952,13 +951,6 @@
       "decisions": [
         {
           "fieldPath": "compartmentId",
-          "finalPolicy": "allowInPlaceUpdate",
-          "joinStatus": "matched",
-          "mergeCase": "docsConfirmedCandidate",
-          "docsEvidenceState": "confirmedUpdatable"
-        },
-        {
-          "fieldPath": "ddlStatement",
           "finalPolicy": "allowInPlaceUpdate",
           "joinStatus": "matched",
           "mergeCase": "docsConfirmedCandidate",
@@ -1060,9 +1052,9 @@
       "terraformDocsVersion": "7.22.0",
       "overlayPath": "internal/generator/generated/mutability_overlay/objectstorage/objectstoragebucket.json",
       "vapPath": "internal/generator/generated/vap_update_policy/objectstorage/objectstoragebucket.json",
-      "fields": 12,
+      "fields": 10,
       "allowInPlaceCount": 9,
-      "denyInPlaceCount": 2,
+      "denyInPlaceCount": 0,
       "replacementRequiredCount": 1,
       "unknownPolicyCount": 0,
       "allowInPlacePaths": [
@@ -1120,20 +1112,6 @@
           "docsEvidenceState": "confirmedUpdatable"
         },
         {
-          "fieldPath": "name",
-          "finalPolicy": "denyInPlaceUpdate",
-          "joinStatus": "matched",
-          "mergeCase": "docsDeniedCandidate",
-          "docsEvidenceState": "deniedUpdatable"
-        },
-        {
-          "fieldPath": "namespace",
-          "finalPolicy": "denyInPlaceUpdate",
-          "joinStatus": "matched",
-          "mergeCase": "docsDeniedCandidate",
-          "docsEvidenceState": "deniedUpdatable"
-        },
-        {
           "fieldPath": "objectEventsEnabled",
           "finalPolicy": "allowInPlaceUpdate",
           "joinStatus": "matched",
@@ -1162,23 +1140,7 @@
           "docsEvidenceState": "confirmedUpdatable"
         }
       ],
-      "docsDeniedFields": [
-        "name",
-        "namespace"
-      ],
       "denyRules": [
-        {
-          "fieldPath": "name",
-          "decision": "denyInPlaceUpdate",
-          "mergeCase": "docsDeniedCandidate",
-          "docsEvidenceState": "deniedUpdatable"
-        },
-        {
-          "fieldPath": "namespace",
-          "decision": "denyInPlaceUpdate",
-          "mergeCase": "docsDeniedCandidate",
-          "docsEvidenceState": "deniedUpdatable"
-        },
         {
           "fieldPath": "storageTier",
           "decision": "replacementRequired",

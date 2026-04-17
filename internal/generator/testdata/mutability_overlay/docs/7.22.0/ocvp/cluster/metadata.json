@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "ocvp",
+  "kind": "Cluster",
+  "formalSlug": "cluster",
+  "providerResource": "oci_ocvp_cluster",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/ocvp_cluster",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/ocvp_cluster",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/ocvp/cluster/page.html",
+  "bodySHA256": "6529509603c062a3081b127aa9f415f8e17cd3d1fc2d11241a1ad1685d8b6bae",
+  "bodyBytes": 2124,
+  "fixtureBodyPath": "7.22.0/ocvp/cluster/page.html"
+}

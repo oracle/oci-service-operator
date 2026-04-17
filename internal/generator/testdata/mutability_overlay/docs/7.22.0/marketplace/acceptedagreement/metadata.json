@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "marketplace",
+  "kind": "AcceptedAgreement",
+  "formalSlug": "acceptedagreement",
+  "providerResource": "oci_marketplace_accepted_agreement",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/marketplace_accepted_agreement",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/marketplace_accepted_agreement",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/marketplace/acceptedagreement/page.html",
+  "bodySHA256": "c23571c2526655b8db55ea553d25ff854d6f4e8bebf03c84d51690f9e3d5b968",
+  "bodyBytes": 1039,
+  "fixtureBodyPath": "7.22.0/marketplace/acceptedagreement/page.html"
+}

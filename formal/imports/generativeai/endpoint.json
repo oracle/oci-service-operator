@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeai",
+  "slug": "endpoint",
+  "kind": "Endpoint",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_endpoint",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEndpoint",
+        "requestType": "generativeai.CreateEndpointRequest",
+        "responseType": "generativeai.CreateEndpointResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEndpoint",
+        "requestType": "generativeai.GetEndpointRequest",
+        "responseType": "generativeai.GetEndpointResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEndpoints",
+        "requestType": "generativeai.ListEndpointsRequest",
+        "responseType": "generativeai.ListEndpointsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEndpoint",
+        "requestType": "generativeai.UpdateEndpointRequest",
+        "responseType": "generativeai.UpdateEndpointResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEndpoint",
+        "requestType": "generativeai.DeleteEndpointRequest",
+        "responseType": "generativeai.DeleteEndpointResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "content_moderation_config",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "dedicated_ai_cluster_id",
+      "model_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_generative_ai_endpoints",
+    "collectionField": "endpoint_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "dedicated_ai_cluster_id",
+      "display_name",
+      "id",
+      "model_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeai/endpoint/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeai/endpoint/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded from the OCI Generative AI Endpoint SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available."
+  ]
+}

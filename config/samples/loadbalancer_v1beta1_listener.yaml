@@ -1,0 +1,15 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+apiVersion: loadbalancer.oracle.com/v1beta1
+kind: Listener
+metadata:
+  name: listener-sample
+spec:
+  loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+  name: example_listener
+  defaultBackendSetName: example_backend_set
+  port: 80
+  protocol: HTTP

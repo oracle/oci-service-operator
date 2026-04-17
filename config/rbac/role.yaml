@@ -326,6 +326,50 @@ rules:
   - patch
   - update
 - apiGroups:
+  - email.oracle.com
+  resources:
+  - dkims
+  - emaildomains
+  - senders
+  - suppressions
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - email.oracle.com
+  resources:
+  - dkims/finalizers
+  - emaildomains/finalizers
+  - senders/finalizers
+  - suppressions/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - email.oracle.com
+  resources:
+  - dkims/status
+  - emaildomains/status
+  - senders/status
+  - suppressions/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - functions.oracle.com
   resources:
   - applications
@@ -350,6 +394,47 @@ rules:
   resources:
   - applications/status
   - functions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - generativeai.oracle.com
+  resources:
+  - dedicatedaiclusters
+  - endpoints
+  - models
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - generativeai.oracle.com
+  resources:
+  - dedicatedaiclusters/finalizers
+  - endpoints/finalizers
+  - models/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - generativeai.oracle.com
+  resources:
+  - dedicatedaiclusters/status
+  - endpoints/status
+  - models/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
   verbs:
   - get
   - patch
@@ -402,6 +487,248 @@ rules:
   - keymanagement.oracle.com
   resources:
   - vaults/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backendhealths
+  - backends
+  - backendsethealths
+  - backendsets
+  - certificates
+  - healthcheckers
+  - hostnames
+  - listenerrules
+  - listeners
+  - loadbalancerhealths
+  - loadbalancers
+  - loadbalancershapes
+  - networksecuritygroups
+  - pathroutesets
+  - policies
+  - protocols
+  - routingpolicies
+  - rulesets
+  - shapes
+  - sslciphersuites
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backendhealths/finalizers
+  - backends/finalizers
+  - backendsethealths/finalizers
+  - backendsets/finalizers
+  - certificates/finalizers
+  - healthcheckers/finalizers
+  - hostnames/finalizers
+  - listenerrules/finalizers
+  - listeners/finalizers
+  - loadbalancerhealths/finalizers
+  - loadbalancers/finalizers
+  - loadbalancershapes/finalizers
+  - networksecuritygroups/finalizers
+  - pathroutesets/finalizers
+  - policies/finalizers
+  - protocols/finalizers
+  - routingpolicies/finalizers
+  - rulesets/finalizers
+  - shapes/finalizers
+  - sslciphersuites/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - loadbalancer.oracle.com
+  resources:
+  - backendhealths/status
+  - backends/status
+  - backendsethealths/status
+  - backendsets/status
+  - certificates/status
+  - healthcheckers/status
+  - hostnames/status
+  - listenerrules/status
+  - listeners/status
+  - loadbalancerhealths/status
+  - loadbalancers/status
+  - loadbalancershapes/status
+  - networksecuritygroups/status
+  - pathroutesets/status
+  - policies/status
+  - protocols/status
+  - routingpolicies/status
+  - rulesets/status
+  - shapes/status
+  - sslciphersuites/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - logging.oracle.com
+  resources:
+  - loggroups
+  - logs
+  - logsavedsearches
+  - services
+  - unifiedagentconfigurations
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - logging.oracle.com
+  resources:
+  - loggroups/finalizers
+  - logs/finalizers
+  - logsavedsearches/finalizers
+  - services/finalizers
+  - unifiedagentconfigurations/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - logging.oracle.com
+  resources:
+  - loggroups/status
+  - logs/status
+  - logsavedsearches/status
+  - services/status
+  - unifiedagentconfigurations/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - marketplace.oracle.com
+  resources:
+  - acceptedagreements
+  - agreements
+  - categories
+  - launcheligibilities
+  - listings
+  - packages
+  - publicationpackages
+  - publications
+  - publishers
+  - reports
+  - reporttypes
+  - taxes
+  - thirdpartypaidlistingeligibilities
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - marketplace.oracle.com
+  resources:
+  - acceptedagreements/finalizers
+  - agreements/finalizers
+  - categories/finalizers
+  - launcheligibilities/finalizers
+  - listings/finalizers
+  - packages/finalizers
+  - publicationpackages/finalizers
+  - publications/finalizers
+  - publishers/finalizers
+  - reports/finalizers
+  - reporttypes/finalizers
+  - taxes/finalizers
+  - thirdpartypaidlistingeligibilities/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - marketplace.oracle.com
+  resources:
+  - acceptedagreements/status
+  - agreements/status
+  - categories/status
+  - launcheligibilities/status
+  - listings/status
+  - packages/status
+  - publicationpackages/status
+  - publications/status
+  - publishers/status
+  - reports/status
+  - reporttypes/status
+  - taxes/status
+  - thirdpartypaidlistingeligibilities/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring.oracle.com
+  resources:
+  - alarmhistories
+  - alarms
+  - alarmstatuses
+  - alarmsuppressions
+  - metrics
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring.oracle.com
+  resources:
+  - alarmhistories/finalizers
+  - alarms/finalizers
+  - alarmstatuses/finalizers
+  - alarmsuppressions/finalizers
+  - metrics/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - monitoring.oracle.com
+  resources:
+  - alarmhistories/status
+  - alarms/status
+  - alarmstatuses/status
+  - alarmsuppressions/status
+  - metrics/status
   verbs:
   - get
   - patch
@@ -483,6 +810,130 @@ rules:
   - objectstorage.oracle.com
   resources:
   - buckets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ocvp.oracle.com
+  resources:
+  - clusters
+  - esxihosts
+  - sddcs
+  - supportedcommitments
+  - supportedhostshapes
+  - supportedvmwaresoftwareversions
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ocvp.oracle.com
+  resources:
+  - clusters/finalizers
+  - esxihosts/finalizers
+  - sddcs/finalizers
+  - supportedcommitments/finalizers
+  - supportedhostshapes/finalizers
+  - supportedvmwaresoftwareversions/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ocvp.oracle.com
+  resources:
+  - clusters/status
+  - esxihosts/status
+  - sddcs/status
+  - supportedcommitments/status
+  - supportedhostshapes/status
+  - supportedvmwaresoftwareversions/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - oda.oracle.com
+  resources:
+  - authenticationproviders
+  - channels
+  - digitalassistantparameters
+  - digitalassistants
+  - importedpackages
+  - odainstanceattachments
+  - odainstances
+  - odaprivateendpointattachments
+  - odaprivateendpoints
+  - odaprivateendpointscanproxies
+  - packages
+  - skillparameters
+  - skills
+  - translators
+  - workrequesterrors
+  - workrequestlogs
+  - workrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - oda.oracle.com
+  resources:
+  - authenticationproviders/finalizers
+  - channels/finalizers
+  - digitalassistantparameters/finalizers
+  - digitalassistants/finalizers
+  - importedpackages/finalizers
+  - odainstanceattachments/finalizers
+  - odainstances/finalizers
+  - odaprivateendpointattachments/finalizers
+  - odaprivateendpoints/finalizers
+  - odaprivateendpointscanproxies/finalizers
+  - packages/finalizers
+  - skillparameters/finalizers
+  - skills/finalizers
+  - translators/finalizers
+  - workrequesterrors/finalizers
+  - workrequestlogs/finalizers
+  - workrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - oda.oracle.com
+  resources:
+  - authenticationproviders/status
+  - channels/status
+  - digitalassistantparameters/status
+  - digitalassistants/status
+  - importedpackages/status
+  - odainstanceattachments/status
+  - odainstances/status
+  - odaprivateendpointattachments/status
+  - odaprivateendpoints/status
+  - odaprivateendpointscanproxies/status
+  - packages/status
+  - skillparameters/status
+  - skills/status
+  - translators/status
+  - workrequesterrors/status
+  - workrequestlogs/status
+  - workrequests/status
   verbs:
   - get
   - patch
@@ -587,6 +1038,44 @@ rules:
   - streaming.oracle.com
   resources:
   - streams/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - usageapi.oracle.com
+  resources:
+  - customtables
+  - queries
+  - scheduledruns
+  - schedules
+  - usagecarbonemissionsqueries
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - usageapi.oracle.com
+  resources:
+  - customtables/finalizers
+  - queries/finalizers
+  - scheduledruns/finalizers
+  - schedules/finalizers
+  - usagecarbonemissionsqueries/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - usageapi.oracle.com
+  resources:
+  - customtables/status
+  - queries/status
+  - scheduledruns/status
+  - schedules/status
+  - usagecarbonemissionsqueries/status
   verbs:
   - get
   - patch

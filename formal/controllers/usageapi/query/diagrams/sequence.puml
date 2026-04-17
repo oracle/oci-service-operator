@@ -1,0 +1,138 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - usageapi/Query
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Query reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Query
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetQuery
+else tracked identity is missing
+ServiceManager -> OCI: ListQueries(filters:\nquery_definition.display_name,\nquery_definition.version,\nquery_definition.report_query.tenant_id,\nquery_definition.report_query.granularity\n(+16 more))
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateQuery
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetQuery
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteQuery
+ServiceManager -> OCI: confirm delete via GetQuery or\nListQueries
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+query_definition
+Reject before mutate: force-new fields
+compartment_id
+Lookup filters:
+query_definition.display_name,
+query_definition.version,
+query_definition.report_query.tenant_id,
+query_definition.report_query.granularity
+(+16 more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateQuery only for mutable\nfields query_definition
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on terminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: usageapi
+slug: query
+kind: Query
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift: query_definition
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_usage_queries filters
+query_definition.display_name,
+query_definition.version,
+query_definition.report_query.tenant_id,
+query_definition.report_query.granularity (+16
+more)
+conflicts: none
+open gaps: none
+The generated runtime reuses an existing query
+by listing on the required compartmentId request
+scope, then matching the returned
+queryDefinition payload on displayName, version,
+report inputs, and any populated costAnalysisUI
+fields.
+The SDK surface does not expose lifecycle states
+on Query bodies, so create and update settle
+through read-after-write GetQuery confirmation
+instead of lifecycle polling; a service-local
+wrapper converts that confirmed reread into
+settled Active status.
+In-place updates are limited to queryDefinition;
+compartmentId requires replacement and is
+rejected before OCI mutation.
+Delete retains the finalizer until GetQuery
+confirms the query no longer exists.
+end note
+@enduml

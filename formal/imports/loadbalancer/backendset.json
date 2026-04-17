@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "backendset",
+  "kind": "BackendSet",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_backend_set",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBackendSet",
+        "requestType": "loadbalancer.CreateBackendSetRequest",
+        "responseType": "loadbalancer.CreateBackendSetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBackendSet",
+        "requestType": "loadbalancer.GetBackendSetRequest",
+        "responseType": "loadbalancer.GetBackendSetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBackendSets",
+        "requestType": "loadbalancer.ListBackendSetsRequest",
+        "responseType": "loadbalancer.ListBackendSetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBackendSet",
+        "requestType": "loadbalancer.UpdateBackendSetRequest",
+        "responseType": "loadbalancer.UpdateBackendSetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBackendSet",
+        "requestType": "loadbalancer.DeleteBackendSetRequest",
+        "responseType": "loadbalancer.DeleteBackendSetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "backends",
+      "health_checker",
+      "lb_cookie_session_persistence_configuration",
+      "policy",
+      "session_persistence_configuration",
+      "ssl_configuration"
+    ],
+    "forceNew": [
+      "load_balancer_id",
+      "name"
+    ],
+    "conflictsWith": {
+      "lb_cookie_session_persistence_configuration": [
+        "session_persistence_configuration"
+      ],
+      "session_persistence_configuration": [
+        "lb_cookie_session_persistence_configuration"
+      ]
+    }
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_load_balancer_backend_sets",
+    "collectionField": "backend_sets",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/backendset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/backendset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "path-identity-resolution",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts.",
+    "The published BackendSet runtime must keep loadBalancerId mirroring and BackendSetName path resolution in the loadbalancer/backendset package instead of shared generatedruntime.",
+    "SessionPersistenceConfiguration and LbCookieSessionPersistenceConfiguration stay mutually exclusive in the reviewed runtime contract."
+  ]
+}

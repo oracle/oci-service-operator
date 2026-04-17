@@ -1,0 +1,135 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - usageapi/Schedule
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Schedule reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Schedule
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetSchedule
+else tracked identity is missing
+ServiceManager -> OCI: ListSchedules(filters: name)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateSchedule
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetSchedule
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteSchedule
+ServiceManager -> OCI: confirm delete via GetSchedule or\nListSchedules
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: defined_tags,
+description, freeform_tags,
+output_file_format (+1 more)
+Reject before mutate: force-new fields
+compartment_id, name, query_properties,
+saved_report_id (+2 more)
+Lookup filters: name
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateSchedule only for\nmutable fields defined_tags,\ndescription, freeform_tags,\noutput_file_format (+1 more)
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on terminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: usageapi
+slug: schedule
+kind: Schedule
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift: defined_tags, description,
+freeform_tags, output_file_format (+1 more)
+reject before mutate: force-new fields
+compartment_id, name, query_properties,
+saved_report_id (+2 more)
+create-only fields: none
+list lookup: oci_usage_schedules filters name
+conflicts: none
+open gaps: none
+The generated runtime reuses an existing
+schedule by listing on the required
+compartmentId request scope plus the exact
+schedule name, then binding on that unique name
+before GetSchedule loads the full payload for
+drift evaluation.
+The Usage API exposes lifecycleState on Schedule
+bodies, so create and update settle without a
+service-local synchronous wrapper; both ACTIVE
+and INACTIVE are modeled as steady
+resource-exists states.
+In-place updates are limited to description,
+outputFileFormat, resultLocation, freeformTags,
+and definedTags; name, compartmentId,
+scheduleRecurrences, timeScheduled,
+savedReportId, and queryProperties require
+replacement and are rejected before OCI
+mutation.
+Delete retains the finalizer until GetSchedule
+confirms the schedule no longer exists.
+end note
+@enduml

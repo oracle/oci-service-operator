@@ -173,6 +173,51 @@ func TestPopulateSnapshotKeepsSelectedOutputsWritable(t *testing.T) {
 	assertCoverageSymlink(t, filepath.Join(snapshotRoot, "pkg", "servicemanager", "identity"))
 }
 
+func TestPopulateSnapshotKeepsInternalGeneratorArtifactsIsolated(t *testing.T) {
+	t.Helper()
+
+	repoRoot := t.TempDir()
+	snapshotRoot := t.TempDir()
+
+	sourceArtifact := filepath.Join(repoRoot, "internal", "generator", "generated", "mutability_overlay", "objectstorage", "objectstoragebucket.json")
+	for _, dir := range []string{
+		filepath.Join(repoRoot, "api"),
+		filepath.Join(repoRoot, "cmd"),
+		filepath.Join(repoRoot, "controllers"),
+		filepath.Join(repoRoot, "hack"),
+		filepath.Join(repoRoot, "formal"),
+		filepath.Join(repoRoot, "pkg", "servicemanager", "database"),
+		filepath.Join(repoRoot, "pkg", "servicemanager", "identity"),
+		filepath.Join(repoRoot, "internal", "registrations"),
+		filepath.Join(repoRoot, "internal", "validator"),
+		filepath.Dir(sourceArtifact),
+	} {
+		mustCoverageMkdirAll(t, dir)
+	}
+	writeCoverageTestFiles(t, map[string]string{
+		filepath.Join(repoRoot, "go.mod"):                                             "module example.com/test\n",
+		filepath.Join(repoRoot, "go.sum"):                                             "",
+		filepath.Join(repoRoot, "validator_allowlist.yaml"):                           "{}\n",
+		filepath.Join(repoRoot, "cmd", "main.go"):                                     "package main\n",
+		filepath.Join(repoRoot, "internal", "validator", "doc.go"):                    "package validator\n",
+		filepath.Join(repoRoot, "internal", "registrations", "database_generated.go"): "package registrations\n",
+		sourceArtifact: "{\"schemaVersion\":\"v1alpha1\"}\n",
+	})
+
+	if err := populateSnapshot(repoRoot, snapshotRoot, []string{"database"}, []string{"database"}); err != nil {
+		t.Fatalf("populateSnapshot() error = %v", err)
+	}
+
+	snapshotArtifact := filepath.Join(snapshotRoot, "internal", "generator", "generated", "mutability_overlay", "objectstorage", "objectstoragebucket.json")
+	assertCoverageRegularFile(t, snapshotArtifact)
+	if err := os.Remove(snapshotArtifact); err != nil {
+		t.Fatalf("Remove(%q) error = %v", snapshotArtifact, err)
+	}
+	if _, err := os.Stat(sourceArtifact); err != nil {
+		t.Fatalf("source artifact %q was affected by snapshot mutation: %v", sourceArtifact, err)
+	}
+}
+
 func TestPreserveCheckedInCompanionFilesLinksManualCompanions(t *testing.T) {
 	t.Helper()
 

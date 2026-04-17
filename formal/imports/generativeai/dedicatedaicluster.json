@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeai",
+  "slug": "dedicatedaicluster",
+  "kind": "DedicatedAiCluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_dedicated_ai_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDedicatedAiCluster",
+        "requestType": "generativeai.CreateDedicatedAiClusterRequest",
+        "responseType": "generativeai.CreateDedicatedAiClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDedicatedAiCluster",
+        "requestType": "generativeai.GetDedicatedAiClusterRequest",
+        "responseType": "generativeai.GetDedicatedAiClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDedicatedAiClusters",
+        "requestType": "generativeai.ListDedicatedAiClustersRequest",
+        "responseType": "generativeai.ListDedicatedAiClustersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDedicatedAiCluster",
+        "requestType": "generativeai.UpdateDedicatedAiClusterRequest",
+        "responseType": "generativeai.UpdateDedicatedAiClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDedicatedAiCluster",
+        "requestType": "generativeai.DeleteDedicatedAiClusterRequest",
+        "responseType": "generativeai.DeleteDedicatedAiClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "unit_count"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "type",
+      "unit_shape"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_generative_ai_dedicated_ai_clusters",
+    "collectionField": "dedicated_ai_cluster_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeai/dedicatedaicluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeai/dedicatedaicluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded from the OCI Generative AI Terraform resource and data source docs; refresh with formal-import when a matching terraform-provider-oci checkout is available.",
+    "The checked-in DedicatedAiCluster baseline keeps compartmentId replacement-only even though provider facts also model a separate compartment-move path."
+  ]
+}

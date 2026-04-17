@@ -1,0 +1,15 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: usageapi
+slug: customtable
+kind: CustomTable
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+notes:
+  - The generated runtime reuses an existing custom table by listing on the required compartmentId and savedReportId request scope, then matching the returned savedCustomTable payload on displayName and any populated row, column, tag, depth, or version fields.
+  - The SDK surface does not expose lifecycle states on CustomTable bodies, so create and update settle through read-after-write GetCustomTable confirmation instead of lifecycle polling; a service-local wrapper converts that confirmed reread into settled Active status.
+  - In-place updates are limited to savedCustomTable; compartmentId and savedReportId require replacement and are rejected before OCI mutation.
+  - Delete retains the finalizer until GetCustomTable confirms the custom table no longer exists.

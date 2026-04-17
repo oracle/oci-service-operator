@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "listener",
+  "kind": "Listener",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_listener",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateListener",
+        "requestType": "loadbalancer.CreateListenerRequest",
+        "responseType": "loadbalancer.CreateListenerResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateListener",
+        "requestType": "loadbalancer.UpdateListenerRequest",
+        "responseType": "loadbalancer.UpdateListenerResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteListener",
+        "requestType": "loadbalancer.DeleteListenerRequest",
+        "responseType": "loadbalancer.DeleteListenerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "connection_configuration",
+      "default_backend_set_name",
+      "hostname_names",
+      "path_route_set_name",
+      "port",
+      "protocol",
+      "routing_policy_name",
+      "rule_set_names",
+      "ssl_configuration"
+    ],
+    "forceNew": [
+      "load_balancer_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "DELETED"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/listener/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/listener/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "path-identity-resolution",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts.",
+    "The published Listener runtime must keep the GetLoadBalancer-backed read/list bridge, loadBalancerId status mirroring, and synthetic tracked listener identity in the loadbalancer/listener package instead of shared generatedruntime.",
+    "Listener read-after-write and delete confirmation are repo-authored because the service does not expose standalone GetListener or ListListeners APIs."
+  ]
+}

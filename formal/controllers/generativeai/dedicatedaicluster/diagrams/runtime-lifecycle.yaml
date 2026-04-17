@@ -1,0 +1,29 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: generativeai
+slug: dedicatedaicluster
+kind: DedicatedAiCluster
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - The generated runtime binds by exact compartmentId plus displayName when displayName is provided and no OCI identifier is already tracked.
+  - A service-local wrapper skips pre-create reuse when displayName is empty and clears stale tracked IDs before recreating so create never falls back to compartment-wide matching.
+  - In-place updates are limited to displayName, description, unitCount, freeformTags, and definedTags; compartmentId, type, and unitShape require replacement in the checked-in runtime.
+  - Delete retains the finalizer until GetDedicatedAiCluster confirms DELETED or OCI no longer returns the resource.
+repoAuthored:
+  mutation:
+    mutable:
+      - defined_tags
+      - description
+      - display_name
+      - freeform_tags
+      - unit_count
+    forceNew:
+      - compartment_id
+      - type
+      - unit_shape

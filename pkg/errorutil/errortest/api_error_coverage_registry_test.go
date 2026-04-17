@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 105; got != want {
+	if got, want := len(inventory), 199; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 34; got != want {
+	if got, want := countRegistrations(inventory), 128; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 71; got != want {
@@ -35,8 +35,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "databasetools/DatabaseToolsConnection", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datascience/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "loadbalancer/LoadBalancer", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "marketplace/Package", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 
 	assertInventoryRegistration(t, byKey, "aidocument/Project")
 	assertInventoryException(t, byKey, "aidocument/WorkRequest", `controller.strategy="none"`)
@@ -52,9 +57,15 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "databasetools/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "datascience/Project")
 	assertInventoryException(t, byKey, "datascience/WorkRequest", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "loadbalancer/LoadBalancer")
+	assertInventoryRegistration(t, byKey, "marketplace/Package")
+	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
+	assertInventoryRegistration(t, byKey, "oda/Skill")
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "usageapi/Query")
 }
 
 func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T) {
@@ -80,16 +91,24 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "databasetools/DatabaseToolsConnection", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datascience/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyManualRuntime)
+	assertReviewedFamily(t, "email/Dkim", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "generativeai/DedicatedAiCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "identity/Compartment", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "keymanagement/Vault", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "loadbalancer/LoadBalancer", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "marketplace/Package", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "monitoring/Alarm", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "nosql/Table", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "ocvp/Cluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "oda/Skill", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "objectstorage/Bucket", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "psql/DbSystem", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "queue/Queue", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
+	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
 
 	assertReviewedException(t, "aidocument/WorkRequest", "strategy=none")
 	assertReviewedException(t, "ailanguage/WorkRequest", "strategy=none")
@@ -105,6 +124,8 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 func TestReviewedAPIErrorCoverageRegistryAsyncDeviationsRemainExplicit(t *testing.T) {
 	t.Parallel()
 
+	assertReviewedDeviation(t, "generativeai/DedicatedAiCluster", "displayName-based reuse")
+	assertReviewedDeviation(t, "generativeai/Model", "baseModelId")
 	assertReviewedDeviation(t, "opensearch/OpensearchCluster", "read-after-write")
 	assertReviewedDeviation(t, "psql/DbSystem", "readback adapter")
 	assertReviewedDeviation(t, "queue/Queue", "work-request")

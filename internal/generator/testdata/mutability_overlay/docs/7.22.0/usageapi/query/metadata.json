@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "usageapi",
+  "kind": "Query",
+  "formalSlug": "query",
+  "providerResource": "oci_usage_query",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/usage_query",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/usage_query",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/usageapi/query/page.html",
+  "bodySHA256": "f50dbae61341111ce93d786776bff72cd4081f1b0584e2d19b751efe4cdf6933",
+  "bodyBytes": 388,
+  "fixtureBodyPath": "7.22.0/usageapi/query/page.html"
+}

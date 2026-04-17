@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ocvp",
+  "slug": "sddc",
+  "kind": "Sddc",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ocvp_sddc",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSddc",
+        "requestType": "ocvp.CreateSddcRequest",
+        "responseType": "ocvp.CreateSddcResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSddc",
+        "requestType": "ocvp.GetSddcRequest",
+        "responseType": "ocvp.GetSddcResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSddcs",
+        "requestType": "ocvp.ListSddcsRequest",
+        "responseType": "ocvp.ListSddcsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSddc",
+        "requestType": "ocvp.UpdateSddcRequest",
+        "responseType": "ocvp.UpdateSddcResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSddc",
+        "requestType": "ocvp.DeleteSddcRequest",
+        "responseType": "ocvp.DeleteSddcResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "esxi_software_version",
+      "freeform_tags",
+      "ssh_authorized_keys",
+      "vmware_software_version"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "hcx_mode",
+      "initial_configuration",
+      "is_single_host_sddc"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "sddc",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "sddc",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_ocvp_sddcs",
+    "collectionField": "sddc_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ocvp/sddc/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ocvp/sddc/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Sddc lifecycle exposes CREATING, UPDATING, ACTIVE, DELETING, DELETED, and FAILED. Repo-authored controller success is ACTIVE, requeue covers CREATING and UPDATING, FAILED is terminal without requeue, and delete confirmation follows DELETING to DELETED or NotFound.",
+    "Pinned OCI SDK contract: UpdateSddcDetails exposes displayName, vmwareSoftwareVersion, esxiSoftwareVersion, sshAuthorizedKeys, freeformTags, and definedTags as the in-place update surface. Fields absent from UpdateSddcDetails remain create-only drift and never open implicit replacement.",
+    "CreateSddc and DeleteSddc return opc-work-request-id headers, while UpdateSddc returns the Sddc body directly. The reviewed generatedruntime client records request and work-request breadcrumbs when present and relies on lifecycle projection plus confirm-delete rereads rather than service-local work-request polling.",
+    "ListSddcsRequest filters by compartmentId, displayName, lifecycleState, and computeAvailabilityDomain and returns Items []SddcSummary. Repo-authored bind logic only attempts pre-create reuse when spec.displayName is set, and safe reusable matching is exact compartment_id plus display_name in reusable ACTIVE, CREATING, or UPDATING states; duplicate exact matches fail instead of guessing."
+  ]
+}

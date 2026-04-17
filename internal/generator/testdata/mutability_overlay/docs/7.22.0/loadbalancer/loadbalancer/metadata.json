@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "loadbalancer",
+  "kind": "LoadBalancer",
+  "formalSlug": "loadbalancer",
+  "providerResource": "oci_load_balancer_load_balancer",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/load_balancer_load_balancer",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/load_balancer_load_balancer",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/loadbalancer/loadbalancer/page.html",
+  "bodySHA256": "9f5b120c41f4e58debebe7a6adbdaabe991b0c2c6a3f172e66b3bcb9bef3871f",
+  "bodyBytes": 2135,
+  "fixtureBodyPath": "7.22.0/loadbalancer/loadbalancer/page.html"
+}

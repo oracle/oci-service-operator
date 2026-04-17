@@ -1,0 +1,128 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - loadbalancer/BackendSet
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired BackendSet spec, tracked status,\nand delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via GetBackendSet;
+else (no)
+:Resolve an existing OCI resource through\nListBackendSets using filters name;
+:Create the OCI resource via CreateBackendSet\nwhen no reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteBackendSet with\nrequired via GetBackendSet or ListBackendSets\nto DELETED confirmation;
+:Confirm deletion via GetBackendSet or\nListBackendSets until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields load_balancer_id, name and conflicts\nlb_cookie_session_persistence_configuration ->\nsession_persistence_configuration,\nsession_persistence_configuration ->\nlb_cookie_session_persistence_configuration;
+stop
+endif
+:Enforce conflictsWith rules\nlb_cookie_session_persistence_configuration ->\nsession_persistence_configuration,\nsession_persistence_configuration ->\nlb_cookie_session_persistence_configuration\nbefore any OCI mutation;
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateBackendSet only for mutable fields\nbackends, health_checker,\nlb_cookie_session_persistence_configuration,\npolicy (+2 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: loadbalancer
+slug: backendset
+kind: BackendSet
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create none; update none;
+delete none
+supported drift: backends, health_checker,
+lb_cookie_session_persistence_configuration,
+policy (+2 more)
+reject before mutate: force-new fields
+load_balancer_id, name and conflicts
+lb_cookie_session_persistence_configuration ->
+session_persistence_configuration,
+session_persistence_configuration ->
+lb_cookie_session_persistence_configuration
+create-only fields: none
+list lookup: oci_load_balancer_backend_sets
+filters name
+conflicts:
+lb_cookie_session_persistence_configuration ->
+session_persistence_configuration,
+session_persistence_configuration ->
+lb_cookie_session_persistence_configuration
+open gaps: none
+The published BackendSet runtime keeps
+request-path lookup under
+pkg/servicemanager/loadbalancer/backendset by
+resolving loadBalancerId from status or spec and
+backendSetName from status.name or spec.name.
+Create first probes GetBackendSet on the
+deterministic backend set path; a matching
+backend set binds into observe or update, while
+a 404 falls through to list lookup by name and
+then CreateBackendSet.
+Create and update use read-after-write
+follow-up, then settle through the next observe
+because BackendSet payloads do not expose
+lifecycle fields. Delete retains the finalizer
+until GetBackendSet or list fallback confirms
+the backend set is gone.
+end note
+@enduml

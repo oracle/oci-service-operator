@@ -1,0 +1,15 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: usageapi
+slug: query
+kind: Query
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+notes:
+  - The generated runtime reuses an existing query by listing on the required compartmentId request scope, then matching the returned queryDefinition payload on displayName, version, report inputs, and any populated costAnalysisUI fields.
+  - The SDK surface does not expose lifecycle states on Query bodies, so create and update settle through read-after-write GetQuery confirmation instead of lifecycle polling; a service-local wrapper converts that confirmed reread into settled Active status.
+  - In-place updates are limited to queryDefinition; compartmentId requires replacement and is rejected before OCI mutation.
+  - Delete retains the finalizer until GetQuery confirms the query no longer exists.

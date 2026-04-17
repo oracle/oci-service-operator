@@ -1,0 +1,263 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: acceptedagreements.marketplace.oracle.com
+spec:
+  group: marketplace.oracle.com
+  names:
+    kind: AcceptedAgreement
+    listKind: AcceptedAgreementList
+    plural: acceptedagreements
+    singular: acceptedagreement
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the AcceptedAgreement
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AcceptedAgreement
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AcceptedAgreement is the Schema for the acceptedagreements API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AcceptedAgreementSpec defines the desired state of AcceptedAgreement.
+            properties:
+              agreementId:
+                description: The agreement to accept.
+                type: string
+              compartmentId:
+                description: The unique identifier for the compartment where the agreement
+                  will be accepted.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A display name for the accepted agreement.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              listingId:
+                description: The unique identifier for the listing associated with
+                  the agreement.
+                type: string
+              packageVersion:
+                description: The package version associated with the agreement.
+                type: string
+              signature:
+                description: |-
+                  A signature generated for the listing package agreements that you can retrieve
+                  with GetAgreement (https://docs.cloud.oracle.com/api/#/en/marketplace/20181001/Agreement/GetAgreement).
+                type: string
+            required:
+            - agreementId
+            - compartmentId
+            - listingId
+            - packageVersion
+            - signature
+            type: object
+          status:
+            description: AcceptedAgreementStatus defines the observed state of AcceptedAgreement.
+            properties:
+              agreementId:
+                description: The unique identifier for the terms of use agreement
+                  itself.
+                type: string
+              appliedSignature:
+                description: The last applied agreement signature used when the accepted
+                  agreement was created or rebound.
+                type: string
+              compartmentId:
+                description: The unique identifier for the compartment where the agreement
+                  was accepted.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A display name for the accepted agreement.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The unique identifier for the acceptance of the agreement
+                  within a specific compartment.
+                type: string
+              listingId:
+                description: The unique identifier for the listing associated with
+                  the agreement.
+                type: string
+              packageVersion:
+                description: The package version associated with the agreement.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeAccepted:
+                description: The time the agreement was accepted.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

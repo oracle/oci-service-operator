@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "logging",
+  "kind": "Log",
+  "formalSlug": "log",
+  "providerResource": "oci_logging_log",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/logging_log",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/logging_log",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/logging/log/page.html",
+  "bodySHA256": "24075505585312f9b1de08696fa5734d916f01c2217c451626f3f5024ed95376",
+  "bodyBytes": 1010,
+  "fixtureBodyPath": "7.22.0/logging/log/page.html"
+}

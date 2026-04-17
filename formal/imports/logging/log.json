@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "logging",
+  "slug": "log",
+  "kind": "Log",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_logging_log",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLog",
+        "requestType": "logging.CreateLogRequest",
+        "responseType": "logging.CreateLogResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLog",
+        "requestType": "logging.GetLogRequest",
+        "responseType": "logging.GetLogResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLogs",
+        "requestType": "logging.ListLogsRequest",
+        "responseType": "logging.ListLogsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLog",
+        "requestType": "logging.UpdateLogRequest",
+        "responseType": "logging.UpdateLogResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLog",
+        "requestType": "logging.DeleteLogRequest",
+        "responseType": "logging.DeleteLogResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "is_enabled",
+      "retention_duration"
+    ],
+    "forceNew": [
+      "configuration",
+      "log_group_id",
+      "log_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_logging_logs",
+    "collectionField": "logs",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "display_name",
+      "log_group_id",
+      "log_type",
+      "lifecycle_state",
+      "source_resource",
+      "source_service"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/logging/log/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/logging/log/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts."
+  ]
+}

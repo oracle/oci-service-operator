@@ -1,0 +1,112 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - loadbalancer/BackendSet
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateBackendSet
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in ACTIVE
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\nbackends, health_checker,\nlb_cookie_session_persistence_configuration\n(+3 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: loadbalancer
+slug: backendset
+kind: BackendSet
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create none; update none;
+delete none
+supported drift: backends, health_checker,
+lb_cookie_session_persistence_configuration,
+policy (+2 more)
+reject before mutate: force-new fields
+load_balancer_id, name and conflicts
+lb_cookie_session_persistence_configuration ->
+session_persistence_configuration,
+session_persistence_configuration ->
+lb_cookie_session_persistence_configuration
+create-only fields: none
+list lookup: oci_load_balancer_backend_sets
+filters name
+conflicts:
+lb_cookie_session_persistence_configuration ->
+session_persistence_configuration,
+session_persistence_configuration ->
+lb_cookie_session_persistence_configuration
+open gaps: none
+The published BackendSet runtime keeps
+request-path lookup under
+pkg/servicemanager/loadbalancer/backendset by
+resolving loadBalancerId from status or spec and
+backendSetName from status.name or spec.name.
+Create first probes GetBackendSet on the
+deterministic backend set path; a matching
+backend set binds into observe or update, while
+a 404 falls through to list lookup by name and
+then CreateBackendSet.
+Create and update use read-after-write
+follow-up, then settle through the next observe
+because BackendSet payloads do not expose
+lifecycle fields. Delete retains the finalizer
+until GetBackendSet or list fallback confirms
+the backend set is gone.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetBackendSet or ListBackendSets
+delete targets: DELETED
+end note
+@enduml

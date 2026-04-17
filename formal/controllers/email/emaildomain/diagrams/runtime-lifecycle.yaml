@@ -1,0 +1,16 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: email
+slug: emaildomain
+kind: EmailDomain
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - The generated runtime binds through ListEmailDomains on compartmentId plus name before create when no OCI identifier is already recorded.
+  - Requeue continues while OCI reports CREATING, UPDATING, or DELETING, and ACTIVE is the steady-state success target for create or update.
+  - Delete retains the finalizer until GetEmailDomain or list fallback confirms DELETED or not found, and no Kubernetes secret side effects are part of this path.

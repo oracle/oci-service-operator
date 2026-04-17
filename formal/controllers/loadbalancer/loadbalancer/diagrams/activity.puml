@@ -1,0 +1,119 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - loadbalancer/LoadBalancer
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired LoadBalancer spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetLoadBalancer;
+else (no)
+:Resolve an existing OCI resource through\nListLoadBalancers using filters display_name,\ncompartment_id;
+:Create the OCI resource via CreateLoadBalancer\nwhen no reusable match is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteLoadBalancer with\nrequired via GetLoadBalancer or\nListLoadBalancers to DELETED confirmation;
+:Confirm deletion via GetLoadBalancer or\nListLoadBalancers until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields backend_sets, certificates,\ncompartment_id, hostnames (+11 more);
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateLoadBalancer only for mutable\nfields defined_tags, display_name,\nfreeform_tags;
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: loadbalancer
+slug: loadbalancer
+kind: LoadBalancer
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, terminating
+provider states: create none; update none;
+delete none
+supported drift: defined_tags, display_name,
+freeform_tags
+reject before mutate: force-new fields
+backend_sets, certificates, compartment_id,
+hostnames (+11 more)
+create-only fields: none
+list lookup: oci_load_balancer_load_balancers
+filters display_name, compartment_id
+conflicts: none
+open gaps: none
+The published LoadBalancer runtime keeps
+bind-versus-create local to
+pkg/servicemanager/loadbalancer/loadbalancer by
+listing exact compartmentId plus displayName
+before CreateLoadBalancer when no tracked OCI ID
+is present.
+Create and update use GetLoadBalancer-backed
+read-after-write follow-up until OCI returns
+ACTIVE, while delete retains the finalizer until
+GetLoadBalancer or list fallback confirms the
+load balancer is gone or terminally DELETED.
+Only displayName and tag fields stay mutable
+through UpdateLoadBalancer; desired-state drift
+for networking, shape, and nested child maps is
+rejected before OCI mutation as create-only
+replacement drift.
+end note
+@enduml

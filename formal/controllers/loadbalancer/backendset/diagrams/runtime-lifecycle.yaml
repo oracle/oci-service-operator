@@ -1,0 +1,28 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loadbalancer
+slug: backendset
+kind: BackendSet
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  mutation:
+    mutable:
+      - backends
+      - health_checker
+      - lb_cookie_session_persistence_configuration
+      - policy
+      - session_persistence_configuration
+      - ssl_configuration
+    forceNew:
+      - load_balancer_id
+      - name
+notes:
+  - The published BackendSet runtime keeps request-path lookup under pkg/servicemanager/loadbalancer/backendset by resolving loadBalancerId from status or spec and backendSetName from status.name or spec.name.
+  - Create first probes GetBackendSet on the deterministic backend set path; a matching backend set binds into observe or update, while a 404 falls through to list lookup by name and then CreateBackendSet.
+  - Create and update use read-after-write follow-up, then settle through the next observe because BackendSet payloads do not expose lifecycle fields. Delete retains the finalizer until GetBackendSet or list fallback confirms the backend set is gone.

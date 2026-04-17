@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -478,6 +479,14 @@ func populateInternal(repoRoot, snapshotRoot string) error {
 	}
 	for _, entry := range entries {
 		if entry.Name() == "registrations" {
+			continue
+		}
+		if entry.Name() == "generator" {
+			// The snapshot runs generator-driven cleanup under internal/generator/generated,
+			// so this tree must be copy-isolated from the source checkout.
+			if err := copyTree(filepath.Join(repoRoot, "internal", entry.Name()), filepath.Join(internalRoot, entry.Name())); err != nil {
+				return err
+			}
 			continue
 		}
 		if err := symlink(filepath.Join(repoRoot, "internal", entry.Name()), filepath.Join(internalRoot, entry.Name())); err != nil {
@@ -1026,6 +1035,61 @@ func symlinkIfPresent(src, dst string) error {
 		return err
 	}
 	return symlink(src, dst)
+}
+
+func copyTree(src, dst string) error {
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(dst, rel)
+		if d.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			linkTarget, err := os.Readlink(path)
+			if err != nil {
+				return err
+			}
+			return os.Symlink(linkTarget, target)
+		}
+		return copyFile(path, target, info.Mode())
+	})
+}
+
+func copyFile(src, dst string, mode fs.FileMode) (err error) {
+	input, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if closeErr := input.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
+
+	output, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode.Perm())
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if closeErr := output.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
+
+	if _, err = io.Copy(output, input); err != nil {
+		return err
+	}
+	return nil
 }
 
 func snapshotCommandEnv(snapshotRoot string) []string {

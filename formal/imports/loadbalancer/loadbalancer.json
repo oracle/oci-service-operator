@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "loadbalancer",
+  "kind": "LoadBalancer",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_load_balancer",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateLoadBalancer",
+        "requestType": "loadbalancer.CreateLoadBalancerRequest",
+        "responseType": "loadbalancer.CreateLoadBalancerResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetLoadBalancer",
+        "requestType": "loadbalancer.GetLoadBalancerRequest",
+        "responseType": "loadbalancer.GetLoadBalancerResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListLoadBalancers",
+        "requestType": "loadbalancer.ListLoadBalancersRequest",
+        "responseType": "loadbalancer.ListLoadBalancersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateLoadBalancer",
+        "requestType": "loadbalancer.UpdateLoadBalancerRequest",
+        "responseType": "loadbalancer.UpdateLoadBalancerResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteLoadBalancer",
+        "requestType": "loadbalancer.DeleteLoadBalancerRequest",
+        "responseType": "loadbalancer.DeleteLoadBalancerResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "backend_sets",
+      "certificates",
+      "compartment_id",
+      "hostnames",
+      "ip_mode",
+      "is_private",
+      "listeners",
+      "network_security_group_ids",
+      "path_route_sets",
+      "reserved_ips",
+      "rule_sets",
+      "shape_details",
+      "shape_name",
+      "ssl_cipher_suites",
+      "subnet_ids"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_load_balancer_load_balancers",
+    "collectionField": "load_balancers",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "display_name",
+      "compartment_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/loadbalancer/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/loadbalancer/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts.",
+    "The published LoadBalancer runtime keeps exact compartmentId plus displayName bind lookup, read-after-write follow-up, and confirm-delete behavior in the loadbalancer/loadbalancer package instead of relying on undeclared shared generatedruntime defaults.",
+    "Only display_name, defined_tags, and freeform_tags are mutable through UpdateLoadBalancer; the remaining desired-state fields stay create-only and are rejected before OCI mutation."
+  ]
+}

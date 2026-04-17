@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "marketplace",
+  "slug": "acceptedagreement",
+  "kind": "AcceptedAgreement",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_marketplace_accepted_agreement",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAcceptedAgreement",
+        "requestType": "marketplace.CreateAcceptedAgreementRequest",
+        "responseType": "marketplace.CreateAcceptedAgreementResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAcceptedAgreement",
+        "requestType": "marketplace.GetAcceptedAgreementRequest",
+        "responseType": "marketplace.GetAcceptedAgreementResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAcceptedAgreements",
+        "requestType": "marketplace.ListAcceptedAgreementsRequest",
+        "responseType": "marketplace.ListAcceptedAgreementsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAcceptedAgreement",
+        "requestType": "marketplace.UpdateAcceptedAgreementRequest",
+        "responseType": "marketplace.UpdateAcceptedAgreementResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAcceptedAgreement",
+        "requestType": "marketplace.DeleteAcceptedAgreementRequest",
+        "responseType": "marketplace.DeleteAcceptedAgreementResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "agreement_id",
+      "compartment_id",
+      "listing_id",
+      "package_version",
+      "signature"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_marketplace_accepted_agreements",
+    "collectionField": "accepted_agreements",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "agreement_id",
+      "compartment_id",
+      "display_name",
+      "listing_id",
+      "package_version"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/marketplace/acceptedagreement/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/marketplace/acceptedagreement/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation"
+    ]
+  }
+}

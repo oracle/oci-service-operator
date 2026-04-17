@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+#
+
+#
+# Replace the OCI identifiers below before running e2e.
+# Use ListingPackageAgreement or GetAgreement to obtain the agreementId and
+# signature for the listing package version you want to accept.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of binding to an existing accepted agreement for the same compartment,
+# listing, package version, and agreement.
+#
+apiVersion: marketplace.oracle.com/v1beta1
+kind: AcceptedAgreement
+metadata:
+  name: acceptedagreement-sample
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  listingId: ocid1.listing.oc1..exampleuniqueID
+  packageVersion: "1.0.0"
+  agreementId: ocid1.agreement.oc1..exampleuniqueID
+  signature: "<listing-package-agreement-signature>"
+  displayName: "acceptedagreement-sample"

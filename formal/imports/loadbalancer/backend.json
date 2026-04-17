@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "backend",
+  "kind": "Backend",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_load_balancer_backend",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBackend",
+        "requestType": "loadbalancer.CreateBackendRequest",
+        "responseType": "loadbalancer.CreateBackendResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBackend",
+        "requestType": "loadbalancer.GetBackendRequest",
+        "responseType": "loadbalancer.GetBackendResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBackends",
+        "requestType": "loadbalancer.ListBackendsRequest",
+        "responseType": "loadbalancer.ListBackendsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBackend",
+        "requestType": "loadbalancer.UpdateBackendRequest",
+        "responseType": "loadbalancer.UpdateBackendResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBackend",
+        "requestType": "loadbalancer.DeleteBackendRequest",
+        "responseType": "loadbalancer.DeleteBackendResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "backup",
+      "drain",
+      "offline",
+      "weight"
+    ],
+    "forceNew": [
+      "backend_set_name",
+      "ip_address",
+      "load_balancer_id",
+      "port"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_load_balancer_backends",
+    "collectionField": "backends",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "ip_address",
+      "port"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/backend/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/backend/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "path-identity-resolution",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts.",
+    "The published Backend runtime must keep path identity and backendName derivation in the loadbalancer/backend package instead of shared generatedruntime."
+  ]
+}

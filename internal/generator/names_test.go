@@ -49,3 +49,28 @@ func TestSingularizeAndPluralize(t *testing.T) {
 		})
 	}
 }
+
+func TestSafeGoIdentifier(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{name: "plain identifier", input: "widget", want: "widget"},
+		{name: "keyword", input: "package", want: "package_"},
+		{name: "blank", input: "   ", want: ""},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := safeGoIdentifier(test.input); got != test.want {
+				t.Fatalf("safeGoIdentifier(%q) = %q, want %q", test.input, got, test.want)
+			}
+		})
+	}
+}

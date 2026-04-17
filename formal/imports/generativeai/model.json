@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "generativeai",
+  "slug": "model",
+  "kind": "Model",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_generative_ai_model",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateModel",
+        "requestType": "generativeai.CreateModelRequest",
+        "responseType": "generativeai.CreateModelResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetModel",
+        "requestType": "generativeai.GetModelRequest",
+        "responseType": "generativeai.GetModelResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListModels",
+        "requestType": "generativeai.ListModelsRequest",
+        "responseType": "generativeai.ListModelsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateModel",
+        "requestType": "generativeai.UpdateModelRequest",
+        "responseType": "generativeai.UpdateModelResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteModel",
+        "requestType": "generativeai.DeleteModelRequest",
+        "responseType": "generativeai.DeleteModelResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "vendor",
+      "version"
+    ],
+    "forceNew": [
+      "base_model_id",
+      "compartment_id",
+      "fine_tune_details"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_generative_ai_models",
+    "collectionField": "model_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "base_model_id",
+      "compartment_id",
+      "display_name",
+      "fine_tune_details.dedicated_ai_cluster_id",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/generativeai/model/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/generativeai/model/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded from the OCI Generative AI Model SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available.",
+    "The checked-in generatedruntime row narrows bind matching to compartmentId, baseModelId, fineTuneDetails.dedicatedAiClusterId, and any populated displayName, while a service-local wrapper skips pre-create reuse when spec.displayName is empty."
+  ]
+}

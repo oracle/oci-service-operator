@@ -1,0 +1,28 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: loadbalancer
+slug: backend
+kind: Backend
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  mutation:
+    mutable:
+      - backup
+      - drain
+      - offline
+      - weight
+    forceNew:
+      - backend_set_name
+      - ip_address
+      - load_balancer_id
+      - port
+notes:
+  - The published Backend runtime keeps request-path identity under pkg/servicemanager/loadbalancer/backend by resolving loadBalancerId, backendSetName, and the derived backend name locally.
+  - Create first probes GetBackend on the deterministic backend path; a matching backend binds into observe or update, while 404 falls through to CreateBackend.
+  - Create and update use read-after-write follow-up, then settle through the next observe because Backend payloads do not expose lifecycle fields. Delete retains the finalizer until GetBackend or list fallback confirms the backend is gone.

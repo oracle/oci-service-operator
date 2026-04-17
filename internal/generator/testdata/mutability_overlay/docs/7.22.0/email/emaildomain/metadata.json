@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "email",
+  "kind": "EmailDomain",
+  "formalSlug": "emaildomain",
+  "providerResource": "oci_email_email_domain",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/email_email_domain",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/email_email_domain",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/email/emaildomain/page.html",
+  "bodySHA256": "dc04eaa4cbca2323a54c5adf52d322f8bfd620380bf662fdd1b9f7842182a416",
+  "bodyBytes": 686,
+  "fixtureBodyPath": "7.22.0/email/emaildomain/page.html"
+}

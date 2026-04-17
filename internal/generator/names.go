@@ -6,6 +6,7 @@
 package generator
 
 import (
+	"go/token"
 	"strings"
 	"unicode"
 )
@@ -102,6 +103,17 @@ func lowerCamel(name string) string {
 	}
 
 	return builder.String()
+}
+
+func safeGoIdentifier(name string) string {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return ""
+	}
+	if token.Lookup(name).IsKeyword() {
+		return name + "_"
+	}
+	return name
 }
 
 func splitCamel(name string) []string {

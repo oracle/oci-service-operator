@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "sender",
+  "kind": "Sender",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_email_sender",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSender",
+        "requestType": "email.CreateSenderRequest",
+        "responseType": "email.CreateSenderResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSender",
+        "requestType": "email.GetSenderRequest",
+        "responseType": "email.GetSenderResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSenders",
+        "requestType": "email.ListSendersRequest",
+        "responseType": "email.ListSendersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSender",
+        "requestType": "email.UpdateSenderRequest",
+        "responseType": "email.UpdateSenderResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSender",
+        "requestType": "email.DeleteSenderRequest",
+        "responseType": "email.DeleteSenderResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "email_address"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_email_senders",
+    "collectionField": "senders",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "email_address",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/sender/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/sender/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded from the OCI Email Sender SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available."
+  ]
+}

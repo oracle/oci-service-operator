@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "monitoring",
+  "slug": "alarm",
+  "kind": "Alarm",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_monitoring_alarm",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateAlarm",
+        "requestType": "monitoring.CreateAlarmRequest",
+        "responseType": "monitoring.CreateAlarmResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetAlarm",
+        "requestType": "monitoring.GetAlarmRequest",
+        "responseType": "monitoring.GetAlarmResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListAlarms",
+        "requestType": "monitoring.ListAlarmsRequest",
+        "responseType": "monitoring.ListAlarmsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateAlarm",
+        "requestType": "monitoring.UpdateAlarmRequest",
+        "responseType": "monitoring.UpdateAlarmResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteAlarm",
+        "requestType": "monitoring.DeleteAlarmRequest",
+        "responseType": "monitoring.DeleteAlarmResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "body",
+      "defined_tags",
+      "destinations",
+      "display_name",
+      "freeform_tags",
+      "is_enabled",
+      "is_notifications_per_metric_dimension_enabled",
+      "message_format",
+      "metric_compartment_id",
+      "metric_compartment_id_in_subtree",
+      "namespace",
+      "pending_duration",
+      "query",
+      "repeat_notification_duration",
+      "resolution",
+      "resource_group",
+      "severity",
+      "suppression"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_monitoring_alarms",
+    "collectionField": "alarms",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/monitoring/alarm/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/monitoring/alarm/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Alarm uses CreateAlarm, GetAlarm, ListAlarms, UpdateAlarm, and DeleteAlarm for the checked-in CRUD path.",
+    "Pinned OCI SDK lifecycle contract: Alarm responses expose ACTIVE, DELETING, and DELETED only; the vendored SDK does not define separate provisioning or updating lifecycle enums for create or update.",
+    "Pinned SDK request surface: UpdateAlarmDetails exposes display_name, metric_compartment_id, namespace, query, severity, destinations, is_enabled, resource_group, resolution, pending_duration, body, is_notifications_per_metric_dimension_enabled, message_format, repeat_notification_duration, suppression, freeform_tags, and defined_tags as the reviewed in-place update surface.",
+    "The Monitoring SDK also exposes ChangeAlarmCompartment, but the reviewed baseline keeps compartment moves out of scope and treats compartment_id drift as replacement-only until a monitoring/alarm-specific move contract is proven."
+  ]
+}

@@ -1173,6 +1173,73 @@ services:
         ZoneRecord:
           - Record
 
+  - service: email
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/email
+    group: email
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Dkim
+        - EmailDomain
+        - Sender
+        - Suppression
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: EmailDomain
+          formalSpec: emaildomain
+          sample:
+            body: |-
+              #
+              # Replace the domain and compartment OCID below before running e2e.
+              # Update metadata.name and spec.name together if you want to force a fresh create instead of
+              # binding to an existing EmailDomain with the same name in the same compartment.
+              #
+              apiVersion: email.oracle.com/v1beta1
+              kind: EmailDomain
+              metadata:
+                name: emaildomain-sample
+              spec:
+                name: mail.example.com
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                description: OSOK EmailDomain sample
+        - kind: Sender
+          formalSpec: sender
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and sender email address below before running e2e.
+              # Update metadata.name if you want to force a fresh create instead of reusing an
+              # existing Sender with the same compartmentId and emailAddress.
+              #
+              apiVersion: email.oracle.com/v1beta1
+              kind: Sender
+              metadata:
+                name: sender-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                emailAddress: sender@example.com
+                freeformTags:
+                  managed-by: oci-service-operator
+
   - service: events
     sdkPackage: github.com/oracle/oci-go-sdk/v65/events
     group: events
@@ -1231,6 +1298,113 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
           serviceManager:
             packagePath: functions
+
+  - service: generativeai
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/generativeai
+    group: generativeai
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DedicatedAiCluster
+        - Endpoint
+        - Model
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DedicatedAiCluster
+          formalSpec: dedicatedaicluster
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and tune the displayName below before running e2e.
+              # Keeping spec.displayName empty disables pre-create reuse; setting it allows the
+              # controller to bind to an existing DedicatedAiCluster with the same compartmentId
+              # and displayName.
+              #
+              apiVersion: generativeai.oracle.com/v1beta1
+              kind: DedicatedAiCluster
+              metadata:
+                name: dedicatedaicluster-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-dedicatedaicluster-sample
+                type: HOSTING
+                unitCount: 1
+                unitShape: SMALL_COHERE
+                description: OSOK DedicatedAiCluster sample
+                freeformTags:
+                  managed-by: oci-service-operator
+        - kind: Endpoint
+          formalSpec: endpoint
+          sample:
+            body: |-
+              #
+              # Replace the compartment, model, and DedicatedAiCluster OCIDs before running e2e.
+              # The controller may bind an existing Endpoint only when the returned OCI list item
+              # matches spec.compartmentId, spec.modelId, spec.dedicatedAiClusterId, and any
+              # populated spec.displayName.
+              #
+              apiVersion: generativeai.oracle.com/v1beta1
+              kind: Endpoint
+              metadata:
+                name: endpoint-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                modelId: ocid1.generativeaimodel.oc1..exampleuniqueID
+                dedicatedAiClusterId: ocid1.generativeaidedicatedaicluster.oc1..exampleuniqueID
+                displayName: osok-endpoint-sample
+                description: OSOK Endpoint sample
+                contentModerationConfig:
+                  isEnabled: false
+                freeformTags:
+                  managed-by: oci-service-operator
+        - kind: Model
+          formalSpec: model
+          sample:
+            body: |-
+              #
+              # Replace the compartment, base model, and DedicatedAiCluster OCIDs before running e2e.
+              # Keeping spec.displayName empty disables pre-create reuse; setting it allows the
+              # controller to bind an existing custom Model only when the returned OCI list item
+              # matches spec.compartmentId, spec.baseModelId, spec.fineTuneDetails.dedicatedAiClusterId,
+              # and any populated spec.displayName.
+              #
+              apiVersion: generativeai.oracle.com/v1beta1
+              kind: Model
+              metadata:
+                name: model-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                baseModelId: ocid1.generativeaimodel.oc1..exampleuniqueID
+                displayName: osok-model-sample
+                description: OSOK Model sample
+                fineTuneDetails:
+                  dedicatedAiClusterId: ocid1.generativeaidedicatedaicluster.oc1..exampleuniqueID
+                  trainingDataset:
+                    datasetType: OBJECT_STORAGE
+                    namespaceName: object-storage-namespace
+                    bucketName: generativeai-training-data
+                    objectName: datasets/model-training.jsonl
+                freeformTags:
+                  managed-by: oci-service-operator
 
   - service: identity
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
@@ -1406,8 +1580,34 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Backend
+        - BackendHealth
+        - BackendSet
+        - BackendSetHealth
+        - Certificate
+        - HealthChecker
+        - Hostname
+        - Listener
+        - ListenerRule
+        - LoadBalancer
+        - LoadBalancerHealth
+        - LoadBalancerShape
+        - NetworkSecurityGroup
+        - PathRouteSet
+        - Policy
+        - Protocol
+        - RoutingPolicy
+        - RuleSet
+        - SSLCipherSuite
+        - Shape
+        - WorkRequest
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1417,6 +1617,127 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Backend
+          formalSpec: backend
+          specFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId"'
+              comments:
+                - "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer associated with the backend set and server."
+              markers:
+                - +kubebuilder:validation:Required
+            - name: BackendSetName
+              type: string
+              tag: 'json:"backendSetName"'
+              comments:
+                - "The name of the backend set associated with the backend server."
+                - "Example: `example_backend_set`"
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId,omitempty"'
+              comments:
+                - The bound load balancer OCID used to address this backend.
+            - name: BackendSetName
+              type: string
+              tag: 'json:"backendSetName,omitempty"'
+              comments:
+                - The bound backend set name used to address this backend.
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: Backend
+              metadata:
+                name: backend-sample
+              spec:
+                loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+                backendSetName: example_backend_set
+                ipAddress: "10.0.0.3"
+                port: 8080
+                weight: 1
+                backup: false
+                drain: false
+                offline: false
+        - kind: BackendSet
+          formalSpec: backendset
+          specFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId"'
+              comments:
+                - "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this backend set."
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId,omitempty"'
+              comments:
+                - The bound load balancer OCID used to address this backend set.
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: BackendSet
+              metadata:
+                name: backendset-sample
+              spec:
+                loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+                name: example_backend_set
+                policy: ROUND_ROBIN
+                healthChecker:
+                  protocol: HTTP
+                  urlPath: /healthz
+                  port: 8080
+                  returnCode: 200
+        - kind: Listener
+          formalSpec: listener
+          specFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId"'
+              comments:
+                - "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this listener."
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId,omitempty"'
+              comments:
+                - The bound load balancer OCID used to address this listener.
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: Listener
+              metadata:
+                name: listener-sample
+              spec:
+                loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+                name: example_listener
+                defaultBackendSetName: example_backend_set
+                port: 80
+                protocol: HTTP
+        - kind: LoadBalancer
+          formalSpec: loadbalancer
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: LoadBalancer
+              metadata:
+                name: loadbalancer-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..<unique_ID>
+                displayName: example_load_balancer
+                shapeName: Flexible
+                subnetIds:
+                  - ocid1.subnet.oc1..<unique_ID>
+                shapeDetails:
+                  minimumBandwidthInMbps: 10
+                  maximumBandwidthInMbps: 10
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
@@ -1425,8 +1746,21 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Log
+        - LogGroup
+        - LogSavedSearch
+        - Service
+        - UnifiedAgentConfiguration
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1436,6 +1770,38 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Log
+          formalSpec: log
+          specFields:
+            - name: LogGroupId
+              type: string
+              tag: 'json:"logGroupId"'
+              comments:
+                - The OCID of the log group that owns this log.
+              markers:
+                - +kubebuilder:validation:Required
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers and logging source values below before running e2e.
+              #
+              apiVersion: logging.oracle.com/v1beta1
+              kind: Log
+              metadata:
+                name: log-sample
+              spec:
+                logGroupId: ocid1.loggroup.oc1..exampleuniqueID
+                displayName: log-sample
+                logType: SERVICE
+                isEnabled: true
+                retentionDuration: 30
+                configuration:
+                  source:
+                    sourceType: OCISERVICE
+                    service: service_name
+                    resource: ocid1.resource.oc1..exampleuniqueID
+                    category: category_name
 
   - service: monitoring
     sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
@@ -1444,8 +1810,18 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Alarm
+        - AlarmHistory
+        - AlarmStatus
+        - AlarmSuppression
+        - Metric
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1455,10 +1831,110 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Alarm
+          formalSpec: alarm
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCIDs and destination OCID below before running e2e.
+              # Update spec.displayName or spec.query if you want to force a fresh create instead of
+              # binding to an existing Alarm with the same compartment and display name.
+              #
+              apiVersion: monitoring.oracle.com/v1beta1
+              kind: Alarm
+              metadata:
+                name: alarm-sample
+              spec:
+                displayName: osok-alarm-sample
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                metricCompartmentId: ocid1.compartment.oc1..exampleuniqueID
+                namespace: oci_computeagent
+                query: CpuUtilization[1m].mean() > 85
+                severity: CRITICAL
+                destinations:
+                  - ocid1.onstopic.oc1..exampleuniqueID
+                isEnabled: true
     observedState:
       sdkAliases:
         AlarmHistory:
           - AlarmHistoryCollection
+
+  - service: marketplace
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplace
+    group: marketplace
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AcceptedAgreement
+        - Agreement
+        - Category
+        - LaunchEligibility
+        - Listing
+        - Package
+        - Publication
+        - PublicationPackage
+        - Publisher
+        - Report
+        - ReportType
+        - Tax
+        - ThirdPartyPaidListingEligibility
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: AcceptedAgreement
+          formalSpec: acceptedagreement
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: marketplace/acceptedagreement
+          statusFields:
+            - name: AppliedSignature
+              type: string
+              tag: 'json:"appliedSignature,omitempty"'
+              comments:
+                - The last applied agreement signature used when the accepted agreement was created or rebound.
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Use ListingPackageAgreement or GetAgreement to obtain the agreementId and
+              # signature for the listing package version you want to accept.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of binding to an existing accepted agreement for the same compartment,
+              # listing, package version, and agreement.
+              #
+              apiVersion: marketplace.oracle.com/v1beta1
+              kind: AcceptedAgreement
+              metadata:
+                name: acceptedagreement-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                listingId: ocid1.listing.oc1..exampleuniqueID
+                packageVersion: "1.0.0"
+                agreementId: ocid1.agreement.oc1..exampleuniqueID
+                signature: "<listing-package-agreement-signature>"
+                displayName: "acceptedagreement-sample"
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -1635,6 +2111,148 @@ services:
       sdkAliases:
         WorkRequestLog:
           - WorkRequestLogEntry
+
+  - service: ocvp
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ocvp
+    group: ocvp
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Cluster
+        - EsxiHost
+        - Sddc
+        - SupportedCommitment
+        - SupportedHostShape
+        - SupportedVmwareSoftwareVersion
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Cluster
+          formalSpec: cluster
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create instead of
+              # binding to an existing Cluster with the same displayName in the same SDDC.
+              # Replace spec.computeAvailabilityDomain with an availability domain valid for the
+              # target SDDC before running this sample.
+              #
+              apiVersion: ocvp.oracle.com/v1beta1
+              kind: Cluster
+              metadata:
+                name: cluster-sample
+              spec:
+                displayName: "cluster-sample"
+                sddcId: ocid1.sddc.oc1..exampleuniqueID
+                computeAvailabilityDomain: "Uocm:PHX-AD-1"
+                esxiHostsCount: 3
+                networkConfiguration:
+                  provisioningSubnetId: ocid1.subnet.oc1..exampleuniqueID
+                  vmotionVlanId: ocid1.vlan.oc1..exampleuniqueID
+                  vsanVlanId: ocid1.vlan.oc1..exampleuniqueID
+                  nsxVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
+                  nsxEdgeVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
+          serviceManager:
+            packagePath: ocvp/cluster
+        - kind: Sddc
+          formalSpec: sddc
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers and SSH key material below before running e2e.
+              # Update metadata.name and spec.displayName if you want to force a fresh create instead of
+              # binding to an existing SDDC with the same displayName in the same compartment.
+              # Replace the nested initialConfiguration subnet and VLAN OCIDs with values valid for the
+              # target environment before running this sample.
+              #
+              apiVersion: ocvp.oracle.com/v1beta1
+              kind: Sddc
+              metadata:
+                name: sddc-sample
+              spec:
+                displayName: "sddc-sample"
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                vmwareSoftwareVersion: "7.0.0"
+                hcxMode: DISABLED
+                sshAuthorizedKeys: |
+                  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCexampleReplaceMe user@example
+                initialConfiguration:
+                  initialClusterConfigurations:
+                    - displayName: "management-cluster"
+                      vsphereType: MANAGEMENT
+                      computeAvailabilityDomain: "Uocm:PHX-AD-1"
+                      esxiHostsCount: 3
+                      networkConfiguration:
+                        provisioningSubnetId: ocid1.subnet.oc1..exampleuniqueID
+                        vmotionVlanId: ocid1.vlan.oc1..exampleuniqueID
+                        vsanVlanId: ocid1.vlan.oc1..exampleuniqueID
+                        nsxVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
+                        nsxEdgeVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
+                        vsphereVlanId: ocid1.vlan.oc1..exampleuniqueID
+                        nsxEdgeUplink1VlanId: ocid1.vlan.oc1..exampleuniqueID
+                        nsxEdgeUplink2VlanId: ocid1.vlan.oc1..exampleuniqueID
+          serviceManager:
+            packagePath: ocvp/sddc
+
+  - service: oda
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/oda
+    group: oda
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AuthenticationProvider
+        - Channel
+        - DigitalAssistant
+        - DigitalAssistantParameter
+        - ImportedPackage
+        - OdaInstance
+        - OdaInstanceAttachment
+        - OdaPrivateEndpoint
+        - OdaPrivateEndpointAttachment
+        - OdaPrivateEndpointScanProxy
+        - Package
+        - Skill
+        - SkillParameter
+        - Translator
+        - WorkRequest
+        - WorkRequestError
+        - WorkRequestLog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: opensearch
     sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
@@ -1988,6 +2606,124 @@ services:
               - groups="",resources=secrets,verbs=get;list;watch;create;update;delete
           serviceManager:
             packagePath: streaming/stream
+
+  - service: usageapi
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/usageapi
+    group: usageapi
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - CustomTable
+        - Query
+        - Schedule
+        - ScheduledRun
+        - UsageCarbonEmissionsQuery
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: CustomTable
+          formalSpec: customtable
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.savedCustomTable.displayName if you want to force a
+              # fresh create instead of binding to an existing CustomTable with the same saved
+              # report scope and rendered table shape.
+              #
+              apiVersion: usageapi.oracle.com/v1beta1
+              kind: CustomTable
+              metadata:
+                name: customtable-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                savedReportId: ocid1.savedreport.oc1..exampleuniqueID
+                savedCustomTable:
+                  displayName: "customtable-sample"
+                  rowGroupBy:
+                    - compartmentId
+                  columnGroupBy:
+                    - service
+                  groupByTag:
+                    - namespace: oracle
+                      key: createdBy
+                  compartmentDepth: 2
+                  version: 1
+        - kind: Query
+          formalSpec: query
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.queryDefinition.displayName if you want to force a
+              # fresh create instead of binding to an existing Query with the same saved
+              # definition in the same compartment.
+              #
+              apiVersion: usageapi.oracle.com/v1beta1
+              kind: Query
+              metadata:
+                name: query-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                queryDefinition:
+                  displayName: "query-sample"
+                  reportQuery:
+                    tenantId: ocid1.tenancy.oc1..exampleuniqueID
+                    granularity: MONTHLY
+                    queryType: COST
+                    groupBy:
+                      - service
+                    dateRangeName: LAST_THREE_MONTHS
+                  costAnalysisUI:
+                    graph: BARS
+                    isCumulativeGraph: false
+                  version: 1
+        - kind: Schedule
+          formalSpec: schedule
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers and Object Storage values below before running e2e.
+              # Update spec.description, spec.outputFileFormat, spec.resultLocation, or tags to
+              # exercise supported in-place updates on an existing Schedule.
+              # Changing spec.name, spec.compartmentId, spec.scheduleRecurrences, spec.timeScheduled,
+              # spec.savedReportId, or spec.queryProperties requires recreation and is rejected on
+              # an already bound Schedule.
+              #
+              apiVersion: usageapi.oracle.com/v1beta1
+              kind: Schedule
+              metadata:
+                name: schedule-sample
+              spec:
+                name: schedule-sample
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                resultLocation:
+                  locationType: OBJECT_STORAGE
+                  region: us-ashburn-1
+                  namespace: example-namespace
+                  bucketName: usage-reports
+                scheduleRecurrences: "FREQ=DAILY;INTERVAL=1"
+                timeScheduled: "2026-01-15T15:00:00Z"
+                description: "Daily usage export"
+                outputFileFormat: CSV
+                savedReportId: ocid1.savedreport.oc1..exampleuniqueID
+                freeformTags:
+                  workload: finops
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

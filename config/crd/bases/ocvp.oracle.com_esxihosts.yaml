@@ -1,0 +1,388 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: esxihosts.ocvp.oracle.com
+spec:
+  group: ocvp.oracle.com
+  names:
+    kind: EsxiHost
+    listKind: EsxiHostList
+    plural: esxihosts
+    singular: esxihost
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the EsxiHost
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the EsxiHost
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: EsxiHost is the Schema for the esxihosts API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EsxiHostSpec defines the desired state of EsxiHost.
+            properties:
+              billingDonorHostId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the deleted ESXi Host with LeftOver billing cycle.
+                type: string
+              capacityReservationId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Capacity Reservation.
+                type: string
+              clusterId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Cluster to add the ESXi host to.
+                type: string
+              computeAvailabilityDomain:
+                description: |-
+                  The availability domain to create the ESXi host in.
+                  If keep empty, for AD-specific Cluster, new ESXi host will be created in the same availability domain;
+                  for multi-AD Cluster, new ESXi host will be auto assigned to the next availability domain following evenly distribution strategy.
+                type: string
+              currentCommitment:
+                description: |-
+                  The billing option currently used by the ESXi host.
+                  ListSupportedCommitments.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A descriptive name for the ESXi host. It's changeable.
+                  Esxi Host name requirements are 1-16 character length limit, Must start with a letter,
+                  Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the Cluster.
+                  If this attribute is not specified, the Cluster's `instanceDisplayNamePrefix` attribute is used
+                  to name and incrementally number the ESXi host. For example, if you're creating the fourth
+                  ESXi host in the Cluster, and `instanceDisplayNamePrefix` is `MyCluster`, the host's display
+                  name is `MyCluster-4`.
+                  Avoid entering confidential information.
+                type: string
+              esxiSoftwareVersion:
+                description: |-
+                  The ESXi software bundle to install on the ESXi host.
+                  Only versions under the same vmwareSoftwareVersion and have been validate by Oracle Cloud VMware Solution will be accepted.
+                  To get a list of the available versions, use
+                  ListSupportedVmwareSoftwareVersions.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              hostOcpuCount:
+                description: The OCPU count of the ESXi host.
+                type: number
+              hostShapeName:
+                description: |-
+                  The compute shape name of the ESXi host.
+                  ListSupportedHostShapes.
+                type: string
+              nextCommitment:
+                description: |-
+                  The billing option to switch to after the existing billing cycle ends.
+                  If `nextCommitment` is null or empty, `currentCommitment` continues to the next billing cycle.
+                  ListSupportedCommitments.
+                type: string
+            required:
+            - clusterId
+            type: object
+          status:
+            description: EsxiHostStatus defines the observed state of EsxiHost.
+            properties:
+              billingContractEndDate:
+                description: |-
+                  Current billing cycle end date. If the value in `currentCommitment` and `nextCommitment` are different, the value specified in `nextCommitment`
+                  becomes the new `currentCommitment` when the `contractEndDate` is reached.
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              billingDonorHostId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the deleted ESXi Host with LeftOver billing cycle.
+                type: string
+              capacityReservationId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the Capacity Reservation.
+                type: string
+              clusterId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster that the
+                  ESXi host belongs to.
+                type: string
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that
+                  contains the Cluster.
+                type: string
+              computeAvailabilityDomain:
+                description: The availability domain of the ESXi host.
+                type: string
+              computeInstanceId:
+                description: |-
+                  In terms of implementation, an ESXi host is a Compute instance that
+                  is configured with the chosen bundle of VMware software. The `computeInstanceId`
+                  is the OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of that Compute instance.
+                type: string
+              currentCommitment:
+                description: |-
+                  The billing option currently used by the ESXi host.
+                  ListSupportedCommitments.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a
+                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: |-
+                  A descriptive name for the ESXi host. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              esxiSoftwareVersion:
+                description: The version of ESXi software that Oracle Cloud VMware
+                  Solution installed on the ESXi hosts.
+                type: string
+              failedEsxiHostId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the ESXi host that failed.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              gracePeriodEndDate:
+                description: |-
+                  The date and time when the new esxi host should start billing cycle.
+                  RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2021-07-25T21:10:29.600Z`
+                type: string
+              hostOcpuCount:
+                description: The OCPU count of the ESXi host.
+                type: number
+              hostShapeName:
+                description: |-
+                  The compute shape name of the ESXi host.
+                  ListSupportedHostShapes.
+                type: string
+              id:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the ESXi host.
+                type: string
+              isBillingContinuationInProgress:
+                description: Indicates whether this host is in the progress of billing
+                  continuation.
+                type: boolean
+              isBillingSwappingInProgress:
+                description: Indicates whether this host is in the progress of swapping
+                  billing.
+                type: boolean
+              lifecycleState:
+                description: The current state of the ESXi host.
+                type: string
+              nextCommitment:
+                description: |-
+                  The billing option to switch to after the current billing cycle ends.
+                  If `nextCommitment` is null or empty, `currentCommitment` continues to the next billing cycle.
+                  ListSupportedCommitments.
+                type: string
+              nonUpgradedEsxiHostId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that
+                  will be upgraded.
+                type: string
+              replacementEsxiHostId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that
+                  is created to replace the failed host.
+                type: string
+              sddcId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC that the
+                  ESXi host belongs to.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              swapBillingHostId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the active ESXi Host to swap billing with current host.
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time the ESXi host was created, in the format defined by
+                  RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2016-08-25T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time the ESXi host was updated, in the format defined by
+                  RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              upgradedReplacementEsxiHostId:
+                description: |-
+                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that
+                  is newly created to upgrade the original host.
+                type: string
+              vmwareSoftwareVersion:
+                description: The version of VMware software that Oracle Cloud VMware
+                  Solution installed on the ESXi hosts.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
