@@ -10,4 +10,14 @@ states:
   - updating
   - terminating
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - Generated runtime uses read-after-write follow-up for create and update plus
+    confirm-delete for delete; `CREATING` maps to provisioning, `ACTIVE` to
+    success, `UPDATING` to updating, and `DELETING` keeps reconcile in the
+    terminating bucket until `DELETED` or NotFound.
+  - Pre-create lookup queries `ListProjects` with `compartmentId`,
+    `displayName`, and an optional tracked `id`; delete fallback can re-resolve
+    the tracked project through `ListProjects` when `GetProject` returns
+    NotFound.
+  - Only `displayName`, `description`, `freeformTags`, and `definedTags`
+    reconcile in place. `compartmentId` remains replacement-only drift and the
+    runtime has no secret side effects.

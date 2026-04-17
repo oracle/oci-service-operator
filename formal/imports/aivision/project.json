@@ -5,7 +5,7 @@
   "slug": "project",
   "kind": "Project",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_aivision_project",
+  "providerResource": "oci_ai_vision_project",
   "operations": {
     "create": [
       {
@@ -23,12 +23,17 @@
     ],
     "list": [
       {
-        "operation": "ListProject",
-        "requestType": "aivision.ListProjectRequest",
-        "responseType": "aivision.ListProjectResponse"
+        "operation": "ListProjects",
+        "requestType": "aivision.ListProjectsRequest",
+        "responseType": "aivision.ListProjectsResponse"
       }
     ],
     "update": [
+      {
+        "operation": "ChangeProjectCompartment",
+        "requestType": "aivision.ChangeProjectCompartmentRequest",
+        "responseType": "aivision.ChangeProjectCompartmentResponse"
+      },
       {
         "operation": "UpdateProject",
         "requestType": "aivision.UpdateProjectRequest",
@@ -46,7 +51,7 @@
   "lifecycle": {
     "create": {
       "pending": [
-        "PROVISIONING"
+        "CREATING"
       ],
       "target": [
         "ACTIVE"
@@ -63,27 +68,27 @@
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
     ],
-    "forceNew": [
-      "compartment_id"
-    ],
+    "forceNew": null,
     "conflictsWith": {}
   },
   "hooks": {
     "create": [
       {
         "helper": "tfresource.CreateResource"
-      },
-      {
-        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
-        "entityType": "template",
-        "action": "CREATED"
       }
     ],
     "update": [
       {
         "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForUpdatedState"
       }
     ],
     "delete": [
@@ -101,11 +106,13 @@
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_aivision_project",
-    "collectionField": "project",
+    "datasource": "oci_ai_vision_projects",
+    "collectionField": "project_collection",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
+      "display_name",
+      "id",
       "state"
     ]
   },
@@ -115,11 +122,18 @@
     "repoAuthoredLogicGapsPath": "controllers/aivision/project/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
       "secret-output",
-      "delete-confirmation"
+      "delete-confirmation",
+      "waiter-work-request"
     ]
   },
   "notes": [
-    "Scaffold placeholder for aivision/project; replace imported facts before promoting this row beyond scaffold."
+    "Pinned OCI SDK contract: the provider resource exposes CreateProject, GetProject, UpdateProject, and DeleteProject, while the paired datasource oci_ai_vision_projects exposes ListProjects filters compartment_id, display_name, id, and state and returns project_collection.items from the SDK Items list.",
+    "Pinned provider implementation: create, update, and delete are work-request-backed, and compartment changes call ChangeProjectCompartment plus WaitForUpdatedState before UpdateProject. The reviewed generatedruntime client does not use provider work-request polling or ChangeProjectCompartment; it follows write calls with read-after-write or confirm-delete rereads instead.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses ListProjects with compartmentId, displayName, optional tracked id, and reusable lifecycle states to decide whether create is required, and delete fallback can use the same datasource shape when GetProject returns NotFound.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, freeformTags, and definedTags reconcile in place. Provider support for changing compartment_id remains out-of-scope drift because the published runtime treats compartmentId as replacement-only."
   ]
 }
