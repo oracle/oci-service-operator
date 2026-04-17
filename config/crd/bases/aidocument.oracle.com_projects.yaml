@@ -1,0 +1,249 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: projects.aidocument.oracle.com
+spec:
+  group: aidocument.oracle.com
+  names:
+    kind: Project
+    listKind: ProjectList
+    plural: projects
+    singular: project
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Project
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Project
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Project is the Schema for the projects API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ProjectSpec defines the desired state of Project.
+            properties:
+              compartmentId:
+                description: The compartment identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: An optional description of the project.
+                type: string
+              displayName:
+                description: A human-friendly name for the project, that can be changed.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+                  For example: `{"bar-key": "value"}`
+                type: object
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: ProjectStatus defines the observed state of Project.
+            properties:
+              compartmentId:
+                description: The compartment identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: An optional description of the project.
+                type: string
+              displayName:
+                description: A human-friendly name for the project, which can be changed.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+                  For example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: A unique identifier that is immutable after creation.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail,
+                  that can provide actionable information if creation failed.
+                type: string
+              lifecycleState:
+                description: The current state of the project.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  For example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: When the project was created, as an RFC3339 datetime
+                  string.
+                type: string
+              timeUpdated:
+                description: When the project was updated, as an RFC3339 datetime
+                  string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

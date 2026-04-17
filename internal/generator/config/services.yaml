@@ -20,6 +20,57 @@ packageProfiles:
     description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
 
 services:
+  - service: aidocument
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aidocument
+    group: aidocument
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ProcessorJob
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: ailanguage
     sdkPackage: github.com/oracle/oci-go-sdk/v65/ailanguage
     group: ailanguage
@@ -210,6 +261,82 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+
+  - service: bds
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/bds
+    group: bds
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - BdsInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: BdsInstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: AutoScalingConfiguration
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: BdsApiKey
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: BdsMetastoreConfiguration
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OsPatch
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: OsPatchDetail
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Patch
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: PatchHistory
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
 
   - service: certificates
     sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates

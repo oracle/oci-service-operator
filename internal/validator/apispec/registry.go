@@ -3,9 +3,11 @@ package apispec
 import (
 	"reflect"
 
+	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
 	ailanguagev1beta1 "github.com/oracle/oci-service-operator/api/ailanguage/v1beta1"
 	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
+	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
@@ -492,6 +494,28 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "AidocumentProject",
+		SpecType:   reflect.TypeOf(aidocumentv1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(aidocumentv1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "aidocument.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "aidocument.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "aidocument.Project",
+			},
+			{
+				SDKStruct: "aidocument.ProjectCollection",
+			},
+			{
+				SDKStruct: "aidocument.ProjectSummary",
+			},
+		},
+	},
+	{
 		Name:       "AilanguageProject",
 		SpecType:   reflect.TypeOf(ailanguagev1beta1.ProjectSpec{}),
 		StatusType: reflect.TypeOf(ailanguagev1beta1.ProjectStatus{}),
@@ -551,6 +575,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "analytics.AnalyticsInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "BdsBdsInstance",
+		SpecType:   reflect.TypeOf(bdsv1beta1.BdsInstanceSpec{}),
+		StatusType: reflect.TypeOf(bdsv1beta1.BdsInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "bds.CreateBdsInstanceDetails",
+			},
+			{
+				SDKStruct: "bds.UpdateBdsInstanceDetails",
+			},
+			{
+				SDKStruct: "bds.BdsInstance",
+			},
+			{
+				SDKStruct: "bds.BdsInstanceSummary",
 			},
 		},
 	},
