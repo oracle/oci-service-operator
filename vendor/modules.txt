@@ -161,7 +161,9 @@ github.com/oracle/oci-go-sdk/v65/containerengine
 github.com/oracle/oci-go-sdk/v65/containerinstances
 github.com/oracle/oci-go-sdk/v65/core
 github.com/oracle/oci-go-sdk/v65/database
+github.com/oracle/oci-go-sdk/v65/databasetools
 github.com/oracle/oci-go-sdk/v65/dataflow
+github.com/oracle/oci-go-sdk/v65/datascience
 github.com/oracle/oci-go-sdk/v65/dns
 github.com/oracle/oci-go-sdk/v65/events
 github.com/oracle/oci-go-sdk/v65/functions

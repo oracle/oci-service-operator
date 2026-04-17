@@ -3049,6 +3049,96 @@ func TestCheckedInAIDocumentProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T
 	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
 }
 
+func TestCheckedInDataScienceSDKDiscoveryFindsProjectAndWorkRequestFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/datascience")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	assertDiscoveredKindsInclude(t, candidates, []string{"Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
+}
+
+func TestCheckedInDataScienceProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/datascience"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	project, err := buildResourceModel(index, ServiceConfig{
+		Service:        "datascience",
+		SDKPackage:     sdkPackage,
+		Group:          "datascience",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "Project"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(Project) error = %v", err)
+	}
+
+	if project.Runtime == nil {
+		t.Fatal("Project runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, project.Runtime.Create, "CreateProject")
+	assertRuntimeMethodName(t, project.Runtime.Get, "GetProject")
+	assertRuntimeMethodName(t, project.Runtime.List, "ListProjects")
+	assertRuntimeMethodName(t, project.Runtime.Update, "UpdateProject")
+	assertRuntimeMethodName(t, project.Runtime.Delete, "DeleteProject")
+	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
+}
+
+func TestCheckedInDatabaseToolsSDKDiscoveryFindsConnectionAndWorkRequestFamilies(t *testing.T) {
+	t.Parallel()
+
+	index := loadCheckedInSDKPackage(t, "github.com/oracle/oci-go-sdk/v65/databasetools")
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	assertDiscoveredKindsInclude(t, candidates, []string{"DatabaseToolsConnection", "WorkRequest", "WorkRequestError", "WorkRequestLog"})
+}
+
+func TestCheckedInDatabaseToolsConnectionRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/databasetools"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	databaseToolsConnection, err := buildResourceModel(index, ServiceConfig{
+		Service:        "databasetools",
+		SDKPackage:     sdkPackage,
+		Group:          "databasetools",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "DatabaseToolsConnection"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(DatabaseToolsConnection) error = %v", err)
+	}
+
+	if databaseToolsConnection.Runtime == nil {
+		t.Fatal("DatabaseToolsConnection runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Create, "CreateDatabaseToolsConnection")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Get, "GetDatabaseToolsConnection")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.List, "ListDatabaseToolsConnections")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Update, "UpdateDatabaseToolsConnection")
+	assertRuntimeMethodName(t, databaseToolsConnection.Runtime.Delete, "DeleteDatabaseToolsConnection")
+	assertRuntimeRequestFieldNamesInclude(t, databaseToolsConnection.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Type", "RuntimeSupport", "RelatedResourceIdentifier"})
+}
+
 func TestCheckedInBDSSDKDiscoveryFindsBdsInstanceAndAuxiliaryFamilies(t *testing.T) {
 	t.Parallel()
 
@@ -3979,6 +4069,21 @@ func assertRuntimeRequestFieldNamesInclude(t *testing.T, operation *RuntimeOpera
 	for _, fieldName := range want {
 		if !slices.Contains(got, fieldName) {
 			t.Fatalf("runtime request fields = %v, want to contain %q", got, fieldName)
+		}
+	}
+}
+
+func assertDiscoveredKindsInclude(t *testing.T, candidates []resourceCandidate, want []string) {
+	t.Helper()
+
+	got := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		got = append(got, candidate.rawName)
+	}
+
+	for _, kind := range want {
+		if !slices.Contains(got, kind) {
+			t.Fatalf("discovered kinds = %v, want to contain %q", got, kind)
 		}
 	}
 }
