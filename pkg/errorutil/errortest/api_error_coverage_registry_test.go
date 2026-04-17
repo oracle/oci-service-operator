@@ -80,7 +80,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	t.Parallel()
 
 	assertReviewedFamily(t, "aidocument/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
-	assertReviewedFamily(t, "ailanguage/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "ailanguage/Project", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "aivision/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
@@ -148,6 +148,15 @@ func TestReviewedAPIErrorCoverageRegistryRedisWorkRequestSemantics(t *testing.T)
 	assertReviewedRetryableConflictContains(t, "redis/RedisCluster", "work-request")
 	assertReviewedRetryableConflictContains(t, "redis/RedisCluster", "reread live RedisCluster state")
 	assertReviewedDeviation(t, "redis/RedisCluster", "delete guard")
+}
+
+func TestReviewedAPIErrorCoverageRegistryAILanguageProjectWorkRequestSemantics(t *testing.T) {
+	t.Parallel()
+
+	assertReviewedFamily(t, "ailanguage/Project", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedDeleteSemantics(t, "ailanguage/Project", deleteNotFoundReadback)
+	assertReviewedRetryableConflictContains(t, "ailanguage/Project", "work-request")
+	assertReviewedDeviation(t, "ailanguage/Project", "poll GetWorkRequest")
 }
 
 func TestReviewedAPIErrorCoverageRegistrySplitCoreDeleteSemantics(t *testing.T) {
