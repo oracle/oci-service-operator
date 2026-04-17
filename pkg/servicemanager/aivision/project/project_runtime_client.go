@@ -36,7 +36,7 @@ func init() {
 	}
 }
 
-func newProjectRuntimeSemantics() *generatedruntime.Semantics {
+func projectRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "aivision",
 		FormalSlug:    "project",
@@ -97,7 +97,7 @@ func newProjectRuntimeConfig(
 		Kind:      "Project",
 		SDKName:   "Project",
 		Log:       log,
-		Semantics: newProjectRuntimeSemantics(),
+		Semantics: projectRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &aivisionsdk.CreateProjectRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {

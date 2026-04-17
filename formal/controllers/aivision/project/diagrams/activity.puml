@@ -55,13 +55,18 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id;
+stop
+endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply ChangeProjectCompartment, UpdateProject\nonly for mutable fields compartment_id,\ndefined_tags, description, display_name (+1\nmore);
+:Apply UpdateProject only for mutable fields\ndefined_tags, description, display_name,\nfreeform_tags;
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -89,9 +94,12 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id, defined_tags,
-description, display_name (+1 more)
-reject before mutate: none
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
+reject before mutate: force-new fields
+compartment_id
 create-only fields: none
 list lookup: oci_ai_vision_projects filters
 compartment_id, display_name, id, state

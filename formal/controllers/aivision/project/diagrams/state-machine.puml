@@ -25,6 +25,7 @@ state "Retryable" as retryable
 state "Failed" as failed
 observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
 state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
 state "ApplyUpdate" as apply_update
 state "DeletePending" as delete_pending
 state "Deleted" as deleted
@@ -37,7 +38,9 @@ resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE
 observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
-evaluate_ready --> apply_update : supported mutable drift for\ncompartment_id,\ndefined_tags, description\n(+2 more)
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, description,\ndisplay_name (+1 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -68,9 +71,12 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id, defined_tags,
-description, display_name (+1 more)
-reject before mutate: none
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
+reject before mutate: force-new fields
+compartment_id
 create-only fields: none
 list lookup: oci_ai_vision_projects filters
 compartment_id, display_name, id, state

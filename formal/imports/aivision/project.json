@@ -30,11 +30,6 @@
     ],
     "update": [
       {
-        "operation": "ChangeProjectCompartment",
-        "requestType": "aivision.ChangeProjectCompartmentRequest",
-        "responseType": "aivision.ChangeProjectCompartmentResponse"
-      },
-      {
         "operation": "UpdateProject",
         "requestType": "aivision.UpdateProjectRequest",
         "responseType": "aivision.UpdateProjectResponse"

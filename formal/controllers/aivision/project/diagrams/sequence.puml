@@ -67,20 +67,24 @@ ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDAT
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface:
-compartment_id, defined_tags,
-description, display_name (+1 more)
-Reject before mutate: none
+Supported update surface: defined_tags,
+description, display_name, freeform_tags
+Reject before mutate: force-new fields
+compartment_id
 Lookup filters: compartment_id,
 display_name, id, state
 end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply ChangeProjectCompartment,\nUpdateProject only for mutable\nfields compartment_id, defined_tags,\ndescription, display_name (+1 more)
+ServiceManager -> OCI: Apply UpdateProject only for mutable\nfields defined_tags, description,\ndisplay_name, freeform_tags
 loop update pending UPDATING
 ServiceManager -> OCI: GetProject
 end
 end
-ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForUpdatedState;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -109,9 +113,12 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: compartment_id, defined_tags,
-description, display_name (+1 more)
-reject before mutate: none
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
+reject before mutate: force-new fields
+compartment_id
 create-only fields: none
 list lookup: oci_ai_vision_projects filters
 compartment_id, display_name, id, state
