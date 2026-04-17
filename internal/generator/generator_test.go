@@ -2996,6 +2996,70 @@ func TestCheckedInAIVisionProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) 
 	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
 }
 
+func TestCheckedInAIDocumentProjectRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/aidocument"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	project, err := buildResourceModel(index, ServiceConfig{
+		Service:        "aidocument",
+		SDKPackage:     sdkPackage,
+		Group:          "aidocument",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "Project"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(Project) error = %v", err)
+	}
+
+	if project.Runtime == nil {
+		t.Fatal("Project runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, project.Runtime.Create, "CreateProject")
+	assertRuntimeMethodName(t, project.Runtime.Get, "GetProject")
+	assertRuntimeMethodName(t, project.Runtime.List, "ListProjects")
+	assertRuntimeMethodName(t, project.Runtime.Update, "UpdateProject")
+	assertRuntimeMethodName(t, project.Runtime.Delete, "DeleteProject")
+	assertRuntimeRequestFieldNamesInclude(t, project.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName", "Id"})
+}
+
+func TestCheckedInBDSBdsInstanceRuntimeDiscoveryMatchesPinnedSDK(t *testing.T) {
+	t.Parallel()
+
+	const sdkPackage = "github.com/oracle/oci-go-sdk/v65/bds"
+	index := loadCheckedInSDKPackage(t, sdkPackage)
+
+	candidates, err := discoverResourceCandidates(index)
+	if err != nil {
+		t.Fatalf("discoverResourceCandidates() error = %v", err)
+	}
+
+	bdsInstance, err := buildResourceModel(index, ServiceConfig{
+		Service:        "bds",
+		SDKPackage:     sdkPackage,
+		Group:          "bds",
+		PackageProfile: PackageProfileCRDOnly,
+	}, findResourceCandidate(t, candidates, "BdsInstance"))
+	if err != nil {
+		t.Fatalf("buildResourceModel(BdsInstance) error = %v", err)
+	}
+
+	if bdsInstance.Runtime == nil {
+		t.Fatal("BdsInstance runtime model was not attached")
+	}
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Create, "CreateBdsInstance")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Get, "GetBdsInstance")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.List, "ListBdsInstances")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Update, "UpdateBdsInstance")
+	assertRuntimeMethodName(t, bdsInstance.Runtime.Delete, "DeleteBdsInstance")
+	assertRuntimeRequestFieldNamesInclude(t, bdsInstance.Runtime.List, []string{"CompartmentId", "LifecycleState", "DisplayName"})
+}
+
 func TestCheckedInConfigIncludesQueueObservedStateAlias(t *testing.T) {
 	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
 	cfg, err := LoadConfig(cfgPath)
