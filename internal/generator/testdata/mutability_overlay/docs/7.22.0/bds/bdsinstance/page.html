@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>bds_cluster_version_summary</code> - (Optional) Cluster version details including bds and odh version information.
+        <ul>
+          <li><code>bds_version</code> - (Required) BDS version to be used for cluster creation</li>
+          <li><code>odh_version</code> - (Optional) ODH version to be used for cluster creation</li>
+        </ul>
+      </li>
+      <li><code>bootstrap_script_url</code> - (Optional) (Updatable) Pre-authenticated URL of the script in Object Store that is downloaded and executed.</li>
+      <li><code>cluster_admin_password</code> - (Required) Base-64 encoded password for the cluster (and Cloudera Manager) admin user.</li>
+      <li><code>cluster_profile</code> - (Optional) Profile of the Big Data Service cluster.</li>
+      <li><code>cluster_public_key</code> - (Required) The SSH public key used to authenticate the cluster connection.</li>
+      <li><code>cluster_version</code> - (Required) Version of the Hadoop distribution</li>
+      <li><code>compartment_id</code> - (Required) (Updatable) The OCID of the compartment</li>
+      <li><code>display_name</code> - (Required) (Updatable) Name of the BDS instance</li>
+      <li><code>is_cloud_sql_configured</code> -(Optional) (Updatable) Boolean flag specifying whether we configure Cloud SQL or not</li>
+      <li><code>cloud_sql_details</code> -(Optional) The information about added Cloud SQL capability
+        <ul>
+          <li><code>block_volume_size_in_gbs</code> - (Required) The size of block volume in GB that needs to be attached to a given node. All the necessary details needed for attachment are managed by service itself.</li>
+          <li><code>shape</code> - (Required) Shape of the node</li>
+        </ul>
+      </li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>is_high_availability</code> - (Required) Boolean flag specifying whether or not the cluster is HA</li>
+      <li><code>is_secure</code> - (Required) Boolean flag specifying whether or not the cluster should be setup as secure.</li>
+      <li><code>kerberos_realm_name</code> - (Optional) The user-defined kerberos realm name.</li>
+      <li><code>kms_key_id</code> - (Optional) (Updatable) The OCID of the Key Management master encryption key.</li>
+      <li><code>network_config</code> - (Optional) (Updatable) Additional configuration of the user&#39;s network.
+        <ul>
+          <li><code>cidr_block</code> - (Optional) (Updatable) The CIDR IP address block of the VCN.</li>
+          <li><code>is_nat_gateway_required</code> - (Optional) (Updatable) A boolean flag whether to configure a NAT gateway.</li>
+        </ul>
+      </li>
+      <li><code>nodes</code> - (Required) The list of nodes in the Big Data Service cluster.
+        <ul>
+          <li><code>block_volume_size_in_gbs</code> - (Required) The size of block volume in GB to be attached to a given node. All the details needed for attaching the block volume are managed by service itself.</li>
+          <li><code>node_type</code> - (Required) The Big Data Service cluster node type.</li>
+          <li><code>shape</code> - (Required) (Updatable) Shape of the node.</li>
+          <li><code>shape_config</code> - (Optional) The shape configuration requested for the node.
+            <ul>
+              <li><code>memory_in_gbs</code> - (Optional) The total amount of memory available to the node, in gigabytes.</li>
+              <li><code>nvmes</code> - (Optional) The number of NVMe drives to be used for storage. A single drive has 6.8 TB available.</li>
+              <li><code>ocpus</code> - (Optional) The total number of OCPUs available to the node.</li>
+            </ul>
+          </li>
+          <li><code>subnet_id</code> - (Required) The OCID of the subnet in which the node will be created.</li>
+        </ul>
+      </li>
+      <li><code>state</code> - (Optional) (Updatable) The target state for the Bds Instance. Could be set to <code>ACTIVE</code> or <code>INACTIVE</code>.</li>
+      <li><code>execute_bootstrap_script_trigger</code> - (Optional) (Updatable) An optional property when incremented triggers Execute Bootstrap Script. Could be set to any integer value.</li>
+      <li><code>install_os_patch_trigger</code> - (Optional) (Updatable) An optional property when incremented triggers Install Os Patch. Could be set to any integer value.</li>
+      <li><code>remove_kafka_trigger</code> - (Optional) (Updatable) An optional property when incremented triggers Remove Kafka. Could be set to any integer value.</li>
+      <li><code>remove_node</code> - (Optional) (Updatable) An optional property when used triggers Remove Node. Takes the node ocid as input.</li>
+      <li><code>install_os_patch_trigger</code> - (Optional) (Updatable) An optional property when incremented triggers Install Os Patch. Could be set to any integer value.</li>
+      <li><code>state</code> - (Optional) (Updatable) The target state for the Bds Instance. Could be set to <code>ACTIVE</code> or <code>INACTIVE</code>.</li>
+      <li><code>remove_node</code> - (Optional) (Updatable) An optional property when used triggers Remove Node from an Active Cluster. Takes the node ocid as input</li>
+      <li><code>is_force_stop_jobs</code> - (Optional) (Updatable) When setting state as <code>INACTIVE</code> for stopping a cluster, setting this flag to true forcefully stops the bds instance.</li>
+      <li><code>is_kafka_configured</code> - (Optional) Boolean flag specifying whether or not Kafka should be configured.</li>
+      <li><code>os_patch_version</code>  - (Optional) (Updatable) The version of the patch to be upated.</li>
+      <li><code>state</code> - (Optional) (Updatable) The target state for the Bds Instance. Could be set to <code>ACTIVE</code> or <code>INACTIVE</code> to start/stop the bds instance.</li>
+      <li><code>is_force_stop_jobs</code> - (Optional) (Updatable) When setting state as <code>INACTIVE</code> for stopping a cluster, setting this flag to true forcefully stops the bds instance.</li>
+      <li><code>ignore_existing_nodes_shape</code> - Tag to ignore changing the shape of existing worker, master, utility, compute_only_worker, edge, kafka_broker nodes, in a list format, when new nodes are added with a different shape.</li>
+      <li><code>master_node</code> - (Required) The master node in the BDS instance
+        <ul>
+          <li><code>block_volume_size_in_gbs</code> - (Optional) The size of block volume in GB that needs to be attached to a given node. All the necessary details needed for attachment are managed by service itself.</li>
+          <li><code>number_of_nodes</code> - (Required) The amount of master nodes should be created.</li>
+          <li><code>shape</code> - (Required) Shape of the node</li>
+          <li><code>subnet_id</code> - (Required) The OCID of the subnet in which the node should be created</li>
+          <li><code>shape_config</code> - (Optional) The shape configuration requested for the node.
+            <ul>
+              <li><code>memory_in_gbs</code> - (Optional) The total amount of memory available to the node, in gigabytes</li>
+              <li><code>ocpus</code> - (Optional) The total number of OCPUs available to the node.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>util_node</code> - (Required) The utility node in the BDS instance
+        <ul>
+          <li><code>block_volume_size_in_gbs</code> - (Optional) The size of block volume in GB that needs to be attached to a given node. All the necessary details needed for attachment are managed by service itself.</li>
+          <li><code>number_of_nodes</code> - (Required) The amount of utility nodes should be created.</li>
+          <li><code>shape</code> - (Required) Shape of the node</li>
+          <li><code>subnet_id</code> - (Required) The OCID of the subnet in which the node should be created</li>
+          <li><code>shape_config</code> - (Optional) The shape configuration requested for the node.
+            <ul>
+              <li><code>memory_in_gbs</code> - (Optional) The total amount of memory available to the node, in gigabytes</li>
+              <li><code>ocpus</code> - (Optional) The total number of OCPUs available to the node.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>woker_node</code> - (Required) The worker node in the BDS instance
+        <ul>
+          <li><code>block_volume_size_in_gbs</code> - (Optional) The size of block volume in GB that needs to be attached to a given node. All the necessary details needed for attachment are managed by service itself.</li>
+          <li><code>number_of_nodes</code> - (Required) The amount of worker nodes should be created, at least be 3.</li>
+          <li><code>shape</code> - (Required) Shape of the node</li>
+          <li><code>subnet_id</code> - (Required) The OCID of the subnet in which the node should be created</li>
+          <li><code>shape_config</code> - (Optional) The shape configuration requested for the node.
+            <ul>
+              <li><code>memory_in_gbs</code> - (Optional) The total amount of memory available to the node, in gigabytes</li>
+              <li><code>ocpus</code> - (Optional) The total number of OCPUs available to the node.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>compute_only_woker_node</code> - (Optional) The worker node in the BDS instance
+        <ul>
+          <li><code>block_volume_size_in_gbs</code> - (Optional) The size of block volume in GB that needs to be attached to a given node. All the necessary details needed for attachment are managed by service itself.</li>
+          <li><code>number_of_nodes</code> - (Required) The amount of worker nodes should be created</li>
+          <li><code>shape</code> - (Required) Shape of the node</li>
+          <li><code>subnet_id</code> - (Required) The OCID of the subnet in which the node should be created</li>
+          <li><code>shape_config</code> - (Optional) The shape configuration requested for the node.
+            <ul>
+              <li><code>memory_in_gbs</code> - (Optional) The total amount of memory available to the node, in gigabytes</li>
+              <li><code>ocpus</code> - (Optional) The total number of OCPUs available to the node.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>kafka_broker_node</code> - (Optional) The kafka broker node in the BDS instance
+        <ul>
+          <li><code>block_volume_size_in_gbs</code> - (Optional) The size of block volume in GB that needs to be attached to a given node. All the necessary details needed for attachment are managed by service itself.</li>
+          <li><code>number_of_nodes</code> - (Required) The amount of worker nodes should be created</li>
+          <li><code>shape</code> - (Required) Shape of the node</li>
+          <li><code>subnet_id</code> - (Required) The OCID of the subnet in which the node should be created</li>
+          <li><code>shape_config</code> - (Optional) The shape configuration requested for the node.
+            <ul>
+              <li><code>memory_in_gbs</code> - (Optional) The total amount of memory available to the node, in gigabytes</li>
+              <li><code>ocpus</code> - (Optional) The total number of OCPUs available to the node.</li>
+            </ul>
+          </li>
+          <li><code>block_volume_size_in_gbs</code> - (Optional) The size of block volume in GB that needs to be attached to a given node. All the necessary details needed for attachment are managed by service itself.</li>
+          <li><code>number_of_nodes</code> - (Required) The amount of worker nodes should be created</li>
+          <li><code>shape</code> - (Required) Shape of the node</li>
+          <li><code>subnet_id</code> - (Required) The OCID of the subnet in which the node should be created</li>
+          <li><code>shape_config</code> - (Optional) The shape configuration requested for the node.
+            <ul>
+              <li><code>memory_in_gbs</code> - (Optional) The total amount of memory available to the node, in gigabytes</li>
+              <li><code>ocpus</code> - (Optional) The total number of OCPUs available to the node. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>

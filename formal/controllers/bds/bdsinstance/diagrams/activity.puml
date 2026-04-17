@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via\nGetBdsInstance;
 else (no)
-:Resolve an existing OCI resource through\nListBdsInstance using filters compartment_id,\nstate;
-:Create the OCI resource via CreateBdsInstance\nwhen no reusable match is found;
+:Resolve an existing OCI resource through\nListBdsInstances using filters compartment_id,\ndisplay_name, state;
+:Create the OCI resource via AddKafka,\nAddWorkerNodes, CreateBdsInstance when no\nreusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteBdsInstance with\nrequired via GetBdsInstance or ListBdsInstance\nto DELETED confirmation;
-:Confirm deletion via GetBdsInstance or\nListBdsInstance until OCI reaches DELETED;
+:Delete path uses DeleteBdsInstance with\nrequired via GetBdsInstance or\nListBdsInstances to DELETED confirmation;
+:Confirm deletion via GetBdsInstance or\nListBdsInstances until OCI reaches DELETED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -46,27 +46,28 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in CREATING,\nRESUMING, SUSPENDING, UPDATING (+1 more);
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
-:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE, SUSPENDED;
 stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields cluster_profile, cluster_version,\ncompartment_id, is_high_availability (+3 more);
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateBdsInstance only for mutable\nfields display_name;
+:Apply AddBlockStorage, AddKafka,\nAddMasterNodes (+7 more) only for mutable\nfields bootstrap_script_url, defined_tags,\ndisplay_name, freeform_tags (+1 more);
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Return success for the ACTIVE success state;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
+:Return success for the ACTIVE, INACTIVE,\nSUSPENDED success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
 }
@@ -91,18 +92,39 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+provider states: create CREATING; update
+RESUMING, SUSPENDING, UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: bootstrap_script_url,
+defined_tags, display_name, freeform_tags (+1
+more)
 reject before mutate: force-new fields
-compartment_id
+cluster_profile, cluster_version,
+compartment_id, is_high_availability (+3 more)
 create-only fields: none
-list lookup: scaffold_bds_bdsinstance filters
-compartment_id, state
+list lookup: oci_bds_bds_instances filters
+compartment_id, display_name, state
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `UPDATING`/`SUSPENDING`/`RESUMING`
+to updating, `ACTIVE`/`INACTIVE`/`SUSPENDED` to
+success, `DELETING` to terminating, and `FAILED`
+to the terminal failed bucket.
+Pre-create lookup queries `ListBdsInstances`
+with `compartmentId` and `displayName`; delete
+fallback can re-resolve the tracked cluster
+through `ListBdsInstances` when `GetBdsInstance`
+stops finding the resource.
+Only `displayName`, `bootstrapScriptUrl`,
+`freeformTags`, `definedTags`, and `kmsKeyId`
+reconcile in place. `compartmentId`,
+`clusterVersion`, `isHighAvailability`,
+`isSecure`, `clusterProfile`, `networkConfig`,
+and `nodes` remain replacement-only drift, while
+the runtime has no secret side effects.
 end note
 @enduml

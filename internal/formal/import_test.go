@@ -421,6 +421,62 @@ func TestImportPreservesRepoAuthoredExcludedMutationAndListLookup(t *testing.T) 
 	})
 }
 
+func TestImportPreservesRepoAuthoredExcludedLifecycleClassification(t *testing.T) {
+	formalRoot := writeFormalRoot(t, "seeded", "oci_widget_widget")
+	providerRoot := writeProviderFixture(t)
+	importPath := filepath.Join(formalRoot, "imports", "widget", "widget.json")
+
+	doc, err := loadImport(importPath)
+	if err != nil {
+		t.Fatalf("loadImport(%q) failed: %v", importPath, err)
+	}
+	doc.Lifecycle = lifecycle{
+		Create: lifecyclePhase{
+			Pending: []string{"REPO_CREATING"},
+			Target:  []string{"REPO_ACTIVE", "REPO_INACTIVE"},
+		},
+		Update: lifecyclePhase{
+			Pending: []string{"REPO_UPDATING", "REPO_RESUMING"},
+			Target:  []string{"REPO_ACTIVE", "REPO_INACTIVE"},
+		},
+	}
+	doc.Boundary.ExcludedSemantics = append(doc.Boundary.ExcludedSemantics, "lifecycle-classification")
+	if err := writeJSONFile(importPath, doc); err != nil {
+		t.Fatalf("writeJSONFile(%q) failed: %v", importPath, err)
+	}
+
+	if _, err := Import(ImportOptions{
+		Root:             formalRoot,
+		ProviderPath:     providerRoot,
+		ProviderRevision: "test-revision",
+	}); err != nil {
+		t.Fatalf("Import() returned error: %v", err)
+	}
+
+	doc, err = loadImport(importPath)
+	if err != nil {
+		t.Fatalf("loadImport(%q) after refresh failed: %v", importPath, err)
+	}
+
+	assertStrings(t, doc.Lifecycle.Create.Pending, []string{"REPO_CREATING"})
+	assertStrings(t, doc.Lifecycle.Create.Target, []string{"REPO_ACTIVE", "REPO_INACTIVE"})
+	assertStrings(t, doc.Lifecycle.Update.Pending, []string{"REPO_UPDATING", "REPO_RESUMING"})
+	assertStrings(t, doc.Lifecycle.Update.Target, []string{"REPO_ACTIVE", "REPO_INACTIVE"})
+
+	assertBindings(t, doc.Operations.Update, []operationBinding{
+		{
+			Operation:    "ChangeWidgetCompartment",
+			RequestType:  "sdkwidget.ChangeWidgetCompartmentRequest",
+			ResponseType: "sdkwidget.ChangeWidgetCompartmentResponse",
+		},
+		{
+			Operation:    "UpdateWidget",
+			RequestType:  "sdkwidget.UpdateWidgetRequest",
+			ResponseType: "sdkwidget.UpdateWidgetResponse",
+		},
+	})
+}
+
 func TestNormalizeResponseItemsField(t *testing.T) {
 	if got := normalizeResponseItemsField(""); got != "Items" {
 		t.Fatalf("normalizeResponseItemsField(\"\") = %q, want %q", got, "Items")

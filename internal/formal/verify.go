@@ -108,6 +108,7 @@ var allowedLogicGapCategories = stringSet{
 	"drift-guard":              {},
 	"endpoint-materialization": {},
 	"legacy-adapter":           {},
+	"lifecycle-classification": {},
 	"list-lookup":              {},
 	"manual-webhook":           {},
 	"mutation-policy":          {},

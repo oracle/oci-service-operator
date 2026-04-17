@@ -287,6 +287,7 @@ services:
         strategy: none
       resources:
         - kind: BdsInstance
+          formalSpec: bdsinstance
           async:
             strategy: lifecycle
             runtime: generatedruntime
