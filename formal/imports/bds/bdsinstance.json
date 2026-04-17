@@ -243,6 +243,7 @@
     "repoAuthoredLogicGapsPath": "controllers/bds/bdsinstance/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
+      "lifecycle-classification",
       "list-lookup",
       "mutation-policy",
       "status-projection",

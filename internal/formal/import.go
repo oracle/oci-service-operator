@@ -221,7 +221,11 @@ func Import(opts ImportOptions) (ImportReport, error) {
 		updated.Kind = row.Kind
 		updated.SourceRef = report.SourceName
 		updated.Operations = facts.Operations
-		updated.Lifecycle = facts.Lifecycle
+		if excludedSemantics.has("lifecycle-classification") {
+			updated.Lifecycle = currentDoc.Lifecycle
+		} else {
+			updated.Lifecycle = facts.Lifecycle
+		}
 		if excludedSemantics.has("mutation-policy") {
 			updated.Mutation = currentDoc.Mutation
 		} else {
