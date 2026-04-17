@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetProject;
 else (no)
-:Resolve an existing OCI resource through\nListProject using filters compartment_id,\nstate;
+:Resolve an existing OCI resource through\nListProjects using filters compartment_id,\ndisplay_name, id, state;
 :Create the OCI resource via CreateProject when\nno reusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteProject with required\nvia GetProject or ListProject to DELETED\nconfirmation;
-:Confirm deletion via GetProject or ListProject\nuntil OCI reaches DELETED;
+:Delete path uses DeleteProject with required\nvia GetProject or ListProjects to DELETED\nconfirmation;
+:Confirm deletion via GetProject or\nListProjects until OCI reaches DELETED;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -46,7 +46,7 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
@@ -55,17 +55,18 @@ stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
 :Reject drift before OCI mutation for force-new\nfields compartment_id;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateProject only for mutable fields\ndisplay_name;
+:Apply UpdateProject only for mutable fields\ndefined_tags, description, display_name,\nfreeform_tags;
 else (no)
 :Skip the no-op mutation path;
 endif
-:Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
 :Return success for the ACTIVE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
@@ -91,18 +92,34 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create PROVISIONING; update
+provider states: create CREATING; update
 UPDATING; delete DELETING
-supported drift: display_name
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
-list lookup: scaffold_aivision_project filters
-compartment_id, state
+list lookup: oci_ai_vision_projects filters
+compartment_id, display_name, id, state
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Generated runtime uses read-after-write
+follow-up for create and update plus
+confirm-delete for delete; `CREATING` maps to
+provisioning, `ACTIVE` to success, `UPDATING` to
+updating, and `DELETING` keeps reconcile in the
+terminating bucket until `DELETED` or NotFound.
+Pre-create lookup queries `ListProjects` with
+`compartmentId`, `displayName`, and an optional
+tracked `id`; delete fallback can re-resolve the
+tracked project through `ListProjects` when
+`GetProject` returns NotFound.
+Only `displayName`, `description`,
+`freeformTags`, and `definedTags` reconcile in
+place. `compartmentId` remains replacement-only
+drift and the runtime has no secret side
+effects.
 end note
 @enduml
