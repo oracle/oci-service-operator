@@ -40,7 +40,7 @@ Each reviewed exception records:
 
 | Family | Use For | Current Examples |
 | --- | --- | --- |
-| `generatedruntime-plain` | shared generatedruntime CRUD with no special follow-up helper ownership | `core/Instance`, `database/AutonomousDatabase`, `mysql/DbSystem`, `objectstorage/Bucket` |
+| `generatedruntime-plain` | shared generatedruntime CRUD with no special follow-up helper ownership | `ailanguage/Project`, `aivision/Project`, `core/Instance`, `database/AutonomousDatabase`, `mysql/DbSystem`, `objectstorage/Bucket` |
 | `generatedruntime-follow-up` | generatedruntime paths whose error handling depends on follow-up helpers such as `WaitForUpdatedState` or `WaitForWorkRequestWithErrorHandling` | `containerengine/Cluster`, `opensearch/OpensearchCluster`, `streaming/Stream` |
 | `generatedruntime-workrequest` | work-request-aware flows that keep explicit work-request tracking as the reviewed contract, even when the polling adapter is handwritten | `queue/Queue`, `redis/RedisCluster` |
 | `manual-runtime` | direct handwritten runtimes whose primary OCI error handling stays in package-local create/update logic; per-resource delete/conflict semantics may still point at generatedruntime when delete is delegated there | `core/Vcn`, `core/InternetGateway`, `core/Subnet`, `core/SecurityList`, other active core-network runtimes |
@@ -83,6 +83,11 @@ exceptions explicit today:
 
 Each of these stays exempt because `services.yaml` still marks the subresource
 with `strategy: none`.
+
+- `ailanguage`: `Endpoint`, `EvaluationResult`, `Model`, `ModelType`,
+  `WorkRequest`, `WorkRequestError`, `WorkRequestLog`
+- `aivision`: `DocumentJob`, `ImageJob`, `Model`, `WorkRequest`,
+  `WorkRequestError`, `WorkRequestLog`
 
 ## Update Workflow
 

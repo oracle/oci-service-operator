@@ -10,6 +10,8 @@ kind: Kustomization
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
+- bases/ailanguage.oracle.com_projects.yaml
+- bases/aivision.oracle.com_projects.yaml
 - bases/analytics.oracle.com_analyticsinstances.yaml
 - bases/apigateway.oracle.com_apigatewaydeployments.yaml
 - bases/apigateway.oracle.com_apigateways.yaml

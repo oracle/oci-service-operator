@@ -20,6 +20,123 @@ packageProfiles:
     description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
 
 services:
+  - service: ailanguage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/ailanguage
+    group: ailanguage
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: Endpoint
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: EvaluationResult
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ModelType
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: aivision
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aivision
+    group: aivision
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Project
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: DocumentJob
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ImageJob
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Model
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: analytics
     sdkPackage: github.com/oracle/oci-go-sdk/v65/analytics
     group: analytics

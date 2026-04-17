@@ -8,6 +8,8 @@ This landing page is generated from the checked-in package and release inventory
 
 | API version | Resources | Packages |
 | --- | --- | --- |
+| [ailanguage.oracle.com/v1beta1](ailanguage/v1beta1/index.md) | [Project](ailanguage/v1beta1/index.md#kind-project) | - |
+| [aivision.oracle.com/v1beta1](aivision/v1beta1/index.md) | [Project](aivision/v1beta1/index.md#kind-project) | - |
 | [analytics.oracle.com/v1beta1](analytics/v1beta1/index.md) | [AnalyticsInstance](analytics/v1beta1/index.md#kind-analyticsinstance) | - |
 | [apigateway.oracle.com/v1beta1](apigateway/v1beta1/index.md) | [ApiGateway](apigateway/v1beta1/index.md#kind-apigateway), [ApiGatewayDeployment](apigateway/v1beta1/index.md#kind-apigatewaydeployment) | API Gateway (`v2.0.0-alpha`) |
 | [containerengine.oracle.com/v1beta1](containerengine/v1beta1/index.md) | [Cluster](containerengine/v1beta1/index.md#kind-cluster), [NodePool](containerengine/v1beta1/index.md#kind-nodepool) | - |

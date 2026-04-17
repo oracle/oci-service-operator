@@ -128,6 +128,8 @@ nav:
       - reference/api/index.md
       # BEGIN GENERATED API VERSION NAV
       - API Versions:
+          - ailanguage.oracle.com/v1beta1: reference/api/ailanguage/v1beta1/index.md
+          - aivision.oracle.com/v1beta1: reference/api/aivision/v1beta1/index.md
           - analytics.oracle.com/v1beta1: reference/api/analytics/v1beta1/index.md
           - apigateway.oracle.com/v1beta1: reference/api/apigateway/v1beta1/index.md
           - containerengine.oracle.com/v1beta1: reference/api/containerengine/v1beta1/index.md
