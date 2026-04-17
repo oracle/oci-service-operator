@@ -592,7 +592,9 @@ func populateInternal(repoRoot, snapshotRoot string, selectedGroups []string) er
 	for _, entry := range entries {
 		src := filepath.Join(repoRoot, "internal", entry.Name())
 		dst := filepath.Join(internalRoot, entry.Name())
-		if entry.Name() == "validator" {
+		if entry.Name() == "validator" || entry.Name() == "generator" {
+			// The snapshot runs generator-driven cleanup under internal/generator/generated,
+			// so this tree must be copy-isolated from the source checkout.
 			if err := copyTree(src, dst); err != nil {
 				return err
 			}

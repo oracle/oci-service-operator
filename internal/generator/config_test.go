@@ -1922,15 +1922,53 @@ func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContra
 		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
 	}
 
-	services := serviceConfigsByName(t, cfg, "core", "nosql", "objectstorage")
+	services := serviceConfigsByName(t, cfg, "analytics", "containerengine", "core", "dataflow", "nosql", "objectstorage")
 
+	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
+	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"NodePool"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
+	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
 	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
 
-	assertAsyncContract(t, services["core"], "Instance", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
-	assertAsyncContract(t, services["nosql"], "Table", AsyncStrategyLifecycle, AsyncRuntimeHandwritten)
-	assertAsyncContract(t, services["objectstorage"], "Bucket", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+	expectedByService := map[string]struct {
+		strategy string
+		runtime  string
+	}{
+		"analytics":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerengine": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"core":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataflow":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"nosql":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"objectstorage":   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+	}
+
+	targets := defaultActiveExplicitSelectedKindTargets(cfg)
+	if len(targets) == 0 {
+		t.Fatal("defaultActiveExplicitSelectedKindTargets() returned no targets for mutability validation config")
+	}
+
+	coveredServices := make(map[string]struct{}, len(expectedByService))
+	for _, target := range targets {
+		service := services[target.Service]
+		expected, ok := expectedByService[target.Service]
+		if !ok {
+			t.Fatalf("missing async expectation for mutability validation service %q", target.Service)
+		}
+		assertAsyncContract(t, service, target.Kind, expected.strategy, expected.runtime)
+		coveredServices[target.Service] = struct{}{}
+	}
+
+	missingServices := make([]string, 0, len(expectedByService))
+	for serviceName := range expectedByService {
+		if _, ok := coveredServices[serviceName]; !ok {
+			missingServices = append(missingServices, serviceName)
+		}
+	}
+	slices.Sort(missingServices)
+	if len(missingServices) != 0 {
+		t.Fatalf("mutability validation config services missing selected-kind async coverage: %v", missingServices)
+	}
 }
 
 func selectionExplicit(enabled bool, includeKinds ...string) SelectionConfig {
