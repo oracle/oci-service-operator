@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ocvp",
+  "slug": "cluster",
+  "kind": "Cluster",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ocvp_cluster",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCluster",
+        "requestType": "ocvp.CreateClusterRequest",
+        "responseType": "ocvp.CreateClusterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCluster",
+        "requestType": "ocvp.GetClusterRequest",
+        "responseType": "ocvp.GetClusterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListClusters",
+        "requestType": "ocvp.ListClustersRequest",
+        "responseType": "ocvp.ListClustersResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCluster",
+        "requestType": "ocvp.UpdateClusterRequest",
+        "responseType": "ocvp.UpdateClusterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCluster",
+        "requestType": "ocvp.DeleteClusterRequest",
+        "responseType": "ocvp.DeleteClusterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING",
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "esxi_software_version",
+      "freeform_tags",
+      "network_configuration",
+      "vmware_software_version"
+    ],
+    "forceNew": [
+      "capacity_reservation_id",
+      "compute_availability_domain",
+      "datastores",
+      "esxi_hosts_count",
+      "initial_commitment",
+      "initial_host_ocpu_count",
+      "initial_host_shape_name",
+      "instance_display_name_prefix",
+      "is_shielded_instance_enabled",
+      "sddc_id",
+      "workload_network_cidr"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "cluster",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "cluster",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_ocvp_clusters",
+    "collectionField": "cluster_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state",
+      "sddc_id"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ocvp/cluster/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ocvp/cluster/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Cluster lifecycle exposes CREATING, UPDATING, ACTIVE, DELETING, DELETED, and FAILED. Repo-authored controller success is ACTIVE, requeue covers CREATING and UPDATING, FAILED is terminal without requeue, and delete confirmation follows DELETING to DELETED or NotFound.",
+    "Pinned OCI SDK contract: UpdateClusterDetails exposes displayName, networkConfiguration, vmwareSoftwareVersion, esxiSoftwareVersion, freeformTags, and definedTags as the in-place update surface. Fields absent from UpdateClusterDetails remain create-only drift and never open implicit replacement.",
+    "CreateCluster and DeleteCluster return opc-work-request-id headers, while UpdateCluster returns the Cluster body directly. The reviewed generatedruntime client records request and work-request breadcrumbs when present and relies on lifecycle projection plus confirm-delete rereads rather than service-local work-request polling.",
+    "ListClustersRequest filters by sddcId, displayName, lifecycleState, and compartmentId and returns Items []ClusterSummary. Repo-authored bind logic only attempts pre-create reuse when spec.displayName is set, and safe reusable matching is exact sddc_id plus display_name in reusable ACTIVE, CREATING, or UPDATING states; duplicate exact matches fail instead of guessing."
+  ]
+}

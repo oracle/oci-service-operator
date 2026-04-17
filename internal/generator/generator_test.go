@@ -3144,6 +3144,112 @@ func TestCheckedInRedisClusterFormalBindingMatchesDiscovery(t *testing.T) {
 	}
 }
 
+func TestCheckedInOCVPClusterFormalBindingMatchesDiscovery(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	var ocvpService *ServiceConfig
+	for i := range cfg.Services {
+		if cfg.Services[i].Service == "ocvp" {
+			ocvpService = &cfg.Services[i]
+			break
+		}
+	}
+	if ocvpService == nil {
+		t.Fatal("ocvp service was not found in services.yaml")
+	}
+	if got := ocvpService.FormalSpecFor("Cluster"); got != "cluster" {
+		t.Fatalf("ocvp Cluster formalSpec = %q, want %q", got, "cluster")
+	}
+
+	pkg, err := NewDiscoverer().BuildPackageModel(context.Background(), cfg, *ocvpService)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+
+	cluster := findResource(t, pkg.Resources, "Cluster")
+	if cluster.SDKName != "Cluster" {
+		t.Fatalf("Cluster SDK name = %q, want %q", cluster.SDKName, "Cluster")
+	}
+	if cluster.Formal == nil {
+		t.Fatal("Cluster formal model was not attached")
+	}
+	if cluster.Formal.Reference.Service != "ocvp" {
+		t.Fatalf("Cluster formal service = %q, want %q", cluster.Formal.Reference.Service, "ocvp")
+	}
+	if cluster.Formal.Reference.Slug != "cluster" {
+		t.Fatalf("Cluster formal slug = %q, want %q", cluster.Formal.Reference.Slug, "cluster")
+	}
+	if cluster.Formal.Binding.Spec.Kind != "Cluster" {
+		t.Fatalf("Cluster formal kind = %q, want %q", cluster.Formal.Binding.Spec.Kind, "Cluster")
+	}
+	if cluster.Formal.Binding.Import.ProviderResource != "oci_ocvp_cluster" {
+		t.Fatalf("Cluster provider resource = %q, want %q", cluster.Formal.Binding.Import.ProviderResource, "oci_ocvp_cluster")
+	}
+	if cluster.Runtime == nil {
+		t.Fatal("Cluster runtime model was not attached")
+	}
+	if cluster.Runtime.Create == nil || cluster.Runtime.Create.MethodName != "CreateCluster" {
+		t.Fatalf("Cluster create method = %#v, want CreateCluster", cluster.Runtime.Create)
+	}
+	if cluster.Runtime.Get == nil || cluster.Runtime.Get.MethodName != "GetCluster" {
+		t.Fatalf("Cluster get method = %#v, want GetCluster", cluster.Runtime.Get)
+	}
+	if cluster.Runtime.List == nil || cluster.Runtime.List.MethodName != "ListClusters" {
+		t.Fatalf("Cluster list method = %#v, want ListClusters", cluster.Runtime.List)
+	}
+	if cluster.Runtime.Update == nil || cluster.Runtime.Update.MethodName != "UpdateCluster" {
+		t.Fatalf("Cluster update method = %#v, want UpdateCluster", cluster.Runtime.Update)
+	}
+	if cluster.Runtime.Delete == nil || cluster.Runtime.Delete.MethodName != "DeleteCluster" {
+		t.Fatalf("Cluster delete method = %#v, want DeleteCluster", cluster.Runtime.Delete)
+	}
+	if cluster.Runtime.Semantics == nil {
+		t.Fatal("Cluster runtime semantics were not attached")
+	}
+	if got := cluster.Runtime.Semantics.Async; got == nil {
+		t.Fatal("Cluster async semantics were not attached")
+	} else {
+		if got.Strategy != "lifecycle" {
+			t.Fatalf("Cluster async.strategy = %q, want %q", got.Strategy, "lifecycle")
+		}
+		if got.Runtime != "generatedruntime" {
+			t.Fatalf("Cluster async.runtime = %q, want %q", got.Runtime, "generatedruntime")
+		}
+		if got.FormalClassification != "lifecycle" {
+			t.Fatalf("Cluster async.formalClassification = %q, want %q", got.FormalClassification, "lifecycle")
+		}
+	}
+	if got := cluster.Runtime.Semantics.List; got == nil {
+		t.Fatal("Cluster list semantics were not attached")
+	} else if !slices.Equal(got.MatchFields, []string{"compartmentId", "displayName", "lifecycleState", "sddcId"}) {
+		t.Fatalf("Cluster list match fields = %v, want [compartmentId displayName lifecycleState sddcId]", got.MatchFields)
+	}
+	if got := cluster.Runtime.Semantics.Mutation.Mutable; !slices.Equal(got, []string{"definedTags", "displayName", "esxiSoftwareVersion", "freeformTags", "networkConfiguration", "vmwareSoftwareVersion"}) {
+		t.Fatalf("Cluster mutable fields = %v, want reviewed mutable surface", got)
+	}
+	if got := cluster.Runtime.Semantics.Mutation.ForceNew; !slices.Equal(got, []string{"capacityReservationId", "computeAvailabilityDomain", "datastores", "esxiHostsCount", "initialCommitment", "initialHostOcpuCount", "initialHostShapeName", "instanceDisplayNamePrefix", "isShieldedInstanceEnabled", "sddcId", "workloadNetworkCidr"}) {
+		t.Fatalf("Cluster force-new fields = %v, want reviewed replacement surface", got)
+	}
+	if cluster.Runtime.Semantics.CreateFollowUp.Strategy != "read-after-write" {
+		t.Fatalf("Cluster create follow-up = %q, want %q", cluster.Runtime.Semantics.CreateFollowUp.Strategy, "read-after-write")
+	}
+	if cluster.Runtime.Semantics.UpdateFollowUp.Strategy != "read-after-write" {
+		t.Fatalf("Cluster update follow-up = %q, want %q", cluster.Runtime.Semantics.UpdateFollowUp.Strategy, "read-after-write")
+	}
+	if cluster.Runtime.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
+		t.Fatalf("Cluster delete follow-up = %q, want %q", cluster.Runtime.Semantics.DeleteFollowUp.Strategy, "confirm-delete")
+	}
+	if len(cluster.Runtime.Semantics.OpenGaps) != 0 {
+		t.Fatalf("Cluster open gaps = %v, want none", cluster.Runtime.Semantics.OpenGaps)
+	}
+}
+
 func TestCheckedInBucketFormalBindingUsesRepoAuthoredMutationSurface(t *testing.T) {
 	t.Parallel()
 

@@ -16,9 +16,26 @@ This page is generated from the checked-in sample manifest at `config/samples/oc
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the OCI identifiers below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create instead of
+# binding to an existing Cluster with the same displayName in the same SDDC.
+# Replace spec.computeAvailabilityDomain with an availability domain valid for the
+# target SDDC before running this sample.
+#
 apiVersion: ocvp.oracle.com/v1beta1
 kind: Cluster
 metadata:
   name: cluster-sample
-spec: {}
+spec:
+  displayName: "cluster-sample"
+  sddcId: ocid1.sddc.oc1..exampleuniqueID
+  computeAvailabilityDomain: "Uocm:PHX-AD-1"
+  esxiHostsCount: 3
+  networkConfiguration:
+    provisioningSubnetId: ocid1.subnet.oc1..exampleuniqueID
+    vmotionVlanId: ocid1.vlan.oc1..exampleuniqueID
+    vsanVlanId: ocid1.vlan.oc1..exampleuniqueID
+    nsxVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
+    nsxEdgeVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
 ```
