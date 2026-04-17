@@ -175,6 +175,59 @@ func requireAsyncCurrent(t *testing.T, resource *ailanguagev1beta1.Project, phas
 	}
 }
 
+func TestIsRetryableProjectUpdateConflict(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{
+			name: "incorrect state currently being modified",
+			err:  errortest.NewServiceError(409, "IncorrectState", "Project is currently being modified"),
+			want: true,
+		},
+		{
+			name: "plain conflict currently being modified",
+			err:  errortest.NewServiceError(409, "Conflict", "Project is currently being modified"),
+			want: true,
+		},
+		{
+			name: "incorrect state without message stays retryable",
+			err: errortest.FakeServiceError{
+				StatusCode:   409,
+				Code:         "IncorrectState",
+				Message:      "",
+				OpcRequestID: "opc-request-id",
+			},
+			want: true,
+		},
+		{
+			name: "plain conflict without being modified message is not retryable",
+			err:  errortest.NewServiceError(409, "Conflict", "etag mismatch"),
+			want: false,
+		},
+		{
+			name: "other 409 stays non retryable",
+			err:  errortest.NewServiceError(409, "InvalidatedRetryToken", "retry token invalidated"),
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := isRetryableProjectUpdateConflict(tt.err)
+			if got != tt.want {
+				t.Fatalf("isRetryableProjectUpdateConflict() = %t, want %t", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestProjectServiceClientCreateOrUpdateCreatesAndPollsWorkRequest(t *testing.T) {
 	t.Parallel()
 
@@ -521,57 +574,88 @@ func TestProjectServiceClientCreateOrUpdateResumesSucceededUpdateWorkRequest(t *
 func TestProjectServiceClientCreateOrUpdateConflictCurrentlyBeingModifiedRequeuesInsteadOfFailing(t *testing.T) {
 	t.Parallel()
 
-	client := testProjectClient(&fakeProjectOCIClient{
-		getProjectFn: func(_ context.Context, req ailanguagesdk.GetProjectRequest) (ailanguagesdk.GetProjectResponse, error) {
-			if req.ProjectId == nil || *req.ProjectId != "ocid1.project.oc1..existing" {
-				t.Fatalf("get projectId = %v, want tracked project ID", req.ProjectId)
-			}
-			return ailanguagesdk.GetProjectResponse{
-				Project: makeSDKProject(
-					"ocid1.project.oc1..existing",
-					"ocid1.compartment.oc1..example",
-					"project-alpha",
-					"stale description",
-					ailanguagesdk.ProjectLifecycleStateActive,
-				),
-			}, nil
+	tests := []struct {
+		name      string
+		errorCode string
+	}{
+		{
+			name:      "incorrect state",
+			errorCode: "IncorrectState",
 		},
-		updateProjectFn: func(_ context.Context, req ailanguagesdk.UpdateProjectRequest) (ailanguagesdk.UpdateProjectResponse, error) {
-			if req.ProjectId == nil || *req.ProjectId != "ocid1.project.oc1..existing" {
-				t.Fatalf("update projectId = %v, want tracked project ID", req.ProjectId)
-			}
-			return ailanguagesdk.UpdateProjectResponse{}, errortest.NewServiceError(409, "IncorrectState", "Project is currently being modified")
+		{
+			name:      "plain conflict",
+			errorCode: "Conflict",
 		},
-	})
+	}
 
-	resource := makeProjectResource()
-	resource.Status.Id = "ocid1.project.oc1..existing"
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
-	if err != nil {
-		t.Fatalf("CreateOrUpdate() error = %v, want nil for retryable conflict", err)
-	}
-	if !response.IsSuccessful {
-		t.Fatal("CreateOrUpdate() should report success for retryable update conflict")
-	}
-	if !response.ShouldRequeue {
-		t.Fatal("CreateOrUpdate() should requeue for retryable update conflict")
-	}
-	if resource.Status.OsokStatus.Reason != string(shared.Updating) {
-		t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Updating)
-	}
-	current := resource.Status.OsokStatus.Async.Current
-	if current == nil {
-		t.Fatal("status.async.current = nil, want pending update tracker")
-	}
-	if current.Phase != shared.OSOKAsyncPhaseUpdate {
-		t.Fatalf("status.async.current.phase = %q, want %q", current.Phase, shared.OSOKAsyncPhaseUpdate)
-	}
-	if current.WorkRequestID != "" {
-		t.Fatalf("status.async.current.workRequestId = %q, want empty when OCI did not return a work request ID", current.WorkRequestID)
-	}
-	if current.NormalizedClass != shared.OSOKAsyncClassPending {
-		t.Fatalf("status.async.current.normalizedClass = %q, want %q", current.NormalizedClass, shared.OSOKAsyncClassPending)
+			client := testProjectClient(&fakeProjectOCIClient{
+				getProjectFn: func(_ context.Context, req ailanguagesdk.GetProjectRequest) (ailanguagesdk.GetProjectResponse, error) {
+					if req.ProjectId == nil || *req.ProjectId != "ocid1.project.oc1..existing" {
+						t.Fatalf("get projectId = %v, want tracked project ID", req.ProjectId)
+					}
+					return ailanguagesdk.GetProjectResponse{
+						Project: makeSDKProject(
+							"ocid1.project.oc1..existing",
+							"ocid1.compartment.oc1..example",
+							"project-alpha",
+							"stale description",
+							ailanguagesdk.ProjectLifecycleStateActive,
+						),
+					}, nil
+				},
+				updateProjectFn: func(_ context.Context, req ailanguagesdk.UpdateProjectRequest) (ailanguagesdk.UpdateProjectResponse, error) {
+					if req.ProjectId == nil || *req.ProjectId != "ocid1.project.oc1..existing" {
+						t.Fatalf("update projectId = %v, want tracked project ID", req.ProjectId)
+					}
+					return ailanguagesdk.UpdateProjectResponse{}, errortest.NewServiceError(409, tt.errorCode, "Project is currently being modified")
+				},
+			})
+
+			resource := makeProjectResource()
+			resource.Status.Id = "ocid1.project.oc1..existing"
+
+			response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+			if err != nil {
+				t.Fatalf("CreateOrUpdate() error = %v, want nil for retryable conflict", err)
+			}
+			if !response.IsSuccessful {
+				t.Fatal("CreateOrUpdate() should report success for retryable update conflict")
+			}
+			if !response.ShouldRequeue {
+				t.Fatal("CreateOrUpdate() should requeue for retryable update conflict")
+			}
+			if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
+				t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-request-id")
+			}
+			if resource.Status.OsokStatus.Reason != string(shared.Updating) {
+				t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Updating)
+			}
+
+			current := resource.Status.OsokStatus.Async.Current
+			if current == nil {
+				t.Fatal("status.async.current = nil, want pending update tracker")
+			}
+			if current.Source != shared.OSOKAsyncSourceLifecycle {
+				t.Fatalf("status.async.current.source = %q, want %q", current.Source, shared.OSOKAsyncSourceLifecycle)
+			}
+			if current.Phase != shared.OSOKAsyncPhaseUpdate {
+				t.Fatalf("status.async.current.phase = %q, want %q", current.Phase, shared.OSOKAsyncPhaseUpdate)
+			}
+			if current.WorkRequestID != "" {
+				t.Fatalf("status.async.current.workRequestId = %q, want empty when OCI did not return a work request ID", current.WorkRequestID)
+			}
+			if current.NormalizedClass != shared.OSOKAsyncClassPending {
+				t.Fatalf("status.async.current.normalizedClass = %q, want %q", current.NormalizedClass, shared.OSOKAsyncClassPending)
+			}
+			if current.Message != "Project is currently being modified" {
+				t.Fatalf("status.async.current.message = %q, want exact OCI conflict message", current.Message)
+			}
+		})
 	}
 }
 

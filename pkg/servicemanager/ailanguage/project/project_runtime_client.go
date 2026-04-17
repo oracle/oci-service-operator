@@ -1150,12 +1150,17 @@ func isProjectDeleteNotFoundOCI(err error) bool {
 
 func isRetryableProjectUpdateConflict(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
-	if !classification.IsConflict() {
+	if classification.HTTPStatusCode != 409 {
 		return false
 	}
 
 	message := strings.ToLower(strings.TrimSpace(serviceErrorMessage(err)))
-	return message == "" || strings.Contains(message, "currently being modified")
+	if classification.IsConflict() {
+		return message == "" || strings.Contains(message, "currently being modified")
+	}
+
+	return strings.EqualFold(classification.ErrorCode, "Conflict") &&
+		strings.Contains(message, "currently being modified")
 }
 
 func serviceErrorMessage(err error) string {
