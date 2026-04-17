@@ -14,16 +14,18 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 43; got != want {
+	if got, want := len(inventory), 58; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 28; got != want {
+	if got, want := countRegistrations(inventory), 30; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 15; got != want {
+	if got, want := countExceptions(inventory), 28; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
+	assertInventorySelectionSource(t, byKey, "ailanguage/Project", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "aivision/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "analytics/AnalyticsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
@@ -32,6 +34,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 
+	assertInventoryRegistration(t, byKey, "ailanguage/Project")
+	assertInventoryException(t, byKey, "ailanguage/Endpoint", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "aivision/Project")
+	assertInventoryException(t, byKey, "aivision/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "analytics/AnalyticsInstance")
 	assertInventoryException(t, byKey, "analytics/PrivateAccessChannel", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
@@ -50,6 +56,8 @@ func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T)
 func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	t.Parallel()
 
+	assertReviewedFamily(t, "ailanguage/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "aivision/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerengine/Cluster", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
@@ -67,6 +75,8 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 
+	assertReviewedException(t, "ailanguage/WorkRequest", "strategy=none")
+	assertReviewedException(t, "aivision/WorkRequest", "strategy=none")
 	assertReviewedException(t, "analytics/WorkRequest", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")
 	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")

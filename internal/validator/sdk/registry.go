@@ -4,6 +4,8 @@ import (
 	"path"
 	"reflect"
 
+	"github.com/oracle/oci-go-sdk/v65/ailanguage"
+	"github.com/oracle/oci-go-sdk/v65/aivision"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
@@ -137,6 +139,20 @@ var seedTargets = []Target{
 	newTarget("core", "Subnet", reflect.TypeOf(core.Subnet{})),
 	newTarget("core", "Vcn", reflect.TypeOf(core.Vcn{})),
 	newTarget("core", "InstanceSummary", reflect.TypeOf(core.InstanceSummary{})),
+
+	// Ailanguage CRD support
+	newTarget("ailanguage", "CreateProjectDetails", reflect.TypeOf(ailanguage.CreateProjectDetails{})),
+	newTarget("ailanguage", "UpdateProjectDetails", reflect.TypeOf(ailanguage.UpdateProjectDetails{})),
+	newTarget("ailanguage", "Project", reflect.TypeOf(ailanguage.Project{})),
+	newTarget("ailanguage", "ProjectCollection", reflect.TypeOf(ailanguage.ProjectCollection{})),
+	newTarget("ailanguage", "ProjectSummary", reflect.TypeOf(ailanguage.ProjectSummary{})),
+
+	// Aivision CRD support
+	newTarget("aivision", "CreateProjectDetails", reflect.TypeOf(aivision.CreateProjectDetails{})),
+	newTarget("aivision", "UpdateProjectDetails", reflect.TypeOf(aivision.UpdateProjectDetails{})),
+	newTarget("aivision", "Project", reflect.TypeOf(aivision.Project{})),
+	newTarget("aivision", "ProjectCollection", reflect.TypeOf(aivision.ProjectCollection{})),
+	newTarget("aivision", "ProjectSummary", reflect.TypeOf(aivision.ProjectSummary{})),
 
 	// Analytics CRD support
 	newTarget("analytics", "CreateAnalyticsInstanceDetails", reflect.TypeOf(analytics.CreateAnalyticsInstanceDetails{})),

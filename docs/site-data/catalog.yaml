@@ -2,6 +2,32 @@
 # or release history alone.
 schemaVersion: v1alpha1
 packages:
+  - package: ailanguage
+    displayName: AI Language
+    summary: Manage OCI AI Language projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining AI Language resource families stay unpublished.
+    kindOverrides:
+      - group: ailanguage
+        kind: Project
+        summary: Manage OCI AI Language projects.
+
+  - package: aivision
+    displayName: AI Vision
+    summary: Manage OCI AI Vision projects from Kubernetes with an initial controller-backed Project rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Project while the remaining AI Vision resource families stay unpublished.
+    kindOverrides:
+      - group: aivision
+        kind: Project
+        summary: Manage OCI AI Vision projects.
+
   - package: analytics
     displayName: Analytics
     summary: Manage OCI Analytics instances from Kubernetes with a reviewed controller-backed runtime.

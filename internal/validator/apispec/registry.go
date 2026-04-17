@@ -3,6 +3,8 @@ package apispec
 import (
 	"reflect"
 
+	ailanguagev1beta1 "github.com/oracle/oci-service-operator/api/ailanguage/v1beta1"
+	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
@@ -486,6 +488,50 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "core.Vcn",
+			},
+		},
+	},
+	{
+		Name:       "AilanguageProject",
+		SpecType:   reflect.TypeOf(ailanguagev1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(ailanguagev1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "ailanguage.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "ailanguage.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "ailanguage.Project",
+			},
+			{
+				SDKStruct: "ailanguage.ProjectCollection",
+			},
+			{
+				SDKStruct: "ailanguage.ProjectSummary",
+			},
+		},
+	},
+	{
+		Name:       "AivisionProject",
+		SpecType:   reflect.TypeOf(aivisionv1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(aivisionv1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "aivision.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "aivision.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "aivision.Project",
+			},
+			{
+				SDKStruct: "aivision.ProjectCollection",
+			},
+			{
+				SDKStruct: "aivision.ProjectSummary",
 			},
 		},
 	},
