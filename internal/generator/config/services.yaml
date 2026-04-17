@@ -886,6 +886,30 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: DedicatedAiCluster
+          formalSpec: dedicatedaicluster
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and tune the displayName below before running e2e.
+              # Keeping spec.displayName empty disables pre-create reuse; setting it allows the
+              # controller to bind to an existing DedicatedAiCluster with the same compartmentId
+              # and displayName.
+              #
+              apiVersion: generativeai.oracle.com/v1beta1
+              kind: DedicatedAiCluster
+              metadata:
+                name: dedicatedaicluster-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: osok-dedicatedaicluster-sample
+                type: HOSTING
+                unitCount: 1
+                unitShape: SMALL_COHERE
+                description: OSOK DedicatedAiCluster sample
+                freeformTags:
+                  managed-by: oci-service-operator
 
   - service: identity
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity

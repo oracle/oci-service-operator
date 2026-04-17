@@ -1,0 +1,122 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - generativeai/DedicatedAiCluster
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired DedicatedAiCluster spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetDedicatedAiCluster;
+else (no)
+:Resolve an existing OCI resource through\nListDedicatedAiClusters using filters\ncompartment_id, display_name, id, state;
+:Create the OCI resource via\nCreateDedicatedAiCluster when no reusable\nmatch is found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteDedicatedAiCluster with\nrequired via GetDedicatedAiCluster or\nListDedicatedAiClusters to DELETED\nconfirmation;
+:Confirm deletion via GetDedicatedAiCluster or\nListDedicatedAiClusters until OCI reaches\nDELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id, type, unit_shape;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateDedicatedAiCluster only for\nmutable fields defined_tags, description,\ndisplay_name, freeform_tags (+1 more);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: generativeai
+slug: dedicatedaicluster
+kind: DedicatedAiCluster
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: defined_tags, description,
+display_name, freeform_tags (+1 more)
+reject before mutate: force-new fields
+compartment_id, type, unit_shape
+create-only fields: none
+list lookup:
+oci_generative_ai_dedicated_ai_clusters filters
+compartment_id, display_name, id, state
+conflicts: none
+open gaps: none
+The generated runtime binds by exact
+compartmentId plus displayName when displayName
+is provided and no OCI identifier is already
+tracked.
+A service-local wrapper skips pre-create reuse
+when displayName is empty and clears stale
+tracked IDs before recreating so create never
+falls back to compartment-wide matching.
+In-place updates are limited to displayName,
+description, unitCount, freeformTags, and
+definedTags; compartmentId, type, and unitShape
+require replacement in the checked-in runtime.
+Delete retains the finalizer until
+GetDedicatedAiCluster confirms DELETED or OCI no
+longer returns the resource.
+end note
+@enduml

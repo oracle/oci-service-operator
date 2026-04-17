@@ -64,6 +64,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyManualRuntime)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)
+	assertReviewedFamily(t, "generativeai/DedicatedAiCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "identity/Compartment", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "keymanagement/Vault", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "nosql/Table", APIErrorCoverageFamilyLegacyAdapter)
@@ -94,6 +95,15 @@ func TestReviewedAPIErrorCoverageRegistryNodePoolPlainSemantics(t *testing.T) {
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedSemantics(t, "containerengine/NodePool", deleteNotFoundGeneratedRuntime, retryableConflictGeneratedRuntime)
 	assertReviewedDeviation(t, "containerengine/NodePool", "request-body shaping")
+}
+
+func TestReviewedAPIErrorCoverageRegistryDedicatedAiClusterPlainSemantics(t *testing.T) {
+	t.Parallel()
+
+	assertReviewedFamily(t, "generativeai/DedicatedAiCluster", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedSemantics(t, "generativeai/DedicatedAiCluster", deleteNotFoundGeneratedRuntime, retryableConflictGeneratedRuntime)
+	assertReviewedDeviation(t, "generativeai/DedicatedAiCluster", "spec.displayName is empty")
+	assertReviewedDeviation(t, "generativeai/DedicatedAiCluster", "stale tracked identifiers")
 }
 
 func TestReviewedAPIErrorCoverageRegistryRedisWorkRequestSemantics(t *testing.T) {
