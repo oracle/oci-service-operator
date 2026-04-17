@@ -70,6 +70,8 @@ type AcceptedAgreementStatus struct {
 	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// The last applied agreement signature used when the accepted agreement was created or rebound.
+	AppliedSignature string `json:"appliedSignature,omitempty"`
 }
 
 // +kubebuilder:object:root=true

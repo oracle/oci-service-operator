@@ -110,6 +110,10 @@ spec:
                 description: The unique identifier for the terms of use agreement
                   itself.
                 type: string
+              appliedSignature:
+                description: The last applied agreement signature used when the accepted
+                  agreement was created or rebound.
+                type: string
               compartmentId:
                 description: The unique identifier for the compartment where the agreement
                   was accepted.

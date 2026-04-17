@@ -70,6 +70,7 @@ AcceptedAgreementStatus defines the observed state of AcceptedAgreement.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `agreementId` | The unique identifier for the terms of use agreement itself. | `string` | No | - | - |
+| `appliedSignature` | The last applied agreement signature used when the accepted agreement was created or rebound. | `string` | No | - | - |
 | `compartmentId` | The unique identifier for the compartment where the agreement was accepted. | `string` | No | - | - |
 | `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A display name for the accepted agreement. | `string` | No | - | - |

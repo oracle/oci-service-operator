@@ -1,0 +1,17 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: marketplace
+slug: acceptedagreement
+kind: AcceptedAgreement
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+  - failed
+notes:
+  - AcceptedAgreement reuses an existing OCI agreement before create by exact compartmentId, listingId, packageVersion, and agreementId match, with displayName narrowing when set.
+  - OCI accepted agreement responses do not expose lifecycle state, so successful create and update normalize directly to Active from the immediate response body.
+  - In-place updates are limited to displayName, definedTags, and freeformTags; agreementId, compartmentId, listingId, packageVersion, and signature are replacement-only.
+  - The controller mirrors the last applied signature at status.appliedSignature because OCI read models never return the signature needed for explicit drift checks.
+  - Delete retains the finalizer until DeleteAcceptedAgreement is followed by GetAcceptedAgreement returning not found.

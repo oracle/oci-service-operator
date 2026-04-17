@@ -30,43 +30,102 @@ type defaultAcceptedAgreementServiceClient struct {
 	generatedruntime.ServiceClient[*marketplacev1beta1.AcceptedAgreement]
 }
 
+func newAcceptedAgreementRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "marketplace",
+		FormalSlug:    "acceptedagreement",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"agreementId", "compartmentId", "displayName", "listingId", "packageVersion"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
+			ForceNew:      []string{"agreementId", "compartmentId", "listingId", "packageVersion", "signature"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ AcceptedAgreementServiceClient = defaultAcceptedAgreementServiceClient{}
 
 var newAcceptedAgreementServiceClient = func(manager *AcceptedAgreementServiceManager) AcceptedAgreementServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*marketplacev1beta1.AcceptedAgreement]{
-		Kind:    "AcceptedAgreement",
-		SDKName: "AcceptedAgreement",
-		Log:     manager.Log,
+		Kind:      "AcceptedAgreement",
+		SDKName:   "AcceptedAgreement",
+		Log:       manager.Log,
+		Semantics: newAcceptedAgreementRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &marketplacesdk.CreateAcceptedAgreementRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateAcceptedAgreement(ctx, *request.(*marketplacesdk.CreateAcceptedAgreementRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateAcceptedAgreementDetails", RequestName: "CreateAcceptedAgreementDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &marketplacesdk.GetAcceptedAgreementRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetAcceptedAgreement(ctx, *request.(*marketplacesdk.GetAcceptedAgreementRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "AcceptedAgreementId", RequestName: "acceptedAgreementId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &marketplacesdk.ListAcceptedAgreementsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListAcceptedAgreements(ctx, *request.(*marketplacesdk.ListAcceptedAgreementsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "ListingId", RequestName: "listingId", Contribution: "query", PreferResourceID: false}, {FieldName: "PackageVersion", RequestName: "packageVersion", Contribution: "query", PreferResourceID: false}, {FieldName: "AcceptedAgreementId", RequestName: "acceptedAgreementId", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &marketplacesdk.UpdateAcceptedAgreementRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateAcceptedAgreement(ctx, *request.(*marketplacesdk.UpdateAcceptedAgreementRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "AcceptedAgreementId", RequestName: "acceptedAgreementId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateAcceptedAgreementDetails", RequestName: "UpdateAcceptedAgreementDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &marketplacesdk.DeleteAcceptedAgreementRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteAcceptedAgreement(ctx, *request.(*marketplacesdk.DeleteAcceptedAgreementRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "AcceptedAgreementId", RequestName: "acceptedAgreementId", Contribution: "path", PreferResourceID: true}, {FieldName: "Signature", RequestName: "signature", Contribution: "query", PreferResourceID: false}},
 		},
 	}
 	if err != nil {

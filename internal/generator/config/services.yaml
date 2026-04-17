@@ -1352,6 +1352,42 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: AcceptedAgreement
+          formalSpec: acceptedagreement
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: marketplace/acceptedagreement
+          statusFields:
+            - name: AppliedSignature
+              type: string
+              tag: 'json:"appliedSignature,omitempty"'
+              comments:
+                - The last applied agreement signature used when the accepted agreement was created or rebound.
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Use ListingPackageAgreement or GetAgreement to obtain the agreementId and
+              # signature for the listing package version you want to accept.
+              # Update metadata.name and spec.displayName if you want to force a fresh create
+              # instead of binding to an existing accepted agreement for the same compartment,
+              # listing, package version, and agreement.
+              #
+              apiVersion: marketplace.oracle.com/v1beta1
+              kind: AcceptedAgreement
+              metadata:
+                name: acceptedagreement-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                listingId: ocid1.listing.oc1..exampleuniqueID
+                packageVersion: "1.0.0"
+                agreementId: ocid1.agreement.oc1..exampleuniqueID
+                signature: "<listing-package-agreement-signature>"
+                displayName: "acceptedagreement-sample"
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
