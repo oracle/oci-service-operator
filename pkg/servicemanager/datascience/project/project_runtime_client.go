@@ -52,7 +52,7 @@ func newProjectRuntimeConfig(
 		Kind:      "Project",
 		SDKName:   "Project",
 		Log:       log,
-		Semantics: newProjectRuntimeSemantics(),
+		Semantics: reviewedProjectRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &datasciencesdk.CreateProjectRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
@@ -91,55 +91,14 @@ func newProjectRuntimeConfig(
 	}
 }
 
-func newProjectRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "datascience",
-		FormalSlug:    "project",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "none",
-			Runtime:              "generatedruntime",
-			FormalClassification: "none",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ActiveStates: []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
-			ForceNew:      []string{"compartmentId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+func reviewedProjectRuntimeSemantics() *generatedruntime.Semantics {
+	semantics := newProjectRuntimeSemantics()
+	semantics.List = &generatedruntime.ListSemantics{
+		ResponseItemsField: "Items",
+		MatchFields:        []string{"compartmentId", "displayName", "id"},
 	}
+	semantics.AuxiliaryOperations = nil
+	return semantics
 }
 
 func projectCreateFields() []generatedruntime.RequestField {
