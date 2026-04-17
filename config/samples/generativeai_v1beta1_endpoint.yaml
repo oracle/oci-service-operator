@@ -3,8 +3,23 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the compartment, model, and DedicatedAiCluster OCIDs before running e2e.
+# The controller may bind an existing Endpoint only when the returned OCI list item
+# matches spec.compartmentId, spec.modelId, spec.dedicatedAiClusterId, and any
+# populated spec.displayName.
+#
 apiVersion: generativeai.oracle.com/v1beta1
 kind: Endpoint
 metadata:
   name: endpoint-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  modelId: ocid1.generativeaimodel.oc1..exampleuniqueID
+  dedicatedAiClusterId: ocid1.generativeaidedicatedaicluster.oc1..exampleuniqueID
+  displayName: osok-endpoint-sample
+  description: OSOK Endpoint sample
+  contentModerationConfig:
+    isEnabled: false
+  freeformTags:
+    managed-by: oci-service-operator

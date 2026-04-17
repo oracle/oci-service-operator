@@ -1,0 +1,30 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: generativeai
+slug: endpoint
+kind: Endpoint
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+notes:
+  - The generated runtime reuses an existing endpoint by listing on the required compartment scope, then matching returned items on modelId, dedicatedAiClusterId, and any populated displayName before create.
+  - Ready state maps to OCI ACTIVE, while CREATING, UPDATING, and DELETING keep the controller on the generated lifecycle requeue path.
+  - In-place updates are limited to contentModerationConfig, displayName, description, freeformTags, and definedTags; compartmentId, modelId, and dedicatedAiClusterId require replacement.
+  - Create and update use read-after-write follow-up through GetEndpoint before the controller reports steady state.
+  - Delete retains the finalizer until GetEndpoint confirms DELETED or OCI no longer returns the endpoint.
+repoAuthored:
+  mutation:
+    mutable:
+      - content_moderation_config
+      - defined_tags
+      - description
+      - display_name
+      - freeform_tags
+    forceNew:
+      - compartment_id
+      - dedicated_ai_cluster_id
+      - model_id

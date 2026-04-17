@@ -910,6 +910,30 @@ services:
                 description: OSOK DedicatedAiCluster sample
                 freeformTags:
                   managed-by: oci-service-operator
+        - kind: Endpoint
+          formalSpec: endpoint
+          sample:
+            body: |-
+              #
+              # Replace the compartment, model, and DedicatedAiCluster OCIDs before running e2e.
+              # The controller may bind an existing Endpoint only when the returned OCI list item
+              # matches spec.compartmentId, spec.modelId, spec.dedicatedAiClusterId, and any
+              # populated spec.displayName.
+              #
+              apiVersion: generativeai.oracle.com/v1beta1
+              kind: Endpoint
+              metadata:
+                name: endpoint-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                modelId: ocid1.generativeaimodel.oc1..exampleuniqueID
+                dedicatedAiClusterId: ocid1.generativeaidedicatedaicluster.oc1..exampleuniqueID
+                displayName: osok-endpoint-sample
+                description: OSOK Endpoint sample
+                contentModerationConfig:
+                  isEnabled: false
+                freeformTags:
+                  managed-by: oci-service-operator
 
   - service: identity
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
