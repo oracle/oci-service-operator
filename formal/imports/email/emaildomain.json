@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "emaildomain",
+  "kind": "EmailDomain",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_email_email_domain",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEmailDomain",
+        "requestType": "email.CreateEmailDomainRequest",
+        "responseType": "email.CreateEmailDomainResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEmailDomain",
+        "requestType": "email.GetEmailDomainRequest",
+        "responseType": "email.GetEmailDomainResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEmailDomains",
+        "requestType": "email.ListEmailDomainsRequest",
+        "responseType": "email.ListEmailDomainsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEmailDomain",
+        "requestType": "email.UpdateEmailDomainRequest",
+        "responseType": "email.UpdateEmailDomainResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEmailDomain",
+        "requestType": "email.DeleteEmailDomainRequest",
+        "responseType": "email.DeleteEmailDomainResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "name"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_email_email_domains",
+    "collectionField": "email_domains",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "id",
+      "lifecycle_state",
+      "name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/emaildomain/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/emaildomain/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seed stub; run formal-import to refresh provider facts."
+  ]
+}

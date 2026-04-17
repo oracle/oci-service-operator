@@ -16,9 +16,17 @@ This page is generated from the checked-in sample manifest at `config/samples/em
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the domain and compartment OCID below before running e2e.
+# Update metadata.name and spec.name together if you want to force a fresh create instead of
+# binding to an existing EmailDomain with the same name in the same compartment.
+#
 apiVersion: email.oracle.com/v1beta1
 kind: EmailDomain
 metadata:
   name: emaildomain-sample
-spec: {}
+spec:
+  name: mail.example.com
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  description: OSOK EmailDomain sample
 ```
