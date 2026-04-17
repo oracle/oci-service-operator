@@ -16,9 +16,18 @@ This page is generated from the checked-in sample manifest at `config/samples/em
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the compartment OCID and sender email address below before running e2e.
+# Update metadata.name if you want to force a fresh create instead of reusing an
+# existing Sender with the same compartmentId and emailAddress.
+#
 apiVersion: email.oracle.com/v1beta1
 kind: Sender
 metadata:
   name: sender-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  emailAddress: sender@example.com
+  freeformTags:
+    managed-by: oci-service-operator
 ```

@@ -30,43 +30,102 @@ type defaultSenderServiceClient struct {
 	generatedruntime.ServiceClient[*emailv1beta1.Sender]
 }
 
+func newSenderRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "email",
+		FormalSlug:    "sender",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "emailAddress", "lifecycleState"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "freeformTags"},
+			ForceNew:      []string{"compartmentId", "emailAddress"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ SenderServiceClient = defaultSenderServiceClient{}
 
 var newSenderServiceClient = func(manager *SenderServiceManager) SenderServiceClient {
 	sdkClient, err := emailsdk.NewEmailClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*emailv1beta1.Sender]{
-		Kind:    "Sender",
-		SDKName: "Sender",
-		Log:     manager.Log,
+		Kind:      "Sender",
+		SDKName:   "Sender",
+		Log:       manager.Log,
+		Semantics: newSenderRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &emailsdk.CreateSenderRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateSender(ctx, *request.(*emailsdk.CreateSenderRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateSenderDetails", RequestName: "CreateSenderDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &emailsdk.GetSenderRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetSender(ctx, *request.(*emailsdk.GetSenderRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "SenderId", RequestName: "senderId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &emailsdk.ListSendersRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListSenders(ctx, *request.(*emailsdk.ListSendersRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Domain", RequestName: "domain", Contribution: "query", PreferResourceID: false}, {FieldName: "EmailAddress", RequestName: "emailAddress", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &emailsdk.UpdateSenderRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateSender(ctx, *request.(*emailsdk.UpdateSenderRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "SenderId", RequestName: "senderId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSenderDetails", RequestName: "UpdateSenderDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &emailsdk.DeleteSenderRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteSender(ctx, *request.(*emailsdk.DeleteSenderRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "SenderId", RequestName: "senderId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

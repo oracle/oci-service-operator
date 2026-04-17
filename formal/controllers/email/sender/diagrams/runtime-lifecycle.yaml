@@ -1,0 +1,17 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: email
+slug: sender
+kind: Sender
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+  - deleted
+notes:
+  - The generated runtime reuses an existing sender by exact compartmentId plus emailAddress match before create.
+  - Ready state maps to OCI ACTIVE.
+  - In-place updates are limited to freeformTags and definedTags; compartmentId and emailAddress require replacement.
+  - Create and update use read-after-write follow-up through GetSender before the controller reports steady state.
+  - Delete retains the finalizer until GetSender confirms DELETED or OCI no longer returns the sender.

@@ -761,6 +761,25 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Sender
+          formalSpec: sender
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID and sender email address below before running e2e.
+              # Update metadata.name if you want to force a fresh create instead of reusing an
+              # existing Sender with the same compartmentId and emailAddress.
+              #
+              apiVersion: email.oracle.com/v1beta1
+              kind: Sender
+              metadata:
+                name: sender-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                emailAddress: sender@example.com
+                freeformTags:
+                  managed-by: oci-service-operator
 
   - service: events
     sdkPackage: github.com/oracle/oci-go-sdk/v65/events

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "email",
+  "kind": "Sender",
+  "formalSlug": "sender",
+  "providerResource": "oci_email_sender",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/email_sender",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/email_sender",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/email/sender/page.html",
+  "bodySHA256": "9fa1fd11f9fc5e3a5305600938693530cc7f9a778a3a43c8479917aced237937",
+  "bodyBytes": 560,
+  "fixtureBodyPath": "7.22.0/email/sender/page.html"
+}
