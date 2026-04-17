@@ -342,6 +342,85 @@ func TestImportSkipsScaffoldRows(t *testing.T) {
 	}
 }
 
+func TestImportPreservesRepoAuthoredExcludedMutationAndListLookup(t *testing.T) {
+	formalRoot := writeFormalRoot(t, "seeded", "oci_widget_widget")
+	providerRoot := writeProviderFixture(t)
+	importPath := filepath.Join(formalRoot, "imports", "widget", "widget.json")
+
+	doc, err := loadImport(importPath)
+	if err != nil {
+		t.Fatalf("loadImport(%q) failed: %v", importPath, err)
+	}
+	doc.Operations.List = []operationBinding{{
+		Operation:    "ListRepoWidgets",
+		RequestType:  "sdkwidget.ListRepoWidgetsRequest",
+		ResponseType: "sdkwidget.ListRepoWidgetsResponse",
+	}}
+	doc.Mutation = mutation{
+		Mutable:       []string{"repo_display_name"},
+		ForceNew:      []string{"repo_compartment_id"},
+		ConflictsWith: map[string][]string{"repo_display_name": {"repo_compartment_id"}},
+	}
+	doc.ListLookup = &listLookup{
+		Datasource:         "repo_widget_widgets",
+		CollectionField:    "widgets",
+		ResponseItemsField: "Items",
+		FilterFields:       []string{"repo_name", "repo_state"},
+	}
+	doc.Boundary.ExcludedSemantics = append(doc.Boundary.ExcludedSemantics, "list-lookup", "mutation-policy")
+	if err := writeJSONFile(importPath, doc); err != nil {
+		t.Fatalf("writeJSONFile(%q) failed: %v", importPath, err)
+	}
+
+	if _, err := Import(ImportOptions{
+		Root:             formalRoot,
+		ProviderPath:     providerRoot,
+		ProviderRevision: "test-revision",
+	}); err != nil {
+		t.Fatalf("Import() returned error: %v", err)
+	}
+
+	doc, err = loadImport(importPath)
+	if err != nil {
+		t.Fatalf("loadImport(%q) after refresh failed: %v", importPath, err)
+	}
+
+	assertBindings(t, doc.Operations.List, []operationBinding{{
+		Operation:    "ListRepoWidgets",
+		RequestType:  "sdkwidget.ListRepoWidgetsRequest",
+		ResponseType: "sdkwidget.ListRepoWidgetsResponse",
+	}})
+	assertStrings(t, doc.Mutation.Mutable, []string{"repo_display_name"})
+	assertStrings(t, doc.Mutation.ForceNew, []string{"repo_compartment_id"})
+	assertStrings(t, doc.Mutation.ConflictsWith["repo_display_name"], []string{"repo_compartment_id"})
+	if doc.ListLookup == nil {
+		t.Fatal("doc.ListLookup = nil, want preserved repo-authored lookup")
+	}
+	if doc.ListLookup.Datasource != "repo_widget_widgets" {
+		t.Fatalf("doc.ListLookup.Datasource = %q, want %q", doc.ListLookup.Datasource, "repo_widget_widgets")
+	}
+	if doc.ListLookup.CollectionField != "widgets" {
+		t.Fatalf("doc.ListLookup.CollectionField = %q, want %q", doc.ListLookup.CollectionField, "widgets")
+	}
+	if doc.ListLookup.ResponseItemsField != "Items" {
+		t.Fatalf("doc.ListLookup.ResponseItemsField = %q, want %q", doc.ListLookup.ResponseItemsField, "Items")
+	}
+	assertStrings(t, doc.ListLookup.FilterFields, []string{"repo_name", "repo_state"})
+
+	assertBindings(t, doc.Operations.Update, []operationBinding{
+		{
+			Operation:    "ChangeWidgetCompartment",
+			RequestType:  "sdkwidget.ChangeWidgetCompartmentRequest",
+			ResponseType: "sdkwidget.ChangeWidgetCompartmentResponse",
+		},
+		{
+			Operation:    "UpdateWidget",
+			RequestType:  "sdkwidget.UpdateWidgetRequest",
+			ResponseType: "sdkwidget.UpdateWidgetResponse",
+		},
+	})
+}
+
 func TestNormalizeResponseItemsField(t *testing.T) {
 	if got := normalizeResponseItemsField(""); got != "Items" {
 		t.Fatalf("normalizeResponseItemsField(\"\") = %q, want %q", got, "Items")
@@ -847,7 +926,15 @@ func WidgetsDataSource() *schema.Resource {
 			"widgets": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     tfresource.GetDataSourceItemSchema(WidgetResource()),
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"items": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem:     tfresource.GetDataSourceItemSchema(WidgetResource()),
+						},
+					},
+				},
 			},
 		},
 	}

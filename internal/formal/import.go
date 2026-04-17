@@ -206,6 +206,14 @@ func Import(opts ImportOptions) (ImportReport, error) {
 		}
 
 		updated := currentDoc
+		excludedSemantics := stringSet{}
+		for _, semantic := range currentDoc.Boundary.ExcludedSemantics {
+			semantic = strings.TrimSpace(semantic)
+			if semantic == "" {
+				continue
+			}
+			excludedSemantics[semantic] = struct{}{}
+		}
 		updated.SchemaVersion = currentSchemaVersion
 		updated.Surface = "provider-facts"
 		updated.Service = row.Service
@@ -214,10 +222,19 @@ func Import(opts ImportOptions) (ImportReport, error) {
 		updated.SourceRef = report.SourceName
 		updated.Operations = facts.Operations
 		updated.Lifecycle = facts.Lifecycle
-		updated.Mutation = facts.Mutation
+		if excludedSemantics.has("mutation-policy") {
+			updated.Mutation = currentDoc.Mutation
+		} else {
+			updated.Mutation = facts.Mutation
+		}
 		updated.Hooks = facts.Hooks
 		updated.DeleteConfirmation = facts.DeleteConfirmation
-		updated.ListLookup = facts.ListLookup
+		if excludedSemantics.has("list-lookup") {
+			updated.Operations.List = currentDoc.Operations.List
+			updated.ListLookup = currentDoc.ListLookup
+		} else {
+			updated.ListLookup = facts.ListLookup
+		}
 		updated.Boundary.ProviderFactsOnly = true
 		updated.Boundary.RepoAuthoredSpecPath = row.SpecPath
 		updated.Boundary.RepoAuthoredLogicGapsPath = row.LogicPath
@@ -421,12 +438,15 @@ func collectListLookups(registrations []providerRegistration) (map[string]listLo
 		readHandler := resourceHandlerName(resourceLit, "read")
 		readFn := reg.Package.Funcs[readHandler]
 		if readFn == nil {
-			return nil, fmt.Errorf("%s: datasource %s is missing read handler %s", reg.Package.PkgPath, reg.Constructor, readHandler)
+			continue
 		}
 		crudType, _ := crudTypeFromHandler(readFn)
+		if crudType == "" {
+			continue
+		}
 		methods := reg.Package.Methods[crudType]
 		if methods == nil {
-			return nil, fmt.Errorf("%s: datasource %s is missing CRUD methods for %s", reg.Package.PkgPath, reg.Constructor, crudType)
+			continue
 		}
 
 		getClosure := methodClosure(methods, "Get")
@@ -434,7 +454,7 @@ func collectListLookups(registrations []providerRegistration) (map[string]listLo
 
 		bindings := collectOperationBindings(getClosure)
 		if len(bindings) == 0 {
-			return nil, fmt.Errorf("%s: datasource %s did not expose a list operation binding", reg.Package.PkgPath, reg.Constructor)
+			continue
 		}
 
 		responseItemsField := findResponseItemsField(setDataClosure)
@@ -646,43 +666,63 @@ func extractSchemaMap(resourceLit *ast.CompositeLit) map[string]ast.Expr {
 }
 
 func findListCollection(schemaMap map[string]ast.Expr) (string, string) {
-	var collectionField string
-	var resourceConstructor string
-	for fieldName, fieldExpr := range schemaMap {
-		schemaLit := schemaLiteral(fieldExpr)
-		if schemaLit == nil {
-			continue
-		}
-		for _, elt := range schemaLit.Elts {
-			keyValue, ok := elt.(*ast.KeyValueExpr)
-			if !ok || identName(keyValue.Key) != "Elem" {
-				continue
-			}
-			call, ok := unparen(keyValue.Value).(*ast.CallExpr)
-			if !ok {
-				continue
-			}
-			selector, ok := call.Fun.(*ast.SelectorExpr)
-			if !ok {
-				continue
-			}
-			pkgIdent, ok := selector.X.(*ast.Ident)
-			if !ok || pkgIdent.Name != "tfresource" || selector.Sel.Name != "GetDataSourceItemSchema" || len(call.Args) != 1 {
-				continue
-			}
-			resourceCall, ok := call.Args[0].(*ast.CallExpr)
-			if !ok {
-				continue
-			}
-			constructor := identName(resourceCall.Fun)
-			if constructor == "" {
-				continue
-			}
-			collectionField = fieldName
-			resourceConstructor = constructor
+	var fieldNames []string
+	for fieldName := range schemaMap {
+		fieldNames = append(fieldNames, fieldName)
+	}
+	sort.Strings(fieldNames)
+
+	for _, fieldName := range fieldNames {
+		constructor := findListItemResourceConstructor(schemaLiteral(schemaMap[fieldName]))
+		if constructor != "" {
+			return fieldName, constructor
 		}
 	}
-	return collectionField, resourceConstructor
+	return "", ""
+}
+
+func findListItemResourceConstructor(schemaLit *ast.CompositeLit) string {
+	if schemaLit == nil {
+		return ""
+	}
+
+	for _, elt := range schemaLit.Elts {
+		keyValue, ok := elt.(*ast.KeyValueExpr)
+		if !ok || identName(keyValue.Key) != "Elem" {
+			continue
+		}
+		if constructor := dataSourceItemSchemaConstructor(keyValue.Value); constructor != "" {
+			return constructor
+		}
+		nestedSchema := nestedSchemaMap(keyValue.Value)
+		if len(nestedSchema) == 0 {
+			continue
+		}
+		if _, constructor := findListCollection(nestedSchema); constructor != "" {
+			return constructor
+		}
+	}
+	return ""
+}
+
+func dataSourceItemSchemaConstructor(expr ast.Expr) string {
+	call, ok := unparen(expr).(*ast.CallExpr)
+	if !ok {
+		return ""
+	}
+	selector, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return ""
+	}
+	pkgIdent, ok := selector.X.(*ast.Ident)
+	if !ok || pkgIdent.Name != "tfresource" || selector.Sel.Name != "GetDataSourceItemSchema" || len(call.Args) != 1 {
+		return ""
+	}
+	resourceCall, ok := unparen(call.Args[0]).(*ast.CallExpr)
+	if !ok {
+		return ""
+	}
+	return identName(resourceCall.Fun)
 }
 
 func resourceHandlerName(resourceLit *ast.CompositeLit, operation string) string {

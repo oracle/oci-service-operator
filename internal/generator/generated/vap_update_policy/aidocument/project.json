@@ -18,12 +18,19 @@
   },
   "update": {
     "allowInPlacePaths": [
-      "compartmentId",
       "definedTags",
       "description",
       "displayName",
       "freeformTags"
     ],
-    "denyRules": []
+    "denyRules": [
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
   }
 }
