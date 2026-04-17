@@ -74,3 +74,4 @@ psql	workrequestlog	WorkRequestLog	scaffold	repo-authored-semantics	imports/psql
 queue	queue	Queue	seeded	repo-authored-semantics	imports/queue/queue.json	controllers/queue/queue/spec.cfg	controllers/queue/queue/logic-gaps.md	controllers/queue/queue/diagrams
 redis	rediscluster	RedisCluster	seeded	repo-authored-semantics	imports/redis/rediscluster.json	controllers/redis/rediscluster/spec.cfg	controllers/redis/rediscluster/logic-gaps.md	controllers/redis/rediscluster/diagrams
 streaming	stream	Stream	seeded	repo-authored-semantics	imports/streaming/stream.json	controllers/streaming/stream/spec.cfg	controllers/streaming/stream/logic-gaps.md	controllers/streaming/stream/diagrams
+usageapi	customtable	CustomTable	seeded	repo-authored-semantics	imports/usageapi/customtable.json	controllers/usageapi/customtable/spec.cfg	controllers/usageapi/customtable/logic-gaps.md	controllers/usageapi/customtable/diagrams

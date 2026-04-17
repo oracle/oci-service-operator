@@ -30,43 +30,102 @@ type defaultCustomTableServiceClient struct {
 	generatedruntime.ServiceClient[*usageapiv1beta1.CustomTable]
 }
 
+func newCustomTableRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "usageapi",
+		FormalSlug:    "customtable",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"savedCustomTable.columnGroupBy", "savedCustomTable.compartmentDepth", "savedCustomTable.displayName", "savedCustomTable.groupByTag", "savedCustomTable.rowGroupBy", "savedCustomTable.version"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"savedCustomTable"},
+			ForceNew:      []string{"compartmentId", "savedReportId"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ CustomTableServiceClient = defaultCustomTableServiceClient{}
 
 var newCustomTableServiceClient = func(manager *CustomTableServiceManager) CustomTableServiceClient {
 	sdkClient, err := usageapisdk.NewUsageapiClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*usageapiv1beta1.CustomTable]{
-		Kind:    "CustomTable",
-		SDKName: "CustomTable",
-		Log:     manager.Log,
+		Kind:      "CustomTable",
+		SDKName:   "CustomTable",
+		Log:       manager.Log,
+		Semantics: newCustomTableRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &usageapisdk.CreateCustomTableRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateCustomTable(ctx, *request.(*usageapisdk.CreateCustomTableRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateCustomTableDetails", RequestName: "CreateCustomTableDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &usageapisdk.GetCustomTableRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetCustomTable(ctx, *request.(*usageapisdk.GetCustomTableRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CustomTableId", RequestName: "customTableId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &usageapisdk.ListCustomTablesRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListCustomTables(ctx, *request.(*usageapisdk.ListCustomTablesRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "SavedReportId", RequestName: "savedReportId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &usageapisdk.UpdateCustomTableRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateCustomTable(ctx, *request.(*usageapisdk.UpdateCustomTableRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CustomTableId", RequestName: "customTableId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateCustomTableDetails", RequestName: "UpdateCustomTableDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &usageapisdk.DeleteCustomTableRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteCustomTable(ctx, *request.(*usageapisdk.DeleteCustomTableRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CustomTableId", RequestName: "customTableId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {

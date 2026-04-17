@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageapi",
+  "slug": "customtable",
+  "kind": "CustomTable",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_usage_custom_table",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateCustomTable",
+        "requestType": "usageapi.CreateCustomTableRequest",
+        "responseType": "usageapi.CreateCustomTableResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetCustomTable",
+        "requestType": "usageapi.GetCustomTableRequest",
+        "responseType": "usageapi.GetCustomTableResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListCustomTables",
+        "requestType": "usageapi.ListCustomTablesRequest",
+        "responseType": "usageapi.ListCustomTablesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateCustomTable",
+        "requestType": "usageapi.UpdateCustomTableRequest",
+        "responseType": "usageapi.UpdateCustomTableResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteCustomTable",
+        "requestType": "usageapi.DeleteCustomTableRequest",
+        "responseType": "usageapi.DeleteCustomTableResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "saved_custom_table"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "saved_report_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_usage_custom_tables",
+    "collectionField": "custom_tables",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "saved_custom_table.display_name",
+      "saved_custom_table.row_group_by",
+      "saved_custom_table.column_group_by",
+      "saved_custom_table.group_by_tag",
+      "saved_custom_table.compartment_depth",
+      "saved_custom_table.version"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageapi/customtable/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageapi/customtable/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "synchronous-write-success",
+      "status-projection",
+      "mutation-policy",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Seeded from the OCI Usage API CustomTable SDK surface; refresh with formal-import when a matching terraform-provider-oci checkout is available."
+  ]
+}

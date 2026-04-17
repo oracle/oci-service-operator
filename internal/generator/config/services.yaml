@@ -1896,6 +1896,35 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: CustomTable
+          formalSpec: customtable
+          sample:
+            body: |-
+              #
+              # Replace the OCI identifiers below before running e2e.
+              # Update metadata.name and spec.savedCustomTable.displayName if you want to force a
+              # fresh create instead of binding to an existing CustomTable with the same saved
+              # report scope and rendered table shape.
+              #
+              apiVersion: usageapi.oracle.com/v1beta1
+              kind: CustomTable
+              metadata:
+                name: customtable-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                savedReportId: ocid1.savedreport.oc1..exampleuniqueID
+                savedCustomTable:
+                  displayName: "customtable-sample"
+                  rowGroupBy:
+                    - compartmentId
+                  columnGroupBy:
+                    - service
+                  groupByTag:
+                    - namespace: oracle
+                      key: createdBy
+                  compartmentDepth: 2
+                  version: 1
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

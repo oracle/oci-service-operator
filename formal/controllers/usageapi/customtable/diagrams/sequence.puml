@@ -1,0 +1,139 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - usageapi/CustomTable
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue CustomTable reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired CustomTable
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetCustomTable
+else tracked identity is missing
+ServiceManager -> OCI: ListCustomTables(filters:\nsaved_custom_table.display_name,\nsaved_custom_table.row_group_by,\nsaved_custom_table.column_group_by,\nsaved_custom_table.group_by_tag (+2\nmore))
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateCustomTable
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetCustomTable
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteCustomTable
+ServiceManager -> OCI: confirm delete via GetCustomTable or\nListCustomTables
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+saved_custom_table
+Reject before mutate: force-new fields
+compartment_id, saved_report_id
+Lookup filters:
+saved_custom_table.display_name,
+saved_custom_table.row_group_by,
+saved_custom_table.column_group_by,
+saved_custom_table.group_by_tag (+2
+more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateCustomTable only for\nmutable fields saved_custom_table
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on terminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: usageapi
+slug: customtable
+kind: CustomTable
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete none
+supported drift: saved_custom_table
+reject before mutate: force-new fields
+compartment_id, saved_report_id
+create-only fields: none
+list lookup: oci_usage_custom_tables filters
+saved_custom_table.display_name,
+saved_custom_table.row_group_by,
+saved_custom_table.column_group_by,
+saved_custom_table.group_by_tag (+2 more)
+conflicts: none
+open gaps: none
+The generated runtime reuses an existing custom
+table by listing on the required compartmentId
+and savedReportId request scope, then matching
+the returned savedCustomTable payload on
+displayName and any populated row, column, tag,
+depth, or version fields.
+The SDK surface does not expose lifecycle states
+on CustomTable bodies, so create and update
+settle through read-after-write GetCustomTable
+confirmation instead of lifecycle polling; a
+service-local wrapper converts that confirmed
+reread into settled Active status.
+In-place updates are limited to
+savedCustomTable; compartmentId and
+savedReportId require replacement and are
+rejected before OCI mutation.
+Delete retains the finalizer until
+GetCustomTable confirms the custom table no
+longer exists.
+end note
+@enduml
