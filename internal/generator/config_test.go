@@ -1237,8 +1237,9 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "aivision", "analytics", "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "containerengine", "containerinstances", "identity", "core", "dataflow", "database", "mysql", "objectstorage", "opensearch", "psql", "streaming", "redis")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
+	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
 	assertFormalSpecFor(t, services["aivision"], "Project", "project")
 	assertFormalSpecFor(t, services["analytics"], "AnalyticsInstance", "analyticsinstance")
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
