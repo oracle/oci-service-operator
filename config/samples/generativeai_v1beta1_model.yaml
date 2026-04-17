@@ -3,8 +3,28 @@
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the compartment, base model, and DedicatedAiCluster OCIDs before running e2e.
+# Keeping spec.displayName empty disables pre-create reuse; setting it allows the
+# controller to bind an existing custom Model only when the returned OCI list item
+# matches spec.compartmentId, spec.baseModelId, spec.fineTuneDetails.dedicatedAiClusterId,
+# and any populated spec.displayName.
+#
 apiVersion: generativeai.oracle.com/v1beta1
 kind: Model
 metadata:
   name: model-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  baseModelId: ocid1.generativeaimodel.oc1..exampleuniqueID
+  displayName: osok-model-sample
+  description: OSOK Model sample
+  fineTuneDetails:
+    dedicatedAiClusterId: ocid1.generativeaidedicatedaicluster.oc1..exampleuniqueID
+    trainingDataset:
+      datasetType: OBJECT_STORAGE
+      namespaceName: object-storage-namespace
+      bucketName: generativeai-training-data
+      objectName: datasets/model-training.jsonl
+  freeformTags:
+    managed-by: oci-service-operator

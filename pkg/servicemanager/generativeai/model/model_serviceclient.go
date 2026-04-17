@@ -30,43 +30,102 @@ type defaultModelServiceClient struct {
 	generatedruntime.ServiceClient[*generativeaiv1beta1.Model]
 }
 
+func newModelRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "generativeai",
+		FormalSlug:    "model",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"CREATING"},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"DELETING"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"baseModelId", "compartmentId", "displayName", "fineTuneDetails.dedicatedAiClusterId", "id", "state"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "vendor", "version"},
+			ForceNew:      []string{"baseModelId", "compartmentId", "fineTuneDetails"},
+			ConflictsWith: map[string][]string{},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ ModelServiceClient = defaultModelServiceClient{}
 
 var newModelServiceClient = func(manager *ModelServiceManager) ModelServiceClient {
 	sdkClient, err := generativeaisdk.NewGenerativeAiClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*generativeaiv1beta1.Model]{
-		Kind:    "Model",
-		SDKName: "Model",
-		Log:     manager.Log,
+		Kind:      "Model",
+		SDKName:   "Model",
+		Log:       manager.Log,
+		Semantics: newModelRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &generativeaisdk.CreateModelRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateModel(ctx, *request.(*generativeaisdk.CreateModelRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CreateModelDetails", RequestName: "CreateModelDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &generativeaisdk.GetModelRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetModel(ctx, *request.(*generativeaisdk.GetModelRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ModelId", RequestName: "modelId", Contribution: "path", PreferResourceID: true}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &generativeaisdk.ListModelsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListModels(ctx, *request.(*generativeaisdk.ListModelsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Vendor", RequestName: "vendor", Contribution: "query", PreferResourceID: false}, {FieldName: "Capability", RequestName: "capability", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &generativeaisdk.UpdateModelRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateModel(ctx, *request.(*generativeaisdk.UpdateModelRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ModelId", RequestName: "modelId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateModelDetails", RequestName: "UpdateModelDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &generativeaisdk.DeleteModelRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteModel(ctx, *request.(*generativeaisdk.DeleteModelRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "ModelId", RequestName: "modelId", Contribution: "path", PreferResourceID: true}},
 		},
 	}
 	if err != nil {
