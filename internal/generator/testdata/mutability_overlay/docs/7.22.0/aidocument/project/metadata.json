@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "aidocument",
+  "kind": "Project",
+  "formalSlug": "project",
+  "providerResource": "oci_ai_document_project",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/ai_document_project",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/ai_document_project",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/aidocument/project/page.html",
+  "bodySHA256": "32d811076d8be449e31938f8c237d8c176c115ff7e657ca6fa15998eb89b8d35",
+  "bodyBytes": 996,
+  "fixtureBodyPath": "7.22.0/aidocument/project/page.html"
+}

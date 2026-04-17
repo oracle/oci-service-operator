@@ -42,6 +42,7 @@ services:
         strategy: none
       resources:
         - kind: Project
+          formalSpec: project
           async:
             strategy: lifecycle
             runtime: generatedruntime
