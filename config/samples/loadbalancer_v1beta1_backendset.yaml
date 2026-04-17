@@ -7,4 +7,12 @@ apiVersion: loadbalancer.oracle.com/v1beta1
 kind: BackendSet
 metadata:
   name: backendset-sample
-spec: {}
+spec:
+  loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+  name: example_backend_set
+  policy: ROUND_ROBIN
+  healthChecker:
+    protocol: HTTP
+    urlPath: /healthz
+    port: 8080
+    returnCode: 200

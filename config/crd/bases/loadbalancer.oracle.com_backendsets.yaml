@@ -244,6 +244,10 @@ spec:
                       Example: `/example`
                     type: string
                 type: object
+              loadBalancerId:
+                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                  of the load balancer that owns this backend set.
+                type: string
               name:
                 description: |-
                   A friendly name for the backend set. It must be unique and it cannot be changed.
@@ -366,6 +370,7 @@ spec:
                 type: object
             required:
             - healthChecker
+            - loadBalancerId
             - name
             - policy
             type: object
@@ -560,6 +565,10 @@ spec:
                       Example: `/example`
                     type: string
                 type: object
+              loadBalancerId:
+                description: The bound load balancer OCID used to address this backend
+                  set.
+                type: string
               name:
                 description: |-
                   A friendly name for the backend set. It must be unique and it cannot be changed.

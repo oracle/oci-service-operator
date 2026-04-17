@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "loadbalancer",
+  "kind": "BackendSet",
+  "formalSlug": "backendset",
+  "providerResource": "oci_load_balancer_backend_set",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/load_balancer_backend_set",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/load_balancer_backend_set",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/loadbalancer/backendset/page.html",
+  "bodySHA256": "64ea1613e58d3c0a22f98263869450a66333e00c0a0227e66ed36634746fb851",
+  "bodyBytes": 1120,
+  "fixtureBodyPath": "7.22.0/loadbalancer/backendset/page.html"
+}

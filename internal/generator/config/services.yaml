@@ -1220,6 +1220,37 @@ services:
                 backup: false
                 drain: false
                 offline: false
+        - kind: BackendSet
+          formalSpec: backendset
+          specFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId"'
+              comments:
+                - "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this backend set."
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: LoadBalancerId
+              type: string
+              tag: 'json:"loadBalancerId,omitempty"'
+              comments:
+                - The bound load balancer OCID used to address this backend set.
+          sample:
+            body: |-
+              apiVersion: loadbalancer.oracle.com/v1beta1
+              kind: BackendSet
+              metadata:
+                name: backendset-sample
+              spec:
+                loadBalancerId: ocid1.loadbalancer.oc1..<unique_ID>
+                name: example_backend_set
+                policy: ROUND_ROBIN
+                healthChecker:
+                  protocol: HTTP
+                  urlPath: /healthz
+                  port: 8080
+                  returnCode: 200
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging

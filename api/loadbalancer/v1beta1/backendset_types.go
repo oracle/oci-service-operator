@@ -35,6 +35,9 @@ type BackendSetSpec struct {
 	SessionPersistenceConfiguration BackendSetSessionPersistenceConfiguration `json:"sessionPersistenceConfiguration,omitempty"`
 	// +kubebuilder:validation:Optional
 	LbCookieSessionPersistenceConfiguration BackendSetLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this backend set.
+	// +kubebuilder:validation:Required
+	LoadBalancerId string `json:"loadBalancerId"`
 }
 
 // BackendSetHealthChecker defines nested fields for BackendSet.HealthChecker.
@@ -299,6 +302,8 @@ type BackendSetStatus struct {
 	SslConfiguration                        BackendSetSslConfiguration                        `json:"sslConfiguration,omitempty"`
 	SessionPersistenceConfiguration         BackendSetSessionPersistenceConfiguration         `json:"sessionPersistenceConfiguration,omitempty"`
 	LbCookieSessionPersistenceConfiguration BackendSetLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`
+	// The bound load balancer OCID used to address this backend set.
+	LoadBalancerId string `json:"loadBalancerId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

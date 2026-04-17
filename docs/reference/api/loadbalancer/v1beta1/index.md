@@ -267,6 +267,7 @@ BackendSetSpec defines the desired state of BackendSet.
 | [`backends`](#kind-backendset-spec-backends) | - | `list[object]` | No | - | - |
 | [`healthChecker`](#kind-backendset-spec-healthchecker) | BackendSetHealthChecker defines nested fields for BackendSet.HealthChecker. | `object` | Yes | - | - |
 | [`lbCookieSessionPersistenceConfiguration`](#kind-backendset-spec-lbcookiesessionpersistenceconfiguration) | BackendSetLbCookieSessionPersistenceConfiguration defines nested fields for BackendSet.LbCookieSessionPersistenceConfiguration. | `object` | No | - | - |
+| `loadBalancerId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer that owns this backend set. | `string` | Yes | - | - |
 | `name` | A friendly name for the backend set. It must be unique and it cannot be changed. Valid backend set names include only alphanumeric characters, dashes, and underscores. Backend set names cannot contain spaces. Avoid entering confidential information. Example: `example_backend_set` | `string` | Yes | - | - |
 | `policy` | The load balancer policy for the backend set. To get a list of available policies, use the ListPolicies operation. Example: `LEAST_CONNECTIONS` | `string` | Yes | - | - |
 | [`sessionPersistenceConfiguration`](#kind-backendset-spec-sessionpersistenceconfiguration) | BackendSetSessionPersistenceConfiguration defines nested fields for BackendSet.SessionPersistenceConfiguration. | `object` | No | - | - |
@@ -364,6 +365,7 @@ BackendSetStatus defines the observed state of BackendSet.
 | [`backends`](#kind-backendset-status-backends) | - | `list[object]` | No | - | - |
 | [`healthChecker`](#kind-backendset-status-healthchecker) | BackendSetHealthChecker defines nested fields for BackendSet.HealthChecker. | `object` | No | - | - |
 | [`lbCookieSessionPersistenceConfiguration`](#kind-backendset-status-lbcookiesessionpersistenceconfiguration) | BackendSetLbCookieSessionPersistenceConfiguration defines nested fields for BackendSet.LbCookieSessionPersistenceConfiguration. | `object` | No | - | - |
+| `loadBalancerId` | The bound load balancer OCID used to address this backend set. | `string` | No | - | - |
 | `name` | A friendly name for the backend set. It must be unique and it cannot be changed. Valid backend set names include only alphanumeric characters, dashes, and underscores. Backend set names cannot contain spaces. Avoid entering confidential information. Example: `example_backend_set` | `string` | No | - | - |
 | `policy` | The load balancer policy for the backend set. To get a list of available policies, use the ListPolicies operation. Example: `LEAST_CONNECTIONS` | `string` | No | - | - |
 | [`sessionPersistenceConfiguration`](#kind-backendset-status-sessionpersistenceconfiguration) | BackendSetSessionPersistenceConfiguration defines nested fields for BackendSet.SessionPersistenceConfiguration. | `object` | No | - | - |

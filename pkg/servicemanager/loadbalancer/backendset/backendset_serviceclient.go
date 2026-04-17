@@ -30,43 +30,102 @@ type defaultBackendSetServiceClient struct {
 	generatedruntime.ServiceClient[*loadbalancerv1beta1.BackendSet]
 }
 
+func newBackendSetRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		FormalService: "loadbalancer",
+		FormalSlug:    "backendset",
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{},
+			UpdatingStates:     []string{},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"name"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			Mutable:       []string{"backends", "healthChecker", "lbCookieSessionPersistenceConfiguration", "policy", "sessionPersistenceConfiguration", "sslConfiguration"},
+			ForceNew:      []string{"loadBalancerId", "name"},
+			ConflictsWith: map[string][]string{"lbCookieSessionPersistenceConfiguration": []string{"sessionPersistenceConfiguration"}, "sessionPersistenceConfiguration": []string{"lbCookieSessionPersistenceConfiguration"}},
+		},
+		Hooks: generatedruntime.HookSet{
+			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
+		},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
 var _ BackendSetServiceClient = defaultBackendSetServiceClient{}
 
 var newBackendSetServiceClient = func(manager *BackendSetServiceManager) BackendSetServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
 	config := generatedruntime.Config[*loadbalancerv1beta1.BackendSet]{
-		Kind:    "BackendSet",
-		SDKName: "BackendSet",
-		Log:     manager.Log,
+		Kind:      "BackendSet",
+		SDKName:   "BackendSet",
+		Log:       manager.Log,
+		Semantics: newBackendSetRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.CreateBackendSetRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.CreateBackendSet(ctx, *request.(*loadbalancersdk.CreateBackendSetRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBackendSetDetails", RequestName: "CreateBackendSetDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.GetBackendSetRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.GetBackendSet(ctx, *request.(*loadbalancersdk.GetBackendSetRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.ListBackendSetsRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.ListBackendSets(ctx, *request.(*loadbalancersdk.ListBackendSetsRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
 		},
 		Update: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.UpdateBackendSetRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.UpdateBackendSet(ctx, *request.(*loadbalancersdk.UpdateBackendSetRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "UpdateBackendSetDetails", RequestName: "UpdateBackendSetDetails", Contribution: "body", PreferResourceID: false}},
 		},
 		Delete: &generatedruntime.Operation{
 			NewRequest: func() any { return &loadbalancersdk.DeleteBackendSetRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
 				return sdkClient.DeleteBackendSet(ctx, *request.(*loadbalancersdk.DeleteBackendSetRequest))
 			},
+			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}},
 		},
 	}
 	if err != nil {

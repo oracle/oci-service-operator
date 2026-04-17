@@ -8,7 +8,7 @@
     "missingFields": 49,
     "mandatoryPresentFields": 1187,
     "mandatoryMissingFields": 49,
-    "extraSpecFields": 295,
+    "extraSpecFields": 304,
     "overallCoveragePercent": 98.52587244283995,
     "mandatoryCoveragePercent": 96.03559870550163
   },
@@ -177,7 +177,7 @@
       "missingFields": 0,
       "mandatoryPresentFields": 124,
       "mandatoryMissingFields": 0,
-      "extraSpecFields": 26,
+      "extraSpecFields": 33,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
     },
@@ -191,7 +191,7 @@
       "missingFields": 1,
       "mandatoryPresentFields": 68,
       "mandatoryMissingFields": 1,
-      "extraSpecFields": 4,
+      "extraSpecFields": 6,
       "overallCoveragePercent": 99.40828402366864,
       "mandatoryCoveragePercent": 98.55072463768117
     },
