@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 75; got != want {
+	if got, want := len(inventory), 105; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 32; got != want {
+	if got, want := countRegistrations(inventory), 34; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 43; got != want {
+	if got, want := countExceptions(inventory), 71; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -32,6 +32,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
+	assertInventorySelectionSource(t, byKey, "databasetools/DatabaseToolsConnection", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "datascience/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
@@ -46,6 +48,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "analytics/PrivateAccessChannel", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "bds/BdsInstance")
 	assertInventoryException(t, byKey, "bds/WorkRequest", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "databasetools/DatabaseToolsConnection")
+	assertInventoryException(t, byKey, "databasetools/WorkRequest", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "datascience/Project")
+	assertInventoryException(t, byKey, "datascience/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
@@ -71,6 +77,8 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "core/Vcn", APIErrorCoverageFamilyManualRuntime)
+	assertReviewedFamily(t, "databasetools/DatabaseToolsConnection", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "datascience/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyManualRuntime)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)
@@ -88,6 +96,8 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "aivision/WorkRequest", "strategy=none")
 	assertReviewedException(t, "analytics/WorkRequest", "strategy=none")
 	assertReviewedException(t, "bds/WorkRequest", "strategy=none")
+	assertReviewedException(t, "databasetools/WorkRequest", "strategy=none")
+	assertReviewedException(t, "datascience/WorkRequest", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")
 	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")
 }

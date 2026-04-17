@@ -12,7 +12,9 @@ import (
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	databasetoolsv1beta1 "github.com/oracle/oci-service-operator/api/databasetools/v1beta1"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
+	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
@@ -622,6 +624,74 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DatabasetoolsDatabaseToolsConnection",
+		SpecType:   reflect.TypeOf(databasetoolsv1beta1.DatabaseToolsConnectionSpec{}),
+		StatusType: reflect.TypeOf(databasetoolsv1beta1.DatabaseToolsConnectionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionGenericJdbcDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionMySqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionOracleDatabaseDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionPostgresqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionGenericJdbcDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionMySqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionOracleDatabaseDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionPostgresqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.DatabaseToolsConnectionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbc",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionMySql",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabase",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresql",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbcSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionMySqlSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabaseSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresqlSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "DataflowApplication",
 		SpecType:   reflect.TypeOf(dataflowv1beta1.ApplicationSpec{}),
 		StatusType: reflect.TypeOf(dataflowv1beta1.ApplicationStatus{}),
@@ -637,6 +707,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "dataflow.ApplicationSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatascienceProject",
+		SpecType:   reflect.TypeOf(datasciencev1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(datasciencev1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "datascience.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "datascience.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "datascience.Project",
+			},
+			{
+				SDKStruct: "datascience.ProjectSummary",
 			},
 		},
 	},

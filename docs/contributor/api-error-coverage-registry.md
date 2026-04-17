@@ -40,7 +40,7 @@ Each reviewed exception records:
 
 | Family | Use For | Current Examples |
 | --- | --- | --- |
-| `generatedruntime-plain` | shared generatedruntime CRUD with no special follow-up helper ownership | `aidocument/Project`, `ailanguage/Project`, `aivision/Project`, `bds/BdsInstance`, `core/Instance`, `database/AutonomousDatabase`, `mysql/DbSystem`, `objectstorage/Bucket` |
+| `generatedruntime-plain` | shared generatedruntime CRUD with no special follow-up helper ownership | `aidocument/Project`, `ailanguage/Project`, `aivision/Project`, `bds/BdsInstance`, `database/AutonomousDatabase`, `databasetools/DatabaseToolsConnection`, `datascience/Project`, `core/Instance`, `mysql/DbSystem`, `objectstorage/Bucket` |
 | `generatedruntime-follow-up` | generatedruntime paths whose error handling depends on follow-up helpers such as `WaitForUpdatedState` or `WaitForWorkRequestWithErrorHandling` | `containerengine/Cluster`, `opensearch/OpensearchCluster`, `streaming/Stream` |
 | `generatedruntime-workrequest` | work-request-aware flows that keep explicit work-request tracking as the reviewed contract, even when the polling adapter is handwritten | `queue/Queue`, `redis/RedisCluster` |
 | `manual-runtime` | direct handwritten runtimes whose primary OCI error handling stays in package-local create/update logic; per-resource delete/conflict semantics may still point at generatedruntime when delete is delegated there | `core/Vcn`, `core/InternetGateway`, `core/Subnet`, `core/SecurityList`, other active core-network runtimes |
@@ -93,6 +93,16 @@ with `strategy: none`.
 - `bds`: `AutoScalingConfiguration`, `BdsApiKey`,
   `BdsMetastoreConfiguration`, `OsPatch`, `OsPatchDetail`, `Patch`,
   `PatchHistory`, `WorkRequest`, `WorkRequestError`, `WorkRequestLog`
+- `databasetools`: `DatabaseToolsEndpointService`,
+  `DatabaseToolsPrivateEndpoint`, `WorkRequest`, `WorkRequestError`,
+  `WorkRequestLog`
+- `datascience`: `DataSciencePrivateEndpoint`, `FastLaunchJobConfig`, `Job`,
+  `JobArtifact`, `JobArtifactContent`, `JobRun`, `JobShape`, `Model`,
+  `ModelArtifact`, `ModelArtifactContent`, `ModelDeployment`,
+  `ModelDeploymentShape`, `ModelProvenance`, `ModelVersionSet`,
+  `NotebookSession`, `NotebookSessionShape`, `Pipeline`, `PipelineRun`,
+  `StepArtifact`, `StepArtifactContent`, `WorkRequest`, `WorkRequestError`,
+  `WorkRequestLog`
 
 ## Update Workflow
 
