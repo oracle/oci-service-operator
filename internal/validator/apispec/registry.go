@@ -629,7 +629,65 @@ var targets = []Target{
 		StatusType: reflect.TypeOf(databasetoolsv1beta1.DatabaseToolsConnectionStatus{}),
 		SDKMappings: []SDKMapping{
 			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionGenericJdbcDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionMySqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionOracleDatabaseDetails",
+			},
+			{
+				SDKStruct: "databasetools.CreateDatabaseToolsConnectionPostgresqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionGenericJdbcDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionMySqlDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionOracleDatabaseDetails",
+			},
+			{
+				SDKStruct: "databasetools.UpdateDatabaseToolsConnectionPostgresqlDetails",
+			},
+			{
 				SDKStruct: "databasetools.DatabaseToolsConnectionCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbc",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionMySql",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabase",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresql",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbcSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionMySqlSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabaseSummary",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresqlSummary",
+				APISurface: "status",
 			},
 		},
 	},

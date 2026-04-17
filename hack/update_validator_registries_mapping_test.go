@@ -737,6 +737,96 @@ func TestBuildSDKMappingsAppliesQueueStatusAndWrapperOverrides(t *testing.T) {
 	}
 }
 
+func TestBuildSDKMappingsAppliesDatabasetoolsStatusAndWrapperOverrides(t *testing.T) {
+	t.Parallel()
+
+	got := buildSDKMappings("databasetools", "DatabaseToolsConnection", []string{
+		"CreateDatabaseToolsConnectionGenericJdbcDetails",
+		"CreateDatabaseToolsConnectionMySqlDetails",
+		"CreateDatabaseToolsConnectionOracleDatabaseDetails",
+		"CreateDatabaseToolsConnectionPostgresqlDetails",
+		"UpdateDatabaseToolsConnectionGenericJdbcDetails",
+		"UpdateDatabaseToolsConnectionMySqlDetails",
+		"UpdateDatabaseToolsConnectionOracleDatabaseDetails",
+		"UpdateDatabaseToolsConnectionPostgresqlDetails",
+		"DatabaseToolsConnectionCollection",
+		"DatabaseToolsConnectionGenericJdbc",
+		"DatabaseToolsConnectionMySql",
+		"DatabaseToolsConnectionOracleDatabase",
+		"DatabaseToolsConnectionPostgresql",
+		"DatabaseToolsConnectionGenericJdbcSummary",
+		"DatabaseToolsConnectionMySqlSummary",
+		"DatabaseToolsConnectionOracleDatabaseSummary",
+		"DatabaseToolsConnectionPostgresqlSummary",
+	}, false, specTarget{})
+
+	want := map[string]sdkMapping{
+		"databasetools.CreateDatabaseToolsConnectionGenericJdbcDetails": {
+			SDKStruct: "databasetools.CreateDatabaseToolsConnectionGenericJdbcDetails",
+		},
+		"databasetools.CreateDatabaseToolsConnectionMySqlDetails": {
+			SDKStruct: "databasetools.CreateDatabaseToolsConnectionMySqlDetails",
+		},
+		"databasetools.CreateDatabaseToolsConnectionOracleDatabaseDetails": {
+			SDKStruct: "databasetools.CreateDatabaseToolsConnectionOracleDatabaseDetails",
+		},
+		"databasetools.CreateDatabaseToolsConnectionPostgresqlDetails": {
+			SDKStruct: "databasetools.CreateDatabaseToolsConnectionPostgresqlDetails",
+		},
+		"databasetools.UpdateDatabaseToolsConnectionGenericJdbcDetails": {
+			SDKStruct: "databasetools.UpdateDatabaseToolsConnectionGenericJdbcDetails",
+		},
+		"databasetools.UpdateDatabaseToolsConnectionMySqlDetails": {
+			SDKStruct: "databasetools.UpdateDatabaseToolsConnectionMySqlDetails",
+		},
+		"databasetools.UpdateDatabaseToolsConnectionOracleDatabaseDetails": {
+			SDKStruct: "databasetools.UpdateDatabaseToolsConnectionOracleDatabaseDetails",
+		},
+		"databasetools.UpdateDatabaseToolsConnectionPostgresqlDetails": {
+			SDKStruct: "databasetools.UpdateDatabaseToolsConnectionPostgresqlDetails",
+		},
+		"databasetools.DatabaseToolsConnectionCollection": {
+			SDKStruct: "databasetools.DatabaseToolsConnectionCollection",
+			Exclude:   true,
+			Reason:    collectionResponseExcludedReason,
+		},
+		"databasetools.DatabaseToolsConnectionGenericJdbc": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbc",
+			APISurface: "status",
+		},
+		"databasetools.DatabaseToolsConnectionMySql": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionMySql",
+			APISurface: "status",
+		},
+		"databasetools.DatabaseToolsConnectionOracleDatabase": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabase",
+			APISurface: "status",
+		},
+		"databasetools.DatabaseToolsConnectionPostgresql": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresql",
+			APISurface: "status",
+		},
+		"databasetools.DatabaseToolsConnectionGenericJdbcSummary": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionGenericJdbcSummary",
+			APISurface: "status",
+		},
+		"databasetools.DatabaseToolsConnectionMySqlSummary": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionMySqlSummary",
+			APISurface: "status",
+		},
+		"databasetools.DatabaseToolsConnectionOracleDatabaseSummary": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionOracleDatabaseSummary",
+			APISurface: "status",
+		},
+		"databasetools.DatabaseToolsConnectionPostgresqlSummary": {
+			SDKStruct:  "databasetools.DatabaseToolsConnectionPostgresqlSummary",
+			APISurface: "status",
+		},
+	}
+
+	assertExactMappings(t, got, want)
+}
+
 func TestBuildSDKMappingsAppliesMonitoringStatusOverrides(t *testing.T) {
 	t.Parallel()
 
