@@ -1,0 +1,39 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - databasetools.oracle.com
+  resources:
+  - databasetoolsconnections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - databasetools.oracle.com
+  resources:
+  - databasetoolsconnections/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - databasetools.oracle.com
+  resources:
+  - databasetoolsconnections/status
+  verbs:
+  - get
+  - patch
+  - update
