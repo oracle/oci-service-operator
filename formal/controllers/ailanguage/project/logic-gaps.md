@@ -45,10 +45,13 @@ gaps: []
   the delete work request is terminal and `GetProject` or fallback
   `ListProjects` confirms the Project is gone or exposes lifecycle state
   `DELETED`.
-- Retryable update conflicts stay explicit. When OCI returns a 409
-  "currently being modified" response without a work-request ID, the runtime
-  still projects a pending update async state and requeues instead of failing
-  the reconcile.
+- Retryable update conflicts stay explicit and resumable. When OCI returns a
+  409 "currently being modified" response without a work-request ID, the
+  runtime projects a lifecycle-sourced pending update async state, rereads the
+  Project before retrying, clears that async state if mutable drift has already
+  converged, and otherwise keeps the update pending until the standard requeue
+  backoff has elapsed instead of hot-looping `UpdateProject` on every `ACTIVE`
+  reread.
 
 ## Authority and scoped cleanup
 

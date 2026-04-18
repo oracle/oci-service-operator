@@ -116,6 +116,10 @@ func (c *projectRuntimeClient) CreateOrUpdate(
 
 	c.projectStatus(resource, current)
 
+	if pendingUpdate := currentLifecyclePendingProjectUpdate(resource); pendingUpdate != nil {
+		return c.resumeLifecyclePendingUpdate(ctx, resource, current, pendingUpdate)
+	}
+
 	switch current.LifecycleState {
 	case ailanguagesdk.ProjectLifecycleStateCreating,
 		ailanguagesdk.ProjectLifecycleStateUpdating,
@@ -132,27 +136,7 @@ func (c *projectRuntimeClient) CreateOrUpdate(
 		return c.finishWithLifecycle(resource, current, ""), nil
 	}
 
-	response, err := c.client.UpdateProject(ctx, updateRequest)
-	if err != nil {
-		if isRetryableProjectUpdateConflict(err) {
-			return c.markRetryableUpdateConflict(resource, err), nil
-		}
-		return c.fail(resource, normalizeProjectOCIError(err))
-	}
-	c.recordResponseRequestID(resource, response)
-
-	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
-	if workRequestID == "" {
-		return c.fail(resource, fmt.Errorf("Project update did not return an opc-work-request-id"))
-	}
-
-	c.trackAsyncWorkRequest(
-		resource,
-		shared.OSOKAsyncPhaseUpdate,
-		workRequestID,
-		fmt.Sprintf("Project update requested; polling work request %s", workRequestID),
-	)
-	return c.resumeUpdate(ctx, resource, workRequestID)
+	return c.startUpdate(ctx, resource, updateRequest)
 }
 
 func (c *projectRuntimeClient) Delete(ctx context.Context, resource *ailanguagev1beta1.Project) (bool, error) {
@@ -361,6 +345,34 @@ func (c *projectRuntimeClient) resumeUpdate(
 	default:
 		return c.fail(resource, fmt.Errorf("Project update work request %s projected unsupported async class %s", workRequestID, currentAsync.NormalizedClass))
 	}
+}
+
+func (c *projectRuntimeClient) resumeLifecyclePendingUpdate(
+	ctx context.Context,
+	resource *ailanguagev1beta1.Project,
+	current ailanguagesdk.Project,
+	pending *shared.OSOKAsyncOperation,
+) (servicemanager.OSOKResponse, error) {
+	switch current.LifecycleState {
+	case ailanguagesdk.ProjectLifecycleStateCreating,
+		ailanguagesdk.ProjectLifecycleStateUpdating,
+		ailanguagesdk.ProjectLifecycleStateDeleting,
+		ailanguagesdk.ProjectLifecycleStateFailed:
+		return c.finishWithLifecycle(resource, current, shared.OSOKAsyncPhaseUpdate), nil
+	}
+
+	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+	if !updateNeeded {
+		return c.finishWithLifecycle(resource, current, shared.OSOKAsyncPhaseUpdate), nil
+	}
+	if !projectLifecyclePendingUpdateRetryDue(pending, resource.Status.OsokStatus.UpdatedAt, time.Now()) {
+		return c.keepAsyncOperation(resource, lifecyclePendingUpdateBackoffOperation(pending, current)), nil
+	}
+
+	return c.startUpdate(ctx, resource, updateRequest)
 }
 
 func (c *projectRuntimeClient) resumeDelete(
@@ -636,6 +648,34 @@ func (c *projectRuntimeClient) buildUpdateRequest(
 	}, true, nil
 }
 
+func (c *projectRuntimeClient) startUpdate(
+	ctx context.Context,
+	resource *ailanguagev1beta1.Project,
+	updateRequest ailanguagesdk.UpdateProjectRequest,
+) (servicemanager.OSOKResponse, error) {
+	response, err := c.client.UpdateProject(ctx, updateRequest)
+	if err != nil {
+		if isRetryableProjectUpdateConflict(err) {
+			return c.markRetryableUpdateConflict(resource, err), nil
+		}
+		return c.fail(resource, normalizeProjectOCIError(err))
+	}
+	c.recordResponseRequestID(resource, response)
+
+	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
+	if workRequestID == "" {
+		return c.fail(resource, fmt.Errorf("Project update did not return an opc-work-request-id"))
+	}
+
+	c.trackAsyncWorkRequest(
+		resource,
+		shared.OSOKAsyncPhaseUpdate,
+		workRequestID,
+		fmt.Sprintf("Project update requested; polling work request %s", workRequestID),
+	)
+	return c.resumeUpdate(ctx, resource, workRequestID)
+}
+
 func buildCreateProjectDetails(spec ailanguagev1beta1.ProjectSpec) ailanguagesdk.CreateProjectDetails {
 	createDetails := ailanguagesdk.CreateProjectDetails{
 		CompartmentId: common.String(spec.CompartmentId),
@@ -758,6 +798,13 @@ func (c *projectRuntimeClient) setAsyncOperation(
 	next.Message = message
 	next.UpdatedAt = nil
 	return c.markAsyncOperation(resource, &next)
+}
+
+func (c *projectRuntimeClient) keepAsyncOperation(
+	resource *ailanguagev1beta1.Project,
+	current *shared.OSOKAsyncOperation,
+) servicemanager.OSOKResponse {
+	return c.markAsyncOperation(resource, current)
 }
 
 func (c *projectRuntimeClient) failAsyncOperation(
@@ -1111,6 +1158,26 @@ func currentProjectAsyncPhase(
 	return servicemanager.ResolveAsyncPhase(&resource.Status.OsokStatus, "")
 }
 
+func currentLifecyclePendingProjectUpdate(
+	resource *ailanguagev1beta1.Project,
+) *shared.OSOKAsyncOperation {
+	if resource == nil || resource.Status.OsokStatus.Async.Current == nil {
+		return nil
+	}
+
+	current := resource.Status.OsokStatus.Async.Current
+	if current.Source != shared.OSOKAsyncSourceLifecycle {
+		return nil
+	}
+	if current.Phase != shared.OSOKAsyncPhaseUpdate {
+		return nil
+	}
+	if current.NormalizedClass != shared.OSOKAsyncClassPending {
+		return nil
+	}
+	return current
+}
+
 func currentProjectWorkRequest(
 	resource *ailanguagev1beta1.Project,
 ) (string, shared.OSOKAsyncPhase) {
@@ -1126,6 +1193,45 @@ func currentProjectWorkRequest(
 		return "", ""
 	}
 	return workRequestID, current.Phase
+}
+
+func lifecyclePendingUpdateBackoffOperation(
+	current *shared.OSOKAsyncOperation,
+	project ailanguagesdk.Project,
+) *shared.OSOKAsyncOperation {
+	message := fmt.Sprintf(
+		"%s; mutable drift still exists after a retryable update conflict, waiting before retrying UpdateProject",
+		projectLifecycleMessage(project),
+	)
+
+	if current == nil {
+		return &shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseUpdate,
+			RawStatus:       string(project.LifecycleState),
+			NormalizedClass: shared.OSOKAsyncClassPending,
+			Message:         message,
+		}
+	}
+
+	next := *current
+	next.RawStatus = string(project.LifecycleState)
+	next.Message = message
+	return &next
+}
+
+func projectLifecyclePendingUpdateRetryDue(
+	current *shared.OSOKAsyncOperation,
+	fallback *metav1.Time,
+	now time.Time,
+) bool {
+	if current != nil && current.UpdatedAt != nil && !current.UpdatedAt.IsZero() {
+		return !now.Before(current.UpdatedAt.Time.Add(projectRequeueDuration))
+	}
+	if fallback != nil && !fallback.IsZero() {
+		return !now.Before(fallback.Time.Add(projectRequeueDuration))
+	}
+	return true
 }
 
 func normalizeProjectOCIError(err error) error {

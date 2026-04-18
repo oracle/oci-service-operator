@@ -8,6 +8,7 @@ package project
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr"
 	ailanguagesdk "github.com/oracle/oci-go-sdk/v65/ailanguage"
@@ -16,6 +17,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -656,6 +658,243 @@ func TestProjectServiceClientCreateOrUpdateConflictCurrentlyBeingModifiedRequeue
 				t.Fatalf("status.async.current.message = %q, want exact OCI conflict message", current.Message)
 			}
 		})
+	}
+}
+
+func TestProjectServiceClientCreateOrUpdateLifecyclePendingConflictBacksOffBeforeRetrying(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.project.oc1..existing"
+
+	getProjectCalls := 0
+	updateCalls := 0
+	getWorkRequestCalls := 0
+
+	client := testProjectClient(&fakeProjectOCIClient{
+		getProjectFn: func(_ context.Context, req ailanguagesdk.GetProjectRequest) (ailanguagesdk.GetProjectResponse, error) {
+			getProjectCalls++
+			if req.ProjectId == nil || *req.ProjectId != existingID {
+				t.Fatalf("get projectId = %v, want tracked project ID", req.ProjectId)
+			}
+
+			description := "stale description"
+			if getProjectCalls >= 4 {
+				description = "desired description"
+			}
+
+			return ailanguagesdk.GetProjectResponse{
+				Project: makeSDKProject(
+					existingID,
+					"ocid1.compartment.oc1..example",
+					"project-alpha",
+					description,
+					ailanguagesdk.ProjectLifecycleStateActive,
+				),
+			}, nil
+		},
+		updateProjectFn: func(_ context.Context, req ailanguagesdk.UpdateProjectRequest) (ailanguagesdk.UpdateProjectResponse, error) {
+			updateCalls++
+			if req.ProjectId == nil || *req.ProjectId != existingID {
+				t.Fatalf("update projectId = %v, want tracked project ID", req.ProjectId)
+			}
+			if req.UpdateProjectDetails.Description == nil || *req.UpdateProjectDetails.Description != "desired description" {
+				t.Fatalf("update description = %v, want %q", req.UpdateProjectDetails.Description, "desired description")
+			}
+
+			switch updateCalls {
+			case 1:
+				return ailanguagesdk.UpdateProjectResponse{}, errortest.NewServiceError(409, "Conflict", "Project is currently being modified")
+			case 2:
+				return ailanguagesdk.UpdateProjectResponse{
+					OpcRequestId:     common.String("opc-update-2"),
+					OpcWorkRequestId: common.String("wr-update-2"),
+				}, nil
+			default:
+				t.Fatalf("UpdateProject() calls = %d, want exactly 2", updateCalls)
+				return ailanguagesdk.UpdateProjectResponse{}, nil
+			}
+		},
+		getWorkRequestFn: func(_ context.Context, req ailanguagesdk.GetWorkRequestRequest) (ailanguagesdk.GetWorkRequestResponse, error) {
+			getWorkRequestCalls++
+			if req.WorkRequestId == nil || *req.WorkRequestId != "wr-update-2" {
+				t.Fatalf("getWorkRequest workRequestId = %v, want %q", req.WorkRequestId, "wr-update-2")
+			}
+
+			status := ailanguagesdk.OperationStatusInProgress
+			if getWorkRequestCalls >= 2 {
+				status = ailanguagesdk.OperationStatusSucceeded
+			}
+
+			return ailanguagesdk.GetWorkRequestResponse{
+				WorkRequest: makeProjectWorkRequest(
+					"wr-update-2",
+					ailanguagesdk.OperationTypeUpdateProject,
+					status,
+					ailanguagesdk.ActionTypeUpdated,
+					existingID,
+				),
+			}, nil
+		},
+	})
+
+	resource := makeProjectResource()
+	resource.Status.Id = existingID
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("first CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("first CreateOrUpdate() should report success for retryable conflict")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("first CreateOrUpdate() should requeue for retryable conflict")
+	}
+	if updateCalls != 1 {
+		t.Fatalf("UpdateProject() calls after first reconcile = %d, want 1", updateCalls)
+	}
+	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseUpdate, "")
+	if resource.Status.OsokStatus.Async.Current.Source != shared.OSOKAsyncSourceLifecycle {
+		t.Fatalf("first status.async.current.source = %q, want %q", resource.Status.OsokStatus.Async.Current.Source, shared.OSOKAsyncSourceLifecycle)
+	}
+	firstPendingUpdatedAt := resource.Status.OsokStatus.Async.Current.UpdatedAt.DeepCopy()
+
+	response, err = client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("second CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("second CreateOrUpdate() should report success while backing off retryable conflict")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("second CreateOrUpdate() should keep requeueing while lifecycle-pending update remains unresolved")
+	}
+	if updateCalls != 1 {
+		t.Fatalf("UpdateProject() calls after second reconcile = %d, want 1", updateCalls)
+	}
+	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseUpdate, "")
+	if resource.Status.OsokStatus.Async.Current.Source != shared.OSOKAsyncSourceLifecycle {
+		t.Fatalf("second status.async.current.source = %q, want %q", resource.Status.OsokStatus.Async.Current.Source, shared.OSOKAsyncSourceLifecycle)
+	}
+	if resource.Status.OsokStatus.Async.Current.UpdatedAt == nil || !resource.Status.OsokStatus.Async.Current.UpdatedAt.Time.Equal(firstPendingUpdatedAt.Time) {
+		t.Fatalf("second status.async.current.updatedAt = %v, want preserved first pending timestamp %v", resource.Status.OsokStatus.Async.Current.UpdatedAt, firstPendingUpdatedAt)
+	}
+
+	aged := metav1.NewTime(time.Now().Add(-2 * projectRequeueDuration))
+	resource.Status.OsokStatus.Async.Current.UpdatedAt = &aged
+	resource.Status.OsokStatus.UpdatedAt = &aged
+
+	response, err = client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("third CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("third CreateOrUpdate() should report success when retrying update after backoff")
+	}
+	if !response.ShouldRequeue {
+		t.Fatal("third CreateOrUpdate() should requeue while the retried work request remains in progress")
+	}
+	if updateCalls != 2 {
+		t.Fatalf("UpdateProject() calls after third reconcile = %d, want 2", updateCalls)
+	}
+	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseUpdate, "wr-update-2")
+	if resource.Status.OsokStatus.Async.Current.Source != shared.OSOKAsyncSourceWorkRequest {
+		t.Fatalf("third status.async.current.source = %q, want %q", resource.Status.OsokStatus.Async.Current.Source, shared.OSOKAsyncSourceWorkRequest)
+	}
+	if getWorkRequestCalls != 1 {
+		t.Fatalf("GetWorkRequest() calls after third reconcile = %d, want 1", getWorkRequestCalls)
+	}
+
+	response, err = client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("fourth CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("fourth CreateOrUpdate() should report success after work request convergence")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("fourth CreateOrUpdate() should not requeue after Project returns ACTIVE with desired state")
+	}
+	if getProjectCalls != 4 {
+		t.Fatalf("GetProject() calls = %d, want 4 across the full retry sequence", getProjectCalls)
+	}
+	if getWorkRequestCalls != 2 {
+		t.Fatalf("GetWorkRequest() calls = %d, want 2 across the retried work request", getWorkRequestCalls)
+	}
+	if resource.Status.Description != "desired description" {
+		t.Fatalf("status.description = %q, want %q after convergence", resource.Status.Description, "desired description")
+	}
+	if resource.Status.OsokStatus.Reason != string(shared.Active) {
+		t.Fatalf("status.reason = %q, want %q after convergence", resource.Status.OsokStatus.Reason, shared.Active)
+	}
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.async.current = %#v, want nil after convergence", resource.Status.OsokStatus.Async.Current)
+	}
+}
+
+func TestProjectServiceClientCreateOrUpdateLifecyclePendingConflictClearsWhenMutableDriftIsGone(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.project.oc1..existing"
+
+	pendingAt := metav1.NewTime(time.Now())
+	updateCalls := 0
+
+	client := testProjectClient(&fakeProjectOCIClient{
+		getProjectFn: func(_ context.Context, req ailanguagesdk.GetProjectRequest) (ailanguagesdk.GetProjectResponse, error) {
+			if req.ProjectId == nil || *req.ProjectId != existingID {
+				t.Fatalf("get projectId = %v, want tracked project ID", req.ProjectId)
+			}
+			return ailanguagesdk.GetProjectResponse{
+				Project: makeSDKProject(
+					existingID,
+					"ocid1.compartment.oc1..example",
+					"project-alpha",
+					"desired description",
+					ailanguagesdk.ProjectLifecycleStateActive,
+				),
+			}, nil
+		},
+		updateProjectFn: func(_ context.Context, _ ailanguagesdk.UpdateProjectRequest) (ailanguagesdk.UpdateProjectResponse, error) {
+			updateCalls++
+			t.Fatal("UpdateProject() should not be called when lifecycle-pending update has already converged")
+			return ailanguagesdk.UpdateProjectResponse{}, nil
+		},
+	})
+
+	resource := makeProjectResource()
+	resource.Status.Id = existingID
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           shared.OSOKAsyncPhaseUpdate,
+		RawStatus:       "UPDATING",
+		NormalizedClass: shared.OSOKAsyncClassPending,
+		Message:         "Project is currently being modified",
+		UpdatedAt:       pendingAt.DeepCopy(),
+	}
+	resource.Status.OsokStatus.UpdatedAt = pendingAt.DeepCopy()
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success once mutable drift has converged")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue once mutable drift has converged")
+	}
+	if updateCalls != 0 {
+		t.Fatalf("UpdateProject() calls = %d, want 0", updateCalls)
+	}
+	if resource.Status.Description != "desired description" {
+		t.Fatalf("status.description = %q, want %q", resource.Status.Description, "desired description")
+	}
+	if resource.Status.OsokStatus.Reason != string(shared.Active) {
+		t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Active)
+	}
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.async.current = %#v, want nil after lifecycle-pending convergence", resource.Status.OsokStatus.Async.Current)
 	}
 }
 

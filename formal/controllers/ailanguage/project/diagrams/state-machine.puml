@@ -102,9 +102,14 @@ work-request resources when the response omits
 it, then polls `GetProject` until the Project
 becomes readable. Update also gates completion
 on a succeeded work request plus a readable
-`GetProject`, and retryable 409 "currently being
-modified" conflicts stay in the updating bucket
-even without a work-request ID.
+`GetProject`. Retryable 409 "currently being
+modified" conflicts project a lifecycle-sourced
+pending update when OCI omits a work-request ID;
+later reconciles reread `GetProject`, clear
+async if mutable drift is already gone, and
+otherwise back off for one normal requeue
+interval before retrying `UpdateProject` instead
+of hot-looping on every `ACTIVE` reread.
 Pre-create lookup adopts only a unique paginated
 non-`DELETED` `ListProjects` match on
 `compartmentId` and `displayName`. Delete
