@@ -2183,6 +2183,55 @@ func TestCheckedInStreamingPreservesStreamNamePrinterColumn(t *testing.T) {
 	}
 }
 
+func TestCheckedInAISpeechTranscriptionJobDiscoveryUsesVendoredSDK(t *testing.T) {
+	t.Parallel()
+
+	const importPath = "github.com/oracle/oci-go-sdk/v65/aispeech"
+
+	resolvedDir, err := defaultPackageDirResolver(context.Background(), importPath)
+	if err != nil {
+		t.Fatalf("defaultPackageDirResolver(%q) error = %v", importPath, err)
+	}
+
+	wantDir := filepath.Join(repoRoot(t), "vendor", filepath.FromSlash(importPath))
+	if resolvedDir != wantDir {
+		t.Fatalf("defaultPackageDirResolver(%q) = %q, want %q", importPath, resolvedDir, wantDir)
+	}
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "aispeech",
+		SDKPackage:     importPath,
+		Group:          "aispeech",
+		PackageProfile: PackageProfileCRDOnly,
+	}.withSelectedKinds([]string{"TranscriptionJob"})
+
+	discoverer := &Discoverer{
+		resolveDir: func(_ context.Context, resolvedImportPath string) (string, error) {
+			if resolvedImportPath != importPath {
+				return "", fmt.Errorf("unexpected import path %q", resolvedImportPath)
+			}
+			return resolvedDir, nil
+		},
+	}
+
+	pkg, err := discoverer.BuildPackageModel(context.Background(), cfg, service)
+	if err != nil {
+		t.Fatalf("BuildPackageModel() error = %v", err)
+	}
+	if len(pkg.Resources) != 1 {
+		t.Fatalf("BuildPackageModel() discovered %d resources, want 1", len(pkg.Resources))
+	}
+
+	transcriptionJob := findResource(t, pkg.Resources, "TranscriptionJob")
+	if transcriptionJob.SDKName != "TranscriptionJob" {
+		t.Fatalf("TranscriptionJob SDK name = %q, want %q", transcriptionJob.SDKName, "TranscriptionJob")
+	}
+}
+
 func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services, err := cfg.SelectServices("containerengine", false)
