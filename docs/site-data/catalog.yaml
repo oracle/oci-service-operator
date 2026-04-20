@@ -28,6 +28,19 @@ packages:
         kind: Project
         summary: Manage OCI AI Language projects.
 
+  - package: aispeech
+    displayName: AI Speech
+    summary: Manage OCI AI Speech transcription jobs from Kubernetes with an initial controller-backed TranscriptionJob rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to TranscriptionJob while the remaining AI Speech resource families stay unpublished.
+    kindOverrides:
+      - group: aispeech
+        kind: TranscriptionJob
+        summary: Manage OCI AI Speech transcription jobs.
+
   - package: aivision
     displayName: AI Vision
     summary: Manage OCI AI Vision projects from Kubernetes with an initial controller-backed Project rollout.

@@ -201,6 +201,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"Handwritten Project create/update/delete now persist work-request OCIDs in shared async status, poll GetWorkRequest, and keep delete confirmation through GetProject plus ListProjects fallback.",
 			),
+			resourceKey("aispeech", "TranscriptionJob"): reviewedRegistration(
+				"aispeech",
+				"aispeech",
+				apiErrorCoverageDefaultVersion,
+				"TranscriptionJob",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"Initial TranscriptionJob rollout keeps plain generatedruntime CRUD and lifecycle rereads while the service's TranscriptionTask family remains unpublished.",
+			),
 			resourceKey("aivision", "Project"): reviewedRegistration(
 				"aivision",
 				"aivision",
@@ -801,6 +811,13 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"ailanguage",
 			apiErrorCoverageDefaultVersion,
 			"WorkRequestLog",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("aispeech", "TranscriptionTask"): reviewedException(
+			"aispeech",
+			"aispeech",
+			apiErrorCoverageDefaultVersion,
+			"TranscriptionTask",
 			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
 		),
 		resourceKey("aivision", "DocumentJob"): reviewedException(
