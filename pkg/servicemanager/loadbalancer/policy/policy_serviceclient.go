@@ -19,7 +19,7 @@ import (
 )
 
 // PolicyServiceClient is the handwritten extension seam for Policy runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*PolicyServiceManager).WithClient.
 type PolicyServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.Policy, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ PolicyServiceClient = defaultPolicyServiceClient{}
 
 var newPolicyServiceClient = func(manager *PolicyServiceManager) PolicyServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.Policy]{
-		Kind:    "Policy",
-		SDKName: "Policy",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListPoliciesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListPolicies(ctx, *request.(*loadbalancersdk.ListPoliciesRequest))
-			},
-		},
-	}
+	hooks := newPolicyRuntimeHooks(manager, sdkClient)
+	config := buildPolicyGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Policy OCI client: %w", err)
 	}
-	return defaultPolicyServiceClient{
+	delegate := defaultPolicyServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Policy](config),
 	}
+	return wrapPolicyGeneratedClient(hooks, delegate)
 }

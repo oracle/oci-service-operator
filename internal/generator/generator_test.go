@@ -1980,12 +1980,6 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 
 	desiredGoFiles, desiredExactFiles := collectDesiredGeneratorOwnedRelativePaths(t, cfg, services)
 	generatedGoFiles, generatedExactFiles := collectGeneratorOwnedRelativePaths(t, outputRoot)
-	// US-201 defines the extracted runtimehooks scaffold and refactors generated
-	// service clients around it. The checked-in service-manager refresh lands in
-	// US-202, so keep this snapshot comparison pinned to the unchanged checked-in
-	// generator-owned surfaces until that follow-up updates the repo outputs.
-	desiredGoFiles = comparableGeneratedGoPaths(desiredGoFiles)
-	generatedGoFiles = comparableGeneratedGoPaths(generatedGoFiles)
 	assertRelativePathSetEqual(t, "generated Go file set", generatedGoFiles, desiredGoFiles)
 	assertRelativePathSetEqual(t, "generated exact file set", generatedExactFiles, desiredExactFiles)
 	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, desiredGoFiles)
@@ -4465,17 +4459,6 @@ func readGeneratedServiceClientSurface(t *testing.T, outputRoot string, serviceC
 		surface += "\n" + normalizeGoForComparison(t, readFile(t, runtimeHooksPath))
 	}
 	return surface
-}
-
-func comparableGeneratedGoPaths(paths []string) []string {
-	filtered := make([]string, 0, len(paths))
-	for _, path := range paths {
-		if strings.HasPrefix(path, "pkg/servicemanager/") && (strings.HasSuffix(path, "_serviceclient.go") || strings.HasSuffix(path, "_runtimehooks_generated.go")) {
-			continue
-		}
-		filtered = append(filtered, path)
-	}
-	return filtered
 }
 
 func assertResourceOrderContainsSubset(t *testing.T, fullPath string, subsetPath string) {

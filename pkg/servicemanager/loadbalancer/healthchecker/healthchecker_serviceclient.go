@@ -19,7 +19,7 @@ import (
 )
 
 // HealthCheckerServiceClient is the handwritten extension seam for HealthChecker runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*HealthCheckerServiceManager).WithClient.
 type HealthCheckerServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.HealthChecker, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,27 +34,13 @@ var _ HealthCheckerServiceClient = defaultHealthCheckerServiceClient{}
 
 var newHealthCheckerServiceClient = func(manager *HealthCheckerServiceManager) HealthCheckerServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.HealthChecker]{
-		Kind:    "HealthChecker",
-		SDKName: "HealthChecker",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetHealthCheckerRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetHealthChecker(ctx, *request.(*loadbalancersdk.GetHealthCheckerRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateHealthCheckerRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateHealthChecker(ctx, *request.(*loadbalancersdk.UpdateHealthCheckerRequest))
-			},
-		},
-	}
+	hooks := newHealthCheckerRuntimeHooks(manager, sdkClient)
+	config := buildHealthCheckerGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize HealthChecker OCI client: %w", err)
 	}
-	return defaultHealthCheckerServiceClient{
+	delegate := defaultHealthCheckerServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.HealthChecker](config),
 	}
+	return wrapHealthCheckerGeneratedClient(hooks, delegate)
 }

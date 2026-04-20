@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "mysql",
+  "kind": "DbSystem",
+  "formalSlug": "dbsystem",
+  "providerResource": "oci_mysql_mysql_db_system",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/mysql_mysql_db_system",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/mysql_mysql_db_system",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/mysql/dbsystem/page.html",
+  "bodySHA256": "ec270841ed0f6eeaac405488ca407336413b6072ca493609eb3d98749886598b",
+  "bodyBytes": 22037,
+  "fixtureBodyPath": "7.22.0/mysql/dbsystem/page.html"
+}

@@ -19,7 +19,7 @@ import (
 )
 
 // ServiceServiceClient is the handwritten extension seam for Service runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ServiceServiceManager).WithClient.
 type ServiceServiceClient interface {
 	CreateOrUpdate(context.Context, *loggingv1beta1.Service, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ ServiceServiceClient = defaultServiceServiceClient{}
 
 var newServiceServiceClient = func(manager *ServiceServiceManager) ServiceServiceClient {
 	sdkClient, err := loggingsdk.NewLoggingManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loggingv1beta1.Service]{
-		Kind:    "Service",
-		SDKName: "Service",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.ListServicesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListServices(ctx, *request.(*loggingsdk.ListServicesRequest))
-			},
-		},
-	}
+	hooks := newServiceRuntimeHooks(manager, sdkClient)
+	config := buildServiceGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Service OCI client: %w", err)
 	}
-	return defaultServiceServiceClient{
+	delegate := defaultServiceServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loggingv1beta1.Service](config),
 	}
+	return wrapServiceGeneratedClient(hooks, delegate)
 }

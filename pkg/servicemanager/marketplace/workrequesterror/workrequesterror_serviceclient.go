@@ -19,7 +19,7 @@ import (
 )
 
 // WorkRequestErrorServiceClient is the handwritten extension seam for WorkRequestError runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*WorkRequestErrorServiceManager).WithClient.
 type WorkRequestErrorServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.WorkRequestError, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ WorkRequestErrorServiceClient = defaultWorkRequestErrorServiceClient{}
 
 var newWorkRequestErrorServiceClient = func(manager *WorkRequestErrorServiceManager) WorkRequestErrorServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.WorkRequestError]{
-		Kind:    "WorkRequestError",
-		SDKName: "WorkRequestError",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListWorkRequestErrorsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListWorkRequestErrors(ctx, *request.(*marketplacesdk.ListWorkRequestErrorsRequest))
-			},
-		},
-	}
+	hooks := newWorkRequestErrorRuntimeHooks(manager, sdkClient)
+	config := buildWorkRequestErrorGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize WorkRequestError OCI client: %w", err)
 	}
-	return defaultWorkRequestErrorServiceClient{
+	delegate := defaultWorkRequestErrorServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.WorkRequestError](config),
 	}
+	return wrapWorkRequestErrorGeneratedClient(hooks, delegate)
 }

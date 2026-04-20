@@ -19,7 +19,7 @@ import (
 )
 
 // ShapeServiceClient is the handwritten extension seam for Shape runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ShapeServiceManager).WithClient.
 type ShapeServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.Shape, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ ShapeServiceClient = defaultShapeServiceClient{}
 
 var newShapeServiceClient = func(manager *ShapeServiceManager) ShapeServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.Shape]{
-		Kind:    "Shape",
-		SDKName: "Shape",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListShapesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListShapes(ctx, *request.(*loadbalancersdk.ListShapesRequest))
-			},
-		},
-	}
+	hooks := newShapeRuntimeHooks(manager, sdkClient)
+	config := buildShapeGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Shape OCI client: %w", err)
 	}
-	return defaultShapeServiceClient{
+	delegate := defaultShapeServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Shape](config),
 	}
+	return wrapShapeGeneratedClient(hooks, delegate)
 }

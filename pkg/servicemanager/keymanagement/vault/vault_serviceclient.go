@@ -19,7 +19,7 @@ import (
 )
 
 // VaultServiceClient is the handwritten extension seam for Vault runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*VaultServiceManager).WithClient.
 type VaultServiceClient interface {
 	CreateOrUpdate(context.Context, *keymanagementv1beta1.Vault, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,39 +34,13 @@ var _ VaultServiceClient = defaultVaultServiceClient{}
 
 var newVaultServiceClient = func(manager *VaultServiceManager) VaultServiceClient {
 	sdkClient, err := keymanagementsdk.NewKmsVaultClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*keymanagementv1beta1.Vault]{
-		Kind:    "Vault",
-		SDKName: "Vault",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &keymanagementsdk.CreateVaultRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateVault(ctx, *request.(*keymanagementsdk.CreateVaultRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &keymanagementsdk.GetVaultRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetVault(ctx, *request.(*keymanagementsdk.GetVaultRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &keymanagementsdk.ListVaultsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListVaults(ctx, *request.(*keymanagementsdk.ListVaultsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &keymanagementsdk.UpdateVaultRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateVault(ctx, *request.(*keymanagementsdk.UpdateVaultRequest))
-			},
-		},
-	}
+	hooks := newVaultRuntimeHooks(manager, sdkClient)
+	config := buildVaultGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Vault OCI client: %w", err)
 	}
-	return defaultVaultServiceClient{
+	delegate := defaultVaultServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*keymanagementv1beta1.Vault](config),
 	}
+	return wrapVaultGeneratedClient(hooks, delegate)
 }

@@ -19,7 +19,7 @@ import (
 )
 
 // ThirdPartyPaidListingEligibilityServiceClient is the handwritten extension seam for ThirdPartyPaidListingEligibility runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ThirdPartyPaidListingEligibilityServiceManager).WithClient.
 type ThirdPartyPaidListingEligibilityServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.ThirdPartyPaidListingEligibility, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ ThirdPartyPaidListingEligibilityServiceClient = defaultThirdPartyPaidListi
 
 var newThirdPartyPaidListingEligibilityServiceClient = func(manager *ThirdPartyPaidListingEligibilityServiceManager) ThirdPartyPaidListingEligibilityServiceClient {
 	sdkClient, err := marketplacesdk.NewAccountClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{
-		Kind:    "ThirdPartyPaidListingEligibility",
-		SDKName: "ThirdPartyPaidListingEligibility",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.GetThirdPartyPaidListingEligibilityRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetThirdPartyPaidListingEligibility(ctx, *request.(*marketplacesdk.GetThirdPartyPaidListingEligibilityRequest))
-			},
-		},
-	}
+	hooks := newThirdPartyPaidListingEligibilityRuntimeHooks(manager, sdkClient)
+	config := buildThirdPartyPaidListingEligibilityGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize ThirdPartyPaidListingEligibility OCI client: %w", err)
 	}
-	return defaultThirdPartyPaidListingEligibilityServiceClient{
+	delegate := defaultThirdPartyPaidListingEligibilityServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.ThirdPartyPaidListingEligibility](config),
 	}
+	return wrapThirdPartyPaidListingEligibilityGeneratedClient(hooks, delegate)
 }

@@ -19,7 +19,7 @@ import (
 )
 
 // RuleSetServiceClient is the handwritten extension seam for RuleSet runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*RuleSetServiceManager).WithClient.
 type RuleSetServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.RuleSet, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ RuleSetServiceClient = defaultRuleSetServiceClient{}
 
 var newRuleSetServiceClient = func(manager *RuleSetServiceManager) RuleSetServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.RuleSet]{
-		Kind:    "RuleSet",
-		SDKName: "RuleSet",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateRuleSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateRuleSet(ctx, *request.(*loadbalancersdk.CreateRuleSetRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetRuleSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetRuleSet(ctx, *request.(*loadbalancersdk.GetRuleSetRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListRuleSetsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListRuleSets(ctx, *request.(*loadbalancersdk.ListRuleSetsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateRuleSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateRuleSet(ctx, *request.(*loadbalancersdk.UpdateRuleSetRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteRuleSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteRuleSet(ctx, *request.(*loadbalancersdk.DeleteRuleSetRequest))
-			},
-		},
-	}
+	hooks := newRuleSetRuntimeHooks(manager, sdkClient)
+	config := buildRuleSetGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize RuleSet OCI client: %w", err)
 	}
-	return defaultRuleSetServiceClient{
+	delegate := defaultRuleSetServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.RuleSet](config),
 	}
+	return wrapRuleSetGeneratedClient(hooks, delegate)
 }

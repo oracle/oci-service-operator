@@ -19,7 +19,7 @@ import (
 )
 
 // TableServiceClient is the handwritten extension seam for Table runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*TableServiceManager).WithClient.
 type TableServiceClient interface {
 	CreateOrUpdate(context.Context, *nosqlv1beta1.Table, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ TableServiceClient = defaultTableServiceClient{}
 
 var newTableServiceClient = func(manager *TableServiceManager) TableServiceClient {
 	sdkClient, err := nosqlsdk.NewNosqlClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*nosqlv1beta1.Table]{
-		Kind:    "Table",
-		SDKName: "Table",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &nosqlsdk.CreateTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateTable(ctx, *request.(*nosqlsdk.CreateTableRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &nosqlsdk.GetTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetTable(ctx, *request.(*nosqlsdk.GetTableRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &nosqlsdk.ListTablesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListTables(ctx, *request.(*nosqlsdk.ListTablesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &nosqlsdk.UpdateTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateTable(ctx, *request.(*nosqlsdk.UpdateTableRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &nosqlsdk.DeleteTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteTable(ctx, *request.(*nosqlsdk.DeleteTableRequest))
-			},
-		},
-	}
+	hooks := newTableRuntimeHooks(manager, sdkClient)
+	config := buildTableGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Table OCI client: %w", err)
 	}
-	return defaultTableServiceClient{
+	delegate := defaultTableServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*nosqlv1beta1.Table](config),
 	}
+	return wrapTableGeneratedClient(hooks, delegate)
 }

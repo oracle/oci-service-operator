@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "opensearch",
+  "kind": "OpensearchCluster",
+  "formalSlug": "opensearchopensearchcluster",
+  "providerResource": "oci_opensearch_opensearch_cluster",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/opensearch_opensearch_cluster",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/opensearch_opensearch_cluster",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/opensearch/opensearchopensearchcluster/page.html",
+  "bodySHA256": "2f266cc3f46d7e32e170c882129e465df9c4d78ea28126f641179c382ba5ff33",
+  "bodyBytes": 11144,
+  "fixtureBodyPath": "7.22.0/opensearch/opensearchopensearchcluster/page.html"
+}

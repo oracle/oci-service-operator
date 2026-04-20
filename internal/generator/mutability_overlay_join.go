@@ -359,23 +359,39 @@ func resolveMutabilityOverlayFieldPath(fields []mutabilityOverlayFieldNode, toke
 		return nil, []string{fmt.Sprintf("unexpected wildcard under %s", location)}
 	}
 
-	var (
-		candidates  []mutabilityOverlayCanonicalFieldPath
-		diagnostics []string
-		matchedAny  bool
-	)
+	type pathMatch struct {
+		field    mutabilityOverlayFieldNode
+		singular bool
+	}
+
+	var exactMatches []pathMatch
+	var aliasMatches []pathMatch
 	for _, field := range fields {
 		exact, singular := field.matches(tokens[0])
 		if !exact && !singular {
 			continue
 		}
-		matchedAny = true
-		nextCandidates, nextDiagnostics := resolveMutabilityOverlayFieldNode(field, tokens[0], tokens[1:], prefix, singular)
-		candidates = append(candidates, nextCandidates...)
-		diagnostics = append(diagnostics, nextDiagnostics...)
+		if singular {
+			aliasMatches = append(aliasMatches, pathMatch{field: field, singular: true})
+			continue
+		}
+		exactMatches = append(exactMatches, pathMatch{field: field})
 	}
 
-	if matchedAny {
+	selectedMatches := exactMatches
+	if len(selectedMatches) == 0 {
+		selectedMatches = aliasMatches
+	}
+	if len(selectedMatches) != 0 {
+		var (
+			candidates  []mutabilityOverlayCanonicalFieldPath
+			diagnostics []string
+		)
+		for _, match := range selectedMatches {
+			nextCandidates, nextDiagnostics := resolveMutabilityOverlayFieldNode(match.field, tokens[0], tokens[1:], prefix, match.singular)
+			candidates = append(candidates, nextCandidates...)
+			diagnostics = append(diagnostics, nextDiagnostics...)
+		}
 		return candidates, diagnostics
 	}
 

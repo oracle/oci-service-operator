@@ -303,6 +303,10 @@ func parseMutabilityOverlayDocsListNode(node *xhtml.Node, prefix []string, resul
 func parseMutabilityOverlayDocsListItem(node *xhtml.Node, prefix []string, result *mutabilityOverlayDocsParseResult) {
 	fieldName, ok := appendMutabilityOverlayParsedDocsField(node, prefix, result)
 	if !ok {
+		if len(prefix) != 0 {
+			parseMutabilityOverlayDocsDescendantLists(node, prefix, result)
+			return
+		}
 		appendMutabilityOverlayDocsDiagnostic(result, mutabilityOverlayDocsParserDiagnostic{
 			Severity:      mutabilityOverlayDocsParseDiagnosticSeverityError,
 			Reason:        mutabilityOverlayDocsParseDiagnosticUnsupportedFieldEntry,

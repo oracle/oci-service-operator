@@ -19,7 +19,7 @@ import (
 )
 
 // QueryServiceClient is the handwritten extension seam for Query runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*QueryServiceManager).WithClient.
 type QueryServiceClient interface {
 	CreateOrUpdate(context.Context, *usageapiv1beta1.Query, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultQueryServiceClient struct {
 	generatedruntime.ServiceClient[*usageapiv1beta1.Query]
 }
 
-func newQueryRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "usageapi",
-		FormalSlug:    "query",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"queryDefinition.costAnalysisUi.graph", "queryDefinition.costAnalysisUi.isCumulativeGraph", "queryDefinition.displayName", "queryDefinition.reportQuery.compartmentDepth", "queryDefinition.reportQuery.dateRangeName", "queryDefinition.reportQuery.filter.dimensions", "queryDefinition.reportQuery.filter.operator", "queryDefinition.reportQuery.filter.tags", "queryDefinition.reportQuery.forecast.forecastType", "queryDefinition.reportQuery.forecast.timeForecastEnded", "queryDefinition.reportQuery.forecast.timeForecastStarted", "queryDefinition.reportQuery.granularity", "queryDefinition.reportQuery.groupBy", "queryDefinition.reportQuery.groupByTag", "queryDefinition.reportQuery.isAggregateByTime", "queryDefinition.reportQuery.queryType", "queryDefinition.reportQuery.tenantId", "queryDefinition.reportQuery.timeUsageEnded", "queryDefinition.reportQuery.timeUsageStarted", "queryDefinition.version"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"queryDefinition"},
-			ForceNew:      []string{"compartmentId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ QueryServiceClient = defaultQueryServiceClient{}
 
 var newQueryServiceClient = func(manager *QueryServiceManager) QueryServiceClient {
 	sdkClient, err := usageapisdk.NewUsageapiClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*usageapiv1beta1.Query]{
-		Kind:      "Query",
-		SDKName:   "Query",
-		Log:       manager.Log,
-		Semantics: newQueryRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.CreateQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateQuery(ctx, *request.(*usageapisdk.CreateQueryRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueryDetails", RequestName: "CreateQueryDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.GetQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetQuery(ctx, *request.(*usageapisdk.GetQueryRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "QueryId", RequestName: "queryId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.ListQueriesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListQueries(ctx, *request.(*usageapisdk.ListQueriesRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.UpdateQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateQuery(ctx, *request.(*usageapisdk.UpdateQueryRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "QueryId", RequestName: "queryId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateQueryDetails", RequestName: "UpdateQueryDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.DeleteQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteQuery(ctx, *request.(*usageapisdk.DeleteQueryRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "QueryId", RequestName: "queryId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newQueryRuntimeHooks(manager, sdkClient)
+	config := buildQueryGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Query OCI client: %w", err)
 	}
-	return defaultQueryServiceClient{
+	delegate := defaultQueryServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*usageapiv1beta1.Query](config),
 	}
+	return wrapQueryGeneratedClient(hooks, delegate)
 }

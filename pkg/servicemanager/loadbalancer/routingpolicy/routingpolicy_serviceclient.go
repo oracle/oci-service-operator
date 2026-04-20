@@ -19,7 +19,7 @@ import (
 )
 
 // RoutingPolicyServiceClient is the handwritten extension seam for RoutingPolicy runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*RoutingPolicyServiceManager).WithClient.
 type RoutingPolicyServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.RoutingPolicy, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ RoutingPolicyServiceClient = defaultRoutingPolicyServiceClient{}
 
 var newRoutingPolicyServiceClient = func(manager *RoutingPolicyServiceManager) RoutingPolicyServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.RoutingPolicy]{
-		Kind:    "RoutingPolicy",
-		SDKName: "RoutingPolicy",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateRoutingPolicyRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateRoutingPolicy(ctx, *request.(*loadbalancersdk.CreateRoutingPolicyRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetRoutingPolicyRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetRoutingPolicy(ctx, *request.(*loadbalancersdk.GetRoutingPolicyRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListRoutingPoliciesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListRoutingPolicies(ctx, *request.(*loadbalancersdk.ListRoutingPoliciesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateRoutingPolicyRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateRoutingPolicy(ctx, *request.(*loadbalancersdk.UpdateRoutingPolicyRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteRoutingPolicyRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteRoutingPolicy(ctx, *request.(*loadbalancersdk.DeleteRoutingPolicyRequest))
-			},
-		},
-	}
+	hooks := newRoutingPolicyRuntimeHooks(manager, sdkClient)
+	config := buildRoutingPolicyGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize RoutingPolicy OCI client: %w", err)
 	}
-	return defaultRoutingPolicyServiceClient{
+	delegate := defaultRoutingPolicyServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.RoutingPolicy](config),
 	}
+	return wrapRoutingPolicyGeneratedClient(hooks, delegate)
 }

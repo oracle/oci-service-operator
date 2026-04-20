@@ -19,7 +19,7 @@ import (
 )
 
 // OdaPrivateEndpointAttachmentServiceClient is the handwritten extension seam for OdaPrivateEndpointAttachment runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*OdaPrivateEndpointAttachmentServiceManager).WithClient.
 type OdaPrivateEndpointAttachmentServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.OdaPrivateEndpointAttachment, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,39 +34,13 @@ var _ OdaPrivateEndpointAttachmentServiceClient = defaultOdaPrivateEndpointAttac
 
 var newOdaPrivateEndpointAttachmentServiceClient = func(manager *OdaPrivateEndpointAttachmentServiceManager) OdaPrivateEndpointAttachmentServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.OdaPrivateEndpointAttachment]{
-		Kind:    "OdaPrivateEndpointAttachment",
-		SDKName: "OdaPrivateEndpointAttachment",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateOdaPrivateEndpointAttachmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateOdaPrivateEndpointAttachment(ctx, *request.(*odasdk.CreateOdaPrivateEndpointAttachmentRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetOdaPrivateEndpointAttachmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetOdaPrivateEndpointAttachment(ctx, *request.(*odasdk.GetOdaPrivateEndpointAttachmentRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListOdaPrivateEndpointAttachmentsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListOdaPrivateEndpointAttachments(ctx, *request.(*odasdk.ListOdaPrivateEndpointAttachmentsRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteOdaPrivateEndpointAttachmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteOdaPrivateEndpointAttachment(ctx, *request.(*odasdk.DeleteOdaPrivateEndpointAttachmentRequest))
-			},
-		},
-	}
+	hooks := newOdaPrivateEndpointAttachmentRuntimeHooks(manager, sdkClient)
+	config := buildOdaPrivateEndpointAttachmentGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize OdaPrivateEndpointAttachment OCI client: %w", err)
 	}
-	return defaultOdaPrivateEndpointAttachmentServiceClient{
+	delegate := defaultOdaPrivateEndpointAttachmentServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.OdaPrivateEndpointAttachment](config),
 	}
+	return wrapOdaPrivateEndpointAttachmentGeneratedClient(hooks, delegate)
 }

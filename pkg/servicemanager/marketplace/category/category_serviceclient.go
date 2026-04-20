@@ -19,7 +19,7 @@ import (
 )
 
 // CategoryServiceClient is the handwritten extension seam for Category runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*CategoryServiceManager).WithClient.
 type CategoryServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.Category, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ CategoryServiceClient = defaultCategoryServiceClient{}
 
 var newCategoryServiceClient = func(manager *CategoryServiceManager) CategoryServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.Category]{
-		Kind:    "Category",
-		SDKName: "Category",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListCategoriesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListCategories(ctx, *request.(*marketplacesdk.ListCategoriesRequest))
-			},
-		},
-	}
+	hooks := newCategoryRuntimeHooks(manager, sdkClient)
+	config := buildCategoryGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Category OCI client: %w", err)
 	}
-	return defaultCategoryServiceClient{
+	delegate := defaultCategoryServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.Category](config),
 	}
+	return wrapCategoryGeneratedClient(hooks, delegate)
 }

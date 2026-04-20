@@ -19,7 +19,7 @@ import (
 )
 
 // NatGatewayServiceClient is the handwritten extension seam for NatGateway runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*NatGatewayServiceManager).WithClient.
 type NatGatewayServiceClient interface {
 	CreateOrUpdate(context.Context, *corev1beta1.NatGateway, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultNatGatewayServiceClient struct {
 	generatedruntime.ServiceClient[*corev1beta1.NatGateway]
 }
 
-func newNatGatewayRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "core",
-		FormalSlug:    "natgateway",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"PROVISIONING"},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"AVAILABLE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"TERMINATED", "TERMINATING"},
-			TerminalStates: []string{"NOT_FOUND"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId"},
-			ForceNew:      []string{"compartmentId", "publicIpId", "vcnId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ NatGatewayServiceClient = defaultNatGatewayServiceClient{}
 
 var newNatGatewayServiceClient = func(manager *NatGatewayServiceManager) NatGatewayServiceClient {
 	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*corev1beta1.NatGateway]{
-		Kind:      "NatGateway",
-		SDKName:   "NatGateway",
-		Log:       manager.Log,
-		Semantics: newNatGatewayRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateNatGateway(ctx, *request.(*coresdk.CreateNatGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateNatGatewayDetails", RequestName: "CreateNatGatewayDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetNatGateway(ctx, *request.(*coresdk.GetNatGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListNatGatewaysRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListNatGateways(ctx, *request.(*coresdk.ListNatGatewaysRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "VcnId", RequestName: "vcnId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateNatGateway(ctx, *request.(*coresdk.UpdateNatGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateNatGatewayDetails", RequestName: "UpdateNatGatewayDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteNatGateway(ctx, *request.(*coresdk.DeleteNatGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newNatGatewayRuntimeHooks(manager, sdkClient)
+	config := buildNatGatewayGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize NatGateway OCI client: %w", err)
 	}
-	return defaultNatGatewayServiceClient{
+	delegate := defaultNatGatewayServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.NatGateway](config),
 	}
+	return wrapNatGatewayGeneratedClient(hooks, delegate)
 }

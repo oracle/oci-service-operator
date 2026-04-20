@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>compartment_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the security list.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).  Example: <code>{&#34;Operations.CostCenter&#34;: &#34;42&#34;}</code></li>
+      <li><code>display_name</code> - (Optional) (Updatable) A user-friendly name. Does not have to be unique, and it&#39;s changeable. Avoid entering confidential information.</li>
+      <li><code>egress_security_rules</code> - (Optional) (Updatable) Rules for allowing egress IP packets.
+        <ul>
+          <li><code>description</code> - (Optional) (Updatable) An optional description of your choice for the rule.</li>
+          <li><code>destination</code> - (Required) (Updatable) Conceptually, this is the range of IP addresses that a packet originating from the instance can go to. Allowed values:
+            <ul>
+              <li>IP address range in CIDR notation. For example: <code>192.168.1.0/24</code> or <code>2001:0db8:0123:45::/56</code> Note that IPv6 addressing is currently supported only in certain regions. See [IPv6 Addresses](https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).</li>
+              <li>The <code>cidrBlock</code> value for a [Service](https://docs.cloud.oracle.com/iaas/api/#/en/iaas/latest/Service/), if you&#39;re setting up a security list rule for traffic destined for a particular <code>Service</code> through a service gateway. For example: <code>oci-phx-objectstorage</code>.</li>
+            </ul>
+          </li>
+          <li><code>destination_type</code> - (Optional) (Updatable) Type of destination for the rule. The default is <code>CIDR_BLOCK</code>. Allowed values:
+            <ul>
+              <li><code>CIDR_BLOCK</code>: If the rule&#39;s <code>destination</code> is an IP address range in CIDR notation.</li>
+              <li><code>SERVICE_CIDR_BLOCK</code>: If the rule&#39;s <code>destination</code> is the <code>cidrBlock</code> value for a [Service](https://docs.cloud.oracle.com/iaas/api/#/en/iaas/latest/Service/) (the rule is for traffic destined for a particular <code>Service</code> through a service gateway).</li>
+            </ul>
+          </li>
+          <li><code>icmp_options</code> - (Optional) (Updatable) Optional and valid only for ICMP and ICMPv6. Use to specify a particular ICMP type and code as defined in:
+            <ul>
+              <li>[ICMP Parameters](http://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml)</li>
+              <li>[ICMPv6 Parameters](https://www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xhtml) If you specify ICMP or ICMPv6 as the protocol but omit this object, then all ICMP types and codes are allowed. If you do provide this object, the type is required and the code is optional. To enable MTU negotiation for ingress internet traffic via IPv4, make sure to allow type 3 (&#34;Destination Unreachable&#34;) code 4 (&#34;Fragmentation Needed and Don&#39;t Fragment was Set&#34;). If you need to specify multiple codes for a single type, create a separate security list rule for each.</li>
+              <li><code>code</code> - (Optional) (Updatable) The ICMP code (optional).</li>
+              <li><code>type</code> - (Required) (Updatable) The ICMP type.</li>
+            </ul>
+          </li>
+          <li><code>protocol</code> - (Required) (Updatable) The transport protocol. Specify either <code>all</code> or an IPv4 protocol number as defined in [Protocol Numbers](http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml). Options are supported only for ICMP (&#34;1&#34;), TCP (&#34;6&#34;), UDP (&#34;17&#34;), and ICMPv6 (&#34;58&#34;).</li>
+          <li><code>stateless</code> - (Optional) (Updatable) A stateless rule allows traffic in one direction. Remember to add a corresponding stateless rule in the other direction if you need to support bidirectional traffic. For example, if egress traffic allows TCP destination port 80, there should be an ingress rule to allow TCP source port 80. Defaults to false, which means the rule is stateful and a corresponding rule is not necessary for bidirectional traffic.</li>
+          <li><code>tcp_options</code> - (Optional) (Updatable) Optional and valid only for TCP. Use to specify particular destination ports for TCP rules. If you specify TCP as the protocol but omit this object, then all destination ports are allowed.
+            <ul>
+              <li><code>destination_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Optional) (Updatable) The maximum port number. Must not be lower than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Optional) (Updatable) The minimum port number. Must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+              <li><code>source_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Required) (Updatable) The maximum port number. Must not be lower than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Required) (Updatable) The minimum port number. Must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><code>udp_options</code> - (Optional) (Updatable) Optional and valid only for UDP. Use to specify particular destination ports for UDP rules. If you specify UDP as the protocol but omit this object, then all destination ports are allowed.
+            <ul>
+              <li><code>destination_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Optional) (Updatable) The maximum port number. Must not be lower than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Optional) (Updatable) The minimum port number. Must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+              <li><code>source_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Required) (Updatable) The maximum port number. Must not be lower than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Required) (Updatable) The minimum port number. Must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).  Example: <code>{&#34;Department&#34;: &#34;Finance&#34;}</code></li>
+      <li><code>ingress_security_rules</code> - (Optional) (Updatable) Rules for allowing ingress IP packets.
+        <ul>
+          <li><code>description</code> - (Optional) (Updatable) An optional description of your choice for the rule.</li>
+          <li><code>icmp_options</code> - (Optional) (Updatable) Optional and valid only for ICMP and ICMPv6. Use to specify a particular ICMP type and code as defined in:
+            <ul>
+              <li>[ICMP Parameters](http://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml)</li>
+              <li>[ICMPv6 Parameters](https://www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xhtml) If you specify ICMP or ICMPv6 as the protocol but omit this object, then all ICMP types and codes are allowed. If you do provide this object, the type is required and the code is optional. To enable MTU negotiation for ingress internet traffic via IPv4, make sure to allow type 3 (&#34;Destination Unreachable&#34;) code 4 (&#34;Fragmentation Needed and Don&#39;t Fragment was Set&#34;). If you need to specify multiple codes for a single type, create a separate security list rule for each.</li>
+              <li><code>code</code> - (Optional) (Updatable) The ICMP code (optional).</li>
+              <li><code>type</code> - (Required) (Updatable) The ICMP type.</li>
+            </ul>
+          </li>
+          <li><code>protocol</code> - (Required) (Updatable) The transport protocol. Specify either <code>all</code> or an IPv4 protocol number as defined in [Protocol Numbers](http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml). Options are supported only for ICMP (&#34;1&#34;), TCP (&#34;6&#34;), UDP (&#34;17&#34;), and ICMPv6 (&#34;58&#34;).</li>
+          <li><code>source</code> - (Required) (Updatable) Conceptually, this is the range of IP addresses that a packet coming into the instance can come from. Allowed values:
+            <ul>
+              <li>IP address range in CIDR notation. For example: <code>192.168.1.0/24</code> or <code>2001:0db8:0123:45::/56</code>. IPv6 addressing is supported for all commercial and government regions. See [IPv6 Addresses](https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).</li>
+              <li>The <code>cidrBlock</code> value for a [Service](https://docs.cloud.oracle.com/iaas/api/#/en/iaas/latest/Service/), if you&#39;re setting up a security list rule for traffic coming from a particular <code>Service</code> through a service gateway. For example: <code>oci-phx-objectstorage</code>.</li>
+            </ul>
+          </li>
+          <li><code>source_type</code> - (Optional) (Updatable) Type of source for the rule. The default is <code>CIDR_BLOCK</code>.
+            <ul>
+              <li><code>CIDR_BLOCK</code>: If the rule&#39;s <code>source</code> is an IP address range in CIDR notation.</li>
+              <li><code>SERVICE_CIDR_BLOCK</code>: If the rule&#39;s <code>source</code> is the <code>cidrBlock</code> value for a [Service](https://docs.cloud.oracle.com/iaas/api/#/en/iaas/latest/Service/) (the rule is for traffic coming from a particular <code>Service</code> through a service gateway).</li>
+            </ul>
+          </li>
+          <li><code>stateless</code> - (Optional) (Updatable) A stateless rule allows traffic in one direction. Remember to add a corresponding stateless rule in the other direction if you need to support bidirectional traffic. For example, if ingress traffic allows TCP destination port 80, there should be an egress rule to allow TCP source port 80. Defaults to false, which means the rule is stateful and a corresponding rule is not necessary for bidirectional traffic.</li>
+          <li><code>tcp_options</code> - (Optional) (Updatable) Optional and valid only for TCP. Use to specify particular destination ports for TCP rules. If you specify TCP as the protocol but omit this object, then all destination ports are allowed.
+            <ul>
+              <li><code>destination_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Optional) (Updatable) The maximum port number. Must not be lower than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Optional) (Updatable) The minimum port number. Must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+              <li><code>source_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Required) (Updatable) The maximum port number. Must not be lower than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Required) (Updatable) The minimum port number. Must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><code>udp_options</code> - (Optional) (Updatable) Optional and valid only for UDP. Use to specify particular destination ports for UDP rules. If you specify UDP as the protocol but omit this object, then all destination ports are allowed.
+            <ul>
+              <li><code>destination_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Optional) (Updatable) The maximum port number. Must not be lower than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Optional) (Updatable) The minimum port number. Must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+              <li><code>source_port_range</code> - (Optional) (Updatable)
+                <ul>
+                  <li><code>max</code> - (Required) (Updatable) The maximum port number, which must not be less than the minimum port number. To specify a single port number, set both the min and max to the same value.</li>
+                  <li><code>min</code> - (Required) (Updatable) The minimum port number, which must not be greater than the maximum port number.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>vcn_id</code> - (Required) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the security list belongs to. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

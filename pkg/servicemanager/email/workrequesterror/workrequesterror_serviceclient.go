@@ -19,7 +19,7 @@ import (
 )
 
 // WorkRequestErrorServiceClient is the handwritten extension seam for WorkRequestError runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*WorkRequestErrorServiceManager).WithClient.
 type WorkRequestErrorServiceClient interface {
 	CreateOrUpdate(context.Context, *emailv1beta1.WorkRequestError, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ WorkRequestErrorServiceClient = defaultWorkRequestErrorServiceClient{}
 
 var newWorkRequestErrorServiceClient = func(manager *WorkRequestErrorServiceManager) WorkRequestErrorServiceClient {
 	sdkClient, err := emailsdk.NewEmailClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*emailv1beta1.WorkRequestError]{
-		Kind:    "WorkRequestError",
-		SDKName: "WorkRequestError",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.ListWorkRequestErrorsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListWorkRequestErrors(ctx, *request.(*emailsdk.ListWorkRequestErrorsRequest))
-			},
-		},
-	}
+	hooks := newWorkRequestErrorRuntimeHooks(manager, sdkClient)
+	config := buildWorkRequestErrorGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize WorkRequestError OCI client: %w", err)
 	}
-	return defaultWorkRequestErrorServiceClient{
+	delegate := defaultWorkRequestErrorServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*emailv1beta1.WorkRequestError](config),
 	}
+	return wrapWorkRequestErrorGeneratedClient(hooks, delegate)
 }

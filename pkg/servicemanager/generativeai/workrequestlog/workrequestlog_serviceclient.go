@@ -19,7 +19,7 @@ import (
 )
 
 // WorkRequestLogServiceClient is the handwritten extension seam for WorkRequestLog runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*WorkRequestLogServiceManager).WithClient.
 type WorkRequestLogServiceClient interface {
 	CreateOrUpdate(context.Context, *generativeaiv1beta1.WorkRequestLog, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ WorkRequestLogServiceClient = defaultWorkRequestLogServiceClient{}
 
 var newWorkRequestLogServiceClient = func(manager *WorkRequestLogServiceManager) WorkRequestLogServiceClient {
 	sdkClient, err := generativeaisdk.NewGenerativeAiClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*generativeaiv1beta1.WorkRequestLog]{
-		Kind:    "WorkRequestLog",
-		SDKName: "WorkRequestLog",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.ListWorkRequestLogsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListWorkRequestLogs(ctx, *request.(*generativeaisdk.ListWorkRequestLogsRequest))
-			},
-		},
-	}
+	hooks := newWorkRequestLogRuntimeHooks(manager, sdkClient)
+	config := buildWorkRequestLogGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize WorkRequestLog OCI client: %w", err)
 	}
-	return defaultWorkRequestLogServiceClient{
+	delegate := defaultWorkRequestLogServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*generativeaiv1beta1.WorkRequestLog](config),
 	}
+	return wrapWorkRequestLogGeneratedClient(hooks, delegate)
 }

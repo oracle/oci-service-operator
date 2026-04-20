@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "database",
+  "kind": "AutonomousDatabase",
+  "formalSlug": "databaseautonomousdatabase",
+  "providerResource": "oci_database_autonomous_database",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/database_autonomous_database",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/database_autonomous_database",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/database/databaseautonomousdatabase/page.html",
+  "bodySHA256": "8be51e7144070195e9687913dc154da022da1c78075c44d17c5e9ca368650e54",
+  "bodyBytes": 42235,
+  "fixtureBodyPath": "7.22.0/database/databaseautonomousdatabase/page.html"
+}

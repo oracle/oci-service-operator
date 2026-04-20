@@ -19,7 +19,7 @@ import (
 )
 
 // LoadBalancerHealthServiceClient is the handwritten extension seam for LoadBalancerHealth runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*LoadBalancerHealthServiceManager).WithClient.
 type LoadBalancerHealthServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.LoadBalancerHealth, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,27 +34,13 @@ var _ LoadBalancerHealthServiceClient = defaultLoadBalancerHealthServiceClient{}
 
 var newLoadBalancerHealthServiceClient = func(manager *LoadBalancerHealthServiceManager) LoadBalancerHealthServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.LoadBalancerHealth]{
-		Kind:    "LoadBalancerHealth",
-		SDKName: "LoadBalancerHealth",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetLoadBalancerHealthRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetLoadBalancerHealth(ctx, *request.(*loadbalancersdk.GetLoadBalancerHealthRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListLoadBalancerHealthsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListLoadBalancerHealths(ctx, *request.(*loadbalancersdk.ListLoadBalancerHealthsRequest))
-			},
-		},
-	}
+	hooks := newLoadBalancerHealthRuntimeHooks(manager, sdkClient)
+	config := buildLoadBalancerHealthGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize LoadBalancerHealth OCI client: %w", err)
 	}
-	return defaultLoadBalancerHealthServiceClient{
+	delegate := defaultLoadBalancerHealthServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.LoadBalancerHealth](config),
 	}
+	return wrapLoadBalancerHealthGeneratedClient(hooks, delegate)
 }

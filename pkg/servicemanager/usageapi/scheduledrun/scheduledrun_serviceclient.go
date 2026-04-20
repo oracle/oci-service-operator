@@ -19,7 +19,7 @@ import (
 )
 
 // ScheduledRunServiceClient is the handwritten extension seam for ScheduledRun runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ScheduledRunServiceManager).WithClient.
 type ScheduledRunServiceClient interface {
 	CreateOrUpdate(context.Context, *usageapiv1beta1.ScheduledRun, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,27 +34,13 @@ var _ ScheduledRunServiceClient = defaultScheduledRunServiceClient{}
 
 var newScheduledRunServiceClient = func(manager *ScheduledRunServiceManager) ScheduledRunServiceClient {
 	sdkClient, err := usageapisdk.NewUsageapiClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*usageapiv1beta1.ScheduledRun]{
-		Kind:    "ScheduledRun",
-		SDKName: "ScheduledRun",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.GetScheduledRunRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetScheduledRun(ctx, *request.(*usageapisdk.GetScheduledRunRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.ListScheduledRunsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListScheduledRuns(ctx, *request.(*usageapisdk.ListScheduledRunsRequest))
-			},
-		},
-	}
+	hooks := newScheduledRunRuntimeHooks(manager, sdkClient)
+	config := buildScheduledRunGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize ScheduledRun OCI client: %w", err)
 	}
-	return defaultScheduledRunServiceClient{
+	delegate := defaultScheduledRunServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*usageapiv1beta1.ScheduledRun](config),
 	}
+	return wrapScheduledRunGeneratedClient(hooks, delegate)
 }

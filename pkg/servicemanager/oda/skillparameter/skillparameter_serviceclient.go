@@ -19,7 +19,7 @@ import (
 )
 
 // SkillParameterServiceClient is the handwritten extension seam for SkillParameter runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SkillParameterServiceManager).WithClient.
 type SkillParameterServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.SkillParameter, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ SkillParameterServiceClient = defaultSkillParameterServiceClient{}
 
 var newSkillParameterServiceClient = func(manager *SkillParameterServiceManager) SkillParameterServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.SkillParameter]{
-		Kind:    "SkillParameter",
-		SDKName: "SkillParameter",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateSkillParameterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateSkillParameter(ctx, *request.(*odasdk.CreateSkillParameterRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetSkillParameterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetSkillParameter(ctx, *request.(*odasdk.GetSkillParameterRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListSkillParametersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSkillParameters(ctx, *request.(*odasdk.ListSkillParametersRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateSkillParameterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateSkillParameter(ctx, *request.(*odasdk.UpdateSkillParameterRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteSkillParameterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteSkillParameter(ctx, *request.(*odasdk.DeleteSkillParameterRequest))
-			},
-		},
-	}
+	hooks := newSkillParameterRuntimeHooks(manager, sdkClient)
+	config := buildSkillParameterGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize SkillParameter OCI client: %w", err)
 	}
-	return defaultSkillParameterServiceClient{
+	delegate := defaultSkillParameterServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.SkillParameter](config),
 	}
+	return wrapSkillParameterGeneratedClient(hooks, delegate)
 }

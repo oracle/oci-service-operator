@@ -19,7 +19,7 @@ import (
 )
 
 // CertificateServiceClient is the handwritten extension seam for Certificate runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*CertificateServiceManager).WithClient.
 type CertificateServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.Certificate, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,33 +34,13 @@ var _ CertificateServiceClient = defaultCertificateServiceClient{}
 
 var newCertificateServiceClient = func(manager *CertificateServiceManager) CertificateServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.Certificate]{
-		Kind:    "Certificate",
-		SDKName: "Certificate",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateCertificateRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateCertificate(ctx, *request.(*loadbalancersdk.CreateCertificateRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListCertificatesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListCertificates(ctx, *request.(*loadbalancersdk.ListCertificatesRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteCertificateRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteCertificate(ctx, *request.(*loadbalancersdk.DeleteCertificateRequest))
-			},
-		},
-	}
+	hooks := newCertificateRuntimeHooks(manager, sdkClient)
+	config := buildCertificateGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Certificate OCI client: %w", err)
 	}
-	return defaultCertificateServiceClient{
+	delegate := defaultCertificateServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Certificate](config),
 	}
+	return wrapCertificateGeneratedClient(hooks, delegate)
 }
