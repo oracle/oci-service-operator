@@ -307,7 +307,7 @@ func collectGeneratorOwnedRelativePaths(t *testing.T, root string) ([]string, []
 			goPaths = append(goPaths, relPath)
 		case strings.HasPrefix(relPath, "controllers/") && strings.HasSuffix(name, "_controller.go"):
 			goPaths = append(goPaths, relPath)
-		case strings.HasPrefix(relPath, "pkg/servicemanager/") && (strings.HasSuffix(name, "_serviceclient.go") || strings.HasSuffix(name, "_servicemanager.go")):
+		case strings.HasPrefix(relPath, "pkg/servicemanager/") && (strings.HasSuffix(name, "_runtimehooks_generated.go") || strings.HasSuffix(name, "_serviceclient.go") || strings.HasSuffix(name, "_servicemanager.go")):
 			goPaths = append(goPaths, relPath)
 		case strings.HasPrefix(relPath, "internal/registrations/") && strings.HasSuffix(name, "_generated.go"):
 			goPaths = append(goPaths, relPath)

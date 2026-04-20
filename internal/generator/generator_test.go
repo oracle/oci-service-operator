@@ -1412,7 +1412,9 @@ func TestGenerateRendersServiceManagerScaffolds(t *testing.T) {
 		t.Fatalf("Generate() error = %v", err)
 	}
 
-	serviceClientPath := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_serviceclient.go")
+	serviceClientRelativePath := "pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go"
+	runtimeHooksPath := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_runtimehooks_generated.go")
+	serviceClientPath := filepath.Join(outputRoot, serviceClientRelativePath)
 	serviceManagerPath := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_servicemanager.go")
 
 	serviceClientContent := readFile(t, serviceClientPath)
@@ -1420,11 +1422,23 @@ func TestGenerateRendersServiceManagerScaffolds(t *testing.T) {
 		"package dbsystem",
 		"type DbSystemServiceClient interface {",
 		"var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {",
-		`Kind:    "DbSystem"`,
 		"github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime",
 		"generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem]",
 		"mysqlsdk.NewSampleClientWithConfigurationProvider(manager.Provider)",
+		"hooks := newDbSystemRuntimeHooks(manager, sdkClient)",
+		"config := buildDbSystemGeneratedRuntimeConfig(manager, hooks)",
+		"return wrapDbSystemGeneratedClient(hooks, delegate)",
 	})
+
+	runtimeHooksContent := readGeneratedServiceClientSurface(t, outputRoot, serviceClientRelativePath)
+	assertContains(t, runtimeHooksContent, []string{
+		"type DbSystemRuntimeHooks struct {",
+		"func registerDbSystemRuntimeHooksMutator(",
+		"func buildDbSystemGeneratedRuntimeConfig(",
+		`Kind: "DbSystem"`,
+		`SDKName: "DbSystem"`,
+	})
+	assertPathExists(t, runtimeHooksPath)
 
 	serviceManagerContent := readFile(t, serviceManagerPath)
 	assertContains(t, serviceManagerContent, []string{
@@ -1542,7 +1556,7 @@ func TestGenerateRendersPackageSplitOutputs(t *testing.T) {
 func TestRenderServiceClientFileHandlesEndpointConstructors(t *testing.T) {
 	t.Parallel()
 
-	content, err := renderServiceClientFile(ServiceManagerModel{
+	model := ServiceManagerModel{
 		Kind:                     "Cursor",
 		SDKName:                  "Cursor",
 		PackageName:              "cursor",
@@ -1557,11 +1571,14 @@ func TestRenderServiceClientFileHandlesEndpointConstructors(t *testing.T) {
 		SDKClientConstructor:     "NewStreamClientWithConfigurationProvider",
 		SDKClientConstructorKind: "provider_endpoint",
 		CreateOperation: &RuntimeOperationModel{
-			MethodName:      "CreateCursor",
-			RequestTypeName: "CreateCursorRequest",
-			UsesRequest:     true,
+			MethodName:       "CreateCursor",
+			RequestTypeName:  "CreateCursorRequest",
+			ResponseTypeName: "CreateCursorResponse",
+			UsesRequest:      true,
 		},
-	})
+	}
+
+	content, err := renderServiceClientFile(model)
 	if err != nil {
 		t.Fatalf("renderServiceClientFile() error = %v", err)
 	}
@@ -1569,17 +1586,27 @@ func TestRenderServiceClientFileHandlesEndpointConstructors(t *testing.T) {
 	assertContains(t, content, []string{
 		"sdkClient streamingsdk.StreamClient",
 		`err = fmt.Errorf("streamingsdk.NewStreamClientWithConfigurationProvider requires an explicit service endpoint")`,
-		"return sdkClient.CreateCursor(ctx, *request.(*streamingsdk.CreateCursorRequest))",
+		"hooks := newCursorRuntimeHooks(manager, sdkClient)",
+		"config := buildCursorGeneratedRuntimeConfig(manager, hooks)",
+		"return wrapCursorGeneratedClient(hooks, delegate)",
 	})
 	assertNotContains(t, content, []string{
 		"NewStreamClientWithConfigurationProvider(manager.Provider)",
 	})
+
+	runtimeHooksContent, err := renderServiceRuntimeHooksFile(model)
+	if err != nil {
+		t.Fatalf("renderServiceRuntimeHooksFile() error = %v", err)
+	}
+	assertContains(t, runtimeHooksContent, []string{
+		"return sdkClient.CreateCursor(ctx, request)",
+	})
 }
 
-func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testing.T) {
+func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *testing.T) {
 	t.Parallel()
 
-	content, err := renderServiceClientFile(ServiceManagerModel{
+	content, err := renderServiceRuntimeHooksFile(ServiceManagerModel{
 		Kind:                     "Thing",
 		SDKName:                  "Thing",
 		PackageName:              "thing",
@@ -1631,39 +1658,48 @@ func TestRenderServiceClientFileRendersFormalSemanticsAndRequestFields(t *testin
 			},
 		},
 		CreateOperation: &RuntimeOperationModel{
-			MethodName:      "CreateThing",
-			RequestTypeName: "CreateThingRequest",
-			UsesRequest:     true,
+			MethodName:       "CreateThing",
+			RequestTypeName:  "CreateThingRequest",
+			ResponseTypeName: "CreateThingResponse",
+			UsesRequest:      true,
 			RequestFields: []RuntimeRequestFieldModel{
 				{FieldName: "CreateThingDetails", Contribution: "body"},
 			},
 		},
 		GetOperation: &RuntimeOperationModel{
-			MethodName:      "GetThing",
-			RequestTypeName: "GetThingRequest",
-			UsesRequest:     true,
+			MethodName:       "GetThing",
+			RequestTypeName:  "GetThingRequest",
+			ResponseTypeName: "GetThingResponse",
+			UsesRequest:      true,
 			RequestFields: []RuntimeRequestFieldModel{
 				{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true},
 			},
 		},
 	})
 	if err != nil {
-		t.Fatalf("renderServiceClientFile() error = %v", err)
+		t.Fatalf("renderServiceRuntimeHooksFile() error = %v", err)
 	}
 	content = normalizeGoForComparison(t, content)
 
 	assertContains(t, content, []string{
+		"type ThingRuntimeHooks struct {",
 		"func newThingRuntimeSemantics() *generatedruntime.Semantics {",
 		"return &generatedruntime.Semantics{",
-		"Semantics: newThingRuntimeSemantics(),",
+		"func buildThingGeneratedRuntimeConfig(",
+		"Semantics: hooks.Semantics,",
 		`FormalService: "identity"`,
 		`FormalSlug: "user"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
 		`Strategy: "lifecycle"`,
 		`Runtime: "generatedruntime"`,
+		`BuildCreateBody func(context.Context, *examplev1beta1.Thing, string) (any, error)`,
+		`BuildUpdateBody func(context.Context, *examplev1beta1.Thing, string, any) (any, bool, error)`,
+		`WrapGeneratedClient []func(ThingServiceClient) ThingServiceClient`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
+		`return hooks.Create.Call(ctx, *request.(*examplesdk.CreateThingRequest))`,
+		`return hooks.Get.Call(ctx, *request.(*examplesdk.GetThingRequest))`,
 	})
 }
 
@@ -1694,9 +1730,11 @@ func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
 	}
 
 	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "runtime", "dbsystem", "dbsystem_serviceclient.go"))
+	runtimeHooksContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "runtime", "dbsystem", "dbsystem_runtimehooks_generated.go"))
 	serviceManagerContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "runtime", "dbsystem", "dbsystem_servicemanager.go"))
 
 	assertContains(t, serviceClientContent, []string{"package dbsystem"})
+	assertContains(t, runtimeHooksContent, []string{"package dbsystem"})
 	assertContains(t, serviceManagerContent, []string{"package dbsystem"})
 }
 
@@ -1780,6 +1818,143 @@ func TestGeneratedServiceManagerScaffoldCompiles(t *testing.T) {
 	}
 }
 
+func TestGeneratedServiceManagerRuntimeHooksMutatorsCompose(t *testing.T) {
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := testServiceConfig(PackageProfileControllerBacked)
+	service.Generation.ServiceManager.Strategy = GenerationStrategyGenerated
+	pipeline := newTestGenerator(t)
+
+	moduleRoot := repoRoot(t)
+	outputRoot, err := os.MkdirTemp(moduleRoot, "generated-runtimehooks-")
+	if err != nil {
+		t.Fatalf("MkdirTemp(%s) error = %v", moduleRoot, err)
+	}
+	t.Cleanup(func() {
+		_ = os.RemoveAll(outputRoot)
+	})
+
+	if _, err := pipeline.Generate(context.Background(), cfg, []ServiceConfig{service}, Options{
+		OutputRoot: outputRoot,
+	}); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	packageDir := filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem")
+	writeGeneratorTestFile(t, filepath.Join(packageDir, "dbsystem_runtimehooks_contract_test.go"), `package dbsystem
+
+import (
+	"context"
+	"reflect"
+	"testing"
+
+	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	sample "github.com/oracle/oci-service-operator/internal/generator/testdata/sdk/sample"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+)
+
+type buildCreateBodyMarker struct {
+	Value string
+}
+
+type generatedRuntimeHooksWrapper struct {
+	DbSystemServiceClient
+	tag string
+}
+
+func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
+	dbsystemRuntimeHooksMutators = nil
+	defer func() {
+		dbsystemRuntimeHooksMutators = nil
+	}()
+
+	wantFields := []generatedruntime.RequestField{
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false},
+	}
+
+	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+		hooks.BuildCreateBody = func(context.Context, *mysqlv1beta1.DbSystem, string) (any, error) {
+			return buildCreateBodyMarker{Value: "hooked-create-body"}, nil
+		}
+	})
+	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+		hooks.Create.Fields = append([]generatedruntime.RequestField(nil), wantFields...)
+	})
+	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+		hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate DbSystemServiceClient) DbSystemServiceClient {
+			return generatedRuntimeHooksWrapper{DbSystemServiceClient: delegate, tag: "first"}
+		})
+	})
+	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+		hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate DbSystemServiceClient) DbSystemServiceClient {
+			return generatedRuntimeHooksWrapper{DbSystemServiceClient: delegate, tag: "second"}
+		})
+	})
+
+	manager := &DbSystemServiceManager{}
+	hooks := newDbSystemRuntimeHooks(manager, sample.SampleClient{})
+	if hooks.BuildCreateBody == nil {
+		t.Fatal("BuildCreateBody hook was not applied")
+	}
+	body, err := hooks.BuildCreateBody(context.Background(), &mysqlv1beta1.DbSystem{}, "")
+	if err != nil {
+		t.Fatalf("hooks.BuildCreateBody() error = %v", err)
+	}
+	if got, ok := body.(buildCreateBodyMarker); !ok || got.Value != "hooked-create-body" {
+		t.Fatalf("hooks.BuildCreateBody() = %#v, want hooked marker", body)
+	}
+	if !reflect.DeepEqual(hooks.Create.Fields, wantFields) {
+		t.Fatalf("hooks.Create.Fields = %#v, want %#v", hooks.Create.Fields, wantFields)
+	}
+
+	cfg := buildDbSystemGeneratedRuntimeConfig(manager, hooks)
+	if cfg.Create == nil {
+		t.Fatal("generated runtime config did not expose Create operation")
+	}
+	if cfg.BuildCreateBody == nil {
+		t.Fatal("generated runtime config did not expose BuildCreateBody")
+	}
+	body, err = cfg.BuildCreateBody(context.Background(), &mysqlv1beta1.DbSystem{}, "")
+	if err != nil {
+		t.Fatalf("cfg.BuildCreateBody() error = %v", err)
+	}
+	if got, ok := body.(buildCreateBodyMarker); !ok || got.Value != "hooked-create-body" {
+		t.Fatalf("cfg.BuildCreateBody() = %#v, want hooked marker", body)
+	}
+	if !reflect.DeepEqual(cfg.Create.Fields, wantFields) {
+		t.Fatalf("cfg.Create.Fields = %#v, want %#v", cfg.Create.Fields, wantFields)
+	}
+
+	client := newDbSystemServiceClient(manager)
+	outer, ok := client.(generatedRuntimeHooksWrapper)
+	if !ok || outer.tag != "second" {
+		t.Fatalf("outer wrapped client = %#v, want second wrapper", client)
+	}
+	inner, ok := outer.DbSystemServiceClient.(generatedRuntimeHooksWrapper)
+	if !ok || inner.tag != "first" {
+		t.Fatalf("inner wrapped client = %#v, want first wrapper", outer.DbSystemServiceClient)
+	}
+	if _, ok := inner.DbSystemServiceClient.(defaultDbSystemServiceClient); !ok {
+		t.Fatalf("wrapped delegate type = %T, want defaultDbSystemServiceClient", inner.DbSystemServiceClient)
+	}
+}
+`)
+
+	relativePackagePath, err := filepath.Rel(moduleRoot, packageDir)
+	if err != nil {
+		t.Fatalf("Rel() error = %v", err)
+	}
+
+	cmd := exec.Command("go", "test", "./"+filepath.ToSlash(relativePackagePath), "-run", "TestGeneratedRuntimeHooksMutatorsCompose")
+	cmd.Dir = moduleRoot
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("go test %s error = %v\n%s", relativePackagePath, err, output)
+	}
+}
+
 func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.T) {
 	cfg := loadCheckedInConfig(t)
 	services, err := cfg.SelectServices("", true)
@@ -1805,6 +1980,12 @@ func TestCurrentDefaultActiveGeneratedArtifactsMatchCheckedInOutputs(t *testing.
 
 	desiredGoFiles, desiredExactFiles := collectDesiredGeneratorOwnedRelativePaths(t, cfg, services)
 	generatedGoFiles, generatedExactFiles := collectGeneratorOwnedRelativePaths(t, outputRoot)
+	// US-201 defines the extracted runtimehooks scaffold and refactors generated
+	// service clients around it. The checked-in service-manager refresh lands in
+	// US-202, so keep this snapshot comparison pinned to the unchanged checked-in
+	// generator-owned surfaces until that follow-up updates the repo outputs.
+	desiredGoFiles = comparableGeneratedGoPaths(desiredGoFiles)
+	generatedGoFiles = comparableGeneratedGoPaths(generatedGoFiles)
 	assertRelativePathSetEqual(t, "generated Go file set", generatedGoFiles, desiredGoFiles)
 	assertRelativePathSetEqual(t, "generated exact file set", generatedExactFiles, desiredExactFiles)
 	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, desiredGoFiles)
@@ -1860,15 +2041,24 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		filepath.Join(outputRoot, "api", "core", "v1beta1", "vcn_types.go"),
 		filepath.Join(outputRoot, "controllers", "core", "instance_controller.go"),
 		filepath.Join(outputRoot, "controllers", "core", "vcn_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "internetgateway", "internetgateway_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "internetgateway", "internetgateway_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_servicemanager.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "natgateway", "natgateway_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "natgateway", "natgateway_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "networksecuritygroup", "networksecuritygroup_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "networksecuritygroup", "networksecuritygroup_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "routetable", "routetable_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "routetable", "routetable_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "securitylist", "securitylist_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "securitylist", "securitylist_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "servicegateway", "servicegateway_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "servicegateway", "servicegateway_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "subnet", "subnet_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "subnet", "subnet_serviceclient.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_servicemanager.go"),
 		filepath.Join(outputRoot, "internal", "registrations", "core_generated.go"),
@@ -1898,13 +2088,10 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		filepath.Join(outputRoot, "pkg", "servicemanager", "core", "bootvolume", "bootvolume_serviceclient.go"),
 	})
 
-	instanceServiceClient := normalizeGoForComparison(
-		t,
-		readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "instance", "instance_serviceclient.go")),
-	)
+	instanceServiceClient := readGeneratedServiceClientSurface(t, outputRoot, "pkg/servicemanager/core/instance/instance_serviceclient.go")
 	assertContains(t, instanceServiceClient, []string{
 		"func newInstanceRuntimeSemantics() *generatedruntime.Semantics {",
-		"Semantics: newInstanceRuntimeSemantics(),",
+		"Semantics: hooks.Semantics,",
 		`FormalService: "core"`,
 		`FormalSlug: "instance"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -1917,13 +2104,10 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		`Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}},`,
 	})
 
-	vcnServiceClient := normalizeGoForComparison(
-		t,
-		readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "core", "vcn", "vcn_serviceclient.go")),
-	)
+	vcnServiceClient := readGeneratedServiceClientSurface(t, outputRoot, "pkg/servicemanager/core/vcn/vcn_serviceclient.go")
 	assertContains(t, vcnServiceClient, []string{
 		"func newVcnRuntimeSemantics() *generatedruntime.Semantics {",
-		"Semantics: newVcnRuntimeSemantics(),",
+		"Semantics: hooks.Semantics,",
 		`FormalService: "core"`,
 		`FormalSlug: "vcn"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -2034,10 +2218,14 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		},
 	}
 	for _, test := range coreFormalServiceClients {
-		serviceClient := normalizeGoForComparison(t, readFile(t, test.path))
+		relativePath, err := filepath.Rel(outputRoot, test.path)
+		if err != nil {
+			t.Fatalf("Rel(%q, %q) error = %v", outputRoot, test.path, err)
+		}
+		serviceClient := readGeneratedServiceClientSurface(t, outputRoot, filepath.ToSlash(relativePath))
 		assertContains(t, serviceClient, append([]string{
 			"RuntimeSemantics() *generatedruntime.Semantics {",
-			`Semantics: new`,
+			`Semantics: hooks.Semantics,`,
 			`FormalService: "core"`,
 			`Async: &generatedruntime.AsyncSemantics{`,
 			`Strategy: "lifecycle"`,
@@ -2263,8 +2451,10 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 	}
 
 	serviceClientPath := "pkg/servicemanager/containerengine/cluster/cluster_serviceclient.go"
+	runtimeHooksPath := "pkg/servicemanager/containerengine/cluster/cluster_runtimehooks_generated.go"
 	serviceManagerPath := "pkg/servicemanager/containerengine/cluster/cluster_servicemanager.go"
 	nodePoolServiceClientPath := "pkg/servicemanager/containerengine/nodepool/nodepool_serviceclient.go"
+	nodePoolRuntimeHooksPath := "pkg/servicemanager/containerengine/nodepool/nodepool_runtimehooks_generated.go"
 	nodePoolServiceManagerPath := "pkg/servicemanager/containerengine/nodepool/nodepool_servicemanager.go"
 	registrationPath := filepath.Join(outputRoot, "internal", "registrations", "containerengine_generated.go")
 	assertPathsExist(t, []string{
@@ -2274,8 +2464,10 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 		filepath.Join(outputRoot, "controllers", "containerengine", "cluster_controller.go"),
 		filepath.Join(outputRoot, "controllers", "containerengine", "nodepool_controller.go"),
 		filepath.Join(outputRoot, serviceClientPath),
+		filepath.Join(outputRoot, runtimeHooksPath),
 		filepath.Join(outputRoot, serviceManagerPath),
 		filepath.Join(outputRoot, nodePoolServiceClientPath),
+		filepath.Join(outputRoot, nodePoolRuntimeHooksPath),
 		filepath.Join(outputRoot, nodePoolServiceManagerPath),
 		registrationPath,
 		filepath.Join(outputRoot, "packages", "containerengine", "metadata.env"),
@@ -2284,10 +2476,10 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 		filepath.Join(outputRoot, "config", "samples", "containerengine_v1beta1_nodepool.yaml"),
 	})
 
-	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, serviceClientPath)))
+	content := readGeneratedServiceClientSurface(t, outputRoot, serviceClientPath)
 	assertContains(t, content, []string{
 		"func newClusterRuntimeSemantics() *generatedruntime.Semantics {",
-		"Semantics: newClusterRuntimeSemantics(),",
+		"Semantics: hooks.Semantics,",
 		`FormalService: "containerengine"`,
 		`FormalSlug: "cluster"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -2303,7 +2495,7 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 		`Mutable: []string{"definedTags", "freeformTags", "imagePolicyConfig.isPolicyEnabled", "imagePolicyConfig.keyDetails.kmsKeyId", "kubernetesVersion", "name", "options.admissionControllerOptions.isPodSecurityPolicyEnabled", "options.persistentVolumeConfig.definedTags", "options.persistentVolumeConfig.freeformTags", "options.serviceLbConfig.definedTags", "options.serviceLbConfig.freeformTags", "type"}`,
 		`ForceNew: []string{"clusterPodNetworkOptions.cniType", "clusterPodNetworkOptions.jsonData", "compartmentId", "endpointConfig.isPublicIpEnabled", "endpointConfig.nsgIds", "endpointConfig.subnetId", "kmsKeyId", "options.addOns.isKubernetesDashboardEnabled", "options.addOns.isTillerEnabled", "options.kubernetesNetworkConfig.podsCidr", "options.kubernetesNetworkConfig.servicesCidr", "options.serviceLbSubnetIds", "vcnId"}`,
 		`NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} }`,
-		`return sdkClient.ListClusters(ctx, *request.(*containerenginesdk.ListClustersRequest))`,
+		`return sdkClient.ListClusters(ctx, request)`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -2312,10 +2504,10 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 	})
 	assertNotContains(t, content, []string{`tfresource.WaitForWorkRequestWithErrorHandling`})
 
-	nodePoolContent := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, nodePoolServiceClientPath)))
+	nodePoolContent := readGeneratedServiceClientSurface(t, outputRoot, nodePoolServiceClientPath)
 	assertContains(t, nodePoolContent, []string{
 		"func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {",
-		"Semantics: newNodePoolRuntimeSemantics(),",
+		"Semantics: hooks.Semantics,",
 		`FormalService: "containerengine"`,
 		`FormalSlug: "nodepool"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -2332,7 +2524,7 @@ func TestExplicitContainerengineRuntimeArtifactsGenerateFromConfig(t *testing.T)
 		`Mutable: []string{"definedTags", "freeformTags", "initialNodeLabels", "kubernetesVersion", "name", "nodeConfigDetails", "nodeEvictionNodePoolSettings", "nodeMetadata", "nodePoolCyclingDetails", "nodeShape", "nodeShapeConfig", "nodeSourceDetails", "quantityPerSubnet", "sshPublicKey", "subnetIds"}`,
 		`ForceNew: []string{"clusterId", "compartmentId", "nodeImageName"}`,
 		`NewRequest: func() any { return &containerenginesdk.ListNodePoolsRequest{} }`,
-		`return sdkClient.ListNodePools(ctx, *request.(*containerenginesdk.ListNodePoolsRequest))`,
+		`return sdkClient.ListNodePools(ctx, request)`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`UpdateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`DeleteFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -2408,7 +2600,7 @@ func TestCheckedInQueueWorkRequestAsyncContractRendersHandwrittenMetadata(t *tes
 		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
 	}
 
-	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "queue", "queue", "queue_serviceclient.go")))
+	content := readGeneratedServiceClientSurface(t, outputRoot, "pkg/servicemanager/queue/queue/queue_serviceclient.go")
 	assertContains(t, content, []string{
 		`Async: &generatedruntime.AsyncSemantics{`,
 		`Strategy: "workrequest"`,
@@ -2442,7 +2634,7 @@ func TestCheckedInRedisWorkRequestAsyncContractRendersRepoAuthoredHooks(t *testi
 		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
 	}
 
-	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "redis", "rediscluster", "rediscluster_serviceclient.go")))
+	content := readGeneratedServiceClientSurface(t, outputRoot, "pkg/servicemanager/redis/rediscluster/rediscluster_serviceclient.go")
 	assertContains(t, content, []string{
 		`Async: &generatedruntime.AsyncSemantics{`,
 		`Strategy: "workrequest"`,
@@ -2503,18 +2695,10 @@ func TestCheckedInLifecycleAsyncContractsStripStaleWorkRequestHelpers(t *testing
 			for _, target := range targets {
 				stem := fileStem(target.Kind)
 				packagePath := service.ServiceManagerPackagePathFor(target.Kind, stem)
-				content := normalizeGoForComparison(
+				content := readGeneratedServiceClientSurface(
 					t,
-					readFile(
-						t,
-						filepath.Join(
-							outputRoot,
-							"pkg",
-							"servicemanager",
-							filepath.FromSlash(packagePath),
-							stem+"_serviceclient.go",
-						),
-					),
+					outputRoot,
+					filepath.ToSlash(filepath.Join("pkg", "servicemanager", filepath.FromSlash(packagePath), stem+"_serviceclient.go")),
 				)
 				assertContains(t, content, []string{
 					`Async: &generatedruntime.AsyncSemantics{`,
@@ -2558,11 +2742,13 @@ func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testin
 	}
 
 	serviceClientPath := "pkg/servicemanager/identity/compartment/compartment_serviceclient.go"
+	runtimeHooksPath := "pkg/servicemanager/identity/compartment/compartment_runtimehooks_generated.go"
 	serviceManagerPath := "pkg/servicemanager/identity/compartment/compartment_servicemanager.go"
 	assertPathsExist(t, []string{
 		filepath.Join(outputRoot, "api", "identity", "v1beta1", "compartment_types.go"),
 		filepath.Join(outputRoot, "controllers", "identity", "compartment_controller.go"),
 		filepath.Join(outputRoot, serviceClientPath),
+		filepath.Join(outputRoot, runtimeHooksPath),
 		filepath.Join(outputRoot, serviceManagerPath),
 		filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"),
 		filepath.Join(outputRoot, "packages", "identity", "metadata.env"),
@@ -2575,10 +2761,10 @@ func TestExplicitIdentityCompartmentRuntimeArtifactsGenerateFromConfig(t *testin
 		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "user", "user_serviceclient.go"),
 	})
 
-	content := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, serviceClientPath)))
+	content := readGeneratedServiceClientSurface(t, outputRoot, serviceClientPath)
 	assertContains(t, content, []string{
 		"func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {",
-		"Semantics: newCompartmentRuntimeSemantics(),",
+		"Semantics: hooks.Semantics,",
 		`FormalService: "identity"`,
 		`FormalSlug: "compartment"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -2698,7 +2884,7 @@ func TestCheckedInDatabaseAutonomousDatabaseUsesSecretBackedAdminPassword(t *tes
 		`AdminPassword string ` + "`json:\"adminPassword,omitempty\"`",
 	})
 
-	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "database", "autonomousdatabase", "autonomousdatabase_serviceclient.go"))
+	serviceClientContent := readGeneratedServiceClientSurface(t, outputRoot, "pkg/servicemanager/database/autonomousdatabase/autonomousdatabase_serviceclient.go")
 	assertContains(t, serviceClientContent, []string{
 		`CredentialClient: manager.CredentialClient,`,
 	})
@@ -2743,7 +2929,7 @@ func TestCheckedInMySQLDbSystemUsesSecretBackedAdminCredentials(t *testing.T) {
 		"secretName: admin-secret",
 	})
 
-	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "dbsystem", "dbsystem_serviceclient.go"))
+	serviceClientContent := readGeneratedServiceClientSurface(t, outputRoot, "pkg/servicemanager/mysql/dbsystem/dbsystem_serviceclient.go")
 	assertContains(t, serviceClientContent, []string{
 		`CredentialClient: manager.CredentialClient,`,
 	})
@@ -2793,7 +2979,7 @@ func TestCheckedInPSQLDbSystemUsesSecretBackedAdminCredentials(t *testing.T) {
 		"credentials:",
 	})
 
-	serviceClientContent := readFile(t, filepath.Join(outputRoot, "pkg", "servicemanager", "psql", "dbsystem", "dbsystem_serviceclient.go"))
+	serviceClientContent := readGeneratedServiceClientSurface(t, outputRoot, "pkg/servicemanager/psql/dbsystem/dbsystem_serviceclient.go")
 	assertContains(t, serviceClientContent, []string{
 		`CredentialClient: manager.CredentialClient,`,
 	})
@@ -4216,11 +4402,8 @@ func assertPromotedRuntimeArtifactsCase(t *testing.T, cfg *Config, service *Serv
 		t.Fatalf("Generate() generated %d services, want 1", len(result.Generated))
 	}
 
-	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, []string{
-		want.serviceClientPath,
-		want.controllerPath,
-	})
-	assertContains(t, normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, want.serviceClientPath))), want.serviceClientChecks)
+	assertGeneratedGoMatchesAll(t, repoRoot(t), outputRoot, []string{want.controllerPath})
+	assertContains(t, readGeneratedServiceClientSurface(t, outputRoot, want.serviceClientPath), want.serviceClientChecks)
 	assertFileContains(t, filepath.Join(outputRoot, want.controllerPath), want.controllerContains)
 	assertFileDoesNotContain(t, filepath.Join(outputRoot, want.controllerPath), want.controllerExcludes)
 }
@@ -4266,6 +4449,33 @@ func assertExactFileMatch(t *testing.T, wantPath string, gotPath string) {
 	if want != got {
 		t.Fatalf("file mismatch for %s", wantPath)
 	}
+}
+
+func runtimeHooksPathFromServiceClientPath(serviceClientPath string) string {
+	return strings.Replace(serviceClientPath, "_serviceclient.go", "_runtimehooks_generated.go", 1)
+}
+
+func readGeneratedServiceClientSurface(t *testing.T, outputRoot string, serviceClientPath string) string {
+	t.Helper()
+
+	serviceClientPath = filepath.ToSlash(serviceClientPath)
+	surface := normalizeGoForComparison(t, readFile(t, filepath.Join(outputRoot, filepath.FromSlash(serviceClientPath))))
+	runtimeHooksPath := filepath.Join(outputRoot, filepath.FromSlash(runtimeHooksPathFromServiceClientPath(serviceClientPath)))
+	if _, err := os.Stat(runtimeHooksPath); err == nil {
+		surface += "\n" + normalizeGoForComparison(t, readFile(t, runtimeHooksPath))
+	}
+	return surface
+}
+
+func comparableGeneratedGoPaths(paths []string) []string {
+	filtered := make([]string, 0, len(paths))
+	for _, path := range paths {
+		if strings.HasPrefix(path, "pkg/servicemanager/") && (strings.HasSuffix(path, "_serviceclient.go") || strings.HasSuffix(path, "_runtimehooks_generated.go")) {
+			continue
+		}
+		filtered = append(filtered, path)
+	}
+	return filtered
 }
 
 func assertResourceOrderContainsSubset(t *testing.T, fullPath string, subsetPath string) {

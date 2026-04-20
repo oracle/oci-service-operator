@@ -152,6 +152,15 @@ func (r *Renderer) RenderServiceManagers(root string, pkg *PackageModel, overwri
 			return fmt.Errorf("create service-manager dir %q: %w", outputDir, err)
 		}
 
+		runtimeHooksContent, err := renderServiceRuntimeHooksFile(serviceManager)
+		if err != nil {
+			return fmt.Errorf("render %s for %s: %w", serviceManager.RuntimeHooksFileName, pkg.Service.Service, err)
+		}
+		runtimeHooksPath := filepath.Join(outputDir, serviceManager.RuntimeHooksFileName)
+		if err := writeGeneratedFile(runtimeHooksPath, runtimeHooksContent, overwrite); err != nil {
+			return err
+		}
+
 		serviceClientContent, err := renderServiceClientFile(serviceManager)
 		if err != nil {
 			return fmt.Errorf("render %s for %s: %w", serviceManager.ServiceClientFileName, pkg.Service.Service, err)
@@ -472,6 +481,14 @@ func renderControllerManagerConfigFile(group string) (string, error) {
 
 func renderServiceClientFile(serviceManager ServiceManagerModel) (string, error) {
 	content, err := executeTemplate(serviceClientTemplate, serviceManager)
+	if err != nil {
+		return "", err
+	}
+	return formatGoSource(content)
+}
+
+func renderServiceRuntimeHooksFile(serviceManager ServiceManagerModel) (string, error) {
+	content, err := executeTemplate(serviceRuntimeHooksTemplate, serviceManager)
 	if err != nil {
 		return "", err
 	}
@@ -986,7 +1003,7 @@ func init() {
 }
 `
 
-const serviceClientTemplate = `/*
+const serviceRuntimeHooksTemplate = `/*
   Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
   Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 */
@@ -997,25 +1014,48 @@ package {{ .PackageName }}
 
 import (
 	"context"
-	"fmt"
 
 	{{ .SDKImportAlias }} "{{ .SDKImportPath }}"
 	{{ .APIImportAlias }} "{{ .APIImportPath }}"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-// {{ .ClientInterfaceName }} is the handwritten extension seam for {{ .Kind }} runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
-// (*{{ .ManagerTypeName }}).WithClient.
-type {{ .ClientInterfaceName }} interface {
-	CreateOrUpdate(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, ctrl.Request) (servicemanager.OSOKResponse, error)
-	Delete(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}) (bool, error)
+type runtimeOperationHooks[Req any, Resp any] struct {
+	Fields []generatedruntime.RequestField
+	Call   func(context.Context, Req) (Resp, error)
 }
 
-type {{ .DefaultClientTypeName }} struct {
-	generatedruntime.ServiceClient[*{{ .APIImportAlias }}.{{ .Kind }}]
+type {{ .Kind }}RuntimeHooks struct {
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, string) (any, error)
+	BuildUpdateBody func(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, string, any) (any, bool, error)
+{{- if .CreateOperation }}
+	Create          runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]
+{{- end }}
+{{- if .GetOperation }}
+	Get             runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .GetOperation.ResponseTypeName }}]
+{{- end }}
+{{- if .ListOperation }}
+	List            runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .ListOperation.ResponseTypeName }}]
+{{- end }}
+{{- if .UpdateOperation }}
+	Update          runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .UpdateOperation.ResponseTypeName }}]
+{{- end }}
+{{- if .DeleteOperation }}
+	Delete          runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .DeleteOperation.ResponseTypeName }}]
+{{- end }}
+	WrapGeneratedClient []func({{ .ClientInterfaceName }}) {{ .ClientInterfaceName }}
+}
+
+type {{ .Kind }}RuntimeHooksMutator func(*{{ .ManagerTypeName }}, *{{ .Kind }}RuntimeHooks)
+
+var {{ .FileStem }}RuntimeHooksMutators []{{ .Kind }}RuntimeHooksMutator
+
+func register{{ .Kind }}RuntimeHooksMutator(mutator {{ .Kind }}RuntimeHooksMutator) {
+	if mutator == nil {
+		return
+	}
+	{{ .FileStem }}RuntimeHooksMutators = append({{ .FileStem }}RuntimeHooksMutators, mutator)
 }
 
 {{- if .Semantics }}
@@ -1090,6 +1130,192 @@ func new{{ .Kind }}RuntimeSemantics() *generatedruntime.Semantics {
 }
 
 {{- end }}
+func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKClientTypeName }}) {{ .Kind }}RuntimeHooks {
+	return {{ .Kind }}RuntimeHooks{
+{{- if .Semantics }}
+		Semantics: new{{ .Kind }}RuntimeSemantics(),
+{{- end }}
+{{- if .CreateOperation }}
+		Create: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]{
+			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
+			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}, error) {
+{{- if .CreateOperation.UsesRequest }}
+				return sdkClient.{{ .CreateOperation.MethodName }}(ctx, request)
+{{- else }}
+				return sdkClient.{{ .CreateOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .GetOperation }}
+		Get: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .GetOperation.ResponseTypeName }}]{
+			Fields: {{ requestFieldsLiteral .GetOperation.RequestFields }},
+			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .GetOperation.ResponseTypeName }}, error) {
+{{- if .GetOperation.UsesRequest }}
+				return sdkClient.{{ .GetOperation.MethodName }}(ctx, request)
+{{- else }}
+				return sdkClient.{{ .GetOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .ListOperation }}
+		List: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .ListOperation.ResponseTypeName }}]{
+			Fields: {{ requestFieldsLiteral .ListOperation.RequestFields }},
+			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .ListOperation.ResponseTypeName }}, error) {
+{{- if .ListOperation.UsesRequest }}
+				return sdkClient.{{ .ListOperation.MethodName }}(ctx, request)
+{{- else }}
+				return sdkClient.{{ .ListOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .UpdateOperation }}
+		Update: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .UpdateOperation.ResponseTypeName }}]{
+			Fields: {{ requestFieldsLiteral .UpdateOperation.RequestFields }},
+			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .UpdateOperation.ResponseTypeName }}, error) {
+{{- if .UpdateOperation.UsesRequest }}
+				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx, request)
+{{- else }}
+				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+{{- if .DeleteOperation }}
+		Delete: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .DeleteOperation.ResponseTypeName }}]{
+			Fields: {{ requestFieldsLiteral .DeleteOperation.RequestFields }},
+			Call: func(ctx context.Context, request {{ .SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}) ({{ .SDKImportAlias }}.{{ .DeleteOperation.ResponseTypeName }}, error) {
+{{- if .DeleteOperation.UsesRequest }}
+				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx, request)
+{{- else }}
+				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx)
+{{- end }}
+			},
+		},
+{{- end }}
+		WrapGeneratedClient: []func({{ .ClientInterfaceName }}) {{ .ClientInterfaceName }}{},
+	}
+}
+
+func new{{ .Kind }}RuntimeHooks(manager *{{ .ManagerTypeName }}, sdkClient {{ .SDKImportAlias }}.{{ .SDKClientTypeName }}) {{ .Kind }}RuntimeHooks {
+	hooks := new{{ .Kind }}DefaultRuntimeHooks(sdkClient)
+	for _, mutator := range {{ .FileStem }}RuntimeHooksMutators {
+		mutator(manager, &hooks)
+	}
+	return hooks
+}
+
+func build{{ .Kind }}GeneratedRuntimeConfig(
+	manager *{{ .ManagerTypeName }},
+	hooks {{ .Kind }}RuntimeHooks,
+) generatedruntime.Config[*{{ .APIImportAlias }}.{{ .Kind }}] {
+	return generatedruntime.Config[*{{ .APIImportAlias }}.{{ .Kind }}]{
+		Kind:             "{{ .Kind }}",
+		SDKName:          "{{ .SDKName }}",
+		Log:              manager.Log,
+{{- if or .UsesCredentialClient .NeedsCredentialClient }}
+		CredentialClient: manager.CredentialClient,
+{{- end }}
+		Semantics:        hooks.Semantics,
+		BuildCreateBody:  hooks.BuildCreateBody,
+		BuildUpdateBody:  hooks.BuildUpdateBody,
+{{- if .CreateOperation }}
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}{} },
+			Fields:     append([]generatedruntime.RequestField(nil), hooks.Create.Fields...),
+			Call: func(ctx context.Context, request any) (any, error) {
+				return hooks.Create.Call(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}))
+			},
+		},
+{{- end }}
+{{- if .GetOperation }}
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}{} },
+			Fields:     append([]generatedruntime.RequestField(nil), hooks.Get.Fields...),
+			Call: func(ctx context.Context, request any) (any, error) {
+				return hooks.Get.Call(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}))
+			},
+		},
+{{- end }}
+{{- if .ListOperation }}
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}{} },
+			Fields:     append([]generatedruntime.RequestField(nil), hooks.List.Fields...),
+			Call: func(ctx context.Context, request any) (any, error) {
+				return hooks.List.Call(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}))
+			},
+		},
+{{- end }}
+{{- if .UpdateOperation }}
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}{} },
+			Fields:     append([]generatedruntime.RequestField(nil), hooks.Update.Fields...),
+			Call: func(ctx context.Context, request any) (any, error) {
+				return hooks.Update.Call(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}))
+			},
+		},
+{{- end }}
+{{- if .DeleteOperation }}
+		Delete: &generatedruntime.Operation{
+			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}{} },
+			Fields:     append([]generatedruntime.RequestField(nil), hooks.Delete.Fields...),
+			Call: func(ctx context.Context, request any) (any, error) {
+				return hooks.Delete.Call(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}))
+			},
+		},
+{{- end }}
+	}
+}
+
+func wrap{{ .Kind }}GeneratedClient(
+	hooks {{ .Kind }}RuntimeHooks,
+	delegate {{ .ClientInterfaceName }},
+) {{ .ClientInterfaceName }} {
+	wrapped := delegate
+	for _, wrap := range hooks.WrapGeneratedClient {
+		if wrap == nil {
+			continue
+		}
+		wrapped = wrap(wrapped)
+	}
+	return wrapped
+}
+`
+
+const serviceClientTemplate = `/*
+  Copyright (c) 2021, Oracle and/or its affiliates. All rights reserved.
+  Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+*/
+
+// Code generated by generator. DO NOT EDIT.
+
+package {{ .PackageName }}
+
+import (
+	"context"
+	"fmt"
+
+	{{ .SDKImportAlias }} "{{ .SDKImportPath }}"
+	{{ .APIImportAlias }} "{{ .APIImportPath }}"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	ctrl "sigs.k8s.io/controller-runtime"
+)
+
+// {{ .ClientInterfaceName }} is the handwritten extension seam for {{ .Kind }} runtime behavior.
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
+// (*{{ .ManagerTypeName }}).WithClient.
+type {{ .ClientInterfaceName }} interface {
+	CreateOrUpdate(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, ctrl.Request) (servicemanager.OSOKResponse, error)
+	Delete(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}) (bool, error)
+}
+
+type {{ .DefaultClientTypeName }} struct {
+	generatedruntime.ServiceClient[*{{ .APIImportAlias }}.{{ .Kind }}]
+}
+
 var _ {{ .ClientInterfaceName }} = {{ .DefaultClientTypeName }}{}
 
 var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .ClientInterfaceName }} {
@@ -1106,98 +1332,15 @@ var new{{ .Kind }}ServiceClient = func(manager *{{ .ManagerTypeName }}) {{ .Clie
 	err = fmt.Errorf("unsupported SDK client constructor signature for {{ .SDKImportAlias }}.{{ .SDKClientConstructor }}")
 {{- end }}
 {{- end }}
-	config := generatedruntime.Config[*{{ .APIImportAlias }}.{{ .Kind }}]{
-		Kind:             "{{ .Kind }}",
-		SDKName:          "{{ .SDKName }}",
-		Log:              manager.Log,
-{{- if or .UsesCredentialClient .NeedsCredentialClient }}
-		CredentialClient: manager.CredentialClient,
-{{- end }}
-{{- if .Semantics }}
-		Semantics: new{{ .Kind }}RuntimeSemantics(),
-{{- end }}
-{{- if .CreateOperation }}
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-{{- if .CreateOperation.UsesRequest }}
-				return sdkClient.{{ .CreateOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}))
-{{- else }}
-				return sdkClient.{{ .CreateOperation.MethodName }}(ctx)
-{{- end }}
-			},
-{{- if $.Semantics }}
-			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
-{{- end }}
-		},
-{{- end }}
-{{- if .GetOperation }}
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-{{- if .GetOperation.UsesRequest }}
-				return sdkClient.{{ .GetOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .GetOperation.RequestTypeName }}))
-{{- else }}
-				return sdkClient.{{ .GetOperation.MethodName }}(ctx)
-{{- end }}
-			},
-{{- if $.Semantics }}
-			Fields: {{ requestFieldsLiteral .GetOperation.RequestFields }},
-{{- end }}
-		},
-{{- end }}
-{{- if .ListOperation }}
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-{{- if .ListOperation.UsesRequest }}
-				return sdkClient.{{ .ListOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .ListOperation.RequestTypeName }}))
-{{- else }}
-				return sdkClient.{{ .ListOperation.MethodName }}(ctx)
-{{- end }}
-			},
-{{- if $.Semantics }}
-			Fields: {{ requestFieldsLiteral .ListOperation.RequestFields }},
-{{- end }}
-		},
-{{- end }}
-{{- if .UpdateOperation }}
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-{{- if .UpdateOperation.UsesRequest }}
-				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .UpdateOperation.RequestTypeName }}))
-{{- else }}
-				return sdkClient.{{ .UpdateOperation.MethodName }}(ctx)
-{{- end }}
-			},
-{{- if $.Semantics }}
-			Fields: {{ requestFieldsLiteral .UpdateOperation.RequestFields }},
-{{- end }}
-		},
-{{- end }}
-{{- if .DeleteOperation }}
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &{{ $.SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-{{- if .DeleteOperation.UsesRequest }}
-				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx, *request.(*{{ $.SDKImportAlias }}.{{ .DeleteOperation.RequestTypeName }}))
-{{- else }}
-				return sdkClient.{{ .DeleteOperation.MethodName }}(ctx)
-{{- end }}
-			},
-{{- if $.Semantics }}
-			Fields: {{ requestFieldsLiteral .DeleteOperation.RequestFields }},
-{{- end }}
-		},
-{{- end }}
-	}
+	hooks := new{{ .Kind }}RuntimeHooks(manager, sdkClient)
+	config := build{{ .Kind }}GeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize {{ .Kind }} OCI client: %w", err)
 	}
-	return {{ .DefaultClientTypeName }}{
+	delegate := {{ .DefaultClientTypeName }}{
 		ServiceClient: generatedruntime.NewServiceClient[*{{ .APIImportAlias }}.{{ .Kind }}](config),
 	}
+	return wrap{{ .Kind }}GeneratedClient(hooks, delegate)
 }
 `
 
