@@ -475,6 +475,83 @@ func TestTranscriptionJobDeleteCallsDeleteForLiveCanceledJobWithoutPendingState(
 	requireTrailingCondition(t, resource, shared.Terminating)
 }
 
+func TestTranscriptionJobDeleteCallsDeleteAfterCancelingSettlesToCanceled(t *testing.T) {
+	t.Parallel()
+
+	getCalls := 0
+	deleteCalls := 0
+	resource := makeTranscriptionJobResource()
+	resource.Status.Id = "ocid1.transcriptionjob.oc1..existing"
+
+	client := testTranscriptionJobClient(&fakeTranscriptionJobOCIClient{
+		getTranscriptionJobFn: func(_ context.Context, req aispeech.GetTranscriptionJobRequest) (aispeech.GetTranscriptionJobResponse, error) {
+			getCalls++
+			if req.TranscriptionJobId == nil || *req.TranscriptionJobId != "ocid1.transcriptionjob.oc1..existing" {
+				t.Fatalf("get transcriptionJobId = %v, want tracked TranscriptionJob ID", req.TranscriptionJobId)
+			}
+
+			lifecycleState := aispeech.TranscriptionJobLifecycleStateCanceling
+			lifecycleDetails := "cancel still settling"
+			if getCalls >= 2 {
+				lifecycleState = aispeech.TranscriptionJobLifecycleStateCanceled
+				lifecycleDetails = "cancel completed"
+			}
+
+			return aispeech.GetTranscriptionJobResponse{
+				TranscriptionJob: makeSDKTranscriptionJob(
+					"ocid1.transcriptionjob.oc1..existing",
+					"ocid1.compartment.oc1..example",
+					"job-alpha",
+					"desired description",
+					lifecycleState,
+					lifecycleDetails,
+				),
+			}, nil
+		},
+		deleteTranscriptionJobFn: func(_ context.Context, req aispeech.DeleteTranscriptionJobRequest) (aispeech.DeleteTranscriptionJobResponse, error) {
+			deleteCalls++
+			if req.TranscriptionJobId == nil || *req.TranscriptionJobId != "ocid1.transcriptionjob.oc1..existing" {
+				t.Fatalf("delete transcriptionJobId = %v, want tracked TranscriptionJob ID", req.TranscriptionJobId)
+			}
+			return aispeech.DeleteTranscriptionJobResponse{OpcRequestId: common.String("opc-delete-after-cancel")}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() first call error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() first call should wait while the job is still CANCELING")
+	}
+	if deleteCalls != 0 {
+		t.Fatalf("DeleteTranscriptionJob() calls after first delete = %d, want 0", deleteCalls)
+	}
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.async.current = %#v, want no delete-confirmation marker before delete is attempted", resource.Status.OsokStatus.Async.Current)
+	}
+	if !strings.Contains(resource.Status.OsokStatus.Message, "waiting to issue delete") {
+		t.Fatalf("status message = %q, want waiting-to-issue-delete breadcrumb", resource.Status.OsokStatus.Message)
+	}
+	requireTrailingCondition(t, resource, shared.Terminating)
+
+	deleted, err = client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() second call error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() second call should still wait for final not-found confirmation")
+	}
+	if deleteCalls != 1 {
+		t.Fatalf("DeleteTranscriptionJob() calls after second delete = %d, want 1", deleteCalls)
+	}
+	if getCalls != 3 {
+		t.Fatalf("GetTranscriptionJob() calls after second delete = %d, want 3", getCalls)
+	}
+	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending, "CANCELED")
+	requireTrailingCondition(t, resource, shared.Terminating)
+}
+
 func TestTranscriptionJobDeleteConflictRereadsLifecycleState(t *testing.T) {
 	t.Parallel()
 

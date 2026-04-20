@@ -256,8 +256,12 @@ func (c *transcriptionJobRuntimeClient) Delete(ctx context.Context, resource *ai
 	}
 
 	lifecycleState := normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState)
-	if transcriptionJobDeleteShortCircuit(resource, lifecycleState) {
+	if transcriptionJobDeletePending(resource) && transcriptionJobDeleteInProgress(lifecycleState) {
 		c.markDeletePending(resource, lifecycleState)
+		return false, nil
+	}
+	if lifecycleState == string(aispeech.TranscriptionJobLifecycleStateCanceling) {
+		c.markDeleteWaitingForCancel(resource, lifecycleState)
 		return false, nil
 	}
 	if transcriptionJobDeletePending(resource) {
@@ -392,6 +396,19 @@ func (c *transcriptionJobRuntimeClient) markDeletePending(
 	)
 }
 
+func (c *transcriptionJobRuntimeClient) markDeleteWaitingForCancel(
+	resource *aispeechv1beta1.TranscriptionJob,
+	lifecycleState string,
+) {
+	status := &resource.Status.OsokStatus
+	now := metav1.Now()
+	status.UpdatedAt = &now
+	status.Message = transcriptionJobDeleteWaitMessage(lifecycleState)
+	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, c.log)
+}
+
 func (c *transcriptionJobRuntimeClient) markDeleteRetry(
 	resource *aispeechv1beta1.TranscriptionJob,
 	lifecycleState string,
@@ -427,17 +444,6 @@ func transcriptionJobDeletePending(resource *aispeechv1beta1.TranscriptionJob) b
 	current := resource.Status.OsokStatus.Async.Current
 	return current.Phase == shared.OSOKAsyncPhaseDelete &&
 		current.NormalizedClass == shared.OSOKAsyncClassPending
-}
-
-func transcriptionJobDeleteShortCircuit(resource *aispeechv1beta1.TranscriptionJob, lifecycleState string) bool {
-	switch normalizedTranscriptionJobLifecycle(lifecycleState) {
-	case string(aispeech.TranscriptionJobLifecycleStateCanceling):
-		return true
-	case string(aispeech.TranscriptionJobLifecycleStateCanceled):
-		return transcriptionJobDeletePending(resource)
-	default:
-		return false
-	}
 }
 
 func transcriptionJobDeleteInProgress(lifecycleState string) bool {
@@ -490,6 +496,13 @@ func transcriptionJobDeleteMessage(lifecycleState string) string {
 	default:
 		return "OCI TranscriptionJob delete is awaiting final not-found confirmation"
 	}
+}
+
+func transcriptionJobDeleteWaitMessage(lifecycleState string) string {
+	if normalizedTranscriptionJobLifecycle(lifecycleState) == string(aispeech.TranscriptionJobLifecycleStateCanceling) {
+		return "OCI TranscriptionJob cancellation is still in progress; waiting to issue delete"
+	}
+	return transcriptionJobDeleteRetryMessage(lifecycleState)
 }
 
 func transcriptionJobDeleteRetryMessage(lifecycleState string) string {
