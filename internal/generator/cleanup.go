@@ -204,6 +204,7 @@ func (inventory *cleanupInventory) includeRegistrationOutputs(root string, pkg *
 func (inventory *cleanupInventory) includeServiceManagerOutputs(root string, serviceManagers []ServiceManagerModel) {
 	for _, serviceManager := range serviceManagers {
 		outputDir := filepath.Join(root, "pkg", "servicemanager", filepath.FromSlash(serviceManager.PackagePath))
+		inventory.serviceManagerFiles[filepath.Join(outputDir, serviceManager.RuntimeHooksFileName)] = struct{}{}
 		inventory.serviceManagerFiles[filepath.Join(outputDir, serviceManager.ServiceClientFileName)] = struct{}{}
 		inventory.serviceManagerFiles[filepath.Join(outputDir, serviceManager.ServiceManagerFileName)] = struct{}{}
 	}
@@ -900,7 +901,8 @@ func isOwnedRegistrationFile(name string) bool {
 }
 
 func isOwnedServiceManagerFile(name string) bool {
-	return strings.HasSuffix(name, "_serviceclient.go") ||
+	return strings.HasSuffix(name, "_runtimehooks_generated.go") ||
+		strings.HasSuffix(name, "_serviceclient.go") ||
 		strings.HasSuffix(name, "_servicemanager.go")
 }
 

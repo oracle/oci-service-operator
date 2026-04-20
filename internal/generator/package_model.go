@@ -434,6 +434,7 @@ func buildServiceManagerModels(service ServiceConfig, version string, resources 
 			ListOperation:            resource.Runtime.List,
 			UpdateOperation:          resource.Runtime.Update,
 			DeleteOperation:          resource.Runtime.Delete,
+			RuntimeHooksFileName:     fmt.Sprintf("%s_runtimehooks_generated.go", resource.FileStem),
 			ServiceClientFileName:    fmt.Sprintf("%s_serviceclient.go", resource.FileStem),
 			ServiceManagerFileName:   fmt.Sprintf("%s_servicemanager.go", resource.FileStem),
 		})
