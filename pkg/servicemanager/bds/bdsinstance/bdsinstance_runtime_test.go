@@ -20,6 +20,14 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+type bdsInstanceOCIClient interface {
+	CreateBdsInstance(context.Context, bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error)
+	GetBdsInstance(context.Context, bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error)
+	ListBdsInstances(context.Context, bdssdk.ListBdsInstancesRequest) (bdssdk.ListBdsInstancesResponse, error)
+	UpdateBdsInstance(context.Context, bdssdk.UpdateBdsInstanceRequest) (bdssdk.UpdateBdsInstanceResponse, error)
+	DeleteBdsInstance(context.Context, bdssdk.DeleteBdsInstanceRequest) (bdssdk.DeleteBdsInstanceResponse, error)
+}
+
 type fakeBdsInstanceOCIClient struct {
 	createFn func(context.Context, bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error)
 	getFn    func(context.Context, bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error)
@@ -67,8 +75,25 @@ func newBdsInstanceTestManager(client bdsInstanceOCIClient) *BdsInstanceServiceM
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewBdsInstanceServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
+		hooks := newBdsInstanceDefaultRuntimeHooks(bdssdk.BdsClient{})
+		hooks.Create.Call = func(ctx context.Context, request bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error) {
+			return client.CreateBdsInstance(ctx, request)
+		}
+		hooks.Get.Call = func(ctx context.Context, request bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error) {
+			return client.GetBdsInstance(ctx, request)
+		}
+		hooks.List.Call = func(ctx context.Context, request bdssdk.ListBdsInstancesRequest) (bdssdk.ListBdsInstancesResponse, error) {
+			return client.ListBdsInstances(ctx, request)
+		}
+		hooks.Update.Call = func(ctx context.Context, request bdssdk.UpdateBdsInstanceRequest) (bdssdk.UpdateBdsInstanceResponse, error) {
+			return client.UpdateBdsInstance(ctx, request)
+		}
+		hooks.Delete.Call = func(ctx context.Context, request bdssdk.DeleteBdsInstanceRequest) (bdssdk.DeleteBdsInstanceResponse, error) {
+			return client.DeleteBdsInstance(ctx, request)
+		}
+		applyBdsInstanceRuntimeHooks(&hooks)
 		manager.WithClient(defaultBdsInstanceServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*bdsv1beta1.BdsInstance](newBdsInstanceRuntimeConfig(log, client)),
+			ServiceClient: generatedruntime.NewServiceClient[*bdsv1beta1.BdsInstance](buildBdsInstanceGeneratedRuntimeConfig(manager, hooks)),
 		})
 	}
 	return manager
