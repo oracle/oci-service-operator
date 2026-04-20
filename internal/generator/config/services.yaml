@@ -156,6 +156,7 @@ services:
         strategy: none
       resources:
         - kind: TranscriptionJob
+          formalSpec: transcriptionjob
           async:
             strategy: lifecycle
             runtime: generatedruntime

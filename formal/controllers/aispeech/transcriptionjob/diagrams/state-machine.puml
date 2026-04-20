@@ -1,0 +1,124 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - aispeech/TranscriptionJob
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateTranscriptionJob
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nSUCCEEDED
+resolve_by_lookup --> retryable : OCI state in ACCEPTED,\nIN_PROGRESS, CANCELING,\nCANCELED
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in SUCCEEDED
+observe --> retryable : OCI state in ACCEPTED,\nIN_PROGRESS, CANCELING,\nCANCELED
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, description,\ndisplay_name (+1 more)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: aispeech
+slug: transcriptionjob
+kind: TranscriptionJob
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create ACCEPTED, IN_PROGRESS;
+update ACCEPTED, IN_PROGRESS; delete CANCELING,
+CANCELED
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_ai_speech_transcription_jobs
+filters compartment_id, display_name, id; Exact
+displayName or tracked OCID match within the
+requested compartment.
+conflicts: none
+open gaps: none
+TranscriptionJob keeps the generated controller
+and service-manager shell, but the handwritten
+runtime client overrides lifecycle handling for
+FAILED, CANCELING, and CANCELED while still
+using generatedruntime request projection plus
+read-after-write follow-up.
+ACCEPTED and IN_PROGRESS remain the provisioning
+states for both create and update. SUCCEEDED is
+the only steady success state, FAILED is
+terminal, and CANCELING is a terminating
+breadcrumb during normal observe.
+Delete confirmation is explicit repo-authored
+behavior: CANCELING and CANCELED are
+intermediate delete breadcrumbs only, and the
+finalizer is retained until GetTranscriptionJob
+confirms the resource is absent rather than
+stopping at CANCELED.
+Only displayName, description, freeformTags, and
+definedTags reconcile in place. compartmentId is
+replacement-only, there are no secret side
+effects, and the auxiliary
+CancelTranscriptionJob API remains outside the
+published controller surface.
+The pinned terraform-provider-oci revision has
+no matching speech resource, so the import
+catalog for this row is SDK-shaped and
+repo-curated; the runtime semantics in this file
+are the authoritative formal input for diagrams
+and generator binding.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetTranscriptionJob or
+ListTranscriptionJobs
+delete targets: NOT_FOUND
+end note
+@enduml

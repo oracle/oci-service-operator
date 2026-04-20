@@ -1322,7 +1322,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "database", "databasetools", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
-	assertFormalSpecFor(t, services["aispeech"], "TranscriptionJob", "")
+	assertFormalSpecFor(t, services["aispeech"], "TranscriptionJob", "transcriptionjob")
 	assertFormalSpecFor(t, services["aivision"], "Project", "project")
 	assertFormalSpecFor(t, services["analytics"], "AnalyticsInstance", "analyticsinstance")
 	assertFormalSpecFor(t, services["bds"], "BdsInstance", "bdsinstance")
