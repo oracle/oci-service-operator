@@ -19,7 +19,7 @@ import (
 )
 
 // ChannelServiceClient is the handwritten extension seam for Channel runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ChannelServiceManager).WithClient.
 type ChannelServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.Channel, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ ChannelServiceClient = defaultChannelServiceClient{}
 
 var newChannelServiceClient = func(manager *ChannelServiceManager) ChannelServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.Channel]{
-		Kind:    "Channel",
-		SDKName: "Channel",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateChannelRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateChannel(ctx, *request.(*odasdk.CreateChannelRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetChannelRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetChannel(ctx, *request.(*odasdk.GetChannelRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListChannelsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListChannels(ctx, *request.(*odasdk.ListChannelsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateChannelRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateChannel(ctx, *request.(*odasdk.UpdateChannelRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteChannelRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteChannel(ctx, *request.(*odasdk.DeleteChannelRequest))
-			},
-		},
-	}
+	hooks := newChannelRuntimeHooks(manager, sdkClient)
+	config := buildChannelGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Channel OCI client: %w", err)
 	}
-	return defaultChannelServiceClient{
+	delegate := defaultChannelServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.Channel](config),
 	}
+	return wrapChannelGeneratedClient(hooks, delegate)
 }

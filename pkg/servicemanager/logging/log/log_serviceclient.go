@@ -19,7 +19,7 @@ import (
 )
 
 // LogServiceClient is the handwritten extension seam for Log runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*LogServiceManager).WithClient.
 type LogServiceClient interface {
 	CreateOrUpdate(context.Context, *loggingv1beta1.Log, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultLogServiceClient struct {
 	generatedruntime.ServiceClient[*loggingv1beta1.Log]
 }
 
-func newLogRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "logging",
-		FormalSlug:    "log",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"displayName", "lifecycleState", "logGroupId", "logType", "sourceResource", "sourceService"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "freeformTags", "isEnabled", "retentionDuration"},
-			ForceNew:      []string{"configuration", "logGroupId", "logType"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ LogServiceClient = defaultLogServiceClient{}
 
 var newLogServiceClient = func(manager *LogServiceManager) LogServiceClient {
 	sdkClient, err := loggingsdk.NewLoggingManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loggingv1beta1.Log]{
-		Kind:      "Log",
-		SDKName:   "Log",
-		Log:       manager.Log,
-		Semantics: newLogRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.CreateLogRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateLog(ctx, *request.(*loggingsdk.CreateLogRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateLogDetails", RequestName: "CreateLogDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.GetLogRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetLog(ctx, *request.(*loggingsdk.GetLogRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.ListLogsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListLogs(ctx, *request.(*loggingsdk.ListLogsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogType", RequestName: "logType", Contribution: "query", PreferResourceID: false}, {FieldName: "SourceService", RequestName: "sourceService", Contribution: "query", PreferResourceID: false}, {FieldName: "SourceResource", RequestName: "sourceResource", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.UpdateLogRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateLog(ctx, *request.(*loggingsdk.UpdateLogRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLogDetails", RequestName: "UpdateLogDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.DeleteLogRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteLog(ctx, *request.(*loggingsdk.DeleteLogRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "LogId", RequestName: "logId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newLogRuntimeHooks(manager, sdkClient)
+	config := buildLogGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Log OCI client: %w", err)
 	}
-	return defaultLogServiceClient{
+	delegate := defaultLogServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loggingv1beta1.Log](config),
 	}
+	return wrapLogGeneratedClient(hooks, delegate)
 }

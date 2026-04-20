@@ -19,7 +19,7 @@ import (
 )
 
 // OdaInstanceAttachmentServiceClient is the handwritten extension seam for OdaInstanceAttachment runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*OdaInstanceAttachmentServiceManager).WithClient.
 type OdaInstanceAttachmentServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.OdaInstanceAttachment, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ OdaInstanceAttachmentServiceClient = defaultOdaInstanceAttachmentServiceCl
 
 var newOdaInstanceAttachmentServiceClient = func(manager *OdaInstanceAttachmentServiceManager) OdaInstanceAttachmentServiceClient {
 	sdkClient, err := odasdk.NewOdaClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.OdaInstanceAttachment]{
-		Kind:    "OdaInstanceAttachment",
-		SDKName: "OdaInstanceAttachment",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateOdaInstanceAttachmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateOdaInstanceAttachment(ctx, *request.(*odasdk.CreateOdaInstanceAttachmentRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetOdaInstanceAttachmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetOdaInstanceAttachment(ctx, *request.(*odasdk.GetOdaInstanceAttachmentRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListOdaInstanceAttachmentsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListOdaInstanceAttachments(ctx, *request.(*odasdk.ListOdaInstanceAttachmentsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateOdaInstanceAttachmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateOdaInstanceAttachment(ctx, *request.(*odasdk.UpdateOdaInstanceAttachmentRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteOdaInstanceAttachmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteOdaInstanceAttachment(ctx, *request.(*odasdk.DeleteOdaInstanceAttachmentRequest))
-			},
-		},
-	}
+	hooks := newOdaInstanceAttachmentRuntimeHooks(manager, sdkClient)
+	config := buildOdaInstanceAttachmentGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize OdaInstanceAttachment OCI client: %w", err)
 	}
-	return defaultOdaInstanceAttachmentServiceClient{
+	delegate := defaultOdaInstanceAttachmentServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.OdaInstanceAttachment](config),
 	}
+	return wrapOdaInstanceAttachmentGeneratedClient(hooks, delegate)
 }

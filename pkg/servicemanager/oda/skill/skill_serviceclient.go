@@ -19,7 +19,7 @@ import (
 )
 
 // SkillServiceClient is the handwritten extension seam for Skill runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SkillServiceManager).WithClient.
 type SkillServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.Skill, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ SkillServiceClient = defaultSkillServiceClient{}
 
 var newSkillServiceClient = func(manager *SkillServiceManager) SkillServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.Skill]{
-		Kind:    "Skill",
-		SDKName: "Skill",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateSkillRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateSkill(ctx, *request.(*odasdk.CreateSkillRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetSkillRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetSkill(ctx, *request.(*odasdk.GetSkillRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListSkillsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSkills(ctx, *request.(*odasdk.ListSkillsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateSkillRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateSkill(ctx, *request.(*odasdk.UpdateSkillRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteSkillRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteSkill(ctx, *request.(*odasdk.DeleteSkillRequest))
-			},
-		},
-	}
+	hooks := newSkillRuntimeHooks(manager, sdkClient)
+	config := buildSkillGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Skill OCI client: %w", err)
 	}
-	return defaultSkillServiceClient{
+	delegate := defaultSkillServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.Skill](config),
 	}
+	return wrapSkillGeneratedClient(hooks, delegate)
 }

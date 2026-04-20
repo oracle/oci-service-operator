@@ -19,7 +19,7 @@ import (
 )
 
 // NetworkSecurityGroupServiceClient is the handwritten extension seam for NetworkSecurityGroup runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*NetworkSecurityGroupServiceManager).WithClient.
 type NetworkSecurityGroupServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.NetworkSecurityGroup, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ NetworkSecurityGroupServiceClient = defaultNetworkSecurityGroupServiceClie
 
 var newNetworkSecurityGroupServiceClient = func(manager *NetworkSecurityGroupServiceManager) NetworkSecurityGroupServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.NetworkSecurityGroup]{
-		Kind:    "NetworkSecurityGroup",
-		SDKName: "NetworkSecurityGroup",
-		Log:     manager.Log,
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateNetworkSecurityGroupsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateNetworkSecurityGroups(ctx, *request.(*loadbalancersdk.UpdateNetworkSecurityGroupsRequest))
-			},
-		},
-	}
+	hooks := newNetworkSecurityGroupRuntimeHooks(manager, sdkClient)
+	config := buildNetworkSecurityGroupGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize NetworkSecurityGroup OCI client: %w", err)
 	}
-	return defaultNetworkSecurityGroupServiceClient{
+	delegate := defaultNetworkSecurityGroupServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.NetworkSecurityGroup](config),
 	}
+	return wrapNetworkSecurityGroupGeneratedClient(hooks, delegate)
 }

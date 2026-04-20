@@ -19,7 +19,7 @@ import (
 )
 
 // ApplicationServiceClient is the handwritten extension seam for Application runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ApplicationServiceManager).WithClient.
 type ApplicationServiceClient interface {
 	CreateOrUpdate(context.Context, *dataflowv1beta1.Application, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultApplicationServiceClient struct {
 	generatedruntime.ServiceClient[*dataflowv1beta1.Application]
 }
 
-func newApplicationRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "dataflow",
-		FormalSlug:    "application",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "handwritten",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "displayNameStartsWith", "ownerPrincipalId", "sparkVersion"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"applicationLogConfig", "archiveUri", "arguments", "className", "configuration", "definedTags", "description", "displayName", "driverShape", "driverShapeConfig", "execute", "executorShape", "executorShapeConfig", "fileUri", "freeformTags", "idleTimeoutInMinutes", "language", "logsBucketUri", "maxDurationInMinutes", "metastoreId", "numExecutors", "parameters", "poolId", "privateEndpointId", "sparkVersion", "warehouseBucketUri"},
-			ForceNew:      []string{"compartmentId", "type"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ ApplicationServiceClient = defaultApplicationServiceClient{}
 
 var newApplicationServiceClient = func(manager *ApplicationServiceManager) ApplicationServiceClient {
 	sdkClient, err := dataflowsdk.NewDataFlowClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*dataflowv1beta1.Application]{
-		Kind:      "Application",
-		SDKName:   "Application",
-		Log:       manager.Log,
-		Semantics: newApplicationRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.CreateApplicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateApplication(ctx, *request.(*dataflowsdk.CreateApplicationRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateApplicationDetails", RequestName: "CreateApplicationDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.GetApplicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetApplication(ctx, *request.(*dataflowsdk.GetApplicationRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.ListApplicationsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListApplications(ctx, *request.(*dataflowsdk.ListApplicationsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "OwnerPrincipalId", RequestName: "ownerPrincipalId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayNameStartsWith", RequestName: "displayNameStartsWith", Contribution: "query", PreferResourceID: false}, {FieldName: "SparkVersion", RequestName: "sparkVersion", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.UpdateApplicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateApplication(ctx, *request.(*dataflowsdk.UpdateApplicationRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateApplicationDetails", RequestName: "UpdateApplicationDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.DeleteApplicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteApplication(ctx, *request.(*dataflowsdk.DeleteApplicationRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newApplicationRuntimeHooks(manager, sdkClient)
+	config := buildApplicationGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Application OCI client: %w", err)
 	}
-	return defaultApplicationServiceClient{
+	delegate := defaultApplicationServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*dataflowv1beta1.Application](config),
 	}
+	return wrapApplicationGeneratedClient(hooks, delegate)
 }

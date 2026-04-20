@@ -19,7 +19,7 @@ import (
 )
 
 // AlarmSuppressionServiceClient is the handwritten extension seam for AlarmSuppression runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*AlarmSuppressionServiceManager).WithClient.
 type AlarmSuppressionServiceClient interface {
 	CreateOrUpdate(context.Context, *monitoringv1beta1.AlarmSuppression, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,39 +34,13 @@ var _ AlarmSuppressionServiceClient = defaultAlarmSuppressionServiceClient{}
 
 var newAlarmSuppressionServiceClient = func(manager *AlarmSuppressionServiceManager) AlarmSuppressionServiceClient {
 	sdkClient, err := monitoringsdk.NewMonitoringClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*monitoringv1beta1.AlarmSuppression]{
-		Kind:    "AlarmSuppression",
-		SDKName: "AlarmSuppression",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.CreateAlarmSuppressionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateAlarmSuppression(ctx, *request.(*monitoringsdk.CreateAlarmSuppressionRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.GetAlarmSuppressionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetAlarmSuppression(ctx, *request.(*monitoringsdk.GetAlarmSuppressionRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.ListAlarmSuppressionsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListAlarmSuppressions(ctx, *request.(*monitoringsdk.ListAlarmSuppressionsRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.DeleteAlarmSuppressionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteAlarmSuppression(ctx, *request.(*monitoringsdk.DeleteAlarmSuppressionRequest))
-			},
-		},
-	}
+	hooks := newAlarmSuppressionRuntimeHooks(manager, sdkClient)
+	config := buildAlarmSuppressionGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize AlarmSuppression OCI client: %w", err)
 	}
-	return defaultAlarmSuppressionServiceClient{
+	delegate := defaultAlarmSuppressionServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*monitoringv1beta1.AlarmSuppression](config),
 	}
+	return wrapAlarmSuppressionGeneratedClient(hooks, delegate)
 }

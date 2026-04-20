@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "queue",
+  "kind": "Queue",
+  "formalSlug": "queue",
+  "providerResource": "oci_queue_queue",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/queue_queue",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/queue_queue",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/queue/queue/page.html",
+  "bodySHA256": "11719ad98244c8fd9c15e321d08036292b8012495f46c5467b235d1908366eb3",
+  "bodyBytes": 4185,
+  "fixtureBodyPath": "7.22.0/queue/queue/page.html"
+}

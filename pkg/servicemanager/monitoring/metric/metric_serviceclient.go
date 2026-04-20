@@ -19,7 +19,7 @@ import (
 )
 
 // MetricServiceClient is the handwritten extension seam for Metric runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*MetricServiceManager).WithClient.
 type MetricServiceClient interface {
 	CreateOrUpdate(context.Context, *monitoringv1beta1.Metric, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ MetricServiceClient = defaultMetricServiceClient{}
 
 var newMetricServiceClient = func(manager *MetricServiceManager) MetricServiceClient {
 	sdkClient, err := monitoringsdk.NewMonitoringClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*monitoringv1beta1.Metric]{
-		Kind:    "Metric",
-		SDKName: "Metric",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.ListMetricsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListMetrics(ctx, *request.(*monitoringsdk.ListMetricsRequest))
-			},
-		},
-	}
+	hooks := newMetricRuntimeHooks(manager, sdkClient)
+	config := buildMetricGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Metric OCI client: %w", err)
 	}
-	return defaultMetricServiceClient{
+	delegate := defaultMetricServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*monitoringv1beta1.Metric](config),
 	}
+	return wrapMetricGeneratedClient(hooks, delegate)
 }

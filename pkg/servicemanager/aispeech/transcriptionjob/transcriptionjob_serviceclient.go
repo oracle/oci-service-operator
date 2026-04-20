@@ -19,7 +19,7 @@ import (
 )
 
 // TranscriptionJobServiceClient is the handwritten extension seam for TranscriptionJob runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*TranscriptionJobServiceManager).WithClient.
 type TranscriptionJobServiceClient interface {
 	CreateOrUpdate(context.Context, *aispeechv1beta1.TranscriptionJob, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultTranscriptionJobServiceClient struct {
 	generatedruntime.ServiceClient[*aispeechv1beta1.TranscriptionJob]
 }
 
-func newTranscriptionJobRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "aispeech",
-		FormalSlug:    "transcriptionjob",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"ACCEPTED", "IN_PROGRESS"},
-			UpdatingStates:     []string{"ACCEPTED", "IN_PROGRESS"},
-			ActiveStates:       []string{"SUCCEEDED"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"CANCELED", "CANCELING"},
-			TerminalStates: []string{"NOT_FOUND"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "lifecycleState"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
-			ForceNew:      []string{"compartmentId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ TranscriptionJobServiceClient = defaultTranscriptionJobServiceClient{}
 
 var newTranscriptionJobServiceClient = func(manager *TranscriptionJobServiceManager) TranscriptionJobServiceClient {
 	sdkClient, err := aispeechsdk.NewAIServiceSpeechClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*aispeechv1beta1.TranscriptionJob]{
-		Kind:      "TranscriptionJob",
-		SDKName:   "TranscriptionJob",
-		Log:       manager.Log,
-		Semantics: newTranscriptionJobRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeechsdk.CreateTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateTranscriptionJob(ctx, *request.(*aispeechsdk.CreateTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateTranscriptionJobDetails", RequestName: "CreateTranscriptionJobDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeechsdk.GetTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetTranscriptionJob(ctx, *request.(*aispeechsdk.GetTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeechsdk.ListTranscriptionJobsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListTranscriptionJobs(ctx, *request.(*aispeechsdk.ListTranscriptionJobsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeechsdk.UpdateTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateTranscriptionJob(ctx, *request.(*aispeechsdk.UpdateTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateTranscriptionJobDetails", RequestName: "UpdateTranscriptionJobDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeechsdk.DeleteTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteTranscriptionJob(ctx, *request.(*aispeechsdk.DeleteTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newTranscriptionJobRuntimeHooks(manager, sdkClient)
+	config := buildTranscriptionJobGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize TranscriptionJob OCI client: %w", err)
 	}
-	return defaultTranscriptionJobServiceClient{
+	delegate := defaultTranscriptionJobServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*aispeechv1beta1.TranscriptionJob](config),
 	}
+	return wrapTranscriptionJobGeneratedClient(hooks, delegate)
 }

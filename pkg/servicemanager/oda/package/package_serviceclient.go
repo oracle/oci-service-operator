@@ -19,7 +19,7 @@ import (
 )
 
 // PackageServiceClient is the handwritten extension seam for Package runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*PackageServiceManager).WithClient.
 type PackageServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.Package, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,27 +34,13 @@ var _ PackageServiceClient = defaultPackageServiceClient{}
 
 var newPackageServiceClient = func(manager *PackageServiceManager) PackageServiceClient {
 	sdkClient, err := odasdk.NewOdapackageClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.Package]{
-		Kind:    "Package",
-		SDKName: "Package",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetPackageRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetPackage(ctx, *request.(*odasdk.GetPackageRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListPackagesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListPackages(ctx, *request.(*odasdk.ListPackagesRequest))
-			},
-		},
-	}
+	hooks := newPackageRuntimeHooks(manager, sdkClient)
+	config := buildPackageGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Package OCI client: %w", err)
 	}
-	return defaultPackageServiceClient{
+	delegate := defaultPackageServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.Package](config),
 	}
+	return wrapPackageGeneratedClient(hooks, delegate)
 }

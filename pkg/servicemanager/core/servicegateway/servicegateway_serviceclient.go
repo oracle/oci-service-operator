@@ -19,7 +19,7 @@ import (
 )
 
 // ServiceGatewayServiceClient is the handwritten extension seam for ServiceGateway runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ServiceGatewayServiceManager).WithClient.
 type ServiceGatewayServiceClient interface {
 	CreateOrUpdate(context.Context, *corev1beta1.ServiceGateway, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultServiceGatewayServiceClient struct {
 	generatedruntime.ServiceClient[*corev1beta1.ServiceGateway]
 }
 
-func newServiceGatewayRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "core",
-		FormalSlug:    "servicegateway",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"PROVISIONING"},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"AVAILABLE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"TERMINATED", "TERMINATING"},
-			TerminalStates: []string{"NOT_FOUND"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId", "services"},
-			ForceNew:      []string{"compartmentId", "vcnId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ ServiceGatewayServiceClient = defaultServiceGatewayServiceClient{}
 
 var newServiceGatewayServiceClient = func(manager *ServiceGatewayServiceManager) ServiceGatewayServiceClient {
 	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*corev1beta1.ServiceGateway]{
-		Kind:      "ServiceGateway",
-		SDKName:   "ServiceGateway",
-		Log:       manager.Log,
-		Semantics: newServiceGatewayRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateServiceGateway(ctx, *request.(*coresdk.CreateServiceGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceGatewayDetails", RequestName: "CreateServiceGatewayDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetServiceGateway(ctx, *request.(*coresdk.GetServiceGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListServiceGatewaysRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListServiceGateways(ctx, *request.(*coresdk.ListServiceGatewaysRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "VcnId", RequestName: "vcnId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateServiceGateway(ctx, *request.(*coresdk.UpdateServiceGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateServiceGatewayDetails", RequestName: "UpdateServiceGatewayDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteServiceGateway(ctx, *request.(*coresdk.DeleteServiceGatewayRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newServiceGatewayRuntimeHooks(manager, sdkClient)
+	config := buildServiceGatewayGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize ServiceGateway OCI client: %w", err)
 	}
-	return defaultServiceGatewayServiceClient{
+	delegate := defaultServiceGatewayServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.ServiceGateway](config),
 	}
+	return wrapServiceGatewayGeneratedClient(hooks, delegate)
 }

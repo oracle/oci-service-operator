@@ -19,7 +19,7 @@ import (
 )
 
 // DigitalAssistantParameterServiceClient is the handwritten extension seam for DigitalAssistantParameter runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*DigitalAssistantParameterServiceManager).WithClient.
 type DigitalAssistantParameterServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.DigitalAssistantParameter, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,33 +34,13 @@ var _ DigitalAssistantParameterServiceClient = defaultDigitalAssistantParameterS
 
 var newDigitalAssistantParameterServiceClient = func(manager *DigitalAssistantParameterServiceManager) DigitalAssistantParameterServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.DigitalAssistantParameter]{
-		Kind:    "DigitalAssistantParameter",
-		SDKName: "DigitalAssistantParameter",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetDigitalAssistantParameterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetDigitalAssistantParameter(ctx, *request.(*odasdk.GetDigitalAssistantParameterRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListDigitalAssistantParametersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListDigitalAssistantParameters(ctx, *request.(*odasdk.ListDigitalAssistantParametersRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateDigitalAssistantParameterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateDigitalAssistantParameter(ctx, *request.(*odasdk.UpdateDigitalAssistantParameterRequest))
-			},
-		},
-	}
+	hooks := newDigitalAssistantParameterRuntimeHooks(manager, sdkClient)
+	config := buildDigitalAssistantParameterGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize DigitalAssistantParameter OCI client: %w", err)
 	}
-	return defaultDigitalAssistantParameterServiceClient{
+	delegate := defaultDigitalAssistantParameterServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.DigitalAssistantParameter](config),
 	}
+	return wrapDigitalAssistantParameterGeneratedClient(hooks, delegate)
 }

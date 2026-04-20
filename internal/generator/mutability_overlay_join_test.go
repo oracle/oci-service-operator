@@ -52,10 +52,11 @@ func TestMutabilityOverlayPathResolverResolve(t *testing.T) {
 			wantDiag:   "did not match any generated field",
 		},
 		{
-			name:       "alias collision stays ambiguous",
-			fieldPath:  "policy.name",
-			wantStatus: mutabilityOverlayJoinAmbiguous,
-			wantDiag:   "matched multiple canonical join keys",
+			name:          "exact field outranks singular list alias",
+			fieldPath:     "policy.name",
+			wantStatus:    mutabilityOverlayJoinMatched,
+			wantJoinKey:   "policy.name",
+			wantPathShape: mutabilityOverlayPathShapeObject,
 		},
 	}
 

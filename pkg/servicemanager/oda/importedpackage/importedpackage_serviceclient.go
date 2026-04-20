@@ -19,7 +19,7 @@ import (
 )
 
 // ImportedPackageServiceClient is the handwritten extension seam for ImportedPackage runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ImportedPackageServiceManager).WithClient.
 type ImportedPackageServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.ImportedPackage, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ ImportedPackageServiceClient = defaultImportedPackageServiceClient{}
 
 var newImportedPackageServiceClient = func(manager *ImportedPackageServiceManager) ImportedPackageServiceClient {
 	sdkClient, err := odasdk.NewOdapackageClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.ImportedPackage]{
-		Kind:    "ImportedPackage",
-		SDKName: "ImportedPackage",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateImportedPackageRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateImportedPackage(ctx, *request.(*odasdk.CreateImportedPackageRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetImportedPackageRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetImportedPackage(ctx, *request.(*odasdk.GetImportedPackageRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListImportedPackagesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListImportedPackages(ctx, *request.(*odasdk.ListImportedPackagesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateImportedPackageRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateImportedPackage(ctx, *request.(*odasdk.UpdateImportedPackageRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteImportedPackageRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteImportedPackage(ctx, *request.(*odasdk.DeleteImportedPackageRequest))
-			},
-		},
-	}
+	hooks := newImportedPackageRuntimeHooks(manager, sdkClient)
+	config := buildImportedPackageGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize ImportedPackage OCI client: %w", err)
 	}
-	return defaultImportedPackageServiceClient{
+	delegate := defaultImportedPackageServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.ImportedPackage](config),
 	}
+	return wrapImportedPackageGeneratedClient(hooks, delegate)
 }

@@ -19,7 +19,7 @@ import (
 )
 
 // ListenerRuleServiceClient is the handwritten extension seam for ListenerRule runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ListenerRuleServiceManager).WithClient.
 type ListenerRuleServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.ListenerRule, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ ListenerRuleServiceClient = defaultListenerRuleServiceClient{}
 
 var newListenerRuleServiceClient = func(manager *ListenerRuleServiceManager) ListenerRuleServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.ListenerRule]{
-		Kind:    "ListenerRule",
-		SDKName: "ListenerRule",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListListenerRulesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListListenerRules(ctx, *request.(*loadbalancersdk.ListListenerRulesRequest))
-			},
-		},
-	}
+	hooks := newListenerRuleRuntimeHooks(manager, sdkClient)
+	config := buildListenerRuleGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize ListenerRule OCI client: %w", err)
 	}
-	return defaultListenerRuleServiceClient{
+	delegate := defaultListenerRuleServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.ListenerRule](config),
 	}
+	return wrapListenerRuleGeneratedClient(hooks, delegate)
 }

@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "analytics",
+    "apiVersion": "analytics.oracle.com/v1beta1",
+    "kind": "AnalyticsInstance",
+    "formalSlug": "analyticsinstance",
+    "providerResource": "oci_analytics_analytics_instance",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "capacity.capacityValue",
+      "compartmentId",
+      "definedTags",
+      "description",
+      "emailNotification",
+      "freeformTags",
+      "licenseType"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "capacity.capacityType",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "featureSet",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "idcsAccessToken",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "kmsKeyId",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "name",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.networkEndpointType",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.networkSecurityGroupIds",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.subnetId",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.vcnId",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.whitelistedIps",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.whitelistedServices",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.whitelistedVcns.id",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      },
+      {
+        "fieldPath": "networkEndpointDetails.whitelistedVcns.whitelistedIps",
+        "decision": "unknown",
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "core",
+  "kind": "NetworkSecurityGroup",
+  "formalSlug": "networksecuritygroup",
+  "providerResource": "oci_core_network_security_group",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/core_network_security_group",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/core_network_security_group",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/core/networksecuritygroup/page.html",
+  "bodySHA256": "7d3ddb89458e6bf4692035710e9d237ba8adacff6fadf112b9ef0b59f76938b0",
+  "bodyBytes": 1624,
+  "fixtureBodyPath": "7.22.0/core/networksecuritygroup/page.html"
+}

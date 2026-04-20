@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>access_mode</code> - (Optional) (Updatable) The access mode indicating if the database access will be restricted only to administrators or not:
+        <ul>
+          <li>UNRESTRICTED (default): the access to the database is not restricted;</li>
+          <li>RESTRICTED: the access will be allowed only to users with specific privileges; RESTRICTED will correspond to setting the MySQL system variable  [offline_mode](https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON.</li>
+        </ul>
+      </li>
+      <li><code>admin_password</code> - (Optional) The password for the administrative user. The password must be between 8 and 32 characters long, and must contain at least 1 numeric character, 1 lowercase character, 1 uppercase character, and 1 special (nonalphanumeric) character.</li>
+      <li><code>admin_username</code> - (Optional) The username for the administrative user.</li>
+      <li><code>availability_domain</code> - (Required) The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other availability domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the availability domain in which the DB System is placed.</li>
+      <li><code>backup_policy</code> - (Optional) (Updatable) Backup policy as optionally used for DB System Creation.
+        <ul>
+          <li><code>copy_policies</code> - (Optional) (Updatable) List of policies of a DB system to schedule cross-region DB system backup copy. The policy includes the name of the destination region to which the DB system backup will be copied, and an optional parameter which specifies the retention period of the copied DB system backup in days. **Note:** Currently, only one policy can be specified in the list.
+            <ul>
+              <li><code>backup_copy_retention_in_days</code> - (Optional) (Updatable) Number of days to retain the copied DB system backup.</li>
+              <li><code>copy_to_region</code> - (Required) (Updatable) The destination region name to which the DB system backup will be copied.</li>
+            </ul>
+          </li>
+          <li><code>defined_tags</code> - (Optional) (Updatable) Usage of predefined tag keys. These predefined keys are scoped to namespaces. Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+          <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only. Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+          <li><code>is_enabled</code> - (Optional) (Updatable) Specifies if automatic backups are enabled.</li>
+          <li><code>pitr_policy</code> - (Optional) (Updatable) The PITR policy for the DB System.
+            <ul>
+              <li><code>is_enabled</code> - (Required) (Updatable) Specifies if PITR is enabled or disabled.</li>
+            </ul>
+          </li>
+          <li><code>retention_in_days</code> - (Optional) (Updatable) Number of days to retain an automatic backup.</li>
+          <li><code>soft_delete</code> - (Optional) (Updatable) Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED state for 7 days before permanently deleting it.</li>
+          <li><code>window_start_time</code> - (Optional) (Updatable) The start of a 30-minute window of time in which daily, automated backups occur. This should be in the format of the &#34;Time&#34; portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. At some point in the window, the system may incur a brief service disruption as the backup is performed.</li>
+        </ul>
+      </li>
+      <li><code>compartment_id</code> - (Required) The OCID of the compartment.</li>
+      <li><code>configuration_id</code> - (Optional) (Updatable) The OCID of the Configuration to be used for this DB System.</li>
+      <li><code>crash_recovery</code> - (Optional) (Updatable) Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled, and whether to enable or disable syncing of the Binary Logs.</li>
+      <li><code>data_storage</code> - (Optional) (Updatable) Data Storage configuration properties.
+        <ul>
+          <li><code>is_auto_expand_storage_enabled</code> - (Optional) (Updatable) Enable/disable automatic storage expansion. When set to true, the DB System will automatically add storage incrementally up to the value specified in maxStorageSizeInGBs.</li>
+          <li><code>max_storage_size_in_gbs</code> - (Optional) (Updatable) Maximum storage size this DB System can expand to. When isAutoExpandStorageEnabled is set to true, the DB System will add storage incrementally up to this value. DB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB. DB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB. DB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB. DB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB. It is not possible to decrease data storage size. You cannot set the maximum data storage size to less than either current DB System dataStorageSizeInGBs or allocatedStorageSizeInGBs.</li>
+        </ul>
+      </li>
+      <li><code>customer_contacts</code> - (Optional) (Updatable) The list of customer email addresses that receive information from Oracle about the specified Oracle Cloud Infrastructure DB System resource.  Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators.  Up to 10 email addresses can be added to the customer contacts for a DB System.
+        <ul>
+          <li><code>email</code> - (Required) (Updatable) The email address used by Oracle to send notifications regarding the DB System.</li>
+        </ul>
+      </li>
+      <li><code>data_storage_size_in_gb</code> - (Optional) (Updatable) Initial size of the data volume in GBs that will be created and attached. Keep in mind that this only specifies the size of the database data volume, the log volume for the database will be scaled appropriately with its shape. It is required if you are creating a new database. It cannot be set if you are creating a database from a backup.</li>
+      <li><code>database_console</code> - (Optional) (Updatable) Details required to configure the database console while creating a DB System.
+        <ul>
+          <li><code>port</code> - (Optional) (Updatable) The port on which the database console can be accessed. Supported port numbers are 443 and from 1024 to 65535.</li>
+          <li><code>status</code> - (Required) (Updatable) Enable/disable the database console on the DB System.</li>
+        </ul>
+      </li>
+      <li><code>database_management</code> - (Optional) (Updatable) Whether to enable monitoring via the Database Management service.</li>
+      <li><code>database_mode</code> - (Optional) (Updatable) The database mode indicating the types of statements that will be allowed to run in the DB system. This mode will apply only to statements run by user connections. Replicated write statements will continue  to be allowed regardless of the DatabaseMode.
+        <ul>
+          <li>READ_WRITE (default): allow running read and write statements on the DB system;</li>
+          <li>READ_ONLY: only allow running read statements on the DB system.</li>
+        </ul>
+      </li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>deletion_policy</code> - (Optional) (Updatable) Policy for how the DB System and related resources should be handled at the time of its deletion.
+        <ul>
+          <li><code>automatic_backup_retention</code> - (Optional) (Updatable) Specifies if any automatic backups created for a DB System should be retained or deleted when the DB System is deleted.</li>
+          <li><code>final_backup</code> - (Optional) (Updatable) Specifies whether or not a backup is taken when the DB System is deleted. REQUIRE_FINAL_BACKUP: a backup is taken if the DB System is deleted. SKIP_FINAL_BACKUP: a backup is not taken if the DB System is deleted.</li>
+          <li><code>is_delete_protected</code> - (Optional) (Updatable) Specifies whether the DB System can be deleted. Set to true to prevent deletion, false (default) to allow.</li>
+        </ul>
+      </li>
+      <li><code>description</code> - (Optional) (Updatable) User-provided data about the DB System.</li>
+      <li><code>display_name</code> - (Optional) (Updatable) The user-friendly name for the DB System. It does not have to be unique.</li>
+      <li><code>encrypt_data</code> - (Optional) (Updatable) Encrypt data details.
+        <ul>
+          <li><code>key_generation_type</code> - (Required) (Updatable) Select whether to use Oracle-managed key (SYSTEM) or your own key (BYOK).</li>
+          <li><code>key_id</code> - (Optional) (Updatable) The OCID of the key to use.</li>
+        </ul>
+      </li>
+      <li><code>fault_domain</code> - (Optional) The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other fault domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the fault domain in which the DB System is placed.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>hostname_label</code> - (Optional) (Updatable) The hostname for the primary endpoint of the DB System. Used for DNS. The value is the hostname portion of the primary private IP&#39;s fully qualified domain name (FQDN) (for example, &#34;dbsystem-1&#34; in FQDN &#34;dbsystem-1.subnet123.vcn1.oraclevcn.com&#34;). Must be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123.</li>
+      <li><code>ip_address</code> - (Optional) The IP address the DB System is configured to listen on. A private IP address of your choice to assign to the primary endpoint of the DB System. Must be an available IP address within the subnet&#39;s CIDR. If you don&#39;t specify a value, Oracle automatically assigns a private IP address from the subnet. This should be a &#34;dotted-quad&#34; style IPv4 address.</li>
+      <li><code>is_highly_available</code> - (Optional) (Updatable) Specifies if the DB System is highly available. When creating a DB System with High Availability, three instances are created and placed according to your region- and subnet-type. The secondaries are placed automatically in the other two availability or fault domains.  You can choose the preferred location of your primary instance, only.</li>
+      <li><code>maintenance</code> - (Optional) (Updatable) The Maintenance Policy for the DB System or Read Replica that this model is included in. <code>maintenance</code> and <code>backup_policy</code> cannot be updated in the same request.
+        <ul>
+          <li><code>maintenance_disabled_windows</code> - (Optional) (Updatable) Time window during which downtime-inducing maintenance shall not be performed. Downtime-free maintenance may be performed to apply required security patches. At most one configured window is supported.
+            <ul>
+              <li><code>time_end</code> - (Required) (Updatable) The time until when maintenance is disabled. Must be set together with timeStart and must be after timeStart. as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).</li>
+              <li><code>time_start</code> - (Required) (Updatable) The time from when maintenance is disabled. Must be set together with timeEnd and must be before timeEnd. as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).</li>
+            </ul>
+          </li>
+          <li><code>maintenance_schedule_type</code> - (Optional) (Updatable) The maintenance schedule type of the DB system. Defaults to REGULAR. EARLY:   Maintenance schedule follows a cycle where upgrades are performed when versions become deprecated. REGULAR: Maintenance schedule follows the normal cycle where upgrades are performed when versions become unavailable.</li>
+          <li><code>version_preference</code> - (Optional) (Updatable) The preferred version to target when performing an automatic MySQL upgrade. Defaults to OLDEST. OLDEST: Choose the oldest available MySQL version based on the current version of the DB System. SECOND_NEWEST: Choose the MySQL version before the newest for auto-upgrade. NEWEST: Choose the latest and greatest MySQL version available for auto-upgrade.</li>
+          <li><code>version_track_preference</code> - (Optional) (Updatable) The preferred version track to target when performing an automatic MySQL upgrade. Defaults to FOLLOW. LONG_TERM_SUPPORT: No MySQL database behavior changes. INNOVATION:        Provides access to the latest features and all bug fixes. FOLLOW:            Follows the track of the current MySQL version.</li>
+          <li><code>window_start_time</code> - (Required) (Updatable) The start of the 2 hour maintenance window. This string is of the format: &#34;{day-of-week} {time-of-day}&#34;. &#34;{day-of-week}&#34; is a case-insensitive string like &#34;mon&#34;, &#34;tue&#34;, &amp;c. &#34;{time-of-day}&#34; is the &#34;Time&#34; portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. If you set the read replica maintenance window to &#34;&#34; or if not specified, the read replica is set same as the DB system maintenance window.</li>
+        </ul>
+      </li>
+      <li><code>mysql_version</code> - (Optional) The specific MySQL version identifier.</li>
+      <li><code>nsg_ids</code> - (Optional) (Updatable) Network Security Group OCIDs used for the VNIC attachment.</li>
+      <li><code>port</code> - (Optional) The port for primary endpoint of the DB System to listen on.</li>
+      <li><code>port_x</code> - (Optional) The TCP network port on which X Plugin listens for connections. This is the X Plugin equivalent of port.</li>
+      <li><code>read_endpoint</code> - (Optional) (Updatable) Details required to create a Read Endpoint.
+        <ul>
+          <li><code>exclude_ips</code> - (Optional) (Updatable) A list of IP addresses of read replicas that are excluded from serving read requests.</li>
+          <li><code>is_enabled</code> - (Optional) (Updatable) Specifies if the DB System read endpoint is enabled or not.</li>
+          <li><code>read_endpoint_hostname_label</code> - (Optional) (Updatable) The hostname for the read endpoint of the DB System. Used for DNS. The value is the hostname portion of the primary private IP&#39;s fully qualified domain name (FQDN)  (for example, &#34;dbsystem-1&#34; in FQDN &#34;dbsystem-1.subnet123.vcn1.oraclevcn.com&#34;). Must be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123.</li>
+          <li><code>read_endpoint_ip_address</code> - (Optional) (Updatable) The IP address the DB System read endpoint is configured to listen on. A private IP address of your choice to assign to the read endpoint of the DB System. Must be an available IP address within the subnet&#39;s CIDR. If you don&#39;t specify a value, Oracle automatically assigns a private IP address from the subnet. This should be a &#34;dotted-quad&#34; style IPv4 address.</li>
+        </ul>
+      </li>
+      <li><code>rest</code> - (Optional) (Updatable) Details required to configure REST while creating a DB System.
+        <ul>
+          <li><code>configuration</code> - (Required) (Updatable) Select how REST is configured across the DB System instances.</li>
+          <li><code>port</code> - (Optional) (Updatable) The port for REST to listen on. Supported port numbers are 443 and from 1024 to 65535.</li>
+        </ul>
+      </li>
+      <li><code>secure_connections</code> - (Optional) (Updatable) Secure connection configuration details.
+        <ul>
+          <li><code>certificate_generation_type</code> - (Required) (Updatable) Select whether to use MySQL Database Service-managed certificate (SYSTEM) or your own certificate (BYOC).</li>
+          <li><code>certificate_id</code> - (Optional) (Updatable) The OCID of the certificate to use.</li>
+        </ul>
+      </li>
+      <li><code>security_attributes</code> - (Optional) (Updatable) Security Attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see [ZPR Artifacts](https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm). Example: <code>{&#34;Oracle-ZPR&#34;: {&#34;MaxEgressCount&#34;: {&#34;value&#34;: &#34;42&#34;, &#34;mode&#34;: &#34;audit&#34;}}}</code></li>
+      <li><code>shape_name</code> - (Required) (Updatable) The name of the shape. The shape determines the resources allocated
+        <ul>
+          <li>CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes. To get a list of shapes, use the [ListShapes](https://docs.cloud.oracle.com/iaas/api/#/en/mysql/20190415/ShapeSummary/ListShapes) operation.</li>
+        </ul>
+      </li>
+      <li><code>source</code> - (Optional) Parameters detailing how to provision the initial data of the system.
+        <ul>
+          <li><code>backup_id</code> - (Required when source_type=BACKUP) The OCID of the backup to be used as the source for the new DB System.</li>
+          <li><code>db_system_id</code> - (Required when source_type=PITR) The OCID of the DB System from which a backup shall be selected to be restored when creating the new DB System. Use this together with recovery point to perform a point in time recovery operation.</li>
+          <li><code>recovery_point</code> - (Applicable when source_type=PITR) The date and time, as per RFC 3339, of the change up to which the new DB System shall be restored to, using a backup and logs from the original DB System. In case no point in time is specified, then this new DB System shall be restored up to the latest change recorded for the original DB System.</li>
+          <li><code>source_type</code> - (Required) The specific source identifier. Use <code>BACKUP</code> for creating a new database by restoring from a backup. Use <code>IMPORTURL</code> for creating a new database from a URL Object Storage PAR.</li>
+          <li><code>source_url</code> - (Required when source_type=IMPORTURL) The Pre-Authenticated Request (PAR) of a bucket/prefix or PAR of a @.manifest.json object from the Object Storage. Check [Using Pre-Authenticated Requests](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm) for information related to PAR creation. Please create PAR with &#34;Permit object reads&#34; access type and &#34;Enable Object Listing&#34; permission when using a bucket/prefix PAR. Please create PAR with &#34;Permit object reads&#34; access type when using a @.manifest.json object PAR.</li>
+        </ul>
+      </li>
+      <li><code>subnet_id</code> - (Required) The OCID of the subnet the DB System is associated with.</li>
+      <li><code>telemetry_configuration</code> - (Optional) (Updatable) Details required to configure how MySQL telemetry should be exposed.
+        <ul>
+          <li><code>logs</code> - (Optional) (Updatable) Telemetry configuration details for logging.
+            <ul>
+              <li><code>destination</code> - (Required) (Updatable) Type of destination where MySQL telemetry is exposed to. Use <code>LOG_ANALYTICS</code> to send logs to OCI Log Analytics.</li>
+              <li><code>destination_configurations</code> - (Required) (Updatable) List of configuration variables for a given destination type. * <code>key</code> - (Required) (Updatable) Name of the destination configuration variable. Use <code>log-group-id</code> to  specify Log Analytics Log Group OCID. Also specify <code>log-set</code> when using the Log Partitioning feature of Log Analytics.
+                <ul>
+                  <li><code>value</code> - (Required) (Updatable) Value of the destination configuration variable.</li>
+                </ul>
+              </li>
+              <li><code>log_types</code> - (Required) (Updatable) List of MySQL telemetry types that can be exposed on a telemetry destination</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>state</code> - (Optional) (Updatable) The target state for the DB System. Could be set to <code>ACTIVE</code> or <code>INACTIVE</code>.</li>
+      <li><code>shutdown_type</code> - (Optional) It is applicable only for stopping a DB System. Could be set to <code>FAST</code>, <code>SLOW</code> or <code>IMMEDIATE</code>. Default value is <code>FAST</code>. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

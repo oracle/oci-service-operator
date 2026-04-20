@@ -19,7 +19,7 @@ import (
 )
 
 // BackendSetHealthServiceClient is the handwritten extension seam for BackendSetHealth runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*BackendSetHealthServiceManager).WithClient.
 type BackendSetHealthServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.BackendSetHealth, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ BackendSetHealthServiceClient = defaultBackendSetHealthServiceClient{}
 
 var newBackendSetHealthServiceClient = func(manager *BackendSetHealthServiceManager) BackendSetHealthServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.BackendSetHealth]{
-		Kind:    "BackendSetHealth",
-		SDKName: "BackendSetHealth",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetBackendSetHealthRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetBackendSetHealth(ctx, *request.(*loadbalancersdk.GetBackendSetHealthRequest))
-			},
-		},
-	}
+	hooks := newBackendSetHealthRuntimeHooks(manager, sdkClient)
+	config := buildBackendSetHealthGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize BackendSetHealth OCI client: %w", err)
 	}
-	return defaultBackendSetHealthServiceClient{
+	delegate := defaultBackendSetHealthServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.BackendSetHealth](config),
 	}
+	return wrapBackendSetHealthGeneratedClient(hooks, delegate)
 }

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "identity",
+  "kind": "Compartment",
+  "formalSlug": "compartment",
+  "providerResource": "oci_identity_compartment",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/identity_compartment",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/identity_compartment",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/identity/compartment/page.html",
+  "bodySHA256": "78d3208575781f8cf2badd5881661b8b67ae039b304ff108937c624a18801801",
+  "bodyBytes": 2048,
+  "fixtureBodyPath": "7.22.0/identity/compartment/page.html"
+}

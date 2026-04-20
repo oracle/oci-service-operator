@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "core",
+  "kind": "SecurityList",
+  "formalSlug": "securitylist",
+  "providerResource": "oci_core_security_list",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/core_security_list",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/core_security_list",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/core/securitylist/page.html",
+  "bodySHA256": "cebf2cc936d583eaf03e85146f9ab107ba1f44b3ca4d4462f815549a74cf3034",
+  "bodyBytes": 14320,
+  "fixtureBodyPath": "7.22.0/core/securitylist/page.html"
+}

@@ -19,7 +19,7 @@ import (
 )
 
 // SuppressionServiceClient is the handwritten extension seam for Suppression runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SuppressionServiceManager).WithClient.
 type SuppressionServiceClient interface {
 	CreateOrUpdate(context.Context, *emailv1beta1.Suppression, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,39 +34,13 @@ var _ SuppressionServiceClient = defaultSuppressionServiceClient{}
 
 var newSuppressionServiceClient = func(manager *SuppressionServiceManager) SuppressionServiceClient {
 	sdkClient, err := emailsdk.NewEmailClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*emailv1beta1.Suppression]{
-		Kind:    "Suppression",
-		SDKName: "Suppression",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.CreateSuppressionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateSuppression(ctx, *request.(*emailsdk.CreateSuppressionRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.GetSuppressionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetSuppression(ctx, *request.(*emailsdk.GetSuppressionRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.ListSuppressionsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSuppressions(ctx, *request.(*emailsdk.ListSuppressionsRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.DeleteSuppressionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteSuppression(ctx, *request.(*emailsdk.DeleteSuppressionRequest))
-			},
-		},
-	}
+	hooks := newSuppressionRuntimeHooks(manager, sdkClient)
+	config := buildSuppressionGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Suppression OCI client: %w", err)
 	}
-	return defaultSuppressionServiceClient{
+	delegate := defaultSuppressionServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*emailv1beta1.Suppression](config),
 	}
+	return wrapSuppressionGeneratedClient(hooks, delegate)
 }

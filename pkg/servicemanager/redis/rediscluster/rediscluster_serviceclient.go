@@ -19,7 +19,7 @@ import (
 )
 
 // RedisClusterServiceClient is the handwritten extension seam for RedisCluster runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*RedisClusterServiceManager).WithClient.
 type RedisClusterServiceClient interface {
 	CreateOrUpdate(context.Context, *redisv1beta1.RedisCluster, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,112 +30,17 @@ type defaultRedisClusterServiceClient struct {
 	generatedruntime.ServiceClient[*redisv1beta1.RedisCluster]
 }
 
-func newRedisClusterRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "redis",
-		FormalSlug:    "rediscluster",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "workrequest",
-			Runtime:              "handwritten",
-			FormalClassification: "workrequest",
-			WorkRequest: &generatedruntime.WorkRequestSemantics{
-				Source: "service-sdk",
-				Phases: []string{"create", "update", "delete"},
-			},
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "freeformTags", "nodeCount", "nodeMemoryInGbs"},
-			ForceNew:      []string{"compartmentId", "softwareVersion", "subnetId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "CREATED"}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "UPDATED"}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "DELETED"}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "CREATED"}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "UPDATED"}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "redis", Action: "DELETED"}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ RedisClusterServiceClient = defaultRedisClusterServiceClient{}
 
 var newRedisClusterServiceClient = func(manager *RedisClusterServiceManager) RedisClusterServiceClient {
 	sdkClient, err := redissdk.NewRedisClusterClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*redisv1beta1.RedisCluster]{
-		Kind:      "RedisCluster",
-		SDKName:   "RedisCluster",
-		Log:       manager.Log,
-		Semantics: newRedisClusterRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &redissdk.CreateRedisClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateRedisCluster(ctx, *request.(*redissdk.CreateRedisClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateRedisClusterDetails", RequestName: "CreateRedisClusterDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &redissdk.GetRedisClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetRedisCluster(ctx, *request.(*redissdk.GetRedisClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "RedisClusterId", RequestName: "redisClusterId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &redissdk.ListRedisClustersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListRedisClusters(ctx, *request.(*redissdk.ListRedisClustersRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &redissdk.UpdateRedisClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateRedisCluster(ctx, *request.(*redissdk.UpdateRedisClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "RedisClusterId", RequestName: "redisClusterId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateRedisClusterDetails", RequestName: "UpdateRedisClusterDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &redissdk.DeleteRedisClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteRedisCluster(ctx, *request.(*redissdk.DeleteRedisClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "RedisClusterId", RequestName: "redisClusterId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newRedisClusterRuntimeHooks(manager, sdkClient)
+	config := buildRedisClusterGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize RedisCluster OCI client: %w", err)
 	}
-	return defaultRedisClusterServiceClient{
+	delegate := defaultRedisClusterServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*redisv1beta1.RedisCluster](config),
 	}
+	return wrapRedisClusterGeneratedClient(hooks, delegate)
 }

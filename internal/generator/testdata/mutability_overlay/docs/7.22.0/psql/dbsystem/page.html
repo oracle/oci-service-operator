@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>compartment_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system.</li>
+      <li><code>config_id</code> - (Optional) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system.</li>
+      <li><code>apply_config</code> - (Optional) Whether a configuration update requires a restart of the database instance or a reload of the configuration. Some configuration changes require a restart of database instances to be applied. Apply config can be passed as <code>RESTART</code> or <code>RELOAD</code></li>
+      <li><code>credentials</code> - (Optional) Initial database system credentials that the database system will be provisioned with. The password details are not visible on any subsequent operation, such as GET /dbSystems/{dbSystemId}.
+        <ul>
+          <li><code>password_details</code> - (Required) Details for the database system password. Password can be passed as <code>VaultSecretPasswordDetails</code> or <code>PlainTextPasswordDetails</code>.
+            <ul>
+              <li><code>password</code> - (Required when password_type=PLAIN_TEXT) The database system password.</li>
+              <li><code>password_type</code> - (Required) The password type.</li>
+              <li><code>secret_id</code> - (Required when password_type=VAULT_SECRET) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret where the password is stored.</li>
+              <li><code>secret_version</code> - (Required when password_type=VAULT_SECRET) The secret version of the stored password.</li>
+            </ul>
+          </li>
+          <li><code>username</code> - (Required) The database system administrator username.</li>
+        </ul>
+      </li>
+      <li><code>db_version</code> - (Required) Version of database system software.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>description</code> - (Optional) (Updatable) A user-provided description of a database system.</li>
+      <li><code>display_name</code> - (Required) (Updatable) A user-friendly display name for the database system. Avoid entering confidential information.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>instance_count</code> - (Optional) Count of database instances nodes to be created in the database system.</li>
+      <li><code>instance_memory_size_in_gbs</code> - (Optional) (Updatable) The total amount of memory available to each database instance node, in gigabytes.</li>
+      <li><code>instance_ocpu_count</code> - (Optional) (Updatable) The total number of OCPUs available to each database instance node.</li>
+      <li><code>instances_details</code> - (Optional) Details of database instances nodes to be created. This parameter is optional. If specified, its size must match <code>instanceCount</code>.
+        <ul>
+          <li><code>description</code> - (Optional) A user-provided description of the database instance node.</li>
+          <li><code>display_name</code> - (Optional) Display name of the database instance node. Avoid entering confidential information.</li>
+          <li><code>private_ip</code> - (Optional) Private IP in customer subnet that will be assigned to the database instance node. This value is optional. If the IP is not provided, the IP will be chosen from the available IP addresses in the specified subnet.</li>
+        </ul>
+      </li>
+      <li><code>management_policy</code> - (Optional) (Updatable) PostgreSQL database system management policy update details.
+        <ul>
+          <li><code>backup_policy</code> - (Optional) (Updatable) PostgreSQL database system backup policy.
+            <ul>
+              <li><code>backup_start</code> - (Required when kind=DAILY | MONTHLY | WEEKLY) (Updatable) Hour of the day when the backup starts.</li>
+              <li><code>copy_policy</code> - (Optional) (Updatable) Backup copy details
+                <ul>
+                  <li><code>compartment_id</code> - (Required) (Updatable) target compartment to place a new backup</li>
+                  <li><code>regions</code> - (Optional) (Updatable) List of region names of the remote region</li>
+                  <li><code>retention_period</code> - (Optional) (Updatable) Retention period in days of the backup copy.</li>
+                </ul>
+              </li>
+              <li><code>days_of_the_month</code> - (Required when kind=MONTHLY) (Updatable) Day of the month when the backup should start. To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day.</li>
+              <li><code>days_of_the_week</code> - (Required when kind=WEEKLY) (Updatable) The day of the week that the backup starts.</li>
+              <li><code>kind</code> - (Optional) (Updatable) The kind of backup policy.</li>
+              <li><code>retention_days</code> - (Optional) (Updatable) How many days the data should be stored after the database system deletion.</li>
+            </ul>
+          </li>
+          <li><code>maintenance_window_start</code> - (Optional) (Updatable) The start of the maintenance window in UTC. This string is of the format: &#34;{day-of-week} {time-of-day}&#34;. &#34;{day-of-week}&#34; is a case-insensitive string like &#34;mon&#34;, &#34;tue&#34;, &amp;c. &#34;{time-of-day}&#34; is the &#34;Time&#34; portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.</li>
+        </ul>
+      </li>
+      <li><code>network_details</code> - (Required) (Updatable) Network details for the database system.
+        <ul>
+          <li><code>is_reader_endpoint_enabled</code> - (Optional) (Updatable) Specifies if the reader endpoint is enabled on the dbSystem.</li>
+          <li><code>nsg_ids</code> - (Optional) (Updatable) List of customer Network Security Group [OCIDs](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the database system.</li>
+          <li><code>primary_db_endpoint_private_ip</code> - (Optional) Private IP in customer subnet. The value is optional. If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet.</li>
+          <li><code>subnet_id</code> - (Required) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the customer subnet associated with the database system.</li>
+        </ul>
+      </li>
+      <li><code>shape</code> - (Required) (Updatable) The name of the shape for the database instance node. Use the /shapes API for accepted shapes. Example: <code>VM.Standard.E4.Flex</code></li>
+      <li><code>patch_operations</code> - (Optional) (Updatable) For adding and removing from read replica database instances. Please remove the patch_operations after it is applied. Update the instance_count arrodrandly. Cannot be specified when creating the resource.
+        <ul>
+          <li><code>operation</code> - (Required) The operation can be one of these values: <code>INSERT</code>, <code>REMOVE</code>.</li>
+          <li><code>selection</code> - (Required) In case of <code>INSERT</code>, selection is <code>instances</code>. In case of <code>REMOVE</code>, selection is <code>instances[?id == &#39;${var.instance_id}&#39;]</code>.</li>
+          <li><code>value</code> - (Required when operation=INSERT) Specify instance details such as displayName, description or privateIp. Example: <code>{&#34;displayName&#34;: &#34;value&#34;}</code>.</li>
+        </ul>
+      </li>
+      <li><code>source</code> - (Optional) The source of the database system.
+        <ul>
+          <li><code>backup_id</code> - (Required when source_type=BACKUP) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the database system backup.</li>
+          <li><code>is_having_restore_config_overrides</code> - (Applicable when source_type=BACKUP) Deprecated. Don&#39;t use.</li>
+          <li><code>source_type</code> - (Required) The source descriminator. Example: <code>{&#34;source_type&#34;: &#34;BACKUP&#34;}</code>.</li>
+        </ul>
+      </li>
+      <li><code>storage_details</code> - (Required) (Updatable) Storage details of the database system.
+        <ul>
+          <li><code>availability_domain</code> - (Optional) Specifies the availability domain of AD-local storage. If <code>isRegionallyDurable</code> is set to true, <code>availabilityDomain</code> should not be specified. If <code>isRegionallyDurable</code> is set to false, <code>availabilityDomain</code> must be specified.</li>
+          <li><code>iops</code> - (Applicable when system_type=OCI_OPTIMIZED_STORAGE) (Updatable) Guaranteed input/output storage requests per second (IOPS) available to the database system. Find more about the supported Peformance Tiers [here](https://docs.oracle.com/en-us/iaas/Content/postgresql/performance-tiers.htm).</li>
+          <li><code>is_regionally_durable</code> - (Required) Specifies if the block volume used for the database system is regional or AD-local. If not specified, it will be set to false. If <code>isRegionallyDurable</code> is set to true, <code>availabilityDomain</code> should not be specified. If <code>isRegionallyDurable</code> is set to false, <code>availabilityDomain</code> must be specified.</li>
+          <li><code>system_type</code> - (Required) Type of the database system.</li>
+        </ul>
+      </li>
+      <li><code>system_type</code> - (Optional) Type of the database system. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

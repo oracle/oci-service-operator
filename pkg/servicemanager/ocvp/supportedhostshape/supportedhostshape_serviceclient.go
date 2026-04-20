@@ -19,7 +19,7 @@ import (
 )
 
 // SupportedHostShapeServiceClient is the handwritten extension seam for SupportedHostShape runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SupportedHostShapeServiceManager).WithClient.
 type SupportedHostShapeServiceClient interface {
 	CreateOrUpdate(context.Context, *ocvpv1beta1.SupportedHostShape, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ SupportedHostShapeServiceClient = defaultSupportedHostShapeServiceClient{}
 
 var newSupportedHostShapeServiceClient = func(manager *SupportedHostShapeServiceManager) SupportedHostShapeServiceClient {
 	sdkClient, err := ocvpsdk.NewSddcClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*ocvpv1beta1.SupportedHostShape]{
-		Kind:    "SupportedHostShape",
-		SDKName: "SupportedHostShape",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.ListSupportedHostShapesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSupportedHostShapes(ctx, *request.(*ocvpsdk.ListSupportedHostShapesRequest))
-			},
-		},
-	}
+	hooks := newSupportedHostShapeRuntimeHooks(manager, sdkClient)
+	config := buildSupportedHostShapeGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize SupportedHostShape OCI client: %w", err)
 	}
-	return defaultSupportedHostShapeServiceClient{
+	delegate := defaultSupportedHostShapeServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.SupportedHostShape](config),
 	}
+	return wrapSupportedHostShapeGeneratedClient(hooks, delegate)
 }

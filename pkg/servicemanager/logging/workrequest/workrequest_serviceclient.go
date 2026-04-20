@@ -19,7 +19,7 @@ import (
 )
 
 // WorkRequestServiceClient is the handwritten extension seam for WorkRequest runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*WorkRequestServiceManager).WithClient.
 type WorkRequestServiceClient interface {
 	CreateOrUpdate(context.Context, *loggingv1beta1.WorkRequest, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,33 +34,13 @@ var _ WorkRequestServiceClient = defaultWorkRequestServiceClient{}
 
 var newWorkRequestServiceClient = func(manager *WorkRequestServiceManager) WorkRequestServiceClient {
 	sdkClient, err := loggingsdk.NewLoggingManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loggingv1beta1.WorkRequest]{
-		Kind:    "WorkRequest",
-		SDKName: "WorkRequest",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.GetWorkRequestRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetWorkRequest(ctx, *request.(*loggingsdk.GetWorkRequestRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.ListWorkRequestsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListWorkRequests(ctx, *request.(*loggingsdk.ListWorkRequestsRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.DeleteWorkRequestRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteWorkRequest(ctx, *request.(*loggingsdk.DeleteWorkRequestRequest))
-			},
-		},
-	}
+	hooks := newWorkRequestRuntimeHooks(manager, sdkClient)
+	config := buildWorkRequestGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize WorkRequest OCI client: %w", err)
 	}
-	return defaultWorkRequestServiceClient{
+	delegate := defaultWorkRequestServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loggingv1beta1.WorkRequest](config),
 	}
+	return wrapWorkRequestGeneratedClient(hooks, delegate)
 }

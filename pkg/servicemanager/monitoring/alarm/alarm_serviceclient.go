@@ -19,7 +19,7 @@ import (
 )
 
 // AlarmServiceClient is the handwritten extension seam for Alarm runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*AlarmServiceManager).WithClient.
 type AlarmServiceClient interface {
 	CreateOrUpdate(context.Context, *monitoringv1beta1.Alarm, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultAlarmServiceClient struct {
 	generatedruntime.ServiceClient[*monitoringv1beta1.Alarm]
 }
 
-func newAlarmRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "monitoring",
-		FormalSlug:    "alarm",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "lifecycleState"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"body", "definedTags", "destinations", "displayName", "freeformTags", "isEnabled", "isNotificationsPerMetricDimensionEnabled", "messageFormat", "metricCompartmentId", "metricCompartmentIdInSubtree", "namespace", "pendingDuration", "query", "repeatNotificationDuration", "resolution", "resourceGroup", "severity", "suppression"},
-			ForceNew:      []string{"compartmentId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ AlarmServiceClient = defaultAlarmServiceClient{}
 
 var newAlarmServiceClient = func(manager *AlarmServiceManager) AlarmServiceClient {
 	sdkClient, err := monitoringsdk.NewMonitoringClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*monitoringv1beta1.Alarm]{
-		Kind:      "Alarm",
-		SDKName:   "Alarm",
-		Log:       manager.Log,
-		Semantics: newAlarmRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.CreateAlarmRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateAlarm(ctx, *request.(*monitoringsdk.CreateAlarmRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateAlarmDetails", RequestName: "CreateAlarmDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.GetAlarmRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetAlarm(ctx, *request.(*monitoringsdk.GetAlarmRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "AlarmId", RequestName: "alarmId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.ListAlarmsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListAlarms(ctx, *request.(*monitoringsdk.ListAlarmsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentIdInSubtree", RequestName: "compartmentIdInSubtree", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.UpdateAlarmRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateAlarm(ctx, *request.(*monitoringsdk.UpdateAlarmRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "AlarmId", RequestName: "alarmId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateAlarmDetails", RequestName: "UpdateAlarmDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.DeleteAlarmRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteAlarm(ctx, *request.(*monitoringsdk.DeleteAlarmRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "AlarmId", RequestName: "alarmId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newAlarmRuntimeHooks(manager, sdkClient)
+	config := buildAlarmGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Alarm OCI client: %w", err)
 	}
-	return defaultAlarmServiceClient{
+	delegate := defaultAlarmServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*monitoringv1beta1.Alarm](config),
 	}
+	return wrapAlarmGeneratedClient(hooks, delegate)
 }

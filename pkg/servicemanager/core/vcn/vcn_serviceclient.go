@@ -19,7 +19,7 @@ import (
 )
 
 // VcnServiceClient is the handwritten extension seam for Vcn runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*VcnServiceManager).WithClient.
 type VcnServiceClient interface {
 	CreateOrUpdate(context.Context, *corev1beta1.Vcn, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultVcnServiceClient struct {
 	generatedruntime.ServiceClient[*corev1beta1.Vcn]
 }
 
-func newVcnRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "core",
-		FormalSlug:    "vcn",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"PROVISIONING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"AVAILABLE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"TERMINATED", "TERMINATING"},
-			TerminalStates: []string{"NOT_FOUND"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-			ForceNew:      []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"},
-			ConflictsWith: map[string][]string{"cidrBlock": []string{"cidrBlocks"}, "cidrBlocks": []string{"cidrBlock"}},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ VcnServiceClient = defaultVcnServiceClient{}
 
 var newVcnServiceClient = func(manager *VcnServiceManager) VcnServiceClient {
 	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*corev1beta1.Vcn]{
-		Kind:      "Vcn",
-		SDKName:   "Vcn",
-		Log:       manager.Log,
-		Semantics: newVcnRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateVcn(ctx, *request.(*coresdk.CreateVcnRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetVcn(ctx, *request.(*coresdk.GetVcnRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListVcnsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListVcns(ctx, *request.(*coresdk.ListVcnsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateVcn(ctx, *request.(*coresdk.UpdateVcnRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateVcnDetails", RequestName: "UpdateVcnDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteVcn(ctx, *request.(*coresdk.DeleteVcnRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newVcnRuntimeHooks(manager, sdkClient)
+	config := buildVcnGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Vcn OCI client: %w", err)
 	}
-	return defaultVcnServiceClient{
+	delegate := defaultVcnServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Vcn](config),
 	}
+	return wrapVcnGeneratedClient(hooks, delegate)
 }

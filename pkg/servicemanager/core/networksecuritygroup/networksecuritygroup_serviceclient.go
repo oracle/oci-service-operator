@@ -19,7 +19,7 @@ import (
 )
 
 // NetworkSecurityGroupServiceClient is the handwritten extension seam for NetworkSecurityGroup runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*NetworkSecurityGroupServiceManager).WithClient.
 type NetworkSecurityGroupServiceClient interface {
 	CreateOrUpdate(context.Context, *corev1beta1.NetworkSecurityGroup, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultNetworkSecurityGroupServiceClient struct {
 	generatedruntime.ServiceClient[*corev1beta1.NetworkSecurityGroup]
 }
 
-func newNetworkSecurityGroupRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "core",
-		FormalSlug:    "networksecuritygroup",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"PROVISIONING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"AVAILABLE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"TERMINATED", "TERMINATING"},
-			TerminalStates: []string{"NOT_FOUND"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "state", "vcnId"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-			ForceNew:      []string{"compartmentId", "vcnId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ NetworkSecurityGroupServiceClient = defaultNetworkSecurityGroupServiceClient{}
 
 var newNetworkSecurityGroupServiceClient = func(manager *NetworkSecurityGroupServiceManager) NetworkSecurityGroupServiceClient {
 	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*corev1beta1.NetworkSecurityGroup]{
-		Kind:      "NetworkSecurityGroup",
-		SDKName:   "NetworkSecurityGroup",
-		Log:       manager.Log,
-		Semantics: newNetworkSecurityGroupRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateNetworkSecurityGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateNetworkSecurityGroup(ctx, *request.(*coresdk.CreateNetworkSecurityGroupRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetNetworkSecurityGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetNetworkSecurityGroup(ctx, *request.(*coresdk.GetNetworkSecurityGroupRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListNetworkSecurityGroupsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListNetworkSecurityGroups(ctx, *request.(*coresdk.ListNetworkSecurityGroupsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "VlanId", RequestName: "vlanId", Contribution: "query", PreferResourceID: false}, {FieldName: "VcnId", RequestName: "vcnId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateNetworkSecurityGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateNetworkSecurityGroup(ctx, *request.(*coresdk.UpdateNetworkSecurityGroupRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateNetworkSecurityGroupDetails", RequestName: "UpdateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteNetworkSecurityGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteNetworkSecurityGroup(ctx, *request.(*coresdk.DeleteNetworkSecurityGroupRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "NetworkSecurityGroupId", RequestName: "networkSecurityGroupId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newNetworkSecurityGroupRuntimeHooks(manager, sdkClient)
+	config := buildNetworkSecurityGroupGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize NetworkSecurityGroup OCI client: %w", err)
 	}
-	return defaultNetworkSecurityGroupServiceClient{
+	delegate := defaultNetworkSecurityGroupServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.NetworkSecurityGroup](config),
 	}
+	return wrapNetworkSecurityGroupGeneratedClient(hooks, delegate)
 }

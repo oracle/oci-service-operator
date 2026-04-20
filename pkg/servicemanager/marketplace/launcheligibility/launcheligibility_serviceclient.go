@@ -19,7 +19,7 @@ import (
 )
 
 // LaunchEligibilityServiceClient is the handwritten extension seam for LaunchEligibility runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*LaunchEligibilityServiceManager).WithClient.
 type LaunchEligibilityServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.LaunchEligibility, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ LaunchEligibilityServiceClient = defaultLaunchEligibilityServiceClient{}
 
 var newLaunchEligibilityServiceClient = func(manager *LaunchEligibilityServiceManager) LaunchEligibilityServiceClient {
 	sdkClient, err := marketplacesdk.NewAccountClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.LaunchEligibility]{
-		Kind:    "LaunchEligibility",
-		SDKName: "LaunchEligibility",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.GetLaunchEligibilityRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetLaunchEligibility(ctx, *request.(*marketplacesdk.GetLaunchEligibilityRequest))
-			},
-		},
-	}
+	hooks := newLaunchEligibilityRuntimeHooks(manager, sdkClient)
+	config := buildLaunchEligibilityGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize LaunchEligibility OCI client: %w", err)
 	}
-	return defaultLaunchEligibilityServiceClient{
+	delegate := defaultLaunchEligibilityServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.LaunchEligibility](config),
 	}
+	return wrapLaunchEligibilityGeneratedClient(hooks, delegate)
 }
