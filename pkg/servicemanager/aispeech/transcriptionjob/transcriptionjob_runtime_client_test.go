@@ -484,3 +484,86 @@ func TestTranscriptionJobDeleteConflictRereadsLifecycleState(t *testing.T) {
 	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending, "CANCELING")
 	requireTrailingCondition(t, resource, shared.Terminating)
 }
+
+func TestTranscriptionJobDeleteConflictWithSucceededFollowUpRetriesDelete(t *testing.T) {
+	t.Parallel()
+
+	getCalls := 0
+	deleteCalls := 0
+	resource := makeTranscriptionJobResource()
+	resource.Status.Id = "ocid1.transcriptionjob.oc1..existing"
+
+	client := testTranscriptionJobClient(&fakeTranscriptionJobOCIClient{
+		getTranscriptionJobFn: func(_ context.Context, req aispeech.GetTranscriptionJobRequest) (aispeech.GetTranscriptionJobResponse, error) {
+			getCalls++
+			if req.TranscriptionJobId == nil || *req.TranscriptionJobId != "ocid1.transcriptionjob.oc1..existing" {
+				t.Fatalf("get transcriptionJobId = %v, want tracked TranscriptionJob ID", req.TranscriptionJobId)
+			}
+
+			lifecycleState := aispeech.TranscriptionJobLifecycleStateSucceeded
+			lifecycleDetails := ""
+			if getCalls == 4 {
+				lifecycleState = aispeech.TranscriptionJobLifecycleStateCanceled
+				lifecycleDetails = "delete request accepted"
+			}
+
+			return aispeech.GetTranscriptionJobResponse{
+				TranscriptionJob: makeSDKTranscriptionJob(
+					"ocid1.transcriptionjob.oc1..existing",
+					"ocid1.compartment.oc1..example",
+					"job-alpha",
+					"desired description",
+					lifecycleState,
+					lifecycleDetails,
+				),
+			}, nil
+		},
+		deleteTranscriptionJobFn: func(_ context.Context, req aispeech.DeleteTranscriptionJobRequest) (aispeech.DeleteTranscriptionJobResponse, error) {
+			deleteCalls++
+			if req.TranscriptionJobId == nil || *req.TranscriptionJobId != "ocid1.transcriptionjob.oc1..existing" {
+				t.Fatalf("delete transcriptionJobId = %v, want tracked TranscriptionJob ID", req.TranscriptionJobId)
+			}
+			if deleteCalls == 1 {
+				return aispeech.DeleteTranscriptionJobResponse{}, errortest.NewServiceError(409, "IncorrectState", "delete is still settling")
+			}
+			return aispeech.DeleteTranscriptionJobResponse{OpcRequestId: common.String("opc-delete-2")}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() first call error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() first call should retry when conflict follow-up still returns SUCCEEDED")
+	}
+	if deleteCalls != 1 {
+		t.Fatalf("DeleteTranscriptionJob() calls after first delete = %d, want 1", deleteCalls)
+	}
+	if getCalls != 2 {
+		t.Fatalf("GetTranscriptionJob() calls after first delete = %d, want 2", getCalls)
+	}
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.async.current = %#v, want cleared retry state after SUCCEEDED follow-up", resource.Status.OsokStatus.Async.Current)
+	}
+	if !strings.Contains(resource.Status.OsokStatus.Message, "retrying delete") {
+		t.Fatalf("status message = %q, want retrying delete breadcrumb", resource.Status.OsokStatus.Message)
+	}
+	requireTrailingCondition(t, resource, shared.Terminating)
+
+	deleted, err = client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() second call error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() second call should wait while follow-up reports CANCELED")
+	}
+	if deleteCalls != 2 {
+		t.Fatalf("DeleteTranscriptionJob() calls after second delete = %d, want 2", deleteCalls)
+	}
+	if getCalls != 4 {
+		t.Fatalf("GetTranscriptionJob() calls after second delete = %d, want 4", getCalls)
+	}
+	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, shared.OSOKAsyncClassPending, "CANCELED")
+	requireTrailingCondition(t, resource, shared.Terminating)
+}

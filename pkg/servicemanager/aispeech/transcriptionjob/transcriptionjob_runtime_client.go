@@ -256,9 +256,12 @@ func (c *transcriptionJobRuntimeClient) Delete(ctx context.Context, resource *ai
 	}
 
 	lifecycleState := normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState)
-	if transcriptionJobDeletePending(resource) || lifecycleState == string(aispeech.TranscriptionJobLifecycleStateCanceling) {
+	if transcriptionJobDeleteInProgress(lifecycleState) {
 		c.markDeletePending(resource, lifecycleState)
 		return false, nil
+	}
+	if transcriptionJobDeletePending(resource) {
+		c.markDeleteRetry(resource, lifecycleState)
 	}
 
 	response, err := c.client.DeleteTranscriptionJob(ctx, aispeech.DeleteTranscriptionJobRequest{
@@ -307,7 +310,13 @@ func (c *transcriptionJobRuntimeClient) confirmDelete(
 		return false, err
 	}
 
-	c.markDeletePending(resource, normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState))
+	lifecycleState := normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState)
+	if transcriptionJobDeleteInProgress(lifecycleState) {
+		c.markDeletePending(resource, lifecycleState)
+		return false, nil
+	}
+
+	c.markDeleteRetry(resource, lifecycleState)
 	return false, nil
 }
 
@@ -383,6 +392,19 @@ func (c *transcriptionJobRuntimeClient) markDeletePending(
 	)
 }
 
+func (c *transcriptionJobRuntimeClient) markDeleteRetry(
+	resource *aispeechv1beta1.TranscriptionJob,
+	lifecycleState string,
+) {
+	status := &resource.Status.OsokStatus
+	now := metav1.Now()
+	status.UpdatedAt = &now
+	status.Message = transcriptionJobDeleteRetryMessage(lifecycleState)
+	status.Reason = string(shared.Terminating)
+	servicemanager.ClearAsyncOperation(status)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, c.log)
+}
+
 func (c *transcriptionJobRuntimeClient) markDeleted(
 	resource *aispeechv1beta1.TranscriptionJob,
 	message string,
@@ -405,6 +427,16 @@ func transcriptionJobDeletePending(resource *aispeechv1beta1.TranscriptionJob) b
 	current := resource.Status.OsokStatus.Async.Current
 	return current.Phase == shared.OSOKAsyncPhaseDelete &&
 		current.NormalizedClass == shared.OSOKAsyncClassPending
+}
+
+func transcriptionJobDeleteInProgress(lifecycleState string) bool {
+	switch normalizedTranscriptionJobLifecycle(lifecycleState) {
+	case string(aispeech.TranscriptionJobLifecycleStateCanceling),
+		string(aispeech.TranscriptionJobLifecycleStateCanceled):
+		return true
+	default:
+		return false
+	}
 }
 
 func currentTranscriptionJobID(resource *aispeechv1beta1.TranscriptionJob) string {
@@ -447,6 +479,14 @@ func transcriptionJobDeleteMessage(lifecycleState string) string {
 	default:
 		return "OCI TranscriptionJob delete is awaiting final not-found confirmation"
 	}
+}
+
+func transcriptionJobDeleteRetryMessage(lifecycleState string) string {
+	lifecycleState = normalizedTranscriptionJobLifecycle(lifecycleState)
+	if lifecycleState == "" {
+		return "OCI TranscriptionJob delete has not started yet; retrying delete"
+	}
+	return fmt.Sprintf("OCI TranscriptionJob delete is not in progress yet; current lifecycle state is %s; retrying delete", lifecycleState)
 }
 
 func normalizeTranscriptionJobOCIError(err error) error {
