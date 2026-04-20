@@ -14,18 +14,19 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 199; got != want {
+	if got, want := len(inventory), 201; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 128; got != want {
+	if got, want := countRegistrations(inventory), 129; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 71; got != want {
+	if got, want := countExceptions(inventory), 72; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
 	assertInventorySelectionSource(t, byKey, "aidocument/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "ailanguage/Project", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "aispeech/TranscriptionJob", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "aivision/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "analytics/AnalyticsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "bds/BdsInstance", "selection.includeKinds")
@@ -47,6 +48,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "aidocument/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "ailanguage/Project")
 	assertInventoryException(t, byKey, "ailanguage/Endpoint", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "aispeech/TranscriptionJob")
+	assertInventoryException(t, byKey, "aispeech/TranscriptionTask", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "aivision/Project")
 	assertInventoryException(t, byKey, "aivision/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "analytics/AnalyticsInstance")
@@ -81,6 +84,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 
 	assertReviewedFamily(t, "aidocument/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "ailanguage/Project", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "aispeech/TranscriptionJob", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "aivision/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
@@ -112,6 +116,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 
 	assertReviewedException(t, "aidocument/WorkRequest", "strategy=none")
 	assertReviewedException(t, "ailanguage/WorkRequest", "strategy=none")
+	assertReviewedException(t, "aispeech/TranscriptionTask", "strategy=none")
 	assertReviewedException(t, "aivision/WorkRequest", "strategy=none")
 	assertReviewedException(t, "analytics/WorkRequest", "strategy=none")
 	assertReviewedException(t, "bds/WorkRequest", "strategy=none")

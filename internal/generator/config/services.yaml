@@ -134,6 +134,37 @@ services:
           serviceManager:
             strategy: none
 
+  - service: aispeech
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aispeech
+    group: aispeech
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - TranscriptionJob
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: TranscriptionJob
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: TranscriptionTask
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: aivision
     sdkPackage: github.com/oracle/oci-go-sdk/v65/aivision
     group: aivision
