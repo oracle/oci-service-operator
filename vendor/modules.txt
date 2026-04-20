@@ -147,6 +147,7 @@ github.com/onsi/gomega/types
 ## explicit; go 1.13
 github.com/oracle/oci-go-sdk/v65/aidocument
 github.com/oracle/oci-go-sdk/v65/ailanguage
+github.com/oracle/oci-go-sdk/v65/aispeech
 github.com/oracle/oci-go-sdk/v65/aivision
 github.com/oracle/oci-go-sdk/v65/analytics
 github.com/oracle/oci-go-sdk/v65/apigateway
