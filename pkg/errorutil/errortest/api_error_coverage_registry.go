@@ -209,7 +209,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				APIErrorCoverageFamilyGeneratedRuntimePlain,
 				deleteNotFoundGeneratedRuntime,
 				retryableConflictGeneratedRuntime,
-				"Initial TranscriptionJob rollout keeps plain generatedruntime CRUD and lifecycle rereads while the service's TranscriptionTask family remains unpublished.",
+				"TranscriptionJob keeps generatedruntime request projection and rereads, but a small handwritten layer now owns FAILED/CANCELING/CANCELED lifecycle mapping and delete confirmation until GetTranscriptionJob returns 404/auth-shaped 404.",
 			),
 			resourceKey("aivision", "Project"): reviewedRegistration(
 				"aivision",
