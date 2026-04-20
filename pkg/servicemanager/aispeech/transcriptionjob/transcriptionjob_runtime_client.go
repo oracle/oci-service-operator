@@ -256,7 +256,7 @@ func (c *transcriptionJobRuntimeClient) Delete(ctx context.Context, resource *ai
 	}
 
 	lifecycleState := normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState)
-	if transcriptionJobDeleteInProgress(lifecycleState) {
+	if transcriptionJobDeleteShortCircuit(resource, lifecycleState) {
 		c.markDeletePending(resource, lifecycleState)
 		return false, nil
 	}
@@ -427,6 +427,17 @@ func transcriptionJobDeletePending(resource *aispeechv1beta1.TranscriptionJob) b
 	current := resource.Status.OsokStatus.Async.Current
 	return current.Phase == shared.OSOKAsyncPhaseDelete &&
 		current.NormalizedClass == shared.OSOKAsyncClassPending
+}
+
+func transcriptionJobDeleteShortCircuit(resource *aispeechv1beta1.TranscriptionJob, lifecycleState string) bool {
+	switch normalizedTranscriptionJobLifecycle(lifecycleState) {
+	case string(aispeech.TranscriptionJobLifecycleStateCanceling):
+		return true
+	case string(aispeech.TranscriptionJobLifecycleStateCanceled):
+		return transcriptionJobDeletePending(resource)
+	default:
+		return false
+	}
 }
 
 func transcriptionJobDeleteInProgress(lifecycleState string) bool {
