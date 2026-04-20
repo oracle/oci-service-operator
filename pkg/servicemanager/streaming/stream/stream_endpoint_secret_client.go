@@ -24,10 +24,9 @@ import (
 const streamEndpointSecretOwnerUIDLabel = "streaming.oracle.com/stream-uid"
 
 func init() {
-	generatedFactory := newStreamServiceClient
-	newStreamServiceClient = func(manager *StreamServiceManager) StreamServiceClient {
-		return newStreamEndpointSecretClient(manager, generatedFactory(manager))
-	}
+	registerStreamRuntimeHooksMutator(func(manager *StreamServiceManager, hooks *StreamRuntimeHooks) {
+		appendStreamEndpointSecretRuntimeWrapper(manager, hooks)
+	})
 }
 
 type streamEndpointSecretRecordReader interface {
@@ -43,6 +42,16 @@ type streamEndpointSecretClient struct {
 }
 
 var _ StreamServiceClient = streamEndpointSecretClient{}
+
+func appendStreamEndpointSecretRuntimeWrapper(manager *StreamServiceManager, hooks *StreamRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate StreamServiceClient) StreamServiceClient {
+		return newStreamEndpointSecretClient(manager, delegate)
+	})
+}
 
 func newStreamEndpointSecretClient(manager *StreamServiceManager, delegate StreamServiceClient) StreamServiceClient {
 	client := streamEndpointSecretClient{
