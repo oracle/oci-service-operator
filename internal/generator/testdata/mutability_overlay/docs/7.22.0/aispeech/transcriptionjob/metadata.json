@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "aispeech",
+  "kind": "TranscriptionJob",
+  "formalSlug": "transcriptionjob",
+  "providerResource": "oci_ai_speech_transcription_job",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/ai_speech_transcription_job",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/ai_speech_transcription_job",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/aispeech/transcriptionjob/page.html",
+  "bodySHA256": "d24e02f8ac54d1f847aa8cfdf453283b84b35a8b14b4c3993012008a1ec92a8c",
+  "bodyBytes": 1309,
+  "fixtureBodyPath": "7.22.0/aispeech/transcriptionjob/page.html"
+}

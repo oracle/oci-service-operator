@@ -5,6 +5,7 @@ import (
 
 	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
 	ailanguagev1beta1 "github.com/oracle/oci-service-operator/api/ailanguage/v1beta1"
+	aispeechv1beta1 "github.com/oracle/oci-service-operator/api/aispeech/v1beta1"
 	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
@@ -2027,6 +2028,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "ailanguage.ProjectSummary",
+			},
+		},
+	},
+	{
+		Name:       "AispeechTranscriptionJob",
+		SpecType:   reflect.TypeOf(aispeechv1beta1.TranscriptionJobSpec{}),
+		StatusType: reflect.TypeOf(aispeechv1beta1.TranscriptionJobStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "aispeech.CreateTranscriptionJobDetails",
+			},
+			{
+				SDKStruct: "aispeech.UpdateTranscriptionJobDetails",
+			},
+			{
+				SDKStruct: "aispeech.TranscriptionJob",
+			},
+			{
+				SDKStruct: "aispeech.TranscriptionJobCollection",
+			},
+			{
+				SDKStruct: "aispeech.TranscriptionJobSummary",
 			},
 		},
 	},

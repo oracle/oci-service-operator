@@ -8,47 +8,58 @@ gaps: []
 
 # Logic Gaps
 
-No open logic gaps remain for the seeded `ailanguage/Project` row after the
-runtime audit replaced the scaffold placeholder with the reviewed
-generated-runtime contract.
-
-## Current runtime path
+## Current runtime contract
 
 - `Project` keeps the generated controller, service-manager shell, and
-  registration wiring, but overrides the generated client seam with
-  `pkg/servicemanager/ailanguage/project/project_runtime_client.go`.
-- The handwritten runtime config binds `CreateProject`, `GetProject`,
-  `ListProjects`, `UpdateProject`, and `DeleteProject` through
-  `generatedruntime.ServiceClient` rather than a service-local legacy adapter.
-- Lifecycle handling is explicit: `CREATING` requeues as provisioning,
-  `UPDATING` requeues as updating, `ACTIVE` settles success, and delete
-  confirmation waits through `DELETING` until `DELETED` or NotFound via
-  `GetProject` plus `ListProjects` fallback when identity must be re-resolved.
+  registration wiring, but the live runtime contract is owned by
+  `pkg/servicemanager/ailanguage/project/project_runtime_client.go` rather than
+  the generated helper/read-after-write baseline in
+  `pkg/servicemanager/ailanguage/project/project_serviceclient.go`.
+- Create, update, and delete are work-request-backed. The runtime stores the
+  in-flight OCI work request in `status.async.current`, normalizes AI Language
+  `OperationStatus*` values into shared async classes, normalizes work-request
+  `OperationType*` values into create/update/delete phases, and resumes
+  reconciliation from that shared async tracker across requeues.
+- Create-time identity recovery is work-request-backed. The runtime records the
+  create response Project OCID when OCI returns it, otherwise resolves the
+  created Project OCID from work-request resources before reading the Project
+  by ID and projecting status.
+- Bind resolution uses an explicit OCI identity first. When no OCI identifier
+  is tracked, the runtime may adopt only a unique paginated non-`DELETED`
+  `ListProjects` match on `compartmentId` plus `displayName`. Delete fallback
+  reuses `status.compartmentId`, `status.displayName`, and tracked `projectId`
+  when `GetProject` returns NotFound so finalizer release does not depend on
+  stale spec values.
+- Mutable drift is limited to `displayName`, `description`, `freeformTags`, and
+  `definedTags`. `compartmentId` remains replacement-only drift, so the live
+  runtime never exercises provider-only `ChangeProjectCompartment` even though
+  that auxiliary operation remains part of the imported provider surface.
 - Required status projection remains part of the repo-authored contract. The
-  generated runtime stamps OSOK lifecycle conditions plus the published
-  `status.id`, `status.compartmentId`, `status.timeCreated`,
+  runtime projects OSOK lifecycle conditions, the shared async tracker, and the
+  published `status.id`, `status.compartmentId`, `status.timeCreated`,
   `status.lifecycleState`, `status.displayName`, `status.description`,
   `status.timeUpdated`, `status.lifecycleDetails`, `status.freeformTags`,
   `status.definedTags`, and `status.systemTags` read-model fields when OCI
   returns them.
+- Delete confirmation is required, not best-effort. The finalizer stays until
+  the delete work request is terminal and `GetProject` or fallback
+  `ListProjects` confirms the Project is gone or exposes lifecycle state
+  `DELETED`.
+- Retryable update conflicts stay explicit and resumable. When OCI returns a
+  409 "currently being modified" response without a work-request ID, the
+  runtime projects a lifecycle-sourced pending update async state, rereads the
+  Project before retrying, clears that async state if mutable drift has already
+  converged, and otherwise keeps the update pending until the standard requeue
+  backoff has elapsed instead of hot-looping `UpdateProject` on every `ACTIVE`
+  reread.
 
-## Repo-authored semantics
+## Authority and scoped cleanup
 
-- Pre-create lookup is explicit. When no OCI identifier is already tracked, the
-  generated runtime queries `ListProjects` with the identifying request shape
-  `compartmentId`, `displayName`, and optional tracked `projectId`; the OCI
-  list request also exposes `lifecycleState`, `sortBy`, `sortOrder`, `limit`,
-  and `page`, but reusable matching remains a repo-authored decision layered on
-  top of those provider facts.
-- Mutation policy is explicit: only `displayName`, `description`,
-  `freeformTags`, and `definedTags` reconcile in place. `compartmentId` stays
-  replacement-only drift and the runtime skips `UpdateProject` when the mutable
-  surface already matches the live OCI response.
-- Create, update, and delete use plain provider helper semantics
-  (`tfresource.CreateResource`, `tfresource.UpdateResource`,
-  `tfresource.DeleteResource`) with read-after-write follow-up for create and
-  update plus confirm-delete follow-up for delete. The runtime does not add
-  service-local work-request polling or Kubernetes secret side effects.
-- Delete keeps the finalizer until `GetProject` or fallback `ListProjects`
-  confirms the project is gone; a `DELETING` list summary keeps reconcile in
-  the terminating bucket instead of removing the finalizer early.
+- `formal/controllers/ailanguage/project/*` is the authoritative formal path
+  for the promoted `ailanguage/Project` work-request-backed runtime contract.
+- `pkg/servicemanager/ailanguage/project/project_runtime_client.go` and
+  `pkg/servicemanager/ailanguage/project/project_runtime_client_test.go` own
+  the live runtime behavior.
+- `pkg/servicemanager/ailanguage/project/project_serviceclient.go` still
+  records the generated helper baseline and should not be treated as the active
+  execution contract.
