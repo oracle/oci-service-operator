@@ -177,6 +177,21 @@ type fakeNamedListThingResponse struct {
 	Collection fakeNamedThingCollection `presentIn:"body"`
 }
 
+type fakePathIdentity struct {
+	parentID    string
+	thingName   string
+	syntheticID string
+}
+
+type fakeNestedGetThingRequest struct {
+	ParentId  *string `contributesTo:"path" name:"parentId"`
+	ThingName *string `contributesTo:"path" name:"thingName"`
+}
+
+type fakeNestedListThingRequest struct {
+	ParentId *string `contributesTo:"path" name:"parentId"`
+}
+
 type fakeCredentialClient struct {
 	secrets    map[string]map[string][]byte
 	getCalls   []string
@@ -4167,6 +4182,259 @@ func TestResponseRequestIDReadsOCIHeader(t *testing.T) {
 	if got := responseRequestID(fakeDeleteThingResponse{}); got != "" {
 		t.Fatalf("responseRequestID(delete) = %q, want empty string", got)
 	}
+}
+
+func TestServiceClientCreateOrUpdateUsesIdentityLookupAndPersistsTrackedIdentity(t *testing.T) {
+	t.Parallel()
+
+	var createCalled bool
+	var lookupCalls int
+	var seedCalls int
+	var recordTrackedCalls int
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				return fakeCreateThingResponse{}, nil
+			},
+		},
+		Identity: IdentityHooks[*fakeResource]{
+			Resolve: func(resource *fakeResource) (any, error) {
+				return fakePathIdentity{
+					parentID:    resource.Spec.CompartmentId,
+					thingName:   resource.Spec.Name,
+					syntheticID: "thing/" + resource.Spec.Name,
+				}, nil
+			},
+			RecordPath: func(resource *fakeResource, identity any) {
+				resolved := identity.(fakePathIdentity)
+				resource.Status.CompartmentId = resolved.parentID
+				resource.Status.Name = resolved.thingName
+			},
+			LookupExisting: func(context.Context, *fakeResource, any) (any, error) {
+				lookupCalls++
+				return fakeGetThingResponse{
+					Thing: fakeThing{
+						Name:           "thing-a",
+						DisplayName:    "existing-display",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+			SeedSyntheticTrackedID: func(resource *fakeResource, identity any) func() {
+				seedCalls++
+				previous := resource.Status.OsokStatus.Ocid
+				resource.Status.OsokStatus.Ocid = shared.OCID(identity.(fakePathIdentity).syntheticID)
+				return func() {
+					resource.Status.OsokStatus.Ocid = previous
+				}
+			},
+			RecordTracked: func(resource *fakeResource, _ any, resourceID string) {
+				recordTrackedCalls++
+				resource.Status.OsokStatus.Ocid = shared.OCID(resourceID)
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..parent",
+			Name:          "thing-a",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err)
+	requireRequeueState(t, response, false, "CreateOrUpdate() should not requeue for ACTIVE lifecycle")
+	if createCalled {
+		t.Fatal("CreateOrUpdate() invoked Create instead of reusing the looked-up resource")
+	}
+	if lookupCalls != 1 {
+		t.Fatalf("LookupExisting() calls = %d, want 1", lookupCalls)
+	}
+	if seedCalls != 1 {
+		t.Fatalf("SeedSyntheticTrackedID() calls = %d, want 1", seedCalls)
+	}
+	if recordTrackedCalls != 1 {
+		t.Fatalf("RecordTracked() calls = %d, want 1", recordTrackedCalls)
+	}
+	requireStatusOCID(t, resource, "thing/thing-a")
+	requireStringEqual(t, "status.compartmentId", resource.Status.CompartmentId, "ocid1.compartment.oc1..parent")
+	requireStringEqual(t, "status.name", resource.Status.Name, "thing-a")
+	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "existing-display")
+	requireTrailingCondition(t, resource, shared.Active)
+}
+
+func TestServiceClientDeleteUsesTemporarySyntheticTrackedIDWhenConfigured(t *testing.T) {
+	t.Parallel()
+
+	var deleteRequest fakeDeleteThingRequest
+	var seedCalls int
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Delete: &Operation{
+			NewRequest: func() any { return &fakeDeleteThingRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				deleteRequest = *request.(*fakeDeleteThingRequest)
+				return fakeDeleteThingResponse{}, nil
+			},
+		},
+		Identity: IdentityHooks[*fakeResource]{
+			Resolve: func(resource *fakeResource) (any, error) {
+				return fakePathIdentity{
+					parentID:    resource.Spec.CompartmentId,
+					thingName:   resource.Spec.Name,
+					syntheticID: "thing/" + resource.Spec.Name,
+				}, nil
+			},
+			RecordPath: func(resource *fakeResource, identity any) {
+				resource.Status.CompartmentId = identity.(fakePathIdentity).parentID
+			},
+			SeedSyntheticTrackedID: func(resource *fakeResource, identity any) func() {
+				seedCalls++
+				previous := resource.Status.OsokStatus.Ocid
+				resource.Status.OsokStatus.Ocid = shared.OCID(identity.(fakePathIdentity).syntheticID)
+				return func() {
+					resource.Status.OsokStatus.Ocid = previous
+				}
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..delete",
+			Name:          "thing-delete",
+		},
+	}
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() = false, want true")
+	}
+	if seedCalls != 1 {
+		t.Fatalf("SeedSyntheticTrackedID() calls = %d, want 1", seedCalls)
+	}
+	requireThingIDRequest(t, "delete", deleteRequest.ThingId, "thing/thing-delete")
+	requireStringEqual(t, "status.compartmentId", resource.Status.CompartmentId, "ocid1.compartment.oc1..delete")
+	requireStatusOCID(t, resource, "")
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt should be set after successful delete")
+	}
+}
+
+func TestServiceClientCreateOrUpdateUsesReadGetAdapterWhenConfigured(t *testing.T) {
+	t.Parallel()
+
+	var getRequest fakeNestedGetThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Read: ReadHooks{
+			Get: &Operation{
+				NewRequest: func() any { return &fakeNestedGetThingRequest{} },
+				Fields: []RequestField{
+					{FieldName: "ParentId", RequestName: "parentId", Contribution: "path", LookupPaths: []string{"status.compartmentId", "spec.compartmentId"}},
+					{FieldName: "ThingName", RequestName: "thingName", Contribution: "path", LookupPaths: []string{"status.name", "spec.name", "name"}},
+				},
+				Call: func(_ context.Context, request any) (any, error) {
+					getRequest = *request.(*fakeNestedGetThingRequest)
+					return fakeGetThingResponse{
+						Thing: fakeThing{
+							Id:             "ocid1.thing.oc1..nested",
+							Name:           "thing-read",
+							DisplayName:    "nested-display",
+							LifecycleState: "ACTIVE",
+						},
+					}, nil
+				},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..read",
+			Name:          "thing-read",
+		},
+		Status: fakeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Ocid: "thing/thing-read",
+			},
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err)
+	requireThingIDRequest(t, "read parent", getRequest.ParentId, "ocid1.compartment.oc1..read")
+	requireThingIDRequest(t, "read name", getRequest.ThingName, "thing-read")
+	requireStatusOCID(t, resource, "ocid1.thing.oc1..nested")
+	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "nested-display")
+}
+
+func TestServiceClientCreateOrUpdateUsesReadListAdapterWhenConfigured(t *testing.T) {
+	t.Parallel()
+
+	var listRequest fakeNestedListThingRequest
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			Lifecycle: LifecycleSemantics{
+				ActiveStates: []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy: "best-effort",
+			},
+			List: &ListSemantics{
+				ResponseItemsField: "Resources",
+				MatchFields:        []string{"name"},
+			},
+		},
+		Read: ReadHooks{
+			List: &Operation{
+				NewRequest: func() any { return &fakeNestedListThingRequest{} },
+				Fields: []RequestField{
+					{FieldName: "ParentId", RequestName: "parentId", Contribution: "path", LookupPaths: []string{"status.compartmentId", "spec.compartmentId"}},
+				},
+				Call: func(_ context.Context, request any) (any, error) {
+					listRequest = *request.(*fakeNestedListThingRequest)
+					return fakeNamedListThingResponse{
+						Collection: fakeNamedThingCollection{
+							Resources: []fakeThingSummary{
+								{Id: "ocid1.thing.oc1..other", Name: "other", LifecycleState: "ACTIVE"},
+								{Id: "ocid1.thing.oc1..list", Name: "thing-list", LifecycleState: "ACTIVE"},
+							},
+						},
+					}, nil
+				},
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..list",
+			Name:          "thing-list",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err)
+	requireThingIDRequest(t, "list parent", listRequest.ParentId, "ocid1.compartment.oc1..list")
+	requireStatusOCID(t, resource, "ocid1.thing.oc1..list")
+	requireStringEqual(t, "status.name", resource.Status.Name, "thing-list")
 }
 
 func requireCreateOrUpdateSuccess(t *testing.T, response servicemanager.OSOKResponse, err error) {

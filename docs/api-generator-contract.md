@@ -230,6 +230,17 @@ and service-manager generation is enabled.
   hook set, the typed mutator registration seam, and the extracted
   `build<Kind>GeneratedRuntimeConfig(...)` builder used by the baseline service
   client factory.
+- The runtime-hooks surface now also carries an additive bounded
+  `Identity` seam plus a read-only nested `Read` seam. `Identity` is for
+  path-addressed load-balancer-style subresources that need to resolve path
+  identity, record path status, optionally record tracked identity, optionally
+  look up an existing object by identity, or optionally seed a temporary
+  synthetic tracked ID.
+- The nested `Read` seam is only for read adaptation such as synthesizing
+  `Get` or `List` from a parent-shaped SDK call. It does not widen
+  create/update/delete into a generic untyped CRUD contract, and this contract
+  still does not expose generic `CurrentID`, `ClearTrackedIdentity`,
+  status-reset, async, or OCI-error hooks.
 - `<file-stem>_serviceclient.go` now limits itself to OCI client construction,
   hook assembly, generated-runtime config creation, default delegate creation,
   and optional wrapper application.
