@@ -122,9 +122,10 @@ func newTestModelDelegate(client *fakeModelOCIClient) ModelServiceClient {
 		Log: loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")},
 	}, hooks)
 
-	return defaultModelServiceClient{
+	delegate := defaultModelServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*generativeaiv1beta1.Model](config),
 	}
+	return wrapModelGeneratedClient(hooks, delegate)
 }
 
 func newTestModelClient(client *fakeModelOCIClient) ModelServiceClient {
@@ -374,6 +375,83 @@ func TestModelCreateOrUpdateClearsStaleTrackedIDWhenDisplayNameMissing(t *testin
 	}
 	if createCalls != 1 {
 		t.Fatalf("CreateModel() calls = %d, want 1 after clearing stale ID", createCalls)
+	}
+	if listCalls != 0 {
+		t.Fatalf("ListModels() calls = %d, want 0 when displayName is empty", listCalls)
+	}
+	if len(getIDs) != 2 || getIDs[0] != staleID || getIDs[1] != newID {
+		t.Fatalf("GetModel() ids = %v, want [%q %q]", getIDs, staleID, newID)
+	}
+	if got := resource.Status.Id; got != newID {
+		t.Fatalf("status.id = %q, want %q", got, newID)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != newID {
+		t.Fatalf("status.status.ocid = %q, want %q", got, newID)
+	}
+}
+
+func TestModelCreateOrUpdateClearsDeletedTrackedIDWhenDisplayNameMissing(t *testing.T) {
+	t.Parallel()
+
+	const (
+		staleID = "ocid1.generativeaimodel.oc1..deleted"
+		newID   = "ocid1.generativeaimodel.oc1..new"
+	)
+
+	resource := makeSpecModel()
+	resource.Spec.DisplayName = ""
+	resource.Status.Id = staleID
+	resource.Status.OsokStatus.Ocid = shared.OCID(staleID)
+
+	createCalls := 0
+	listCalls := 0
+	getIDs := make([]string, 0, 2)
+
+	client := newTestModelClient(&fakeModelOCIClient{
+		createFn: func(_ context.Context, req generativeaisdk.CreateModelRequest) (generativeaisdk.CreateModelResponse, error) {
+			createCalls++
+			if req.DisplayName != nil {
+				t.Fatalf("CreateModelRequest.DisplayName = %v, want nil when spec.displayName is empty", req.DisplayName)
+			}
+			return generativeaisdk.CreateModelResponse{
+				Model: makeSDKModel(newID, resource.Spec, generativeaisdk.ModelLifecycleStateCreating),
+			}, nil
+		},
+		getFn: func(_ context.Context, req generativeaisdk.GetModelRequest) (generativeaisdk.GetModelResponse, error) {
+			gotID := ""
+			if req.ModelId != nil {
+				gotID = *req.ModelId
+			}
+			getIDs = append(getIDs, gotID)
+			switch gotID {
+			case staleID:
+				return generativeaisdk.GetModelResponse{
+					Model: makeSDKModel(staleID, resource.Spec, generativeaisdk.ModelLifecycleStateDeleted),
+				}, nil
+			case newID:
+				return generativeaisdk.GetModelResponse{
+					Model: makeSDKModel(newID, resource.Spec, generativeaisdk.ModelLifecycleStateActive),
+				}, nil
+			default:
+				t.Fatalf("unexpected GetModelRequest.ModelId %q", gotID)
+				return generativeaisdk.GetModelResponse{}, nil
+			}
+		},
+		listFn: func(context.Context, generativeaisdk.ListModelsRequest) (generativeaisdk.ListModelsResponse, error) {
+			listCalls++
+			return generativeaisdk.ListModelsResponse{}, nil
+		},
+	})
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want success", response)
+	}
+	if createCalls != 1 {
+		t.Fatalf("CreateModel() calls = %d, want 1 after clearing deleted tracked ID", createCalls)
 	}
 	if listCalls != 0 {
 		t.Fatalf("ListModels() calls = %d, want 0 when displayName is empty", listCalls)
