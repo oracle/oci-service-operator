@@ -252,6 +252,58 @@ func TestBuildNodePoolCreateDetailsRejectsUnsupportedNodeSourceType(t *testing.T
 	}
 }
 
+func TestApplyNodePoolRuntimeHooksSanitizesTypedCalls(t *testing.T) {
+	t.Parallel()
+
+	hooks := newNodePoolDefaultRuntimeHooks(containerenginesdk.ContainerEngineClient{})
+
+	var createRequest containerenginesdk.CreateNodePoolRequest
+	var updateRequest containerenginesdk.UpdateNodePoolRequest
+
+	hooks.Create.Call = func(_ context.Context, request containerenginesdk.CreateNodePoolRequest) (containerenginesdk.CreateNodePoolResponse, error) {
+		createRequest = request
+		return containerenginesdk.CreateNodePoolResponse{}, nil
+	}
+	hooks.Update.Call = func(_ context.Context, request containerenginesdk.UpdateNodePoolRequest) (containerenginesdk.UpdateNodePoolResponse, error) {
+		updateRequest = request
+		return containerenginesdk.UpdateNodePoolResponse{}, nil
+	}
+
+	applyNodePoolRuntimeHooks(&hooks)
+
+	if _, err := hooks.Create.Call(context.Background(), containerenginesdk.CreateNodePoolRequest{
+		CreateNodePoolDetails: containerenginesdk.CreateNodePoolDetails{
+			SubnetIds:         []string{"ocid1.subnet.oc1..worker"},
+			QuantityPerSubnet: common.Int(1),
+			NodeConfigDetails: &containerenginesdk.CreateNodePoolNodeConfigDetails{Size: common.Int(1)},
+		},
+	}); err != nil {
+		t.Fatalf("hooks.Create.Call() error = %v", err)
+	}
+	if createRequest.CreateNodePoolDetails.SubnetIds != nil {
+		t.Fatalf("hooks.Create.Call() subnetIds = %#v, want nil after sanitation", createRequest.CreateNodePoolDetails.SubnetIds)
+	}
+	if createRequest.CreateNodePoolDetails.QuantityPerSubnet == nil || *createRequest.CreateNodePoolDetails.QuantityPerSubnet != 1 {
+		t.Fatalf("hooks.Create.Call() quantityPerSubnet = %#v, want preserved 1", createRequest.CreateNodePoolDetails.QuantityPerSubnet)
+	}
+
+	if _, err := hooks.Update.Call(context.Background(), containerenginesdk.UpdateNodePoolRequest{
+		UpdateNodePoolDetails: containerenginesdk.UpdateNodePoolDetails{
+			SubnetIds:         []string{"ocid1.subnet.oc1..worker"},
+			QuantityPerSubnet: common.Int(2),
+			NodeConfigDetails: &containerenginesdk.UpdateNodePoolNodeConfigDetails{Size: common.Int(2)},
+		},
+	}); err != nil {
+		t.Fatalf("hooks.Update.Call() error = %v", err)
+	}
+	if updateRequest.UpdateNodePoolDetails.SubnetIds != nil {
+		t.Fatalf("hooks.Update.Call() subnetIds = %#v, want nil after sanitation", updateRequest.UpdateNodePoolDetails.SubnetIds)
+	}
+	if updateRequest.UpdateNodePoolDetails.QuantityPerSubnet == nil || *updateRequest.UpdateNodePoolDetails.QuantityPerSubnet != 2 {
+		t.Fatalf("hooks.Update.Call() quantityPerSubnet = %#v, want preserved 2", updateRequest.UpdateNodePoolDetails.QuantityPerSubnet)
+	}
+}
+
 func TestBuildNodePoolUpdateBodyDetectsMutableDrift(t *testing.T) {
 	t.Parallel()
 

@@ -101,6 +101,58 @@ func TestBuildClusterCreateDetailsPreservesNestedFalseAndPolymorphicOptions(t *t
 	}
 }
 
+func TestApplyClusterRuntimeHooksInstallsCustomBodyBuilders(t *testing.T) {
+	t.Parallel()
+
+	hooks := newClusterDefaultRuntimeHooks(containerenginesdk.ContainerEngineClient{})
+	applyClusterRuntimeHooks(&ClusterServiceManager{}, &hooks)
+
+	if hooks.Semantics == nil {
+		t.Fatal("hooks.Semantics = nil, want runtime semantics")
+	}
+	if hooks.BuildCreateBody == nil {
+		t.Fatal("hooks.BuildCreateBody = nil, want custom create builder")
+	}
+	if hooks.BuildUpdateBody == nil {
+		t.Fatal("hooks.BuildUpdateBody = nil, want custom update builder")
+	}
+
+	createBody, err := hooks.BuildCreateBody(context.Background(), newClusterTestResource(), "default")
+	if err != nil {
+		t.Fatalf("hooks.BuildCreateBody() error = %v", err)
+	}
+	createDetails, ok := createBody.(containerenginesdk.CreateClusterDetails)
+	if !ok {
+		t.Fatalf("hooks.BuildCreateBody() body type = %T, want containerengine.CreateClusterDetails", createBody)
+	}
+	if createDetails.Name == nil || *createDetails.Name != "cluster-sample" {
+		t.Fatalf("hooks.BuildCreateBody() name = %#v, want cluster-sample", createDetails.Name)
+	}
+
+	resource := newExistingClusterTestResource("ocid1.cluster.oc1..existing")
+	resource.Spec.Name = "renamed-cluster"
+	updateBody, updateNeeded, err := hooks.BuildUpdateBody(
+		context.Background(),
+		resource,
+		resource.Namespace,
+		observedClusterFromSpec("ocid1.cluster.oc1..existing", newClusterTestResource().Spec, "ACTIVE"),
+	)
+	if err != nil {
+		t.Fatalf("hooks.BuildUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("hooks.BuildUpdateBody() updateNeeded = false, want true after mutable drift")
+	}
+
+	updateDetails, ok := updateBody.(containerenginesdk.UpdateClusterDetails)
+	if !ok {
+		t.Fatalf("hooks.BuildUpdateBody() body type = %T, want containerengine.UpdateClusterDetails", updateBody)
+	}
+	if updateDetails.Name == nil || *updateDetails.Name != resource.Spec.Name {
+		t.Fatalf("hooks.BuildUpdateBody() name = %#v, want %q", updateDetails.Name, resource.Spec.Name)
+	}
+}
+
 func TestBuildClusterCreateDetailsOmitsEmptyBlocks(t *testing.T) {
 	t.Parallel()
 

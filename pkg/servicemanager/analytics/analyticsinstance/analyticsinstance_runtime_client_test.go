@@ -89,6 +89,54 @@ func TestAnalyticsInstanceCreateRequestPreservesPolymorphicNetworkEndpointDetail
 	}
 }
 
+func TestApplyAnalyticsInstanceRuntimeHooksOverridesGeneratedDefaults(t *testing.T) {
+	t.Parallel()
+
+	hooks := newAnalyticsInstanceDefaultRuntimeHooks(analyticssdk.AnalyticsClient{})
+	applyAnalyticsInstanceRuntimeHooks(&hooks)
+
+	if hooks.Semantics == nil {
+		t.Fatal("hooks.Semantics = nil, want reviewed semantics")
+	}
+	if len(hooks.Semantics.AuxiliaryOperations) != 0 {
+		t.Fatalf("hooks.Semantics.AuxiliaryOperations = %#v, want cleared reviewed semantics", hooks.Semantics.AuxiliaryOperations)
+	}
+	if len(hooks.Semantics.Lifecycle.UpdatingStates) != 1 || hooks.Semantics.Lifecycle.UpdatingStates[0] != "UPDATING" {
+		t.Fatalf("hooks.Semantics.Lifecycle.UpdatingStates = %#v, want [\"UPDATING\"]", hooks.Semantics.Lifecycle.UpdatingStates)
+	}
+	if hooks.BuildUpdateBody == nil {
+		t.Fatal("hooks.BuildUpdateBody = nil, want reviewed update builder")
+	}
+
+	resource := newAnalyticsInstanceTestResource()
+	resource.Spec.Description = "updated analytics description"
+
+	body, updateNeeded, err := hooks.BuildUpdateBody(
+		context.Background(),
+		resource,
+		resource.Namespace,
+		observedAnalyticsInstanceFromSpec(
+			"ocid1.analyticsinstance.oc1..existing",
+			newAnalyticsInstanceTestResource().Spec,
+			"ACTIVE",
+		),
+	)
+	if err != nil {
+		t.Fatalf("hooks.BuildUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("hooks.BuildUpdateBody() updateNeeded = false, want true after reviewed drift")
+	}
+
+	details, ok := body.(analyticssdk.UpdateAnalyticsInstanceDetails)
+	if !ok {
+		t.Fatalf("hooks.BuildUpdateBody() body type = %T, want analytics.UpdateAnalyticsInstanceDetails", body)
+	}
+	if details.Description == nil || *details.Description != resource.Spec.Description {
+		t.Fatalf("hooks.BuildUpdateBody() description = %#v, want %q", details.Description, resource.Spec.Description)
+	}
+}
+
 func TestBuildAnalyticsInstanceUpdateBodySupportsClearingOptionalFields(t *testing.T) {
 	t.Parallel()
 

@@ -13,6 +13,8 @@ import (
 )
 
 func TestCreateOpensearchClusterRequestUsesSDKGBKeys(t *testing.T) {
+	t.Parallel()
+
 	resource := &opensearchv1beta1.OpensearchCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "opensearchcluster-sample",
@@ -42,9 +44,19 @@ func TestCreateOpensearchClusterRequestUsesSDKGBKeys(t *testing.T) {
 		},
 	}
 
-	details, err := buildOpensearchCreateDetails(context.Background(), nil, resource, resource.Namespace)
+	hooks := newOpensearchClusterDefaultRuntimeHooks(opensearchsdk.OpensearchClusterClient{})
+	applyOpensearchClusterRuntimeHooks(&OpensearchClusterServiceManager{}, &hooks)
+	if hooks.BuildCreateBody == nil {
+		t.Fatal("hooks.BuildCreateBody = nil, want opensearch create builder")
+	}
+
+	createBody, err := hooks.BuildCreateBody(context.Background(), resource, resource.Namespace)
 	if err != nil {
-		t.Fatalf("buildOpensearchCreateDetails() error = %v", err)
+		t.Fatalf("hooks.BuildCreateBody() error = %v", err)
+	}
+	details, ok := createBody.(opensearchsdk.CreateOpensearchClusterDetails)
+	if !ok {
+		t.Fatalf("hooks.BuildCreateBody() body type = %T, want opensearch.CreateOpensearchClusterDetails", createBody)
 	}
 
 	request := opensearchsdk.CreateOpensearchClusterRequest{
