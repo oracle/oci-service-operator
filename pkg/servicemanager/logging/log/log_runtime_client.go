@@ -6,65 +6,25 @@
 package log
 
 import (
-	"context"
-	"fmt"
-
-	loggingsdk "github.com/oracle/oci-go-sdk/v65/logging"
-	loggingv1beta1 "github.com/oracle/oci-service-operator/api/logging/v1beta1"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 )
 
 func init() {
-	newLogServiceClient = func(manager *LogServiceManager) LogServiceClient {
-		sdkClient, err := loggingsdk.NewLoggingManagementClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*loggingv1beta1.Log]{
-			Kind:      "Log",
-			SDKName:   "Log",
-			Log:       manager.Log,
-			Semantics: newLogRuntimeSemantics(),
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &loggingsdk.CreateLogRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateLog(ctx, *request.(*loggingsdk.CreateLogRequest))
-				},
-				Fields: logCreateFields(),
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &loggingsdk.GetLogRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetLog(ctx, *request.(*loggingsdk.GetLogRequest))
-				},
-				Fields: logGetFields(),
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &loggingsdk.ListLogsRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListLogs(ctx, *request.(*loggingsdk.ListLogsRequest))
-				},
-				Fields: logListFields(),
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &loggingsdk.UpdateLogRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateLog(ctx, *request.(*loggingsdk.UpdateLogRequest))
-				},
-				Fields: logUpdateFields(),
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &loggingsdk.DeleteLogRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteLog(ctx, *request.(*loggingsdk.DeleteLogRequest))
-				},
-				Fields: logDeleteFields(),
-			},
-		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Log OCI client: %w", err)
-		}
-		return defaultLogServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*loggingv1beta1.Log](config),
-		}
+	registerLogRuntimeHooksMutator(func(_ *LogServiceManager, hooks *LogRuntimeHooks) {
+		applyLogRuntimeHooks(hooks)
+	})
+}
+
+func applyLogRuntimeHooks(hooks *LogRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
+
+	hooks.Create.Fields = logCreateFields()
+	hooks.Get.Fields = logGetFields()
+	hooks.List.Fields = logListFields()
+	hooks.Update.Fields = logUpdateFields()
+	hooks.Delete.Fields = logDeleteFields()
 }
 
 func logCreateFields() []generatedruntime.RequestField {

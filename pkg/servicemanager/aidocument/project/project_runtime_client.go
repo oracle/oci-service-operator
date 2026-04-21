@@ -7,7 +7,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 
 	aidocumentsdk "github.com/oracle/oci-go-sdk/v65/aidocument"
 	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
@@ -24,16 +23,18 @@ type projectOCIClient interface {
 }
 
 func init() {
-	newProjectServiceClient = func(manager *ProjectServiceManager) ProjectServiceClient {
-		sdkClient, err := aidocumentsdk.NewAIServiceDocumentClientWithConfigurationProvider(manager.Provider)
-		config := newProjectRuntimeConfig(manager.Log, sdkClient)
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Project OCI client: %w", err)
-		}
-		return defaultProjectServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*aidocumentv1beta1.Project](config),
-		}
+	registerProjectRuntimeHooksMutator(func(_ *ProjectServiceManager, hooks *ProjectRuntimeHooks) {
+		applyProjectRuntimeHooks(hooks)
+	})
+}
+
+func applyProjectRuntimeHooks(hooks *ProjectRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
+
+	hooks.Semantics = reviewedProjectRuntimeSemantics()
+	hooks.List.Fields = projectListFields()
 }
 
 func newProjectServiceClientWithOCIClient(log loggerutil.OSOKLogger, client projectOCIClient) ProjectServiceClient {
@@ -48,45 +49,43 @@ func newProjectRuntimeConfig(
 	log loggerutil.OSOKLogger,
 	client projectOCIClient,
 ) generatedruntime.Config[*aidocumentv1beta1.Project] {
-	return generatedruntime.Config[*aidocumentv1beta1.Project]{
-		Kind:      "Project",
-		SDKName:   "Project",
-		Log:       log,
-		Semantics: reviewedProjectRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.CreateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateProject(ctx, *request.(*aidocumentsdk.CreateProjectRequest))
-			},
+	hooks := newProjectRuntimeHooksWithOCIClient(client)
+	applyProjectRuntimeHooks(&hooks)
+	return buildProjectGeneratedRuntimeConfig(&ProjectServiceManager{Log: log}, hooks)
+}
+
+func newProjectRuntimeHooksWithOCIClient(client projectOCIClient) ProjectRuntimeHooks {
+	return ProjectRuntimeHooks{
+		Semantics: newProjectRuntimeSemantics(),
+		Create: runtimeOperationHooks[aidocumentsdk.CreateProjectRequest, aidocumentsdk.CreateProjectResponse]{
 			Fields: projectCreateFields(),
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.GetProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetProject(ctx, *request.(*aidocumentsdk.GetProjectRequest))
+			Call: func(ctx context.Context, request aidocumentsdk.CreateProjectRequest) (aidocumentsdk.CreateProjectResponse, error) {
+				return client.CreateProject(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[aidocumentsdk.GetProjectRequest, aidocumentsdk.GetProjectResponse]{
 			Fields: projectGetFields(),
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.ListProjectsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListProjects(ctx, *request.(*aidocumentsdk.ListProjectsRequest))
+			Call: func(ctx context.Context, request aidocumentsdk.GetProjectRequest) (aidocumentsdk.GetProjectResponse, error) {
+				return client.GetProject(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[aidocumentsdk.ListProjectsRequest, aidocumentsdk.ListProjectsResponse]{
 			Fields: projectListFields(),
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.UpdateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateProject(ctx, *request.(*aidocumentsdk.UpdateProjectRequest))
+			Call: func(ctx context.Context, request aidocumentsdk.ListProjectsRequest) (aidocumentsdk.ListProjectsResponse, error) {
+				return client.ListProjects(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[aidocumentsdk.UpdateProjectRequest, aidocumentsdk.UpdateProjectResponse]{
 			Fields: projectUpdateFields(),
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.DeleteProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteProject(ctx, *request.(*aidocumentsdk.DeleteProjectRequest))
+			Call: func(ctx context.Context, request aidocumentsdk.UpdateProjectRequest) (aidocumentsdk.UpdateProjectResponse, error) {
+				return client.UpdateProject(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[aidocumentsdk.DeleteProjectRequest, aidocumentsdk.DeleteProjectResponse]{
 			Fields: projectDeleteFields(),
+			Call: func(ctx context.Context, request aidocumentsdk.DeleteProjectRequest) (aidocumentsdk.DeleteProjectResponse, error) {
+				return client.DeleteProject(ctx, request)
+			},
 		},
 	}
 }

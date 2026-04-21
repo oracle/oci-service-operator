@@ -25,10 +25,22 @@ type loadBalancerRuntimeOCIClient interface {
 }
 
 func init() {
-	newLoadBalancerServiceClient = func(manager *LoadBalancerServiceManager) LoadBalancerServiceClient {
-		sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-		return newGeneratedLoadBalancerServiceClient(sdkClient, manager.Log, manager.CredentialClient, err)
+	registerLoadBalancerRuntimeHooksMutator(func(_ *LoadBalancerServiceManager, hooks *LoadBalancerRuntimeHooks) {
+		applyLoadBalancerRuntimeHooks(hooks)
+	})
+}
+
+func applyLoadBalancerRuntimeHooks(hooks *LoadBalancerRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
+
+	hooks.Semantics = newReviewedLoadBalancerRuntimeSemantics()
+	hooks.Create.Fields = loadBalancerCreateFields()
+	hooks.Get.Fields = loadBalancerGetFields()
+	hooks.List.Fields = loadBalancerListFields()
+	hooks.Update.Fields = loadBalancerUpdateFields()
+	hooks.Delete.Fields = loadBalancerDeleteFields()
 }
 
 func newGeneratedLoadBalancerServiceClient(
@@ -37,52 +49,61 @@ func newGeneratedLoadBalancerServiceClient(
 	credentialClient credhelper.CredentialClient,
 	initErr error,
 ) LoadBalancerServiceClient {
-	config := generatedruntime.Config[*loadbalancerv1beta1.LoadBalancer]{
-		Kind:             "LoadBalancer",
-		SDKName:          "LoadBalancer",
-		Log:              log,
-		CredentialClient: credentialClient,
-		InitError:        newLoadBalancerClientInitError(initErr),
-		Semantics:        newReviewedLoadBalancerRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateLoadBalancerRequest{} },
-			Fields:     loadBalancerCreateFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateLoadBalancer(ctx, *request.(*loadbalancersdk.CreateLoadBalancerRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetLoadBalancerRequest{} },
-			Fields:     loadBalancerGetFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetLoadBalancer(ctx, *request.(*loadbalancersdk.GetLoadBalancerRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListLoadBalancersRequest{} },
-			Fields:     loadBalancerListFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListLoadBalancers(ctx, *request.(*loadbalancersdk.ListLoadBalancersRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateLoadBalancerRequest{} },
-			Fields:     loadBalancerUpdateFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateLoadBalancer(ctx, *request.(*loadbalancersdk.UpdateLoadBalancerRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteLoadBalancerRequest{} },
-			Fields:     loadBalancerDeleteFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteLoadBalancer(ctx, *request.(*loadbalancersdk.DeleteLoadBalancerRequest))
-			},
-		},
-	}
-
 	return defaultLoadBalancerServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.LoadBalancer](config),
+		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.LoadBalancer](
+			newLoadBalancerRuntimeConfig(log, credentialClient, client, initErr),
+		),
+	}
+}
+
+func newLoadBalancerRuntimeConfig(
+	log loggerutil.OSOKLogger,
+	credentialClient credhelper.CredentialClient,
+	client loadBalancerRuntimeOCIClient,
+	initErr error,
+) generatedruntime.Config[*loadbalancerv1beta1.LoadBalancer] {
+	hooks := newLoadBalancerRuntimeHooksWithOCIClient(client)
+	applyLoadBalancerRuntimeHooks(&hooks)
+
+	config := buildLoadBalancerGeneratedRuntimeConfig(&LoadBalancerServiceManager{Log: log}, hooks)
+	config.CredentialClient = credentialClient
+	config.InitError = newLoadBalancerClientInitError(initErr)
+	return config
+}
+
+func newLoadBalancerRuntimeHooksWithOCIClient(client loadBalancerRuntimeOCIClient) LoadBalancerRuntimeHooks {
+	return LoadBalancerRuntimeHooks{
+		Semantics: newLoadBalancerRuntimeSemantics(),
+		Create: runtimeOperationHooks[loadbalancersdk.CreateLoadBalancerRequest, loadbalancersdk.CreateLoadBalancerResponse]{
+			Fields: loadBalancerCreateFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.CreateLoadBalancerRequest) (loadbalancersdk.CreateLoadBalancerResponse, error) {
+				return client.CreateLoadBalancer(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[loadbalancersdk.GetLoadBalancerRequest, loadbalancersdk.GetLoadBalancerResponse]{
+			Fields: loadBalancerGetFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error) {
+				return client.GetLoadBalancer(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[loadbalancersdk.ListLoadBalancersRequest, loadbalancersdk.ListLoadBalancersResponse]{
+			Fields: loadBalancerListFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.ListLoadBalancersRequest) (loadbalancersdk.ListLoadBalancersResponse, error) {
+				return client.ListLoadBalancers(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerRequest, loadbalancersdk.UpdateLoadBalancerResponse]{
+			Fields: loadBalancerUpdateFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.UpdateLoadBalancerRequest) (loadbalancersdk.UpdateLoadBalancerResponse, error) {
+				return client.UpdateLoadBalancer(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[loadbalancersdk.DeleteLoadBalancerRequest, loadbalancersdk.DeleteLoadBalancerResponse]{
+			Fields: loadBalancerDeleteFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.DeleteLoadBalancerRequest) (loadbalancersdk.DeleteLoadBalancerResponse, error) {
+				return client.DeleteLoadBalancer(ctx, request)
+			},
+		},
 	}
 }
 
