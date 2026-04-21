@@ -1,7 +1,8 @@
 # Runtime Hook Adoption Audit
 
-This audit is the `US-213` closeout for the phase-1 runtime-hook adoption
-stories (`US-210`, `US-211`, and `US-212`).
+This audit was originally checked in for `US-213` and is refreshed in
+`US-218` after `US-217` moved the three load-balancer proof packages onto the
+bounded path-identity and nested-read seams.
 
 The live residual set comes from:
 
@@ -10,15 +11,14 @@ rg -l "new[A-Za-z0-9]+ServiceClient\s*=" pkg/servicemanager | \
   rg -v '_serviceclient\.go$|_test\.go$'
 ```
 
-That command now returns 22 live constructor rewrites. The remaining packages
+That command now returns 19 live constructor rewrites. The remaining packages
 are still real blockers, but they are no longer a flat list of one-off manual
-exceptions. They collapse into six concrete blocked families:
+exceptions. They collapse into five concrete blocked families:
 
 | Family | Count | Packages |
 | --- | --- | --- |
 | Identity parity wrappers | 7 | `core/vcn`, `core/internetgateway`, `core/networksecuritygroup`, `core/natgateway`, `core/routetable`, `core/subnet`, `core/servicegateway` |
 | Identity bind guards | 4 | `generativeai/model`, `generativeai/dedicatedaicluster`, `ocvp/cluster`, `ocvp/sddc` |
-| Load-balancer path identity adapters | 3 | `loadbalancer/backend`, `loadbalancer/backendset`, `loadbalancer/listener` |
 | Async resume and work-request state machines | 3 | `ailanguage/project`, `queue/queue`, `redis/rediscluster` |
 | Delete-confirmation and OCI-error overlays | 2 | `aispeech/transcriptionjob`, `dataflow/application` |
 | Full manual runtime engines | 3 | `core/securitylist`, `nosql/table`, `psql/dbsystem` |
@@ -26,14 +26,16 @@ exceptions. They collapse into six concrete blocked families:
 ## Current Hook Boundary
 
 - The generated scaffold already exposes operation-field overrides,
-  `BuildCreateBody`, `BuildUpdateBody`, and `WrapGeneratedClient`.
-- That seam is enough for the packages already migrated in `US-210`,
-  `US-211`, and `US-212`, where the live path only needed a narrow generated
-  delegate wrapper.
-- The remaining 22 rewrites all still need one of the blocked families below.
-  This story records that inventory only. It does not add `MutateConfig`, a
-  generic identity-repair seam, a generic status-reset seam, a generic
-  async-resume seam, or a broad OCI-error hook.
+  `BuildCreateBody`, `BuildUpdateBody`, `WrapGeneratedClient`, and the bounded
+  `Identity` and `Read` seams for path-addressed subresources.
+- That surface is enough for the packages already migrated in `US-210`,
+  `US-211`, `US-212`, and the load-balancer proof migrations in `US-217`,
+  where the live path only needed a bounded identity or read extension around
+  the generated delegate.
+- The remaining 19 rewrites all still need one of the blocked families below.
+  This refresh records that inventory only. It does not widen the checked-in
+  runtime surface into generic identity-repair, status-reset, async-resume, or
+  OCI-error hooks.
 
 ## Family Inventory
 
@@ -81,26 +83,6 @@ The common shape is:
   package-local list query before the generated delegate runs
 - clear stale recorded identity before retrying a create path that must skip
   list reuse
-
-### Load-balancer path identity adapters
-
-These packages are not identified by a durable standalone OCI ID in the same
-way as the plain generatedruntime baseline.
-
-- `loadbalancer/backend`
-- `loadbalancer/backendset`
-- `loadbalancer/listener`
-
-The common shape is:
-
-- resolve identity from parent-path fields such as `loadBalancerId`,
-  `backendSetName`, `listenerName`, or the synthesized backend name
-- persist path identity into status before delegating
-- seed a synthetic tracked ID for existing or delete flows when the subresource
-  does not expose a standalone OCI identifier
-- for `listener`, synthesize the `Get` and `List` read model from
-  `GetLoadBalancer(...)` because the nested listener surface does not match the
-  default generated assumptions
 
 ### Async resume and work-request state machines
 
@@ -164,9 +146,6 @@ The common shape is:
 | `core/subnet` | Identity parity wrapper | Normalizes mutable collections and create-only parity flags, clears projected status before delegation, and keeps explicit delete confirmation local. |
 | `core/servicegateway` | Identity parity wrapper | Normalizes equivalent services, clears projected status before delegation, and still owns parity-only update handling. |
 | `core/securitylist` | Full manual runtime engine | The runtime still owns full CRUD because nested rule normalization, stale optional status clearing, tracked-OCID recreate behavior, and an SDK contract guard are all package-local. |
-| `loadbalancer/backend` | Load-balancer path identity adapter | Resolves identity from `loadBalancerId`, `backendSetName`, and the synthesized backend name, then seeds a synthetic tracked ID for existing and delete flows. |
-| `loadbalancer/backendset` | Load-balancer path identity adapter | Persists load-balancer path identity and uses a synthetic tracked ID for existing and delete flows because the subresource is still path-addressed. |
-| `loadbalancer/listener` | Load-balancer path identity adapter | Rebuilds `Get` and `List` from `GetLoadBalancer(...)`, so the generated runtime still needs a package-local nested read model. |
 | `ailanguage/project` | Async resume and work-request state machine | Persists and resumes create, update, and delete through `GetWorkRequest(...)`, then rebinds the OCI Project identity before convergence. |
 | `aispeech/transcriptionjob` | Delete-confirmation and OCI-error overlay | The generated path still needs a handwritten delete layer because `CANCELING` and `CANCELED` mean different things for normal observation and delete confirmation. |
 | `dataflow/application` | Delete-confirmation and OCI-error overlay | Uses an embedded generated client for create or update, but delete still needs package-local rereads, OCI error normalization, and request-ID projection. |
@@ -179,39 +158,42 @@ The common shape is:
 | `ocvp/cluster` | Identity bind guard | Requires `spec.displayName` when no OCI identifier is recorded because the generated delegate does not have a narrower bind-safety seam yet. |
 | `ocvp/sddc` | Identity bind guard | Resolves an existing OCI ID with `ListSddcs(...)` before delegating and sanitizes the read payload shape locally. |
 
-## Later-Phase Candidate API Shape
+## Residual Design Input
 
-The cleanest repeated later-phase candidate is a bounded load-balancer
-subresource identity seam.
+No new narrow later-phase candidate replaces the load-balancer proof family.
+With those packages off the residual list, the clearest remaining repeated need
+is the broader identity parity wrapper shape.
 
-Proof packages:
+Representative packages:
 
-- `loadbalancer/backend`
-- `loadbalancer/backendset`
-- `loadbalancer/listener`
+- `core/vcn`
+- `core/internetgateway`
+- `core/networksecuritygroup`
+- `core/natgateway`
+- `core/routetable`
+- `core/subnet`
+- `core/servicegateway`
 
 Current repeated need:
 
-- persist parent-path identity into status before generated CRUD runs
-- optionally seed a synthetic tracked ID for existing and delete flows
-- optionally synthesize `Get` or `List` from a parent read when the nested SDK
-  surface does not match the default generated assumptions
+- clear tracked identity when OCI no longer exposes the prior object
+- clear and sometimes restore projected status around the generated delegate so
+  stale status does not create parity drift
+- keep package-local parity normalization or recreate-intent handling around
+  create, update, or delete decisions
 
-Bounded candidate shape for a later phase, not implemented here:
+Why this stays residual design input instead of a new bounded hook claim:
 
-- a load-balancer-specific subresource identity helper on runtime hooks or
-  config that can:
-  - persist named path keys into status
-  - seed or restore a synthetic tracked ID for path-only resources
-  - plug a nested read adapter into generated `Get` or `List`
-
-This is narrower than a generic identity-repair hook and matches the one
-remaining repeated path-identity family without claiming broader runtime-hook
-coverage.
+- it is broader than the bounded `Identity` and `Read` seams that already
+  landed for the load-balancer proof migrations
+- the remaining packages still mix identity repair with package-specific
+  normalization, delete confirmation, or recreate-intent semantics
+- this audit records the repeated gap only; it does not claim a generic parity
+  repair or projected-status-reset hook shape
 
 ## Contract Note
 
-`docs/api-generator-contract.md` already says the checked-in generated runtime
-surface exposes manual extension seams and that remaining handwritten runtime
-seams stay explicit until later rollout work closes them. This audit updates
-the residual inventory only, so no contract change is required in `US-213`.
+`docs/api-generator-contract.md` already records the checked-in `Identity` and
+`Read` seams and says the remaining handwritten runtime seams stay explicit
+until later rollout work closes them. This audit refreshes the residual
+inventory only, so no further contract change is required in `US-218`.
