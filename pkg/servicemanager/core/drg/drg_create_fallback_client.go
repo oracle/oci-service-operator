@@ -23,10 +23,9 @@ import (
 )
 
 func init() {
-	generatedFactory := newDrgServiceClient
-	newDrgServiceClient = func(manager *DrgServiceManager) DrgServiceClient {
-		return newDrgCreateFallbackClient(manager, generatedFactory(manager))
-	}
+	registerDrgRuntimeHooksMutator(func(manager *DrgServiceManager, hooks *DrgRuntimeHooks) {
+		appendDrgCreateFallbackRuntimeWrapper(manager, hooks)
+	})
 }
 
 type drgCreateFallbackClient struct {
@@ -35,6 +34,16 @@ type drgCreateFallbackClient struct {
 }
 
 var _ DrgServiceClient = drgCreateFallbackClient{}
+
+func appendDrgCreateFallbackRuntimeWrapper(manager *DrgServiceManager, hooks *DrgRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate DrgServiceClient) DrgServiceClient {
+		return newDrgCreateFallbackClient(manager, delegate)
+	})
+}
 
 func newDrgCreateFallbackClient(manager *DrgServiceManager, delegate DrgServiceClient) DrgServiceClient {
 	return drgCreateFallbackClient{
