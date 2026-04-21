@@ -1689,6 +1689,9 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		"Semantics: hooks.Semantics,",
 		"Identity generatedruntime.IdentityHooks[*examplev1beta1.Thing]",
 		"Read generatedruntime.ReadHooks",
+		"TrackedRecreate generatedruntime.TrackedRecreateHooks[*examplev1beta1.Thing]",
+		"StatusHooks generatedruntime.StatusHooks[*examplev1beta1.Thing]",
+		"ParityHooks generatedruntime.ParityHooks[*examplev1beta1.Thing]",
 		`FormalService: "identity"`,
 		`FormalSlug: "user"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -1698,9 +1701,15 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		`BuildUpdateBody func(context.Context, *examplev1beta1.Thing, string, any) (any, bool, error)`,
 		`Identity: generatedruntime.IdentityHooks[*examplev1beta1.Thing]{},`,
 		`Read: generatedruntime.ReadHooks{},`,
+		`TrackedRecreate: generatedruntime.TrackedRecreateHooks[*examplev1beta1.Thing]{},`,
+		`StatusHooks: generatedruntime.StatusHooks[*examplev1beta1.Thing]{},`,
+		`ParityHooks: generatedruntime.ParityHooks[*examplev1beta1.Thing]{},`,
 		`WrapGeneratedClient []func(ThingServiceClient) ThingServiceClient`,
 		`Identity: hooks.Identity,`,
 		`Read: hooks.Read,`,
+		`TrackedRecreate: hooks.TrackedRecreate,`,
+		`StatusHooks: hooks.StatusHooks,`,
+		`ParityHooks: hooks.ParityHooks,`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -1887,6 +1896,9 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	wantFields := []generatedruntime.RequestField{
 		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false},
 	}
+	trackedClearCalled := false
+	statusClearCalled := false
+	parityNormalizeCalled := false
 
 	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
 		hooks.BuildCreateBody = func(context.Context, *mysqlv1beta1.DbSystem, string) (any, error) {
@@ -1905,6 +1917,16 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 			Call: func(context.Context, any) (any, error) {
 				return readMarkerResponse{}, nil
 			},
+		}
+		hooks.TrackedRecreate.ClearTrackedIdentity = func(*mysqlv1beta1.DbSystem) {
+			trackedClearCalled = true
+		}
+		hooks.StatusHooks.ClearProjectedStatus = func(*mysqlv1beta1.DbSystem) any {
+			statusClearCalled = true
+			return "status-clear-marker"
+		}
+		hooks.ParityHooks.NormalizeDesiredState = func(*mysqlv1beta1.DbSystem, any) {
+			parityNormalizeCalled = true
 		}
 	})
 	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
@@ -1946,6 +1968,29 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	if hooks.Read.Get == nil {
 		t.Fatal("Read.Get hook was not applied")
 	}
+	if hooks.TrackedRecreate.ClearTrackedIdentity == nil {
+		t.Fatal("TrackedRecreate.ClearTrackedIdentity hook was not applied")
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity(&mysqlv1beta1.DbSystem{})
+	if !trackedClearCalled {
+		t.Fatal("TrackedRecreate.ClearTrackedIdentity hook was not invoked")
+	}
+	if hooks.StatusHooks.ClearProjectedStatus == nil {
+		t.Fatal("StatusHooks.ClearProjectedStatus hook was not applied")
+	}
+	if got := hooks.StatusHooks.ClearProjectedStatus(&mysqlv1beta1.DbSystem{}); got != "status-clear-marker" {
+		t.Fatalf("hooks.StatusHooks.ClearProjectedStatus() = %#v, want status-clear-marker", got)
+	}
+	if !statusClearCalled {
+		t.Fatal("StatusHooks.ClearProjectedStatus hook was not invoked")
+	}
+	if hooks.ParityHooks.NormalizeDesiredState == nil {
+		t.Fatal("ParityHooks.NormalizeDesiredState hook was not applied")
+	}
+	hooks.ParityHooks.NormalizeDesiredState(&mysqlv1beta1.DbSystem{}, nil)
+	if !parityNormalizeCalled {
+		t.Fatal("ParityHooks.NormalizeDesiredState hook was not invoked")
+	}
 
 	cfg := buildDbSystemGeneratedRuntimeConfig(manager, hooks)
 	if cfg.Create == nil {
@@ -1956,6 +2001,15 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	}
 	if cfg.Read.Get == nil {
 		t.Fatal("generated runtime config did not expose Read.Get")
+	}
+	if cfg.TrackedRecreate.ClearTrackedIdentity == nil {
+		t.Fatal("generated runtime config did not expose TrackedRecreate.ClearTrackedIdentity")
+	}
+	if cfg.StatusHooks.ClearProjectedStatus == nil {
+		t.Fatal("generated runtime config did not expose StatusHooks.ClearProjectedStatus")
+	}
+	if cfg.ParityHooks.NormalizeDesiredState == nil {
+		t.Fatal("generated runtime config did not expose ParityHooks.NormalizeDesiredState")
 	}
 	if cfg.BuildCreateBody == nil {
 		t.Fatal("generated runtime config did not expose BuildCreateBody")
@@ -1980,6 +2034,23 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	}
 	if _, ok := readResponse.(readMarkerResponse); !ok {
 		t.Fatalf("cfg.Read.Get.Call() = %#v, want readMarkerResponse", readResponse)
+	}
+	trackedClearCalled = false
+	cfg.TrackedRecreate.ClearTrackedIdentity(&mysqlv1beta1.DbSystem{})
+	if !trackedClearCalled {
+		t.Fatal("cfg.TrackedRecreate.ClearTrackedIdentity() did not invoke the hooked mutator")
+	}
+	statusClearCalled = false
+	if got := cfg.StatusHooks.ClearProjectedStatus(&mysqlv1beta1.DbSystem{}); got != "status-clear-marker" {
+		t.Fatalf("cfg.StatusHooks.ClearProjectedStatus() = %#v, want status-clear-marker", got)
+	}
+	if !statusClearCalled {
+		t.Fatal("cfg.StatusHooks.ClearProjectedStatus() did not invoke the hooked mutator")
+	}
+	parityNormalizeCalled = false
+	cfg.ParityHooks.NormalizeDesiredState(&mysqlv1beta1.DbSystem{}, nil)
+	if !parityNormalizeCalled {
+		t.Fatal("cfg.ParityHooks.NormalizeDesiredState() did not invoke the hooked mutator")
 	}
 
 	client := newDbSystemServiceClient(manager)
@@ -4563,9 +4634,21 @@ func normalizeRuntimeHookContractForComparison(path string, content string) stri
 			continue
 		case strings.Contains(line, "generatedruntime.ReadHooks"):
 			continue
+		case strings.Contains(line, "generatedruntime.TrackedRecreateHooks["):
+			continue
+		case strings.Contains(line, "generatedruntime.StatusHooks["):
+			continue
+		case strings.Contains(line, "generatedruntime.ParityHooks["):
+			continue
 		case line == "Identity: hooks.Identity,":
 			continue
 		case line == "Read: hooks.Read,":
+			continue
+		case line == "TrackedRecreate: hooks.TrackedRecreate,":
+			continue
+		case line == "StatusHooks: hooks.StatusHooks,":
+			continue
+		case line == "ParityHooks: hooks.ParityHooks,":
 			continue
 		default:
 			kept = append(kept, line)
