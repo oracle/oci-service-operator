@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type RedisClusterRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *redisv1beta1.RedisCluster, string) (any, error)
-	BuildUpdateBody     func(context.Context, *redisv1beta1.RedisCluster, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *redisv1beta1.RedisCluster, string) (any, error)
+	BuildUpdateBody func(context.Context, *redisv1beta1.RedisCluster, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*redisv1beta1.RedisCluster]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*redisv1beta1.RedisCluster]

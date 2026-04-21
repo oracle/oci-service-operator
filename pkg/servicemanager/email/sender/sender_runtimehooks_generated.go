@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type SenderRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *emailv1beta1.Sender, string) (any, error)
-	BuildUpdateBody     func(context.Context, *emailv1beta1.Sender, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *emailv1beta1.Sender, string) (any, error)
+	BuildUpdateBody func(context.Context, *emailv1beta1.Sender, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*emailv1beta1.Sender]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.Sender]

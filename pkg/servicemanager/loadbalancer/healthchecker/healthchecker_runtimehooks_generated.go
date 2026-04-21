@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type HealthCheckerRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.HealthChecker, string) (any, error)
-	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.HealthChecker, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *loadbalancerv1beta1.HealthChecker, string) (any, error)
+	BuildUpdateBody func(context.Context, *loadbalancerv1beta1.HealthChecker, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.HealthChecker]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.HealthChecker]

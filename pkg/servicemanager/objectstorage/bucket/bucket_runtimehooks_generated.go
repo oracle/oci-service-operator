@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type BucketRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *objectstoragev1beta1.Bucket, string) (any, error)
-	BuildUpdateBody     func(context.Context, *objectstoragev1beta1.Bucket, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *objectstoragev1beta1.Bucket, string) (any, error)
+	BuildUpdateBody func(context.Context, *objectstoragev1beta1.Bucket, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*objectstoragev1beta1.Bucket]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*objectstoragev1beta1.Bucket]

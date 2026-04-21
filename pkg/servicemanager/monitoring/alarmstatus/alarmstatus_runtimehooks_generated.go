@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type AlarmStatusRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *monitoringv1beta1.AlarmStatus, string) (any, error)
-	BuildUpdateBody     func(context.Context, *monitoringv1beta1.AlarmStatus, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *monitoringv1beta1.AlarmStatus, string) (any, error)
+	BuildUpdateBody func(context.Context, *monitoringv1beta1.AlarmStatus, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmStatus]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.AlarmStatus]

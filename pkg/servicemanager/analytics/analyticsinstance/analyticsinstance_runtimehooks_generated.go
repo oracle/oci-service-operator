@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type AnalyticsInstanceRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *analyticsv1beta1.AnalyticsInstance, string) (any, error)
-	BuildUpdateBody     func(context.Context, *analyticsv1beta1.AnalyticsInstance, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *analyticsv1beta1.AnalyticsInstance, string) (any, error)
+	BuildUpdateBody func(context.Context, *analyticsv1beta1.AnalyticsInstance, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*analyticsv1beta1.AnalyticsInstance]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*analyticsv1beta1.AnalyticsInstance]

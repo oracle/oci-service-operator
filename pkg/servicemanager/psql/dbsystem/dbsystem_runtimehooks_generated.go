@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type DbSystemRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *psqlv1beta1.DbSystem, string) (any, error)
-	BuildUpdateBody     func(context.Context, *psqlv1beta1.DbSystem, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *psqlv1beta1.DbSystem, string) (any, error)
+	BuildUpdateBody func(context.Context, *psqlv1beta1.DbSystem, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*psqlv1beta1.DbSystem]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*psqlv1beta1.DbSystem]

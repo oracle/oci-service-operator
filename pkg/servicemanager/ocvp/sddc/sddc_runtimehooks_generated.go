@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type SddcRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *ocvpv1beta1.Sddc, string) (any, error)
-	BuildUpdateBody     func(context.Context, *ocvpv1beta1.Sddc, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *ocvpv1beta1.Sddc, string) (any, error)
+	BuildUpdateBody func(context.Context, *ocvpv1beta1.Sddc, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.Sddc]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.Sddc]

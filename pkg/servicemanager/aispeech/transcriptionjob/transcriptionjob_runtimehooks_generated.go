@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type TranscriptionJobRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *aispeechv1beta1.TranscriptionJob, string) (any, error)
-	BuildUpdateBody     func(context.Context, *aispeechv1beta1.TranscriptionJob, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *aispeechv1beta1.TranscriptionJob, string) (any, error)
+	BuildUpdateBody func(context.Context, *aispeechv1beta1.TranscriptionJob, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*aispeechv1beta1.TranscriptionJob]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*aispeechv1beta1.TranscriptionJob]
