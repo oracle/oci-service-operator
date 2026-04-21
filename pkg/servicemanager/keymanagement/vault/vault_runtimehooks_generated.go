@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type VaultRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *keymanagementv1beta1.Vault, string) (any, error)
-	BuildUpdateBody     func(context.Context, *keymanagementv1beta1.Vault, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *keymanagementv1beta1.Vault, string) (any, error)
+	BuildUpdateBody func(context.Context, *keymanagementv1beta1.Vault, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*keymanagementv1beta1.Vault]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*keymanagementv1beta1.Vault]

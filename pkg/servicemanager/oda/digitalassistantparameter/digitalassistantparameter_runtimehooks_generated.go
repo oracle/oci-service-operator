@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type DigitalAssistantParameterRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *odav1beta1.DigitalAssistantParameter, string) (any, error)
-	BuildUpdateBody     func(context.Context, *odav1beta1.DigitalAssistantParameter, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *odav1beta1.DigitalAssistantParameter, string) (any, error)
+	BuildUpdateBody func(context.Context, *odav1beta1.DigitalAssistantParameter, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistantParameter]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.DigitalAssistantParameter]

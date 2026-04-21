@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type DatabaseToolsConnectionRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *databasetoolsv1beta1.DatabaseToolsConnection, string) (any, error)
-	BuildUpdateBody     func(context.Context, *databasetoolsv1beta1.DatabaseToolsConnection, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *databasetoolsv1beta1.DatabaseToolsConnection, string) (any, error)
+	BuildUpdateBody func(context.Context, *databasetoolsv1beta1.DatabaseToolsConnection, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*databasetoolsv1beta1.DatabaseToolsConnection]

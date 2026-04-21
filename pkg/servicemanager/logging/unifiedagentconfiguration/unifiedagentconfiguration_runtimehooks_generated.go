@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type UnifiedAgentConfigurationRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *loggingv1beta1.UnifiedAgentConfiguration, string) (any, error)
-	BuildUpdateBody     func(context.Context, *loggingv1beta1.UnifiedAgentConfiguration, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *loggingv1beta1.UnifiedAgentConfiguration, string) (any, error)
+	BuildUpdateBody func(context.Context, *loggingv1beta1.UnifiedAgentConfiguration, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.UnifiedAgentConfiguration]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.UnifiedAgentConfiguration]

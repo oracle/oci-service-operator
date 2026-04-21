@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type AutonomousDatabaseRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *databasev1beta1.AutonomousDatabase, string) (any, error)
-	BuildUpdateBody     func(context.Context, *databasev1beta1.AutonomousDatabase, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *databasev1beta1.AutonomousDatabase, string) (any, error)
+	BuildUpdateBody func(context.Context, *databasev1beta1.AutonomousDatabase, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*databasev1beta1.AutonomousDatabase]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*databasev1beta1.AutonomousDatabase]

@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type ProjectRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *aivisionv1beta1.Project, string) (any, error)
-	BuildUpdateBody     func(context.Context, *aivisionv1beta1.Project, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *aivisionv1beta1.Project, string) (any, error)
+	BuildUpdateBody func(context.Context, *aivisionv1beta1.Project, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*aivisionv1beta1.Project]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*aivisionv1beta1.Project]

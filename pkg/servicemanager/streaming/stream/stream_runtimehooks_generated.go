@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type StreamRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *streamingv1beta1.Stream, string) (any, error)
-	BuildUpdateBody     func(context.Context, *streamingv1beta1.Stream, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *streamingv1beta1.Stream, string) (any, error)
+	BuildUpdateBody func(context.Context, *streamingv1beta1.Stream, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*streamingv1beta1.Stream]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*streamingv1beta1.Stream]

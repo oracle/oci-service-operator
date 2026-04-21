@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type CompartmentRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *identityv1beta1.Compartment, string) (any, error)
-	BuildUpdateBody     func(context.Context, *identityv1beta1.Compartment, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *identityv1beta1.Compartment, string) (any, error)
+	BuildUpdateBody func(context.Context, *identityv1beta1.Compartment, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*identityv1beta1.Compartment]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*identityv1beta1.Compartment]

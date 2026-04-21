@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type UsageCarbonEmissionsQueryRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, string) (any, error)
-	BuildUpdateBody     func(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, string) (any, error)
+	BuildUpdateBody func(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]

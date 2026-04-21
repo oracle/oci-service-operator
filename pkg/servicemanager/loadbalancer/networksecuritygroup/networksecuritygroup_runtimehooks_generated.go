@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type NetworkSecurityGroupRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.NetworkSecurityGroup, string) (any, error)
-	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.NetworkSecurityGroup, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *loadbalancerv1beta1.NetworkSecurityGroup, string) (any, error)
+	BuildUpdateBody func(context.Context, *loadbalancerv1beta1.NetworkSecurityGroup, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.NetworkSecurityGroup]

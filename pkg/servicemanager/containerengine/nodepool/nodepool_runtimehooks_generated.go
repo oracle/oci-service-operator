@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type NodePoolRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *containerenginev1beta1.NodePool, string) (any, error)
-	BuildUpdateBody     func(context.Context, *containerenginev1beta1.NodePool, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *containerenginev1beta1.NodePool, string) (any, error)
+	BuildUpdateBody func(context.Context, *containerenginev1beta1.NodePool, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*containerenginev1beta1.NodePool]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*containerenginev1beta1.NodePool]

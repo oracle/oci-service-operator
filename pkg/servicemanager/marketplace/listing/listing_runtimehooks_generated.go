@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type ListingRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *marketplacev1beta1.Listing, string) (any, error)
-	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Listing, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *marketplacev1beta1.Listing, string) (any, error)
+	BuildUpdateBody func(context.Context, *marketplacev1beta1.Listing, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Listing]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Listing]

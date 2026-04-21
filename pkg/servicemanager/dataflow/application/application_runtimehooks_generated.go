@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type ApplicationRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *dataflowv1beta1.Application, string) (any, error)
-	BuildUpdateBody     func(context.Context, *dataflowv1beta1.Application, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *dataflowv1beta1.Application, string) (any, error)
+	BuildUpdateBody func(context.Context, *dataflowv1beta1.Application, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*dataflowv1beta1.Application]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*dataflowv1beta1.Application]

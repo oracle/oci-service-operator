@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type ModelRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *generativeaiv1beta1.Model, string) (any, error)
-	BuildUpdateBody     func(context.Context, *generativeaiv1beta1.Model, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *generativeaiv1beta1.Model, string) (any, error)
+	BuildUpdateBody func(context.Context, *generativeaiv1beta1.Model, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*generativeaiv1beta1.Model]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.Model]

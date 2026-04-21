@@ -21,9 +21,10 @@ type runtimeOperationHooks[Req any, Resp any] struct {
 }
 
 type SupportedCommitmentRuntimeHooks struct {
-	Semantics           *generatedruntime.Semantics
-	BuildCreateBody     func(context.Context, *ocvpv1beta1.SupportedCommitment, string) (any, error)
-	BuildUpdateBody     func(context.Context, *ocvpv1beta1.SupportedCommitment, string, any) (any, bool, error)
+	Semantics       *generatedruntime.Semantics
+	BuildCreateBody func(context.Context, *ocvpv1beta1.SupportedCommitment, string) (any, error)
+	BuildUpdateBody func(context.Context, *ocvpv1beta1.SupportedCommitment, string, any) (any, bool, error)
+	// Identity owns bounded pre-create guard and identity reuse hooks.
 	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedCommitment]
 	Read                generatedruntime.ReadHooks
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.SupportedCommitment]
