@@ -19,63 +19,24 @@ import (
 )
 
 func init() {
-	newAnalyticsInstanceServiceClient = func(manager *AnalyticsInstanceServiceManager) AnalyticsInstanceServiceClient {
-		sdkClient, err := analyticssdk.NewAnalyticsClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
-			Kind:      "AnalyticsInstance",
-			SDKName:   "AnalyticsInstance",
-			Log:       manager.Log,
-			Semantics: reviewedAnalyticsInstanceRuntimeSemantics(),
-			BuildUpdateBody: func(
-				_ context.Context,
-				resource *analyticsv1beta1.AnalyticsInstance,
-				_ string,
-				currentResponse any,
-			) (any, bool, error) {
-				return buildAnalyticsInstanceUpdateBody(resource, currentResponse)
-			},
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &analyticssdk.CreateAnalyticsInstanceRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateAnalyticsInstance(ctx, *request.(*analyticssdk.CreateAnalyticsInstanceRequest))
-				},
-				Fields: analyticsInstanceCreateFields(),
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &analyticssdk.GetAnalyticsInstanceRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetAnalyticsInstance(ctx, *request.(*analyticssdk.GetAnalyticsInstanceRequest))
-				},
-				Fields: analyticsInstanceGetFields(),
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &analyticssdk.ListAnalyticsInstancesRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListAnalyticsInstances(ctx, *request.(*analyticssdk.ListAnalyticsInstancesRequest))
-				},
-				Fields: analyticsInstanceListFields(),
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &analyticssdk.UpdateAnalyticsInstanceRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateAnalyticsInstance(ctx, *request.(*analyticssdk.UpdateAnalyticsInstanceRequest))
-				},
-				Fields: analyticsInstanceUpdateFields(),
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &analyticssdk.DeleteAnalyticsInstanceRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteAnalyticsInstance(ctx, *request.(*analyticssdk.DeleteAnalyticsInstanceRequest))
-				},
-				Fields: analyticsInstanceDeleteFields(),
-			},
-		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize AnalyticsInstance OCI client: %w", err)
-		}
-		return defaultAnalyticsInstanceServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*analyticsv1beta1.AnalyticsInstance](config),
-		}
+	registerAnalyticsInstanceRuntimeHooksMutator(func(_ *AnalyticsInstanceServiceManager, hooks *AnalyticsInstanceRuntimeHooks) {
+		applyAnalyticsInstanceRuntimeHooks(hooks)
+	})
+}
+
+func applyAnalyticsInstanceRuntimeHooks(hooks *AnalyticsInstanceRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Semantics = reviewedAnalyticsInstanceRuntimeSemantics()
+	hooks.BuildUpdateBody = func(
+		_ context.Context,
+		resource *analyticsv1beta1.AnalyticsInstance,
+		_ string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildAnalyticsInstanceUpdateBody(resource, currentResponse)
 	}
 }
 

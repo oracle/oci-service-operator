@@ -17,71 +17,30 @@ import (
 )
 
 func init() {
-	newOpensearchClusterServiceClient = func(manager *OpensearchClusterServiceManager) OpensearchClusterServiceClient {
-		sdkClient, err := opensearchsdk.NewOpensearchClusterClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*opensearchv1beta1.OpensearchCluster]{
-			Kind:             "OpensearchCluster",
-			SDKName:          "OpensearchCluster",
-			Log:              manager.Log,
-			CredentialClient: manager.CredentialClient,
-			BuildCreateBody: func(ctx context.Context, resource *opensearchv1beta1.OpensearchCluster, namespace string) (any, error) {
-				return buildOpensearchCreateDetails(ctx, manager.CredentialClient, resource, namespace)
-			},
-			Semantics: newOpensearchClusterRuntimeSemantics(),
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &opensearchsdk.CreateOpensearchClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateOpensearchCluster(ctx, *request.(*opensearchsdk.CreateOpensearchClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "CreateOpensearchClusterDetails", RequestName: "CreateOpensearchClusterDetails", Contribution: "body", PreferResourceID: false}},
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &opensearchsdk.GetOpensearchClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetOpensearchCluster(ctx, *request.(*opensearchsdk.GetOpensearchClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "OpensearchClusterId", RequestName: "opensearchClusterId", Contribution: "path", PreferResourceID: true}},
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &opensearchsdk.ListOpensearchClustersRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListOpensearchClusters(ctx, *request.(*opensearchsdk.ListOpensearchClustersRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false},
-					{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false},
-					{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false},
-					{FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false},
-					{FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false},
-					{FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false},
-					{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false},
-					{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false},
-				},
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &opensearchsdk.UpdateOpensearchClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateOpensearchCluster(ctx, *request.(*opensearchsdk.UpdateOpensearchClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "OpensearchClusterId", RequestName: "opensearchClusterId", Contribution: "path", PreferResourceID: true},
-					{FieldName: "UpdateOpensearchClusterDetails", RequestName: "UpdateOpensearchClusterDetails", Contribution: "body", PreferResourceID: false},
-				},
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &opensearchsdk.DeleteOpensearchClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteOpensearchCluster(ctx, *request.(*opensearchsdk.DeleteOpensearchClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "OpensearchClusterId", RequestName: "opensearchClusterId", Contribution: "path", PreferResourceID: true}},
-			},
-		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize OpensearchCluster OCI client: %w", err)
-		}
-		return defaultOpensearchClusterServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*opensearchv1beta1.OpensearchCluster](config),
-		}
+	registerOpensearchClusterRuntimeHooksMutator(func(
+		manager *OpensearchClusterServiceManager,
+		hooks *OpensearchClusterRuntimeHooks,
+	) {
+		applyOpensearchClusterRuntimeHooks(manager, hooks)
+	})
+}
+
+func applyOpensearchClusterRuntimeHooks(
+	manager *OpensearchClusterServiceManager,
+	hooks *OpensearchClusterRuntimeHooks,
+) {
+	if hooks == nil {
+		return
+	}
+
+	var credentialClient credhelper.CredentialClient
+	if manager != nil {
+		credentialClient = manager.CredentialClient
+	}
+
+	hooks.Semantics = newOpensearchClusterRuntimeSemantics()
+	hooks.BuildCreateBody = func(ctx context.Context, resource *opensearchv1beta1.OpensearchCluster, namespace string) (any, error) {
+		return buildOpensearchCreateDetails(ctx, credentialClient, resource, namespace)
 	}
 }
 
