@@ -1029,6 +1029,8 @@ type {{ .Kind }}RuntimeHooks struct {
 	Semantics       *generatedruntime.Semantics
 	BuildCreateBody func(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, string) (any, error)
 	BuildUpdateBody func(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, string, any) (any, bool, error)
+	Identity        generatedruntime.IdentityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
+	Read            generatedruntime.ReadHooks
 {{- if .CreateOperation }}
 	Create          runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]
 {{- end }}
@@ -1135,6 +1137,8 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 {{- if .Semantics }}
 		Semantics: new{{ .Kind }}RuntimeSemantics(),
 {{- end }}
+		Identity: generatedruntime.IdentityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
+		Read:     generatedruntime.ReadHooks{},
 {{- if .CreateOperation }}
 		Create: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]{
 			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
@@ -1219,6 +1223,8 @@ func build{{ .Kind }}GeneratedRuntimeConfig(
 		CredentialClient: manager.CredentialClient,
 {{- end }}
 		Semantics:        hooks.Semantics,
+		Identity:         hooks.Identity,
+		Read:             hooks.Read,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 {{- if .CreateOperation }}

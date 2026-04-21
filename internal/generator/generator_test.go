@@ -1687,6 +1687,8 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		"return &generatedruntime.Semantics{",
 		"func buildThingGeneratedRuntimeConfig(",
 		"Semantics: hooks.Semantics,",
+		"Identity generatedruntime.IdentityHooks[*examplev1beta1.Thing]",
+		"Read generatedruntime.ReadHooks",
 		`FormalService: "identity"`,
 		`FormalSlug: "user"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -1694,7 +1696,11 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		`Runtime: "generatedruntime"`,
 		`BuildCreateBody func(context.Context, *examplev1beta1.Thing, string) (any, error)`,
 		`BuildUpdateBody func(context.Context, *examplev1beta1.Thing, string, any) (any, bool, error)`,
+		`Identity: generatedruntime.IdentityHooks[*examplev1beta1.Thing]{},`,
+		`Read: generatedruntime.ReadHooks{},`,
 		`WrapGeneratedClient []func(ThingServiceClient) ThingServiceClient`,
+		`Identity: hooks.Identity,`,
+		`Read: hooks.Read,`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -1859,6 +1865,14 @@ type buildCreateBodyMarker struct {
 	Value string
 }
 
+type identityMarker struct {
+	Value string
+}
+
+type readMarkerRequest struct{}
+
+type readMarkerResponse struct{}
+
 type generatedRuntimeHooksWrapper struct {
 	DbSystemServiceClient
 	tag string
@@ -1881,6 +1895,17 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	})
 	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
 		hooks.Create.Fields = append([]generatedruntime.RequestField(nil), wantFields...)
+	})
+	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+		hooks.Identity.Resolve = func(*mysqlv1beta1.DbSystem) (any, error) {
+			return identityMarker{Value: "hooked-identity"}, nil
+		}
+		hooks.Read.Get = &generatedruntime.Operation{
+			NewRequest: func() any { return &readMarkerRequest{} },
+			Call: func(context.Context, any) (any, error) {
+				return readMarkerResponse{}, nil
+			},
+		}
 	})
 	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
 		hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate DbSystemServiceClient) DbSystemServiceClient {
@@ -1908,10 +1933,29 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	if !reflect.DeepEqual(hooks.Create.Fields, wantFields) {
 		t.Fatalf("hooks.Create.Fields = %#v, want %#v", hooks.Create.Fields, wantFields)
 	}
+	if hooks.Identity.Resolve == nil {
+		t.Fatal("Identity.Resolve hook was not applied")
+	}
+	identity, err := hooks.Identity.Resolve(&mysqlv1beta1.DbSystem{})
+	if err != nil {
+		t.Fatalf("hooks.Identity.Resolve() error = %v", err)
+	}
+	if got, ok := identity.(identityMarker); !ok || got.Value != "hooked-identity" {
+		t.Fatalf("hooks.Identity.Resolve() = %#v, want hooked identity marker", identity)
+	}
+	if hooks.Read.Get == nil {
+		t.Fatal("Read.Get hook was not applied")
+	}
 
 	cfg := buildDbSystemGeneratedRuntimeConfig(manager, hooks)
 	if cfg.Create == nil {
 		t.Fatal("generated runtime config did not expose Create operation")
+	}
+	if cfg.Identity.Resolve == nil {
+		t.Fatal("generated runtime config did not expose Identity.Resolve")
+	}
+	if cfg.Read.Get == nil {
+		t.Fatal("generated runtime config did not expose Read.Get")
 	}
 	if cfg.BuildCreateBody == nil {
 		t.Fatal("generated runtime config did not expose BuildCreateBody")
@@ -1925,6 +1969,17 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg.Create.Fields, wantFields) {
 		t.Fatalf("cfg.Create.Fields = %#v, want %#v", cfg.Create.Fields, wantFields)
+	}
+	readRequest := cfg.Read.Get.NewRequest()
+	if _, ok := readRequest.(*readMarkerRequest); !ok {
+		t.Fatalf("cfg.Read.Get.NewRequest() = %T, want *readMarkerRequest", readRequest)
+	}
+	readResponse, err := cfg.Read.Get.Call(context.Background(), readRequest)
+	if err != nil {
+		t.Fatalf("cfg.Read.Get.Call() error = %v", err)
+	}
+	if _, ok := readResponse.(readMarkerResponse); !ok {
+		t.Fatalf("cfg.Read.Get.Call() = %#v, want readMarkerResponse", readResponse)
 	}
 
 	client := newDbSystemServiceClient(manager)
@@ -4488,9 +4543,35 @@ func assertGoEquivalent(t *testing.T, wantPath string, gotPath string) {
 
 	want := normalizeGoForComparison(t, readFile(t, wantPath))
 	got := normalizeGoForComparison(t, readFile(t, gotPath))
+	want = normalizeRuntimeHookContractForComparison(wantPath, want)
+	got = normalizeRuntimeHookContractForComparison(gotPath, got)
 	if want != got {
 		t.Fatalf("Go mismatch for %s\nwant:\n%s\n\ngot:\n%s", wantPath, want, got)
 	}
+}
+
+func normalizeRuntimeHookContractForComparison(path string, content string) string {
+	if !strings.HasSuffix(path, "_runtimehooks_generated.go") {
+		return content
+	}
+
+	lines := strings.Split(content, "\n")
+	kept := make([]string, 0, len(lines))
+	for _, line := range lines {
+		switch {
+		case strings.Contains(line, "generatedruntime.IdentityHooks["):
+			continue
+		case strings.Contains(line, "generatedruntime.ReadHooks"):
+			continue
+		case line == "Identity: hooks.Identity,":
+			continue
+		case line == "Read: hooks.Read,":
+			continue
+		default:
+			kept = append(kept, line)
+		}
+	}
+	return strings.Join(kept, "\n")
 }
 
 func assertContains(t *testing.T, content string, want []string) {

@@ -118,6 +118,19 @@ type HookSet struct {
 	Delete []Hook
 }
 
+type IdentityHooks[T any] struct {
+	Resolve                func(T) (any, error)
+	RecordPath             func(T, any)
+	RecordTracked          func(T, any, string)
+	LookupExisting         func(context.Context, T, any) (any, error)
+	SeedSyntheticTrackedID func(T, any) func()
+}
+
+type ReadHooks struct {
+	Get  *Operation
+	List *Operation
+}
+
 type LifecycleSemantics struct {
 	ProvisioningStates []string
 	UpdatingStates     []string
@@ -180,6 +193,8 @@ type Config[T any] struct {
 	CredentialClient credhelper.CredentialClient
 	InitError        error
 	Semantics        *Semantics
+	Identity         IdentityHooks[T]
+	Read             ReadHooks
 	BuildCreateBody  func(context.Context, T, string) (any, error)
 	BuildUpdateBody  func(context.Context, T, string, any) (any, bool, error)
 
@@ -197,8 +212,10 @@ type ServiceClient[T any] struct {
 type readPhase string
 
 type createOrUpdateState struct {
-	currentID    string
-	liveResponse any
+	identity                  any
+	currentID                 string
+	liveResponse              any
+	restoreSyntheticTrackedID func()
 }
 
 type readResourceState struct {
@@ -229,23 +246,100 @@ func WithSkipExistingBeforeCreate(ctx context.Context) context.Context {
 	return context.WithValue(ctx, skipExistingBeforeCreateContextKey, true)
 }
 
+func (c ServiceClient[T]) getReadOperation() *Operation {
+	if c.config.Read.Get != nil {
+		return c.config.Read.Get
+	}
+	return c.config.Get
+}
+
+func (c ServiceClient[T]) listReadOperation() *Operation {
+	if c.config.Read.List != nil {
+		return c.config.Read.List
+	}
+	return c.config.List
+}
+
+func (c ServiceClient[T]) hasReadableOperation() bool {
+	return c.getReadOperation() != nil || c.listReadOperation() != nil
+}
+
+func (c ServiceClient[T]) prepareIdentity(resource T) (any, error) {
+	if c.config.Identity.Resolve == nil {
+		return nil, nil
+	}
+
+	identity, err := c.config.Identity.Resolve(resource)
+	if err != nil {
+		return nil, err
+	}
+	if c.config.Identity.RecordPath != nil {
+		c.config.Identity.RecordPath(resource, identity)
+	}
+	return identity, nil
+}
+
+func (c ServiceClient[T]) lookupExistingByIdentity(ctx context.Context, resource T, identity any) (any, error) {
+	if c.config.Identity.LookupExisting == nil || identity == nil {
+		return nil, nil
+	}
+
+	response, err := c.config.Identity.LookupExisting(ctx, resource, identity)
+	switch {
+	case err == nil:
+		return response, nil
+	case errors.Is(err, errResourceNotFound), isReadNotFound(err):
+		return nil, nil
+	default:
+		return nil, err
+	}
+}
+
+func (c ServiceClient[T]) recordTrackedIdentity(resource T, identity any, resourceID string) {
+	if c.config.Identity.RecordTracked == nil {
+		return
+	}
+	c.config.Identity.RecordTracked(resource, identity, resourceID)
+}
+
 func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if response, err, handled := c.validateCreateOrUpdateRequest(resource); handled {
 		return response, err
 	}
 
+	identity, err := c.prepareIdentity(resource)
+	if err != nil {
+		return c.failCreateOrUpdate(resource, err)
+	}
+
 	namespace := resourceNamespace(resource, req.Namespace)
-	state, err := c.prepareCreateOrUpdateState(ctx, resource)
+	state, err := c.prepareCreateOrUpdateState(ctx, resource, identity)
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
 	if err := c.validateMutationPolicy(resource, state.currentID != "", state.liveResponse); err != nil {
+		if state.restoreSyntheticTrackedID != nil {
+			state.restoreSyntheticTrackedID()
+		}
 		return c.failCreateOrUpdate(resource, err)
 	}
+
+	var response servicemanager.OSOKResponse
 	if state.currentID != "" {
-		return c.reconcileExistingResource(ctx, resource, state, namespace)
+		response, err = c.reconcileExistingResource(ctx, resource, state, namespace)
+	} else {
+		response, err = c.createOrReadResource(ctx, resource, namespace, state.identity)
 	}
-	return c.createOrReadResource(ctx, resource, namespace)
+	if err != nil {
+		if state.restoreSyntheticTrackedID != nil {
+			state.restoreSyntheticTrackedID()
+		}
+		return response, err
+	}
+	if state.restoreSyntheticTrackedID != nil && c.config.Identity.RecordTracked == nil {
+		state.restoreSyntheticTrackedID()
+	}
+	return response, nil
 }
 
 func (c ServiceClient[T]) validateCreateOrUpdateRequest(resource T) (servicemanager.OSOKResponse, error, bool) {
@@ -259,29 +353,43 @@ func (c ServiceClient[T]) validateCreateOrUpdateRequest(resource T) (servicemana
 	return servicemanager.OSOKResponse{}, nil, false
 }
 
-func (c ServiceClient[T]) prepareCreateOrUpdateState(ctx context.Context, resource T) (createOrUpdateState, error) {
-	currentID, existingResponse, resolvedBeforeCreate, err := c.resolveCurrentResource(ctx, resource)
+func (c ServiceClient[T]) prepareCreateOrUpdateState(ctx context.Context, resource T, identity any) (createOrUpdateState, error) {
+	currentID, existingResponse, resolvedBeforeCreate, restoreSyntheticTrackedID, err := c.resolveCurrentResource(ctx, resource, identity)
 	if err != nil {
 		return createOrUpdateState{}, err
 	}
 
 	currentID, liveResponse, err := c.loadLiveMutationResponse(ctx, resource, currentID, existingResponse, resolvedBeforeCreate)
 	if err != nil {
+		if restoreSyntheticTrackedID != nil {
+			restoreSyntheticTrackedID()
+		}
 		return createOrUpdateState{}, err
 	}
 
-	return createOrUpdateState{currentID: currentID, liveResponse: liveResponse}, nil
+	return createOrUpdateState{
+		identity:                  identity,
+		currentID:                 currentID,
+		liveResponse:              liveResponse,
+		restoreSyntheticTrackedID: restoreSyntheticTrackedID,
+	}, nil
 }
 
-func (c ServiceClient[T]) resolveCurrentResource(ctx context.Context, resource T) (string, any, bool, error) {
+func (c ServiceClient[T]) resolveCurrentResource(ctx context.Context, resource T, identity any) (string, any, bool, func(), error) {
 	currentID := c.currentID(resource)
-	existingResponse, trackedIDStale, err := c.resolveExistingBeforeCreate(ctx, resource)
+	existingResponse, trackedIDStale, err := c.resolveExistingBeforeCreate(ctx, resource, identity)
 	if err != nil {
-		return "", nil, false, err
+		return "", nil, false, nil, err
+	}
+
+	var restoreSyntheticTrackedID func()
+	if existingResponse != nil && currentID == "" && c.config.Identity.SeedSyntheticTrackedID != nil {
+		restoreSyntheticTrackedID = c.config.Identity.SeedSyntheticTrackedID(resource, identity)
+		currentID = c.currentID(resource)
 	}
 
 	currentID, resolvedBeforeCreate := c.resolveTrackedCurrentID(resource, currentID, existingResponse, trackedIDStale)
-	return currentID, existingResponse, resolvedBeforeCreate, nil
+	return currentID, existingResponse, resolvedBeforeCreate, restoreSyntheticTrackedID, nil
 }
 
 func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, existingResponse any, trackedIDStale bool) (string, bool) {
@@ -302,7 +410,8 @@ func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, 
 }
 
 func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T, preferredID string) bool {
-	if preferredID == "" || !c.usesStatusOnlyCurrentID(resource, preferredID) || c.config.Get == nil {
+	getOp := c.getReadOperation()
+	if preferredID == "" || !c.usesStatusOnlyCurrentID(resource, preferredID) || getOp == nil {
 		return false
 	}
 
@@ -311,8 +420,8 @@ func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T
 		return false
 	}
 
-	if len(c.config.Get.Fields) > 0 {
-		for _, field := range c.config.Get.Fields {
+	if len(getOp.Fields) > 0 {
+		for _, field := range getOp.Fields {
 			if !requestFieldRequiresResourceID(field, c.idFieldAliases()) {
 				continue
 			}
@@ -323,7 +432,7 @@ func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T
 		return false
 	}
 
-	requestStruct, ok := operationRequestStruct(c.config.Get.NewRequest)
+	requestStruct, ok := operationRequestStruct(getOp.NewRequest)
 	if !ok {
 		return false
 	}
@@ -355,25 +464,34 @@ func (c ServiceClient[T]) readResourceForExistingBeforeCreate(ctx context.Contex
 }
 
 func (c ServiceClient[T]) readResourceWithGetForExistingBeforeCreate(ctx context.Context, resource T, state readResourceState) (readResourceState, any, bool, bool, error) {
-	if c.config.Get == nil || !c.canInvokeGet(resource, state.readID) {
+	getOp := c.getReadOperation()
+	if getOp == nil || !c.canInvokeGet(resource, state.readID) {
 		return state, nil, false, false, nil
 	}
 
 	trackedIDStale := c.trackedStatusIDCanBeClearedAfterGetNotFound(resource, state.readID)
-	response, err := c.invoke(ctx, c.config.Get, resource, state.readID, requestBuildOptions{})
+	response, err := c.invoke(ctx, getOp, resource, state.readID, requestBuildOptions{})
 	if err == nil {
 		return state, response, true, false, nil
 	}
-	if !isReadNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.listReadOperation() == nil {
 		return state, nil, true, false, err
 	}
 
 	return c.fallbackReadResourceState(resource, state, readPhaseCreate), nil, false, trackedIDStale, nil
 }
 
-func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T) (any, bool, error) {
+func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T, identity any) (any, bool, error) {
 	if skipExistingBeforeCreate(ctx) {
 		return nil, false, nil
+	}
+	if c.config.Create == nil {
+		return nil, false, nil
+	}
+	if response, err := c.lookupExistingByIdentity(ctx, resource, identity); err != nil {
+		return nil, false, err
+	} else if response != nil {
+		return response, false, nil
 	}
 	if !c.shouldResolveExistingBeforeCreate() {
 		return nil, false, nil
@@ -396,7 +514,7 @@ func (c ServiceClient[T]) loadLiveMutationResponse(ctx context.Context, resource
 		return currentID, liveResponse, nil
 	}
 
-	forceLiveGet := resolvedBeforeCreate && c.config.Get != nil
+	forceLiveGet := resolvedBeforeCreate && c.getReadOperation() != nil
 	if liveResponse == nil || forceLiveGet {
 		var err error
 		currentID, liveResponse, err = c.readMutationAssessmentResponse(ctx, resource, currentID, forceLiveGet)
@@ -435,12 +553,12 @@ func (c ServiceClient[T]) reconcileExistingResource(ctx context.Context, resourc
 		return c.failCreateOrUpdate(resource, err)
 	}
 	if shouldUpdate {
-		return c.updateExistingResource(ctx, resource, state.currentID, namespace, state.liveResponse)
+		return c.updateExistingResource(ctx, resource, state.currentID, namespace, state.liveResponse, state.identity)
 	}
-	return c.observeExistingResource(ctx, resource, state.currentID, state.liveResponse)
+	return c.observeExistingResource(ctx, resource, state.currentID, state.liveResponse, state.identity)
 }
 
-func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T, currentID string, namespace string, currentResponse any) (servicemanager.OSOKResponse, error) {
+func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T, currentID string, namespace string, currentResponse any, identity any) (servicemanager.OSOKResponse, error) {
 	options := c.requestBuildOptions(ctx, namespace)
 	options.CurrentResponse = currentResponse
 
@@ -455,22 +573,22 @@ func (c ServiceClient[T]) updateExistingResource(ctx context.Context, resource T
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
-	return c.applySuccess(resource, response, shared.Updating)
+	return c.applySuccessWithIdentity(resource, response, shared.Updating, identity)
 }
 
-func (c ServiceClient[T]) observeExistingResource(ctx context.Context, resource T, currentID string, liveResponse any) (servicemanager.OSOKResponse, error) {
+func (c ServiceClient[T]) observeExistingResource(ctx context.Context, resource T, currentID string, liveResponse any, identity any) (servicemanager.OSOKResponse, error) {
 	response := liveResponse
-	if response == nil && (c.config.Get != nil || c.config.List != nil) {
+	if response == nil && c.hasReadableOperation() {
 		var err error
 		response, err = c.readResource(ctx, resource, currentID, readPhaseObserve)
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
 	}
-	return c.applySuccess(resource, response, shared.Active)
+	return c.applySuccessWithIdentity(resource, response, shared.Active, identity)
 }
 
-func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, namespace string) (servicemanager.OSOKResponse, error) {
+func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, namespace string, identity any) (servicemanager.OSOKResponse, error) {
 	if c.config.Create != nil {
 		response, err := c.invoke(ctx, c.config.Create, resource, "", c.requestBuildOptions(ctx, namespace))
 		if err != nil {
@@ -483,14 +601,14 @@ func (c ServiceClient[T]) createOrReadResource(ctx context.Context, resource T, 
 		if err != nil {
 			return c.failCreateOrUpdate(resource, err)
 		}
-		return c.applySuccess(resource, followUp, shared.Provisioning)
+		return c.applySuccessWithIdentity(resource, followUp, shared.Provisioning, identity)
 	}
 
 	response, err := c.readResource(ctx, resource, "", readPhaseObserve)
 	if err != nil {
 		return c.failCreateOrUpdate(resource, err)
 	}
-	return c.applySuccess(resource, response, shared.Active)
+	return c.applySuccessWithIdentity(resource, response, shared.Active, identity)
 }
 
 func (c ServiceClient[T]) failCreateOrUpdate(resource T, err error) (servicemanager.OSOKResponse, error) {
@@ -509,23 +627,34 @@ func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) 
 	if err := c.validateDeleteRequest(resource); err != nil {
 		return false, err
 	}
-	if c.config.Semantics != nil {
-		return c.deleteWithSemantics(ctx, resource)
-	}
-	if c.config.Delete == nil {
-		c.markDeleted(resource, "OCI delete is not supported for this generated resource")
-		return true, nil
+	identity, err := c.prepareIdentity(resource)
+	if err != nil {
+		return false, err
 	}
 
-	currentID := c.currentID(resource)
-	if currentID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
-		return true, nil
+	var restoreSyntheticTrackedID func()
+	if c.currentID(resource) == "" && c.config.Identity.SeedSyntheticTrackedID != nil {
+		restoreSyntheticTrackedID = c.config.Identity.SeedSyntheticTrackedID(resource, identity)
 	}
-	if deleted, err := c.invokeDeleteOperation(ctx, resource, currentID); deleted || err != nil {
-		return deleted, err
+
+	var deleted bool
+	if c.config.Semantics != nil {
+		deleted, err = c.deleteWithSemantics(ctx, resource)
+	} else {
+		deleted, err = c.deleteWithoutSemantics(ctx, resource)
 	}
-	return c.confirmDeleteWithoutSemantics(ctx, resource, currentID)
+	if err != nil {
+		if restoreSyntheticTrackedID != nil {
+			restoreSyntheticTrackedID()
+		}
+		return false, err
+	}
+
+	c.recordTrackedIdentity(resource, identity, c.currentID(resource))
+	if restoreSyntheticTrackedID != nil && c.config.Identity.RecordTracked == nil {
+		restoreSyntheticTrackedID()
+	}
+	return deleted, nil
 }
 
 func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
@@ -551,8 +680,25 @@ func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T,
 	return false, nil
 }
 
+func (c ServiceClient[T]) deleteWithoutSemantics(ctx context.Context, resource T) (bool, error) {
+	if c.config.Delete == nil {
+		c.markDeleted(resource, "OCI delete is not supported for this generated resource")
+		return true, nil
+	}
+
+	currentID := c.currentID(resource)
+	if currentID == "" {
+		c.markDeleted(resource, "OCI resource identifier is not recorded")
+		return true, nil
+	}
+	if deleted, err := c.invokeDeleteOperation(ctx, resource, currentID); deleted || err != nil {
+		return deleted, err
+	}
+	return c.confirmDeleteWithoutSemantics(ctx, resource, currentID)
+}
+
 func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, resource T, currentID string) (bool, error) {
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasReadableOperation() {
 		c.markDeleted(resource, "OCI delete request accepted")
 		return true, nil
 	}
@@ -576,7 +722,7 @@ func (c ServiceClient[T]) followUpAfterWrite(ctx context.Context, resource T, pr
 	if !c.requiresWriteFollowUp(phase) {
 		return response, nil
 	}
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasReadableOperation() {
 		if c.config.Semantics != nil {
 			return nil, fmt.Errorf("%s formal semantics require %s follow-up without a readable OCI operation", c.config.Kind, phase)
 		}
@@ -595,7 +741,7 @@ func (c ServiceClient[T]) followUpAfterWrite(ctx context.Context, resource T, pr
 
 func (c ServiceClient[T]) requiresWriteFollowUp(phase string) bool {
 	if c.config.Semantics == nil {
-		return c.config.Get != nil || c.config.List != nil
+		return c.hasReadableOperation()
 	}
 
 	switch phase {
@@ -652,7 +798,7 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		return false, nil, false
 	}
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasReadableOperation() {
 		return false, nil, false
 	}
 
@@ -683,7 +829,7 @@ func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
 	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		return false
 	}
-	return c.config.Get != nil || c.config.List != nil
+	return c.hasReadableOperation()
 }
 
 func (c ServiceClient[T]) semanticDeleteConfig() (*Semantics, error) {
@@ -702,7 +848,7 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resour
 		c.markDeleted(resource, "OCI delete request accepted")
 		return true, nil
 	}
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasReadableOperation() {
 		return false, fmt.Errorf("%s formal delete confirmation requires a readable OCI operation", c.config.Kind)
 	}
 
@@ -763,7 +909,7 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 		return currentID, nil
 	}
 
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasReadableOperation() {
 		return "", errResourceNotFound
 	}
 
@@ -788,13 +934,13 @@ func skipExistingBeforeCreate(ctx context.Context) bool {
 }
 
 func (c ServiceClient[T]) shouldResolveExistingBeforeCreate() bool {
-	return c.config.Create != nil && c.config.List != nil && c.config.Semantics != nil && c.config.Semantics.List != nil
+	return c.config.Create != nil && c.listReadOperation() != nil && c.config.Semantics != nil && c.config.Semantics.List != nil
 }
 
 func (c ServiceClient[T]) requiresLiveMutationAssessment() bool {
 	return c.config.Semantics != nil &&
 		(len(c.config.Semantics.Mutation.ForceNew) > 0 || len(c.config.Semantics.Mutation.Mutable) > 0) &&
-		(c.config.Get != nil || c.config.List != nil)
+		c.hasReadableOperation()
 }
 
 func (c ServiceClient[T]) shouldInvokeUpdate(ctx context.Context, resource T, namespace string, currentResponse any) (bool, error) {
@@ -1178,11 +1324,12 @@ func (c ServiceClient[T]) readResourceForMutationValidation(ctx context.Context,
 	if !forceLiveGet {
 		return c.readResource(ctx, resource, currentID, readPhaseUpdate)
 	}
-	if c.config.Get == nil {
+	getOp := c.getReadOperation()
+	if getOp == nil {
 		return nil, fmt.Errorf("%s generated runtime has no OCI Get operation for live mutation validation", c.config.Kind)
 	}
 
-	response, err := c.invoke(ctx, c.config.Get, resource, currentID, requestBuildOptions{})
+	response, err := c.invoke(ctx, getOp, resource, currentID, requestBuildOptions{})
 	if err != nil {
 		if isReadNotFound(err) {
 			return nil, errResourceNotFound
@@ -1212,15 +1359,16 @@ func (c ServiceClient[T]) prepareReadResourceState(resource T, preferredID strin
 }
 
 func (c ServiceClient[T]) readResourceWithGet(ctx context.Context, resource T, state readResourceState, phase readPhase) (readResourceState, any, bool, error) {
-	if c.config.Get == nil || !c.canInvokeGet(resource, state.readID) {
+	getOp := c.getReadOperation()
+	if getOp == nil || !c.canInvokeGet(resource, state.readID) {
 		return state, nil, false, nil
 	}
 
-	response, err := c.invoke(ctx, c.config.Get, resource, state.readID, requestBuildOptions{})
+	response, err := c.invoke(ctx, getOp, resource, state.readID, requestBuildOptions{})
 	if err == nil {
 		return state, response, true, nil
 	}
-	if !isReadNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.listReadOperation() == nil {
 		return state, nil, true, err
 	}
 
@@ -1236,11 +1384,12 @@ func (c ServiceClient[T]) fallbackReadResourceState(resource T, state readResour
 }
 
 func (c ServiceClient[T]) readResourceWithList(ctx context.Context, resource T, state readResourceState, phase readPhase) (any, error) {
-	if c.config.List == nil {
+	listOp := c.listReadOperation()
+	if listOp == nil {
 		return nil, fmt.Errorf("%s generated runtime has no readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.invokeWithValues(ctx, c.config.List, resource, state.listValues, state.listID, requestBuildOptions{})
+	response, err := c.invokeWithValues(ctx, listOp, resource, state.listValues, state.listID, requestBuildOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -1253,7 +1402,12 @@ func (c ServiceClient[T]) readResourceWithList(ctx context.Context, resource T, 
 }
 
 func (c ServiceClient[T]) canInvokeExplicitGet(values map[string]any, preferredID string) bool {
-	for _, field := range c.config.Get.Fields {
+	getOp := c.getReadOperation()
+	if getOp == nil {
+		return false
+	}
+
+	for _, field := range getOp.Fields {
 		if !requestFieldRequiresResourceID(field, c.idFieldAliases()) {
 			continue
 		}
@@ -1265,7 +1419,12 @@ func (c ServiceClient[T]) canInvokeExplicitGet(values map[string]any, preferredI
 }
 
 func (c ServiceClient[T]) canInvokeHeuristicGet(values map[string]any, preferredID string) bool {
-	requestStruct, ok := operationRequestStruct(c.config.Get.NewRequest)
+	getOp := c.getReadOperation()
+	if getOp == nil {
+		return false
+	}
+
+	requestStruct, ok := operationRequestStruct(getOp.NewRequest)
 	if !ok {
 		return true
 	}
@@ -1308,7 +1467,8 @@ func (c ServiceClient[T]) canPopulateHeuristicGetField(values map[string]any, pr
 }
 
 func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
-	if c.config.Get == nil {
+	getOp := c.getReadOperation()
+	if getOp == nil {
 		return false
 	}
 
@@ -1317,7 +1477,7 @@ func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
 		return true
 	}
 
-	if len(c.config.Get.Fields) > 0 {
+	if len(getOp.Fields) > 0 {
 		return c.canInvokeExplicitGet(values, preferredID)
 	}
 	return c.canInvokeHeuristicGet(values, preferredID)
@@ -1440,6 +1600,10 @@ func (c ServiceClient[T]) filteredUpdateBody(resource T, options requestBuildOpt
 }
 
 func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared.OSOKConditionType) (servicemanager.OSOKResponse, error) {
+	return c.applySuccessWithIdentity(resource, response, fallback, nil)
+}
+
+func (c ServiceClient[T]) applySuccessWithIdentity(resource T, response any, fallback shared.OSOKConditionType, identity any) (servicemanager.OSOKResponse, error) {
 	if err := mergeResponseIntoStatus(resource, response); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
@@ -1454,7 +1618,9 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 	if resourceID == "" {
 		resourceID = c.currentID(resource)
 	}
-	if resourceID != "" {
+	if c.config.Identity.RecordTracked != nil {
+		c.recordTrackedIdentity(resource, identity, resourceID)
+	} else if resourceID != "" {
 		status.Ocid = shared.OCID(resourceID)
 	}
 
