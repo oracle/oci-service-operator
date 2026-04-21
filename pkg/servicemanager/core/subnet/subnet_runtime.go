@@ -45,19 +45,94 @@ type subnetRuntimeClient struct {
 }
 
 func init() {
-	generatedFactory := newSubnetServiceClient
-	newSubnetServiceClient = func(manager *SubnetServiceManager) SubnetServiceClient {
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &subnetRuntimeClient{
-			manager:  manager,
-			delegate: generatedFactory(manager),
-			client:   sdkClient,
+	registerSubnetRuntimeHooksMutator(func(manager *SubnetServiceManager, hooks *SubnetRuntimeHooks) {
+		applySubnetRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applySubnetRuntimeHooks(
+	manager *SubnetServiceManager,
+	hooks *SubnetRuntimeHooks,
+	client subnetOCIClient,
+) {
+	if hooks == nil {
+		return
+	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	runtimeClient := newSubnetRuntimeClient(manager, nil, client)
+
+	hooks.BuildCreateBody = func(_ context.Context, resource *corev1beta1.Subnet, _ string) (any, error) {
+		return buildCreateSubnetDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = func(_ context.Context, resource *corev1beta1.Subnet, _ string, currentResponse any) (any, bool, error) {
+		current, ok := subnetFromResponse(currentResponse)
+		if !ok {
+			return nil, false, fmt.Errorf("unexpected Subnet current response type %T", currentResponse)
 		}
+		request, updateNeeded, err := runtimeClient.buildUpdateRequest(resource, current)
 		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize Subnet OCI client: %w", err)
+			return nil, false, err
 		}
+		return request.UpdateSubnetDetails, updateNeeded, nil
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ProjectStatus = func(resource *corev1beta1.Subnet, response any) error {
+		current, ok := subnetFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected Subnet status response type %T", response)
+		}
+		return runtimeClient.projectStatus(resource, current)
+	}
+	hooks.StatusHooks.ApplyLifecycle = func(resource *corev1beta1.Subnet, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := subnetFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected Subnet lifecycle response type %T", response))
+		}
+		return runtimeClient.applyLifecycle(resource, current)
+	}
+	hooks.StatusHooks.MarkDeleted = runtimeClient.markDeleted
+	hooks.StatusHooks.MarkTerminating = func(resource *corev1beta1.Subnet, response any) {
+		current, ok := subnetFromResponse(response)
+		if !ok {
+			return
+		}
+		runtimeClient.markTerminating(resource, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate SubnetServiceClient) SubnetServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
+}
+
+func newSubnetRuntimeClient(
+	manager *SubnetServiceManager,
+	delegate SubnetServiceClient,
+	client subnetOCIClient,
+) *subnetRuntimeClient {
+	runtimeClient := &subnetRuntimeClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
 		return runtimeClient
 	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize Subnet OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.Subnet, req ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -499,6 +574,21 @@ func (c *subnetRuntimeClient) projectStatus(resource *corev1beta1.Subnet, curren
 		TimeCreated:             sdkTimeString(current.TimeCreated),
 	}
 	return nil
+}
+
+func subnetFromResponse(response any) (coresdk.Subnet, bool) {
+	switch typed := response.(type) {
+	case coresdk.Subnet:
+		return typed, true
+	case coresdk.CreateSubnetResponse:
+		return typed.Subnet, true
+	case coresdk.GetSubnetResponse:
+		return typed.Subnet, true
+	case coresdk.UpdateSubnetResponse:
+		return typed.Subnet, true
+	default:
+		return coresdk.Subnet{}, false
+	}
 }
 
 func subnetLifecycleMessage(current coresdk.Subnet) string {

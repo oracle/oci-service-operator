@@ -49,20 +49,122 @@ type normalizedServiceGatewayService struct {
 }
 
 func init() {
-	generatedFactory := newServiceGatewayServiceClient
-	newServiceGatewayServiceClient = func(manager *ServiceGatewayServiceManager) ServiceGatewayServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &serviceGatewayRuntimeClient{
-			manager:  manager,
-			delegate: delegate,
-			client:   sdkClient,
+	registerServiceGatewayRuntimeHooksMutator(func(manager *ServiceGatewayServiceManager, hooks *ServiceGatewayRuntimeHooks) {
+		applyServiceGatewayRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applyServiceGatewayRuntimeHooks(
+	manager *ServiceGatewayServiceManager,
+	hooks *ServiceGatewayRuntimeHooks,
+	client serviceGatewayOCIClient,
+) {
+	if hooks == nil {
+		return
+	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	runtimeClient := newServiceGatewayRuntimeClient(manager, nil, client)
+
+	hooks.BuildCreateBody = func(_ context.Context, resource *corev1beta1.ServiceGateway, _ string) (any, error) {
+		return buildCreateServiceGatewayDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = func(_ context.Context, resource *corev1beta1.ServiceGateway, _ string, currentResponse any) (any, bool, error) {
+		current, ok := serviceGatewayFromResponse(currentResponse)
+		if !ok {
+			return nil, false, fmt.Errorf("unexpected ServiceGateway current response type %T", currentResponse)
 		}
+		request, updateNeeded, err := runtimeClient.buildUpdateRequest(resource, current)
 		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize ServiceGateway OCI client: %w", err)
+			return nil, false, err
 		}
+		return request.UpdateServiceGatewayDetails, updateNeeded, nil
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ProjectStatus = func(resource *corev1beta1.ServiceGateway, response any) error {
+		current, ok := serviceGatewayFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected ServiceGateway status response type %T", response)
+		}
+		return runtimeClient.projectStatus(resource, current)
+	}
+	hooks.StatusHooks.ApplyLifecycle = func(resource *corev1beta1.ServiceGateway, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := serviceGatewayFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected ServiceGateway lifecycle response type %T", response))
+		}
+		return runtimeClient.applyLifecycle(resource, current)
+	}
+	hooks.StatusHooks.MarkDeleted = runtimeClient.markDeleted
+	hooks.StatusHooks.MarkTerminating = func(resource *corev1beta1.ServiceGateway, response any) {
+		current, ok := serviceGatewayFromResponse(response)
+		if !ok {
+			return
+		}
+		runtimeClient.markTerminating(resource, current)
+	}
+	hooks.ParityHooks.NormalizeDesiredState = func(resource *corev1beta1.ServiceGateway, response any) {
+		current, ok := serviceGatewayFromResponse(response)
+		if !ok {
+			return
+		}
+		runtimeClient.normalizeEquivalentServices(resource, current)
+	}
+	hooks.ParityHooks.ValidateCreateOnlyDrift = func(resource *corev1beta1.ServiceGateway, response any) error {
+		current, ok := serviceGatewayFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected ServiceGateway current response type %T", response)
+		}
+		return validateServiceGatewayCreateOnlyDrift(resource.Spec, current)
+	}
+	hooks.ParityHooks.RequiresParityHandling = func(resource *corev1beta1.ServiceGateway, response any) bool {
+		current, ok := serviceGatewayFromResponse(response)
+		if !ok {
+			return false
+		}
+		return serviceGatewayRequiresLocalParity(resource, current)
+	}
+	hooks.ParityHooks.ApplyParityUpdate = func(ctx context.Context, resource *corev1beta1.ServiceGateway, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := serviceGatewayFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected ServiceGateway parity response type %T", response))
+		}
+		return runtimeClient.update(ctx, resource, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ServiceGatewayServiceClient) ServiceGatewayServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
+}
+
+func newServiceGatewayRuntimeClient(
+	manager *ServiceGatewayServiceManager,
+	delegate ServiceGatewayServiceClient,
+	client serviceGatewayOCIClient,
+) *serviceGatewayRuntimeClient {
+	runtimeClient := &serviceGatewayRuntimeClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
 		return runtimeClient
 	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize ServiceGateway OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *serviceGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.ServiceGateway, req ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -122,6 +224,26 @@ func (c *serviceGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resour
 		c.restoreStatus(resource, previousStatus)
 	}
 	return response, err
+}
+
+func (c *serviceGatewayRuntimeClient) update(
+	ctx context.Context,
+	resource *corev1beta1.ServiceGateway,
+	current coresdk.ServiceGateway,
+) (servicemanager.OSOKResponse, error) {
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
+
+	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+	if !updateNeeded {
+		return c.applyLifecycle(resource, current)
+	}
+
+	return c.updateWithParity(ctx, resource, updateRequest)
 }
 
 func (c *serviceGatewayRuntimeClient) updateWithParity(
@@ -455,6 +577,21 @@ func (c *serviceGatewayRuntimeClient) projectStatus(resource *corev1beta1.Servic
 		TimeCreated:    sdkTimeString(current.TimeCreated),
 	}
 	return nil
+}
+
+func serviceGatewayFromResponse(response any) (coresdk.ServiceGateway, bool) {
+	switch typed := response.(type) {
+	case coresdk.ServiceGateway:
+		return typed, true
+	case coresdk.CreateServiceGatewayResponse:
+		return typed.ServiceGateway, true
+	case coresdk.GetServiceGatewayResponse:
+		return typed.ServiceGateway, true
+	case coresdk.UpdateServiceGatewayResponse:
+		return typed.ServiceGateway, true
+	default:
+		return coresdk.ServiceGateway{}, false
+	}
 }
 
 func serviceGatewayLifecycleMessage(current coresdk.ServiceGateway) string {
