@@ -26,6 +26,9 @@ type LoadBalancerShapeRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.LoadBalancerShape, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancerShape]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerShape]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]
 	WrapGeneratedClient []func(LoadBalancerShapeServiceClient) LoadBalancerShapeServiceClient
 }
@@ -42,8 +45,11 @@ func registerLoadBalancerShapeRuntimeHooksMutator(mutator LoadBalancerShapeRunti
 }
 func newLoadBalancerShapeDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) LoadBalancerShapeRuntimeHooks {
 	return LoadBalancerShapeRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLoadBalancerShapeDetails", RequestName: "UpdateLoadBalancerShapeDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateLoadBalancerShapeRequest) (loadbalancersdk.UpdateLoadBalancerShapeResponse, error) {
@@ -73,6 +79,9 @@ func buildLoadBalancerShapeGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Update: &generatedruntime.Operation{

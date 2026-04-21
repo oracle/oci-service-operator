@@ -26,6 +26,9 @@ type SubnetRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *corev1beta1.Subnet, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*corev1beta1.Subnet]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.Subnet]
+	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.Subnet]
+	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.Subnet]
 	Create              runtimeOperationHooks[coresdk.CreateSubnetRequest, coresdk.CreateSubnetResponse]
 	Get                 runtimeOperationHooks[coresdk.GetSubnetRequest, coresdk.GetSubnetResponse]
 	List                runtimeOperationHooks[coresdk.ListSubnetsRequest, coresdk.ListSubnetsResponse]
@@ -98,9 +101,12 @@ func newSubnetRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newSubnetDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) SubnetRuntimeHooks {
 	return SubnetRuntimeHooks{
-		Semantics: newSubnetRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*corev1beta1.Subnet]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newSubnetRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.Subnet]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.Subnet]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.Subnet]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.Subnet]{},
 		Create: runtimeOperationHooks[coresdk.CreateSubnetRequest, coresdk.CreateSubnetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSubnetDetails", RequestName: "CreateSubnetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateSubnetRequest) (coresdk.CreateSubnetResponse, error) {
@@ -154,6 +160,9 @@ func buildSubnetGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

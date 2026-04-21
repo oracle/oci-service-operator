@@ -26,6 +26,9 @@ type BdsInstanceRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *bdsv1beta1.BdsInstance, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*bdsv1beta1.BdsInstance]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*bdsv1beta1.BdsInstance]
+	StatusHooks         generatedruntime.StatusHooks[*bdsv1beta1.BdsInstance]
+	ParityHooks         generatedruntime.ParityHooks[*bdsv1beta1.BdsInstance]
 	Create              runtimeOperationHooks[bdssdk.CreateBdsInstanceRequest, bdssdk.CreateBdsInstanceResponse]
 	Get                 runtimeOperationHooks[bdssdk.GetBdsInstanceRequest, bdssdk.GetBdsInstanceResponse]
 	List                runtimeOperationHooks[bdssdk.ListBdsInstancesRequest, bdssdk.ListBdsInstancesResponse]
@@ -98,9 +101,12 @@ func newBdsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newBdsInstanceDefaultRuntimeHooks(sdkClient bdssdk.BdsClient) BdsInstanceRuntimeHooks {
 	return BdsInstanceRuntimeHooks{
-		Semantics: newBdsInstanceRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*bdsv1beta1.BdsInstance]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newBdsInstanceRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*bdsv1beta1.BdsInstance]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*bdsv1beta1.BdsInstance]{},
+		StatusHooks:     generatedruntime.StatusHooks[*bdsv1beta1.BdsInstance]{},
+		ParityHooks:     generatedruntime.ParityHooks[*bdsv1beta1.BdsInstance]{},
 		Create: runtimeOperationHooks[bdssdk.CreateBdsInstanceRequest, bdssdk.CreateBdsInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateBdsInstanceDetails", RequestName: "CreateBdsInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error) {
@@ -154,6 +160,9 @@ func buildBdsInstanceGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

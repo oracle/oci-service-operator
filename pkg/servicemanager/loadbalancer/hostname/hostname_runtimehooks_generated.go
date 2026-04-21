@@ -26,6 +26,9 @@ type HostnameRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.Hostname, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.Hostname]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Hostname]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Hostname]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Hostname]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateHostnameRequest, loadbalancersdk.CreateHostnameResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetHostnameRequest, loadbalancersdk.GetHostnameResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListHostnamesRequest, loadbalancersdk.ListHostnamesResponse]
@@ -46,8 +49,11 @@ func registerHostnameRuntimeHooksMutator(mutator HostnameRuntimeHooksMutator) {
 }
 func newHostnameDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) HostnameRuntimeHooks {
 	return HostnameRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.Hostname]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.Hostname]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Hostname]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Hostname]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Hostname]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateHostnameRequest, loadbalancersdk.CreateHostnameResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateHostnameDetails", RequestName: "CreateHostnameDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateHostnameRequest) (loadbalancersdk.CreateHostnameResponse, error) {
@@ -101,6 +107,9 @@ func buildHostnameGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

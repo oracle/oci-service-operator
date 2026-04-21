@@ -26,6 +26,9 @@ type NetworkSecurityGroupRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.NetworkSecurityGroup, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateNetworkSecurityGroupsRequest, loadbalancersdk.UpdateNetworkSecurityGroupsResponse]
 	WrapGeneratedClient []func(NetworkSecurityGroupServiceClient) NetworkSecurityGroupServiceClient
 }
@@ -42,8 +45,11 @@ func registerNetworkSecurityGroupRuntimeHooksMutator(mutator NetworkSecurityGrou
 }
 func newNetworkSecurityGroupDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) NetworkSecurityGroupRuntimeHooks {
 	return NetworkSecurityGroupRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateNetworkSecurityGroupsRequest, loadbalancersdk.UpdateNetworkSecurityGroupsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateNetworkSecurityGroupsDetails", RequestName: "UpdateNetworkSecurityGroupsDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateNetworkSecurityGroupsRequest) (loadbalancersdk.UpdateNetworkSecurityGroupsResponse, error) {
@@ -73,6 +79,9 @@ func buildNetworkSecurityGroupGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Update: &generatedruntime.Operation{

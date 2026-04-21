@@ -26,6 +26,9 @@ type InternetGatewayRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *corev1beta1.InternetGateway, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*corev1beta1.InternetGateway]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.InternetGateway]
+	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.InternetGateway]
+	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.InternetGateway]
 	Create              runtimeOperationHooks[coresdk.CreateInternetGatewayRequest, coresdk.CreateInternetGatewayResponse]
 	Get                 runtimeOperationHooks[coresdk.GetInternetGatewayRequest, coresdk.GetInternetGatewayResponse]
 	List                runtimeOperationHooks[coresdk.ListInternetGatewaysRequest, coresdk.ListInternetGatewaysResponse]
@@ -98,9 +101,12 @@ func newInternetGatewayRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newInternetGatewayDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) InternetGatewayRuntimeHooks {
 	return InternetGatewayRuntimeHooks{
-		Semantics: newInternetGatewayRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*corev1beta1.InternetGateway]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newInternetGatewayRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.InternetGateway]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.InternetGateway]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.InternetGateway]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.InternetGateway]{},
 		Create: runtimeOperationHooks[coresdk.CreateInternetGatewayRequest, coresdk.CreateInternetGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateInternetGatewayDetails", RequestName: "CreateInternetGatewayDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error) {
@@ -154,6 +160,9 @@ func buildInternetGatewayGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

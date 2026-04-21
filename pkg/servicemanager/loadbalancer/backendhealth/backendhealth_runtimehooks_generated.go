@@ -26,6 +26,9 @@ type BackendHealthRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.BackendHealth, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendHealth]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendHealth]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendHealth]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendHealth]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetBackendHealthRequest, loadbalancersdk.GetBackendHealthResponse]
 	WrapGeneratedClient []func(BackendHealthServiceClient) BackendHealthServiceClient
 }
@@ -42,8 +45,11 @@ func registerBackendHealthRuntimeHooksMutator(mutator BackendHealthRuntimeHooksM
 }
 func newBackendHealthDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) BackendHealthRuntimeHooks {
 	return BackendHealthRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendHealth]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendHealth]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendHealth]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendHealth]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendHealth]{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetBackendHealthRequest, loadbalancersdk.GetBackendHealthResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetBackendHealthRequest) (loadbalancersdk.GetBackendHealthResponse, error) {
@@ -73,6 +79,9 @@ func buildBackendHealthGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

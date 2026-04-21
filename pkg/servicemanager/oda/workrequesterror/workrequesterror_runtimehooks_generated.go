@@ -26,6 +26,9 @@ type WorkRequestErrorRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.WorkRequestError, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.WorkRequestError]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestError]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.WorkRequestError]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.WorkRequestError]
 	List                runtimeOperationHooks[odasdk.ListWorkRequestErrorsRequest, odasdk.ListWorkRequestErrorsResponse]
 	WrapGeneratedClient []func(WorkRequestErrorServiceClient) WorkRequestErrorServiceClient
 }
@@ -42,8 +45,11 @@ func registerWorkRequestErrorRuntimeHooksMutator(mutator WorkRequestErrorRuntime
 }
 func newWorkRequestErrorDefaultRuntimeHooks(sdkClient odasdk.OdaClient) WorkRequestErrorRuntimeHooks {
 	return WorkRequestErrorRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.WorkRequestError]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.WorkRequestError]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestError]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.WorkRequestError]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.WorkRequestError]{},
 		List: runtimeOperationHooks[odasdk.ListWorkRequestErrorsRequest, odasdk.ListWorkRequestErrorsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.ListWorkRequestErrorsRequest) (odasdk.ListWorkRequestErrorsResponse, error) {
@@ -73,6 +79,9 @@ func buildWorkRequestErrorGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type ListingRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Listing, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Listing]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Listing]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Listing]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Listing]
 	Get                 runtimeOperationHooks[marketplacesdk.GetListingRequest, marketplacesdk.GetListingResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListListingsRequest, marketplacesdk.ListListingsResponse]
 	WrapGeneratedClient []func(ListingServiceClient) ListingServiceClient
@@ -43,8 +46,11 @@ func registerListingRuntimeHooksMutator(mutator ListingRuntimeHooksMutator) {
 }
 func newListingDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) ListingRuntimeHooks {
 	return ListingRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Listing]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.Listing]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Listing]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Listing]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Listing]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetListingRequest, marketplacesdk.GetListingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetListingRequest) (marketplacesdk.GetListingResponse, error) {
@@ -80,6 +86,9 @@ func buildListingGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

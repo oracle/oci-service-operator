@@ -26,6 +26,9 @@ type DedicatedAiClusterRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *generativeaiv1beta1.DedicatedAiCluster, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*generativeaiv1beta1.DedicatedAiCluster]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.DedicatedAiCluster]
+	StatusHooks         generatedruntime.StatusHooks[*generativeaiv1beta1.DedicatedAiCluster]
+	ParityHooks         generatedruntime.ParityHooks[*generativeaiv1beta1.DedicatedAiCluster]
 	Create              runtimeOperationHooks[generativeaisdk.CreateDedicatedAiClusterRequest, generativeaisdk.CreateDedicatedAiClusterResponse]
 	Get                 runtimeOperationHooks[generativeaisdk.GetDedicatedAiClusterRequest, generativeaisdk.GetDedicatedAiClusterResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListDedicatedAiClustersRequest, generativeaisdk.ListDedicatedAiClustersResponse]
@@ -98,9 +101,12 @@ func newDedicatedAiClusterRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newDedicatedAiClusterDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiClient) DedicatedAiClusterRuntimeHooks {
 	return DedicatedAiClusterRuntimeHooks{
-		Semantics: newDedicatedAiClusterRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newDedicatedAiClusterRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
+		StatusHooks:     generatedruntime.StatusHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
+		ParityHooks:     generatedruntime.ParityHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
 		Create: runtimeOperationHooks[generativeaisdk.CreateDedicatedAiClusterRequest, generativeaisdk.CreateDedicatedAiClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDedicatedAiClusterDetails", RequestName: "CreateDedicatedAiClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.CreateDedicatedAiClusterRequest) (generativeaisdk.CreateDedicatedAiClusterResponse, error) {
@@ -154,6 +160,9 @@ func buildDedicatedAiClusterGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

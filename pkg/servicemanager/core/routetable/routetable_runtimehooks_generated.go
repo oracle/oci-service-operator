@@ -26,6 +26,9 @@ type RouteTableRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *corev1beta1.RouteTable, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*corev1beta1.RouteTable]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.RouteTable]
+	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.RouteTable]
+	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.RouteTable]
 	Create              runtimeOperationHooks[coresdk.CreateRouteTableRequest, coresdk.CreateRouteTableResponse]
 	Get                 runtimeOperationHooks[coresdk.GetRouteTableRequest, coresdk.GetRouteTableResponse]
 	List                runtimeOperationHooks[coresdk.ListRouteTablesRequest, coresdk.ListRouteTablesResponse]
@@ -98,9 +101,12 @@ func newRouteTableRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newRouteTableDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) RouteTableRuntimeHooks {
 	return RouteTableRuntimeHooks{
-		Semantics: newRouteTableRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*corev1beta1.RouteTable]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newRouteTableRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.RouteTable]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.RouteTable]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.RouteTable]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.RouteTable]{},
 		Create: runtimeOperationHooks[coresdk.CreateRouteTableRequest, coresdk.CreateRouteTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRouteTableDetails", RequestName: "CreateRouteTableDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
@@ -154,6 +160,9 @@ func buildRouteTableGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

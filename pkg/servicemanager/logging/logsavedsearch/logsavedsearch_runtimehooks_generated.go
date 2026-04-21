@@ -26,6 +26,9 @@ type LogSavedSearchRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.LogSavedSearch, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.LogSavedSearch]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.LogSavedSearch]
+	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.LogSavedSearch]
+	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.LogSavedSearch]
 	Create              runtimeOperationHooks[loggingsdk.CreateLogSavedSearchRequest, loggingsdk.CreateLogSavedSearchResponse]
 	Get                 runtimeOperationHooks[loggingsdk.GetLogSavedSearchRequest, loggingsdk.GetLogSavedSearchResponse]
 	List                runtimeOperationHooks[loggingsdk.ListLogSavedSearchesRequest, loggingsdk.ListLogSavedSearchesResponse]
@@ -46,8 +49,11 @@ func registerLogSavedSearchRuntimeHooksMutator(mutator LogSavedSearchRuntimeHook
 }
 func newLogSavedSearchDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) LogSavedSearchRuntimeHooks {
 	return LogSavedSearchRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.LogSavedSearch]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loggingv1beta1.LogSavedSearch]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loggingv1beta1.LogSavedSearch]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.LogSavedSearch]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.LogSavedSearch]{},
 		Create: runtimeOperationHooks[loggingsdk.CreateLogSavedSearchRequest, loggingsdk.CreateLogSavedSearchResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateLogSavedSearchDetails", RequestName: "CreateLogSavedSearchDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.CreateLogSavedSearchRequest) (loggingsdk.CreateLogSavedSearchResponse, error) {
@@ -101,6 +107,9 @@ func buildLogSavedSearchGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

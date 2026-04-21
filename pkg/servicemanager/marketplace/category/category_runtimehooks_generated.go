@@ -26,6 +26,9 @@ type CategoryRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Category, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Category]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Category]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Category]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Category]
 	List                runtimeOperationHooks[marketplacesdk.ListCategoriesRequest, marketplacesdk.ListCategoriesResponse]
 	WrapGeneratedClient []func(CategoryServiceClient) CategoryServiceClient
 }
@@ -42,8 +45,11 @@ func registerCategoryRuntimeHooksMutator(mutator CategoryRuntimeHooksMutator) {
 }
 func newCategoryDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) CategoryRuntimeHooks {
 	return CategoryRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Category]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.Category]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Category]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Category]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Category]{},
 		List: runtimeOperationHooks[marketplacesdk.ListCategoriesRequest, marketplacesdk.ListCategoriesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListCategoriesRequest) (marketplacesdk.ListCategoriesResponse, error) {
@@ -73,6 +79,9 @@ func buildCategoryGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

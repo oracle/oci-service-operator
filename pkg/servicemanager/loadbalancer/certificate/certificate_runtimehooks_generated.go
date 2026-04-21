@@ -26,6 +26,9 @@ type CertificateRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.Certificate, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.Certificate]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Certificate]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Certificate]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Certificate]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateCertificateRequest, loadbalancersdk.CreateCertificateResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListCertificatesRequest, loadbalancersdk.ListCertificatesResponse]
 	Delete              runtimeOperationHooks[loadbalancersdk.DeleteCertificateRequest, loadbalancersdk.DeleteCertificateResponse]
@@ -44,8 +47,11 @@ func registerCertificateRuntimeHooksMutator(mutator CertificateRuntimeHooksMutat
 }
 func newCertificateDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) CertificateRuntimeHooks {
 	return CertificateRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.Certificate]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.Certificate]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Certificate]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Certificate]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Certificate]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateCertificateRequest, loadbalancersdk.CreateCertificateResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateCertificateDetails", RequestName: "CreateCertificateDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateCertificateRequest) (loadbalancersdk.CreateCertificateResponse, error) {
@@ -87,6 +93,9 @@ func buildCertificateGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type NatGatewayRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *corev1beta1.NatGateway, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*corev1beta1.NatGateway]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.NatGateway]
+	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.NatGateway]
+	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.NatGateway]
 	Create              runtimeOperationHooks[coresdk.CreateNatGatewayRequest, coresdk.CreateNatGatewayResponse]
 	Get                 runtimeOperationHooks[coresdk.GetNatGatewayRequest, coresdk.GetNatGatewayResponse]
 	List                runtimeOperationHooks[coresdk.ListNatGatewaysRequest, coresdk.ListNatGatewaysResponse]
@@ -98,9 +101,12 @@ func newNatGatewayRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newNatGatewayDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) NatGatewayRuntimeHooks {
 	return NatGatewayRuntimeHooks{
-		Semantics: newNatGatewayRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*corev1beta1.NatGateway]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newNatGatewayRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.NatGateway]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.NatGateway]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.NatGateway]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.NatGateway]{},
 		Create: runtimeOperationHooks[coresdk.CreateNatGatewayRequest, coresdk.CreateNatGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNatGatewayDetails", RequestName: "CreateNatGatewayDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
@@ -154,6 +160,9 @@ func buildNatGatewayGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type QueueRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *queuev1beta1.Queue, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*queuev1beta1.Queue]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*queuev1beta1.Queue]
+	StatusHooks         generatedruntime.StatusHooks[*queuev1beta1.Queue]
+	ParityHooks         generatedruntime.ParityHooks[*queuev1beta1.Queue]
 	Create              runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]
 	Get                 runtimeOperationHooks[queuesdk.GetQueueRequest, queuesdk.GetQueueResponse]
 	List                runtimeOperationHooks[queuesdk.ListQueuesRequest, queuesdk.ListQueuesResponse]
@@ -107,9 +110,12 @@ func newQueueRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newQueueDefaultRuntimeHooks(sdkClient queuesdk.QueueAdminClient) QueueRuntimeHooks {
 	return QueueRuntimeHooks{
-		Semantics: newQueueRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*queuev1beta1.Queue]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newQueueRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*queuev1beta1.Queue]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*queuev1beta1.Queue]{},
+		StatusHooks:     generatedruntime.StatusHooks[*queuev1beta1.Queue]{},
+		ParityHooks:     generatedruntime.ParityHooks[*queuev1beta1.Queue]{},
 		Create: runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueueDetails", RequestName: "CreateQueueDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
@@ -163,6 +169,9 @@ func buildQueueGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

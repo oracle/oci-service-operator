@@ -26,6 +26,9 @@ type ServiceRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.Service, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.Service]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.Service]
+	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.Service]
+	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.Service]
 	List                runtimeOperationHooks[loggingsdk.ListServicesRequest, loggingsdk.ListServicesResponse]
 	WrapGeneratedClient []func(ServiceServiceClient) ServiceServiceClient
 }
@@ -42,8 +45,11 @@ func registerServiceRuntimeHooksMutator(mutator ServiceRuntimeHooksMutator) {
 }
 func newServiceDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) ServiceRuntimeHooks {
 	return ServiceRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.Service]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loggingv1beta1.Service]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loggingv1beta1.Service]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.Service]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.Service]{},
 		List: runtimeOperationHooks[loggingsdk.ListServicesRequest, loggingsdk.ListServicesResponse]{
 			Fields: []generatedruntime.RequestField{},
 			Call: func(ctx context.Context, request loggingsdk.ListServicesRequest) (loggingsdk.ListServicesResponse, error) {
@@ -73,6 +79,9 @@ func buildServiceGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

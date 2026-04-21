@@ -26,6 +26,9 @@ type WorkRequestRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.WorkRequest, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.WorkRequest]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.WorkRequest]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.WorkRequest]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetWorkRequestRequest, loadbalancersdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListWorkRequestsRequest, loadbalancersdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -43,8 +46,11 @@ func registerWorkRequestRuntimeHooksMutator(mutator WorkRequestRuntimeHooksMutat
 }
 func newWorkRequestDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) WorkRequestRuntimeHooks {
 	return WorkRequestRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.WorkRequest]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.WorkRequest]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.WorkRequest]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.WorkRequest]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetWorkRequestRequest, loadbalancersdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetWorkRequestRequest) (loadbalancersdk.GetWorkRequestResponse, error) {
@@ -80,6 +86,9 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

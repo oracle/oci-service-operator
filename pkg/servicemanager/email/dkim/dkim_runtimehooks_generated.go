@@ -26,6 +26,9 @@ type DkimRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *emailv1beta1.Dkim, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*emailv1beta1.Dkim]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.Dkim]
+	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.Dkim]
+	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.Dkim]
 	Create              runtimeOperationHooks[emailsdk.CreateDkimRequest, emailsdk.CreateDkimResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetDkimRequest, emailsdk.GetDkimResponse]
 	List                runtimeOperationHooks[emailsdk.ListDkimsRequest, emailsdk.ListDkimsResponse]
@@ -46,8 +49,11 @@ func registerDkimRuntimeHooksMutator(mutator DkimRuntimeHooksMutator) {
 }
 func newDkimDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) DkimRuntimeHooks {
 	return DkimRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*emailv1beta1.Dkim]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*emailv1beta1.Dkim]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.Dkim]{},
+		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.Dkim]{},
+		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.Dkim]{},
 		Create: runtimeOperationHooks[emailsdk.CreateDkimRequest, emailsdk.CreateDkimResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDkimDetails", RequestName: "CreateDkimDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateDkimRequest) (emailsdk.CreateDkimResponse, error) {
@@ -101,6 +107,9 @@ func buildDkimGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

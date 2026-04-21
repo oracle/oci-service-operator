@@ -26,6 +26,9 @@ type WorkRequestLogRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *emailv1beta1.WorkRequestLog, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*emailv1beta1.WorkRequestLog]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.WorkRequestLog]
+	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.WorkRequestLog]
+	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[emailsdk.ListWorkRequestLogsRequest, emailsdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -42,8 +45,11 @@ func registerWorkRequestLogRuntimeHooksMutator(mutator WorkRequestLogRuntimeHook
 }
 func newWorkRequestLogDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) WorkRequestLogRuntimeHooks {
 	return WorkRequestLogRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*emailv1beta1.WorkRequestLog]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*emailv1beta1.WorkRequestLog]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.WorkRequestLog]{},
+		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.WorkRequestLog]{},
+		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[emailsdk.ListWorkRequestLogsRequest, emailsdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.ListWorkRequestLogsRequest) (emailsdk.ListWorkRequestLogsResponse, error) {
@@ -73,6 +79,9 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

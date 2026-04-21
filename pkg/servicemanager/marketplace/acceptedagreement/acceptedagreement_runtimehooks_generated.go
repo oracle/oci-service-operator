@@ -26,6 +26,9 @@ type AcceptedAgreementRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.AcceptedAgreement, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.AcceptedAgreement]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.AcceptedAgreement]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.AcceptedAgreement]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.AcceptedAgreement]
 	Create              runtimeOperationHooks[marketplacesdk.CreateAcceptedAgreementRequest, marketplacesdk.CreateAcceptedAgreementResponse]
 	Get                 runtimeOperationHooks[marketplacesdk.GetAcceptedAgreementRequest, marketplacesdk.GetAcceptedAgreementResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListAcceptedAgreementsRequest, marketplacesdk.ListAcceptedAgreementsResponse]
@@ -98,9 +101,12 @@ func newAcceptedAgreementRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newAcceptedAgreementDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) AcceptedAgreementRuntimeHooks {
 	return AcceptedAgreementRuntimeHooks{
-		Semantics: newAcceptedAgreementRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*marketplacev1beta1.AcceptedAgreement]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newAcceptedAgreementRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.AcceptedAgreement]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.AcceptedAgreement]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.AcceptedAgreement]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.AcceptedAgreement]{},
 		Create: runtimeOperationHooks[marketplacesdk.CreateAcceptedAgreementRequest, marketplacesdk.CreateAcceptedAgreementResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAcceptedAgreementDetails", RequestName: "CreateAcceptedAgreementDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.CreateAcceptedAgreementRequest) (marketplacesdk.CreateAcceptedAgreementResponse, error) {
@@ -154,6 +160,9 @@ func buildAcceptedAgreementGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

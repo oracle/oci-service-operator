@@ -26,6 +26,9 @@ type ProjectRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *aivisionv1beta1.Project, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*aivisionv1beta1.Project]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*aivisionv1beta1.Project]
+	StatusHooks         generatedruntime.StatusHooks[*aivisionv1beta1.Project]
+	ParityHooks         generatedruntime.ParityHooks[*aivisionv1beta1.Project]
 	Create              runtimeOperationHooks[aivisionsdk.CreateProjectRequest, aivisionsdk.CreateProjectResponse]
 	Get                 runtimeOperationHooks[aivisionsdk.GetProjectRequest, aivisionsdk.GetProjectResponse]
 	List                runtimeOperationHooks[aivisionsdk.ListProjectsRequest, aivisionsdk.ListProjectsResponse]
@@ -98,9 +101,12 @@ func newProjectRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newProjectDefaultRuntimeHooks(sdkClient aivisionsdk.AIServiceVisionClient) ProjectRuntimeHooks {
 	return ProjectRuntimeHooks{
-		Semantics: newProjectRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*aivisionv1beta1.Project]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newProjectRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*aivisionv1beta1.Project]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*aivisionv1beta1.Project]{},
+		StatusHooks:     generatedruntime.StatusHooks[*aivisionv1beta1.Project]{},
+		ParityHooks:     generatedruntime.ParityHooks[*aivisionv1beta1.Project]{},
 		Create: runtimeOperationHooks[aivisionsdk.CreateProjectRequest, aivisionsdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aivisionsdk.CreateProjectRequest) (aivisionsdk.CreateProjectResponse, error) {
@@ -154,6 +160,9 @@ func buildProjectGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

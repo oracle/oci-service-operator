@@ -26,6 +26,9 @@ type OpensearchClusterRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *opensearchv1beta1.OpensearchCluster, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*opensearchv1beta1.OpensearchCluster]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*opensearchv1beta1.OpensearchCluster]
+	StatusHooks         generatedruntime.StatusHooks[*opensearchv1beta1.OpensearchCluster]
+	ParityHooks         generatedruntime.ParityHooks[*opensearchv1beta1.OpensearchCluster]
 	Create              runtimeOperationHooks[opensearchsdk.CreateOpensearchClusterRequest, opensearchsdk.CreateOpensearchClusterResponse]
 	Get                 runtimeOperationHooks[opensearchsdk.GetOpensearchClusterRequest, opensearchsdk.GetOpensearchClusterResponse]
 	List                runtimeOperationHooks[opensearchsdk.ListOpensearchClustersRequest, opensearchsdk.ListOpensearchClustersResponse]
@@ -98,9 +101,12 @@ func newOpensearchClusterRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newOpensearchClusterDefaultRuntimeHooks(sdkClient opensearchsdk.OpensearchClusterClient) OpensearchClusterRuntimeHooks {
 	return OpensearchClusterRuntimeHooks{
-		Semantics: newOpensearchClusterRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*opensearchv1beta1.OpensearchCluster]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newOpensearchClusterRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*opensearchv1beta1.OpensearchCluster]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opensearchv1beta1.OpensearchCluster]{},
+		StatusHooks:     generatedruntime.StatusHooks[*opensearchv1beta1.OpensearchCluster]{},
+		ParityHooks:     generatedruntime.ParityHooks[*opensearchv1beta1.OpensearchCluster]{},
 		Create: runtimeOperationHooks[opensearchsdk.CreateOpensearchClusterRequest, opensearchsdk.CreateOpensearchClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOpensearchClusterDetails", RequestName: "CreateOpensearchClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opensearchsdk.CreateOpensearchClusterRequest) (opensearchsdk.CreateOpensearchClusterResponse, error) {
@@ -154,6 +160,9 @@ func buildOpensearchClusterGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

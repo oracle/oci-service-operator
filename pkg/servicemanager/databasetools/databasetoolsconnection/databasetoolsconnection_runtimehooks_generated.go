@@ -26,6 +26,9 @@ type DatabaseToolsConnectionRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *databasetoolsv1beta1.DatabaseToolsConnection, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
+	StatusHooks         generatedruntime.StatusHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
+	ParityHooks         generatedruntime.ParityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
 	Create              runtimeOperationHooks[databasetoolssdk.CreateDatabaseToolsConnectionRequest, databasetoolssdk.CreateDatabaseToolsConnectionResponse]
 	Get                 runtimeOperationHooks[databasetoolssdk.GetDatabaseToolsConnectionRequest, databasetoolssdk.GetDatabaseToolsConnectionResponse]
 	List                runtimeOperationHooks[databasetoolssdk.ListDatabaseToolsConnectionsRequest, databasetoolssdk.ListDatabaseToolsConnectionsResponse]
@@ -98,9 +101,12 @@ func newDatabaseToolsConnectionRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newDatabaseToolsConnectionDefaultRuntimeHooks(sdkClient databasetoolssdk.DatabaseToolsClient) DatabaseToolsConnectionRuntimeHooks {
 	return DatabaseToolsConnectionRuntimeHooks{
-		Semantics: newDatabaseToolsConnectionRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newDatabaseToolsConnectionRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
+		StatusHooks:     generatedruntime.StatusHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
+		ParityHooks:     generatedruntime.ParityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
 		Create: runtimeOperationHooks[databasetoolssdk.CreateDatabaseToolsConnectionRequest, databasetoolssdk.CreateDatabaseToolsConnectionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDatabaseToolsConnectionDetails", RequestName: "CreateDatabaseToolsConnectionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request databasetoolssdk.CreateDatabaseToolsConnectionRequest) (databasetoolssdk.CreateDatabaseToolsConnectionResponse, error) {
@@ -154,6 +160,9 @@ func buildDatabaseToolsConnectionGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

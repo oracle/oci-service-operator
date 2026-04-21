@@ -26,6 +26,9 @@ type UsageCarbonEmissionsQueryRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
+	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
+	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
 	Create              runtimeOperationHooks[usageapisdk.CreateUsageCarbonEmissionsQueryRequest, usageapisdk.CreateUsageCarbonEmissionsQueryResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetUsageCarbonEmissionsQueryRequest, usageapisdk.GetUsageCarbonEmissionsQueryResponse]
 	List                runtimeOperationHooks[usageapisdk.ListUsageCarbonEmissionsQueriesRequest, usageapisdk.ListUsageCarbonEmissionsQueriesResponse]
@@ -46,8 +49,11 @@ func registerUsageCarbonEmissionsQueryRuntimeHooksMutator(mutator UsageCarbonEmi
 }
 func newUsageCarbonEmissionsQueryDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) UsageCarbonEmissionsQueryRuntimeHooks {
 	return UsageCarbonEmissionsQueryRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
+		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
+		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
 		Create: runtimeOperationHooks[usageapisdk.CreateUsageCarbonEmissionsQueryRequest, usageapisdk.CreateUsageCarbonEmissionsQueryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateUsageCarbonEmissionsQueryDetails", RequestName: "CreateUsageCarbonEmissionsQueryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateUsageCarbonEmissionsQueryRequest) (usageapisdk.CreateUsageCarbonEmissionsQueryResponse, error) {
@@ -101,6 +107,9 @@ func buildUsageCarbonEmissionsQueryGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

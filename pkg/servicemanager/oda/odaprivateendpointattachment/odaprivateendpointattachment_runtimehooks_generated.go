@@ -26,6 +26,9 @@ type OdaPrivateEndpointAttachmentRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaPrivateEndpointAttachment, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointAttachment]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpointAttachment]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointAttachment]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointAttachment]
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointAttachmentRequest, odasdk.CreateOdaPrivateEndpointAttachmentResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointAttachmentRequest, odasdk.GetOdaPrivateEndpointAttachmentResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointAttachmentsRequest, odasdk.ListOdaPrivateEndpointAttachmentsResponse]
@@ -45,8 +48,11 @@ func registerOdaPrivateEndpointAttachmentRuntimeHooksMutator(mutator OdaPrivateE
 }
 func newOdaPrivateEndpointAttachmentDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) OdaPrivateEndpointAttachmentRuntimeHooks {
 	return OdaPrivateEndpointAttachmentRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointAttachmentRequest, odasdk.CreateOdaPrivateEndpointAttachmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaPrivateEndpointAttachmentDetails", RequestName: "CreateOdaPrivateEndpointAttachmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointAttachmentRequest) (odasdk.CreateOdaPrivateEndpointAttachmentResponse, error) {
@@ -94,6 +100,9 @@ func buildOdaPrivateEndpointAttachmentGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

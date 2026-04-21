@@ -26,6 +26,9 @@ type ReportRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Report, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Report]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Report]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Report]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Report]
 	List                runtimeOperationHooks[marketplacesdk.ListReportsRequest, marketplacesdk.ListReportsResponse]
 	WrapGeneratedClient []func(ReportServiceClient) ReportServiceClient
 }
@@ -42,8 +45,11 @@ func registerReportRuntimeHooksMutator(mutator ReportRuntimeHooksMutator) {
 }
 func newReportDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) ReportRuntimeHooks {
 	return ReportRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Report]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.Report]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Report]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Report]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Report]{},
 		List: runtimeOperationHooks[marketplacesdk.ListReportsRequest, marketplacesdk.ListReportsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ReportType", RequestName: "reportType", Contribution: "query", PreferResourceID: false}, {FieldName: "Date", RequestName: "date", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListReportsRequest) (marketplacesdk.ListReportsResponse, error) {
@@ -73,6 +79,9 @@ func buildReportGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type RuleSetRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.RuleSet, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.RuleSet]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.RuleSet]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.RuleSet]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.RuleSet]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateRuleSetRequest, loadbalancersdk.CreateRuleSetResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetRuleSetRequest, loadbalancersdk.GetRuleSetResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListRuleSetsRequest, loadbalancersdk.ListRuleSetsResponse]
@@ -46,8 +49,11 @@ func registerRuleSetRuntimeHooksMutator(mutator RuleSetRuntimeHooksMutator) {
 }
 func newRuleSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) RuleSetRuntimeHooks {
 	return RuleSetRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.RuleSet]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.RuleSet]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.RuleSet]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.RuleSet]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.RuleSet]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateRuleSetRequest, loadbalancersdk.CreateRuleSetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateRuleSetDetails", RequestName: "CreateRuleSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateRuleSetRequest) (loadbalancersdk.CreateRuleSetResponse, error) {
@@ -101,6 +107,9 @@ func buildRuleSetGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

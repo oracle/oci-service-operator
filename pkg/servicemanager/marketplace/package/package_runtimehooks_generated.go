@@ -26,6 +26,9 @@ type PackageRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Package, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Package]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Package]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Package]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Package]
 	Get                 runtimeOperationHooks[marketplacesdk.GetPackageRequest, marketplacesdk.GetPackageResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListPackagesRequest, marketplacesdk.ListPackagesResponse]
 	WrapGeneratedClient []func(PackageServiceClient) PackageServiceClient
@@ -43,8 +46,11 @@ func registerPackageRuntimeHooksMutator(mutator PackageRuntimeHooksMutator) {
 }
 func newPackageDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) PackageRuntimeHooks {
 	return PackageRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Package]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.Package]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Package]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Package]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Package]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetPackageRequest, marketplacesdk.GetPackageResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageVersion", RequestName: "packageVersion", Contribution: "path", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetPackageRequest) (marketplacesdk.GetPackageResponse, error) {
@@ -80,6 +86,9 @@ func buildPackageGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type ReportTypeRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.ReportType, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.ReportType]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.ReportType]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.ReportType]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.ReportType]
 	List                runtimeOperationHooks[marketplacesdk.ListReportTypesRequest, marketplacesdk.ListReportTypesResponse]
 	WrapGeneratedClient []func(ReportTypeServiceClient) ReportTypeServiceClient
 }
@@ -42,8 +45,11 @@ func registerReportTypeRuntimeHooksMutator(mutator ReportTypeRuntimeHooksMutator
 }
 func newReportTypeDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) ReportTypeRuntimeHooks {
 	return ReportTypeRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.ReportType]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.ReportType]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.ReportType]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.ReportType]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.ReportType]{},
 		List: runtimeOperationHooks[marketplacesdk.ListReportTypesRequest, marketplacesdk.ListReportTypesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListReportTypesRequest) (marketplacesdk.ListReportTypesResponse, error) {
@@ -73,6 +79,9 @@ func buildReportTypeGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

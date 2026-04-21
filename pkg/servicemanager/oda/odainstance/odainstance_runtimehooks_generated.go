@@ -26,6 +26,9 @@ type OdaInstanceRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaInstance, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaInstance]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaInstance]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaInstance]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaInstance]
 	Create              runtimeOperationHooks[odasdk.CreateOdaInstanceRequest, odasdk.CreateOdaInstanceResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaInstanceRequest, odasdk.GetOdaInstanceResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaInstancesRequest, odasdk.ListOdaInstancesResponse]
@@ -46,8 +49,11 @@ func registerOdaInstanceRuntimeHooksMutator(mutator OdaInstanceRuntimeHooksMutat
 }
 func newOdaInstanceDefaultRuntimeHooks(sdkClient odasdk.OdaClient) OdaInstanceRuntimeHooks {
 	return OdaInstanceRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaInstance]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.OdaInstance]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaInstance]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaInstance]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaInstance]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaInstanceRequest, odasdk.CreateOdaInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaInstanceDetails", RequestName: "CreateOdaInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaInstanceRequest) (odasdk.CreateOdaInstanceResponse, error) {
@@ -101,6 +107,9 @@ func buildOdaInstanceGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

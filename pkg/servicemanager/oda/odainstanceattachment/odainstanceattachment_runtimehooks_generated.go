@@ -26,6 +26,9 @@ type OdaInstanceAttachmentRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaInstanceAttachment, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaInstanceAttachment]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaInstanceAttachment]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaInstanceAttachment]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaInstanceAttachment]
 	Create              runtimeOperationHooks[odasdk.CreateOdaInstanceAttachmentRequest, odasdk.CreateOdaInstanceAttachmentResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaInstanceAttachmentRequest, odasdk.GetOdaInstanceAttachmentResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaInstanceAttachmentsRequest, odasdk.ListOdaInstanceAttachmentsResponse]
@@ -46,8 +49,11 @@ func registerOdaInstanceAttachmentRuntimeHooksMutator(mutator OdaInstanceAttachm
 }
 func newOdaInstanceAttachmentDefaultRuntimeHooks(sdkClient odasdk.OdaClient) OdaInstanceAttachmentRuntimeHooks {
 	return OdaInstanceAttachmentRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaInstanceAttachment]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.OdaInstanceAttachment]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaInstanceAttachment]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaInstanceAttachment]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaInstanceAttachment]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaInstanceAttachmentRequest, odasdk.CreateOdaInstanceAttachmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateOdaInstanceAttachmentDetails", RequestName: "CreateOdaInstanceAttachmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaInstanceAttachmentRequest) (odasdk.CreateOdaInstanceAttachmentResponse, error) {
@@ -101,6 +107,9 @@ func buildOdaInstanceAttachmentGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{
