@@ -82,6 +82,14 @@ type RequestField struct {
 	LookupPaths      []string
 }
 
+type ExistingBeforeCreateDecision string
+
+const (
+	ExistingBeforeCreateDecisionAllow ExistingBeforeCreateDecision = "allow"
+	ExistingBeforeCreateDecisionSkip  ExistingBeforeCreateDecision = "skip"
+	ExistingBeforeCreateDecisionFail  ExistingBeforeCreateDecision = "fail"
+)
+
 type Hook struct {
 	Helper     string
 	EntityType string
@@ -119,11 +127,12 @@ type HookSet struct {
 }
 
 type IdentityHooks[T any] struct {
-	Resolve                func(T) (any, error)
-	RecordPath             func(T, any)
-	RecordTracked          func(T, any, string)
-	LookupExisting         func(context.Context, T, any) (any, error)
-	SeedSyntheticTrackedID func(T, any) func()
+	Resolve                   func(T) (any, error)
+	RecordPath                func(T, any)
+	RecordTracked             func(T, any, string)
+	GuardExistingBeforeCreate func(context.Context, T) (ExistingBeforeCreateDecision, error)
+	LookupExisting            func(context.Context, T, any) (any, error)
+	SeedSyntheticTrackedID    func(T, any) func()
 }
 
 type ReadHooks struct {
@@ -316,6 +325,29 @@ func (c ServiceClient[T]) lookupExistingByIdentity(ctx context.Context, resource
 		return nil, nil
 	default:
 		return nil, err
+	}
+}
+
+func (c ServiceClient[T]) guardExistingBeforeCreate(ctx context.Context, resource T) (ExistingBeforeCreateDecision, error) {
+	if c.config.Identity.GuardExistingBeforeCreate == nil {
+		return ExistingBeforeCreateDecisionAllow, nil
+	}
+
+	decision, err := c.config.Identity.GuardExistingBeforeCreate(ctx, resource)
+	if err != nil {
+		return ExistingBeforeCreateDecisionFail, err
+	}
+	if decision == "" {
+		decision = ExistingBeforeCreateDecisionAllow
+	}
+
+	switch decision {
+	case ExistingBeforeCreateDecisionAllow, ExistingBeforeCreateDecisionSkip:
+		return decision, nil
+	case ExistingBeforeCreateDecisionFail:
+		return decision, fmt.Errorf("%s identity guard rejected pre-create reuse", c.config.Kind)
+	default:
+		return "", fmt.Errorf("%s identity guard returned unsupported pre-create decision %q", c.config.Kind, decision)
 	}
 }
 
@@ -564,23 +596,77 @@ func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resou
 	if c.config.Create == nil {
 		return nil, false, nil
 	}
-	if response, err := c.lookupExistingByIdentity(ctx, resource, identity); err != nil {
-		return nil, false, err
-	} else if response != nil {
-		return response, false, nil
-	}
-	if !c.shouldResolveExistingBeforeCreate() {
-		return nil, false, nil
+
+	trackedIDStale := false
+	statePrepared := false
+	var state readResourceState
+
+	if c.currentID(resource) != "" {
+		getOp := c.getReadOperation()
+		if getOp == nil {
+			return nil, false, nil
+		}
+
+		var err error
+		state, err = c.prepareReadResourceState(resource, "")
+		if err != nil {
+			return nil, false, err
+		}
+		if !c.canInvokeGet(resource, state.readID) {
+			return nil, false, nil
+		}
+
+		response, handled, getTrackedIDStale, err := func() (any, bool, bool, error) {
+			nextState, nextResponse, handled, trackedIDStale, err := c.readResourceWithGetForExistingBeforeCreate(ctx, resource, state)
+			state = nextState
+			return nextResponse, handled, trackedIDStale, err
+		}()
+		trackedIDStale = getTrackedIDStale
+		switch {
+		case handled && err == nil:
+			return response, false, nil
+		case handled && !errors.Is(err, errResourceNotFound):
+			return nil, trackedIDStale, err
+		case !handled:
+			statePrepared = true
+		}
 	}
 
-	response, trackedIDStale, err := c.readResourceForExistingBeforeCreate(ctx, resource)
+	decision, err := c.guardExistingBeforeCreate(ctx, resource)
+	if err != nil {
+		if trackedIDStale {
+			c.clearTrackedIdentity(resource)
+		}
+		return nil, trackedIDStale, err
+	}
+	if decision == ExistingBeforeCreateDecisionSkip {
+		return nil, trackedIDStale, nil
+	}
+
+	if response, err := c.lookupExistingByIdentity(ctx, resource, identity); err != nil {
+		return nil, trackedIDStale, err
+	} else if response != nil {
+		return response, trackedIDStale, nil
+	}
+	if !c.shouldResolveExistingBeforeCreate() {
+		return nil, trackedIDStale, nil
+	}
+
+	if !statePrepared {
+		state, err = c.prepareReadResourceState(resource, "")
+		if err != nil {
+			return nil, trackedIDStale, err
+		}
+	}
+
+	response, err := c.readResourceWithList(ctx, resource, state, readPhaseCreate)
 	if err == nil {
 		return response, trackedIDStale, nil
 	}
 	if errors.Is(err, errResourceNotFound) {
 		return nil, trackedIDStale, nil
 	}
-	return nil, false, err
+	return nil, trackedIDStale, err
 }
 
 func (c ServiceClient[T]) loadLiveMutationResponse(ctx context.Context, resource T, currentID string, existingResponse any, resolvedBeforeCreate bool) (string, any, error) {
