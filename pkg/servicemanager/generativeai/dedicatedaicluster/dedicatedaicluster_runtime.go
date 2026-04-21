@@ -7,11 +7,9 @@ package dedicatedaicluster
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v65/common"
 	generativeaisdk "github.com/oracle/oci-go-sdk/v65/generativeai"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
@@ -21,33 +19,84 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-type dedicatedAiClusterOCIClient interface {
-	GetDedicatedAiCluster(context.Context, generativeaisdk.GetDedicatedAiClusterRequest) (generativeaisdk.GetDedicatedAiClusterResponse, error)
-}
-
-type dedicatedAiClusterGeneratedParityClient struct {
-	delegate DedicatedAiClusterServiceClient
-	client   dedicatedAiClusterOCIClient
-	initErr  error
-}
+type dedicatedAiClusterDeletedLifecycleReadGuardContextKey struct{}
 
 func init() {
-	generatedFactory := newDedicatedAiClusterServiceClient
-	newDedicatedAiClusterServiceClient = func(manager *DedicatedAiClusterServiceManager) DedicatedAiClusterServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := generativeaisdk.NewGenerativeAiClientWithConfigurationProvider(manager.Provider)
-		parityClient := &dedicatedAiClusterGeneratedParityClient{
-			delegate: delegate,
-			client:   sdkClient,
-		}
-		if err != nil {
-			parityClient.initErr = fmt.Errorf("initialize DedicatedAiCluster OCI client: %w", err)
-		}
-		return parityClient
+	registerDedicatedAiClusterRuntimeHooksMutator(func(_ *DedicatedAiClusterServiceManager, hooks *DedicatedAiClusterRuntimeHooks) {
+		applyDedicatedAiClusterRuntimeHooks(hooks)
+	})
+}
+
+func applyDedicatedAiClusterRuntimeHooks(hooks *DedicatedAiClusterRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Identity.GuardExistingBeforeCreate = guardDedicatedAiClusterExistingBeforeCreate
+	hooks.TrackedRecreate.ClearTrackedIdentity = clearDedicatedAiClusterIdentity
+	hooks.Read.Get = dedicatedAiClusterDeletedLifecycleReadOperation(hooks.Get)
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate DedicatedAiClusterServiceClient) DedicatedAiClusterServiceClient {
+		return dedicatedAiClusterDeletedLifecycleGuardClient{delegate: delegate}
+	})
+}
+
+func guardDedicatedAiClusterExistingBeforeCreate(
+	_ context.Context,
+	resource *generativeaiv1beta1.DedicatedAiCluster,
+) (generatedruntime.ExistingBeforeCreateDecision, error) {
+	if resource == nil {
+		return generatedruntime.ExistingBeforeCreateDecisionAllow, nil
+	}
+	if strings.TrimSpace(resource.Spec.DisplayName) == "" {
+		return generatedruntime.ExistingBeforeCreateDecisionSkip, nil
+	}
+	return generatedruntime.ExistingBeforeCreateDecisionAllow, nil
+}
+
+func dedicatedAiClusterDeletedLifecycleReadOperation(
+	get runtimeOperationHooks[generativeaisdk.GetDedicatedAiClusterRequest, generativeaisdk.GetDedicatedAiClusterResponse],
+) *generatedruntime.Operation {
+	return &generatedruntime.Operation{
+		NewRequest: func() any { return &generativeaisdk.GetDedicatedAiClusterRequest{} },
+		Fields:     append([]generatedruntime.RequestField(nil), get.Fields...),
+		Call: func(ctx context.Context, request any) (any, error) {
+			response, err := get.Call(ctx, *request.(*generativeaisdk.GetDedicatedAiClusterRequest))
+			if err != nil {
+				return nil, err
+			}
+			if dedicatedAiClusterDeletedLifecycleReadGuardEnabled(ctx) &&
+				response.DedicatedAiCluster.LifecycleState == generativeaisdk.DedicatedAiClusterLifecycleStateDeleted {
+				return nil, errorutil.NotFoundOciError{
+					HTTPStatusCode: 404,
+					ErrorCode:      errorutil.NotFound,
+					Description:    "DedicatedAiCluster lifecycle state DELETED is treated as not found during stale tracked identity recovery",
+				}
+			}
+			return response, nil
+		},
 	}
 }
 
-func (c *dedicatedAiClusterGeneratedParityClient) CreateOrUpdate(
+func withDedicatedAiClusterDeletedLifecycleReadGuard(ctx context.Context) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return context.WithValue(ctx, dedicatedAiClusterDeletedLifecycleReadGuardContextKey{}, true)
+}
+
+func dedicatedAiClusterDeletedLifecycleReadGuardEnabled(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+	enabled, _ := ctx.Value(dedicatedAiClusterDeletedLifecycleReadGuardContextKey{}).(bool)
+	return enabled
+}
+
+type dedicatedAiClusterDeletedLifecycleGuardClient struct {
+	delegate DedicatedAiClusterServiceClient
+}
+
+func (c dedicatedAiClusterDeletedLifecycleGuardClient) CreateOrUpdate(
 	ctx context.Context,
 	resource *generativeaiv1beta1.DedicatedAiCluster,
 	req ctrl.Request,
@@ -58,37 +107,13 @@ func (c *dedicatedAiClusterGeneratedParityClient) CreateOrUpdate(
 	if resource == nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("DedicatedAiCluster resource must not be nil")
 	}
-
 	if strings.TrimSpace(resource.Spec.DisplayName) != "" {
 		return c.delegate.CreateOrUpdate(ctx, resource, req)
 	}
-
-	trackedID := currentDedicatedAiClusterID(resource)
-	if trackedID == "" {
-		return c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-	}
-
-	if c.initErr != nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, c.initErr
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isDedicatedAiClusterReadNotFoundOCI(err) {
-			clearDedicatedAiClusterIdentity(resource)
-			return c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-		}
-		return servicemanager.OSOKResponse{IsSuccessful: false}, normalizeDedicatedAiClusterOCIError(err)
-	}
-	if current.LifecycleState == generativeaisdk.DedicatedAiClusterLifecycleStateDeleted {
-		clearDedicatedAiClusterIdentity(resource)
-		return c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-	}
-
-	return c.delegate.CreateOrUpdate(ctx, resource, req)
+	return c.delegate.CreateOrUpdate(withDedicatedAiClusterDeletedLifecycleReadGuard(ctx), resource, req)
 }
 
-func (c *dedicatedAiClusterGeneratedParityClient) Delete(
+func (c dedicatedAiClusterDeletedLifecycleGuardClient) Delete(
 	ctx context.Context,
 	resource *generativeaiv1beta1.DedicatedAiCluster,
 ) (bool, error) {
@@ -98,49 +123,10 @@ func (c *dedicatedAiClusterGeneratedParityClient) Delete(
 	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *dedicatedAiClusterGeneratedParityClient) get(
-	ctx context.Context,
-	ocid string,
-) (generativeaisdk.DedicatedAiCluster, error) {
-	response, err := c.client.GetDedicatedAiCluster(ctx, generativeaisdk.GetDedicatedAiClusterRequest{
-		DedicatedAiClusterId: common.String(ocid),
-	})
-	if err != nil {
-		return generativeaisdk.DedicatedAiCluster{}, err
-	}
-	return response.DedicatedAiCluster, nil
-}
-
-func currentDedicatedAiClusterID(resource *generativeaiv1beta1.DedicatedAiCluster) string {
-	if resource == nil {
-		return ""
-	}
-	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
-		return ocid
-	}
-	return strings.TrimSpace(resource.Status.Id)
-}
-
 func clearDedicatedAiClusterIdentity(resource *generativeaiv1beta1.DedicatedAiCluster) {
 	if resource == nil {
 		return
 	}
 	resource.Status.Id = ""
 	resource.Status.OsokStatus.Ocid = shared.OCID("")
-}
-
-func normalizeDedicatedAiClusterOCIError(err error) error {
-	var serviceErr common.ServiceError
-	if !errors.As(err, &serviceErr) {
-		return err
-	}
-	if _, normalized := errorutil.OciErrorTypeResponse(err); normalized != nil {
-		return normalized
-	}
-	return err
-}
-
-func isDedicatedAiClusterReadNotFoundOCI(err error) bool {
-	classification := errorutil.ClassifyDeleteError(err)
-	return classification.IsUnambiguousNotFound()
 }
