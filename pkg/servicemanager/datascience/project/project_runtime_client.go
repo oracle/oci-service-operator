@@ -7,7 +7,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 
 	datasciencesdk "github.com/oracle/oci-go-sdk/v65/datascience"
 	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
@@ -24,16 +23,18 @@ type projectOCIClient interface {
 }
 
 func init() {
-	newProjectServiceClient = func(manager *ProjectServiceManager) ProjectServiceClient {
-		sdkClient, err := datasciencesdk.NewDataScienceClientWithConfigurationProvider(manager.Provider)
-		config := newProjectRuntimeConfig(manager.Log, sdkClient)
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Project OCI client: %w", err)
-		}
-		return defaultProjectServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*datasciencev1beta1.Project](config),
-		}
+	registerProjectRuntimeHooksMutator(func(_ *ProjectServiceManager, hooks *ProjectRuntimeHooks) {
+		applyProjectRuntimeHooks(hooks)
+	})
+}
+
+func applyProjectRuntimeHooks(hooks *ProjectRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
+
+	hooks.Semantics = reviewedProjectRuntimeSemantics()
+	hooks.List.Fields = projectListFields()
 }
 
 func newProjectServiceClientWithOCIClient(log loggerutil.OSOKLogger, client projectOCIClient) ProjectServiceClient {
@@ -48,45 +49,43 @@ func newProjectRuntimeConfig(
 	log loggerutil.OSOKLogger,
 	client projectOCIClient,
 ) generatedruntime.Config[*datasciencev1beta1.Project] {
-	return generatedruntime.Config[*datasciencev1beta1.Project]{
-		Kind:      "Project",
-		SDKName:   "Project",
-		Log:       log,
-		Semantics: reviewedProjectRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &datasciencesdk.CreateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateProject(ctx, *request.(*datasciencesdk.CreateProjectRequest))
-			},
+	hooks := newProjectRuntimeHooksWithOCIClient(client)
+	applyProjectRuntimeHooks(&hooks)
+	return buildProjectGeneratedRuntimeConfig(&ProjectServiceManager{Log: log}, hooks)
+}
+
+func newProjectRuntimeHooksWithOCIClient(client projectOCIClient) ProjectRuntimeHooks {
+	return ProjectRuntimeHooks{
+		Semantics: newProjectRuntimeSemantics(),
+		Create: runtimeOperationHooks[datasciencesdk.CreateProjectRequest, datasciencesdk.CreateProjectResponse]{
 			Fields: projectCreateFields(),
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &datasciencesdk.GetProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetProject(ctx, *request.(*datasciencesdk.GetProjectRequest))
+			Call: func(ctx context.Context, request datasciencesdk.CreateProjectRequest) (datasciencesdk.CreateProjectResponse, error) {
+				return client.CreateProject(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[datasciencesdk.GetProjectRequest, datasciencesdk.GetProjectResponse]{
 			Fields: projectGetFields(),
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &datasciencesdk.ListProjectsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListProjects(ctx, *request.(*datasciencesdk.ListProjectsRequest))
+			Call: func(ctx context.Context, request datasciencesdk.GetProjectRequest) (datasciencesdk.GetProjectResponse, error) {
+				return client.GetProject(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[datasciencesdk.ListProjectsRequest, datasciencesdk.ListProjectsResponse]{
 			Fields: projectListFields(),
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &datasciencesdk.UpdateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateProject(ctx, *request.(*datasciencesdk.UpdateProjectRequest))
+			Call: func(ctx context.Context, request datasciencesdk.ListProjectsRequest) (datasciencesdk.ListProjectsResponse, error) {
+				return client.ListProjects(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[datasciencesdk.UpdateProjectRequest, datasciencesdk.UpdateProjectResponse]{
 			Fields: projectUpdateFields(),
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &datasciencesdk.DeleteProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteProject(ctx, *request.(*datasciencesdk.DeleteProjectRequest))
+			Call: func(ctx context.Context, request datasciencesdk.UpdateProjectRequest) (datasciencesdk.UpdateProjectResponse, error) {
+				return client.UpdateProject(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[datasciencesdk.DeleteProjectRequest, datasciencesdk.DeleteProjectResponse]{
 			Fields: projectDeleteFields(),
+			Call: func(ctx context.Context, request datasciencesdk.DeleteProjectRequest) (datasciencesdk.DeleteProjectResponse, error) {
+				return client.DeleteProject(ctx, request)
+			},
 		},
 	}
 }
