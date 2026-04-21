@@ -234,8 +234,11 @@ and service-manager generation is enabled.
   `Identity` seam plus a read-only nested `Read` seam. `Identity` is for
   path-addressed load-balancer-style subresources that need to resolve path
   identity, record path status, optionally record tracked identity, optionally
-  look up an existing object by identity, or optionally seed a temporary
-  synthetic tracked ID.
+  look up an existing object by identity, optionally seed a temporary
+  synthetic tracked ID, and now make a bounded pre-bind reuse decision before
+  `LookupExisting` or default list reuse. That decision surface is limited to
+  allow reuse, skip unsafe pre-create reuse, or fail fast; it does not widen
+  into generic current-ID repair or a broader bind-resolution contract.
 - The runtime-hooks surface also carries a bounded phase-4 core-wrapper
   extension for the seven core networking wrappers named in
   `docs/contributor/runtime-hook-adoption-audit.md`:
@@ -250,7 +253,8 @@ and service-manager generation is enabled.
   `Get` or `List` from a parent-shaped SDK call. It does not widen
   create/update/delete into a generic untyped CRUD contract, and this contract
   still does not expose generic `CurrentID`, cross-service identity-repair,
-  async, or OCI-error overlay hooks.
+  generic bind lookup or payload-sanitization hooks, async, or OCI-error
+  overlay hooks.
 - `<file-stem>_serviceclient.go` now limits itself to OCI client construction,
   hook assembly, generated-runtime config creation, default delegate creation,
   and optional wrapper application.

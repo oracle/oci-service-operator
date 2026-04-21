@@ -1896,6 +1896,7 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	wantFields := []generatedruntime.RequestField{
 		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false},
 	}
+	guardDecisionCalls := 0
 	trackedClearCalled := false
 	statusClearCalled := false
 	parityNormalizeCalled := false
@@ -1911,6 +1912,10 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
 		hooks.Identity.Resolve = func(*mysqlv1beta1.DbSystem) (any, error) {
 			return identityMarker{Value: "hooked-identity"}, nil
+		}
+		hooks.Identity.GuardExistingBeforeCreate = func(context.Context, *mysqlv1beta1.DbSystem) (generatedruntime.ExistingBeforeCreateDecision, error) {
+			guardDecisionCalls++
+			return generatedruntime.ExistingBeforeCreateDecisionSkip, nil
 		}
 		hooks.Read.Get = &generatedruntime.Operation{
 			NewRequest: func() any { return &readMarkerRequest{} },
@@ -1965,6 +1970,19 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	if got, ok := identity.(identityMarker); !ok || got.Value != "hooked-identity" {
 		t.Fatalf("hooks.Identity.Resolve() = %#v, want hooked identity marker", identity)
 	}
+	if hooks.Identity.GuardExistingBeforeCreate == nil {
+		t.Fatal("Identity.GuardExistingBeforeCreate hook was not applied")
+	}
+	decision, err := hooks.Identity.GuardExistingBeforeCreate(context.Background(), &mysqlv1beta1.DbSystem{})
+	if err != nil {
+		t.Fatalf("hooks.Identity.GuardExistingBeforeCreate() error = %v", err)
+	}
+	if decision != generatedruntime.ExistingBeforeCreateDecisionSkip {
+		t.Fatalf("hooks.Identity.GuardExistingBeforeCreate() = %q, want skip decision", decision)
+	}
+	if guardDecisionCalls != 1 {
+		t.Fatalf("Identity.GuardExistingBeforeCreate() calls = %d, want 1", guardDecisionCalls)
+	}
 	if hooks.Read.Get == nil {
 		t.Fatal("Read.Get hook was not applied")
 	}
@@ -1999,6 +2017,9 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	if cfg.Identity.Resolve == nil {
 		t.Fatal("generated runtime config did not expose Identity.Resolve")
 	}
+	if cfg.Identity.GuardExistingBeforeCreate == nil {
+		t.Fatal("generated runtime config did not expose Identity.GuardExistingBeforeCreate")
+	}
 	if cfg.Read.Get == nil {
 		t.Fatal("generated runtime config did not expose Read.Get")
 	}
@@ -2023,6 +2044,16 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg.Create.Fields, wantFields) {
 		t.Fatalf("cfg.Create.Fields = %#v, want %#v", cfg.Create.Fields, wantFields)
+	}
+	decision, err = cfg.Identity.GuardExistingBeforeCreate(context.Background(), &mysqlv1beta1.DbSystem{})
+	if err != nil {
+		t.Fatalf("cfg.Identity.GuardExistingBeforeCreate() error = %v", err)
+	}
+	if decision != generatedruntime.ExistingBeforeCreateDecisionSkip {
+		t.Fatalf("cfg.Identity.GuardExistingBeforeCreate() = %q, want skip decision", decision)
+	}
+	if guardDecisionCalls != 2 {
+		t.Fatalf("cfg.Identity.GuardExistingBeforeCreate() calls = %d, want 2", guardDecisionCalls)
 	}
 	readRequest := cfg.Read.Get.NewRequest()
 	if _, ok := readRequest.(*readMarkerRequest); !ok {
@@ -4630,6 +4661,8 @@ func normalizeRuntimeHookContractForComparison(path string, content string) stri
 	kept := make([]string, 0, len(lines))
 	for _, line := range lines {
 		switch {
+		case strings.Contains(line, "Identity owns bounded pre-create guard and identity reuse hooks."):
+			continue
 		case strings.Contains(line, "generatedruntime.IdentityHooks["):
 			continue
 		case strings.Contains(line, "generatedruntime.ReadHooks"):

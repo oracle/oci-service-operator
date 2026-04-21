@@ -8,6 +8,7 @@ package generatedruntime
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -3714,10 +3715,12 @@ func TestServiceClientCreateOrUpdateCreatesWhenTrackedStatusIDIsStaleAndNoReplac
 	}
 }
 
-func TestServiceClientCreateOrUpdateClearsTrackedIdentityThroughHookWhenTrackedStatusIDIsStale(t *testing.T) {
+func TestServiceClientCreateOrUpdateClearsTrackedIdentityThroughHookWhenIdentityGuardSkipsStaleTrackedIDReuse(t *testing.T) {
 	t.Parallel()
 
 	clearTrackedIdentityCalled := false
+	guardCalls := 0
+	listCalled := false
 
 	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
 		Kind:    "Thing",
@@ -3742,6 +3745,12 @@ func TestServiceClientCreateOrUpdateClearsTrackedIdentityThroughHookWhenTrackedS
 			ClearTrackedIdentity: func(resource *fakeResource) {
 				clearTrackedIdentityCalled = true
 				resource.Status = fakeStatus{}
+			},
+		},
+		Identity: IdentityHooks[*fakeResource]{
+			GuardExistingBeforeCreate: func(context.Context, *fakeResource) (ExistingBeforeCreateDecision, error) {
+				guardCalls++
+				return ExistingBeforeCreateDecisionSkip, nil
 			},
 		},
 		Create: &Operation{
@@ -3773,6 +3782,7 @@ func TestServiceClientCreateOrUpdateClearsTrackedIdentityThroughHookWhenTrackedS
 		List: &Operation{
 			NewRequest: func() any { return &fakeListThingRequest{} },
 			Call: func(_ context.Context, request any) (any, error) {
+				listCalled = true
 				if request.(*fakeListThingRequest).Id != "" {
 					t.Fatalf("list request id = %q, want empty after stale tracked ID fallback", request.(*fakeListThingRequest).Id)
 				}
@@ -3806,11 +3816,199 @@ func TestServiceClientCreateOrUpdateClearsTrackedIdentityThroughHookWhenTrackedS
 	if !clearTrackedIdentityCalled {
 		t.Fatal("CreateOrUpdate() should clear tracked identity when the tracked ID is stale")
 	}
+	if guardCalls != 1 {
+		t.Fatalf("GuardExistingBeforeCreate() calls = %d, want 1", guardCalls)
+	}
+	if listCalled {
+		t.Fatal("CreateOrUpdate() should skip list reuse when the identity guard rejects stale tracked-ID fallback reuse")
+	}
 	requireStatusOCID(t, resource, "ocid1.thing.oc1..created")
 	requireStringEqual(t, "status.displayName", resource.Status.DisplayName, "created-name")
 	if resource.Status.Partitions != 0 {
 		t.Fatalf("status.partitions = %d, want 0 after stale tracked status is cleared", resource.Status.Partitions)
 	}
+}
+
+func TestServiceClientCreateOrUpdateSkipsPreCreateReuseWhenIdentityGuardSkips(t *testing.T) {
+	t.Parallel()
+
+	var createCalled bool
+	var lookupCalls int
+	var listCalls int
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "best-effort",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				return fakeCreateThingResponse{
+					Thing: fakeThing{
+						Id:             "ocid1.thing.oc1..created",
+						Name:           "thing-a",
+						DisplayName:    "created-name",
+						LifecycleState: "ACTIVE",
+					},
+				}, nil
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				listCalls++
+				return fakeListThingResponse{}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+		Identity: IdentityHooks[*fakeResource]{
+			Resolve: func(resource *fakeResource) (any, error) {
+				return fakePathIdentity{
+					parentID:    resource.Spec.CompartmentId,
+					thingName:   resource.Spec.Name,
+					syntheticID: "thing/" + resource.Spec.Name,
+				}, nil
+			},
+			GuardExistingBeforeCreate: func(context.Context, *fakeResource) (ExistingBeforeCreateDecision, error) {
+				return ExistingBeforeCreateDecisionSkip, nil
+			},
+			LookupExisting: func(context.Context, *fakeResource, any) (any, error) {
+				lookupCalls++
+				return fakeGetThingResponse{}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..parent",
+			Name:          "thing-a",
+			DisplayName:   "created-name",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	requireCreateOrUpdateSuccess(t, response, err)
+	if !createCalled {
+		t.Fatal("CreateOrUpdate() should call Create() when the identity guard skips pre-create reuse")
+	}
+	if lookupCalls != 0 {
+		t.Fatalf("LookupExisting() calls = %d, want 0 when pre-create reuse is skipped", lookupCalls)
+	}
+	if listCalls != 0 {
+		t.Fatalf("List() calls = %d, want 0 when pre-create reuse is skipped", listCalls)
+	}
+	requireStatusOCID(t, resource, "ocid1.thing.oc1..created")
+}
+
+func TestServiceClientCreateOrUpdateFailsBeforePreCreateReuseWhenIdentityGuardFails(t *testing.T) {
+	t.Parallel()
+
+	var createCalled bool
+	var lookupCalls int
+	var listCalls int
+
+	client := NewServiceClient[*fakeResource](Config[*fakeResource]{
+		Kind:    "Thing",
+		SDKName: "Thing",
+		Semantics: &Semantics{
+			List: &ListSemantics{
+				ResponseItemsField: "Items",
+				MatchFields:        []string{"name", "compartmentId"},
+			},
+			Lifecycle: LifecycleSemantics{
+				ProvisioningStates: []string{"CREATING"},
+				UpdatingStates:     []string{"UPDATING"},
+				ActiveStates:       []string{"ACTIVE"},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "best-effort",
+				PendingStates:  []string{"DELETING"},
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+		Create: &Operation{
+			NewRequest: func() any { return &fakeCreateThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				return fakeCreateThingResponse{}, nil
+			},
+		},
+		List: &Operation{
+			NewRequest: func() any { return &fakeListThingRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				listCalls++
+				return fakeListThingResponse{}, nil
+			},
+			Fields: []RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "Name", RequestName: "name", Contribution: "query"},
+			},
+		},
+		Identity: IdentityHooks[*fakeResource]{
+			Resolve: func(resource *fakeResource) (any, error) {
+				return fakePathIdentity{
+					parentID:    resource.Spec.CompartmentId,
+					thingName:   resource.Spec.Name,
+					syntheticID: "thing/" + resource.Spec.Name,
+				}, nil
+			},
+			GuardExistingBeforeCreate: func(context.Context, *fakeResource) (ExistingBeforeCreateDecision, error) {
+				return ExistingBeforeCreateDecisionFail, errors.New("Thing spec.displayName is required before pre-create reuse")
+			},
+			LookupExisting: func(context.Context, *fakeResource, any) (any, error) {
+				lookupCalls++
+				return fakeGetThingResponse{}, nil
+			},
+		},
+	})
+
+	resource := &fakeResource{
+		Spec: fakeSpec{
+			CompartmentId: "ocid1.compartment.oc1..parent",
+			Name:          "thing-a",
+		},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want identity guard failure")
+	}
+	if err.Error() != "Thing spec.displayName is required before pre-create reuse" {
+		t.Fatalf("CreateOrUpdate() error = %v, want identity guard failure", err)
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful guard failure", response)
+	}
+	if createCalled {
+		t.Fatal("CreateOrUpdate() should not call Create() when the identity guard fails")
+	}
+	if lookupCalls != 0 {
+		t.Fatalf("LookupExisting() calls = %d, want 0 when the identity guard fails", lookupCalls)
+	}
+	if listCalls != 0 {
+		t.Fatalf("List() calls = %d, want 0 when the identity guard fails", listCalls)
+	}
+	requireTrailingCondition(t, resource, shared.Failed)
 }
 
 func TestServiceClientCreateOrUpdateRestoresStatusAfterDelegateFailure(t *testing.T) {
@@ -4521,6 +4719,7 @@ func TestServiceClientCreateOrUpdateUsesIdentityLookupAndPersistsTrackedIdentity
 	t.Parallel()
 
 	var createCalled bool
+	var guardCalls []string
 	var lookupCalls int
 	var seedCalls int
 	var recordTrackedCalls int
@@ -4548,7 +4747,12 @@ func TestServiceClientCreateOrUpdateUsesIdentityLookupAndPersistsTrackedIdentity
 				resource.Status.CompartmentId = resolved.parentID
 				resource.Status.Name = resolved.thingName
 			},
+			GuardExistingBeforeCreate: func(context.Context, *fakeResource) (ExistingBeforeCreateDecision, error) {
+				guardCalls = append(guardCalls, "guard")
+				return ExistingBeforeCreateDecisionAllow, nil
+			},
 			LookupExisting: func(context.Context, *fakeResource, any) (any, error) {
+				guardCalls = append(guardCalls, "lookup")
 				lookupCalls++
 				return fakeGetThingResponse{
 					Thing: fakeThing{
@@ -4588,6 +4792,9 @@ func TestServiceClientCreateOrUpdateUsesIdentityLookupAndPersistsTrackedIdentity
 	}
 	if lookupCalls != 1 {
 		t.Fatalf("LookupExisting() calls = %d, want 1", lookupCalls)
+	}
+	if len(guardCalls) != 2 || guardCalls[0] != "guard" || guardCalls[1] != "lookup" {
+		t.Fatalf("guard/lookup call order = %v, want [guard lookup]", guardCalls)
 	}
 	if seedCalls != 1 {
 		t.Fatalf("SeedSyntheticTrackedID() calls = %d, want 1", seedCalls)
