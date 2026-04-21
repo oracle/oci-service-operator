@@ -1508,6 +1508,12 @@ spec:
                 name: ocicredentials
                 key: user
                 optional: true
+          - name: AUTH_TYPE
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: auth_type
+                optional: true
           - name: TENANCY
             valueFrom:
               secretKeyRef:
@@ -1538,16 +1544,119 @@ spec:
                 name: ocicredentials
                 key: privatekey
                 optional: true
+          - name: OCI_CONFIG_FILE_PATH
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: config_file_path
+                optional: true
+          - name: OCI_CONFIG_PROFILE
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: config_file_profile
+                optional: true
+          - name: INSTANCE_PRINCIPAL_DELEGATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: instance_principal_delegation_token
+                optional: true
+          - name: RESOURCE_PRINCIPAL_DELEGATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: resource_principal_delegation_token
+                optional: true
+          - name: INSTANCE_PRINCIPAL_LEAF_CERTIFICATE_PATH
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: instance_principal_leaf_certificate_path
+                optional: true
+          - name: INSTANCE_PRINCIPAL_LEAF_PRIVATE_KEY_PATH
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: instance_principal_leaf_private_key_path
+                optional: true
+          - name: INSTANCE_PRINCIPAL_LEAF_PRIVATE_KEY_PASSPHRASE
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: instance_principal_leaf_private_key_passphrase
+                optional: true
+          - name: INSTANCE_PRINCIPAL_INTERMEDIATE_CERTIFICATE_PATHS
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: instance_principal_intermediate_certificate_paths
+                optional: true
+          - name: OCI_RESOURCE_PRINCIPAL_VERSION
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_resource_principal_version
+                optional: true
+          - name: OCI_RESOURCE_PRINCIPAL_RPST
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_resource_principal_rpst
+                optional: true
+          - name: OCI_RESOURCE_PRINCIPAL_PRIVATE_PEM
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_resource_principal_private_pem
+                optional: true
+          - name: OCI_RESOURCE_PRINCIPAL_PRIVATE_PEM_PASSPHRASE
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_resource_principal_private_pem_passphrase
+                optional: true
+          - name: OCI_RESOURCE_PRINCIPAL_REGION
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_resource_principal_region
+                optional: true
+          - name: OCI_RESOURCE_PRINCIPAL_RPST_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_resource_principal_rpst_endpoint
+                optional: true
+          - name: OCI_RESOURCE_PRINCIPAL_RPT_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_resource_principal_rpt_endpoint
+                optional: true
+          - name: OCI_KUBERNETES_SERVICE_ACCOUNT_CERT_PATH
+            valueFrom:
+              secretKeyRef:
+                name: ocicredentials
+                key: oci_kubernetes_service_account_cert_path
+                optional: true
           - name: USEINSTANCEPRINCIPAL
             valueFrom:
               secretKeyRef:
                 name: osokconfig
                 key: useinstanceprincipal
         volumeMounts:
+          - name: oci-credentials
+            mountPath: /etc/oci
+            readOnly: true
           - name: pki
             mountPath: /etc/pki
             readOnly: true
       volumes:
+        - name: oci-credentials
+          secret:
+            secretName: ocicredentials
+            optional: true
         - name: pki
           hostPath:
             path: /etc/pki

@@ -186,7 +186,37 @@ Allow group <OSOK_OPERATOR_GROUP> to manage <OCI_SERVICE_4> in compartment <NAME
 ```
 Note: the <OCI_SERVICE_1>, <OCI_SERVICE_2> represents in the OCI Services like "autonomous-database-family", "instance_family", etc.
 
-### Enable Security Token
+### Select Authentication Mode
+
+Set the `auth_type` key in the `ocicredentials` secret to choose the OCI SDK
+provider OSOK should use. This checkout supports:
+
+- `user_principal`
+- `security_token`
+- `instance_principal`
+- `instance_principal_with_certs`
+- `resource_principal`
+- `oke_workload_identity`
+- `instance_principal_delegation_token`
+- `resource_principal_delegation_token`
+
+The reserved values `workload_identity_federation` and
+`oauth_delegation_token` are not available in this checkout yet because the
+OCI Go SDK version pinned here does not expose those providers.
+
+### User Principal
+
+When `auth_type=user_principal`, OSOK uses the standard API-key user-principal
+flow. You can provide the credentials in either of these input forms:
+
+- Raw secret keys: `user`, `tenancy`, `region`, `fingerprint`, `privatekey`,
+  and optional `passphrase`.
+- OCI config file: `config_file_path` and optional `config_file_profile`
+  (default: `DEFAULT`). When no path is set, OSOK defaults to `/etc/oci/config`.
+
+If both raw fields and a config file are present, OSOK prefers the raw values.
+
+### Security Token
 
 OSOK also supports OCI security-token authentication for deployments outside OCI.
 This mode uses the OCI SDK session-token provider, so the manager pod must read a
@@ -226,6 +256,41 @@ $ kubectl -n <OPERATOR_NAMESPACE> create secret generic ocicredentials \
 The `config` file stored in the secret must reference the in-pod paths
 (`/etc/oci/privatekey` and `/etc/oci/security_token`), not local workstation
 paths such as `~/.oci/...`.
+
+### Resource Principal and OKE Workload Identity
+
+For `auth_type=resource_principal` and `auth_type=oke_workload_identity`, OSOK
+passes the required OCI SDK environment variables directly to the manager pod.
+Set the matching keys in the `ocicredentials` secret:
+
+- `oci_resource_principal_version`
+- `oci_resource_principal_rpst`
+- `oci_resource_principal_private_pem`
+- `oci_resource_principal_private_pem_passphrase`
+- `oci_resource_principal_region`
+- `oci_resource_principal_rpst_endpoint`
+- `oci_resource_principal_rpt_endpoint`
+- `oci_kubernetes_service_account_cert_path`
+
+Use the keys required by your selected resource-principal version. For version
+`2.2`, the usual minimum is version, RPST, private PEM, and region. For version
+`1.1`, the endpoint-based variables are also required. OKE workload identity
+also uses the in-cluster service-account token and `KUBERNETES_SERVICE_HOST`
+provided by Kubernetes.
+
+### Advanced Modes
+
+- `instance_principal_with_certs` expects `region` plus the secret keys
+  `instance_principal_leaf_certificate_path`,
+  `instance_principal_leaf_private_key_path`, optional
+  `instance_principal_leaf_private_key_passphrase`, and optional
+  `instance_principal_intermediate_certificate_paths` (comma- or newline-
+  separated). These paths should resolve inside the manager pod, typically under
+  `/etc/oci`.
+- `instance_principal_delegation_token` expects the
+  `instance_principal_delegation_token` secret key.
+- `resource_principal_delegation_token` expects the
+  `resource_principal_delegation_token` secret key.
 
 ### Published Service Bundles
 

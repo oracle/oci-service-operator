@@ -6,9 +6,10 @@
 package config
 
 import (
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"os"
 	"strconv"
+
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 )
 
 var (
@@ -16,6 +17,8 @@ var (
 )
 
 func GetConfigDetails(log loggerutil.OSOKLogger) osokConfig {
+	configDetails = osokConfig{}
+
 	ip := os.Getenv("USEINSTANCEPRINCIPAL")
 	log.InfoLog("Instance Principal flag", "ip", ip)
 	if ip != "" {
@@ -33,8 +36,20 @@ func GetConfigDetails(log loggerutil.OSOKLogger) osokConfig {
 	}
 
 	SetUserConfigDetails(log)
+	configDetails.auth.AuthType = resolveConfiguredAuthType(configDetails)
 
 	return configDetails
+}
+
+func resolveConfiguredAuthType(config osokConfig) string {
+	authCfg := config.auth
+	if authType := authCfg.NormalizedAuthType(); authType != "" {
+		return authType
+	}
+	if config.useInstancePrincipals && !authCfg.HasAnyUserPrincipalInput() {
+		return AuthTypeInstancePrincipal
+	}
+	return authCfg.EffectiveAuthType()
 }
 
 func SetUserConfigDetails(log loggerutil.OSOKLogger) {
@@ -82,6 +97,36 @@ func SetUserConfigDetails(log loggerutil.OSOKLogger) {
 	configFileProfile := os.Getenv("OCI_CONFIG_PROFILE")
 	if configFileProfile != "" {
 		configDetails.auth.ConfigFileProfile = configFileProfile
+	}
+
+	instancePrincipalDelegationToken := os.Getenv("INSTANCE_PRINCIPAL_DELEGATION_TOKEN")
+	if instancePrincipalDelegationToken != "" {
+		configDetails.auth.InstancePrincipalDelegationToken = instancePrincipalDelegationToken
+	}
+
+	resourcePrincipalDelegationToken := os.Getenv("RESOURCE_PRINCIPAL_DELEGATION_TOKEN")
+	if resourcePrincipalDelegationToken != "" {
+		configDetails.auth.ResourcePrincipalDelegationToken = resourcePrincipalDelegationToken
+	}
+
+	instancePrincipalLeafCertificatePath := os.Getenv("INSTANCE_PRINCIPAL_LEAF_CERTIFICATE_PATH")
+	if instancePrincipalLeafCertificatePath != "" {
+		configDetails.auth.InstancePrincipalLeafCertificatePath = instancePrincipalLeafCertificatePath
+	}
+
+	instancePrincipalLeafPrivateKeyPath := os.Getenv("INSTANCE_PRINCIPAL_LEAF_PRIVATE_KEY_PATH")
+	if instancePrincipalLeafPrivateKeyPath != "" {
+		configDetails.auth.InstancePrincipalLeafPrivateKeyPath = instancePrincipalLeafPrivateKeyPath
+	}
+
+	instancePrincipalLeafPrivateKeyPassphrase := os.Getenv("INSTANCE_PRINCIPAL_LEAF_PRIVATE_KEY_PASSPHRASE")
+	if instancePrincipalLeafPrivateKeyPassphrase != "" {
+		configDetails.auth.InstancePrincipalLeafPrivateKeyPassphrase = instancePrincipalLeafPrivateKeyPassphrase
+	}
+
+	instancePrincipalIntermediateCertificatePaths := os.Getenv("INSTANCE_PRINCIPAL_INTERMEDIATE_CERTIFICATE_PATHS")
+	if instancePrincipalIntermediateCertificatePaths != "" {
+		configDetails.auth.InstancePrincipalIntermediateCertPathList = instancePrincipalIntermediateCertificatePaths
 	}
 }
 

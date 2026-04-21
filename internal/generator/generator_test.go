@@ -1482,6 +1482,10 @@ func TestGenerateRendersPerServiceManagerOutputs(t *testing.T) {
 		"kind: Deployment",
 		"name: controller-manager",
 		"image: controller:latest",
+		"- name: AUTH_TYPE",
+		"- name: OCI_CONFIG_FILE_PATH",
+		"- name: OCI_RESOURCE_PRINCIPAL_VERSION",
+		"mountPath: /etc/oci",
 	})
 }
 
