@@ -69,10 +69,13 @@ func newVaultTestManager(client vaultOCIClient) *VaultServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewVaultServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
+		delegate := defaultVaultServiceClient{
+			ServiceClient: generatedruntime.NewServiceClient[*keymanagementv1beta1.Vault](newVaultRuntimeConfig(log, client)),
+		}
 		manager.WithClient(&vaultRuntimeClient{
-			generated: generatedruntime.NewServiceClient[*keymanagementv1beta1.Vault](newVaultRuntimeConfig(log, client)),
-			sdk:       client,
-			log:       log,
+			delegate: delegate,
+			sdk:      client,
+			log:      log,
 		})
 	}
 	return manager
