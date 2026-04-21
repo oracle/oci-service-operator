@@ -26,6 +26,9 @@ type ProjectRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *datasciencev1beta1.Project, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*datasciencev1beta1.Project]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*datasciencev1beta1.Project]
+	StatusHooks         generatedruntime.StatusHooks[*datasciencev1beta1.Project]
+	ParityHooks         generatedruntime.ParityHooks[*datasciencev1beta1.Project]
 	Create              runtimeOperationHooks[datasciencesdk.CreateProjectRequest, datasciencesdk.CreateProjectResponse]
 	Get                 runtimeOperationHooks[datasciencesdk.GetProjectRequest, datasciencesdk.GetProjectResponse]
 	List                runtimeOperationHooks[datasciencesdk.ListProjectsRequest, datasciencesdk.ListProjectsResponse]
@@ -98,9 +101,12 @@ func newProjectRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newProjectDefaultRuntimeHooks(sdkClient datasciencesdk.DataScienceClient) ProjectRuntimeHooks {
 	return ProjectRuntimeHooks{
-		Semantics: newProjectRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*datasciencev1beta1.Project]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newProjectRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*datasciencev1beta1.Project]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*datasciencev1beta1.Project]{},
+		StatusHooks:     generatedruntime.StatusHooks[*datasciencev1beta1.Project]{},
+		ParityHooks:     generatedruntime.ParityHooks[*datasciencev1beta1.Project]{},
 		Create: runtimeOperationHooks[datasciencesdk.CreateProjectRequest, datasciencesdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasciencesdk.CreateProjectRequest) (datasciencesdk.CreateProjectResponse, error) {
@@ -154,6 +160,9 @@ func buildProjectGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

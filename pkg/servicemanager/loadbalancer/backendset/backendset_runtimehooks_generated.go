@@ -26,6 +26,9 @@ type BackendSetRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.BackendSet, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendSet]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendSet]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendSet]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendSet]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateBackendSetRequest, loadbalancersdk.CreateBackendSetResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetBackendSetRequest, loadbalancersdk.GetBackendSetResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListBackendSetsRequest, loadbalancersdk.ListBackendSetsResponse]
@@ -98,9 +101,12 @@ func newBackendSetRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newBackendSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) BackendSetRuntimeHooks {
 	return BackendSetRuntimeHooks{
-		Semantics: newBackendSetRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendSet]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newBackendSetRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendSet]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendSet]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendSet]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendSet]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateBackendSetRequest, loadbalancersdk.CreateBackendSetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBackendSetDetails", RequestName: "CreateBackendSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateBackendSetRequest) (loadbalancersdk.CreateBackendSetResponse, error) {
@@ -154,6 +160,9 @@ func buildBackendSetGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

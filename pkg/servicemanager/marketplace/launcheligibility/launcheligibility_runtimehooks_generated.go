@@ -26,6 +26,9 @@ type LaunchEligibilityRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.LaunchEligibility, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.LaunchEligibility]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.LaunchEligibility]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.LaunchEligibility]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.LaunchEligibility]
 	Get                 runtimeOperationHooks[marketplacesdk.GetLaunchEligibilityRequest, marketplacesdk.GetLaunchEligibilityResponse]
 	WrapGeneratedClient []func(LaunchEligibilityServiceClient) LaunchEligibilityServiceClient
 }
@@ -42,8 +45,11 @@ func registerLaunchEligibilityRuntimeHooksMutator(mutator LaunchEligibilityRunti
 }
 func newLaunchEligibilityDefaultRuntimeHooks(sdkClient marketplacesdk.AccountClient) LaunchEligibilityRuntimeHooks {
 	return LaunchEligibilityRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.LaunchEligibility]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.LaunchEligibility]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.LaunchEligibility]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.LaunchEligibility]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.LaunchEligibility]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetLaunchEligibilityRequest, marketplacesdk.GetLaunchEligibilityResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "ImageId", RequestName: "imageId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetLaunchEligibilityRequest) (marketplacesdk.GetLaunchEligibilityResponse, error) {
@@ -73,6 +79,9 @@ func buildLaunchEligibilityGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

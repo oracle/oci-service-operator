@@ -26,6 +26,9 @@ type ApplicationRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *dataflowv1beta1.Application, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*dataflowv1beta1.Application]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*dataflowv1beta1.Application]
+	StatusHooks         generatedruntime.StatusHooks[*dataflowv1beta1.Application]
+	ParityHooks         generatedruntime.ParityHooks[*dataflowv1beta1.Application]
 	Create              runtimeOperationHooks[dataflowsdk.CreateApplicationRequest, dataflowsdk.CreateApplicationResponse]
 	Get                 runtimeOperationHooks[dataflowsdk.GetApplicationRequest, dataflowsdk.GetApplicationResponse]
 	List                runtimeOperationHooks[dataflowsdk.ListApplicationsRequest, dataflowsdk.ListApplicationsResponse]
@@ -98,9 +101,12 @@ func newApplicationRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newApplicationDefaultRuntimeHooks(sdkClient dataflowsdk.DataFlowClient) ApplicationRuntimeHooks {
 	return ApplicationRuntimeHooks{
-		Semantics: newApplicationRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*dataflowv1beta1.Application]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newApplicationRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*dataflowv1beta1.Application]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dataflowv1beta1.Application]{},
+		StatusHooks:     generatedruntime.StatusHooks[*dataflowv1beta1.Application]{},
+		ParityHooks:     generatedruntime.ParityHooks[*dataflowv1beta1.Application]{},
 		Create: runtimeOperationHooks[dataflowsdk.CreateApplicationRequest, dataflowsdk.CreateApplicationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateApplicationDetails", RequestName: "CreateApplicationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error) {
@@ -154,6 +160,9 @@ func buildApplicationGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

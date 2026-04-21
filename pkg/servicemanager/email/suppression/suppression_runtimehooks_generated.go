@@ -26,6 +26,9 @@ type SuppressionRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *emailv1beta1.Suppression, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*emailv1beta1.Suppression]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.Suppression]
+	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.Suppression]
+	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.Suppression]
 	Create              runtimeOperationHooks[emailsdk.CreateSuppressionRequest, emailsdk.CreateSuppressionResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetSuppressionRequest, emailsdk.GetSuppressionResponse]
 	List                runtimeOperationHooks[emailsdk.ListSuppressionsRequest, emailsdk.ListSuppressionsResponse]
@@ -45,8 +48,11 @@ func registerSuppressionRuntimeHooksMutator(mutator SuppressionRuntimeHooksMutat
 }
 func newSuppressionDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) SuppressionRuntimeHooks {
 	return SuppressionRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*emailv1beta1.Suppression]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*emailv1beta1.Suppression]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.Suppression]{},
+		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.Suppression]{},
+		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.Suppression]{},
 		Create: runtimeOperationHooks[emailsdk.CreateSuppressionRequest, emailsdk.CreateSuppressionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSuppressionDetails", RequestName: "CreateSuppressionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateSuppressionRequest) (emailsdk.CreateSuppressionResponse, error) {
@@ -94,6 +100,9 @@ func buildSuppressionGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

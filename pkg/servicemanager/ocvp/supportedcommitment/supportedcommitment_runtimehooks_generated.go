@@ -26,6 +26,9 @@ type SupportedCommitmentRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *ocvpv1beta1.SupportedCommitment, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedCommitment]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.SupportedCommitment]
+	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.SupportedCommitment]
+	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.SupportedCommitment]
 	List                runtimeOperationHooks[ocvpsdk.ListSupportedCommitmentsRequest, ocvpsdk.ListSupportedCommitmentsResponse]
 	WrapGeneratedClient []func(SupportedCommitmentServiceClient) SupportedCommitmentServiceClient
 }
@@ -42,8 +45,11 @@ func registerSupportedCommitmentRuntimeHooksMutator(mutator SupportedCommitmentR
 }
 func newSupportedCommitmentDefaultRuntimeHooks(sdkClient ocvpsdk.SddcClient) SupportedCommitmentRuntimeHooks {
 	return SupportedCommitmentRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedCommitment]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedCommitment]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.SupportedCommitment]{},
+		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.SupportedCommitment]{},
+		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.SupportedCommitment]{},
 		List: runtimeOperationHooks[ocvpsdk.ListSupportedCommitmentsRequest, ocvpsdk.ListSupportedCommitmentsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "HostShapeName", RequestName: "hostShapeName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.ListSupportedCommitmentsRequest) (ocvpsdk.ListSupportedCommitmentsResponse, error) {
@@ -73,6 +79,9 @@ func buildSupportedCommitmentGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

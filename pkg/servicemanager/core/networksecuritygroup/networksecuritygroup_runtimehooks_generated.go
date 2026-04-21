@@ -26,6 +26,9 @@ type NetworkSecurityGroupRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *corev1beta1.NetworkSecurityGroup, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*corev1beta1.NetworkSecurityGroup]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.NetworkSecurityGroup]
+	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.NetworkSecurityGroup]
+	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.NetworkSecurityGroup]
 	Create              runtimeOperationHooks[coresdk.CreateNetworkSecurityGroupRequest, coresdk.CreateNetworkSecurityGroupResponse]
 	Get                 runtimeOperationHooks[coresdk.GetNetworkSecurityGroupRequest, coresdk.GetNetworkSecurityGroupResponse]
 	List                runtimeOperationHooks[coresdk.ListNetworkSecurityGroupsRequest, coresdk.ListNetworkSecurityGroupsResponse]
@@ -98,9 +101,12 @@ func newNetworkSecurityGroupRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newNetworkSecurityGroupDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) NetworkSecurityGroupRuntimeHooks {
 	return NetworkSecurityGroupRuntimeHooks{
-		Semantics: newNetworkSecurityGroupRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*corev1beta1.NetworkSecurityGroup]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newNetworkSecurityGroupRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.NetworkSecurityGroup]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.NetworkSecurityGroup]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.NetworkSecurityGroup]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.NetworkSecurityGroup]{},
 		Create: runtimeOperationHooks[coresdk.CreateNetworkSecurityGroupRequest, coresdk.CreateNetworkSecurityGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error) {
@@ -154,6 +160,9 @@ func buildNetworkSecurityGroupGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

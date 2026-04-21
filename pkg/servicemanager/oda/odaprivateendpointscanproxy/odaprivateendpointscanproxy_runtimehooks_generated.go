@@ -26,6 +26,9 @@ type OdaPrivateEndpointScanProxyRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaPrivateEndpointScanProxy, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointScanProxyRequest, odasdk.CreateOdaPrivateEndpointScanProxyResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointScanProxyRequest, odasdk.GetOdaPrivateEndpointScanProxyResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointScanProxiesRequest, odasdk.ListOdaPrivateEndpointScanProxiesResponse]
@@ -45,8 +48,11 @@ func registerOdaPrivateEndpointScanProxyRuntimeHooksMutator(mutator OdaPrivateEn
 }
 func newOdaPrivateEndpointScanProxyDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) OdaPrivateEndpointScanProxyRuntimeHooks {
 	return OdaPrivateEndpointScanProxyRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointScanProxyRequest, odasdk.CreateOdaPrivateEndpointScanProxyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaPrivateEndpointId", RequestName: "odaPrivateEndpointId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateOdaPrivateEndpointScanProxyDetails", RequestName: "CreateOdaPrivateEndpointScanProxyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointScanProxyRequest) (odasdk.CreateOdaPrivateEndpointScanProxyResponse, error) {
@@ -94,6 +100,9 @@ func buildOdaPrivateEndpointScanProxyGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

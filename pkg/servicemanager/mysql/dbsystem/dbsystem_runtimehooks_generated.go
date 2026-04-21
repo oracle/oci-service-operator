@@ -26,6 +26,9 @@ type DbSystemRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *mysqlv1beta1.DbSystem, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*mysqlv1beta1.DbSystem]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*mysqlv1beta1.DbSystem]
+	StatusHooks         generatedruntime.StatusHooks[*mysqlv1beta1.DbSystem]
+	ParityHooks         generatedruntime.ParityHooks[*mysqlv1beta1.DbSystem]
 	Create              runtimeOperationHooks[mysqlsdk.CreateDbSystemRequest, mysqlsdk.CreateDbSystemResponse]
 	Get                 runtimeOperationHooks[mysqlsdk.GetDbSystemRequest, mysqlsdk.GetDbSystemResponse]
 	List                runtimeOperationHooks[mysqlsdk.ListDbSystemsRequest, mysqlsdk.ListDbSystemsResponse]
@@ -98,9 +101,12 @@ func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newDbSystemDefaultRuntimeHooks(sdkClient mysqlsdk.DbSystemClient) DbSystemRuntimeHooks {
 	return DbSystemRuntimeHooks{
-		Semantics: newDbSystemRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*mysqlv1beta1.DbSystem]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newDbSystemRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*mysqlv1beta1.DbSystem]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*mysqlv1beta1.DbSystem]{},
+		StatusHooks:     generatedruntime.StatusHooks[*mysqlv1beta1.DbSystem]{},
+		ParityHooks:     generatedruntime.ParityHooks[*mysqlv1beta1.DbSystem]{},
 		Create: runtimeOperationHooks[mysqlsdk.CreateDbSystemRequest, mysqlsdk.CreateDbSystemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request mysqlsdk.CreateDbSystemRequest) (mysqlsdk.CreateDbSystemResponse, error) {
@@ -155,6 +161,9 @@ func buildDbSystemGeneratedRuntimeConfig(
 		Semantics:        hooks.Semantics,
 		Identity:         hooks.Identity,
 		Read:             hooks.Read,
+		TrackedRecreate:  hooks.TrackedRecreate,
+		StatusHooks:      hooks.StatusHooks,
+		ParityHooks:      hooks.ParityHooks,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

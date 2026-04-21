@@ -26,6 +26,9 @@ type ThirdPartyPaidListingEligibilityRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.ThirdPartyPaidListingEligibility, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
 	Get                 runtimeOperationHooks[marketplacesdk.GetThirdPartyPaidListingEligibilityRequest, marketplacesdk.GetThirdPartyPaidListingEligibilityResponse]
 	WrapGeneratedClient []func(ThirdPartyPaidListingEligibilityServiceClient) ThirdPartyPaidListingEligibilityServiceClient
 }
@@ -42,8 +45,11 @@ func registerThirdPartyPaidListingEligibilityRuntimeHooksMutator(mutator ThirdPa
 }
 func newThirdPartyPaidListingEligibilityDefaultRuntimeHooks(sdkClient marketplacesdk.AccountClient) ThirdPartyPaidListingEligibilityRuntimeHooks {
 	return ThirdPartyPaidListingEligibilityRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetThirdPartyPaidListingEligibilityRequest, marketplacesdk.GetThirdPartyPaidListingEligibilityResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetThirdPartyPaidListingEligibilityRequest) (marketplacesdk.GetThirdPartyPaidListingEligibilityResponse, error) {
@@ -73,6 +79,9 @@ func buildThirdPartyPaidListingEligibilityGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type AutonomousDatabaseRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *databasev1beta1.AutonomousDatabase, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*databasev1beta1.AutonomousDatabase]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*databasev1beta1.AutonomousDatabase]
+	StatusHooks         generatedruntime.StatusHooks[*databasev1beta1.AutonomousDatabase]
+	ParityHooks         generatedruntime.ParityHooks[*databasev1beta1.AutonomousDatabase]
 	Create              runtimeOperationHooks[databasesdk.CreateAutonomousDatabaseRequest, databasesdk.CreateAutonomousDatabaseResponse]
 	Get                 runtimeOperationHooks[databasesdk.GetAutonomousDatabaseRequest, databasesdk.GetAutonomousDatabaseResponse]
 	List                runtimeOperationHooks[databasesdk.ListAutonomousDatabasesRequest, databasesdk.ListAutonomousDatabasesResponse]
@@ -98,9 +101,12 @@ func newAutonomousDatabaseRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newAutonomousDatabaseDefaultRuntimeHooks(sdkClient databasesdk.DatabaseClient) AutonomousDatabaseRuntimeHooks {
 	return AutonomousDatabaseRuntimeHooks{
-		Semantics: newAutonomousDatabaseRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*databasev1beta1.AutonomousDatabase]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newAutonomousDatabaseRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*databasev1beta1.AutonomousDatabase]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*databasev1beta1.AutonomousDatabase]{},
+		StatusHooks:     generatedruntime.StatusHooks[*databasev1beta1.AutonomousDatabase]{},
+		ParityHooks:     generatedruntime.ParityHooks[*databasev1beta1.AutonomousDatabase]{},
 		Create: runtimeOperationHooks[databasesdk.CreateAutonomousDatabaseRequest, databasesdk.CreateAutonomousDatabaseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body", PreferResourceID: false}, {FieldName: "CreateAutonomousDatabaseBase", RequestName: "CreateAutonomousDatabaseBase", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request databasesdk.CreateAutonomousDatabaseRequest) (databasesdk.CreateAutonomousDatabaseResponse, error) {
@@ -155,6 +161,9 @@ func buildAutonomousDatabaseGeneratedRuntimeConfig(
 		Semantics:        hooks.Semantics,
 		Identity:         hooks.Identity,
 		Read:             hooks.Read,
+		TrackedRecreate:  hooks.TrackedRecreate,
+		StatusHooks:      hooks.StatusHooks,
+		ParityHooks:      hooks.ParityHooks,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

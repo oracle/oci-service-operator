@@ -26,6 +26,9 @@ type WorkRequestRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.WorkRequest, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.WorkRequest]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.WorkRequest]
+	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.WorkRequest]
+	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[loggingsdk.GetWorkRequestRequest, loggingsdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[loggingsdk.ListWorkRequestsRequest, loggingsdk.ListWorkRequestsResponse]
 	Delete              runtimeOperationHooks[loggingsdk.DeleteWorkRequestRequest, loggingsdk.DeleteWorkRequestResponse]
@@ -44,8 +47,11 @@ func registerWorkRequestRuntimeHooksMutator(mutator WorkRequestRuntimeHooksMutat
 }
 func newWorkRequestDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) WorkRequestRuntimeHooks {
 	return WorkRequestRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.WorkRequest]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loggingv1beta1.WorkRequest]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loggingv1beta1.WorkRequest]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.WorkRequest]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[loggingsdk.GetWorkRequestRequest, loggingsdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loggingsdk.GetWorkRequestRequest) (loggingsdk.GetWorkRequestResponse, error) {
@@ -87,6 +93,9 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

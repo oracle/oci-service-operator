@@ -26,6 +26,9 @@ type DigitalAssistantParameterRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.DigitalAssistantParameter, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistantParameter]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.DigitalAssistantParameter]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.DigitalAssistantParameter]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.DigitalAssistantParameter]
 	Get                 runtimeOperationHooks[odasdk.GetDigitalAssistantParameterRequest, odasdk.GetDigitalAssistantParameterResponse]
 	List                runtimeOperationHooks[odasdk.ListDigitalAssistantParametersRequest, odasdk.ListDigitalAssistantParametersResponse]
 	Update              runtimeOperationHooks[odasdk.UpdateDigitalAssistantParameterRequest, odasdk.UpdateDigitalAssistantParameterResponse]
@@ -44,8 +47,11 @@ func registerDigitalAssistantParameterRuntimeHooksMutator(mutator DigitalAssista
 }
 func newDigitalAssistantParameterDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) DigitalAssistantParameterRuntimeHooks {
 	return DigitalAssistantParameterRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistantParameter]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistantParameter]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.DigitalAssistantParameter]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.DigitalAssistantParameter]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.DigitalAssistantParameter]{},
 		Get: runtimeOperationHooks[odasdk.GetDigitalAssistantParameterRequest, odasdk.GetDigitalAssistantParameterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DigitalAssistantId", RequestName: "digitalAssistantId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.GetDigitalAssistantParameterRequest) (odasdk.GetDigitalAssistantParameterResponse, error) {
@@ -87,6 +93,9 @@ func buildDigitalAssistantParameterGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type EmailDomainRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *emailv1beta1.EmailDomain, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*emailv1beta1.EmailDomain]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.EmailDomain]
+	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.EmailDomain]
+	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.EmailDomain]
 	Create              runtimeOperationHooks[emailsdk.CreateEmailDomainRequest, emailsdk.CreateEmailDomainResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetEmailDomainRequest, emailsdk.GetEmailDomainResponse]
 	List                runtimeOperationHooks[emailsdk.ListEmailDomainsRequest, emailsdk.ListEmailDomainsResponse]
@@ -98,9 +101,12 @@ func newEmailDomainRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newEmailDomainDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) EmailDomainRuntimeHooks {
 	return EmailDomainRuntimeHooks{
-		Semantics: newEmailDomainRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*emailv1beta1.EmailDomain]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newEmailDomainRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*emailv1beta1.EmailDomain]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.EmailDomain]{},
+		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.EmailDomain]{},
+		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.EmailDomain]{},
 		Create: runtimeOperationHooks[emailsdk.CreateEmailDomainRequest, emailsdk.CreateEmailDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEmailDomainDetails", RequestName: "CreateEmailDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateEmailDomainRequest) (emailsdk.CreateEmailDomainResponse, error) {
@@ -154,6 +160,9 @@ func buildEmailDomainGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

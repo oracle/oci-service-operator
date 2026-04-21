@@ -26,6 +26,9 @@ type VaultRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *keymanagementv1beta1.Vault, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*keymanagementv1beta1.Vault]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*keymanagementv1beta1.Vault]
+	StatusHooks         generatedruntime.StatusHooks[*keymanagementv1beta1.Vault]
+	ParityHooks         generatedruntime.ParityHooks[*keymanagementv1beta1.Vault]
 	Create              runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]
 	Get                 runtimeOperationHooks[keymanagementsdk.GetVaultRequest, keymanagementsdk.GetVaultResponse]
 	List                runtimeOperationHooks[keymanagementsdk.ListVaultsRequest, keymanagementsdk.ListVaultsResponse]
@@ -45,8 +48,11 @@ func registerVaultRuntimeHooksMutator(mutator VaultRuntimeHooksMutator) {
 }
 func newVaultDefaultRuntimeHooks(sdkClient keymanagementsdk.KmsVaultClient) VaultRuntimeHooks {
 	return VaultRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*keymanagementv1beta1.Vault]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*keymanagementv1beta1.Vault]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*keymanagementv1beta1.Vault]{},
+		StatusHooks:     generatedruntime.StatusHooks[*keymanagementv1beta1.Vault]{},
+		ParityHooks:     generatedruntime.ParityHooks[*keymanagementv1beta1.Vault]{},
 		Create: runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVaultDetails", RequestName: "CreateVaultDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request keymanagementsdk.CreateVaultRequest) (keymanagementsdk.CreateVaultResponse, error) {
@@ -94,6 +100,9 @@ func buildVaultGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

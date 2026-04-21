@@ -26,6 +26,9 @@ type SenderRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *emailv1beta1.Sender, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*emailv1beta1.Sender]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.Sender]
+	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.Sender]
+	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.Sender]
 	Create              runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetSenderRequest, emailsdk.GetSenderResponse]
 	List                runtimeOperationHooks[emailsdk.ListSendersRequest, emailsdk.ListSendersResponse]
@@ -98,9 +101,12 @@ func newSenderRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newSenderDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) SenderRuntimeHooks {
 	return SenderRuntimeHooks{
-		Semantics: newSenderRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*emailv1beta1.Sender]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newSenderRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*emailv1beta1.Sender]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.Sender]{},
+		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.Sender]{},
+		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.Sender]{},
 		Create: runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSenderDetails", RequestName: "CreateSenderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateSenderRequest) (emailsdk.CreateSenderResponse, error) {
@@ -154,6 +160,9 @@ func buildSenderGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

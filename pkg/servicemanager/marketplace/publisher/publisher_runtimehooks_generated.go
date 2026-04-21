@@ -26,6 +26,9 @@ type PublisherRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Publisher, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Publisher]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Publisher]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Publisher]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Publisher]
 	List                runtimeOperationHooks[marketplacesdk.ListPublishersRequest, marketplacesdk.ListPublishersResponse]
 	WrapGeneratedClient []func(PublisherServiceClient) PublisherServiceClient
 }
@@ -42,8 +45,11 @@ func registerPublisherRuntimeHooksMutator(mutator PublisherRuntimeHooksMutator) 
 }
 func newPublisherDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) PublisherRuntimeHooks {
 	return PublisherRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Publisher]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.Publisher]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Publisher]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Publisher]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Publisher]{},
 		List: runtimeOperationHooks[marketplacesdk.ListPublishersRequest, marketplacesdk.ListPublishersResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PublisherId", RequestName: "publisherId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListPublishersRequest) (marketplacesdk.ListPublishersResponse, error) {
@@ -73,6 +79,9 @@ func buildPublisherGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

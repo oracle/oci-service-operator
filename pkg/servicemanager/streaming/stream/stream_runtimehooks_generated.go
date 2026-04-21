@@ -26,6 +26,9 @@ type StreamRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *streamingv1beta1.Stream, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*streamingv1beta1.Stream]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*streamingv1beta1.Stream]
+	StatusHooks         generatedruntime.StatusHooks[*streamingv1beta1.Stream]
+	ParityHooks         generatedruntime.ParityHooks[*streamingv1beta1.Stream]
 	Create              runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]
 	Get                 runtimeOperationHooks[streamingsdk.GetStreamRequest, streamingsdk.GetStreamResponse]
 	List                runtimeOperationHooks[streamingsdk.ListStreamsRequest, streamingsdk.ListStreamsResponse]
@@ -98,9 +101,12 @@ func newStreamRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newStreamDefaultRuntimeHooks(sdkClient streamingsdk.StreamAdminClient) StreamRuntimeHooks {
 	return StreamRuntimeHooks{
-		Semantics: newStreamRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*streamingv1beta1.Stream]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newStreamRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*streamingv1beta1.Stream]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*streamingv1beta1.Stream]{},
+		StatusHooks:     generatedruntime.StatusHooks[*streamingv1beta1.Stream]{},
+		ParityHooks:     generatedruntime.ParityHooks[*streamingv1beta1.Stream]{},
 		Create: runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateStreamDetails", RequestName: "CreateStreamDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request streamingsdk.CreateStreamRequest) (streamingsdk.CreateStreamResponse, error) {
@@ -154,6 +160,9 @@ func buildStreamGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

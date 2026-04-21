@@ -26,6 +26,9 @@ type AlarmSuppressionRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *monitoringv1beta1.AlarmSuppression, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmSuppression]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.AlarmSuppression]
+	StatusHooks         generatedruntime.StatusHooks[*monitoringv1beta1.AlarmSuppression]
+	ParityHooks         generatedruntime.ParityHooks[*monitoringv1beta1.AlarmSuppression]
 	Create              runtimeOperationHooks[monitoringsdk.CreateAlarmSuppressionRequest, monitoringsdk.CreateAlarmSuppressionResponse]
 	Get                 runtimeOperationHooks[monitoringsdk.GetAlarmSuppressionRequest, monitoringsdk.GetAlarmSuppressionResponse]
 	List                runtimeOperationHooks[monitoringsdk.ListAlarmSuppressionsRequest, monitoringsdk.ListAlarmSuppressionsResponse]
@@ -45,8 +48,11 @@ func registerAlarmSuppressionRuntimeHooksMutator(mutator AlarmSuppressionRuntime
 }
 func newAlarmSuppressionDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) AlarmSuppressionRuntimeHooks {
 	return AlarmSuppressionRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmSuppression]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmSuppression]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.AlarmSuppression]{},
+		StatusHooks:     generatedruntime.StatusHooks[*monitoringv1beta1.AlarmSuppression]{},
+		ParityHooks:     generatedruntime.ParityHooks[*monitoringv1beta1.AlarmSuppression]{},
 		Create: runtimeOperationHooks[monitoringsdk.CreateAlarmSuppressionRequest, monitoringsdk.CreateAlarmSuppressionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAlarmSuppressionDetails", RequestName: "CreateAlarmSuppressionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.CreateAlarmSuppressionRequest) (monitoringsdk.CreateAlarmSuppressionResponse, error) {
@@ -94,6 +100,9 @@ func buildAlarmSuppressionGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

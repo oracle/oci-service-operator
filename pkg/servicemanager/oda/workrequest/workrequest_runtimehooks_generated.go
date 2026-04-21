@@ -26,6 +26,9 @@ type WorkRequestRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.WorkRequest, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.WorkRequest]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequest]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.WorkRequest]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[odasdk.GetWorkRequestRequest, odasdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[odasdk.ListWorkRequestsRequest, odasdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -43,8 +46,11 @@ func registerWorkRequestRuntimeHooksMutator(mutator WorkRequestRuntimeHooksMutat
 }
 func newWorkRequestDefaultRuntimeHooks(sdkClient odasdk.OdaClient) WorkRequestRuntimeHooks {
 	return WorkRequestRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.WorkRequest]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.WorkRequest]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequest]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.WorkRequest]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[odasdk.GetWorkRequestRequest, odasdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.GetWorkRequestRequest) (odasdk.GetWorkRequestResponse, error) {
@@ -80,6 +86,9 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type DrgRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *corev1beta1.Drg, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*corev1beta1.Drg]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.Drg]
+	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.Drg]
+	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.Drg]
 	Create              runtimeOperationHooks[coresdk.CreateDrgRequest, coresdk.CreateDrgResponse]
 	Get                 runtimeOperationHooks[coresdk.GetDrgRequest, coresdk.GetDrgResponse]
 	List                runtimeOperationHooks[coresdk.ListDrgsRequest, coresdk.ListDrgsResponse]
@@ -46,8 +49,11 @@ func registerDrgRuntimeHooksMutator(mutator DrgRuntimeHooksMutator) {
 }
 func newDrgDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) DrgRuntimeHooks {
 	return DrgRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*corev1beta1.Drg]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.Drg]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.Drg]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.Drg]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.Drg]{},
 		Create: runtimeOperationHooks[coresdk.CreateDrgRequest, coresdk.CreateDrgResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDrgDetails", RequestName: "CreateDrgDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateDrgRequest) (coresdk.CreateDrgResponse, error) {
@@ -101,6 +107,9 @@ func buildDrgGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type AuthenticationProviderRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.AuthenticationProvider, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.AuthenticationProvider]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.AuthenticationProvider]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.AuthenticationProvider]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.AuthenticationProvider]
 	Create              runtimeOperationHooks[odasdk.CreateAuthenticationProviderRequest, odasdk.CreateAuthenticationProviderResponse]
 	Get                 runtimeOperationHooks[odasdk.GetAuthenticationProviderRequest, odasdk.GetAuthenticationProviderResponse]
 	List                runtimeOperationHooks[odasdk.ListAuthenticationProvidersRequest, odasdk.ListAuthenticationProvidersResponse]
@@ -46,8 +49,11 @@ func registerAuthenticationProviderRuntimeHooksMutator(mutator AuthenticationPro
 }
 func newAuthenticationProviderDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) AuthenticationProviderRuntimeHooks {
 	return AuthenticationProviderRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.AuthenticationProvider]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.AuthenticationProvider]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.AuthenticationProvider]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.AuthenticationProvider]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.AuthenticationProvider]{},
 		Create: runtimeOperationHooks[odasdk.CreateAuthenticationProviderRequest, odasdk.CreateAuthenticationProviderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateAuthenticationProviderDetails", RequestName: "CreateAuthenticationProviderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateAuthenticationProviderRequest) (odasdk.CreateAuthenticationProviderResponse, error) {
@@ -101,6 +107,9 @@ func buildAuthenticationProviderGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type WorkRequestLogRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.WorkRequestLog, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.WorkRequestLog]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.WorkRequestLog]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.WorkRequestLog]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[marketplacesdk.ListWorkRequestLogsRequest, marketplacesdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -42,8 +45,11 @@ func registerWorkRequestLogRuntimeHooksMutator(mutator WorkRequestLogRuntimeHook
 }
 func newWorkRequestLogDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) WorkRequestLogRuntimeHooks {
 	return WorkRequestLogRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.WorkRequestLog]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.WorkRequestLog]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.WorkRequestLog]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.WorkRequestLog]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[marketplacesdk.ListWorkRequestLogsRequest, marketplacesdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListWorkRequestLogsRequest) (marketplacesdk.ListWorkRequestLogsResponse, error) {
@@ -73,6 +79,9 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

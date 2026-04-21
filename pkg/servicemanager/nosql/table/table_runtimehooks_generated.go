@@ -26,6 +26,9 @@ type TableRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *nosqlv1beta1.Table, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*nosqlv1beta1.Table]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*nosqlv1beta1.Table]
+	StatusHooks         generatedruntime.StatusHooks[*nosqlv1beta1.Table]
+	ParityHooks         generatedruntime.ParityHooks[*nosqlv1beta1.Table]
 	Create              runtimeOperationHooks[nosqlsdk.CreateTableRequest, nosqlsdk.CreateTableResponse]
 	Get                 runtimeOperationHooks[nosqlsdk.GetTableRequest, nosqlsdk.GetTableResponse]
 	List                runtimeOperationHooks[nosqlsdk.ListTablesRequest, nosqlsdk.ListTablesResponse]
@@ -46,8 +49,11 @@ func registerTableRuntimeHooksMutator(mutator TableRuntimeHooksMutator) {
 }
 func newTableDefaultRuntimeHooks(sdkClient nosqlsdk.NosqlClient) TableRuntimeHooks {
 	return TableRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*nosqlv1beta1.Table]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*nosqlv1beta1.Table]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*nosqlv1beta1.Table]{},
+		StatusHooks:     generatedruntime.StatusHooks[*nosqlv1beta1.Table]{},
+		ParityHooks:     generatedruntime.ParityHooks[*nosqlv1beta1.Table]{},
 		Create: runtimeOperationHooks[nosqlsdk.CreateTableRequest, nosqlsdk.CreateTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTableDetails", RequestName: "CreateTableDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request nosqlsdk.CreateTableRequest) (nosqlsdk.CreateTableResponse, error) {
@@ -101,6 +107,9 @@ func buildTableGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

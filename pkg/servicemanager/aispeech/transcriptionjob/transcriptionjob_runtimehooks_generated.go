@@ -26,6 +26,9 @@ type TranscriptionJobRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *aispeechv1beta1.TranscriptionJob, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*aispeechv1beta1.TranscriptionJob]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*aispeechv1beta1.TranscriptionJob]
+	StatusHooks         generatedruntime.StatusHooks[*aispeechv1beta1.TranscriptionJob]
+	ParityHooks         generatedruntime.ParityHooks[*aispeechv1beta1.TranscriptionJob]
 	Create              runtimeOperationHooks[aispeechsdk.CreateTranscriptionJobRequest, aispeechsdk.CreateTranscriptionJobResponse]
 	Get                 runtimeOperationHooks[aispeechsdk.GetTranscriptionJobRequest, aispeechsdk.GetTranscriptionJobResponse]
 	List                runtimeOperationHooks[aispeechsdk.ListTranscriptionJobsRequest, aispeechsdk.ListTranscriptionJobsResponse]
@@ -98,9 +101,12 @@ func newTranscriptionJobRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newTranscriptionJobDefaultRuntimeHooks(sdkClient aispeechsdk.AIServiceSpeechClient) TranscriptionJobRuntimeHooks {
 	return TranscriptionJobRuntimeHooks{
-		Semantics: newTranscriptionJobRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*aispeechv1beta1.TranscriptionJob]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newTranscriptionJobRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*aispeechv1beta1.TranscriptionJob]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*aispeechv1beta1.TranscriptionJob]{},
+		StatusHooks:     generatedruntime.StatusHooks[*aispeechv1beta1.TranscriptionJob]{},
+		ParityHooks:     generatedruntime.ParityHooks[*aispeechv1beta1.TranscriptionJob]{},
 		Create: runtimeOperationHooks[aispeechsdk.CreateTranscriptionJobRequest, aispeechsdk.CreateTranscriptionJobResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTranscriptionJobDetails", RequestName: "CreateTranscriptionJobDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aispeechsdk.CreateTranscriptionJobRequest) (aispeechsdk.CreateTranscriptionJobResponse, error) {
@@ -154,6 +160,9 @@ func buildTranscriptionJobGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

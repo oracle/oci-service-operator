@@ -26,6 +26,9 @@ type CompartmentRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *identityv1beta1.Compartment, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*identityv1beta1.Compartment]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*identityv1beta1.Compartment]
+	StatusHooks         generatedruntime.StatusHooks[*identityv1beta1.Compartment]
+	ParityHooks         generatedruntime.ParityHooks[*identityv1beta1.Compartment]
 	Create              runtimeOperationHooks[identitysdk.CreateCompartmentRequest, identitysdk.CreateCompartmentResponse]
 	Get                 runtimeOperationHooks[identitysdk.GetCompartmentRequest, identitysdk.GetCompartmentResponse]
 	List                runtimeOperationHooks[identitysdk.ListCompartmentsRequest, identitysdk.ListCompartmentsResponse]
@@ -98,9 +101,12 @@ func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newCompartmentDefaultRuntimeHooks(sdkClient identitysdk.IdentityClient) CompartmentRuntimeHooks {
 	return CompartmentRuntimeHooks{
-		Semantics: newCompartmentRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*identityv1beta1.Compartment]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newCompartmentRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*identityv1beta1.Compartment]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*identityv1beta1.Compartment]{},
+		StatusHooks:     generatedruntime.StatusHooks[*identityv1beta1.Compartment]{},
+		ParityHooks:     generatedruntime.ParityHooks[*identityv1beta1.Compartment]{},
 		Create: runtimeOperationHooks[identitysdk.CreateCompartmentRequest, identitysdk.CreateCompartmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateCompartmentDetails", RequestName: "CreateCompartmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request identitysdk.CreateCompartmentRequest) (identitysdk.CreateCompartmentResponse, error) {
@@ -154,6 +160,9 @@ func buildCompartmentGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

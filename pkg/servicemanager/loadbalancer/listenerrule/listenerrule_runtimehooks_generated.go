@@ -26,6 +26,9 @@ type ListenerRuleRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.ListenerRule, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.ListenerRule]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.ListenerRule]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.ListenerRule]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.ListenerRule]
 	List                runtimeOperationHooks[loadbalancersdk.ListListenerRulesRequest, loadbalancersdk.ListListenerRulesResponse]
 	WrapGeneratedClient []func(ListenerRuleServiceClient) ListenerRuleServiceClient
 }
@@ -42,8 +45,11 @@ func registerListenerRuleRuntimeHooksMutator(mutator ListenerRuleRuntimeHooksMut
 }
 func newListenerRuleDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) ListenerRuleRuntimeHooks {
 	return ListenerRuleRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.ListenerRule]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.ListenerRule]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.ListenerRule]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.ListenerRule]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.ListenerRule]{},
 		List: runtimeOperationHooks[loadbalancersdk.ListListenerRulesRequest, loadbalancersdk.ListListenerRulesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListListenerRulesRequest) (loadbalancersdk.ListListenerRulesResponse, error) {
@@ -73,6 +79,9 @@ func buildListenerRuleGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

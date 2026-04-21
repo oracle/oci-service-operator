@@ -26,6 +26,9 @@ type PathRouteSetRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.PathRouteSet, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.PathRouteSet]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.PathRouteSet]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.PathRouteSet]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.PathRouteSet]
 	Create              runtimeOperationHooks[loadbalancersdk.CreatePathRouteSetRequest, loadbalancersdk.CreatePathRouteSetResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetPathRouteSetRequest, loadbalancersdk.GetPathRouteSetResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListPathRouteSetsRequest, loadbalancersdk.ListPathRouteSetsResponse]
@@ -46,8 +49,11 @@ func registerPathRouteSetRuntimeHooksMutator(mutator PathRouteSetRuntimeHooksMut
 }
 func newPathRouteSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) PathRouteSetRuntimeHooks {
 	return PathRouteSetRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.PathRouteSet]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.PathRouteSet]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.PathRouteSet]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.PathRouteSet]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.PathRouteSet]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreatePathRouteSetRequest, loadbalancersdk.CreatePathRouteSetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreatePathRouteSetDetails", RequestName: "CreatePathRouteSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreatePathRouteSetRequest) (loadbalancersdk.CreatePathRouteSetResponse, error) {
@@ -101,6 +107,9 @@ func buildPathRouteSetGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

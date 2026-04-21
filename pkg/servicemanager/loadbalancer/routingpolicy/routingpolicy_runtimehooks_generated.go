@@ -26,6 +26,9 @@ type RoutingPolicyRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.RoutingPolicy, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.RoutingPolicy]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.RoutingPolicy]
+	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.RoutingPolicy]
+	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.RoutingPolicy]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateRoutingPolicyRequest, loadbalancersdk.CreateRoutingPolicyResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetRoutingPolicyRequest, loadbalancersdk.GetRoutingPolicyResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListRoutingPoliciesRequest, loadbalancersdk.ListRoutingPoliciesResponse]
@@ -46,8 +49,11 @@ func registerRoutingPolicyRuntimeHooksMutator(mutator RoutingPolicyRuntimeHooksM
 }
 func newRoutingPolicyDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) RoutingPolicyRuntimeHooks {
 	return RoutingPolicyRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.RoutingPolicy]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loadbalancerv1beta1.RoutingPolicy]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.RoutingPolicy]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.RoutingPolicy]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.RoutingPolicy]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateRoutingPolicyRequest, loadbalancersdk.CreateRoutingPolicyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateRoutingPolicyDetails", RequestName: "CreateRoutingPolicyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateRoutingPolicyRequest) (loadbalancersdk.CreateRoutingPolicyResponse, error) {
@@ -101,6 +107,9 @@ func buildRoutingPolicyGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

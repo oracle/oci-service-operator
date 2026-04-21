@@ -26,6 +26,9 @@ type UnifiedAgentConfigurationRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.UnifiedAgentConfiguration, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.UnifiedAgentConfiguration]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.UnifiedAgentConfiguration]
+	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.UnifiedAgentConfiguration]
+	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.UnifiedAgentConfiguration]
 	Create              runtimeOperationHooks[loggingsdk.CreateUnifiedAgentConfigurationRequest, loggingsdk.CreateUnifiedAgentConfigurationResponse]
 	Get                 runtimeOperationHooks[loggingsdk.GetUnifiedAgentConfigurationRequest, loggingsdk.GetUnifiedAgentConfigurationResponse]
 	List                runtimeOperationHooks[loggingsdk.ListUnifiedAgentConfigurationsRequest, loggingsdk.ListUnifiedAgentConfigurationsResponse]
@@ -46,8 +49,11 @@ func registerUnifiedAgentConfigurationRuntimeHooksMutator(mutator UnifiedAgentCo
 }
 func newUnifiedAgentConfigurationDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) UnifiedAgentConfigurationRuntimeHooks {
 	return UnifiedAgentConfigurationRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
+		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
+		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
 		Create: runtimeOperationHooks[loggingsdk.CreateUnifiedAgentConfigurationRequest, loggingsdk.CreateUnifiedAgentConfigurationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateUnifiedAgentConfigurationDetails", RequestName: "CreateUnifiedAgentConfigurationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.CreateUnifiedAgentConfigurationRequest) (loggingsdk.CreateUnifiedAgentConfigurationResponse, error) {
@@ -101,6 +107,9 @@ func buildUnifiedAgentConfigurationGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

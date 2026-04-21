@@ -26,6 +26,9 @@ type ClusterRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *containerenginev1beta1.Cluster, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*containerenginev1beta1.Cluster]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*containerenginev1beta1.Cluster]
+	StatusHooks         generatedruntime.StatusHooks[*containerenginev1beta1.Cluster]
+	ParityHooks         generatedruntime.ParityHooks[*containerenginev1beta1.Cluster]
 	Create              runtimeOperationHooks[containerenginesdk.CreateClusterRequest, containerenginesdk.CreateClusterResponse]
 	Get                 runtimeOperationHooks[containerenginesdk.GetClusterRequest, containerenginesdk.GetClusterResponse]
 	List                runtimeOperationHooks[containerenginesdk.ListClustersRequest, containerenginesdk.ListClustersResponse]
@@ -98,9 +101,12 @@ func newClusterRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newClusterDefaultRuntimeHooks(sdkClient containerenginesdk.ContainerEngineClient) ClusterRuntimeHooks {
 	return ClusterRuntimeHooks{
-		Semantics: newClusterRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*containerenginev1beta1.Cluster]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newClusterRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*containerenginev1beta1.Cluster]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*containerenginev1beta1.Cluster]{},
+		StatusHooks:     generatedruntime.StatusHooks[*containerenginev1beta1.Cluster]{},
+		ParityHooks:     generatedruntime.ParityHooks[*containerenginev1beta1.Cluster]{},
 		Create: runtimeOperationHooks[containerenginesdk.CreateClusterRequest, containerenginesdk.CreateClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request containerenginesdk.CreateClusterRequest) (containerenginesdk.CreateClusterResponse, error) {
@@ -154,6 +160,9 @@ func buildClusterGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -26,6 +26,9 @@ type QueryRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.Query, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.Query]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.Query]
+	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.Query]
+	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.Query]
 	Create              runtimeOperationHooks[usageapisdk.CreateQueryRequest, usageapisdk.CreateQueryResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetQueryRequest, usageapisdk.GetQueryResponse]
 	List                runtimeOperationHooks[usageapisdk.ListQueriesRequest, usageapisdk.ListQueriesResponse]
@@ -98,9 +101,12 @@ func newQueryRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newQueryDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) QueryRuntimeHooks {
 	return QueryRuntimeHooks{
-		Semantics: newQueryRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*usageapiv1beta1.Query]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newQueryRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*usageapiv1beta1.Query]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.Query]{},
+		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.Query]{},
+		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.Query]{},
 		Create: runtimeOperationHooks[usageapisdk.CreateQueryRequest, usageapisdk.CreateQueryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueryDetails", RequestName: "CreateQueryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateQueryRequest) (usageapisdk.CreateQueryResponse, error) {
@@ -154,6 +160,9 @@ func buildQueryGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

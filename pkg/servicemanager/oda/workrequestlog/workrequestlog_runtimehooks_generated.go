@@ -26,6 +26,9 @@ type WorkRequestLogRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *odav1beta1.WorkRequestLog, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*odav1beta1.WorkRequestLog]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestLog]
+	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.WorkRequestLog]
+	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[odasdk.ListWorkRequestLogsRequest, odasdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -42,8 +45,11 @@ func registerWorkRequestLogRuntimeHooksMutator(mutator WorkRequestLogRuntimeHook
 }
 func newWorkRequestLogDefaultRuntimeHooks(sdkClient odasdk.OdaClient) WorkRequestLogRuntimeHooks {
 	return WorkRequestLogRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*odav1beta1.WorkRequestLog]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*odav1beta1.WorkRequestLog]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestLog]{},
+		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.WorkRequestLog]{},
+		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[odasdk.ListWorkRequestLogsRequest, odasdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.ListWorkRequestLogsRequest) (odasdk.ListWorkRequestLogsResponse, error) {
@@ -73,6 +79,9 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

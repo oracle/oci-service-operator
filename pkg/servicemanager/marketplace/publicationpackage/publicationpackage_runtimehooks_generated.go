@@ -26,6 +26,9 @@ type PublicationPackageRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.PublicationPackage, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.PublicationPackage]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.PublicationPackage]
+	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.PublicationPackage]
+	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.PublicationPackage]
 	Get                 runtimeOperationHooks[marketplacesdk.GetPublicationPackageRequest, marketplacesdk.GetPublicationPackageResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListPublicationPackagesRequest, marketplacesdk.ListPublicationPackagesResponse]
 	WrapGeneratedClient []func(PublicationPackageServiceClient) PublicationPackageServiceClient
@@ -43,8 +46,11 @@ func registerPublicationPackageRuntimeHooksMutator(mutator PublicationPackageRun
 }
 func newPublicationPackageDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) PublicationPackageRuntimeHooks {
 	return PublicationPackageRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.PublicationPackage]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*marketplacev1beta1.PublicationPackage]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.PublicationPackage]{},
+		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.PublicationPackage]{},
+		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.PublicationPackage]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetPublicationPackageRequest, marketplacesdk.GetPublicationPackageResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PublicationId", RequestName: "publicationId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageVersion", RequestName: "packageVersion", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetPublicationPackageRequest) (marketplacesdk.GetPublicationPackageResponse, error) {
@@ -80,6 +86,9 @@ func buildPublicationPackageGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

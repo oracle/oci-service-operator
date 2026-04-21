@@ -26,6 +26,9 @@ type VcnRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *corev1beta1.Vcn, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*corev1beta1.Vcn]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.Vcn]
+	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.Vcn]
+	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.Vcn]
 	Create              runtimeOperationHooks[coresdk.CreateVcnRequest, coresdk.CreateVcnResponse]
 	Get                 runtimeOperationHooks[coresdk.GetVcnRequest, coresdk.GetVcnResponse]
 	List                runtimeOperationHooks[coresdk.ListVcnsRequest, coresdk.ListVcnsResponse]
@@ -98,9 +101,12 @@ func newVcnRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newVcnDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) VcnRuntimeHooks {
 	return VcnRuntimeHooks{
-		Semantics: newVcnRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*corev1beta1.Vcn]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newVcnRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.Vcn]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.Vcn]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.Vcn]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.Vcn]{},
 		Create: runtimeOperationHooks[coresdk.CreateVcnRequest, coresdk.CreateVcnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
@@ -154,6 +160,9 @@ func buildVcnGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

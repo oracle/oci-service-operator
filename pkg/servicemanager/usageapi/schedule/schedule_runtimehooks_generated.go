@@ -26,6 +26,9 @@ type ScheduleRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.Schedule, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.Schedule]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.Schedule]
+	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.Schedule]
+	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.Schedule]
 	Create              runtimeOperationHooks[usageapisdk.CreateScheduleRequest, usageapisdk.CreateScheduleResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetScheduleRequest, usageapisdk.GetScheduleResponse]
 	List                runtimeOperationHooks[usageapisdk.ListSchedulesRequest, usageapisdk.ListSchedulesResponse]
@@ -98,9 +101,12 @@ func newScheduleRuntimeSemantics() *generatedruntime.Semantics {
 }
 func newScheduleDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) ScheduleRuntimeHooks {
 	return ScheduleRuntimeHooks{
-		Semantics: newScheduleRuntimeSemantics(),
-		Identity:  generatedruntime.IdentityHooks[*usageapiv1beta1.Schedule]{},
-		Read:      generatedruntime.ReadHooks{},
+		Semantics:       newScheduleRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*usageapiv1beta1.Schedule]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.Schedule]{},
+		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.Schedule]{},
+		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.Schedule]{},
 		Create: runtimeOperationHooks[usageapisdk.CreateScheduleRequest, usageapisdk.CreateScheduleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateScheduleDetails", RequestName: "CreateScheduleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateScheduleRequest) (usageapisdk.CreateScheduleResponse, error) {
@@ -154,6 +160,9 @@ func buildScheduleGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

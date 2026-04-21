@@ -26,6 +26,9 @@ type SupportedHostShapeRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *ocvpv1beta1.SupportedHostShape, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedHostShape]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.SupportedHostShape]
+	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.SupportedHostShape]
+	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.SupportedHostShape]
 	List                runtimeOperationHooks[ocvpsdk.ListSupportedHostShapesRequest, ocvpsdk.ListSupportedHostShapesResponse]
 	WrapGeneratedClient []func(SupportedHostShapeServiceClient) SupportedHostShapeServiceClient
 }
@@ -42,8 +45,11 @@ func registerSupportedHostShapeRuntimeHooksMutator(mutator SupportedHostShapeRun
 }
 func newSupportedHostShapeDefaultRuntimeHooks(sdkClient ocvpsdk.SddcClient) SupportedHostShapeRuntimeHooks {
 	return SupportedHostShapeRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedHostShape]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedHostShape]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.SupportedHostShape]{},
+		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.SupportedHostShape]{},
+		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.SupportedHostShape]{},
 		List: runtimeOperationHooks[ocvpsdk.ListSupportedHostShapesRequest, ocvpsdk.ListSupportedHostShapesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "IsSingleHostSddcSupported", RequestName: "isSingleHostSddcSupported", Contribution: "query", PreferResourceID: false}, {FieldName: "InitialHostShapeName", RequestName: "initialHostShapeName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.ListSupportedHostShapesRequest) (ocvpsdk.ListSupportedHostShapesResponse, error) {
@@ -73,6 +79,9 @@ func buildSupportedHostShapeGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

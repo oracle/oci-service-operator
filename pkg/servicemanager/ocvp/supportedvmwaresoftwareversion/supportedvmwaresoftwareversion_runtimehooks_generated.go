@@ -26,6 +26,9 @@ type SupportedVmwareSoftwareVersionRuntimeHooks struct {
 	BuildUpdateBody     func(context.Context, *ocvpv1beta1.SupportedVmwareSoftwareVersion, string, any) (any, bool, error)
 	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
 	Read                generatedruntime.ReadHooks
+	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
+	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
+	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
 	List                runtimeOperationHooks[ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest, ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse]
 	WrapGeneratedClient []func(SupportedVmwareSoftwareVersionServiceClient) SupportedVmwareSoftwareVersionServiceClient
 }
@@ -42,8 +45,11 @@ func registerSupportedVmwareSoftwareVersionRuntimeHooksMutator(mutator Supported
 }
 func newSupportedVmwareSoftwareVersionDefaultRuntimeHooks(sdkClient ocvpsdk.SddcClient) SupportedVmwareSoftwareVersionRuntimeHooks {
 	return SupportedVmwareSoftwareVersionRuntimeHooks{
-		Identity: generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
-		Read:     generatedruntime.ReadHooks{},
+		Identity:        generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
+		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
+		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
 		List: runtimeOperationHooks[ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest, ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Version", RequestName: "version", Contribution: "query", PreferResourceID: false}, {FieldName: "HostShapeName", RequestName: "hostShapeName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest) (ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse, error) {
@@ -73,6 +79,9 @@ func buildSupportedVmwareSoftwareVersionGeneratedRuntimeConfig(
 		Semantics:       hooks.Semantics,
 		Identity:        hooks.Identity,
 		Read:            hooks.Read,
+		TrackedRecreate: hooks.TrackedRecreate,
+		StatusHooks:     hooks.StatusHooks,
+		ParityHooks:     hooks.ParityHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{
