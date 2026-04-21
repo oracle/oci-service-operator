@@ -39,6 +39,7 @@ func applyClusterRuntimeHooks(manager *ClusterServiceManager, hooks *ClusterRunt
 	hooks.BuildCreateBody = func(_ context.Context, resource *containerenginev1beta1.Cluster, _ string) (any, error) {
 		return buildClusterCreateDetails(resource)
 	}
+	hooks.List.Fields = reviewedClusterListFields()
 	hooks.BuildUpdateBody = func(
 		ctx context.Context,
 		resource *containerenginev1beta1.Cluster,
@@ -46,6 +47,17 @@ func applyClusterRuntimeHooks(manager *ClusterServiceManager, hooks *ClusterRunt
 		currentResponse any,
 	) (any, bool, error) {
 		return buildClusterUpdateBody(ctx, credentialClient, resource, namespace, currentResponse)
+	}
+}
+
+func reviewedClusterListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "Name", RequestName: "name", Contribution: "query"},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
 	}
 }
 
