@@ -24,6 +24,8 @@ type QueueRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *queuev1beta1.Queue, string) (any, error)
 	BuildUpdateBody     func(context.Context, *queuev1beta1.Queue, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*queuev1beta1.Queue]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]
 	Get                 runtimeOperationHooks[queuesdk.GetQueueRequest, queuesdk.GetQueueResponse]
 	List                runtimeOperationHooks[queuesdk.ListQueuesRequest, queuesdk.ListQueuesResponse]
@@ -106,6 +108,8 @@ func newQueueRuntimeSemantics() *generatedruntime.Semantics {
 func newQueueDefaultRuntimeHooks(sdkClient queuesdk.QueueAdminClient) QueueRuntimeHooks {
 	return QueueRuntimeHooks{
 		Semantics: newQueueRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*queuev1beta1.Queue]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueueDetails", RequestName: "CreateQueueDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
@@ -157,6 +161,8 @@ func buildQueueGeneratedRuntimeConfig(
 		SDKName:         "Queue",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

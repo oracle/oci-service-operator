@@ -24,6 +24,8 @@ type BucketRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *objectstoragev1beta1.Bucket, string) (any, error)
 	BuildUpdateBody     func(context.Context, *objectstoragev1beta1.Bucket, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*objectstoragev1beta1.Bucket]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[objectstoragesdk.CreateBucketRequest, objectstoragesdk.CreateBucketResponse]
 	Get                 runtimeOperationHooks[objectstoragesdk.GetBucketRequest, objectstoragesdk.GetBucketResponse]
 	List                runtimeOperationHooks[objectstoragesdk.ListBucketsRequest, objectstoragesdk.ListBucketsResponse]
@@ -97,6 +99,8 @@ func newBucketRuntimeSemantics() *generatedruntime.Semantics {
 func newBucketDefaultRuntimeHooks(sdkClient objectstoragesdk.ObjectStorageClient) BucketRuntimeHooks {
 	return BucketRuntimeHooks{
 		Semantics: newBucketRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*objectstoragev1beta1.Bucket]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[objectstoragesdk.CreateBucketRequest, objectstoragesdk.CreateBucketResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBucketDetails", RequestName: "CreateBucketDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request objectstoragesdk.CreateBucketRequest) (objectstoragesdk.CreateBucketResponse, error) {
@@ -148,6 +152,8 @@ func buildBucketGeneratedRuntimeConfig(
 		SDKName:         "Bucket",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

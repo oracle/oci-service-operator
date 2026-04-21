@@ -24,6 +24,8 @@ type SSLCipherSuiteRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.SSLCipherSuite, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.SSLCipherSuite, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.SSLCipherSuite]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[loadbalancersdk.CreateSSLCipherSuiteRequest, loadbalancersdk.CreateSSLCipherSuiteResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetSSLCipherSuiteRequest, loadbalancersdk.GetSSLCipherSuiteResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListSSLCipherSuitesRequest, loadbalancersdk.ListSSLCipherSuitesResponse]
@@ -44,6 +46,8 @@ func registerSSLCipherSuiteRuntimeHooksMutator(mutator SSLCipherSuiteRuntimeHook
 }
 func newSSLCipherSuiteDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) SSLCipherSuiteRuntimeHooks {
 	return SSLCipherSuiteRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.SSLCipherSuite]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateSSLCipherSuiteRequest, loadbalancersdk.CreateSSLCipherSuiteResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateSslCipherSuiteDetails", RequestName: "CreateSslCipherSuiteDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateSSLCipherSuiteRequest) (loadbalancersdk.CreateSSLCipherSuiteResponse, error) {
@@ -95,6 +99,8 @@ func buildSSLCipherSuiteGeneratedRuntimeConfig(
 		SDKName:         "SSLCipherSuite",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type PublicationRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *marketplacev1beta1.Publication, string) (any, error)
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Publication, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Publication]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[marketplacesdk.CreatePublicationRequest, marketplacesdk.CreatePublicationResponse]
 	Get                 runtimeOperationHooks[marketplacesdk.GetPublicationRequest, marketplacesdk.GetPublicationResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListPublicationsRequest, marketplacesdk.ListPublicationsResponse]
@@ -44,6 +46,8 @@ func registerPublicationRuntimeHooksMutator(mutator PublicationRuntimeHooksMutat
 }
 func newPublicationDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) PublicationRuntimeHooks {
 	return PublicationRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Publication]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[marketplacesdk.CreatePublicationRequest, marketplacesdk.CreatePublicationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreatePublicationDetails", RequestName: "CreatePublicationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.CreatePublicationRequest) (marketplacesdk.CreatePublicationResponse, error) {
@@ -95,6 +99,8 @@ func buildPublicationGeneratedRuntimeConfig(
 		SDKName:         "Publication",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

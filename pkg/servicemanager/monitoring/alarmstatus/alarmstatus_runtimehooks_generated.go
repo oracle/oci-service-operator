@@ -24,6 +24,8 @@ type AlarmStatusRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *monitoringv1beta1.AlarmStatus, string) (any, error)
 	BuildUpdateBody     func(context.Context, *monitoringv1beta1.AlarmStatus, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmStatus]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[monitoringsdk.ListAlarmsStatusRequest, monitoringsdk.ListAlarmsStatusResponse]
 	WrapGeneratedClient []func(AlarmStatusServiceClient) AlarmStatusServiceClient
 }
@@ -40,6 +42,8 @@ func registerAlarmStatusRuntimeHooksMutator(mutator AlarmStatusRuntimeHooksMutat
 }
 func newAlarmStatusDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) AlarmStatusRuntimeHooks {
 	return AlarmStatusRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmStatus]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[monitoringsdk.ListAlarmsStatusRequest, monitoringsdk.ListAlarmsStatusResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentIdInSubtree", RequestName: "compartmentIdInSubtree", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "ResourceId", RequestName: "resourceId", Contribution: "query", PreferResourceID: false}, {FieldName: "ServiceName", RequestName: "serviceName", Contribution: "query", PreferResourceID: false}, {FieldName: "EntityId", RequestName: "entityId", Contribution: "query", PreferResourceID: false}, {FieldName: "Status", RequestName: "status", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.ListAlarmsStatusRequest) (monitoringsdk.ListAlarmsStatusResponse, error) {
@@ -67,6 +71,8 @@ func buildAlarmStatusGeneratedRuntimeConfig(
 		SDKName:         "AlarmStatus",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

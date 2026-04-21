@@ -24,6 +24,8 @@ type InstanceRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.Instance, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.Instance, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.Instance]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.LaunchInstanceRequest, coresdk.LaunchInstanceResponse]
 	Get                 runtimeOperationHooks[coresdk.GetInstanceRequest, coresdk.GetInstanceResponse]
 	List                runtimeOperationHooks[coresdk.ListInstancesRequest, coresdk.ListInstancesResponse]
@@ -97,6 +99,8 @@ func newInstanceRuntimeSemantics() *generatedruntime.Semantics {
 func newInstanceDefaultRuntimeHooks(sdkClient coresdk.ComputeClient) InstanceRuntimeHooks {
 	return InstanceRuntimeHooks{
 		Semantics: newInstanceRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*corev1beta1.Instance]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.LaunchInstanceRequest, coresdk.LaunchInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LaunchInstanceDetails", RequestName: "LaunchInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.LaunchInstanceRequest) (coresdk.LaunchInstanceResponse, error) {
@@ -148,6 +152,8 @@ func buildInstanceGeneratedRuntimeConfig(
 		SDKName:         "Instance",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

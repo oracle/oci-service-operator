@@ -24,6 +24,8 @@ type VcnRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.Vcn, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.Vcn, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.Vcn]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.CreateVcnRequest, coresdk.CreateVcnResponse]
 	Get                 runtimeOperationHooks[coresdk.GetVcnRequest, coresdk.GetVcnResponse]
 	List                runtimeOperationHooks[coresdk.ListVcnsRequest, coresdk.ListVcnsResponse]
@@ -97,6 +99,8 @@ func newVcnRuntimeSemantics() *generatedruntime.Semantics {
 func newVcnDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) VcnRuntimeHooks {
 	return VcnRuntimeHooks{
 		Semantics: newVcnRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*corev1beta1.Vcn]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.CreateVcnRequest, coresdk.CreateVcnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
@@ -148,6 +152,8 @@ func buildVcnGeneratedRuntimeConfig(
 		SDKName:         "Vcn",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

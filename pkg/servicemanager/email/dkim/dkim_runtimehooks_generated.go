@@ -24,6 +24,8 @@ type DkimRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *emailv1beta1.Dkim, string) (any, error)
 	BuildUpdateBody     func(context.Context, *emailv1beta1.Dkim, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*emailv1beta1.Dkim]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[emailsdk.CreateDkimRequest, emailsdk.CreateDkimResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetDkimRequest, emailsdk.GetDkimResponse]
 	List                runtimeOperationHooks[emailsdk.ListDkimsRequest, emailsdk.ListDkimsResponse]
@@ -44,6 +46,8 @@ func registerDkimRuntimeHooksMutator(mutator DkimRuntimeHooksMutator) {
 }
 func newDkimDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) DkimRuntimeHooks {
 	return DkimRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*emailv1beta1.Dkim]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[emailsdk.CreateDkimRequest, emailsdk.CreateDkimResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDkimDetails", RequestName: "CreateDkimDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateDkimRequest) (emailsdk.CreateDkimResponse, error) {
@@ -95,6 +99,8 @@ func buildDkimGeneratedRuntimeConfig(
 		SDKName:         "Dkim",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

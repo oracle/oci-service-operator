@@ -24,6 +24,8 @@ type ProjectRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *aivisionv1beta1.Project, string) (any, error)
 	BuildUpdateBody     func(context.Context, *aivisionv1beta1.Project, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*aivisionv1beta1.Project]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[aivisionsdk.CreateProjectRequest, aivisionsdk.CreateProjectResponse]
 	Get                 runtimeOperationHooks[aivisionsdk.GetProjectRequest, aivisionsdk.GetProjectResponse]
 	List                runtimeOperationHooks[aivisionsdk.ListProjectsRequest, aivisionsdk.ListProjectsResponse]
@@ -97,6 +99,8 @@ func newProjectRuntimeSemantics() *generatedruntime.Semantics {
 func newProjectDefaultRuntimeHooks(sdkClient aivisionsdk.AIServiceVisionClient) ProjectRuntimeHooks {
 	return ProjectRuntimeHooks{
 		Semantics: newProjectRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*aivisionv1beta1.Project]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[aivisionsdk.CreateProjectRequest, aivisionsdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aivisionsdk.CreateProjectRequest) (aivisionsdk.CreateProjectResponse, error) {
@@ -148,6 +152,8 @@ func buildProjectGeneratedRuntimeConfig(
 		SDKName:         "Project",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

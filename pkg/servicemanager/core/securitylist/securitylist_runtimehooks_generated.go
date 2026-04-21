@@ -24,6 +24,8 @@ type SecurityListRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.SecurityList, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.SecurityList, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.SecurityList]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.CreateSecurityListRequest, coresdk.CreateSecurityListResponse]
 	Get                 runtimeOperationHooks[coresdk.GetSecurityListRequest, coresdk.GetSecurityListResponse]
 	List                runtimeOperationHooks[coresdk.ListSecurityListsRequest, coresdk.ListSecurityListsResponse]
@@ -97,6 +99,8 @@ func newSecurityListRuntimeSemantics() *generatedruntime.Semantics {
 func newSecurityListDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) SecurityListRuntimeHooks {
 	return SecurityListRuntimeHooks{
 		Semantics: newSecurityListRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*corev1beta1.SecurityList]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.CreateSecurityListRequest, coresdk.CreateSecurityListResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSecurityListDetails", RequestName: "CreateSecurityListDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateSecurityListRequest) (coresdk.CreateSecurityListResponse, error) {
@@ -148,6 +152,8 @@ func buildSecurityListGeneratedRuntimeConfig(
 		SDKName:         "SecurityList",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

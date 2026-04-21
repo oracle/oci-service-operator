@@ -24,6 +24,8 @@ type LogGroupRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loggingv1beta1.LogGroup, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.LogGroup, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.LogGroup]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[loggingsdk.CreateLogGroupRequest, loggingsdk.CreateLogGroupResponse]
 	Get                 runtimeOperationHooks[loggingsdk.GetLogGroupRequest, loggingsdk.GetLogGroupResponse]
 	List                runtimeOperationHooks[loggingsdk.ListLogGroupsRequest, loggingsdk.ListLogGroupsResponse]
@@ -44,6 +46,8 @@ func registerLogGroupRuntimeHooksMutator(mutator LogGroupRuntimeHooksMutator) {
 }
 func newLogGroupDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) LogGroupRuntimeHooks {
 	return LogGroupRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.LogGroup]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[loggingsdk.CreateLogGroupRequest, loggingsdk.CreateLogGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateLogGroupDetails", RequestName: "CreateLogGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.CreateLogGroupRequest) (loggingsdk.CreateLogGroupResponse, error) {
@@ -95,6 +99,8 @@ func buildLogGroupGeneratedRuntimeConfig(
 		SDKName:         "LogGroup",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

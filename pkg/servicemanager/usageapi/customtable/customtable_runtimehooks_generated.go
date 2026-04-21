@@ -24,6 +24,8 @@ type CustomTableRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *usageapiv1beta1.CustomTable, string) (any, error)
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.CustomTable, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.CustomTable]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[usageapisdk.CreateCustomTableRequest, usageapisdk.CreateCustomTableResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetCustomTableRequest, usageapisdk.GetCustomTableResponse]
 	List                runtimeOperationHooks[usageapisdk.ListCustomTablesRequest, usageapisdk.ListCustomTablesResponse]
@@ -97,6 +99,8 @@ func newCustomTableRuntimeSemantics() *generatedruntime.Semantics {
 func newCustomTableDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) CustomTableRuntimeHooks {
 	return CustomTableRuntimeHooks{
 		Semantics: newCustomTableRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*usageapiv1beta1.CustomTable]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[usageapisdk.CreateCustomTableRequest, usageapisdk.CreateCustomTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateCustomTableDetails", RequestName: "CreateCustomTableDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateCustomTableRequest) (usageapisdk.CreateCustomTableResponse, error) {
@@ -148,6 +152,8 @@ func buildCustomTableGeneratedRuntimeConfig(
 		SDKName:         "CustomTable",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

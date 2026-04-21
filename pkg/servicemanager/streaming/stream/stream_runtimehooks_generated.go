@@ -24,6 +24,8 @@ type StreamRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *streamingv1beta1.Stream, string) (any, error)
 	BuildUpdateBody     func(context.Context, *streamingv1beta1.Stream, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*streamingv1beta1.Stream]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]
 	Get                 runtimeOperationHooks[streamingsdk.GetStreamRequest, streamingsdk.GetStreamResponse]
 	List                runtimeOperationHooks[streamingsdk.ListStreamsRequest, streamingsdk.ListStreamsResponse]
@@ -97,6 +99,8 @@ func newStreamRuntimeSemantics() *generatedruntime.Semantics {
 func newStreamDefaultRuntimeHooks(sdkClient streamingsdk.StreamAdminClient) StreamRuntimeHooks {
 	return StreamRuntimeHooks{
 		Semantics: newStreamRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*streamingv1beta1.Stream]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateStreamDetails", RequestName: "CreateStreamDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request streamingsdk.CreateStreamRequest) (streamingsdk.CreateStreamResponse, error) {
@@ -148,6 +152,8 @@ func buildStreamGeneratedRuntimeConfig(
 		SDKName:         "Stream",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type ThirdPartyPaidListingEligibilityRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *marketplacev1beta1.ThirdPartyPaidListingEligibility, string) (any, error)
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.ThirdPartyPaidListingEligibility, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[marketplacesdk.GetThirdPartyPaidListingEligibilityRequest, marketplacesdk.GetThirdPartyPaidListingEligibilityResponse]
 	WrapGeneratedClient []func(ThirdPartyPaidListingEligibilityServiceClient) ThirdPartyPaidListingEligibilityServiceClient
 }
@@ -40,6 +42,8 @@ func registerThirdPartyPaidListingEligibilityRuntimeHooksMutator(mutator ThirdPa
 }
 func newThirdPartyPaidListingEligibilityDefaultRuntimeHooks(sdkClient marketplacesdk.AccountClient) ThirdPartyPaidListingEligibilityRuntimeHooks {
 	return ThirdPartyPaidListingEligibilityRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[marketplacesdk.GetThirdPartyPaidListingEligibilityRequest, marketplacesdk.GetThirdPartyPaidListingEligibilityResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetThirdPartyPaidListingEligibilityRequest) (marketplacesdk.GetThirdPartyPaidListingEligibilityResponse, error) {
@@ -67,6 +71,8 @@ func buildThirdPartyPaidListingEligibilityGeneratedRuntimeConfig(
 		SDKName:         "ThirdPartyPaidListingEligibility",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

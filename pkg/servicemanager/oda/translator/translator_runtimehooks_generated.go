@@ -24,6 +24,8 @@ type TranslatorRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.Translator, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.Translator, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.Translator]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateTranslatorRequest, odasdk.CreateTranslatorResponse]
 	Get                 runtimeOperationHooks[odasdk.GetTranslatorRequest, odasdk.GetTranslatorResponse]
 	List                runtimeOperationHooks[odasdk.ListTranslatorsRequest, odasdk.ListTranslatorsResponse]
@@ -44,6 +46,8 @@ func registerTranslatorRuntimeHooksMutator(mutator TranslatorRuntimeHooksMutator
 }
 func newTranslatorDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) TranslatorRuntimeHooks {
 	return TranslatorRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.Translator]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateTranslatorRequest, odasdk.CreateTranslatorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateTranslatorDetails", RequestName: "CreateTranslatorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateTranslatorRequest) (odasdk.CreateTranslatorResponse, error) {
@@ -95,6 +99,8 @@ func buildTranslatorGeneratedRuntimeConfig(
 		SDKName:         "Translator",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

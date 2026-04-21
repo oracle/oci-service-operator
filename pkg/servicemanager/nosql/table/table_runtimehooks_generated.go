@@ -24,6 +24,8 @@ type TableRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *nosqlv1beta1.Table, string) (any, error)
 	BuildUpdateBody     func(context.Context, *nosqlv1beta1.Table, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*nosqlv1beta1.Table]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[nosqlsdk.CreateTableRequest, nosqlsdk.CreateTableResponse]
 	Get                 runtimeOperationHooks[nosqlsdk.GetTableRequest, nosqlsdk.GetTableResponse]
 	List                runtimeOperationHooks[nosqlsdk.ListTablesRequest, nosqlsdk.ListTablesResponse]
@@ -44,6 +46,8 @@ func registerTableRuntimeHooksMutator(mutator TableRuntimeHooksMutator) {
 }
 func newTableDefaultRuntimeHooks(sdkClient nosqlsdk.NosqlClient) TableRuntimeHooks {
 	return TableRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*nosqlv1beta1.Table]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[nosqlsdk.CreateTableRequest, nosqlsdk.CreateTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTableDetails", RequestName: "CreateTableDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request nosqlsdk.CreateTableRequest) (nosqlsdk.CreateTableResponse, error) {
@@ -95,6 +99,8 @@ func buildTableGeneratedRuntimeConfig(
 		SDKName:         "Table",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

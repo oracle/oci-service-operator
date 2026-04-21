@@ -24,6 +24,8 @@ type DatabaseToolsConnectionRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *databasetoolsv1beta1.DatabaseToolsConnection, string) (any, error)
 	BuildUpdateBody     func(context.Context, *databasetoolsv1beta1.DatabaseToolsConnection, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[databasetoolssdk.CreateDatabaseToolsConnectionRequest, databasetoolssdk.CreateDatabaseToolsConnectionResponse]
 	Get                 runtimeOperationHooks[databasetoolssdk.GetDatabaseToolsConnectionRequest, databasetoolssdk.GetDatabaseToolsConnectionResponse]
 	List                runtimeOperationHooks[databasetoolssdk.ListDatabaseToolsConnectionsRequest, databasetoolssdk.ListDatabaseToolsConnectionsResponse]
@@ -97,6 +99,8 @@ func newDatabaseToolsConnectionRuntimeSemantics() *generatedruntime.Semantics {
 func newDatabaseToolsConnectionDefaultRuntimeHooks(sdkClient databasetoolssdk.DatabaseToolsClient) DatabaseToolsConnectionRuntimeHooks {
 	return DatabaseToolsConnectionRuntimeHooks{
 		Semantics: newDatabaseToolsConnectionRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[databasetoolssdk.CreateDatabaseToolsConnectionRequest, databasetoolssdk.CreateDatabaseToolsConnectionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDatabaseToolsConnectionDetails", RequestName: "CreateDatabaseToolsConnectionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request databasetoolssdk.CreateDatabaseToolsConnectionRequest) (databasetoolssdk.CreateDatabaseToolsConnectionResponse, error) {
@@ -148,6 +152,8 @@ func buildDatabaseToolsConnectionGeneratedRuntimeConfig(
 		SDKName:         "DatabaseToolsConnection",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

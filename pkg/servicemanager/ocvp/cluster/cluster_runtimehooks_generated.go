@@ -24,6 +24,8 @@ type ClusterRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *ocvpv1beta1.Cluster, string) (any, error)
 	BuildUpdateBody     func(context.Context, *ocvpv1beta1.Cluster, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.Cluster]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[ocvpsdk.CreateClusterRequest, ocvpsdk.CreateClusterResponse]
 	Get                 runtimeOperationHooks[ocvpsdk.GetClusterRequest, ocvpsdk.GetClusterResponse]
 	List                runtimeOperationHooks[ocvpsdk.ListClustersRequest, ocvpsdk.ListClustersResponse]
@@ -97,6 +99,8 @@ func newClusterRuntimeSemantics() *generatedruntime.Semantics {
 func newClusterDefaultRuntimeHooks(sdkClient ocvpsdk.ClusterClient) ClusterRuntimeHooks {
 	return ClusterRuntimeHooks{
 		Semantics: newClusterRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*ocvpv1beta1.Cluster]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[ocvpsdk.CreateClusterRequest, ocvpsdk.CreateClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.CreateClusterRequest) (ocvpsdk.CreateClusterResponse, error) {
@@ -148,6 +152,8 @@ func buildClusterGeneratedRuntimeConfig(
 		SDKName:         "Cluster",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

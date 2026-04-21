@@ -24,6 +24,8 @@ type TranscriptionJobRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *aispeechv1beta1.TranscriptionJob, string) (any, error)
 	BuildUpdateBody     func(context.Context, *aispeechv1beta1.TranscriptionJob, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*aispeechv1beta1.TranscriptionJob]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[aispeechsdk.CreateTranscriptionJobRequest, aispeechsdk.CreateTranscriptionJobResponse]
 	Get                 runtimeOperationHooks[aispeechsdk.GetTranscriptionJobRequest, aispeechsdk.GetTranscriptionJobResponse]
 	List                runtimeOperationHooks[aispeechsdk.ListTranscriptionJobsRequest, aispeechsdk.ListTranscriptionJobsResponse]
@@ -97,6 +99,8 @@ func newTranscriptionJobRuntimeSemantics() *generatedruntime.Semantics {
 func newTranscriptionJobDefaultRuntimeHooks(sdkClient aispeechsdk.AIServiceSpeechClient) TranscriptionJobRuntimeHooks {
 	return TranscriptionJobRuntimeHooks{
 		Semantics: newTranscriptionJobRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*aispeechv1beta1.TranscriptionJob]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[aispeechsdk.CreateTranscriptionJobRequest, aispeechsdk.CreateTranscriptionJobResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTranscriptionJobDetails", RequestName: "CreateTranscriptionJobDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aispeechsdk.CreateTranscriptionJobRequest) (aispeechsdk.CreateTranscriptionJobResponse, error) {
@@ -148,6 +152,8 @@ func buildTranscriptionJobGeneratedRuntimeConfig(
 		SDKName:         "TranscriptionJob",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

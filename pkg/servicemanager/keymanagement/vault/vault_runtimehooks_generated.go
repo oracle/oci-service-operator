@@ -24,6 +24,8 @@ type VaultRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *keymanagementv1beta1.Vault, string) (any, error)
 	BuildUpdateBody     func(context.Context, *keymanagementv1beta1.Vault, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*keymanagementv1beta1.Vault]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]
 	Get                 runtimeOperationHooks[keymanagementsdk.GetVaultRequest, keymanagementsdk.GetVaultResponse]
 	List                runtimeOperationHooks[keymanagementsdk.ListVaultsRequest, keymanagementsdk.ListVaultsResponse]
@@ -43,6 +45,8 @@ func registerVaultRuntimeHooksMutator(mutator VaultRuntimeHooksMutator) {
 }
 func newVaultDefaultRuntimeHooks(sdkClient keymanagementsdk.KmsVaultClient) VaultRuntimeHooks {
 	return VaultRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*keymanagementv1beta1.Vault]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVaultDetails", RequestName: "CreateVaultDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request keymanagementsdk.CreateVaultRequest) (keymanagementsdk.CreateVaultResponse, error) {
@@ -88,6 +92,8 @@ func buildVaultGeneratedRuntimeConfig(
 		SDKName:         "Vault",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

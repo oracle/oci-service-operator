@@ -24,6 +24,8 @@ type LaunchEligibilityRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *marketplacev1beta1.LaunchEligibility, string) (any, error)
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.LaunchEligibility, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.LaunchEligibility]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[marketplacesdk.GetLaunchEligibilityRequest, marketplacesdk.GetLaunchEligibilityResponse]
 	WrapGeneratedClient []func(LaunchEligibilityServiceClient) LaunchEligibilityServiceClient
 }
@@ -40,6 +42,8 @@ func registerLaunchEligibilityRuntimeHooksMutator(mutator LaunchEligibilityRunti
 }
 func newLaunchEligibilityDefaultRuntimeHooks(sdkClient marketplacesdk.AccountClient) LaunchEligibilityRuntimeHooks {
 	return LaunchEligibilityRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.LaunchEligibility]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[marketplacesdk.GetLaunchEligibilityRequest, marketplacesdk.GetLaunchEligibilityResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "ImageId", RequestName: "imageId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetLaunchEligibilityRequest) (marketplacesdk.GetLaunchEligibilityResponse, error) {
@@ -67,6 +71,8 @@ func buildLaunchEligibilityGeneratedRuntimeConfig(
 		SDKName:         "LaunchEligibility",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

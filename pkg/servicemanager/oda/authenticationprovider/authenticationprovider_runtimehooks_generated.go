@@ -24,6 +24,8 @@ type AuthenticationProviderRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.AuthenticationProvider, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.AuthenticationProvider, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.AuthenticationProvider]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateAuthenticationProviderRequest, odasdk.CreateAuthenticationProviderResponse]
 	Get                 runtimeOperationHooks[odasdk.GetAuthenticationProviderRequest, odasdk.GetAuthenticationProviderResponse]
 	List                runtimeOperationHooks[odasdk.ListAuthenticationProvidersRequest, odasdk.ListAuthenticationProvidersResponse]
@@ -44,6 +46,8 @@ func registerAuthenticationProviderRuntimeHooksMutator(mutator AuthenticationPro
 }
 func newAuthenticationProviderDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) AuthenticationProviderRuntimeHooks {
 	return AuthenticationProviderRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.AuthenticationProvider]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateAuthenticationProviderRequest, odasdk.CreateAuthenticationProviderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateAuthenticationProviderDetails", RequestName: "CreateAuthenticationProviderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateAuthenticationProviderRequest) (odasdk.CreateAuthenticationProviderResponse, error) {
@@ -95,6 +99,8 @@ func buildAuthenticationProviderGeneratedRuntimeConfig(
 		SDKName:         "AuthenticationProvider",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

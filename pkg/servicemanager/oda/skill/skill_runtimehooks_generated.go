@@ -24,6 +24,8 @@ type SkillRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.Skill, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.Skill, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.Skill]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateSkillRequest, odasdk.CreateSkillResponse]
 	Get                 runtimeOperationHooks[odasdk.GetSkillRequest, odasdk.GetSkillResponse]
 	List                runtimeOperationHooks[odasdk.ListSkillsRequest, odasdk.ListSkillsResponse]
@@ -44,6 +46,8 @@ func registerSkillRuntimeHooksMutator(mutator SkillRuntimeHooksMutator) {
 }
 func newSkillDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) SkillRuntimeHooks {
 	return SkillRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.Skill]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateSkillRequest, odasdk.CreateSkillResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateSkillDetails", RequestName: "CreateSkillDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateSkillRequest) (odasdk.CreateSkillResponse, error) {
@@ -95,6 +99,8 @@ func buildSkillGeneratedRuntimeConfig(
 		SDKName:         "Skill",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

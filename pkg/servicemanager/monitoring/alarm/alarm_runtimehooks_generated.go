@@ -24,6 +24,8 @@ type AlarmRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *monitoringv1beta1.Alarm, string) (any, error)
 	BuildUpdateBody     func(context.Context, *monitoringv1beta1.Alarm, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*monitoringv1beta1.Alarm]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[monitoringsdk.CreateAlarmRequest, monitoringsdk.CreateAlarmResponse]
 	Get                 runtimeOperationHooks[monitoringsdk.GetAlarmRequest, monitoringsdk.GetAlarmResponse]
 	List                runtimeOperationHooks[monitoringsdk.ListAlarmsRequest, monitoringsdk.ListAlarmsResponse]
@@ -97,6 +99,8 @@ func newAlarmRuntimeSemantics() *generatedruntime.Semantics {
 func newAlarmDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) AlarmRuntimeHooks {
 	return AlarmRuntimeHooks{
 		Semantics: newAlarmRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*monitoringv1beta1.Alarm]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[monitoringsdk.CreateAlarmRequest, monitoringsdk.CreateAlarmResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAlarmDetails", RequestName: "CreateAlarmDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.CreateAlarmRequest) (monitoringsdk.CreateAlarmResponse, error) {
@@ -148,6 +152,8 @@ func buildAlarmGeneratedRuntimeConfig(
 		SDKName:         "Alarm",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

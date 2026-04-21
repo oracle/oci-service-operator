@@ -24,6 +24,8 @@ type ChannelRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.Channel, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.Channel, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.Channel]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateChannelRequest, odasdk.CreateChannelResponse]
 	Get                 runtimeOperationHooks[odasdk.GetChannelRequest, odasdk.GetChannelResponse]
 	List                runtimeOperationHooks[odasdk.ListChannelsRequest, odasdk.ListChannelsResponse]
@@ -44,6 +46,8 @@ func registerChannelRuntimeHooksMutator(mutator ChannelRuntimeHooksMutator) {
 }
 func newChannelDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) ChannelRuntimeHooks {
 	return ChannelRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.Channel]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateChannelRequest, odasdk.CreateChannelResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateChannelDetails", RequestName: "CreateChannelDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateChannelRequest) (odasdk.CreateChannelResponse, error) {
@@ -95,6 +99,8 @@ func buildChannelGeneratedRuntimeConfig(
 		SDKName:         "Channel",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

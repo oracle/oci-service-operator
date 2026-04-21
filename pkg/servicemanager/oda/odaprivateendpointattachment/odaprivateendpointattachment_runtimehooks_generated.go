@@ -24,6 +24,8 @@ type OdaPrivateEndpointAttachmentRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.OdaPrivateEndpointAttachment, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaPrivateEndpointAttachment, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointAttachment]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointAttachmentRequest, odasdk.CreateOdaPrivateEndpointAttachmentResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointAttachmentRequest, odasdk.GetOdaPrivateEndpointAttachmentResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointAttachmentsRequest, odasdk.ListOdaPrivateEndpointAttachmentsResponse]
@@ -43,6 +45,8 @@ func registerOdaPrivateEndpointAttachmentRuntimeHooksMutator(mutator OdaPrivateE
 }
 func newOdaPrivateEndpointAttachmentDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) OdaPrivateEndpointAttachmentRuntimeHooks {
 	return OdaPrivateEndpointAttachmentRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointAttachmentRequest, odasdk.CreateOdaPrivateEndpointAttachmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaPrivateEndpointAttachmentDetails", RequestName: "CreateOdaPrivateEndpointAttachmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointAttachmentRequest) (odasdk.CreateOdaPrivateEndpointAttachmentResponse, error) {
@@ -88,6 +92,8 @@ func buildOdaPrivateEndpointAttachmentGeneratedRuntimeConfig(
 		SDKName:         "OdaPrivateEndpointAttachment",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type WorkRequestRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *emailv1beta1.WorkRequest, string) (any, error)
 	BuildUpdateBody     func(context.Context, *emailv1beta1.WorkRequest, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*emailv1beta1.WorkRequest]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[emailsdk.GetWorkRequestRequest, emailsdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[emailsdk.ListWorkRequestsRequest, emailsdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -41,6 +43,8 @@ func registerWorkRequestRuntimeHooksMutator(mutator WorkRequestRuntimeHooksMutat
 }
 func newWorkRequestDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) WorkRequestRuntimeHooks {
 	return WorkRequestRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*emailv1beta1.WorkRequest]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[emailsdk.GetWorkRequestRequest, emailsdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request emailsdk.GetWorkRequestRequest) (emailsdk.GetWorkRequestResponse, error) {
@@ -74,6 +78,8 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		SDKName:         "WorkRequest",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

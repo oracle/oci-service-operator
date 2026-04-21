@@ -24,6 +24,8 @@ type AutonomousDatabaseRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *databasev1beta1.AutonomousDatabase, string) (any, error)
 	BuildUpdateBody     func(context.Context, *databasev1beta1.AutonomousDatabase, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*databasev1beta1.AutonomousDatabase]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[databasesdk.CreateAutonomousDatabaseRequest, databasesdk.CreateAutonomousDatabaseResponse]
 	Get                 runtimeOperationHooks[databasesdk.GetAutonomousDatabaseRequest, databasesdk.GetAutonomousDatabaseResponse]
 	List                runtimeOperationHooks[databasesdk.ListAutonomousDatabasesRequest, databasesdk.ListAutonomousDatabasesResponse]
@@ -97,6 +99,8 @@ func newAutonomousDatabaseRuntimeSemantics() *generatedruntime.Semantics {
 func newAutonomousDatabaseDefaultRuntimeHooks(sdkClient databasesdk.DatabaseClient) AutonomousDatabaseRuntimeHooks {
 	return AutonomousDatabaseRuntimeHooks{
 		Semantics: newAutonomousDatabaseRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*databasev1beta1.AutonomousDatabase]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[databasesdk.CreateAutonomousDatabaseRequest, databasesdk.CreateAutonomousDatabaseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body", PreferResourceID: false}, {FieldName: "CreateAutonomousDatabaseBase", RequestName: "CreateAutonomousDatabaseBase", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request databasesdk.CreateAutonomousDatabaseRequest) (databasesdk.CreateAutonomousDatabaseResponse, error) {
@@ -149,6 +153,8 @@ func buildAutonomousDatabaseGeneratedRuntimeConfig(
 		Log:              manager.Log,
 		CredentialClient: manager.CredentialClient,
 		Semantics:        hooks.Semantics,
+		Identity:         hooks.Identity,
+		Read:             hooks.Read,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

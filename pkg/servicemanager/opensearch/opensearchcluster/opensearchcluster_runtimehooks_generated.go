@@ -24,6 +24,8 @@ type OpensearchClusterRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *opensearchv1beta1.OpensearchCluster, string) (any, error)
 	BuildUpdateBody     func(context.Context, *opensearchv1beta1.OpensearchCluster, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*opensearchv1beta1.OpensearchCluster]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[opensearchsdk.CreateOpensearchClusterRequest, opensearchsdk.CreateOpensearchClusterResponse]
 	Get                 runtimeOperationHooks[opensearchsdk.GetOpensearchClusterRequest, opensearchsdk.GetOpensearchClusterResponse]
 	List                runtimeOperationHooks[opensearchsdk.ListOpensearchClustersRequest, opensearchsdk.ListOpensearchClustersResponse]
@@ -97,6 +99,8 @@ func newOpensearchClusterRuntimeSemantics() *generatedruntime.Semantics {
 func newOpensearchClusterDefaultRuntimeHooks(sdkClient opensearchsdk.OpensearchClusterClient) OpensearchClusterRuntimeHooks {
 	return OpensearchClusterRuntimeHooks{
 		Semantics: newOpensearchClusterRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*opensearchv1beta1.OpensearchCluster]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[opensearchsdk.CreateOpensearchClusterRequest, opensearchsdk.CreateOpensearchClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOpensearchClusterDetails", RequestName: "CreateOpensearchClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opensearchsdk.CreateOpensearchClusterRequest) (opensearchsdk.CreateOpensearchClusterResponse, error) {
@@ -148,6 +152,8 @@ func buildOpensearchClusterGeneratedRuntimeConfig(
 		SDKName:         "OpensearchCluster",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type WorkRequestRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *generativeaiv1beta1.WorkRequest, string) (any, error)
 	BuildUpdateBody     func(context.Context, *generativeaiv1beta1.WorkRequest, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*generativeaiv1beta1.WorkRequest]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[generativeaisdk.GetWorkRequestRequest, generativeaisdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListWorkRequestsRequest, generativeaisdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -41,6 +43,8 @@ func registerWorkRequestRuntimeHooksMutator(mutator WorkRequestRuntimeHooksMutat
 }
 func newWorkRequestDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiClient) WorkRequestRuntimeHooks {
 	return WorkRequestRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*generativeaiv1beta1.WorkRequest]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[generativeaisdk.GetWorkRequestRequest, generativeaisdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request generativeaisdk.GetWorkRequestRequest) (generativeaisdk.GetWorkRequestResponse, error) {
@@ -74,6 +78,8 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		SDKName:         "WorkRequest",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type ListenerRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.Listener, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.Listener, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.Listener]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateListenerRequest, loadbalancersdk.UpdateListenerResponse]
 	Delete              runtimeOperationHooks[loadbalancersdk.DeleteListenerRequest, loadbalancersdk.DeleteListenerResponse]
@@ -91,6 +93,8 @@ func newListenerRuntimeSemantics() *generatedruntime.Semantics {
 func newListenerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) ListenerRuntimeHooks {
 	return ListenerRuntimeHooks{
 		Semantics: newListenerRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*loadbalancerv1beta1.Listener]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateListenerDetails", RequestName: "CreateListenerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateListenerRequest) (loadbalancersdk.CreateListenerResponse, error) {
@@ -130,6 +134,8 @@ func buildListenerGeneratedRuntimeConfig(
 		SDKName:         "Listener",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

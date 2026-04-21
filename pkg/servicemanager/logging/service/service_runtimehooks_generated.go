@@ -24,6 +24,8 @@ type ServiceRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loggingv1beta1.Service, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.Service, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.Service]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[loggingsdk.ListServicesRequest, loggingsdk.ListServicesResponse]
 	WrapGeneratedClient []func(ServiceServiceClient) ServiceServiceClient
 }
@@ -40,6 +42,8 @@ func registerServiceRuntimeHooksMutator(mutator ServiceRuntimeHooksMutator) {
 }
 func newServiceDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) ServiceRuntimeHooks {
 	return ServiceRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.Service]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[loggingsdk.ListServicesRequest, loggingsdk.ListServicesResponse]{
 			Fields: []generatedruntime.RequestField{},
 			Call: func(ctx context.Context, request loggingsdk.ListServicesRequest) (loggingsdk.ListServicesResponse, error) {
@@ -67,6 +71,8 @@ func buildServiceGeneratedRuntimeConfig(
 		SDKName:         "Service",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

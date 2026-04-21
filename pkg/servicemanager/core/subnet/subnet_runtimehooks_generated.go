@@ -24,6 +24,8 @@ type SubnetRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.Subnet, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.Subnet, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.Subnet]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.CreateSubnetRequest, coresdk.CreateSubnetResponse]
 	Get                 runtimeOperationHooks[coresdk.GetSubnetRequest, coresdk.GetSubnetResponse]
 	List                runtimeOperationHooks[coresdk.ListSubnetsRequest, coresdk.ListSubnetsResponse]
@@ -97,6 +99,8 @@ func newSubnetRuntimeSemantics() *generatedruntime.Semantics {
 func newSubnetDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) SubnetRuntimeHooks {
 	return SubnetRuntimeHooks{
 		Semantics: newSubnetRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*corev1beta1.Subnet]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.CreateSubnetRequest, coresdk.CreateSubnetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSubnetDetails", RequestName: "CreateSubnetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateSubnetRequest) (coresdk.CreateSubnetResponse, error) {
@@ -148,6 +152,8 @@ func buildSubnetGeneratedRuntimeConfig(
 		SDKName:         "Subnet",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

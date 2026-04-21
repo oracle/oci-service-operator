@@ -24,6 +24,8 @@ type LoadBalancerHealthRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.LoadBalancerHealth, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.LoadBalancerHealth, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancerHealth]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[loadbalancersdk.GetLoadBalancerHealthRequest, loadbalancersdk.GetLoadBalancerHealthResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListLoadBalancerHealthsRequest, loadbalancersdk.ListLoadBalancerHealthsResponse]
 	WrapGeneratedClient []func(LoadBalancerHealthServiceClient) LoadBalancerHealthServiceClient
@@ -41,6 +43,8 @@ func registerLoadBalancerHealthRuntimeHooksMutator(mutator LoadBalancerHealthRun
 }
 func newLoadBalancerHealthDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) LoadBalancerHealthRuntimeHooks {
 	return LoadBalancerHealthRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancerHealth]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetLoadBalancerHealthRequest, loadbalancersdk.GetLoadBalancerHealthResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetLoadBalancerHealthRequest) (loadbalancersdk.GetLoadBalancerHealthResponse, error) {
@@ -74,6 +78,8 @@ func buildLoadBalancerHealthGeneratedRuntimeConfig(
 		SDKName:         "LoadBalancerHealth",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type DigitalAssistantRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.DigitalAssistant, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.DigitalAssistant, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistant]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateDigitalAssistantRequest, odasdk.CreateDigitalAssistantResponse]
 	Get                 runtimeOperationHooks[odasdk.GetDigitalAssistantRequest, odasdk.GetDigitalAssistantResponse]
 	List                runtimeOperationHooks[odasdk.ListDigitalAssistantsRequest, odasdk.ListDigitalAssistantsResponse]
@@ -44,6 +46,8 @@ func registerDigitalAssistantRuntimeHooksMutator(mutator DigitalAssistantRuntime
 }
 func newDigitalAssistantDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) DigitalAssistantRuntimeHooks {
 	return DigitalAssistantRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistant]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateDigitalAssistantRequest, odasdk.CreateDigitalAssistantResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateDigitalAssistantDetails", RequestName: "CreateDigitalAssistantDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateDigitalAssistantRequest) (odasdk.CreateDigitalAssistantResponse, error) {
@@ -95,6 +99,8 @@ func buildDigitalAssistantGeneratedRuntimeConfig(
 		SDKName:         "DigitalAssistant",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type ProtocolRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.Protocol, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.Protocol, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.Protocol]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[loadbalancersdk.ListProtocolsRequest, loadbalancersdk.ListProtocolsResponse]
 	WrapGeneratedClient []func(ProtocolServiceClient) ProtocolServiceClient
 }
@@ -40,6 +42,8 @@ func registerProtocolRuntimeHooksMutator(mutator ProtocolRuntimeHooksMutator) {
 }
 func newProtocolDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) ProtocolRuntimeHooks {
 	return ProtocolRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.Protocol]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[loadbalancersdk.ListProtocolsRequest, loadbalancersdk.ListProtocolsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListProtocolsRequest) (loadbalancersdk.ListProtocolsResponse, error) {
@@ -67,6 +71,8 @@ func buildProtocolGeneratedRuntimeConfig(
 		SDKName:         "Protocol",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

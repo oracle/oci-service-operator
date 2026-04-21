@@ -24,6 +24,8 @@ type EmailDomainRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *emailv1beta1.EmailDomain, string) (any, error)
 	BuildUpdateBody     func(context.Context, *emailv1beta1.EmailDomain, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*emailv1beta1.EmailDomain]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[emailsdk.CreateEmailDomainRequest, emailsdk.CreateEmailDomainResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetEmailDomainRequest, emailsdk.GetEmailDomainResponse]
 	List                runtimeOperationHooks[emailsdk.ListEmailDomainsRequest, emailsdk.ListEmailDomainsResponse]
@@ -97,6 +99,8 @@ func newEmailDomainRuntimeSemantics() *generatedruntime.Semantics {
 func newEmailDomainDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) EmailDomainRuntimeHooks {
 	return EmailDomainRuntimeHooks{
 		Semantics: newEmailDomainRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*emailv1beta1.EmailDomain]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[emailsdk.CreateEmailDomainRequest, emailsdk.CreateEmailDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEmailDomainDetails", RequestName: "CreateEmailDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateEmailDomainRequest) (emailsdk.CreateEmailDomainResponse, error) {
@@ -148,6 +152,8 @@ func buildEmailDomainGeneratedRuntimeConfig(
 		SDKName:         "EmailDomain",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

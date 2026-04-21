@@ -24,6 +24,8 @@ type ShapeRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.Shape, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.Shape, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.Shape]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[loadbalancersdk.ListShapesRequest, loadbalancersdk.ListShapesResponse]
 	WrapGeneratedClient []func(ShapeServiceClient) ShapeServiceClient
 }
@@ -40,6 +42,8 @@ func registerShapeRuntimeHooksMutator(mutator ShapeRuntimeHooksMutator) {
 }
 func newShapeDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) ShapeRuntimeHooks {
 	return ShapeRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.Shape]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[loadbalancersdk.ListShapesRequest, loadbalancersdk.ListShapesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListShapesRequest) (loadbalancersdk.ListShapesResponse, error) {
@@ -67,6 +71,8 @@ func buildShapeGeneratedRuntimeConfig(
 		SDKName:         "Shape",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{
