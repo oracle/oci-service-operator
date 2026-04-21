@@ -11,6 +11,7 @@ validation, and repository-owned documentation flows.
 - [Analytics Onboarding Audit](analytics-onboarding-audit.md)
 - [Generator Contract](../api-generator-contract.md)
 - [Enabled Resource Async Strategy Audit](async-strategy-audit.md)
+- [Runtime Hook Adoption Audit](runtime-hook-adoption-audit.md)
 - [Shared Async Status Contract](shared-async-contract.md)
 - [Validator Guide](../validator-guide.md)
 - [GitHub Pages Handoff](github-pages-handoff.md)
