@@ -1031,6 +1031,9 @@ type {{ .Kind }}RuntimeHooks struct {
 	BuildUpdateBody func(context.Context, *{{ .APIImportAlias }}.{{ .Kind }}, string, any) (any, bool, error)
 	Identity        generatedruntime.IdentityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 	Read            generatedruntime.ReadHooks
+	TrackedRecreate generatedruntime.TrackedRecreateHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
+	StatusHooks     generatedruntime.StatusHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
+	ParityHooks     generatedruntime.ParityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 {{- if .CreateOperation }}
 	Create          runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]
 {{- end }}
@@ -1139,6 +1142,9 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 {{- end }}
 		Identity: generatedruntime.IdentityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 		Read:     generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
+		StatusHooks:     generatedruntime.StatusHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
+		ParityHooks:     generatedruntime.ParityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 {{- if .CreateOperation }}
 		Create: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]{
 			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
@@ -1225,6 +1231,9 @@ func build{{ .Kind }}GeneratedRuntimeConfig(
 		Semantics:        hooks.Semantics,
 		Identity:         hooks.Identity,
 		Read:             hooks.Read,
+		TrackedRecreate:  hooks.TrackedRecreate,
+		StatusHooks:      hooks.StatusHooks,
+		ParityHooks:      hooks.ParityHooks,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 {{- if .CreateOperation }}

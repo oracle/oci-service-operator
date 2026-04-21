@@ -131,6 +131,27 @@ type ReadHooks struct {
 	List *Operation
 }
 
+type TrackedRecreateHooks[T any] struct {
+	ClearTrackedIdentity func(T)
+}
+
+type StatusHooks[T any] struct {
+	ClearProjectedStatus   func(T) any
+	ShouldRestoreOnFailure func(T, any) bool
+	RestoreStatus          func(T, any)
+	ProjectStatus          func(T, any) error
+	ApplyLifecycle         func(T, any) (servicemanager.OSOKResponse, error)
+	MarkDeleted            func(T, string)
+	MarkTerminating        func(T, any)
+}
+
+type ParityHooks[T any] struct {
+	NormalizeDesiredState   func(T, any)
+	ValidateCreateOnlyDrift func(T, any) error
+	RequiresParityHandling  func(T, any) bool
+	ApplyParityUpdate       func(context.Context, T, any) (servicemanager.OSOKResponse, error)
+}
+
 type LifecycleSemantics struct {
 	ProvisioningStates []string
 	UpdatingStates     []string
@@ -195,6 +216,9 @@ type Config[T any] struct {
 	Semantics        *Semantics
 	Identity         IdentityHooks[T]
 	Read             ReadHooks
+	TrackedRecreate  TrackedRecreateHooks[T]
+	StatusHooks      StatusHooks[T]
+	ParityHooks      ParityHooks[T]
 	BuildCreateBody  func(context.Context, T, string) (any, error)
 	BuildUpdateBody  func(context.Context, T, string, any) (any, bool, error)
 
@@ -302,6 +326,37 @@ func (c ServiceClient[T]) recordTrackedIdentity(resource T, identity any, resour
 	c.config.Identity.RecordTracked(resource, identity, resourceID)
 }
 
+func (c ServiceClient[T]) clearTrackedIdentity(resource T) {
+	if c.config.TrackedRecreate.ClearTrackedIdentity == nil {
+		return
+	}
+	c.config.TrackedRecreate.ClearTrackedIdentity(resource)
+}
+
+func (c ServiceClient[T]) normalizeDesiredState(resource T, currentResponse any) {
+	if c.config.ParityHooks.NormalizeDesiredState == nil {
+		return
+	}
+	c.config.ParityHooks.NormalizeDesiredState(resource, currentResponse)
+}
+
+func (c ServiceClient[T]) clearProjectedStatus(resource T) (any, bool) {
+	if c.config.StatusHooks.ClearProjectedStatus == nil {
+		return nil, false
+	}
+	return c.config.StatusHooks.ClearProjectedStatus(resource), true
+}
+
+func (c ServiceClient[T]) restoreStatusAfterFailure(resource T, baseline any) {
+	if c.config.StatusHooks.RestoreStatus == nil {
+		return
+	}
+	if c.config.StatusHooks.ShouldRestoreOnFailure != nil && !c.config.StatusHooks.ShouldRestoreOnFailure(resource, baseline) {
+		return
+	}
+	c.config.StatusHooks.RestoreStatus(resource, baseline)
+}
+
 func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if response, err, handled := c.validateCreateOrUpdateRequest(resource); handled {
 		return response, err
@@ -325,12 +380,29 @@ func (c ServiceClient[T]) CreateOrUpdate(ctx context.Context, resource T, req ct
 	}
 
 	var response servicemanager.OSOKResponse
+	if response, err, handled := c.applyExistingResourceHooks(ctx, resource, state, namespace); handled {
+		if err != nil {
+			if state.restoreSyntheticTrackedID != nil {
+				state.restoreSyntheticTrackedID()
+			}
+			return response, err
+		}
+		if state.restoreSyntheticTrackedID != nil && c.config.Identity.RecordTracked == nil {
+			state.restoreSyntheticTrackedID()
+		}
+		return response, nil
+	}
+
+	statusBaseline, statusCleared := c.clearProjectedStatus(resource)
 	if state.currentID != "" {
 		response, err = c.reconcileExistingResource(ctx, resource, state, namespace)
 	} else {
 		response, err = c.createOrReadResource(ctx, resource, namespace, state.identity)
 	}
 	if err != nil {
+		if statusCleared {
+			c.restoreStatusAfterFailure(resource, statusBaseline)
+		}
 		if state.restoreSyntheticTrackedID != nil {
 			state.restoreSyntheticTrackedID()
 		}
@@ -366,6 +438,7 @@ func (c ServiceClient[T]) prepareCreateOrUpdateState(ctx context.Context, resour
 		}
 		return createOrUpdateState{}, err
 	}
+	c.normalizeDesiredState(resource, liveResponse)
 
 	return createOrUpdateState{
 		identity:                  identity,
@@ -394,6 +467,9 @@ func (c ServiceClient[T]) resolveCurrentResource(ctx context.Context, resource T
 
 func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, existingResponse any, trackedIDStale bool) (string, bool) {
 	originalCurrentID := currentID
+	if trackedIDStale {
+		c.clearTrackedIdentity(resource)
+	}
 	if existingResponse != nil {
 		resolvedID := responseID(existingResponse)
 		if currentID == "" && resolvedID != "" {
@@ -547,6 +623,82 @@ func (c ServiceClient[T]) mergeLiveResponseIntoStatus(resource T, currentID stri
 	}
 }
 
+func (c ServiceClient[T]) applyExistingResourceHooks(
+	ctx context.Context,
+	resource T,
+	state createOrUpdateState,
+	namespace string,
+) (servicemanager.OSOKResponse, error, bool) {
+	if state.currentID == "" || state.liveResponse == nil {
+		return servicemanager.OSOKResponse{}, nil, false
+	}
+	if c.shouldObserveCurrentLifecycle(state.liveResponse) {
+		if response, handled, err := c.applyStatusHooksObservation(resource, state.liveResponse, state.identity); handled {
+			return response, err, true
+		}
+	}
+	return c.handleParityHooks(ctx, resource, state, namespace)
+}
+
+func (c ServiceClient[T]) handleParityHooks(
+	ctx context.Context,
+	resource T,
+	state createOrUpdateState,
+	namespace string,
+) (servicemanager.OSOKResponse, error, bool) {
+	if c.config.ParityHooks.RequiresParityHandling == nil || !c.config.ParityHooks.RequiresParityHandling(resource, state.liveResponse) {
+		return servicemanager.OSOKResponse{}, nil, false
+	}
+
+	shouldUpdate, err := c.shouldInvokeUpdate(ctx, resource, namespace, state.liveResponse)
+	if err != nil {
+		return servicemanager.OSOKResponse{}, err, true
+	}
+	if shouldUpdate {
+		if c.config.ParityHooks.ApplyParityUpdate == nil {
+			return servicemanager.OSOKResponse{}, fmt.Errorf("%s parity hooks require ApplyParityUpdate when RequiresParityHandling returns true", c.config.Kind), true
+		}
+		response, err := c.config.ParityHooks.ApplyParityUpdate(ctx, resource, state.liveResponse)
+		return response, err, true
+	}
+
+	if response, handled, err := c.applyStatusHooksObservation(resource, state.liveResponse, state.identity); handled {
+		return response, err, true
+	}
+
+	response, err := c.observeExistingResource(ctx, resource, state.currentID, state.liveResponse, state.identity)
+	return response, err, true
+}
+
+func (c ServiceClient[T]) applyStatusHooksObservation(
+	resource T,
+	response any,
+	identity any,
+) (servicemanager.OSOKResponse, bool, error) {
+	if c.config.StatusHooks.ProjectStatus == nil && c.config.StatusHooks.ApplyLifecycle == nil {
+		return servicemanager.OSOKResponse{}, false, nil
+	}
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return servicemanager.OSOKResponse{}, true, err
+	}
+	if responseID := responseID(response); responseID != "" && c.config.Identity.RecordTracked != nil {
+		c.recordTrackedIdentity(resource, identity, responseID)
+	}
+	if c.config.StatusHooks.ApplyLifecycle != nil {
+		projected, err := c.config.StatusHooks.ApplyLifecycle(resource, response)
+		return projected, true, err
+	}
+	projected, err := c.applySuccessWithIdentity(resource, response, shared.Active, identity)
+	return projected, true, err
+}
+
+func (c ServiceClient[T]) projectStatusWithHooks(resource T, response any) error {
+	if c.config.StatusHooks.ProjectStatus != nil {
+		return c.config.StatusHooks.ProjectStatus(resource, response)
+	}
+	return mergeResponseIntoStatus(resource, response)
+}
+
 func (c ServiceClient[T]) reconcileExistingResource(ctx context.Context, resource T, state createOrUpdateState, namespace string) (servicemanager.OSOKResponse, error) {
 	shouldUpdate, err := c.shouldInvokeUpdate(ctx, resource, namespace, state.liveResponse)
 	if err != nil {
@@ -665,12 +817,29 @@ func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
 	return err
 }
 
+func (c ServiceClient[T]) markDeletedWithHooks(resource T, message string) {
+	if c.config.StatusHooks.MarkDeleted != nil {
+		c.config.StatusHooks.MarkDeleted(resource, message)
+		return
+	}
+	c.markDeleted(resource, message)
+}
+
+func (c ServiceClient[T]) markTerminatingWithHooks(resource T, response any) error {
+	if c.config.StatusHooks.MarkTerminating != nil {
+		c.config.StatusHooks.MarkTerminating(resource, response)
+		return nil
+	}
+	c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+	return nil
+}
+
 func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T, currentID string) (bool, error) {
 	response, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{})
 	if err != nil {
 		if isDeleteNotFound(err) {
 			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource no longer exists")
+			c.markDeletedWithHooks(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
@@ -682,13 +851,13 @@ func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T,
 
 func (c ServiceClient[T]) deleteWithoutSemantics(ctx context.Context, resource T) (bool, error) {
 	if c.config.Delete == nil {
-		c.markDeleted(resource, "OCI delete is not supported for this generated resource")
+		c.markDeletedWithHooks(resource, "OCI delete is not supported for this generated resource")
 		return true, nil
 	}
 
 	currentID := c.currentID(resource)
 	if currentID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
+		c.markDeletedWithHooks(resource, "OCI resource identifier is not recorded")
 		return true, nil
 	}
 	if deleted, err := c.invokeDeleteOperation(ctx, resource, currentID); deleted || err != nil {
@@ -699,7 +868,7 @@ func (c ServiceClient[T]) deleteWithoutSemantics(ctx context.Context, resource T
 
 func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, resource T, currentID string) (bool, error) {
 	if !c.hasReadableOperation() {
-		c.markDeleted(resource, "OCI delete request accepted")
+		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return true, nil
 	}
 
@@ -707,14 +876,18 @@ func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, res
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource deleted")
+			c.markDeletedWithHooks(resource, "OCI resource deleted")
 			return true, nil
 		}
 		return false, err
 	}
 
-	_ = mergeResponseIntoStatus(resource, response)
-	c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return false, err
+	}
+	if err := c.markTerminatingWithHooks(resource, response); err != nil {
+		return false, err
+	}
 	return false, nil
 }
 
@@ -776,7 +949,7 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 	currentID, err := c.resolveDeleteID(ctx, resource)
 	if err != nil {
 		if errors.Is(err, errResourceNotFound) {
-			c.markDeleted(resource, "OCI resource no longer exists")
+			c.markDeletedWithHooks(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
@@ -805,7 +978,7 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
-			c.markDeleted(resource, "OCI resource deleted")
+			c.markDeletedWithHooks(resource, "OCI resource deleted")
 			return true, nil, true
 		}
 		return false, nil, false
@@ -817,7 +990,9 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 		return false, nil, false
 	}
 
-	_ = mergeResponseIntoStatus(resource, response)
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return false, err, true
+	}
 	deleted, err := c.applyDeletePolicy(resource, response, semantics)
 	return deleted, err, true
 }
@@ -845,7 +1020,7 @@ func (c ServiceClient[T]) semanticDeleteConfig() (*Semantics, error) {
 
 func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resource T, currentID string, semantics *Semantics) (bool, error) {
 	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
-		c.markDeleted(resource, "OCI delete request accepted")
+		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return true, nil
 	}
 	if !c.hasReadableOperation() {
@@ -856,13 +1031,15 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resour
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource deleted")
+			c.markDeletedWithHooks(resource, "OCI resource deleted")
 			return true, nil
 		}
 		return false, err
 	}
 
-	_ = mergeResponseIntoStatus(resource, response)
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return false, err
+	}
 	return c.applyDeletePolicy(resource, response, semantics)
 }
 
@@ -870,33 +1047,37 @@ func (c ServiceClient[T]) applyDeletePolicy(resource T, response any, semantics 
 	lifecycleState := strings.ToUpper(responseLifecycleState(response))
 	switch semantics.Delete.Policy {
 	case "best-effort":
-		return c.bestEffortDeleteOutcome(resource, lifecycleState, semantics)
+		return c.bestEffortDeleteOutcome(resource, response, lifecycleState, semantics)
 	case "required":
-		return c.requiredDeleteOutcome(resource, lifecycleState, semantics)
+		return c.requiredDeleteOutcome(resource, response, lifecycleState, semantics)
 	default:
 		return false, fmt.Errorf("%s formal delete confirmation policy %q is not supported", c.config.Kind, semantics.Delete.Policy)
 	}
 }
 
-func (c ServiceClient[T]) bestEffortDeleteOutcome(resource T, lifecycleState string, semantics *Semantics) (bool, error) {
+func (c ServiceClient[T]) bestEffortDeleteOutcome(resource T, response any, lifecycleState string, semantics *Semantics) (bool, error) {
 	if lifecycleState == "" ||
 		containsString(semantics.Delete.PendingStates, lifecycleState) ||
 		containsString(semantics.Delete.TerminalStates, lifecycleState) {
-		c.markDeleted(resource, "OCI delete request accepted")
+		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return true, nil
 	}
 
-	c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+	if err := c.markTerminatingWithHooks(resource, response); err != nil {
+		return false, err
+	}
 	return false, nil
 }
 
-func (c ServiceClient[T]) requiredDeleteOutcome(resource T, lifecycleState string, semantics *Semantics) (bool, error) {
+func (c ServiceClient[T]) requiredDeleteOutcome(resource T, response any, lifecycleState string, semantics *Semantics) (bool, error) {
 	switch {
 	case containsString(semantics.Delete.TerminalStates, lifecycleState):
-		c.markDeleted(resource, "OCI resource deleted")
+		c.markDeletedWithHooks(resource, "OCI resource deleted")
 		return true, nil
 	case lifecycleState == "" || containsString(semantics.Delete.PendingStates, lifecycleState):
-		c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+		if err := c.markTerminatingWithHooks(resource, response); err != nil {
+			return false, err
+		}
 		return false, nil
 	default:
 		return false, fmt.Errorf("%s delete confirmation returned unexpected lifecycle state %q", c.config.Kind, lifecycleState)
@@ -921,7 +1102,9 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 	if currentID == "" {
 		return "", fmt.Errorf("%s delete confirmation could not resolve a resource OCID", c.config.Kind)
 	}
-	_ = mergeResponseIntoStatus(resource, response)
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return "", err
+	}
 	return currentID, nil
 }
 
@@ -995,6 +1178,9 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 	if err := c.validateForceNewFields(resource, specValues, currentValues); err != nil {
 		return err
 	}
+	if err := c.validateCreateOnlyDrift(resource, currentResponse); err != nil {
+		return err
+	}
 	if c.config.Update == nil {
 		return nil
 	}
@@ -1004,6 +1190,13 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 		return nil
 	}
 	return fmt.Errorf("%s formal semantics reject unsupported update drift for %s", c.config.Kind, strings.Join(unsupportedPaths, ", "))
+}
+
+func (c ServiceClient[T]) validateCreateOnlyDrift(resource T, currentResponse any) error {
+	if currentResponse == nil || c.config.ParityHooks.ValidateCreateOnlyDrift == nil {
+		return nil
+	}
+	return c.config.ParityHooks.ValidateCreateOnlyDrift(resource, currentResponse)
 }
 
 func mutationValues(resource any, currentResponse any) (map[string]any, map[string]any, error) {

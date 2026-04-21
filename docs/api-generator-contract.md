@@ -236,11 +236,21 @@ and service-manager generation is enabled.
   identity, record path status, optionally record tracked identity, optionally
   look up an existing object by identity, or optionally seed a temporary
   synthetic tracked ID.
+- The runtime-hooks surface also carries a bounded phase-4 core-wrapper
+  extension for the seven core networking wrappers named in
+  `docs/contributor/runtime-hook-adoption-audit.md`:
+  `TrackedRecreate` lets a package clear stale tracked identity only after
+  generatedruntime proves the recorded OCI ID is gone, `StatusHooks` lets a
+  package clear or restore projected status around delegate execution and
+  optionally project status / apply lifecycle / mark deleted / mark
+  terminating from package-local OCI responses, and `ParityHooks` lets a
+  package normalize desired vs live values, validate create-only drift, and
+  optionally execute a package-local parity-only update path.
 - The nested `Read` seam is only for read adaptation such as synthesizing
   `Get` or `List` from a parent-shaped SDK call. It does not widen
   create/update/delete into a generic untyped CRUD contract, and this contract
-  still does not expose generic `CurrentID`, `ClearTrackedIdentity`,
-  status-reset, async, or OCI-error hooks.
+  still does not expose generic `CurrentID`, cross-service identity-repair,
+  async, or OCI-error overlay hooks.
 - `<file-stem>_serviceclient.go` now limits itself to OCI client construction,
   hook assembly, generated-runtime config creation, default delegate creation,
   and optional wrapper application.
