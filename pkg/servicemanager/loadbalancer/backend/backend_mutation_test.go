@@ -22,6 +22,10 @@ type fakeGeneratedBackendOCIClient struct {
 	deleteFn func(context.Context, loadbalancersdk.DeleteBackendRequest) (loadbalancersdk.DeleteBackendResponse, error)
 }
 
+type backendLookupClient interface {
+	GetBackend(context.Context, loadbalancersdk.GetBackendRequest) (loadbalancersdk.GetBackendResponse, error)
+}
+
 func (f *fakeGeneratedBackendOCIClient) CreateBackend(ctx context.Context, req loadbalancersdk.CreateBackendRequest) (loadbalancersdk.CreateBackendResponse, error) {
 	if f.createFn != nil {
 		return f.createFn(ctx, req)
@@ -58,76 +62,36 @@ func (f *fakeGeneratedBackendOCIClient) DeleteBackend(ctx context.Context, req l
 }
 
 func newTestGeneratedBackendDelegate(client *fakeGeneratedBackendOCIClient) BackendServiceClient {
-	config := generatedruntime.Config[*loadbalancerv1beta1.Backend]{
-		Kind:      "Backend",
-		SDKName:   "Backend",
-		Semantics: newBackendRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateBackendRequest{} },
-			Fields: []generatedruntime.RequestField{
-				backendLoadBalancerIDField(),
-				backendSetNameField(),
-				{FieldName: "CreateBackendDetails", Contribution: "body"},
-			},
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateBackend(ctx, *request.(*loadbalancersdk.CreateBackendRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetBackendRequest{} },
-			Fields: []generatedruntime.RequestField{
-				backendLoadBalancerIDField(),
-				backendSetNameField(),
-				backendNameField(),
-			},
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetBackend(ctx, *request.(*loadbalancersdk.GetBackendRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListBackendsRequest{} },
-			Fields: []generatedruntime.RequestField{
-				backendLoadBalancerIDField(),
-				backendSetNameField(),
-			},
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListBackends(ctx, *request.(*loadbalancersdk.ListBackendsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateBackendRequest{} },
-			Fields: []generatedruntime.RequestField{
-				backendLoadBalancerIDField(),
-				backendSetNameField(),
-				backendNameField(),
-				{FieldName: "UpdateBackendDetails", Contribution: "body"},
-			},
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateBackend(ctx, *request.(*loadbalancersdk.UpdateBackendRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteBackendRequest{} },
-			Fields: []generatedruntime.RequestField{
-				backendLoadBalancerIDField(),
-				backendSetNameField(),
-				backendNameField(),
-			},
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteBackend(ctx, *request.(*loadbalancersdk.DeleteBackendRequest))
-			},
-		},
-	}
+	hooks := newBackendRuntimeHooksWithOCIClient(client)
+	applyBackendRuntimeHooks(&hooks)
+	config := buildBackendGeneratedRuntimeConfig(&BackendServiceManager{}, hooks)
 
 	return defaultBackendServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Backend](config),
 	}
 }
 
-func newTestBackendRuntimeClient(client *fakeGeneratedBackendOCIClient) *backendRuntimeServiceClient {
-	return &backendRuntimeServiceClient{
-		delegate: newTestGeneratedBackendDelegate(client),
-		lookup:   client,
+func newTestBackendRuntimeClient(client *fakeGeneratedBackendOCIClient) BackendServiceClient {
+	return newTestBackendRuntimeClientWithLookup(client, nil)
+}
+
+func newTestBackendRuntimeClientWithLookup(client *fakeGeneratedBackendOCIClient, lookup backendLookupClient) BackendServiceClient {
+	hooks := newBackendRuntimeHooksWithOCIClient(client)
+	applyBackendRuntimeHooks(&hooks)
+	if lookup != nil {
+		hooks.Identity.LookupExisting = func(ctx context.Context, _ *loadbalancerv1beta1.Backend, identity any) (any, error) {
+			resolved := identity.(backendIdentity)
+			return lookup.GetBackend(ctx, loadbalancersdk.GetBackendRequest{
+				LoadBalancerId: common.String(resolved.loadBalancerID),
+				BackendSetName: common.String(resolved.backendSetName),
+				BackendName:    common.String(resolved.backendName),
+			})
+		}
+	}
+
+	config := buildBackendGeneratedRuntimeConfig(&BackendServiceManager{}, hooks)
+	return defaultBackendServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Backend](config),
 	}
 }
 
@@ -147,12 +111,10 @@ func TestCreateOrUpdateExecutesMutableBackendUpdate(t *testing.T) {
 		getFn: func(_ context.Context, req loadbalancersdk.GetBackendRequest) (loadbalancersdk.GetBackendResponse, error) {
 			getCalls++
 			assertBackendPathIdentity(t, req.LoadBalancerId, req.BackendSetName, req.BackendName)
-			switch getCalls {
-			case 1, 2:
+			if getCalls == 1 {
 				return loadbalancersdk.GetBackendResponse{Backend: sdkBackend(1, false, false, false)}, nil
-			default:
-				return loadbalancersdk.GetBackendResponse{Backend: sdkBackend(resource.Spec.Weight, resource.Spec.Backup, resource.Spec.Drain, resource.Spec.Offline)}, nil
 			}
+			return loadbalancersdk.GetBackendResponse{Backend: sdkBackend(resource.Spec.Weight, resource.Spec.Backup, resource.Spec.Drain, resource.Spec.Offline)}, nil
 		},
 		updateFn: func(_ context.Context, req loadbalancersdk.UpdateBackendRequest) (loadbalancersdk.UpdateBackendResponse, error) {
 			updateRequest = req

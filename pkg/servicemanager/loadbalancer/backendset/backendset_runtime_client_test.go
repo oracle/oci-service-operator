@@ -33,6 +33,10 @@ type fakeGeneratedBackendSetOCIClient struct {
 	deleteFn func(context.Context, loadbalancersdk.DeleteBackendSetRequest) (loadbalancersdk.DeleteBackendSetResponse, error)
 }
 
+type backendSetLookupClient interface {
+	GetBackendSet(context.Context, loadbalancersdk.GetBackendSetRequest) (loadbalancersdk.GetBackendSetResponse, error)
+}
+
 type fakeBackendSetLookupClient struct {
 	requests []loadbalancersdk.GetBackendSetRequest
 	response loadbalancersdk.GetBackendSetResponse
@@ -83,68 +87,38 @@ func (f *fakeGeneratedBackendSetOCIClient) DeleteBackendSet(ctx context.Context,
 }
 
 func newTestGeneratedBackendSetDelegate(client *fakeGeneratedBackendSetOCIClient) BackendSetServiceClient {
-	config := generatedruntime.Config[*loadbalancerv1beta1.BackendSet]{
-		Kind:      "BackendSet",
-		SDKName:   "BackendSet",
-		Semantics: newBackendSetRuntimeSemantics(),
-		BuildUpdateBody: func(
-			ctx context.Context,
-			resource *loadbalancerv1beta1.BackendSet,
-			namespace string,
-			currentResponse any,
-		) (any, bool, error) {
-			return buildBackendSetUpdateBody(ctx, resource, namespace, currentResponse)
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateBackendSetRequest{} },
-			Fields:     backendSetCreateFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateBackendSet(ctx, *request.(*loadbalancersdk.CreateBackendSetRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetBackendSetRequest{} },
-			Fields:     backendSetGetFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetBackendSet(ctx, *request.(*loadbalancersdk.GetBackendSetRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListBackendSetsRequest{} },
-			Fields:     backendSetListFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListBackendSets(ctx, *request.(*loadbalancersdk.ListBackendSetsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateBackendSetRequest{} },
-			Fields:     backendSetUpdateFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateBackendSet(ctx, *request.(*loadbalancersdk.UpdateBackendSetRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteBackendSetRequest{} },
-			Fields:     backendSetDeleteFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteBackendSet(ctx, *request.(*loadbalancersdk.DeleteBackendSetRequest))
-			},
-		},
-	}
+	hooks := newBackendSetRuntimeHooksWithOCIClient(client)
+	applyBackendSetRuntimeHooks(&hooks)
+	config := buildBackendSetGeneratedRuntimeConfig(&BackendSetServiceManager{}, hooks)
 
 	return defaultBackendSetServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.BackendSet](config),
 	}
 }
 
-func newTestBackendSetRuntimeClient(client *fakeGeneratedBackendSetOCIClient) *backendSetRuntimeServiceClient {
+func newTestBackendSetRuntimeClient(client *fakeGeneratedBackendSetOCIClient) BackendSetServiceClient {
 	return newTestBackendSetRuntimeClientWithLookup(client, nil)
 }
 
-func newTestBackendSetRuntimeClientWithLookup(client *fakeGeneratedBackendSetOCIClient, lookup backendSetLookupClient) *backendSetRuntimeServiceClient {
-	return &backendSetRuntimeServiceClient{
-		delegate: newTestGeneratedBackendSetDelegate(client),
-		lookup:   lookup,
+func newTestBackendSetRuntimeClientWithLookup(client *fakeGeneratedBackendSetOCIClient, lookup backendSetLookupClient) BackendSetServiceClient {
+	hooks := newBackendSetRuntimeHooksWithOCIClient(client)
+	applyBackendSetRuntimeHooks(&hooks)
+	if lookup != nil {
+		hooks.Identity.LookupExisting = func(ctx context.Context, resource *loadbalancerv1beta1.BackendSet, identity any) (any, error) {
+			if backendSetHasTrackedID(resource) {
+				return nil, nil
+			}
+			resolved := identity.(backendSetIdentity)
+			return lookup.GetBackendSet(ctx, loadbalancersdk.GetBackendSetRequest{
+				LoadBalancerId: common.String(resolved.loadBalancerID),
+				BackendSetName: common.String(resolved.backendSetName),
+			})
+		}
+	}
+
+	config := buildBackendSetGeneratedRuntimeConfig(&BackendSetServiceManager{}, hooks)
+	return defaultBackendSetServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.BackendSet](config),
 	}
 }
 
@@ -321,7 +295,7 @@ func TestCreateOrUpdateCreatesBackendSetWhenMissing(t *testing.T) {
 		getFn: func(_ context.Context, req loadbalancersdk.GetBackendSetRequest) (loadbalancersdk.GetBackendSetResponse, error) {
 			getCalls++
 			assertBackendSetPathIdentity(t, req.LoadBalancerId, req.BackendSetName, backendSetLoadBalancerID, backendSetNameValue)
-			if getCalls == 1 {
+			if getCalls <= 2 {
 				return loadbalancersdk.GetBackendSetResponse{}, errortest.NewServiceError(404, "NotFound", "missing backend set")
 			}
 			return loadbalancersdk.GetBackendSetResponse{BackendSet: sdkBackendSet(resource.Spec.Policy)}, nil
@@ -394,8 +368,8 @@ func TestCreateOrUpdateBindsExistingBackendSetWithoutPreseededOCID(t *testing.T)
 	if updateCalled {
 		t.Fatal("UpdateBackendSet() called, want observe-only bind path")
 	}
-	if getCalls != 1 {
-		t.Fatalf("delegate GetBackendSet() calls = %d, want 1", getCalls)
+	if getCalls != 0 {
+		t.Fatalf("delegate GetBackendSet() calls = %d, want 0", getCalls)
 	}
 	if len(lookup.requests) != 1 {
 		t.Fatalf("lookup GetBackendSet() calls = %d, want 1", len(lookup.requests))
@@ -419,7 +393,7 @@ func TestCreateOrUpdateUpdatesBackendSetAfterCreateWithoutPreseededOCID(t *testi
 			switch phase {
 			case "create":
 				createGetCalls++
-				if createGetCalls == 1 {
+				if createGetCalls <= 2 {
 					return loadbalancersdk.GetBackendSetResponse{}, errortest.NewServiceError(404, "NotFound", "missing backend set")
 				}
 				return loadbalancersdk.GetBackendSetResponse{BackendSet: sdkBackendSet("ROUND_ROBIN")}, nil
@@ -676,7 +650,7 @@ func TestDeleteSucceedsAfterCreateWithoutPreseededOCID(t *testing.T) {
 			switch phase {
 			case "create":
 				createGetCalls++
-				if createGetCalls == 1 {
+				if createGetCalls <= 2 {
 					return loadbalancersdk.GetBackendSetResponse{}, errortest.NewServiceError(404, "NotFound", "missing backend set")
 				}
 				return loadbalancersdk.GetBackendSetResponse{BackendSet: sdkBackendSet("ROUND_ROBIN")}, nil
