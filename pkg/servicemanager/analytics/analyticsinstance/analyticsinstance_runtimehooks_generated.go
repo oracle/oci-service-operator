@@ -24,6 +24,8 @@ type AnalyticsInstanceRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *analyticsv1beta1.AnalyticsInstance, string) (any, error)
 	BuildUpdateBody     func(context.Context, *analyticsv1beta1.AnalyticsInstance, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*analyticsv1beta1.AnalyticsInstance]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[analyticssdk.CreateAnalyticsInstanceRequest, analyticssdk.CreateAnalyticsInstanceResponse]
 	Get                 runtimeOperationHooks[analyticssdk.GetAnalyticsInstanceRequest, analyticssdk.GetAnalyticsInstanceResponse]
 	List                runtimeOperationHooks[analyticssdk.ListAnalyticsInstancesRequest, analyticssdk.ListAnalyticsInstancesResponse]
@@ -97,6 +99,8 @@ func newAnalyticsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 func newAnalyticsInstanceDefaultRuntimeHooks(sdkClient analyticssdk.AnalyticsClient) AnalyticsInstanceRuntimeHooks {
 	return AnalyticsInstanceRuntimeHooks{
 		Semantics: newAnalyticsInstanceRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*analyticsv1beta1.AnalyticsInstance]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[analyticssdk.CreateAnalyticsInstanceRequest, analyticssdk.CreateAnalyticsInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAnalyticsInstanceDetails", RequestName: "CreateAnalyticsInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request analyticssdk.CreateAnalyticsInstanceRequest) (analyticssdk.CreateAnalyticsInstanceResponse, error) {
@@ -148,6 +152,8 @@ func buildAnalyticsInstanceGeneratedRuntimeConfig(
 		SDKName:         "AnalyticsInstance",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

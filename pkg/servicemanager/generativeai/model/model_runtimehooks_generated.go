@@ -24,6 +24,8 @@ type ModelRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *generativeaiv1beta1.Model, string) (any, error)
 	BuildUpdateBody     func(context.Context, *generativeaiv1beta1.Model, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*generativeaiv1beta1.Model]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[generativeaisdk.CreateModelRequest, generativeaisdk.CreateModelResponse]
 	Get                 runtimeOperationHooks[generativeaisdk.GetModelRequest, generativeaisdk.GetModelResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListModelsRequest, generativeaisdk.ListModelsResponse]
@@ -97,6 +99,8 @@ func newModelRuntimeSemantics() *generatedruntime.Semantics {
 func newModelDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiClient) ModelRuntimeHooks {
 	return ModelRuntimeHooks{
 		Semantics: newModelRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*generativeaiv1beta1.Model]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[generativeaisdk.CreateModelRequest, generativeaisdk.CreateModelResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateModelDetails", RequestName: "CreateModelDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.CreateModelRequest) (generativeaisdk.CreateModelResponse, error) {
@@ -148,6 +152,8 @@ func buildModelGeneratedRuntimeConfig(
 		SDKName:         "Model",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type TaxRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *marketplacev1beta1.Tax, string) (any, error)
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Tax, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Tax]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[marketplacesdk.ListTaxesRequest, marketplacesdk.ListTaxesResponse]
 	WrapGeneratedClient []func(TaxServiceClient) TaxServiceClient
 }
@@ -40,6 +42,8 @@ func registerTaxRuntimeHooksMutator(mutator TaxRuntimeHooksMutator) {
 }
 func newTaxDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) TaxRuntimeHooks {
 	return TaxRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Tax]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[marketplacesdk.ListTaxesRequest, marketplacesdk.ListTaxesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListTaxesRequest) (marketplacesdk.ListTaxesResponse, error) {
@@ -67,6 +71,8 @@ func buildTaxGeneratedRuntimeConfig(
 		SDKName:         "Tax",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

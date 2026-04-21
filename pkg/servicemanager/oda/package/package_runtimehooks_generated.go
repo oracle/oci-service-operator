@@ -24,6 +24,8 @@ type PackageRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.Package, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.Package, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.Package]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[odasdk.GetPackageRequest, odasdk.GetPackageResponse]
 	List                runtimeOperationHooks[odasdk.ListPackagesRequest, odasdk.ListPackagesResponse]
 	WrapGeneratedClient []func(PackageServiceClient) PackageServiceClient
@@ -41,6 +43,8 @@ func registerPackageRuntimeHooksMutator(mutator PackageRuntimeHooksMutator) {
 }
 func newPackageDefaultRuntimeHooks(sdkClient odasdk.OdapackageClient) PackageRuntimeHooks {
 	return PackageRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.Package]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[odasdk.GetPackageRequest, odasdk.GetPackageResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.GetPackageRequest) (odasdk.GetPackageResponse, error) {
@@ -74,6 +78,8 @@ func buildPackageGeneratedRuntimeConfig(
 		SDKName:         "Package",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

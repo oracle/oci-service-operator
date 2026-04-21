@@ -24,6 +24,8 @@ type SupportedVmwareSoftwareVersionRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *ocvpv1beta1.SupportedVmwareSoftwareVersion, string) (any, error)
 	BuildUpdateBody     func(context.Context, *ocvpv1beta1.SupportedVmwareSoftwareVersion, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest, ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse]
 	WrapGeneratedClient []func(SupportedVmwareSoftwareVersionServiceClient) SupportedVmwareSoftwareVersionServiceClient
 }
@@ -40,6 +42,8 @@ func registerSupportedVmwareSoftwareVersionRuntimeHooksMutator(mutator Supported
 }
 func newSupportedVmwareSoftwareVersionDefaultRuntimeHooks(sdkClient ocvpsdk.SddcClient) SupportedVmwareSoftwareVersionRuntimeHooks {
 	return SupportedVmwareSoftwareVersionRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest, ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Version", RequestName: "version", Contribution: "query", PreferResourceID: false}, {FieldName: "HostShapeName", RequestName: "hostShapeName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest) (ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse, error) {
@@ -67,6 +71,8 @@ func buildSupportedVmwareSoftwareVersionGeneratedRuntimeConfig(
 		SDKName:         "SupportedVmwareSoftwareVersion",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

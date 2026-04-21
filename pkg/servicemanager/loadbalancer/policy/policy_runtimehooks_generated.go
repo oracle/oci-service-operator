@@ -24,6 +24,8 @@ type PolicyRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.Policy, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.Policy, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.Policy]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[loadbalancersdk.ListPoliciesRequest, loadbalancersdk.ListPoliciesResponse]
 	WrapGeneratedClient []func(PolicyServiceClient) PolicyServiceClient
 }
@@ -40,6 +42,8 @@ func registerPolicyRuntimeHooksMutator(mutator PolicyRuntimeHooksMutator) {
 }
 func newPolicyDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) PolicyRuntimeHooks {
 	return PolicyRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.Policy]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[loadbalancersdk.ListPoliciesRequest, loadbalancersdk.ListPoliciesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListPoliciesRequest) (loadbalancersdk.ListPoliciesResponse, error) {
@@ -67,6 +71,8 @@ func buildPolicyGeneratedRuntimeConfig(
 		SDKName:         "Policy",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

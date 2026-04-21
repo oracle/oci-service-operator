@@ -24,6 +24,8 @@ type RedisClusterRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *redisv1beta1.RedisCluster, string) (any, error)
 	BuildUpdateBody     func(context.Context, *redisv1beta1.RedisCluster, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*redisv1beta1.RedisCluster]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[redissdk.CreateRedisClusterRequest, redissdk.CreateRedisClusterResponse]
 	Get                 runtimeOperationHooks[redissdk.GetRedisClusterRequest, redissdk.GetRedisClusterResponse]
 	List                runtimeOperationHooks[redissdk.ListRedisClustersRequest, redissdk.ListRedisClustersResponse]
@@ -101,6 +103,8 @@ func newRedisClusterRuntimeSemantics() *generatedruntime.Semantics {
 func newRedisClusterDefaultRuntimeHooks(sdkClient redissdk.RedisClusterClient) RedisClusterRuntimeHooks {
 	return RedisClusterRuntimeHooks{
 		Semantics: newRedisClusterRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*redisv1beta1.RedisCluster]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[redissdk.CreateRedisClusterRequest, redissdk.CreateRedisClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRedisClusterDetails", RequestName: "CreateRedisClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request redissdk.CreateRedisClusterRequest) (redissdk.CreateRedisClusterResponse, error) {
@@ -152,6 +156,8 @@ func buildRedisClusterGeneratedRuntimeConfig(
 		SDKName:         "RedisCluster",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

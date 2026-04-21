@@ -24,6 +24,8 @@ type NetworkSecurityGroupRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.NetworkSecurityGroup, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.NetworkSecurityGroup, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.NetworkSecurityGroup]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.CreateNetworkSecurityGroupRequest, coresdk.CreateNetworkSecurityGroupResponse]
 	Get                 runtimeOperationHooks[coresdk.GetNetworkSecurityGroupRequest, coresdk.GetNetworkSecurityGroupResponse]
 	List                runtimeOperationHooks[coresdk.ListNetworkSecurityGroupsRequest, coresdk.ListNetworkSecurityGroupsResponse]
@@ -97,6 +99,8 @@ func newNetworkSecurityGroupRuntimeSemantics() *generatedruntime.Semantics {
 func newNetworkSecurityGroupDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) NetworkSecurityGroupRuntimeHooks {
 	return NetworkSecurityGroupRuntimeHooks{
 		Semantics: newNetworkSecurityGroupRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*corev1beta1.NetworkSecurityGroup]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.CreateNetworkSecurityGroupRequest, coresdk.CreateNetworkSecurityGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error) {
@@ -148,6 +152,8 @@ func buildNetworkSecurityGroupGeneratedRuntimeConfig(
 		SDKName:         "NetworkSecurityGroup",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type CertificateRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.Certificate, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.Certificate, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.Certificate]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[loadbalancersdk.CreateCertificateRequest, loadbalancersdk.CreateCertificateResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListCertificatesRequest, loadbalancersdk.ListCertificatesResponse]
 	Delete              runtimeOperationHooks[loadbalancersdk.DeleteCertificateRequest, loadbalancersdk.DeleteCertificateResponse]
@@ -42,6 +44,8 @@ func registerCertificateRuntimeHooksMutator(mutator CertificateRuntimeHooksMutat
 }
 func newCertificateDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) CertificateRuntimeHooks {
 	return CertificateRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.Certificate]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateCertificateRequest, loadbalancersdk.CreateCertificateResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateCertificateDetails", RequestName: "CreateCertificateDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateCertificateRequest) (loadbalancersdk.CreateCertificateResponse, error) {
@@ -81,6 +85,8 @@ func buildCertificateGeneratedRuntimeConfig(
 		SDKName:         "Certificate",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

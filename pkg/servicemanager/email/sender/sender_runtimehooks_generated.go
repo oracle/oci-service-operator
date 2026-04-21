@@ -24,6 +24,8 @@ type SenderRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *emailv1beta1.Sender, string) (any, error)
 	BuildUpdateBody     func(context.Context, *emailv1beta1.Sender, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*emailv1beta1.Sender]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetSenderRequest, emailsdk.GetSenderResponse]
 	List                runtimeOperationHooks[emailsdk.ListSendersRequest, emailsdk.ListSendersResponse]
@@ -97,6 +99,8 @@ func newSenderRuntimeSemantics() *generatedruntime.Semantics {
 func newSenderDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) SenderRuntimeHooks {
 	return SenderRuntimeHooks{
 		Semantics: newSenderRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*emailv1beta1.Sender]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSenderDetails", RequestName: "CreateSenderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateSenderRequest) (emailsdk.CreateSenderResponse, error) {
@@ -148,6 +152,8 @@ func buildSenderGeneratedRuntimeConfig(
 		SDKName:         "Sender",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

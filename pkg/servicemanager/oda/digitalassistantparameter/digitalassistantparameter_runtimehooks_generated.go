@@ -24,6 +24,8 @@ type DigitalAssistantParameterRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.DigitalAssistantParameter, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.DigitalAssistantParameter, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistantParameter]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[odasdk.GetDigitalAssistantParameterRequest, odasdk.GetDigitalAssistantParameterResponse]
 	List                runtimeOperationHooks[odasdk.ListDigitalAssistantParametersRequest, odasdk.ListDigitalAssistantParametersResponse]
 	Update              runtimeOperationHooks[odasdk.UpdateDigitalAssistantParameterRequest, odasdk.UpdateDigitalAssistantParameterResponse]
@@ -42,6 +44,8 @@ func registerDigitalAssistantParameterRuntimeHooksMutator(mutator DigitalAssista
 }
 func newDigitalAssistantParameterDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) DigitalAssistantParameterRuntimeHooks {
 	return DigitalAssistantParameterRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.DigitalAssistantParameter]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[odasdk.GetDigitalAssistantParameterRequest, odasdk.GetDigitalAssistantParameterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DigitalAssistantId", RequestName: "digitalAssistantId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.GetDigitalAssistantParameterRequest) (odasdk.GetDigitalAssistantParameterResponse, error) {
@@ -81,6 +85,8 @@ func buildDigitalAssistantParameterGeneratedRuntimeConfig(
 		SDKName:         "DigitalAssistantParameter",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

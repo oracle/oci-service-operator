@@ -24,6 +24,8 @@ type CompartmentRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *identityv1beta1.Compartment, string) (any, error)
 	BuildUpdateBody     func(context.Context, *identityv1beta1.Compartment, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*identityv1beta1.Compartment]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[identitysdk.CreateCompartmentRequest, identitysdk.CreateCompartmentResponse]
 	Get                 runtimeOperationHooks[identitysdk.GetCompartmentRequest, identitysdk.GetCompartmentResponse]
 	List                runtimeOperationHooks[identitysdk.ListCompartmentsRequest, identitysdk.ListCompartmentsResponse]
@@ -97,6 +99,8 @@ func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {
 func newCompartmentDefaultRuntimeHooks(sdkClient identitysdk.IdentityClient) CompartmentRuntimeHooks {
 	return CompartmentRuntimeHooks{
 		Semantics: newCompartmentRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*identityv1beta1.Compartment]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[identitysdk.CreateCompartmentRequest, identitysdk.CreateCompartmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateCompartmentDetails", RequestName: "CreateCompartmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request identitysdk.CreateCompartmentRequest) (identitysdk.CreateCompartmentResponse, error) {
@@ -148,6 +152,8 @@ func buildCompartmentGeneratedRuntimeConfig(
 		SDKName:         "Compartment",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type EndpointRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *generativeaiv1beta1.Endpoint, string) (any, error)
 	BuildUpdateBody     func(context.Context, *generativeaiv1beta1.Endpoint, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*generativeaiv1beta1.Endpoint]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[generativeaisdk.CreateEndpointRequest, generativeaisdk.CreateEndpointResponse]
 	Get                 runtimeOperationHooks[generativeaisdk.GetEndpointRequest, generativeaisdk.GetEndpointResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListEndpointsRequest, generativeaisdk.ListEndpointsResponse]
@@ -97,6 +99,8 @@ func newEndpointRuntimeSemantics() *generatedruntime.Semantics {
 func newEndpointDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiClient) EndpointRuntimeHooks {
 	return EndpointRuntimeHooks{
 		Semantics: newEndpointRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*generativeaiv1beta1.Endpoint]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[generativeaisdk.CreateEndpointRequest, generativeaisdk.CreateEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEndpointDetails", RequestName: "CreateEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.CreateEndpointRequest) (generativeaisdk.CreateEndpointResponse, error) {
@@ -148,6 +152,8 @@ func buildEndpointGeneratedRuntimeConfig(
 		SDKName:         "Endpoint",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

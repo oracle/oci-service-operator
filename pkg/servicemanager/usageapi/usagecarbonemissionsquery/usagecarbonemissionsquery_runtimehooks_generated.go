@@ -24,6 +24,8 @@ type UsageCarbonEmissionsQueryRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, string) (any, error)
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[usageapisdk.CreateUsageCarbonEmissionsQueryRequest, usageapisdk.CreateUsageCarbonEmissionsQueryResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetUsageCarbonEmissionsQueryRequest, usageapisdk.GetUsageCarbonEmissionsQueryResponse]
 	List                runtimeOperationHooks[usageapisdk.ListUsageCarbonEmissionsQueriesRequest, usageapisdk.ListUsageCarbonEmissionsQueriesResponse]
@@ -44,6 +46,8 @@ func registerUsageCarbonEmissionsQueryRuntimeHooksMutator(mutator UsageCarbonEmi
 }
 func newUsageCarbonEmissionsQueryDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) UsageCarbonEmissionsQueryRuntimeHooks {
 	return UsageCarbonEmissionsQueryRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[usageapisdk.CreateUsageCarbonEmissionsQueryRequest, usageapisdk.CreateUsageCarbonEmissionsQueryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateUsageCarbonEmissionsQueryDetails", RequestName: "CreateUsageCarbonEmissionsQueryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateUsageCarbonEmissionsQueryRequest) (usageapisdk.CreateUsageCarbonEmissionsQueryResponse, error) {
@@ -95,6 +99,8 @@ func buildUsageCarbonEmissionsQueryGeneratedRuntimeConfig(
 		SDKName:         "UsageCarbonEmissionsQuery",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

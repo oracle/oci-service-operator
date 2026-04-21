@@ -24,6 +24,8 @@ type DrgRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.Drg, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.Drg, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.Drg]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.CreateDrgRequest, coresdk.CreateDrgResponse]
 	Get                 runtimeOperationHooks[coresdk.GetDrgRequest, coresdk.GetDrgResponse]
 	List                runtimeOperationHooks[coresdk.ListDrgsRequest, coresdk.ListDrgsResponse]
@@ -44,6 +46,8 @@ func registerDrgRuntimeHooksMutator(mutator DrgRuntimeHooksMutator) {
 }
 func newDrgDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) DrgRuntimeHooks {
 	return DrgRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*corev1beta1.Drg]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.CreateDrgRequest, coresdk.CreateDrgResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDrgDetails", RequestName: "CreateDrgDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateDrgRequest) (coresdk.CreateDrgResponse, error) {
@@ -95,6 +99,8 @@ func buildDrgGeneratedRuntimeConfig(
 		SDKName:         "Drg",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

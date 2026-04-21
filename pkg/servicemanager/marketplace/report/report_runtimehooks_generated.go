@@ -24,6 +24,8 @@ type ReportRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *marketplacev1beta1.Report, string) (any, error)
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.Report, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.Report]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[marketplacesdk.ListReportsRequest, marketplacesdk.ListReportsResponse]
 	WrapGeneratedClient []func(ReportServiceClient) ReportServiceClient
 }
@@ -40,6 +42,8 @@ func registerReportRuntimeHooksMutator(mutator ReportRuntimeHooksMutator) {
 }
 func newReportDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) ReportRuntimeHooks {
 	return ReportRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.Report]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[marketplacesdk.ListReportsRequest, marketplacesdk.ListReportsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ReportType", RequestName: "reportType", Contribution: "query", PreferResourceID: false}, {FieldName: "Date", RequestName: "date", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListReportsRequest) (marketplacesdk.ListReportsResponse, error) {
@@ -67,6 +71,8 @@ func buildReportGeneratedRuntimeConfig(
 		SDKName:         "Report",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

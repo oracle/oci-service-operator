@@ -24,6 +24,8 @@ type AlarmSuppressionRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *monitoringv1beta1.AlarmSuppression, string) (any, error)
 	BuildUpdateBody     func(context.Context, *monitoringv1beta1.AlarmSuppression, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmSuppression]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[monitoringsdk.CreateAlarmSuppressionRequest, monitoringsdk.CreateAlarmSuppressionResponse]
 	Get                 runtimeOperationHooks[monitoringsdk.GetAlarmSuppressionRequest, monitoringsdk.GetAlarmSuppressionResponse]
 	List                runtimeOperationHooks[monitoringsdk.ListAlarmSuppressionsRequest, monitoringsdk.ListAlarmSuppressionsResponse]
@@ -43,6 +45,8 @@ func registerAlarmSuppressionRuntimeHooksMutator(mutator AlarmSuppressionRuntime
 }
 func newAlarmSuppressionDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) AlarmSuppressionRuntimeHooks {
 	return AlarmSuppressionRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmSuppression]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[monitoringsdk.CreateAlarmSuppressionRequest, monitoringsdk.CreateAlarmSuppressionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAlarmSuppressionDetails", RequestName: "CreateAlarmSuppressionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.CreateAlarmSuppressionRequest) (monitoringsdk.CreateAlarmSuppressionResponse, error) {
@@ -88,6 +92,8 @@ func buildAlarmSuppressionGeneratedRuntimeConfig(
 		SDKName:         "AlarmSuppression",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

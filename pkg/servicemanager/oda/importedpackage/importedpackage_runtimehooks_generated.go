@@ -24,6 +24,8 @@ type ImportedPackageRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.ImportedPackage, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.ImportedPackage, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.ImportedPackage]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateImportedPackageRequest, odasdk.CreateImportedPackageResponse]
 	Get                 runtimeOperationHooks[odasdk.GetImportedPackageRequest, odasdk.GetImportedPackageResponse]
 	List                runtimeOperationHooks[odasdk.ListImportedPackagesRequest, odasdk.ListImportedPackagesResponse]
@@ -44,6 +46,8 @@ func registerImportedPackageRuntimeHooksMutator(mutator ImportedPackageRuntimeHo
 }
 func newImportedPackageDefaultRuntimeHooks(sdkClient odasdk.OdapackageClient) ImportedPackageRuntimeHooks {
 	return ImportedPackageRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.ImportedPackage]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateImportedPackageRequest, odasdk.CreateImportedPackageResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateImportedPackageDetails", RequestName: "CreateImportedPackageDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateImportedPackageRequest) (odasdk.CreateImportedPackageResponse, error) {
@@ -95,6 +99,8 @@ func buildImportedPackageGeneratedRuntimeConfig(
 		SDKName:         "ImportedPackage",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

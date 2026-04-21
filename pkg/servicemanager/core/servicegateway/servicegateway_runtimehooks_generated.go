@@ -24,6 +24,8 @@ type ServiceGatewayRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.ServiceGateway, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.ServiceGateway, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.ServiceGateway]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.CreateServiceGatewayRequest, coresdk.CreateServiceGatewayResponse]
 	Get                 runtimeOperationHooks[coresdk.GetServiceGatewayRequest, coresdk.GetServiceGatewayResponse]
 	List                runtimeOperationHooks[coresdk.ListServiceGatewaysRequest, coresdk.ListServiceGatewaysResponse]
@@ -97,6 +99,8 @@ func newServiceGatewayRuntimeSemantics() *generatedruntime.Semantics {
 func newServiceGatewayDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) ServiceGatewayRuntimeHooks {
 	return ServiceGatewayRuntimeHooks{
 		Semantics: newServiceGatewayRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*corev1beta1.ServiceGateway]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.CreateServiceGatewayRequest, coresdk.CreateServiceGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceGatewayDetails", RequestName: "CreateServiceGatewayDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
@@ -148,6 +152,8 @@ func buildServiceGatewayGeneratedRuntimeConfig(
 		SDKName:         "ServiceGateway",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

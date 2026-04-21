@@ -24,6 +24,8 @@ type SuppressionRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *emailv1beta1.Suppression, string) (any, error)
 	BuildUpdateBody     func(context.Context, *emailv1beta1.Suppression, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*emailv1beta1.Suppression]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[emailsdk.CreateSuppressionRequest, emailsdk.CreateSuppressionResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetSuppressionRequest, emailsdk.GetSuppressionResponse]
 	List                runtimeOperationHooks[emailsdk.ListSuppressionsRequest, emailsdk.ListSuppressionsResponse]
@@ -43,6 +45,8 @@ func registerSuppressionRuntimeHooksMutator(mutator SuppressionRuntimeHooksMutat
 }
 func newSuppressionDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) SuppressionRuntimeHooks {
 	return SuppressionRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*emailv1beta1.Suppression]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[emailsdk.CreateSuppressionRequest, emailsdk.CreateSuppressionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSuppressionDetails", RequestName: "CreateSuppressionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateSuppressionRequest) (emailsdk.CreateSuppressionResponse, error) {
@@ -88,6 +92,8 @@ func buildSuppressionGeneratedRuntimeConfig(
 		SDKName:         "Suppression",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

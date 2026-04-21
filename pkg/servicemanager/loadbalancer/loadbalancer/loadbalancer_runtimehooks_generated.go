@@ -24,6 +24,8 @@ type LoadBalancerRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.LoadBalancer, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.LoadBalancer, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancer]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[loadbalancersdk.CreateLoadBalancerRequest, loadbalancersdk.CreateLoadBalancerResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetLoadBalancerRequest, loadbalancersdk.GetLoadBalancerResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListLoadBalancersRequest, loadbalancersdk.ListLoadBalancersResponse]
@@ -97,6 +99,8 @@ func newLoadBalancerRuntimeSemantics() *generatedruntime.Semantics {
 func newLoadBalancerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) LoadBalancerRuntimeHooks {
 	return LoadBalancerRuntimeHooks{
 		Semantics: newLoadBalancerRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancer]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateLoadBalancerRequest, loadbalancersdk.CreateLoadBalancerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateLoadBalancerDetails", RequestName: "CreateLoadBalancerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateLoadBalancerRequest) (loadbalancersdk.CreateLoadBalancerResponse, error) {
@@ -148,6 +152,8 @@ func buildLoadBalancerGeneratedRuntimeConfig(
 		SDKName:         "LoadBalancer",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

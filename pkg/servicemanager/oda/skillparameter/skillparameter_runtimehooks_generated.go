@@ -24,6 +24,8 @@ type SkillParameterRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.SkillParameter, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.SkillParameter, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.SkillParameter]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateSkillParameterRequest, odasdk.CreateSkillParameterResponse]
 	Get                 runtimeOperationHooks[odasdk.GetSkillParameterRequest, odasdk.GetSkillParameterResponse]
 	List                runtimeOperationHooks[odasdk.ListSkillParametersRequest, odasdk.ListSkillParametersResponse]
@@ -44,6 +46,8 @@ func registerSkillParameterRuntimeHooksMutator(mutator SkillParameterRuntimeHook
 }
 func newSkillParameterDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) SkillParameterRuntimeHooks {
 	return SkillParameterRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.SkillParameter]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateSkillParameterRequest, odasdk.CreateSkillParameterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "SkillId", RequestName: "skillId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateSkillParameterDetails", RequestName: "CreateSkillParameterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateSkillParameterRequest) (odasdk.CreateSkillParameterResponse, error) {
@@ -95,6 +99,8 @@ func buildSkillParameterGeneratedRuntimeConfig(
 		SDKName:         "SkillParameter",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

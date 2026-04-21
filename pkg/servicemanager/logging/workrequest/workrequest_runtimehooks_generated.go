@@ -24,6 +24,8 @@ type WorkRequestRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loggingv1beta1.WorkRequest, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.WorkRequest, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.WorkRequest]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[loggingsdk.GetWorkRequestRequest, loggingsdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[loggingsdk.ListWorkRequestsRequest, loggingsdk.ListWorkRequestsResponse]
 	Delete              runtimeOperationHooks[loggingsdk.DeleteWorkRequestRequest, loggingsdk.DeleteWorkRequestResponse]
@@ -42,6 +44,8 @@ func registerWorkRequestRuntimeHooksMutator(mutator WorkRequestRuntimeHooksMutat
 }
 func newWorkRequestDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) WorkRequestRuntimeHooks {
 	return WorkRequestRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.WorkRequest]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[loggingsdk.GetWorkRequestRequest, loggingsdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loggingsdk.GetWorkRequestRequest) (loggingsdk.GetWorkRequestResponse, error) {
@@ -81,6 +85,8 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		SDKName:         "WorkRequest",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

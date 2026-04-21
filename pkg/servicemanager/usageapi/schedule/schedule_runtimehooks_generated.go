@@ -24,6 +24,8 @@ type ScheduleRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *usageapiv1beta1.Schedule, string) (any, error)
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.Schedule, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.Schedule]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[usageapisdk.CreateScheduleRequest, usageapisdk.CreateScheduleResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetScheduleRequest, usageapisdk.GetScheduleResponse]
 	List                runtimeOperationHooks[usageapisdk.ListSchedulesRequest, usageapisdk.ListSchedulesResponse]
@@ -97,6 +99,8 @@ func newScheduleRuntimeSemantics() *generatedruntime.Semantics {
 func newScheduleDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) ScheduleRuntimeHooks {
 	return ScheduleRuntimeHooks{
 		Semantics: newScheduleRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*usageapiv1beta1.Schedule]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[usageapisdk.CreateScheduleRequest, usageapisdk.CreateScheduleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateScheduleDetails", RequestName: "CreateScheduleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateScheduleRequest) (usageapisdk.CreateScheduleResponse, error) {
@@ -148,6 +152,8 @@ func buildScheduleGeneratedRuntimeConfig(
 		SDKName:         "Schedule",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

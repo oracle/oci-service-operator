@@ -24,6 +24,8 @@ type NodePoolRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *containerenginev1beta1.NodePool, string) (any, error)
 	BuildUpdateBody     func(context.Context, *containerenginev1beta1.NodePool, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*containerenginev1beta1.NodePool]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[containerenginesdk.CreateNodePoolRequest, containerenginesdk.CreateNodePoolResponse]
 	Get                 runtimeOperationHooks[containerenginesdk.GetNodePoolRequest, containerenginesdk.GetNodePoolResponse]
 	List                runtimeOperationHooks[containerenginesdk.ListNodePoolsRequest, containerenginesdk.ListNodePoolsResponse]
@@ -97,6 +99,8 @@ func newNodePoolRuntimeSemantics() *generatedruntime.Semantics {
 func newNodePoolDefaultRuntimeHooks(sdkClient containerenginesdk.ContainerEngineClient) NodePoolRuntimeHooks {
 	return NodePoolRuntimeHooks{
 		Semantics: newNodePoolRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*containerenginev1beta1.NodePool]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[containerenginesdk.CreateNodePoolRequest, containerenginesdk.CreateNodePoolResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNodePoolDetails", RequestName: "CreateNodePoolDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request containerenginesdk.CreateNodePoolRequest) (containerenginesdk.CreateNodePoolResponse, error) {
@@ -148,6 +152,8 @@ func buildNodePoolGeneratedRuntimeConfig(
 		SDKName:         "NodePool",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

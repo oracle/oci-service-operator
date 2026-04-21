@@ -24,6 +24,8 @@ type LoadBalancerShapeRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.LoadBalancerShape, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.LoadBalancerShape, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancerShape]
+	Read                generatedruntime.ReadHooks
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]
 	WrapGeneratedClient []func(LoadBalancerShapeServiceClient) LoadBalancerShapeServiceClient
 }
@@ -40,6 +42,8 @@ func registerLoadBalancerShapeRuntimeHooksMutator(mutator LoadBalancerShapeRunti
 }
 func newLoadBalancerShapeDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) LoadBalancerShapeRuntimeHooks {
 	return LoadBalancerShapeRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
+		Read:     generatedruntime.ReadHooks{},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLoadBalancerShapeDetails", RequestName: "UpdateLoadBalancerShapeDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateLoadBalancerShapeRequest) (loadbalancersdk.UpdateLoadBalancerShapeResponse, error) {
@@ -67,6 +71,8 @@ func buildLoadBalancerShapeGeneratedRuntimeConfig(
 		SDKName:         "LoadBalancerShape",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Update: &generatedruntime.Operation{

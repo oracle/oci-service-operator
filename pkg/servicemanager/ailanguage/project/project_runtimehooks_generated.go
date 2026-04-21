@@ -24,6 +24,8 @@ type ProjectRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *ailanguagev1beta1.Project, string) (any, error)
 	BuildUpdateBody     func(context.Context, *ailanguagev1beta1.Project, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*ailanguagev1beta1.Project]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[ailanguagesdk.CreateProjectRequest, ailanguagesdk.CreateProjectResponse]
 	Get                 runtimeOperationHooks[ailanguagesdk.GetProjectRequest, ailanguagesdk.GetProjectResponse]
 	List                runtimeOperationHooks[ailanguagesdk.ListProjectsRequest, ailanguagesdk.ListProjectsResponse]
@@ -97,6 +99,8 @@ func newProjectRuntimeSemantics() *generatedruntime.Semantics {
 func newProjectDefaultRuntimeHooks(sdkClient ailanguagesdk.AIServiceLanguageClient) ProjectRuntimeHooks {
 	return ProjectRuntimeHooks{
 		Semantics: newProjectRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*ailanguagev1beta1.Project]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[ailanguagesdk.CreateProjectRequest, ailanguagesdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ailanguagesdk.CreateProjectRequest) (ailanguagesdk.CreateProjectResponse, error) {
@@ -148,6 +152,8 @@ func buildProjectGeneratedRuntimeConfig(
 		SDKName:         "Project",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

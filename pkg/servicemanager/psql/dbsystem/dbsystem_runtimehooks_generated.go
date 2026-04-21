@@ -24,6 +24,8 @@ type DbSystemRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *psqlv1beta1.DbSystem, string) (any, error)
 	BuildUpdateBody     func(context.Context, *psqlv1beta1.DbSystem, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*psqlv1beta1.DbSystem]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[psqlsdk.CreateDbSystemRequest, psqlsdk.CreateDbSystemResponse]
 	Get                 runtimeOperationHooks[psqlsdk.GetDbSystemRequest, psqlsdk.GetDbSystemResponse]
 	List                runtimeOperationHooks[psqlsdk.ListDbSystemsRequest, psqlsdk.ListDbSystemsResponse]
@@ -97,6 +99,8 @@ func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {
 func newDbSystemDefaultRuntimeHooks(sdkClient psqlsdk.PostgresqlClient) DbSystemRuntimeHooks {
 	return DbSystemRuntimeHooks{
 		Semantics: newDbSystemRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*psqlv1beta1.DbSystem]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[psqlsdk.CreateDbSystemRequest, psqlsdk.CreateDbSystemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request psqlsdk.CreateDbSystemRequest) (psqlsdk.CreateDbSystemResponse, error) {
@@ -149,6 +153,8 @@ func buildDbSystemGeneratedRuntimeConfig(
 		Log:              manager.Log,
 		CredentialClient: manager.CredentialClient,
 		Semantics:        hooks.Semantics,
+		Identity:         hooks.Identity,
+		Read:             hooks.Read,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

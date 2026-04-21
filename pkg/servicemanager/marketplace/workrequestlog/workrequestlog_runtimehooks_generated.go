@@ -24,6 +24,8 @@ type WorkRequestLogRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *marketplacev1beta1.WorkRequestLog, string) (any, error)
 	BuildUpdateBody     func(context.Context, *marketplacev1beta1.WorkRequestLog, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*marketplacev1beta1.WorkRequestLog]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[marketplacesdk.ListWorkRequestLogsRequest, marketplacesdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -40,6 +42,8 @@ func registerWorkRequestLogRuntimeHooksMutator(mutator WorkRequestLogRuntimeHook
 }
 func newWorkRequestLogDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) WorkRequestLogRuntimeHooks {
 	return WorkRequestLogRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*marketplacev1beta1.WorkRequestLog]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[marketplacesdk.ListWorkRequestLogsRequest, marketplacesdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListWorkRequestLogsRequest) (marketplacesdk.ListWorkRequestLogsResponse, error) {
@@ -67,6 +71,8 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		SDKName:         "WorkRequestLog",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

@@ -24,6 +24,8 @@ type OdaPrivateEndpointScanProxyRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.OdaPrivateEndpointScanProxy, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaPrivateEndpointScanProxy, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointScanProxyRequest, odasdk.CreateOdaPrivateEndpointScanProxyResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointScanProxyRequest, odasdk.GetOdaPrivateEndpointScanProxyResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointScanProxiesRequest, odasdk.ListOdaPrivateEndpointScanProxiesResponse]
@@ -43,6 +45,8 @@ func registerOdaPrivateEndpointScanProxyRuntimeHooksMutator(mutator OdaPrivateEn
 }
 func newOdaPrivateEndpointScanProxyDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) OdaPrivateEndpointScanProxyRuntimeHooks {
 	return OdaPrivateEndpointScanProxyRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointScanProxyRequest, odasdk.CreateOdaPrivateEndpointScanProxyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaPrivateEndpointId", RequestName: "odaPrivateEndpointId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateOdaPrivateEndpointScanProxyDetails", RequestName: "CreateOdaPrivateEndpointScanProxyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointScanProxyRequest) (odasdk.CreateOdaPrivateEndpointScanProxyResponse, error) {
@@ -88,6 +92,8 @@ func buildOdaPrivateEndpointScanProxyGeneratedRuntimeConfig(
 		SDKName:         "OdaPrivateEndpointScanProxy",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

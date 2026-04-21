@@ -24,6 +24,8 @@ type MetricRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *monitoringv1beta1.Metric, string) (any, error)
 	BuildUpdateBody     func(context.Context, *monitoringv1beta1.Metric, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*monitoringv1beta1.Metric]
+	Read                generatedruntime.ReadHooks
 	List                runtimeOperationHooks[monitoringsdk.ListMetricsRequest, monitoringsdk.ListMetricsResponse]
 	WrapGeneratedClient []func(MetricServiceClient) MetricServiceClient
 }
@@ -40,6 +42,8 @@ func registerMetricRuntimeHooksMutator(mutator MetricRuntimeHooksMutator) {
 }
 func newMetricDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) MetricRuntimeHooks {
 	return MetricRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*monitoringv1beta1.Metric]{},
+		Read:     generatedruntime.ReadHooks{},
 		List: runtimeOperationHooks[monitoringsdk.ListMetricsRequest, monitoringsdk.ListMetricsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentIdInSubtree", RequestName: "compartmentIdInSubtree", Contribution: "query", PreferResourceID: false}, {FieldName: "ListMetricsDetails", RequestName: "ListMetricsDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.ListMetricsRequest) (monitoringsdk.ListMetricsResponse, error) {
@@ -67,6 +71,8 @@ func buildMetricGeneratedRuntimeConfig(
 		SDKName:         "Metric",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

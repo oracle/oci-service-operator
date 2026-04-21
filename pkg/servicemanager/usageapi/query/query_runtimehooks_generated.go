@@ -24,6 +24,8 @@ type QueryRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *usageapiv1beta1.Query, string) (any, error)
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.Query, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.Query]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[usageapisdk.CreateQueryRequest, usageapisdk.CreateQueryResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetQueryRequest, usageapisdk.GetQueryResponse]
 	List                runtimeOperationHooks[usageapisdk.ListQueriesRequest, usageapisdk.ListQueriesResponse]
@@ -97,6 +99,8 @@ func newQueryRuntimeSemantics() *generatedruntime.Semantics {
 func newQueryDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) QueryRuntimeHooks {
 	return QueryRuntimeHooks{
 		Semantics: newQueryRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*usageapiv1beta1.Query]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[usageapisdk.CreateQueryRequest, usageapisdk.CreateQueryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueryDetails", RequestName: "CreateQueryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateQueryRequest) (usageapisdk.CreateQueryResponse, error) {
@@ -148,6 +152,8 @@ func buildQueryGeneratedRuntimeConfig(
 		SDKName:         "Query",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

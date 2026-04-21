@@ -24,6 +24,8 @@ type AlarmHistoryRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *monitoringv1beta1.AlarmHistory, string) (any, error)
 	BuildUpdateBody     func(context.Context, *monitoringv1beta1.AlarmHistory, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmHistory]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[monitoringsdk.GetAlarmHistoryRequest, monitoringsdk.GetAlarmHistoryResponse]
 	WrapGeneratedClient []func(AlarmHistoryServiceClient) AlarmHistoryServiceClient
 }
@@ -40,6 +42,8 @@ func registerAlarmHistoryRuntimeHooksMutator(mutator AlarmHistoryRuntimeHooksMut
 }
 func newAlarmHistoryDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) AlarmHistoryRuntimeHooks {
 	return AlarmHistoryRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*monitoringv1beta1.AlarmHistory]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[monitoringsdk.GetAlarmHistoryRequest, monitoringsdk.GetAlarmHistoryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AlarmId", RequestName: "alarmId", Contribution: "path", PreferResourceID: true}, {FieldName: "AlarmHistorytype", RequestName: "alarmHistorytype", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "TimestampGreaterThanOrEqualTo", RequestName: "timestampGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimestampLessThan", RequestName: "timestampLessThan", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.GetAlarmHistoryRequest) (monitoringsdk.GetAlarmHistoryResponse, error) {
@@ -67,6 +71,8 @@ func buildAlarmHistoryGeneratedRuntimeConfig(
 		SDKName:         "AlarmHistory",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

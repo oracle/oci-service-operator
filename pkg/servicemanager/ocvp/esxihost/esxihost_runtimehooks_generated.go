@@ -24,6 +24,8 @@ type EsxiHostRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *ocvpv1beta1.EsxiHost, string) (any, error)
 	BuildUpdateBody     func(context.Context, *ocvpv1beta1.EsxiHost, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.EsxiHost]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[ocvpsdk.CreateEsxiHostRequest, ocvpsdk.CreateEsxiHostResponse]
 	Get                 runtimeOperationHooks[ocvpsdk.GetEsxiHostRequest, ocvpsdk.GetEsxiHostResponse]
 	List                runtimeOperationHooks[ocvpsdk.ListEsxiHostsRequest, ocvpsdk.ListEsxiHostsResponse]
@@ -44,6 +46,8 @@ func registerEsxiHostRuntimeHooksMutator(mutator EsxiHostRuntimeHooksMutator) {
 }
 func newEsxiHostDefaultRuntimeHooks(sdkClient ocvpsdk.EsxiHostClient) EsxiHostRuntimeHooks {
 	return EsxiHostRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*ocvpv1beta1.EsxiHost]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[ocvpsdk.CreateEsxiHostRequest, ocvpsdk.CreateEsxiHostResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEsxiHostDetails", RequestName: "CreateEsxiHostDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.CreateEsxiHostRequest) (ocvpsdk.CreateEsxiHostResponse, error) {
@@ -95,6 +99,8 @@ func buildEsxiHostGeneratedRuntimeConfig(
 		SDKName:         "EsxiHost",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

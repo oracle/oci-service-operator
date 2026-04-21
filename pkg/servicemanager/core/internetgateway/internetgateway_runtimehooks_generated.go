@@ -24,6 +24,8 @@ type InternetGatewayRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *corev1beta1.InternetGateway, string) (any, error)
 	BuildUpdateBody     func(context.Context, *corev1beta1.InternetGateway, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*corev1beta1.InternetGateway]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[coresdk.CreateInternetGatewayRequest, coresdk.CreateInternetGatewayResponse]
 	Get                 runtimeOperationHooks[coresdk.GetInternetGatewayRequest, coresdk.GetInternetGatewayResponse]
 	List                runtimeOperationHooks[coresdk.ListInternetGatewaysRequest, coresdk.ListInternetGatewaysResponse]
@@ -97,6 +99,8 @@ func newInternetGatewayRuntimeSemantics() *generatedruntime.Semantics {
 func newInternetGatewayDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) InternetGatewayRuntimeHooks {
 	return InternetGatewayRuntimeHooks{
 		Semantics: newInternetGatewayRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*corev1beta1.InternetGateway]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[coresdk.CreateInternetGatewayRequest, coresdk.CreateInternetGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateInternetGatewayDetails", RequestName: "CreateInternetGatewayDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error) {
@@ -148,6 +152,8 @@ func buildInternetGatewayGeneratedRuntimeConfig(
 		SDKName:         "InternetGateway",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

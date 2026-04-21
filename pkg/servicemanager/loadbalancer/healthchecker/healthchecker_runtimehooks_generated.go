@@ -24,6 +24,8 @@ type HealthCheckerRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loadbalancerv1beta1.HealthChecker, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loadbalancerv1beta1.HealthChecker, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loadbalancerv1beta1.HealthChecker]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[loadbalancersdk.GetHealthCheckerRequest, loadbalancersdk.GetHealthCheckerResponse]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateHealthCheckerRequest, loadbalancersdk.UpdateHealthCheckerResponse]
 	WrapGeneratedClient []func(HealthCheckerServiceClient) HealthCheckerServiceClient
@@ -41,6 +43,8 @@ func registerHealthCheckerRuntimeHooksMutator(mutator HealthCheckerRuntimeHooksM
 }
 func newHealthCheckerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) HealthCheckerRuntimeHooks {
 	return HealthCheckerRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loadbalancerv1beta1.HealthChecker]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetHealthCheckerRequest, loadbalancersdk.GetHealthCheckerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetHealthCheckerRequest) (loadbalancersdk.GetHealthCheckerResponse, error) {
@@ -74,6 +78,8 @@ func buildHealthCheckerGeneratedRuntimeConfig(
 		SDKName:         "HealthChecker",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

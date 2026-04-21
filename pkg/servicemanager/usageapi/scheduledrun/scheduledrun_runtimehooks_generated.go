@@ -24,6 +24,8 @@ type ScheduledRunRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *usageapiv1beta1.ScheduledRun, string) (any, error)
 	BuildUpdateBody     func(context.Context, *usageapiv1beta1.ScheduledRun, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*usageapiv1beta1.ScheduledRun]
+	Read                generatedruntime.ReadHooks
 	Get                 runtimeOperationHooks[usageapisdk.GetScheduledRunRequest, usageapisdk.GetScheduledRunResponse]
 	List                runtimeOperationHooks[usageapisdk.ListScheduledRunsRequest, usageapisdk.ListScheduledRunsResponse]
 	WrapGeneratedClient []func(ScheduledRunServiceClient) ScheduledRunServiceClient
@@ -41,6 +43,8 @@ func registerScheduledRunRuntimeHooksMutator(mutator ScheduledRunRuntimeHooksMut
 }
 func newScheduledRunDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) ScheduledRunRuntimeHooks {
 	return ScheduledRunRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*usageapiv1beta1.ScheduledRun]{},
+		Read:     generatedruntime.ReadHooks{},
 		Get: runtimeOperationHooks[usageapisdk.GetScheduledRunRequest, usageapisdk.GetScheduledRunResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ScheduledRunId", RequestName: "scheduledRunId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request usageapisdk.GetScheduledRunRequest) (usageapisdk.GetScheduledRunResponse, error) {
@@ -74,6 +78,8 @@ func buildScheduledRunGeneratedRuntimeConfig(
 		SDKName:         "ScheduledRun",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

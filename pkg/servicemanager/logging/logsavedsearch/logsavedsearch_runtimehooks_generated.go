@@ -24,6 +24,8 @@ type LogSavedSearchRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *loggingv1beta1.LogSavedSearch, string) (any, error)
 	BuildUpdateBody     func(context.Context, *loggingv1beta1.LogSavedSearch, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*loggingv1beta1.LogSavedSearch]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[loggingsdk.CreateLogSavedSearchRequest, loggingsdk.CreateLogSavedSearchResponse]
 	Get                 runtimeOperationHooks[loggingsdk.GetLogSavedSearchRequest, loggingsdk.GetLogSavedSearchResponse]
 	List                runtimeOperationHooks[loggingsdk.ListLogSavedSearchesRequest, loggingsdk.ListLogSavedSearchesResponse]
@@ -44,6 +46,8 @@ func registerLogSavedSearchRuntimeHooksMutator(mutator LogSavedSearchRuntimeHook
 }
 func newLogSavedSearchDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) LogSavedSearchRuntimeHooks {
 	return LogSavedSearchRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*loggingv1beta1.LogSavedSearch]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[loggingsdk.CreateLogSavedSearchRequest, loggingsdk.CreateLogSavedSearchResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateLogSavedSearchDetails", RequestName: "CreateLogSavedSearchDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.CreateLogSavedSearchRequest) (loggingsdk.CreateLogSavedSearchResponse, error) {
@@ -95,6 +99,8 @@ func buildLogSavedSearchGeneratedRuntimeConfig(
 		SDKName:         "LogSavedSearch",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

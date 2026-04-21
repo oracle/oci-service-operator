@@ -24,6 +24,8 @@ type OdaInstanceRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.OdaInstance, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaInstance, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaInstance]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateOdaInstanceRequest, odasdk.CreateOdaInstanceResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaInstanceRequest, odasdk.GetOdaInstanceResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaInstancesRequest, odasdk.ListOdaInstancesResponse]
@@ -44,6 +46,8 @@ func registerOdaInstanceRuntimeHooksMutator(mutator OdaInstanceRuntimeHooksMutat
 }
 func newOdaInstanceDefaultRuntimeHooks(sdkClient odasdk.OdaClient) OdaInstanceRuntimeHooks {
 	return OdaInstanceRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaInstance]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaInstanceRequest, odasdk.CreateOdaInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaInstanceDetails", RequestName: "CreateOdaInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaInstanceRequest) (odasdk.CreateOdaInstanceResponse, error) {
@@ -95,6 +99,8 @@ func buildOdaInstanceGeneratedRuntimeConfig(
 		SDKName:         "OdaInstance",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

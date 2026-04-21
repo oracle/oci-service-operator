@@ -24,6 +24,8 @@ type OdaPrivateEndpointRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *odav1beta1.OdaPrivateEndpoint, string) (any, error)
 	BuildUpdateBody     func(context.Context, *odav1beta1.OdaPrivateEndpoint, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpoint]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointRequest, odasdk.CreateOdaPrivateEndpointResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointRequest, odasdk.GetOdaPrivateEndpointResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointsRequest, odasdk.ListOdaPrivateEndpointsResponse]
@@ -44,6 +46,8 @@ func registerOdaPrivateEndpointRuntimeHooksMutator(mutator OdaPrivateEndpointRun
 }
 func newOdaPrivateEndpointDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) OdaPrivateEndpointRuntimeHooks {
 	return OdaPrivateEndpointRuntimeHooks{
+		Identity: generatedruntime.IdentityHooks[*odav1beta1.OdaPrivateEndpoint]{},
+		Read:     generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointRequest, odasdk.CreateOdaPrivateEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaPrivateEndpointDetails", RequestName: "CreateOdaPrivateEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointRequest) (odasdk.CreateOdaPrivateEndpointResponse, error) {
@@ -95,6 +99,8 @@ func buildOdaPrivateEndpointGeneratedRuntimeConfig(
 		SDKName:         "OdaPrivateEndpoint",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

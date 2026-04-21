@@ -24,6 +24,8 @@ type SddcRuntimeHooks struct {
 	Semantics           *generatedruntime.Semantics
 	BuildCreateBody     func(context.Context, *ocvpv1beta1.Sddc, string) (any, error)
 	BuildUpdateBody     func(context.Context, *ocvpv1beta1.Sddc, string, any) (any, bool, error)
+	Identity            generatedruntime.IdentityHooks[*ocvpv1beta1.Sddc]
+	Read                generatedruntime.ReadHooks
 	Create              runtimeOperationHooks[ocvpsdk.CreateSddcRequest, ocvpsdk.CreateSddcResponse]
 	Get                 runtimeOperationHooks[ocvpsdk.GetSddcRequest, ocvpsdk.GetSddcResponse]
 	List                runtimeOperationHooks[ocvpsdk.ListSddcsRequest, ocvpsdk.ListSddcsResponse]
@@ -97,6 +99,8 @@ func newSddcRuntimeSemantics() *generatedruntime.Semantics {
 func newSddcDefaultRuntimeHooks(sdkClient ocvpsdk.SddcClient) SddcRuntimeHooks {
 	return SddcRuntimeHooks{
 		Semantics: newSddcRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*ocvpv1beta1.Sddc]{},
+		Read:      generatedruntime.ReadHooks{},
 		Create: runtimeOperationHooks[ocvpsdk.CreateSddcRequest, ocvpsdk.CreateSddcResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSddcDetails", RequestName: "CreateSddcDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.CreateSddcRequest) (ocvpsdk.CreateSddcResponse, error) {
@@ -148,6 +152,8 @@ func buildSddcGeneratedRuntimeConfig(
 		SDKName:         "Sddc",
 		Log:             manager.Log,
 		Semantics:       hooks.Semantics,
+		Identity:        hooks.Identity,
+		Read:            hooks.Read,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{
