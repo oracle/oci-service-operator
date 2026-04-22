@@ -1692,6 +1692,7 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		"TrackedRecreate generatedruntime.TrackedRecreateHooks[*examplev1beta1.Thing]",
 		"StatusHooks generatedruntime.StatusHooks[*examplev1beta1.Thing]",
 		"ParityHooks generatedruntime.ParityHooks[*examplev1beta1.Thing]",
+		"Async generatedruntime.AsyncHooks[*examplev1beta1.Thing]",
 		`FormalService: "identity"`,
 		`FormalSlug: "user"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -1704,18 +1705,44 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		`TrackedRecreate: generatedruntime.TrackedRecreateHooks[*examplev1beta1.Thing]{},`,
 		`StatusHooks: generatedruntime.StatusHooks[*examplev1beta1.Thing]{},`,
 		`ParityHooks: generatedruntime.ParityHooks[*examplev1beta1.Thing]{},`,
+		`Async: generatedruntime.AsyncHooks[*examplev1beta1.Thing]{},`,
 		`WrapGeneratedClient []func(ThingServiceClient) ThingServiceClient`,
 		`Identity: hooks.Identity,`,
 		`Read: hooks.Read,`,
 		`TrackedRecreate: hooks.TrackedRecreate,`,
 		`StatusHooks: hooks.StatusHooks,`,
 		`ParityHooks: hooks.ParityHooks,`,
+		`Async: hooks.Async,`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
 		`return hooks.Create.Call(ctx, *request.(*examplesdk.CreateThingRequest))`,
 		`return hooks.Get.Call(ctx, *request.(*examplesdk.GetThingRequest))`,
 	})
+}
+
+func TestFilteredRuntimeHooksKeepsWorkRequestHelpersOnlyForExplicitWorkRequestAsync(t *testing.T) {
+	t.Parallel()
+
+	hooks := []formal.Hook{
+		{Helper: "tfresource.CreateResource"},
+		{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"},
+	}
+
+	nilAsync := filteredRuntimeHooks(hooks, nil)
+	if len(nilAsync) != 1 || nilAsync[0].Helper != "tfresource.CreateResource" {
+		t.Fatalf("filteredRuntimeHooks(nil) = %#v, want only the create helper", nilAsync)
+	}
+
+	lifecycleAsync := filteredRuntimeHooks(hooks, &RuntimeAsyncModel{Strategy: AsyncStrategyLifecycle})
+	if len(lifecycleAsync) != 1 || lifecycleAsync[0].Helper != "tfresource.CreateResource" {
+		t.Fatalf("filteredRuntimeHooks(lifecycle) = %#v, want only the create helper", lifecycleAsync)
+	}
+
+	workRequestAsync := filteredRuntimeHooks(hooks, &RuntimeAsyncModel{Strategy: AsyncStrategyWorkRequest})
+	if len(workRequestAsync) != 2 {
+		t.Fatalf("filteredRuntimeHooks(workrequest) = %#v, want both hooks preserved", workRequestAsync)
+	}
 }
 
 func TestGenerateRendersServiceManagerScaffoldAtOverridePath(t *testing.T) {
@@ -4673,6 +4700,8 @@ func normalizeRuntimeHookContractForComparison(path string, content string) stri
 			continue
 		case strings.Contains(line, "generatedruntime.ParityHooks["):
 			continue
+		case strings.Contains(line, "generatedruntime.AsyncHooks["):
+			continue
 		case line == "Identity: hooks.Identity,":
 			continue
 		case line == "Read: hooks.Read,":
@@ -4682,6 +4711,8 @@ func normalizeRuntimeHookContractForComparison(path string, content string) stri
 		case line == "StatusHooks: hooks.StatusHooks,":
 			continue
 		case line == "ParityHooks: hooks.ParityHooks,":
+			continue
+		case line == "Async: hooks.Async,":
 			continue
 		default:
 			kept = append(kept, line)

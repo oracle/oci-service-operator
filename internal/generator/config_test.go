@@ -1658,6 +1658,52 @@ func TestValidateSelectedAsyncMetadataAllowsResourceOverridesToClearInheritedWor
 	}
 }
 
+func TestValidateSelectedAsyncMetadataAllowsGeneratedRuntimeWorkRequestContracts(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "queue",
+				SDKPackage:     "example/queue",
+				Group:          "queue",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "Queue"),
+				Generation: GenerationConfig{
+					Resources: []ResourceGenerationOverride{
+						{
+							Kind: "Queue",
+							Async: AsyncConfig{
+								Strategy: AsyncStrategyWorkRequest,
+								Runtime:  AsyncRuntimeGeneratedRuntime,
+								WorkRequest: AsyncWorkRequestConfig{
+									Source: AsyncWorkRequestSourceServiceSDK,
+									Phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete},
+									LegacyFieldBridge: AsyncLegacyFieldBridge{
+										Create: "CreateWorkRequestId",
+										Update: "UpdateWorkRequestId",
+										Delete: "DeleteWorkRequestId",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v, want nil", err)
+	}
+}
+
 func TestServiceConfigAsyncConfigForMergesServiceAndResourceOverrides(t *testing.T) {
 	t.Parallel()
 
