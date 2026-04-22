@@ -1902,7 +1902,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		runtime  string
 	}{
 		"aidocument":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ailanguage":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ailanguage":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"aispeech":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"aivision":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"analytics":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -1948,6 +1948,17 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 			t.Fatalf("missing async expectation for default-active service %q", target.Service)
 		}
 		assertAsyncContract(t, service, target.Kind, expected.strategy, expected.runtime)
+	}
+
+	ailanguage := assertAsyncContract(t, services["ailanguage"], "Project", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if ailanguage.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("ailanguage Project workRequest.source = %q, want %q", ailanguage.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(ailanguage.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("ailanguage Project workRequest.phases = %v", ailanguage.WorkRequest.Phases)
+	}
+	if ailanguage.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("ailanguage Project workRequest.legacyFieldBridge = %#v, want empty legacy bridge", ailanguage.WorkRequest.LegacyFieldBridge)
 	}
 
 	queue := assertAsyncContract(t, services["queue"], "Queue", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
@@ -2401,7 +2412,16 @@ func assertAILanguageRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig
 		webhook:        GenerationStrategyNone,
 	})
 	assertResourceOverrideCount(t, service, 8)
-	assertAsyncContract(t, service, "Project", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+	project := assertAsyncContract(t, service, "Project", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if project.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("ailanguage Project workRequest.source = %q, want %q", project.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(project.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("ailanguage Project workRequest.phases = %v", project.WorkRequest.Phases)
+	}
+	if project.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("ailanguage Project workRequest.legacyFieldBridge = %#v, want empty legacy bridge", project.WorkRequest.LegacyFieldBridge)
+	}
 
 	overrides := overridesByKind(service)
 	for _, kind := range []string{"Endpoint", "EvaluationResult", "Model", "ModelType", "WorkRequest", "WorkRequestError", "WorkRequestLog"} {
