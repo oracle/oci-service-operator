@@ -24,6 +24,7 @@ import (
 type fakeApplicationOCIClient struct {
 	createFn func(context.Context, dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error)
 	getFn    func(context.Context, dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error)
+	listFn   func(context.Context, dataflowsdk.ListApplicationsRequest) (dataflowsdk.ListApplicationsResponse, error)
 	updateFn func(context.Context, dataflowsdk.UpdateApplicationRequest) (dataflowsdk.UpdateApplicationResponse, error)
 	deleteFn func(context.Context, dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error)
 }
@@ -40,6 +41,13 @@ func (f *fakeApplicationOCIClient) GetApplication(ctx context.Context, req dataf
 		return f.getFn(ctx, req)
 	}
 	return dataflowsdk.GetApplicationResponse{}, nil
+}
+
+func (f *fakeApplicationOCIClient) ListApplications(ctx context.Context, req dataflowsdk.ListApplicationsRequest) (dataflowsdk.ListApplicationsResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return dataflowsdk.ListApplicationsResponse{}, nil
 }
 
 func (f *fakeApplicationOCIClient) UpdateApplication(ctx context.Context, req dataflowsdk.UpdateApplicationRequest) (dataflowsdk.UpdateApplicationResponse, error) {
@@ -60,7 +68,7 @@ func newTestManager(client applicationOCIClient) *ApplicationServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewApplicationServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(newApplicationRuntimeClient(manager, client, nil))
+		manager.WithClient(newApplicationServiceClientWithOCIClient(log, client))
 	}
 	return manager
 }
@@ -582,11 +590,17 @@ func TestDelete_ConfirmsDeletionOnAuthShapedNotFound(t *testing.T) {
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
 
-func TestDelete_ConflictReturnsRetryableError(t *testing.T) {
+func TestDelete_ConflictTransitionsToPendingDeleteAfterConfirmRead(t *testing.T) {
 	manager := newTestManager(&fakeApplicationOCIClient{
 		deleteFn: func(_ context.Context, req dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error) {
 			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
 			return dataflowsdk.DeleteApplicationResponse{}, errortest.NewServiceError(409, errorutil.IncorrectState, "delete conflict")
+		},
+		getFn: func(_ context.Context, req dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
+			return dataflowsdk.GetApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..delete", "delete-app", dataflowsdk.ApplicationLifecycleStateActive),
+			}, nil
 		},
 	})
 
@@ -595,13 +609,16 @@ func TestDelete_ConflictReturnsRetryableError(t *testing.T) {
 
 	done, err := manager.Delete(context.Background(), resource)
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
 	assert.False(t, done)
+	assert.Equal(t, "opc-request-id", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "Application delete-app is ACTIVE", resource.Status.OsokStatus.Message)
 	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
-	errortest.AssertErrorType(t, err, "errorutil.ConflictOciError")
-}
-
-func TestApplicationClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {
-	contract := errortest.NewManualRuntimeClassifierContract("dataflow/Application", true)
-	errortest.RunManualRuntimeClassifierContract(t, contract, isApplicationReadNotFoundOCI, isApplicationDeleteNotFoundOCI)
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want lifecycle delete tracker")
+	}
+	assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+	assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+	assert.Equal(t, "ACTIVE", resource.Status.OsokStatus.Async.Current.RawStatus)
 }

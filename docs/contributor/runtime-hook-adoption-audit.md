@@ -9,7 +9,9 @@ bounded phase-4 hook seam, and refreshed again in `US-228` after `US-227` and
 `Identity` seam, and refreshed again in `US-238` after `redis/rediscluster`
 moved onto the bounded async work-request seam, and refreshed again in
 `US-239` after `queue/queue` moved onto the same bounded async seam, and
-refreshed again in `US-240` after `ailanguage/project` moved onto that seam.
+refreshed again in `US-240` after `ailanguage/project` moved onto that seam,
+and refreshed again in `US-246` after `dataflow/application` moved onto the
+bounded delete/error seam.
 
 The live residual set comes from:
 
@@ -18,7 +20,7 @@ rg -l "new[A-Za-z0-9]+ServiceClient\s*=" pkg/servicemanager | \
   rg -v '_serviceclient\.go$|_test\.go$'
 ```
 
-That command now returns 5 live constructor rewrites. The `core` seven-package
+That command now returns 4 live constructor rewrites. The `core` seven-package
 networking family and the four-package bind-guard family are no longer in the
 residual set, and the former async-resume family is no longer in the live
 inventory. The remaining packages collapse into two concrete blocked
@@ -26,7 +28,7 @@ families:
 
 | Family | Count | Packages |
 | --- | --- | --- |
-| Delete-confirmation and OCI-error overlays | 2 | `aispeech/transcriptionjob`, `dataflow/application` |
+| Delete-confirmation and OCI-error overlays | 1 | `aispeech/transcriptionjob` |
 | Full manual runtime engines | 3 | `core/securitylist`, `nosql/table`, `psql/dbsystem` |
 
 ## Current Hook Boundary
@@ -42,7 +44,7 @@ families:
 - That surface is also now enough for the full four-package bind-guard family:
   `generativeai/model`, `generativeai/dedicatedaicluster`, `ocvp/cluster`, and
   `ocvp/sddc`.
-- The remaining 5 rewrites are still real blockers, but they no longer include
+- The remaining 4 rewrites are still real blockers, but they no longer include
   the core networking wrapper family, the bind-guard family, or the former
   async-resume family and they do not justify widening the checked-in runtime
   surface beyond the current bounded hooks.
@@ -55,7 +57,6 @@ These packages already let generatedruntime own the steady-state create or
 update path, but delete still needs a package-local overlay.
 
 - `aispeech/transcriptionjob`
-- `dataflow/application`
 
 The common shape is:
 
@@ -87,7 +88,6 @@ The common shape is:
 | --- | --- | --- |
 | `core/securitylist` | Full manual runtime engine | The runtime still owns full CRUD because nested rule normalization, stale optional status clearing, tracked-OCID recreate behavior, and an SDK contract guard are all package-local. |
 | `aispeech/transcriptionjob` | Delete-confirmation and OCI-error overlay | The generated path still needs a handwritten delete layer because `CANCELING` and `CANCELED` mean different things for normal observation and delete confirmation. |
-| `dataflow/application` | Delete-confirmation and OCI-error overlay | Uses an embedded generated client for create or update, but delete still needs package-local rereads, OCI error normalization, and request-ID projection. |
 | `psql/dbsystem` | Full manual runtime engine | Keeps full create, update, delete, bind lookup, lifecycle handling, and credential-backed request construction in manual code. |
 | `nosql/table` | Full manual runtime engine | Keeps full lifecycle-aware create, update, compartment move, and delete confirmation behavior in an explicit handwritten runtime. |
 
@@ -110,5 +110,5 @@ hook surface beyond the current bounded runtime seams.
 `docs/api-generator-contract.md` already records the checked-in bounded hook
 surface and says the remaining handwritten runtime seams stay explicit until
 later rollout work closes them. This audit refresh only updates the live
-residual inventory after `US-240`, so no further contract change is required
+residual inventory after `US-246`, so no further contract change is required
 here.

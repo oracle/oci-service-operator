@@ -56,7 +56,7 @@ func newApplicationRuntimeSemantics() *generatedruntime.Semantics {
 		FormalSlug:    "application",
 		Async: &generatedruntime.AsyncSemantics{
 			Strategy:             "lifecycle",
-			Runtime:              "handwritten",
+			Runtime:              "generatedruntime",
 			FormalClassification: "lifecycle",
 		},
 		StatusProjection:  "required",
