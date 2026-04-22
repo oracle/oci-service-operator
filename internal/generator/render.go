@@ -1035,6 +1035,7 @@ type {{ .Kind }}RuntimeHooks struct {
 	TrackedRecreate generatedruntime.TrackedRecreateHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 	StatusHooks     generatedruntime.StatusHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 	ParityHooks     generatedruntime.ParityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
+	Async           generatedruntime.AsyncHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 {{- if .CreateOperation }}
 	Create          runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]
 {{- end }}
@@ -1146,6 +1147,7 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 		StatusHooks:     generatedruntime.StatusHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 		ParityHooks:     generatedruntime.ParityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
+		Async:           generatedruntime.AsyncHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 {{- if .CreateOperation }}
 		Create: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]{
 			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
@@ -1235,6 +1237,7 @@ func build{{ .Kind }}GeneratedRuntimeConfig(
 		TrackedRecreate:  hooks.TrackedRecreate,
 		StatusHooks:      hooks.StatusHooks,
 		ParityHooks:      hooks.ParityHooks,
+		Async:            hooks.Async,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 {{- if .CreateOperation }}

@@ -26,7 +26,7 @@ Each service record defines:
 | `selection.mode` | Default selection contract for the service: `all` or `explicit`. |
 | `selection.includeKinds` | Optional non-empty kind list used only when `selection.mode=explicit`. |
 | `async.strategy` | Optional service-level default for published async behavior: `none`, `lifecycle`, or `workrequest`. |
-| `async.runtime` | Optional service-level default naming whether the active runtime owner is `generatedruntime` or a handwritten service package. |
+| `async.runtime` | Optional service-level default naming whether the active runtime owner is `generatedruntime` or a handwritten service package. For `async.strategy=workrequest`, `generatedruntime` means the runtime uses the bounded `Async` hook seam described below rather than a package-local state machine. |
 | `async.formalClassification` | Optional service-level default that keeps `formal/` classification aligned with the checked-in async posture. |
 | `formalSpec` | Optional controller slug from `formal/controller_manifest.tsv` when one formal row covers the service-level runtime contract. |
 | `observedState.sdkAliases` | Optional observed-state SDK struct aliases keyed by the discovered SDK resource family when status synthesis must read a differently named response model. |
@@ -38,7 +38,7 @@ Each service record defines:
 | `generation.resources[]` | Per-kind overrides keyed by the current OSOK kind from the v2 contract. |
 | `generation.resources[].formalSpec` | Optional per-kind controller slug from `formal/controller_manifest.tsv` when only selected resources are formally promoted. |
 | `generation.resources[].async.strategy` | Optional per-kind async override when the selected kind's published behavior differs from the service default. |
-| `generation.resources[].async.runtime` | Optional per-kind runtime owner classification, typically `generatedruntime` or `handwritten`. |
+| `generation.resources[].async.runtime` | Optional per-kind runtime owner classification, typically `generatedruntime` or `handwritten`. For work-request-backed kinds, `generatedruntime` opts into the bounded `Async` hook seam instead of the handwritten reference path. |
 | `generation.resources[].async.formalClassification` | Optional per-kind formal async classification for the matching controller row. |
 | `generation.resources[].controller.strategy` | Optional per-kind controller rollout override: `none`, `manual`, or `generated`. When omitted, the kind inherits the service-level controller strategy. |
 | `generation.resources[].controller.maxConcurrentReconciles` | Optional controller concurrency override for one kind. |
@@ -107,11 +107,21 @@ The checked-in async contract is now explicit on the selected surface:
   Handwritten runtimes must publish the same field explicitly from mutating
   OCI response headers and surfaced OCI service errors; they must not invent
   resource-local replacements.
+- The generator contract now also allows `async.strategy=workrequest` with
+  `async.runtime=generatedruntime`. That posture requires the generated-runtime
+  `Async` seam to supply work-request fetch, status/action classification,
+  resource-ID recovery, and any temporary legacy bridge mirrors without
+  widening generatedruntime into a generic provider contract.
 - `nosql/Table` is the lifecycle-only reference migration. `queue/Queue` and
   `redis/RedisCluster` are the workrequest-backed reference migrations.
 - `queue/Queue` keeps its legacy work-request ID mirrors only for the current
   compatibility window; new selected resources should not add Queue-style
   compatibility fields by default.
+- The checked-in selected workrequest resources remain handwritten until the
+  later scaffold-refresh and package-migration stories consume the new bounded
+  `Async` seam. Recording `generatedruntime` in async metadata now means the
+  contract is available, not that every existing checked-in package has
+  already switched to it.
 - Remaining lifecycle/manual selected kinds that still expose OCI
   work-request APIs, including `psql/DbSystem`, are re-audited separately
   under `oci-service-operator-0kb`; the metadata classification does not, by
@@ -249,12 +259,21 @@ and service-manager generation is enabled.
   terminating from package-local OCI responses, and `ParityHooks` lets a
   package normalize desired vs live values, validate create-only drift, and
   optionally execute a package-local parity-only update path.
+- The runtime-hooks surface now also carries an additive bounded `Async` seam
+  for work-request-backed resources. `Async` may fetch the service-local work
+  request, classify it through
+  `servicemanager.WorkRequestAsyncAdapter` and
+  `servicemanager.BuildWorkRequestAsyncOperation(...)`, recover the target
+  OCI identifier, and keep any temporary legacy work-request bridge fields in
+  sync with `status.async.current`. It is only active when
+  `Semantics.Async` explicitly resolves to `strategy=workrequest` and
+  `runtime=generatedruntime`.
 - The nested `Read` seam is only for read adaptation such as synthesizing
   `Get` or `List` from a parent-shaped SDK call. It does not widen
   create/update/delete into a generic untyped CRUD contract, and this contract
   still does not expose generic `CurrentID`, cross-service identity-repair,
-  generic bind lookup or payload-sanitization hooks, async, or OCI-error
-  overlay hooks.
+  generic bind lookup or payload-sanitization hooks, generic untyped async, or
+  OCI-error overlay hooks.
 - `<file-stem>_serviceclient.go` now limits itself to OCI client construction,
   hook assembly, generated-runtime config creation, default delegate creation,
   and optional wrapper application.
