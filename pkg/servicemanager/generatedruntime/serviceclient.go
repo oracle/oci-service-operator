@@ -174,6 +174,28 @@ type AsyncHooks[T any] struct {
 	Message           func(shared.OSOKAsyncPhase, any) string
 }
 
+type DeleteConfirmStage string
+
+const (
+	DeleteConfirmStageAlreadyPending DeleteConfirmStage = "already-pending"
+	DeleteConfirmStageAfterRequest   DeleteConfirmStage = "after-request"
+)
+
+type DeleteOutcome struct {
+	Handled bool
+	Deleted bool
+}
+
+// DeleteHooks is the bounded delete-only seam for generatedruntime confirm-delete
+// flows. Implementations may override delete rereads, normalize or project
+// delete-phase errors, and short-circuit delete outcome handling without
+// widening create, update, or observe into generic provider hooks.
+type DeleteHooks[T any] struct {
+	ConfirmRead  func(context.Context, T, string) (any, error)
+	HandleError  func(T, error) error
+	ApplyOutcome func(T, any, DeleteConfirmStage) (DeleteOutcome, error)
+}
+
 type LifecycleSemantics struct {
 	ProvisioningStates []string
 	UpdatingStates     []string
@@ -242,6 +264,7 @@ type Config[T any] struct {
 	StatusHooks      StatusHooks[T]
 	ParityHooks      ParityHooks[T]
 	Async            AsyncHooks[T]
+	DeleteHooks      DeleteHooks[T]
 	BuildCreateBody  func(context.Context, T, string) (any, error)
 	BuildUpdateBody  func(context.Context, T, string, any) (any, bool, error)
 
@@ -399,6 +422,10 @@ func (c ServiceClient[T]) hasReadableOperation() bool {
 	return c.getReadOperation() != nil || c.listReadOperation() != nil
 }
 
+func (c ServiceClient[T]) hasDeleteConfirmRead() bool {
+	return c.config.DeleteHooks.ConfirmRead != nil || c.hasReadableOperation()
+}
+
 func (c ServiceClient[T]) prepareIdentity(resource T) (any, error) {
 	if c.config.Identity.Resolve == nil {
 		return nil, nil
@@ -479,6 +506,41 @@ func (c ServiceClient[T]) clearProjectedStatus(resource T) (any, bool) {
 		return nil, false
 	}
 	return c.config.StatusHooks.ClearProjectedStatus(resource), true
+}
+
+func (c ServiceClient[T]) confirmDeleteRead(ctx context.Context, resource T, currentID string) (any, error) {
+	if c.config.DeleteHooks.ConfirmRead != nil {
+		response, err := c.config.DeleteHooks.ConfirmRead(ctx, resource, currentID)
+		if err != nil {
+			return nil, c.handleDeleteError(resource, err)
+		}
+		return response, nil
+	}
+
+	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	if err != nil {
+		return nil, c.handleDeleteError(resource, err)
+	}
+	return response, nil
+}
+
+func (c ServiceClient[T]) handleDeleteError(resource T, err error) error {
+	if err == nil {
+		return nil
+	}
+	if c.config.DeleteHooks.HandleError != nil {
+		if handledErr := c.config.DeleteHooks.HandleError(resource, err); handledErr != nil {
+			return handledErr
+		}
+	}
+	return err
+}
+
+func (c ServiceClient[T]) applyDeleteOutcomeHooks(resource T, response any, stage DeleteConfirmStage) (DeleteOutcome, error) {
+	if c.config.DeleteHooks.ApplyOutcome == nil {
+		return DeleteOutcome{}, nil
+	}
+	return c.config.DeleteHooks.ApplyOutcome(resource, response, stage)
 }
 
 func (c ServiceClient[T]) restoreStatusAfterFailure(resource T, baseline any) {
@@ -1421,6 +1483,7 @@ func (c ServiceClient[T]) markTerminatingWithHooks(resource T, response any) err
 func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T, currentID string) (bool, error) {
 	response, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{})
 	if err != nil {
+		err = c.handleDeleteError(resource, err)
 		if isDeleteNotFound(err) {
 			c.recordErrorRequestID(resource, err)
 			c.markDeletedWithHooks(resource, "OCI resource no longer exists")
@@ -1458,12 +1521,12 @@ func (c ServiceClient[T]) deleteWithoutSemantics(ctx context.Context, resource T
 }
 
 func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, resource T, currentID string) (bool, error) {
-	if !c.hasReadableOperation() {
+	if !c.hasDeleteConfirmRead() {
 		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return true, nil
 	}
 
-	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	response, err := c.confirmDeleteRead(ctx, resource, currentID)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.recordErrorRequestID(resource, err)
@@ -1475,6 +1538,13 @@ func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, res
 
 	if err := c.projectStatusWithHooks(resource, response); err != nil {
 		return false, err
+	}
+	outcome, err := c.applyDeleteOutcomeHooks(resource, response, DeleteConfirmStageAfterRequest)
+	if err != nil {
+		return false, err
+	}
+	if outcome.Handled {
+		return outcome.Deleted, nil
 	}
 	if err := c.markTerminatingWithHooks(resource, response); err != nil {
 		return false, err
@@ -1565,11 +1635,11 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		return false, nil, false
 	}
-	if !c.hasReadableOperation() {
+	if !c.hasDeleteConfirmRead() {
 		return false, nil, false
 	}
 
-	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	response, err := c.confirmDeleteRead(ctx, resource, currentID)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.markDeletedWithHooks(resource, "OCI resource deleted")
@@ -1578,14 +1648,29 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 		return false, nil, false
 	}
 
+	if c.config.DeleteHooks.ApplyOutcome != nil {
+		if err := c.projectStatusWithHooks(resource, response); err != nil {
+			return false, err, true
+		}
+		outcome, err := c.applyDeleteOutcomeHooks(resource, response, DeleteConfirmStageAlreadyPending)
+		if err != nil {
+			return false, err, true
+		}
+		if outcome.Handled {
+			return outcome.Deleted, nil, true
+		}
+	}
+
 	lifecycleState := strings.ToUpper(responseLifecycleState(response))
 	if !containsString(semantics.Delete.PendingStates, lifecycleState) &&
 		!containsString(semantics.Delete.TerminalStates, lifecycleState) {
 		return false, nil, false
 	}
 
-	if err := c.projectStatusWithHooks(resource, response); err != nil {
-		return false, err, true
+	if c.config.DeleteHooks.ApplyOutcome == nil {
+		if err := c.projectStatusWithHooks(resource, response); err != nil {
+			return false, err, true
+		}
 	}
 	deleted, err := c.applyDeletePolicy(resource, response, semantics)
 	return deleted, err, true
@@ -1598,7 +1683,7 @@ func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
 	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		return false
 	}
-	return c.hasReadableOperation()
+	return c.hasDeleteConfirmRead()
 }
 
 func (c ServiceClient[T]) semanticDeleteConfig() (*Semantics, error) {
@@ -1617,11 +1702,11 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resour
 		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return true, nil
 	}
-	if !c.hasReadableOperation() {
+	if !c.hasDeleteConfirmRead() {
 		return false, fmt.Errorf("%s formal delete confirmation requires a readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	response, err := c.confirmDeleteRead(ctx, resource, currentID)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.recordErrorRequestID(resource, err)
@@ -1633,6 +1718,13 @@ func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resour
 
 	if err := c.projectStatusWithHooks(resource, response); err != nil {
 		return false, err
+	}
+	outcome, err := c.applyDeleteOutcomeHooks(resource, response, DeleteConfirmStageAfterRequest)
+	if err != nil {
+		return false, err
+	}
+	if outcome.Handled {
+		return outcome.Deleted, nil
 	}
 	return c.applyDeletePolicy(resource, response, semantics)
 }
@@ -1684,11 +1776,11 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 		return currentID, nil
 	}
 
-	if !c.hasReadableOperation() {
+	if !c.hasDeleteConfirmRead() {
 		return "", errResourceNotFound
 	}
 
-	response, err := c.readResource(ctx, resource, "", readPhaseDelete)
+	response, err := c.confirmDeleteRead(ctx, resource, "")
 	if err != nil {
 		return "", err
 	}

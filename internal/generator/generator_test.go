@@ -1693,6 +1693,7 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		"StatusHooks generatedruntime.StatusHooks[*examplev1beta1.Thing]",
 		"ParityHooks generatedruntime.ParityHooks[*examplev1beta1.Thing]",
 		"Async generatedruntime.AsyncHooks[*examplev1beta1.Thing]",
+		"DeleteHooks generatedruntime.DeleteHooks[*examplev1beta1.Thing]",
 		`FormalService: "identity"`,
 		`FormalSlug: "user"`,
 		`Async: &generatedruntime.AsyncSemantics{`,
@@ -1706,6 +1707,7 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		`StatusHooks: generatedruntime.StatusHooks[*examplev1beta1.Thing]{},`,
 		`ParityHooks: generatedruntime.ParityHooks[*examplev1beta1.Thing]{},`,
 		`Async: generatedruntime.AsyncHooks[*examplev1beta1.Thing]{},`,
+		`DeleteHooks: generatedruntime.DeleteHooks[*examplev1beta1.Thing]{},`,
 		`WrapGeneratedClient []func(ThingServiceClient) ThingServiceClient`,
 		`Identity: hooks.Identity,`,
 		`Read: hooks.Read,`,
@@ -1713,6 +1715,7 @@ func TestRenderServiceRuntimeHooksFileRendersFormalSemanticsAndRequestFields(t *
 		`StatusHooks: hooks.StatusHooks,`,
 		`ParityHooks: hooks.ParityHooks,`,
 		`Async: hooks.Async,`,
+		`DeleteHooks: hooks.DeleteHooks,`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "CreateThingDetails", RequestName: "", Contribution: "body", PreferResourceID: false}},`,
 		`Fields: []generatedruntime.RequestField{{FieldName: "ThingId", RequestName: "thingId", Contribution: "path", PreferResourceID: true}},`,
 		`CreateFollowUp: generatedruntime.FollowUpSemantics{`,
@@ -1927,6 +1930,9 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	trackedClearCalled := false
 	statusClearCalled := false
 	parityNormalizeCalled := false
+	deleteReadCalled := false
+	deleteErrorHandled := false
+	deleteOutcomeCalled := false
 
 	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
 		hooks.BuildCreateBody = func(context.Context, *mysqlv1beta1.DbSystem, string) (any, error) {
@@ -1959,6 +1965,18 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 		}
 		hooks.ParityHooks.NormalizeDesiredState = func(*mysqlv1beta1.DbSystem, any) {
 			parityNormalizeCalled = true
+		}
+		hooks.DeleteHooks.ConfirmRead = func(context.Context, *mysqlv1beta1.DbSystem, string) (any, error) {
+			deleteReadCalled = true
+			return readMarkerResponse{}, nil
+		}
+		hooks.DeleteHooks.HandleError = func(*mysqlv1beta1.DbSystem, error) error {
+			deleteErrorHandled = true
+			return nil
+		}
+		hooks.DeleteHooks.ApplyOutcome = func(*mysqlv1beta1.DbSystem, any, generatedruntime.DeleteConfirmStage) (generatedruntime.DeleteOutcome, error) {
+			deleteOutcomeCalled = true
+			return generatedruntime.DeleteOutcome{Handled: true, Deleted: true}, nil
 		}
 	})
 	registerDbSystemRuntimeHooksMutator(func(_ *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
@@ -2036,6 +2054,37 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	if !parityNormalizeCalled {
 		t.Fatal("ParityHooks.NormalizeDesiredState hook was not invoked")
 	}
+	if hooks.DeleteHooks.ConfirmRead == nil {
+		t.Fatal("DeleteHooks.ConfirmRead hook was not applied")
+	}
+	if _, err := hooks.DeleteHooks.ConfirmRead(context.Background(), &mysqlv1beta1.DbSystem{}, "ocid1.dbsystem.oc1..delete"); err != nil {
+		t.Fatalf("hooks.DeleteHooks.ConfirmRead() error = %v", err)
+	}
+	if !deleteReadCalled {
+		t.Fatal("DeleteHooks.ConfirmRead hook was not invoked")
+	}
+	if hooks.DeleteHooks.HandleError == nil {
+		t.Fatal("DeleteHooks.HandleError hook was not applied")
+	}
+	if err := hooks.DeleteHooks.HandleError(&mysqlv1beta1.DbSystem{}, context.Canceled); err != nil {
+		t.Fatalf("hooks.DeleteHooks.HandleError() error = %v, want nil passthrough", err)
+	}
+	if !deleteErrorHandled {
+		t.Fatal("DeleteHooks.HandleError hook was not invoked")
+	}
+	if hooks.DeleteHooks.ApplyOutcome == nil {
+		t.Fatal("DeleteHooks.ApplyOutcome hook was not applied")
+	}
+	outcome, err := hooks.DeleteHooks.ApplyOutcome(&mysqlv1beta1.DbSystem{}, nil, generatedruntime.DeleteConfirmStageAfterRequest)
+	if err != nil {
+		t.Fatalf("hooks.DeleteHooks.ApplyOutcome() error = %v", err)
+	}
+	if !outcome.Handled || !outcome.Deleted {
+		t.Fatalf("hooks.DeleteHooks.ApplyOutcome() = %#v, want handled deleted outcome", outcome)
+	}
+	if !deleteOutcomeCalled {
+		t.Fatal("DeleteHooks.ApplyOutcome hook was not invoked")
+	}
 
 	cfg := buildDbSystemGeneratedRuntimeConfig(manager, hooks)
 	if cfg.Create == nil {
@@ -2058,6 +2107,15 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	}
 	if cfg.ParityHooks.NormalizeDesiredState == nil {
 		t.Fatal("generated runtime config did not expose ParityHooks.NormalizeDesiredState")
+	}
+	if cfg.DeleteHooks.ConfirmRead == nil {
+		t.Fatal("generated runtime config did not expose DeleteHooks.ConfirmRead")
+	}
+	if cfg.DeleteHooks.HandleError == nil {
+		t.Fatal("generated runtime config did not expose DeleteHooks.HandleError")
+	}
+	if cfg.DeleteHooks.ApplyOutcome == nil {
+		t.Fatal("generated runtime config did not expose DeleteHooks.ApplyOutcome")
 	}
 	if cfg.BuildCreateBody == nil {
 		t.Fatal("generated runtime config did not expose BuildCreateBody")
@@ -2109,6 +2167,31 @@ func TestGeneratedRuntimeHooksMutatorsCompose(t *testing.T) {
 	cfg.ParityHooks.NormalizeDesiredState(&mysqlv1beta1.DbSystem{}, nil)
 	if !parityNormalizeCalled {
 		t.Fatal("cfg.ParityHooks.NormalizeDesiredState() did not invoke the hooked mutator")
+	}
+	deleteReadCalled = false
+	if _, err := cfg.DeleteHooks.ConfirmRead(context.Background(), &mysqlv1beta1.DbSystem{}, "ocid1.dbsystem.oc1..delete"); err != nil {
+		t.Fatalf("cfg.DeleteHooks.ConfirmRead() error = %v", err)
+	}
+	if !deleteReadCalled {
+		t.Fatal("cfg.DeleteHooks.ConfirmRead() did not invoke the hooked mutator")
+	}
+	deleteErrorHandled = false
+	if err := cfg.DeleteHooks.HandleError(&mysqlv1beta1.DbSystem{}, context.Canceled); err != nil {
+		t.Fatalf("cfg.DeleteHooks.HandleError() error = %v, want nil passthrough", err)
+	}
+	if !deleteErrorHandled {
+		t.Fatal("cfg.DeleteHooks.HandleError() did not invoke the hooked mutator")
+	}
+	deleteOutcomeCalled = false
+	outcome, err = cfg.DeleteHooks.ApplyOutcome(&mysqlv1beta1.DbSystem{}, nil, generatedruntime.DeleteConfirmStageAlreadyPending)
+	if err != nil {
+		t.Fatalf("cfg.DeleteHooks.ApplyOutcome() error = %v", err)
+	}
+	if !outcome.Handled || !outcome.Deleted {
+		t.Fatalf("cfg.DeleteHooks.ApplyOutcome() = %#v, want handled deleted outcome", outcome)
+	}
+	if !deleteOutcomeCalled {
+		t.Fatal("cfg.DeleteHooks.ApplyOutcome() did not invoke the hooked mutator")
 	}
 
 	client := newDbSystemServiceClient(manager)
@@ -4702,6 +4785,8 @@ func normalizeRuntimeHookContractForComparison(path string, content string) stri
 			continue
 		case strings.Contains(line, "generatedruntime.AsyncHooks["):
 			continue
+		case strings.Contains(line, "generatedruntime.DeleteHooks["):
+			continue
 		case line == "Identity: hooks.Identity,":
 			continue
 		case line == "Read: hooks.Read,":
@@ -4713,6 +4798,8 @@ func normalizeRuntimeHookContractForComparison(path string, content string) stri
 		case line == "ParityHooks: hooks.ParityHooks,":
 			continue
 		case line == "Async: hooks.Async,":
+			continue
+		case line == "DeleteHooks: hooks.DeleteHooks,":
 			continue
 		default:
 			kept = append(kept, line)
