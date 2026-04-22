@@ -55,7 +55,7 @@ func newRedisClusterRuntimeSemantics() *generatedruntime.Semantics {
 		FormalSlug:    "rediscluster",
 		Async: &generatedruntime.AsyncSemantics{
 			Strategy:             "workrequest",
-			Runtime:              "handwritten",
+			Runtime:              "generatedruntime",
 			FormalClassification: "workrequest",
 			WorkRequest: &generatedruntime.WorkRequestSemantics{
 				Source: "service-sdk",

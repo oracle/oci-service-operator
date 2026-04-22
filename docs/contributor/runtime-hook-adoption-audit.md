@@ -6,7 +6,8 @@ path-identity and nested-read seams, and refreshed again in `US-223` after
 `US-222` and `US-223` moved the seven-package core networking family onto the
 bounded phase-4 hook seam, and refreshed again in `US-228` after `US-227` and
 `US-228` moved the four-package bind-guard family onto the bounded phase-5
-`Identity` seam.
+`Identity` seam, and refreshed again in `US-238` after `redis/rediscluster`
+moved onto the bounded async work-request seam.
 
 The live residual set comes from:
 
@@ -15,14 +16,14 @@ rg -l "new[A-Za-z0-9]+ServiceClient\s*=" pkg/servicemanager | \
   rg -v '_serviceclient\.go$|_test\.go$'
 ```
 
-That command now returns 8 live constructor rewrites. The `core` seven-package
+That command now returns 7 live constructor rewrites. The `core` seven-package
 networking family and the four-package bind-guard family are no longer in the
 residual set. The remaining packages collapse into three concrete blocked
 families:
 
 | Family | Count | Packages |
 | --- | --- | --- |
-| Async resume and work-request state machines | 3 | `ailanguage/project`, `queue/queue`, `redis/rediscluster` |
+| Async resume and work-request state machines | 2 | `ailanguage/project`, `queue/queue` |
 | Delete-confirmation and OCI-error overlays | 2 | `aispeech/transcriptionjob`, `dataflow/application` |
 | Full manual runtime engines | 3 | `core/securitylist`, `nosql/table`, `psql/dbsystem` |
 
@@ -39,7 +40,7 @@ families:
 - That surface is also now enough for the full four-package bind-guard family:
   `generativeai/model`, `generativeai/dedicatedaicluster`, `ocvp/cluster`, and
   `ocvp/sddc`.
-- The remaining 8 rewrites are still real blockers, but they no longer include
+- The remaining 7 rewrites are still real blockers, but they no longer include
   the core networking wrapper family or the bind-guard family and they do not
   justify widening the checked-in runtime surface beyond the current bounded
   hooks.
@@ -52,7 +53,6 @@ These packages still own explicit persisted async state and resume logic.
 
 - `ailanguage/project`
 - `queue/queue`
-- `redis/rediscluster`
 
 The common shape is:
 
@@ -105,7 +105,6 @@ The common shape is:
 | `aispeech/transcriptionjob` | Delete-confirmation and OCI-error overlay | The generated path still needs a handwritten delete layer because `CANCELING` and `CANCELED` mean different things for normal observation and delete confirmation. |
 | `dataflow/application` | Delete-confirmation and OCI-error overlay | Uses an embedded generated client for create or update, but delete still needs package-local rereads, OCI error normalization, and request-ID projection. |
 | `queue/queue` | Async resume and work-request state machine | Persists `CreateWorkRequestId`, `UpdateWorkRequestId`, and `DeleteWorkRequestId`, then resumes all phases through service-local work-request handling and Queue ID recovery. |
-| `redis/rediscluster` | Async resume and work-request state machine | Persists the shared async tracker and resumes create, update, and delete from Redis work requests before lifecycle convergence. |
 | `psql/dbsystem` | Full manual runtime engine | Keeps full create, update, delete, bind lookup, lifecycle handling, and credential-backed request construction in manual code. |
 | `nosql/table` | Full manual runtime engine | Keeps full lifecycle-aware create, update, compartment move, and delete confirmation behavior in an explicit handwritten runtime. |
 
@@ -119,7 +118,6 @@ Representative packages:
 
 - `ailanguage/project`
 - `queue/queue`
-- `redis/rediscluster`
 
 Current repeated need:
 
@@ -145,5 +143,5 @@ Why this stays residual design input instead of a new bounded hook claim:
 `docs/api-generator-contract.md` already records the checked-in bounded hook
 surface and says the remaining handwritten runtime seams stay explicit until
 later rollout work closes them. This audit refresh only updates the live
-residual inventory after `US-227` and `US-228`, so no further contract change
-is required here.
+residual inventory after `US-238`, so no further contract change is required
+here.
