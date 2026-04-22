@@ -30,6 +30,7 @@ type ListenerRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Listener]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Listener]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Listener]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.Listener]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateListenerRequest, loadbalancersdk.UpdateListenerResponse]
 	Delete              runtimeOperationHooks[loadbalancersdk.DeleteListenerRequest, loadbalancersdk.DeleteListenerResponse]
@@ -102,6 +103,7 @@ func newListenerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Listener]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Listener]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Listener]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Listener]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateListenerDetails", RequestName: "CreateListenerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateListenerRequest) (loadbalancersdk.CreateListenerResponse, error) {
@@ -146,6 +148,7 @@ func buildListenerGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

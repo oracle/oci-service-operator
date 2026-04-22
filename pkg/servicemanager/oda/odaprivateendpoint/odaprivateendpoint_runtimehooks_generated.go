@@ -30,6 +30,7 @@ type OdaPrivateEndpointRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpoint]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpoint]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpoint]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.OdaPrivateEndpoint]
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointRequest, odasdk.CreateOdaPrivateEndpointResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointRequest, odasdk.GetOdaPrivateEndpointResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointsRequest, odasdk.ListOdaPrivateEndpointsResponse]
@@ -55,6 +56,7 @@ func newOdaPrivateEndpointDefaultRuntimeHooks(sdkClient odasdk.ManagementClient)
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpoint]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpoint]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpoint]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.OdaPrivateEndpoint]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointRequest, odasdk.CreateOdaPrivateEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaPrivateEndpointDetails", RequestName: "CreateOdaPrivateEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointRequest) (odasdk.CreateOdaPrivateEndpointResponse, error) {
@@ -111,6 +113,7 @@ func buildOdaPrivateEndpointGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

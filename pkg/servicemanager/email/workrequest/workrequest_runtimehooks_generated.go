@@ -30,6 +30,7 @@ type WorkRequestRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.WorkRequest]
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.WorkRequest]
+	Async               generatedruntime.AsyncHooks[*emailv1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[emailsdk.GetWorkRequestRequest, emailsdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[emailsdk.ListWorkRequestsRequest, emailsdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -52,6 +53,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) WorkReque
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.WorkRequest]{},
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.WorkRequest]{},
+		Async:           generatedruntime.AsyncHooks[*emailv1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[emailsdk.GetWorkRequestRequest, emailsdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request emailsdk.GetWorkRequestRequest) (emailsdk.GetWorkRequestResponse, error) {
@@ -90,6 +92,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

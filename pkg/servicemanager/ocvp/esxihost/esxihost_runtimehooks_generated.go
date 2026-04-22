@@ -30,6 +30,7 @@ type EsxiHostRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.EsxiHost]
 	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.EsxiHost]
 	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.EsxiHost]
+	Async               generatedruntime.AsyncHooks[*ocvpv1beta1.EsxiHost]
 	Create              runtimeOperationHooks[ocvpsdk.CreateEsxiHostRequest, ocvpsdk.CreateEsxiHostResponse]
 	Get                 runtimeOperationHooks[ocvpsdk.GetEsxiHostRequest, ocvpsdk.GetEsxiHostResponse]
 	List                runtimeOperationHooks[ocvpsdk.ListEsxiHostsRequest, ocvpsdk.ListEsxiHostsResponse]
@@ -55,6 +56,7 @@ func newEsxiHostDefaultRuntimeHooks(sdkClient ocvpsdk.EsxiHostClient) EsxiHostRu
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.EsxiHost]{},
 		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.EsxiHost]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.EsxiHost]{},
+		Async:           generatedruntime.AsyncHooks[*ocvpv1beta1.EsxiHost]{},
 		Create: runtimeOperationHooks[ocvpsdk.CreateEsxiHostRequest, ocvpsdk.CreateEsxiHostResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEsxiHostDetails", RequestName: "CreateEsxiHostDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.CreateEsxiHostRequest) (ocvpsdk.CreateEsxiHostResponse, error) {
@@ -111,6 +113,7 @@ func buildEsxiHostGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

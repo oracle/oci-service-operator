@@ -30,6 +30,7 @@ type SSLCipherSuiteRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.SSLCipherSuite]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.SSLCipherSuite]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.SSLCipherSuite]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.SSLCipherSuite]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateSSLCipherSuiteRequest, loadbalancersdk.CreateSSLCipherSuiteResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetSSLCipherSuiteRequest, loadbalancersdk.GetSSLCipherSuiteResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListSSLCipherSuitesRequest, loadbalancersdk.ListSSLCipherSuitesResponse]
@@ -55,6 +56,7 @@ func newSSLCipherSuiteDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancer
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.SSLCipherSuite]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.SSLCipherSuite]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.SSLCipherSuite]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.SSLCipherSuite]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateSSLCipherSuiteRequest, loadbalancersdk.CreateSSLCipherSuiteResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateSslCipherSuiteDetails", RequestName: "CreateSslCipherSuiteDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateSSLCipherSuiteRequest) (loadbalancersdk.CreateSSLCipherSuiteResponse, error) {
@@ -111,6 +113,7 @@ func buildSSLCipherSuiteGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

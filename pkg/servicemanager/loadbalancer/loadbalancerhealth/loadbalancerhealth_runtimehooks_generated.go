@@ -30,6 +30,7 @@ type LoadBalancerHealthRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancerHealth]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerHealth]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerHealth]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancerHealth]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetLoadBalancerHealthRequest, loadbalancersdk.GetLoadBalancerHealthResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListLoadBalancerHealthsRequest, loadbalancersdk.ListLoadBalancerHealthsResponse]
 	WrapGeneratedClient []func(LoadBalancerHealthServiceClient) LoadBalancerHealthServiceClient
@@ -52,6 +53,7 @@ func newLoadBalancerHealthDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBala
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancerHealth]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerHealth]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerHealth]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancerHealth]{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetLoadBalancerHealthRequest, loadbalancersdk.GetLoadBalancerHealthResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetLoadBalancerHealthRequest) (loadbalancersdk.GetLoadBalancerHealthResponse, error) {
@@ -90,6 +92,7 @@ func buildLoadBalancerHealthGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

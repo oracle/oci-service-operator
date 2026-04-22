@@ -30,6 +30,7 @@ type DigitalAssistantParameterRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.DigitalAssistantParameter]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.DigitalAssistantParameter]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.DigitalAssistantParameter]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.DigitalAssistantParameter]
 	Get                 runtimeOperationHooks[odasdk.GetDigitalAssistantParameterRequest, odasdk.GetDigitalAssistantParameterResponse]
 	List                runtimeOperationHooks[odasdk.ListDigitalAssistantParametersRequest, odasdk.ListDigitalAssistantParametersResponse]
 	Update              runtimeOperationHooks[odasdk.UpdateDigitalAssistantParameterRequest, odasdk.UpdateDigitalAssistantParameterResponse]
@@ -53,6 +54,7 @@ func newDigitalAssistantParameterDefaultRuntimeHooks(sdkClient odasdk.Management
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.DigitalAssistantParameter]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.DigitalAssistantParameter]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.DigitalAssistantParameter]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.DigitalAssistantParameter]{},
 		Get: runtimeOperationHooks[odasdk.GetDigitalAssistantParameterRequest, odasdk.GetDigitalAssistantParameterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "DigitalAssistantId", RequestName: "digitalAssistantId", Contribution: "path", PreferResourceID: false}, {FieldName: "ParameterName", RequestName: "parameterName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.GetDigitalAssistantParameterRequest) (odasdk.GetDigitalAssistantParameterResponse, error) {
@@ -97,6 +99,7 @@ func buildDigitalAssistantParameterGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

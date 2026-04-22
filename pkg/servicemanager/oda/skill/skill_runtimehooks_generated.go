@@ -30,6 +30,7 @@ type SkillRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.Skill]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.Skill]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.Skill]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.Skill]
 	Create              runtimeOperationHooks[odasdk.CreateSkillRequest, odasdk.CreateSkillResponse]
 	Get                 runtimeOperationHooks[odasdk.GetSkillRequest, odasdk.GetSkillResponse]
 	List                runtimeOperationHooks[odasdk.ListSkillsRequest, odasdk.ListSkillsResponse]
@@ -55,6 +56,7 @@ func newSkillDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) SkillRuntime
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.Skill]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.Skill]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.Skill]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.Skill]{},
 		Create: runtimeOperationHooks[odasdk.CreateSkillRequest, odasdk.CreateSkillResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateSkillDetails", RequestName: "CreateSkillDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateSkillRequest) (odasdk.CreateSkillResponse, error) {
@@ -111,6 +113,7 @@ func buildSkillGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

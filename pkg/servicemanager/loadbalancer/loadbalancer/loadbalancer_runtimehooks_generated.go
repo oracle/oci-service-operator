@@ -30,6 +30,7 @@ type LoadBalancerRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancer]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancer]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancer]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancer]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateLoadBalancerRequest, loadbalancersdk.CreateLoadBalancerResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetLoadBalancerRequest, loadbalancersdk.GetLoadBalancerResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListLoadBalancersRequest, loadbalancersdk.ListLoadBalancersResponse]
@@ -108,6 +109,7 @@ func newLoadBalancerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerCl
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancer]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancer]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancer]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancer]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateLoadBalancerRequest, loadbalancersdk.CreateLoadBalancerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateLoadBalancerDetails", RequestName: "CreateLoadBalancerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateLoadBalancerRequest) (loadbalancersdk.CreateLoadBalancerResponse, error) {
@@ -164,6 +166,7 @@ func buildLoadBalancerGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

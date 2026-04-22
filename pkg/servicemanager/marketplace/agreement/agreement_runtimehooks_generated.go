@@ -30,6 +30,7 @@ type AgreementRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Agreement]
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Agreement]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Agreement]
+	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Agreement]
 	Get                 runtimeOperationHooks[marketplacesdk.GetAgreementRequest, marketplacesdk.GetAgreementResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListAgreementsRequest, marketplacesdk.ListAgreementsResponse]
 	WrapGeneratedClient []func(AgreementServiceClient) AgreementServiceClient
@@ -52,6 +53,7 @@ func newAgreementDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient)
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Agreement]{},
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Agreement]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Agreement]{},
+		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Agreement]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetAgreementRequest, marketplacesdk.GetAgreementResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageVersion", RequestName: "packageVersion", Contribution: "path", PreferResourceID: false}, {FieldName: "AgreementId", RequestName: "agreementId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetAgreementRequest) (marketplacesdk.GetAgreementResponse, error) {
@@ -90,6 +92,7 @@ func buildAgreementGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

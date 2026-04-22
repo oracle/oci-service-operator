@@ -30,6 +30,7 @@ type WorkRequestErrorRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.WorkRequestError]
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.WorkRequestError]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.WorkRequestError]
+	Async               generatedruntime.AsyncHooks[*emailv1beta1.WorkRequestError]
 	List                runtimeOperationHooks[emailsdk.ListWorkRequestErrorsRequest, emailsdk.ListWorkRequestErrorsResponse]
 	WrapGeneratedClient []func(WorkRequestErrorServiceClient) WorkRequestErrorServiceClient
 }
@@ -51,6 +52,7 @@ func newWorkRequestErrorDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) Work
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.WorkRequestError]{},
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.WorkRequestError]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.WorkRequestError]{},
+		Async:           generatedruntime.AsyncHooks[*emailv1beta1.WorkRequestError]{},
 		List: runtimeOperationHooks[emailsdk.ListWorkRequestErrorsRequest, emailsdk.ListWorkRequestErrorsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.ListWorkRequestErrorsRequest) (emailsdk.ListWorkRequestErrorsResponse, error) {
@@ -83,6 +85,7 @@ func buildWorkRequestErrorGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

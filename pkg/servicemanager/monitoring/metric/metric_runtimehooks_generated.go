@@ -30,6 +30,7 @@ type MetricRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.Metric]
 	StatusHooks         generatedruntime.StatusHooks[*monitoringv1beta1.Metric]
 	ParityHooks         generatedruntime.ParityHooks[*monitoringv1beta1.Metric]
+	Async               generatedruntime.AsyncHooks[*monitoringv1beta1.Metric]
 	List                runtimeOperationHooks[monitoringsdk.ListMetricsRequest, monitoringsdk.ListMetricsResponse]
 	WrapGeneratedClient []func(MetricServiceClient) MetricServiceClient
 }
@@ -51,6 +52,7 @@ func newMetricDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) Metr
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.Metric]{},
 		StatusHooks:     generatedruntime.StatusHooks[*monitoringv1beta1.Metric]{},
 		ParityHooks:     generatedruntime.ParityHooks[*monitoringv1beta1.Metric]{},
+		Async:           generatedruntime.AsyncHooks[*monitoringv1beta1.Metric]{},
 		List: runtimeOperationHooks[monitoringsdk.ListMetricsRequest, monitoringsdk.ListMetricsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentIdInSubtree", RequestName: "compartmentIdInSubtree", Contribution: "query", PreferResourceID: false}, {FieldName: "ListMetricsDetails", RequestName: "ListMetricsDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.ListMetricsRequest) (monitoringsdk.ListMetricsResponse, error) {
@@ -83,6 +85,7 @@ func buildMetricGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

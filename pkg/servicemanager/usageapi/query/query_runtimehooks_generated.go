@@ -30,6 +30,7 @@ type QueryRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.Query]
 	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.Query]
 	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.Query]
+	Async               generatedruntime.AsyncHooks[*usageapiv1beta1.Query]
 	Create              runtimeOperationHooks[usageapisdk.CreateQueryRequest, usageapisdk.CreateQueryResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetQueryRequest, usageapisdk.GetQueryResponse]
 	List                runtimeOperationHooks[usageapisdk.ListQueriesRequest, usageapisdk.ListQueriesResponse]
@@ -108,6 +109,7 @@ func newQueryDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) QueryRunt
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.Query]{},
 		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.Query]{},
 		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.Query]{},
+		Async:           generatedruntime.AsyncHooks[*usageapiv1beta1.Query]{},
 		Create: runtimeOperationHooks[usageapisdk.CreateQueryRequest, usageapisdk.CreateQueryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueryDetails", RequestName: "CreateQueryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateQueryRequest) (usageapisdk.CreateQueryResponse, error) {
@@ -164,6 +166,7 @@ func buildQueryGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

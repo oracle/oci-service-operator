@@ -30,6 +30,7 @@ type WorkRequestRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.WorkRequest]
 	StatusHooks         generatedruntime.StatusHooks[*generativeaiv1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*generativeaiv1beta1.WorkRequest]
+	Async               generatedruntime.AsyncHooks[*generativeaiv1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[generativeaisdk.GetWorkRequestRequest, generativeaisdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListWorkRequestsRequest, generativeaisdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -52,6 +53,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiCli
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.WorkRequest]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiv1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiv1beta1.WorkRequest]{},
+		Async:           generatedruntime.AsyncHooks[*generativeaiv1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[generativeaisdk.GetWorkRequestRequest, generativeaisdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request generativeaisdk.GetWorkRequestRequest) (generativeaisdk.GetWorkRequestResponse, error) {
@@ -90,6 +92,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

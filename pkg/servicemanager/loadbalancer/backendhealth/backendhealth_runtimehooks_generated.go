@@ -30,6 +30,7 @@ type BackendHealthRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendHealth]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendHealth]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendHealth]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.BackendHealth]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetBackendHealthRequest, loadbalancersdk.GetBackendHealthResponse]
 	WrapGeneratedClient []func(BackendHealthServiceClient) BackendHealthServiceClient
 }
@@ -51,6 +52,7 @@ func newBackendHealthDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerC
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendHealth]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendHealth]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendHealth]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.BackendHealth]{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetBackendHealthRequest, loadbalancersdk.GetBackendHealthResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendName", RequestName: "backendName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetBackendHealthRequest) (loadbalancersdk.GetBackendHealthResponse, error) {
@@ -83,6 +85,7 @@ func buildBackendHealthGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

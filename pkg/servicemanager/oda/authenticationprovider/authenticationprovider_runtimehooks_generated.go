@@ -30,6 +30,7 @@ type AuthenticationProviderRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.AuthenticationProvider]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.AuthenticationProvider]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.AuthenticationProvider]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.AuthenticationProvider]
 	Create              runtimeOperationHooks[odasdk.CreateAuthenticationProviderRequest, odasdk.CreateAuthenticationProviderResponse]
 	Get                 runtimeOperationHooks[odasdk.GetAuthenticationProviderRequest, odasdk.GetAuthenticationProviderResponse]
 	List                runtimeOperationHooks[odasdk.ListAuthenticationProvidersRequest, odasdk.ListAuthenticationProvidersResponse]
@@ -55,6 +56,7 @@ func newAuthenticationProviderDefaultRuntimeHooks(sdkClient odasdk.ManagementCli
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.AuthenticationProvider]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.AuthenticationProvider]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.AuthenticationProvider]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.AuthenticationProvider]{},
 		Create: runtimeOperationHooks[odasdk.CreateAuthenticationProviderRequest, odasdk.CreateAuthenticationProviderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateAuthenticationProviderDetails", RequestName: "CreateAuthenticationProviderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateAuthenticationProviderRequest) (odasdk.CreateAuthenticationProviderResponse, error) {
@@ -111,6 +113,7 @@ func buildAuthenticationProviderGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

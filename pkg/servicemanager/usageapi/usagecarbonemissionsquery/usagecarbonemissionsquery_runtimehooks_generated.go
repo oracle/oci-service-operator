@@ -30,6 +30,7 @@ type UsageCarbonEmissionsQueryRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
 	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
 	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
+	Async               generatedruntime.AsyncHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]
 	Create              runtimeOperationHooks[usageapisdk.CreateUsageCarbonEmissionsQueryRequest, usageapisdk.CreateUsageCarbonEmissionsQueryResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetUsageCarbonEmissionsQueryRequest, usageapisdk.GetUsageCarbonEmissionsQueryResponse]
 	List                runtimeOperationHooks[usageapisdk.ListUsageCarbonEmissionsQueriesRequest, usageapisdk.ListUsageCarbonEmissionsQueriesResponse]
@@ -55,6 +56,7 @@ func newUsageCarbonEmissionsQueryDefaultRuntimeHooks(sdkClient usageapisdk.Usage
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
 		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
 		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
+		Async:           generatedruntime.AsyncHooks[*usageapiv1beta1.UsageCarbonEmissionsQuery]{},
 		Create: runtimeOperationHooks[usageapisdk.CreateUsageCarbonEmissionsQueryRequest, usageapisdk.CreateUsageCarbonEmissionsQueryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateUsageCarbonEmissionsQueryDetails", RequestName: "CreateUsageCarbonEmissionsQueryDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateUsageCarbonEmissionsQueryRequest) (usageapisdk.CreateUsageCarbonEmissionsQueryResponse, error) {
@@ -111,6 +113,7 @@ func buildUsageCarbonEmissionsQueryGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

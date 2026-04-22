@@ -30,6 +30,7 @@ type InternetGatewayRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.InternetGateway]
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.InternetGateway]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.InternetGateway]
+	Async               generatedruntime.AsyncHooks[*corev1beta1.InternetGateway]
 	Create              runtimeOperationHooks[coresdk.CreateInternetGatewayRequest, coresdk.CreateInternetGatewayResponse]
 	Get                 runtimeOperationHooks[coresdk.GetInternetGatewayRequest, coresdk.GetInternetGatewayResponse]
 	List                runtimeOperationHooks[coresdk.ListInternetGatewaysRequest, coresdk.ListInternetGatewaysResponse]
@@ -108,6 +109,7 @@ func newInternetGatewayDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClien
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.InternetGateway]{},
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.InternetGateway]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.InternetGateway]{},
+		Async:           generatedruntime.AsyncHooks[*corev1beta1.InternetGateway]{},
 		Create: runtimeOperationHooks[coresdk.CreateInternetGatewayRequest, coresdk.CreateInternetGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateInternetGatewayDetails", RequestName: "CreateInternetGatewayDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error) {
@@ -164,6 +166,7 @@ func buildInternetGatewayGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type NetworkSecurityGroupRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.NetworkSecurityGroup]
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.NetworkSecurityGroup]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.NetworkSecurityGroup]
+	Async               generatedruntime.AsyncHooks[*corev1beta1.NetworkSecurityGroup]
 	Create              runtimeOperationHooks[coresdk.CreateNetworkSecurityGroupRequest, coresdk.CreateNetworkSecurityGroupResponse]
 	Get                 runtimeOperationHooks[coresdk.GetNetworkSecurityGroupRequest, coresdk.GetNetworkSecurityGroupResponse]
 	List                runtimeOperationHooks[coresdk.ListNetworkSecurityGroupsRequest, coresdk.ListNetworkSecurityGroupsResponse]
@@ -108,6 +109,7 @@ func newNetworkSecurityGroupDefaultRuntimeHooks(sdkClient coresdk.VirtualNetwork
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.NetworkSecurityGroup]{},
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.NetworkSecurityGroup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.NetworkSecurityGroup]{},
+		Async:           generatedruntime.AsyncHooks[*corev1beta1.NetworkSecurityGroup]{},
 		Create: runtimeOperationHooks[coresdk.CreateNetworkSecurityGroupRequest, coresdk.CreateNetworkSecurityGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNetworkSecurityGroupDetails", RequestName: "CreateNetworkSecurityGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error) {
@@ -164,6 +166,7 @@ func buildNetworkSecurityGroupGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type VaultRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*keymanagementv1beta1.Vault]
 	StatusHooks         generatedruntime.StatusHooks[*keymanagementv1beta1.Vault]
 	ParityHooks         generatedruntime.ParityHooks[*keymanagementv1beta1.Vault]
+	Async               generatedruntime.AsyncHooks[*keymanagementv1beta1.Vault]
 	Create              runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]
 	Get                 runtimeOperationHooks[keymanagementsdk.GetVaultRequest, keymanagementsdk.GetVaultResponse]
 	List                runtimeOperationHooks[keymanagementsdk.ListVaultsRequest, keymanagementsdk.ListVaultsResponse]
@@ -54,6 +55,7 @@ func newVaultDefaultRuntimeHooks(sdkClient keymanagementsdk.KmsVaultClient) Vaul
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*keymanagementv1beta1.Vault]{},
 		StatusHooks:     generatedruntime.StatusHooks[*keymanagementv1beta1.Vault]{},
 		ParityHooks:     generatedruntime.ParityHooks[*keymanagementv1beta1.Vault]{},
+		Async:           generatedruntime.AsyncHooks[*keymanagementv1beta1.Vault]{},
 		Create: runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVaultDetails", RequestName: "CreateVaultDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request keymanagementsdk.CreateVaultRequest) (keymanagementsdk.CreateVaultResponse, error) {
@@ -104,6 +106,7 @@ func buildVaultGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

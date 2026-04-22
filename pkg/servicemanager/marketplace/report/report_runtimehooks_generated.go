@@ -30,6 +30,7 @@ type ReportRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Report]
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Report]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Report]
+	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Report]
 	List                runtimeOperationHooks[marketplacesdk.ListReportsRequest, marketplacesdk.ListReportsResponse]
 	WrapGeneratedClient []func(ReportServiceClient) ReportServiceClient
 }
@@ -51,6 +52,7 @@ func newReportDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) Re
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Report]{},
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Report]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Report]{},
+		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Report]{},
 		List: runtimeOperationHooks[marketplacesdk.ListReportsRequest, marketplacesdk.ListReportsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ReportType", RequestName: "reportType", Contribution: "query", PreferResourceID: false}, {FieldName: "Date", RequestName: "date", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListReportsRequest) (marketplacesdk.ListReportsResponse, error) {
@@ -83,6 +85,7 @@ func buildReportGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

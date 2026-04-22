@@ -30,6 +30,7 @@ type ListingRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Listing]
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Listing]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Listing]
+	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Listing]
 	Get                 runtimeOperationHooks[marketplacesdk.GetListingRequest, marketplacesdk.GetListingResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListListingsRequest, marketplacesdk.ListListingsResponse]
 	WrapGeneratedClient []func(ListingServiceClient) ListingServiceClient
@@ -52,6 +53,7 @@ func newListingDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) L
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Listing]{},
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Listing]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Listing]{},
+		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Listing]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetListingRequest, marketplacesdk.GetListingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetListingRequest) (marketplacesdk.GetListingResponse, error) {
@@ -90,6 +92,7 @@ func buildListingGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

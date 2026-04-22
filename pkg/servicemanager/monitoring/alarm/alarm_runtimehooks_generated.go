@@ -30,6 +30,7 @@ type AlarmRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.Alarm]
 	StatusHooks         generatedruntime.StatusHooks[*monitoringv1beta1.Alarm]
 	ParityHooks         generatedruntime.ParityHooks[*monitoringv1beta1.Alarm]
+	Async               generatedruntime.AsyncHooks[*monitoringv1beta1.Alarm]
 	Create              runtimeOperationHooks[monitoringsdk.CreateAlarmRequest, monitoringsdk.CreateAlarmResponse]
 	Get                 runtimeOperationHooks[monitoringsdk.GetAlarmRequest, monitoringsdk.GetAlarmResponse]
 	List                runtimeOperationHooks[monitoringsdk.ListAlarmsRequest, monitoringsdk.ListAlarmsResponse]
@@ -108,6 +109,7 @@ func newAlarmDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient) Alarm
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.Alarm]{},
 		StatusHooks:     generatedruntime.StatusHooks[*monitoringv1beta1.Alarm]{},
 		ParityHooks:     generatedruntime.ParityHooks[*monitoringv1beta1.Alarm]{},
+		Async:           generatedruntime.AsyncHooks[*monitoringv1beta1.Alarm]{},
 		Create: runtimeOperationHooks[monitoringsdk.CreateAlarmRequest, monitoringsdk.CreateAlarmResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAlarmDetails", RequestName: "CreateAlarmDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.CreateAlarmRequest) (monitoringsdk.CreateAlarmResponse, error) {
@@ -164,6 +166,7 @@ func buildAlarmGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

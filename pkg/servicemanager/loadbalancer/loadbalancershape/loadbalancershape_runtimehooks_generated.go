@@ -30,6 +30,7 @@ type LoadBalancerShapeRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerShape]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]
 	WrapGeneratedClient []func(LoadBalancerShapeServiceClient) LoadBalancerShapeServiceClient
 }
@@ -51,6 +52,7 @@ func newLoadBalancerShapeDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalan
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLoadBalancerShapeDetails", RequestName: "UpdateLoadBalancerShapeDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateLoadBalancerShapeRequest) (loadbalancersdk.UpdateLoadBalancerShapeResponse, error) {
@@ -83,6 +85,7 @@ func buildLoadBalancerShapeGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Update: &generatedruntime.Operation{

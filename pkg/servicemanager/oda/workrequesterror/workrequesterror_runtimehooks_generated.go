@@ -30,6 +30,7 @@ type WorkRequestErrorRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestError]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.WorkRequestError]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.WorkRequestError]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.WorkRequestError]
 	List                runtimeOperationHooks[odasdk.ListWorkRequestErrorsRequest, odasdk.ListWorkRequestErrorsResponse]
 	WrapGeneratedClient []func(WorkRequestErrorServiceClient) WorkRequestErrorServiceClient
 }
@@ -51,6 +52,7 @@ func newWorkRequestErrorDefaultRuntimeHooks(sdkClient odasdk.OdaClient) WorkRequ
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestError]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.WorkRequestError]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.WorkRequestError]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.WorkRequestError]{},
 		List: runtimeOperationHooks[odasdk.ListWorkRequestErrorsRequest, odasdk.ListWorkRequestErrorsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.ListWorkRequestErrorsRequest) (odasdk.ListWorkRequestErrorsResponse, error) {
@@ -83,6 +85,7 @@ func buildWorkRequestErrorGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

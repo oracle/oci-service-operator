@@ -30,6 +30,7 @@ type TaxRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Tax]
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Tax]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Tax]
+	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Tax]
 	List                runtimeOperationHooks[marketplacesdk.ListTaxesRequest, marketplacesdk.ListTaxesResponse]
 	WrapGeneratedClient []func(TaxServiceClient) TaxServiceClient
 }
@@ -51,6 +52,7 @@ func newTaxDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) TaxRu
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Tax]{},
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Tax]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Tax]{},
+		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Tax]{},
 		List: runtimeOperationHooks[marketplacesdk.ListTaxesRequest, marketplacesdk.ListTaxesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListTaxesRequest) (marketplacesdk.ListTaxesResponse, error) {
@@ -83,6 +85,7 @@ func buildTaxGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

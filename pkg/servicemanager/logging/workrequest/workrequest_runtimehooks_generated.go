@@ -30,6 +30,7 @@ type WorkRequestRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.WorkRequest]
 	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.WorkRequest]
+	Async               generatedruntime.AsyncHooks[*loggingv1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[loggingsdk.GetWorkRequestRequest, loggingsdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[loggingsdk.ListWorkRequestsRequest, loggingsdk.ListWorkRequestsResponse]
 	Delete              runtimeOperationHooks[loggingsdk.DeleteWorkRequestRequest, loggingsdk.DeleteWorkRequestResponse]
@@ -53,6 +54,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementCli
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loggingv1beta1.WorkRequest]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.WorkRequest]{},
+		Async:           generatedruntime.AsyncHooks[*loggingv1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[loggingsdk.GetWorkRequestRequest, loggingsdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loggingsdk.GetWorkRequestRequest) (loggingsdk.GetWorkRequestResponse, error) {
@@ -97,6 +99,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

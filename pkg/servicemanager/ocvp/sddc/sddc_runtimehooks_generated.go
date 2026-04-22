@@ -30,6 +30,7 @@ type SddcRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.Sddc]
 	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.Sddc]
 	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.Sddc]
+	Async               generatedruntime.AsyncHooks[*ocvpv1beta1.Sddc]
 	Create              runtimeOperationHooks[ocvpsdk.CreateSddcRequest, ocvpsdk.CreateSddcResponse]
 	Get                 runtimeOperationHooks[ocvpsdk.GetSddcRequest, ocvpsdk.GetSddcResponse]
 	List                runtimeOperationHooks[ocvpsdk.ListSddcsRequest, ocvpsdk.ListSddcsResponse]
@@ -108,6 +109,7 @@ func newSddcDefaultRuntimeHooks(sdkClient ocvpsdk.SddcClient) SddcRuntimeHooks {
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.Sddc]{},
 		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.Sddc]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.Sddc]{},
+		Async:           generatedruntime.AsyncHooks[*ocvpv1beta1.Sddc]{},
 		Create: runtimeOperationHooks[ocvpsdk.CreateSddcRequest, ocvpsdk.CreateSddcResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSddcDetails", RequestName: "CreateSddcDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.CreateSddcRequest) (ocvpsdk.CreateSddcResponse, error) {
@@ -164,6 +166,7 @@ func buildSddcGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

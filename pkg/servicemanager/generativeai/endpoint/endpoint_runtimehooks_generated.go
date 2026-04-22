@@ -30,6 +30,7 @@ type EndpointRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.Endpoint]
 	StatusHooks         generatedruntime.StatusHooks[*generativeaiv1beta1.Endpoint]
 	ParityHooks         generatedruntime.ParityHooks[*generativeaiv1beta1.Endpoint]
+	Async               generatedruntime.AsyncHooks[*generativeaiv1beta1.Endpoint]
 	Create              runtimeOperationHooks[generativeaisdk.CreateEndpointRequest, generativeaisdk.CreateEndpointResponse]
 	Get                 runtimeOperationHooks[generativeaisdk.GetEndpointRequest, generativeaisdk.GetEndpointResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListEndpointsRequest, generativeaisdk.ListEndpointsResponse]
@@ -108,6 +109,7 @@ func newEndpointDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiClient
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.Endpoint]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiv1beta1.Endpoint]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiv1beta1.Endpoint]{},
+		Async:           generatedruntime.AsyncHooks[*generativeaiv1beta1.Endpoint]{},
 		Create: runtimeOperationHooks[generativeaisdk.CreateEndpointRequest, generativeaisdk.CreateEndpointResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEndpointDetails", RequestName: "CreateEndpointDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.CreateEndpointRequest) (generativeaisdk.CreateEndpointResponse, error) {
@@ -164,6 +166,7 @@ func buildEndpointGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

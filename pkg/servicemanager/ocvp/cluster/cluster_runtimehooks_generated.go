@@ -30,6 +30,7 @@ type ClusterRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.Cluster]
 	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.Cluster]
 	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.Cluster]
+	Async               generatedruntime.AsyncHooks[*ocvpv1beta1.Cluster]
 	Create              runtimeOperationHooks[ocvpsdk.CreateClusterRequest, ocvpsdk.CreateClusterResponse]
 	Get                 runtimeOperationHooks[ocvpsdk.GetClusterRequest, ocvpsdk.GetClusterResponse]
 	List                runtimeOperationHooks[ocvpsdk.ListClustersRequest, ocvpsdk.ListClustersResponse]
@@ -108,6 +109,7 @@ func newClusterDefaultRuntimeHooks(sdkClient ocvpsdk.ClusterClient) ClusterRunti
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.Cluster]{},
 		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.Cluster]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.Cluster]{},
+		Async:           generatedruntime.AsyncHooks[*ocvpv1beta1.Cluster]{},
 		Create: runtimeOperationHooks[ocvpsdk.CreateClusterRequest, ocvpsdk.CreateClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.CreateClusterRequest) (ocvpsdk.CreateClusterResponse, error) {
@@ -164,6 +166,7 @@ func buildClusterGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

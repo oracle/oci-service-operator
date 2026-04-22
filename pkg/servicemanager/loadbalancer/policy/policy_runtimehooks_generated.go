@@ -30,6 +30,7 @@ type PolicyRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Policy]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Policy]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Policy]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.Policy]
 	List                runtimeOperationHooks[loadbalancersdk.ListPoliciesRequest, loadbalancersdk.ListPoliciesResponse]
 	WrapGeneratedClient []func(PolicyServiceClient) PolicyServiceClient
 }
@@ -51,6 +52,7 @@ func newPolicyDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) 
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Policy]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Policy]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Policy]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Policy]{},
 		List: runtimeOperationHooks[loadbalancersdk.ListPoliciesRequest, loadbalancersdk.ListPoliciesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListPoliciesRequest) (loadbalancersdk.ListPoliciesResponse, error) {
@@ -83,6 +85,7 @@ func buildPolicyGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

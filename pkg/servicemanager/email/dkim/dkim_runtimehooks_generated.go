@@ -30,6 +30,7 @@ type DkimRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.Dkim]
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.Dkim]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.Dkim]
+	Async               generatedruntime.AsyncHooks[*emailv1beta1.Dkim]
 	Create              runtimeOperationHooks[emailsdk.CreateDkimRequest, emailsdk.CreateDkimResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetDkimRequest, emailsdk.GetDkimResponse]
 	List                runtimeOperationHooks[emailsdk.ListDkimsRequest, emailsdk.ListDkimsResponse]
@@ -55,6 +56,7 @@ func newDkimDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) DkimRuntimeHooks
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.Dkim]{},
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.Dkim]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.Dkim]{},
+		Async:           generatedruntime.AsyncHooks[*emailv1beta1.Dkim]{},
 		Create: runtimeOperationHooks[emailsdk.CreateDkimRequest, emailsdk.CreateDkimResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDkimDetails", RequestName: "CreateDkimDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateDkimRequest) (emailsdk.CreateDkimResponse, error) {
@@ -111,6 +113,7 @@ func buildDkimGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

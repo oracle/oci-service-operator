@@ -30,6 +30,7 @@ type DbSystemRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*mysqlv1beta1.DbSystem]
 	StatusHooks         generatedruntime.StatusHooks[*mysqlv1beta1.DbSystem]
 	ParityHooks         generatedruntime.ParityHooks[*mysqlv1beta1.DbSystem]
+	Async               generatedruntime.AsyncHooks[*mysqlv1beta1.DbSystem]
 	Create              runtimeOperationHooks[mysqlsdk.CreateDbSystemRequest, mysqlsdk.CreateDbSystemResponse]
 	Get                 runtimeOperationHooks[mysqlsdk.GetDbSystemRequest, mysqlsdk.GetDbSystemResponse]
 	List                runtimeOperationHooks[mysqlsdk.ListDbSystemsRequest, mysqlsdk.ListDbSystemsResponse]
@@ -108,6 +109,7 @@ func newDbSystemDefaultRuntimeHooks(sdkClient mysqlsdk.DbSystemClient) DbSystemR
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*mysqlv1beta1.DbSystem]{},
 		StatusHooks:     generatedruntime.StatusHooks[*mysqlv1beta1.DbSystem]{},
 		ParityHooks:     generatedruntime.ParityHooks[*mysqlv1beta1.DbSystem]{},
+		Async:           generatedruntime.AsyncHooks[*mysqlv1beta1.DbSystem]{},
 		Create: runtimeOperationHooks[mysqlsdk.CreateDbSystemRequest, mysqlsdk.CreateDbSystemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request mysqlsdk.CreateDbSystemRequest) (mysqlsdk.CreateDbSystemResponse, error) {
@@ -165,6 +167,7 @@ func buildDbSystemGeneratedRuntimeConfig(
 		TrackedRecreate:  hooks.TrackedRecreate,
 		StatusHooks:      hooks.StatusHooks,
 		ParityHooks:      hooks.ParityHooks,
+		Async:            hooks.Async,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type OdaPrivateEndpointAttachmentRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpointAttachment]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointAttachment]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointAttachment]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.OdaPrivateEndpointAttachment]
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointAttachmentRequest, odasdk.CreateOdaPrivateEndpointAttachmentResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointAttachmentRequest, odasdk.GetOdaPrivateEndpointAttachmentResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointAttachmentsRequest, odasdk.ListOdaPrivateEndpointAttachmentsResponse]
@@ -54,6 +55,7 @@ func newOdaPrivateEndpointAttachmentDefaultRuntimeHooks(sdkClient odasdk.Managem
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.OdaPrivateEndpointAttachment]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointAttachmentRequest, odasdk.CreateOdaPrivateEndpointAttachmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaPrivateEndpointAttachmentDetails", RequestName: "CreateOdaPrivateEndpointAttachmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointAttachmentRequest) (odasdk.CreateOdaPrivateEndpointAttachmentResponse, error) {
@@ -104,6 +106,7 @@ func buildOdaPrivateEndpointAttachmentGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

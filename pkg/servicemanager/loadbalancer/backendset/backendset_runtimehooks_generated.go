@@ -30,6 +30,7 @@ type BackendSetRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendSet]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendSet]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendSet]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.BackendSet]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateBackendSetRequest, loadbalancersdk.CreateBackendSetResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetBackendSetRequest, loadbalancersdk.GetBackendSetResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListBackendSetsRequest, loadbalancersdk.ListBackendSetsResponse]
@@ -108,6 +109,7 @@ func newBackendSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClie
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.BackendSet]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.BackendSet]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.BackendSet]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.BackendSet]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateBackendSetRequest, loadbalancersdk.CreateBackendSetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBackendSetDetails", RequestName: "CreateBackendSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateBackendSetRequest) (loadbalancersdk.CreateBackendSetResponse, error) {
@@ -164,6 +166,7 @@ func buildBackendSetGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

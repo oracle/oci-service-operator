@@ -30,6 +30,7 @@ type WorkRequestErrorRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.WorkRequestError]
 	StatusHooks         generatedruntime.StatusHooks[*generativeaiv1beta1.WorkRequestError]
 	ParityHooks         generatedruntime.ParityHooks[*generativeaiv1beta1.WorkRequestError]
+	Async               generatedruntime.AsyncHooks[*generativeaiv1beta1.WorkRequestError]
 	List                runtimeOperationHooks[generativeaisdk.ListWorkRequestErrorsRequest, generativeaisdk.ListWorkRequestErrorsResponse]
 	WrapGeneratedClient []func(WorkRequestErrorServiceClient) WorkRequestErrorServiceClient
 }
@@ -51,6 +52,7 @@ func newWorkRequestErrorDefaultRuntimeHooks(sdkClient generativeaisdk.Generative
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.WorkRequestError]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiv1beta1.WorkRequestError]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiv1beta1.WorkRequestError]{},
+		Async:           generatedruntime.AsyncHooks[*generativeaiv1beta1.WorkRequestError]{},
 		List: runtimeOperationHooks[generativeaisdk.ListWorkRequestErrorsRequest, generativeaisdk.ListWorkRequestErrorsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.ListWorkRequestErrorsRequest) (generativeaisdk.ListWorkRequestErrorsResponse, error) {
@@ -83,6 +85,7 @@ func buildWorkRequestErrorGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

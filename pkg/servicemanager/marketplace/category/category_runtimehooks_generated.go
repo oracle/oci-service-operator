@@ -30,6 +30,7 @@ type CategoryRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Category]
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Category]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Category]
+	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Category]
 	List                runtimeOperationHooks[marketplacesdk.ListCategoriesRequest, marketplacesdk.ListCategoriesResponse]
 	WrapGeneratedClient []func(CategoryServiceClient) CategoryServiceClient
 }
@@ -51,6 +52,7 @@ func newCategoryDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) 
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.Category]{},
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Category]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Category]{},
+		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Category]{},
 		List: runtimeOperationHooks[marketplacesdk.ListCategoriesRequest, marketplacesdk.ListCategoriesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListCategoriesRequest) (marketplacesdk.ListCategoriesResponse, error) {
@@ -83,6 +85,7 @@ func buildCategoryGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type AlarmHistoryRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.AlarmHistory]
 	StatusHooks         generatedruntime.StatusHooks[*monitoringv1beta1.AlarmHistory]
 	ParityHooks         generatedruntime.ParityHooks[*monitoringv1beta1.AlarmHistory]
+	Async               generatedruntime.AsyncHooks[*monitoringv1beta1.AlarmHistory]
 	Get                 runtimeOperationHooks[monitoringsdk.GetAlarmHistoryRequest, monitoringsdk.GetAlarmHistoryResponse]
 	WrapGeneratedClient []func(AlarmHistoryServiceClient) AlarmHistoryServiceClient
 }
@@ -51,6 +52,7 @@ func newAlarmHistoryDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringClient
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*monitoringv1beta1.AlarmHistory]{},
 		StatusHooks:     generatedruntime.StatusHooks[*monitoringv1beta1.AlarmHistory]{},
 		ParityHooks:     generatedruntime.ParityHooks[*monitoringv1beta1.AlarmHistory]{},
+		Async:           generatedruntime.AsyncHooks[*monitoringv1beta1.AlarmHistory]{},
 		Get: runtimeOperationHooks[monitoringsdk.GetAlarmHistoryRequest, monitoringsdk.GetAlarmHistoryResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "AlarmId", RequestName: "alarmId", Contribution: "path", PreferResourceID: true}, {FieldName: "AlarmHistorytype", RequestName: "alarmHistorytype", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "TimestampGreaterThanOrEqualTo", RequestName: "timestampGreaterThanOrEqualTo", Contribution: "query", PreferResourceID: false}, {FieldName: "TimestampLessThan", RequestName: "timestampLessThan", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.GetAlarmHistoryRequest) (monitoringsdk.GetAlarmHistoryResponse, error) {
@@ -83,6 +85,7 @@ func buildAlarmHistoryGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

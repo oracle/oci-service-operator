@@ -30,6 +30,7 @@ type WorkRequestRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequest]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.WorkRequest]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[odasdk.GetWorkRequestRequest, odasdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[odasdk.ListWorkRequestsRequest, odasdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -52,6 +53,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient odasdk.OdaClient) WorkRequestRu
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequest]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.WorkRequest]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[odasdk.GetWorkRequestRequest, odasdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.GetWorkRequestRequest) (odasdk.GetWorkRequestResponse, error) {
@@ -90,6 +92,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

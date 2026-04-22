@@ -30,6 +30,7 @@ type DatabaseToolsConnectionRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
 	StatusHooks         generatedruntime.StatusHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
 	ParityHooks         generatedruntime.ParityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
+	Async               generatedruntime.AsyncHooks[*databasetoolsv1beta1.DatabaseToolsConnection]
 	Create              runtimeOperationHooks[databasetoolssdk.CreateDatabaseToolsConnectionRequest, databasetoolssdk.CreateDatabaseToolsConnectionResponse]
 	Get                 runtimeOperationHooks[databasetoolssdk.GetDatabaseToolsConnectionRequest, databasetoolssdk.GetDatabaseToolsConnectionResponse]
 	List                runtimeOperationHooks[databasetoolssdk.ListDatabaseToolsConnectionsRequest, databasetoolssdk.ListDatabaseToolsConnectionsResponse]
@@ -108,6 +109,7 @@ func newDatabaseToolsConnectionDefaultRuntimeHooks(sdkClient databasetoolssdk.Da
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
 		StatusHooks:     generatedruntime.StatusHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
 		ParityHooks:     generatedruntime.ParityHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
+		Async:           generatedruntime.AsyncHooks[*databasetoolsv1beta1.DatabaseToolsConnection]{},
 		Create: runtimeOperationHooks[databasetoolssdk.CreateDatabaseToolsConnectionRequest, databasetoolssdk.CreateDatabaseToolsConnectionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDatabaseToolsConnectionDetails", RequestName: "CreateDatabaseToolsConnectionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request databasetoolssdk.CreateDatabaseToolsConnectionRequest) (databasetoolssdk.CreateDatabaseToolsConnectionResponse, error) {
@@ -164,6 +166,7 @@ func buildDatabaseToolsConnectionGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type OpensearchClusterRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*opensearchv1beta1.OpensearchCluster]
 	StatusHooks         generatedruntime.StatusHooks[*opensearchv1beta1.OpensearchCluster]
 	ParityHooks         generatedruntime.ParityHooks[*opensearchv1beta1.OpensearchCluster]
+	Async               generatedruntime.AsyncHooks[*opensearchv1beta1.OpensearchCluster]
 	Create              runtimeOperationHooks[opensearchsdk.CreateOpensearchClusterRequest, opensearchsdk.CreateOpensearchClusterResponse]
 	Get                 runtimeOperationHooks[opensearchsdk.GetOpensearchClusterRequest, opensearchsdk.GetOpensearchClusterResponse]
 	List                runtimeOperationHooks[opensearchsdk.ListOpensearchClustersRequest, opensearchsdk.ListOpensearchClustersResponse]
@@ -108,6 +109,7 @@ func newOpensearchClusterDefaultRuntimeHooks(sdkClient opensearchsdk.OpensearchC
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*opensearchv1beta1.OpensearchCluster]{},
 		StatusHooks:     generatedruntime.StatusHooks[*opensearchv1beta1.OpensearchCluster]{},
 		ParityHooks:     generatedruntime.ParityHooks[*opensearchv1beta1.OpensearchCluster]{},
+		Async:           generatedruntime.AsyncHooks[*opensearchv1beta1.OpensearchCluster]{},
 		Create: runtimeOperationHooks[opensearchsdk.CreateOpensearchClusterRequest, opensearchsdk.CreateOpensearchClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOpensearchClusterDetails", RequestName: "CreateOpensearchClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request opensearchsdk.CreateOpensearchClusterRequest) (opensearchsdk.CreateOpensearchClusterResponse, error) {
@@ -164,6 +166,7 @@ func buildOpensearchClusterGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{
