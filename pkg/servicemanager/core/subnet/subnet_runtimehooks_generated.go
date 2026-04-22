@@ -31,6 +31,7 @@ type SubnetRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.Subnet]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.Subnet]
 	Async               generatedruntime.AsyncHooks[*corev1beta1.Subnet]
+	DeleteHooks         generatedruntime.DeleteHooks[*corev1beta1.Subnet]
 	Create              runtimeOperationHooks[coresdk.CreateSubnetRequest, coresdk.CreateSubnetResponse]
 	Get                 runtimeOperationHooks[coresdk.GetSubnetRequest, coresdk.GetSubnetResponse]
 	List                runtimeOperationHooks[coresdk.ListSubnetsRequest, coresdk.ListSubnetsResponse]
@@ -110,6 +111,7 @@ func newSubnetDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) Subnet
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.Subnet]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.Subnet]{},
 		Async:           generatedruntime.AsyncHooks[*corev1beta1.Subnet]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*corev1beta1.Subnet]{},
 		Create: runtimeOperationHooks[coresdk.CreateSubnetRequest, coresdk.CreateSubnetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSubnetDetails", RequestName: "CreateSubnetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateSubnetRequest) (coresdk.CreateSubnetResponse, error) {
@@ -167,6 +169,7 @@ func buildSubnetGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

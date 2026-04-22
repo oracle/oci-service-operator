@@ -31,6 +31,7 @@ type OdaPrivateEndpointScanProxyRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
 	Async               generatedruntime.AsyncHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
+	DeleteHooks         generatedruntime.DeleteHooks[*odav1beta1.OdaPrivateEndpointScanProxy]
 	Create              runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointScanProxyRequest, odasdk.CreateOdaPrivateEndpointScanProxyResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaPrivateEndpointScanProxyRequest, odasdk.GetOdaPrivateEndpointScanProxyResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaPrivateEndpointScanProxiesRequest, odasdk.ListOdaPrivateEndpointScanProxiesResponse]
@@ -56,6 +57,7 @@ func newOdaPrivateEndpointScanProxyDefaultRuntimeHooks(sdkClient odasdk.Manageme
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
 		Async:           generatedruntime.AsyncHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*odav1beta1.OdaPrivateEndpointScanProxy]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaPrivateEndpointScanProxyRequest, odasdk.CreateOdaPrivateEndpointScanProxyResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaPrivateEndpointId", RequestName: "odaPrivateEndpointId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateOdaPrivateEndpointScanProxyDetails", RequestName: "CreateOdaPrivateEndpointScanProxyDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaPrivateEndpointScanProxyRequest) (odasdk.CreateOdaPrivateEndpointScanProxyResponse, error) {
@@ -107,6 +109,7 @@ func buildOdaPrivateEndpointScanProxyGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

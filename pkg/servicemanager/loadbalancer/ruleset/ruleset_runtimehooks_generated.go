@@ -31,6 +31,7 @@ type RuleSetRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.RuleSet]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.RuleSet]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.RuleSet]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.RuleSet]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateRuleSetRequest, loadbalancersdk.CreateRuleSetResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetRuleSetRequest, loadbalancersdk.GetRuleSetResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListRuleSetsRequest, loadbalancersdk.ListRuleSetsResponse]
@@ -57,6 +58,7 @@ func newRuleSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient)
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.RuleSet]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.RuleSet]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.RuleSet]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.RuleSet]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateRuleSetRequest, loadbalancersdk.CreateRuleSetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateRuleSetDetails", RequestName: "CreateRuleSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateRuleSetRequest) (loadbalancersdk.CreateRuleSetResponse, error) {
@@ -114,6 +116,7 @@ func buildRuleSetGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

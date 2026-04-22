@@ -31,6 +31,7 @@ type StreamRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*streamingv1beta1.Stream]
 	ParityHooks         generatedruntime.ParityHooks[*streamingv1beta1.Stream]
 	Async               generatedruntime.AsyncHooks[*streamingv1beta1.Stream]
+	DeleteHooks         generatedruntime.DeleteHooks[*streamingv1beta1.Stream]
 	Create              runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]
 	Get                 runtimeOperationHooks[streamingsdk.GetStreamRequest, streamingsdk.GetStreamResponse]
 	List                runtimeOperationHooks[streamingsdk.ListStreamsRequest, streamingsdk.ListStreamsResponse]
@@ -110,6 +111,7 @@ func newStreamDefaultRuntimeHooks(sdkClient streamingsdk.StreamAdminClient) Stre
 		StatusHooks:     generatedruntime.StatusHooks[*streamingv1beta1.Stream]{},
 		ParityHooks:     generatedruntime.ParityHooks[*streamingv1beta1.Stream]{},
 		Async:           generatedruntime.AsyncHooks[*streamingv1beta1.Stream]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*streamingv1beta1.Stream]{},
 		Create: runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateStreamDetails", RequestName: "CreateStreamDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request streamingsdk.CreateStreamRequest) (streamingsdk.CreateStreamResponse, error) {
@@ -167,6 +169,7 @@ func buildStreamGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

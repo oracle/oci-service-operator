@@ -31,6 +31,7 @@ type VcnRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.Vcn]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.Vcn]
 	Async               generatedruntime.AsyncHooks[*corev1beta1.Vcn]
+	DeleteHooks         generatedruntime.DeleteHooks[*corev1beta1.Vcn]
 	Create              runtimeOperationHooks[coresdk.CreateVcnRequest, coresdk.CreateVcnResponse]
 	Get                 runtimeOperationHooks[coresdk.GetVcnRequest, coresdk.GetVcnResponse]
 	List                runtimeOperationHooks[coresdk.ListVcnsRequest, coresdk.ListVcnsResponse]
@@ -110,6 +111,7 @@ func newVcnDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) VcnRuntim
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.Vcn]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.Vcn]{},
 		Async:           generatedruntime.AsyncHooks[*corev1beta1.Vcn]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*corev1beta1.Vcn]{},
 		Create: runtimeOperationHooks[coresdk.CreateVcnRequest, coresdk.CreateVcnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
@@ -167,6 +169,7 @@ func buildVcnGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

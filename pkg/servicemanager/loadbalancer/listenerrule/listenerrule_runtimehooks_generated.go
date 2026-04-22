@@ -31,6 +31,7 @@ type ListenerRuleRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.ListenerRule]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.ListenerRule]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.ListenerRule]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.ListenerRule]
 	List                runtimeOperationHooks[loadbalancersdk.ListListenerRulesRequest, loadbalancersdk.ListListenerRulesResponse]
 	WrapGeneratedClient []func(ListenerRuleServiceClient) ListenerRuleServiceClient
 }
@@ -53,6 +54,7 @@ func newListenerRuleDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerCl
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.ListenerRule]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.ListenerRule]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.ListenerRule]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.ListenerRule]{},
 		List: runtimeOperationHooks[loadbalancersdk.ListListenerRulesRequest, loadbalancersdk.ListListenerRulesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "ListenerName", RequestName: "listenerName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListListenerRulesRequest) (loadbalancersdk.ListListenerRulesResponse, error) {
@@ -86,6 +88,7 @@ func buildListenerRuleGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

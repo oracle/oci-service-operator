@@ -31,6 +31,7 @@ type SupportedCommitmentRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.SupportedCommitment]
 	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.SupportedCommitment]
 	Async               generatedruntime.AsyncHooks[*ocvpv1beta1.SupportedCommitment]
+	DeleteHooks         generatedruntime.DeleteHooks[*ocvpv1beta1.SupportedCommitment]
 	List                runtimeOperationHooks[ocvpsdk.ListSupportedCommitmentsRequest, ocvpsdk.ListSupportedCommitmentsResponse]
 	WrapGeneratedClient []func(SupportedCommitmentServiceClient) SupportedCommitmentServiceClient
 }
@@ -53,6 +54,7 @@ func newSupportedCommitmentDefaultRuntimeHooks(sdkClient ocvpsdk.SddcClient) Sup
 		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.SupportedCommitment]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.SupportedCommitment]{},
 		Async:           generatedruntime.AsyncHooks[*ocvpv1beta1.SupportedCommitment]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*ocvpv1beta1.SupportedCommitment]{},
 		List: runtimeOperationHooks[ocvpsdk.ListSupportedCommitmentsRequest, ocvpsdk.ListSupportedCommitmentsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "HostShapeName", RequestName: "hostShapeName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.ListSupportedCommitmentsRequest) (ocvpsdk.ListSupportedCommitmentsResponse, error) {
@@ -86,6 +88,7 @@ func buildSupportedCommitmentGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

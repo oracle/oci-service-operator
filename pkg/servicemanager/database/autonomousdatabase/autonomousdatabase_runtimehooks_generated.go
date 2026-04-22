@@ -31,6 +31,7 @@ type AutonomousDatabaseRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*databasev1beta1.AutonomousDatabase]
 	ParityHooks         generatedruntime.ParityHooks[*databasev1beta1.AutonomousDatabase]
 	Async               generatedruntime.AsyncHooks[*databasev1beta1.AutonomousDatabase]
+	DeleteHooks         generatedruntime.DeleteHooks[*databasev1beta1.AutonomousDatabase]
 	Create              runtimeOperationHooks[databasesdk.CreateAutonomousDatabaseRequest, databasesdk.CreateAutonomousDatabaseResponse]
 	Get                 runtimeOperationHooks[databasesdk.GetAutonomousDatabaseRequest, databasesdk.GetAutonomousDatabaseResponse]
 	List                runtimeOperationHooks[databasesdk.ListAutonomousDatabasesRequest, databasesdk.ListAutonomousDatabasesResponse]
@@ -110,6 +111,7 @@ func newAutonomousDatabaseDefaultRuntimeHooks(sdkClient databasesdk.DatabaseClie
 		StatusHooks:     generatedruntime.StatusHooks[*databasev1beta1.AutonomousDatabase]{},
 		ParityHooks:     generatedruntime.ParityHooks[*databasev1beta1.AutonomousDatabase]{},
 		Async:           generatedruntime.AsyncHooks[*databasev1beta1.AutonomousDatabase]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*databasev1beta1.AutonomousDatabase]{},
 		Create: runtimeOperationHooks[databasesdk.CreateAutonomousDatabaseRequest, databasesdk.CreateAutonomousDatabaseResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAutonomousDatabaseDetails", RequestName: "createAutonomousDatabaseDetails", Contribution: "body", PreferResourceID: false}, {FieldName: "CreateAutonomousDatabaseBase", RequestName: "CreateAutonomousDatabaseBase", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request databasesdk.CreateAutonomousDatabaseRequest) (databasesdk.CreateAutonomousDatabaseResponse, error) {
@@ -168,6 +170,7 @@ func buildAutonomousDatabaseGeneratedRuntimeConfig(
 		StatusHooks:      hooks.StatusHooks,
 		ParityHooks:      hooks.ParityHooks,
 		Async:            hooks.Async,
+		DeleteHooks:      hooks.DeleteHooks,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -31,6 +31,7 @@ type ServiceRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.Service]
 	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.Service]
 	Async               generatedruntime.AsyncHooks[*loggingv1beta1.Service]
+	DeleteHooks         generatedruntime.DeleteHooks[*loggingv1beta1.Service]
 	List                runtimeOperationHooks[loggingsdk.ListServicesRequest, loggingsdk.ListServicesResponse]
 	WrapGeneratedClient []func(ServiceServiceClient) ServiceServiceClient
 }
@@ -53,6 +54,7 @@ func newServiceDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient)
 		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.Service]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.Service]{},
 		Async:           generatedruntime.AsyncHooks[*loggingv1beta1.Service]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loggingv1beta1.Service]{},
 		List: runtimeOperationHooks[loggingsdk.ListServicesRequest, loggingsdk.ListServicesResponse]{
 			Fields: []generatedruntime.RequestField{},
 			Call: func(ctx context.Context, request loggingsdk.ListServicesRequest) (loggingsdk.ListServicesResponse, error) {
@@ -86,6 +88,7 @@ func buildServiceGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

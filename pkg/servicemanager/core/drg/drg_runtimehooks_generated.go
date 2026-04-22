@@ -31,6 +31,7 @@ type DrgRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.Drg]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.Drg]
 	Async               generatedruntime.AsyncHooks[*corev1beta1.Drg]
+	DeleteHooks         generatedruntime.DeleteHooks[*corev1beta1.Drg]
 	Create              runtimeOperationHooks[coresdk.CreateDrgRequest, coresdk.CreateDrgResponse]
 	Get                 runtimeOperationHooks[coresdk.GetDrgRequest, coresdk.GetDrgResponse]
 	List                runtimeOperationHooks[coresdk.ListDrgsRequest, coresdk.ListDrgsResponse]
@@ -57,6 +58,7 @@ func newDrgDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) DrgRuntim
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.Drg]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.Drg]{},
 		Async:           generatedruntime.AsyncHooks[*corev1beta1.Drg]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*corev1beta1.Drg]{},
 		Create: runtimeOperationHooks[coresdk.CreateDrgRequest, coresdk.CreateDrgResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDrgDetails", RequestName: "CreateDrgDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateDrgRequest) (coresdk.CreateDrgResponse, error) {
@@ -114,6 +116,7 @@ func buildDrgGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

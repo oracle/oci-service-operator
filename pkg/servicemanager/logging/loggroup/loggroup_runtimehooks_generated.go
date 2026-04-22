@@ -31,6 +31,7 @@ type LogGroupRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.LogGroup]
 	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.LogGroup]
 	Async               generatedruntime.AsyncHooks[*loggingv1beta1.LogGroup]
+	DeleteHooks         generatedruntime.DeleteHooks[*loggingv1beta1.LogGroup]
 	Create              runtimeOperationHooks[loggingsdk.CreateLogGroupRequest, loggingsdk.CreateLogGroupResponse]
 	Get                 runtimeOperationHooks[loggingsdk.GetLogGroupRequest, loggingsdk.GetLogGroupResponse]
 	List                runtimeOperationHooks[loggingsdk.ListLogGroupsRequest, loggingsdk.ListLogGroupsResponse]
@@ -57,6 +58,7 @@ func newLogGroupDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient
 		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.LogGroup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.LogGroup]{},
 		Async:           generatedruntime.AsyncHooks[*loggingv1beta1.LogGroup]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loggingv1beta1.LogGroup]{},
 		Create: runtimeOperationHooks[loggingsdk.CreateLogGroupRequest, loggingsdk.CreateLogGroupResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateLogGroupDetails", RequestName: "CreateLogGroupDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.CreateLogGroupRequest) (loggingsdk.CreateLogGroupResponse, error) {
@@ -114,6 +116,7 @@ func buildLogGroupGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -31,6 +31,7 @@ type DbSystemRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*psqlv1beta1.DbSystem]
 	ParityHooks         generatedruntime.ParityHooks[*psqlv1beta1.DbSystem]
 	Async               generatedruntime.AsyncHooks[*psqlv1beta1.DbSystem]
+	DeleteHooks         generatedruntime.DeleteHooks[*psqlv1beta1.DbSystem]
 	Create              runtimeOperationHooks[psqlsdk.CreateDbSystemRequest, psqlsdk.CreateDbSystemResponse]
 	Get                 runtimeOperationHooks[psqlsdk.GetDbSystemRequest, psqlsdk.GetDbSystemResponse]
 	List                runtimeOperationHooks[psqlsdk.ListDbSystemsRequest, psqlsdk.ListDbSystemsResponse]
@@ -110,6 +111,7 @@ func newDbSystemDefaultRuntimeHooks(sdkClient psqlsdk.PostgresqlClient) DbSystem
 		StatusHooks:     generatedruntime.StatusHooks[*psqlv1beta1.DbSystem]{},
 		ParityHooks:     generatedruntime.ParityHooks[*psqlv1beta1.DbSystem]{},
 		Async:           generatedruntime.AsyncHooks[*psqlv1beta1.DbSystem]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*psqlv1beta1.DbSystem]{},
 		Create: runtimeOperationHooks[psqlsdk.CreateDbSystemRequest, psqlsdk.CreateDbSystemResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request psqlsdk.CreateDbSystemRequest) (psqlsdk.CreateDbSystemResponse, error) {
@@ -168,6 +170,7 @@ func buildDbSystemGeneratedRuntimeConfig(
 		StatusHooks:      hooks.StatusHooks,
 		ParityHooks:      hooks.ParityHooks,
 		Async:            hooks.Async,
+		DeleteHooks:      hooks.DeleteHooks,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

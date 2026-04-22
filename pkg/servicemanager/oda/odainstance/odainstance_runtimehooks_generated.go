@@ -31,6 +31,7 @@ type OdaInstanceRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaInstance]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaInstance]
 	Async               generatedruntime.AsyncHooks[*odav1beta1.OdaInstance]
+	DeleteHooks         generatedruntime.DeleteHooks[*odav1beta1.OdaInstance]
 	Create              runtimeOperationHooks[odasdk.CreateOdaInstanceRequest, odasdk.CreateOdaInstanceResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaInstanceRequest, odasdk.GetOdaInstanceResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaInstancesRequest, odasdk.ListOdaInstancesResponse]
@@ -57,6 +58,7 @@ func newOdaInstanceDefaultRuntimeHooks(sdkClient odasdk.OdaClient) OdaInstanceRu
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaInstance]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaInstance]{},
 		Async:           generatedruntime.AsyncHooks[*odav1beta1.OdaInstance]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*odav1beta1.OdaInstance]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaInstanceRequest, odasdk.CreateOdaInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateOdaInstanceDetails", RequestName: "CreateOdaInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaInstanceRequest) (odasdk.CreateOdaInstanceResponse, error) {
@@ -114,6 +116,7 @@ func buildOdaInstanceGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

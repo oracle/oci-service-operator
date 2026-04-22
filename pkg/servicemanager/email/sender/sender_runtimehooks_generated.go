@@ -31,6 +31,7 @@ type SenderRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.Sender]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.Sender]
 	Async               generatedruntime.AsyncHooks[*emailv1beta1.Sender]
+	DeleteHooks         generatedruntime.DeleteHooks[*emailv1beta1.Sender]
 	Create              runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetSenderRequest, emailsdk.GetSenderResponse]
 	List                runtimeOperationHooks[emailsdk.ListSendersRequest, emailsdk.ListSendersResponse]
@@ -110,6 +111,7 @@ func newSenderDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) SenderRuntimeH
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.Sender]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.Sender]{},
 		Async:           generatedruntime.AsyncHooks[*emailv1beta1.Sender]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*emailv1beta1.Sender]{},
 		Create: runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSenderDetails", RequestName: "CreateSenderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateSenderRequest) (emailsdk.CreateSenderResponse, error) {
@@ -167,6 +169,7 @@ func buildSenderGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

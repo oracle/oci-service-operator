@@ -31,6 +31,7 @@ type ProjectRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*aivisionv1beta1.Project]
 	ParityHooks         generatedruntime.ParityHooks[*aivisionv1beta1.Project]
 	Async               generatedruntime.AsyncHooks[*aivisionv1beta1.Project]
+	DeleteHooks         generatedruntime.DeleteHooks[*aivisionv1beta1.Project]
 	Create              runtimeOperationHooks[aivisionsdk.CreateProjectRequest, aivisionsdk.CreateProjectResponse]
 	Get                 runtimeOperationHooks[aivisionsdk.GetProjectRequest, aivisionsdk.GetProjectResponse]
 	List                runtimeOperationHooks[aivisionsdk.ListProjectsRequest, aivisionsdk.ListProjectsResponse]
@@ -110,6 +111,7 @@ func newProjectDefaultRuntimeHooks(sdkClient aivisionsdk.AIServiceVisionClient) 
 		StatusHooks:     generatedruntime.StatusHooks[*aivisionv1beta1.Project]{},
 		ParityHooks:     generatedruntime.ParityHooks[*aivisionv1beta1.Project]{},
 		Async:           generatedruntime.AsyncHooks[*aivisionv1beta1.Project]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*aivisionv1beta1.Project]{},
 		Create: runtimeOperationHooks[aivisionsdk.CreateProjectRequest, aivisionsdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aivisionsdk.CreateProjectRequest) (aivisionsdk.CreateProjectResponse, error) {
@@ -167,6 +169,7 @@ func buildProjectGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

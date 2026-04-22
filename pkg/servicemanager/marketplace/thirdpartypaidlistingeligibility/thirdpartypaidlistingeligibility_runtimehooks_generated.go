@@ -31,6 +31,7 @@ type ThirdPartyPaidListingEligibilityRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]
 	Get                 runtimeOperationHooks[marketplacesdk.GetThirdPartyPaidListingEligibilityRequest, marketplacesdk.GetThirdPartyPaidListingEligibilityResponse]
 	WrapGeneratedClient []func(ThirdPartyPaidListingEligibilityServiceClient) ThirdPartyPaidListingEligibilityServiceClient
 }
@@ -53,6 +54,7 @@ func newThirdPartyPaidListingEligibilityDefaultRuntimeHooks(sdkClient marketplac
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.ThirdPartyPaidListingEligibility]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetThirdPartyPaidListingEligibilityRequest, marketplacesdk.GetThirdPartyPaidListingEligibilityResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetThirdPartyPaidListingEligibilityRequest) (marketplacesdk.GetThirdPartyPaidListingEligibilityResponse, error) {
@@ -86,6 +88,7 @@ func buildThirdPartyPaidListingEligibilityGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

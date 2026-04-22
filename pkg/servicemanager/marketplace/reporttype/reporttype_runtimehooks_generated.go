@@ -31,6 +31,7 @@ type ReportTypeRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.ReportType]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.ReportType]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.ReportType]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.ReportType]
 	List                runtimeOperationHooks[marketplacesdk.ListReportTypesRequest, marketplacesdk.ListReportTypesResponse]
 	WrapGeneratedClient []func(ReportTypeServiceClient) ReportTypeServiceClient
 }
@@ -53,6 +54,7 @@ func newReportTypeDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.ReportType]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.ReportType]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.ReportType]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.ReportType]{},
 		List: runtimeOperationHooks[marketplacesdk.ListReportTypesRequest, marketplacesdk.ListReportTypesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListReportTypesRequest) (marketplacesdk.ListReportTypesResponse, error) {
@@ -86,6 +88,7 @@ func buildReportTypeGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

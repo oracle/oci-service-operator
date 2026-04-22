@@ -31,6 +31,7 @@ type VaultRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*keymanagementv1beta1.Vault]
 	ParityHooks         generatedruntime.ParityHooks[*keymanagementv1beta1.Vault]
 	Async               generatedruntime.AsyncHooks[*keymanagementv1beta1.Vault]
+	DeleteHooks         generatedruntime.DeleteHooks[*keymanagementv1beta1.Vault]
 	Create              runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]
 	Get                 runtimeOperationHooks[keymanagementsdk.GetVaultRequest, keymanagementsdk.GetVaultResponse]
 	List                runtimeOperationHooks[keymanagementsdk.ListVaultsRequest, keymanagementsdk.ListVaultsResponse]
@@ -56,6 +57,7 @@ func newVaultDefaultRuntimeHooks(sdkClient keymanagementsdk.KmsVaultClient) Vaul
 		StatusHooks:     generatedruntime.StatusHooks[*keymanagementv1beta1.Vault]{},
 		ParityHooks:     generatedruntime.ParityHooks[*keymanagementv1beta1.Vault]{},
 		Async:           generatedruntime.AsyncHooks[*keymanagementv1beta1.Vault]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*keymanagementv1beta1.Vault]{},
 		Create: runtimeOperationHooks[keymanagementsdk.CreateVaultRequest, keymanagementsdk.CreateVaultResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVaultDetails", RequestName: "CreateVaultDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request keymanagementsdk.CreateVaultRequest) (keymanagementsdk.CreateVaultResponse, error) {
@@ -107,6 +109,7 @@ func buildVaultGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

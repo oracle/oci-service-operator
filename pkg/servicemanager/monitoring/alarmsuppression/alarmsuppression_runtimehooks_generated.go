@@ -31,6 +31,7 @@ type AlarmSuppressionRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*monitoringv1beta1.AlarmSuppression]
 	ParityHooks         generatedruntime.ParityHooks[*monitoringv1beta1.AlarmSuppression]
 	Async               generatedruntime.AsyncHooks[*monitoringv1beta1.AlarmSuppression]
+	DeleteHooks         generatedruntime.DeleteHooks[*monitoringv1beta1.AlarmSuppression]
 	Create              runtimeOperationHooks[monitoringsdk.CreateAlarmSuppressionRequest, monitoringsdk.CreateAlarmSuppressionResponse]
 	Get                 runtimeOperationHooks[monitoringsdk.GetAlarmSuppressionRequest, monitoringsdk.GetAlarmSuppressionResponse]
 	List                runtimeOperationHooks[monitoringsdk.ListAlarmSuppressionsRequest, monitoringsdk.ListAlarmSuppressionsResponse]
@@ -56,6 +57,7 @@ func newAlarmSuppressionDefaultRuntimeHooks(sdkClient monitoringsdk.MonitoringCl
 		StatusHooks:     generatedruntime.StatusHooks[*monitoringv1beta1.AlarmSuppression]{},
 		ParityHooks:     generatedruntime.ParityHooks[*monitoringv1beta1.AlarmSuppression]{},
 		Async:           generatedruntime.AsyncHooks[*monitoringv1beta1.AlarmSuppression]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*monitoringv1beta1.AlarmSuppression]{},
 		Create: runtimeOperationHooks[monitoringsdk.CreateAlarmSuppressionRequest, monitoringsdk.CreateAlarmSuppressionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAlarmSuppressionDetails", RequestName: "CreateAlarmSuppressionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request monitoringsdk.CreateAlarmSuppressionRequest) (monitoringsdk.CreateAlarmSuppressionResponse, error) {
@@ -107,6 +109,7 @@ func buildAlarmSuppressionGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

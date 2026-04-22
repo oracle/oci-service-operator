@@ -31,6 +31,7 @@ type WorkRequestLogRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.WorkRequestLog]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.WorkRequestLog]
 	Async               generatedruntime.AsyncHooks[*emailv1beta1.WorkRequestLog]
+	DeleteHooks         generatedruntime.DeleteHooks[*emailv1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[emailsdk.ListWorkRequestLogsRequest, emailsdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -53,6 +54,7 @@ func newWorkRequestLogDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) WorkRe
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.WorkRequestLog]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.WorkRequestLog]{},
 		Async:           generatedruntime.AsyncHooks[*emailv1beta1.WorkRequestLog]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*emailv1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[emailsdk.ListWorkRequestLogsRequest, emailsdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.ListWorkRequestLogsRequest) (emailsdk.ListWorkRequestLogsResponse, error) {
@@ -86,6 +88,7 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

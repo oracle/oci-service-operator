@@ -31,6 +31,7 @@ type ServiceGatewayRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.ServiceGateway]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.ServiceGateway]
 	Async               generatedruntime.AsyncHooks[*corev1beta1.ServiceGateway]
+	DeleteHooks         generatedruntime.DeleteHooks[*corev1beta1.ServiceGateway]
 	Create              runtimeOperationHooks[coresdk.CreateServiceGatewayRequest, coresdk.CreateServiceGatewayResponse]
 	Get                 runtimeOperationHooks[coresdk.GetServiceGatewayRequest, coresdk.GetServiceGatewayResponse]
 	List                runtimeOperationHooks[coresdk.ListServiceGatewaysRequest, coresdk.ListServiceGatewaysResponse]
@@ -110,6 +111,7 @@ func newServiceGatewayDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.ServiceGateway]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.ServiceGateway]{},
 		Async:           generatedruntime.AsyncHooks[*corev1beta1.ServiceGateway]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*corev1beta1.ServiceGateway]{},
 		Create: runtimeOperationHooks[coresdk.CreateServiceGatewayRequest, coresdk.CreateServiceGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceGatewayDetails", RequestName: "CreateServiceGatewayDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
@@ -167,6 +169,7 @@ func buildServiceGatewayGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{
