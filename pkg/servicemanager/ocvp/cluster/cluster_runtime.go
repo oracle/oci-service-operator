@@ -9,76 +9,33 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	shared "github.com/oracle/oci-service-operator/pkg/shared"
-	"github.com/oracle/oci-service-operator/pkg/util"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 )
 
-type clusterGeneratedParityClient struct {
-	manager  *ClusterServiceManager
-	delegate ClusterServiceClient
-}
-
 func init() {
-	generatedFactory := newClusterServiceClient
-	newClusterServiceClient = func(manager *ClusterServiceManager) ClusterServiceClient {
-		return &clusterGeneratedParityClient{
-			manager:  manager,
-			delegate: generatedFactory(manager),
-		}
-	}
+	registerClusterRuntimeHooksMutator(func(_ *ClusterServiceManager, hooks *ClusterRuntimeHooks) {
+		applyClusterRuntimeHooks(hooks)
+	})
 }
 
-func (c *clusterGeneratedParityClient) CreateOrUpdate(
-	ctx context.Context,
+func applyClusterRuntimeHooks(hooks *ClusterRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Identity.GuardExistingBeforeCreate = guardClusterExistingBeforeCreate
+}
+
+func guardClusterExistingBeforeCreate(
+	_ context.Context,
 	resource *ocvpv1beta1.Cluster,
-	req ctrl.Request,
-) (servicemanager.OSOKResponse, error) {
-	if c.delegate == nil {
-		return c.fail(resource, fmt.Errorf("cluster generatedruntime delegate is not configured"))
-	}
+) (generatedruntime.ExistingBeforeCreateDecision, error) {
 	if clusterIdentityResolutionRequiresDisplayName(resource) {
-		return c.fail(resource, fmt.Errorf("Cluster spec.displayName is required when no OCI identifier is recorded"))
+		return generatedruntime.ExistingBeforeCreateDecisionFail, fmt.Errorf("Cluster spec.displayName is required when no OCI identifier is recorded")
 	}
-	return c.delegate.CreateOrUpdate(ctx, resource, req)
-}
-
-func (c *clusterGeneratedParityClient) Delete(ctx context.Context, resource *ocvpv1beta1.Cluster) (bool, error) {
-	if c.delegate == nil {
-		return false, fmt.Errorf("cluster generatedruntime delegate is not configured")
-	}
-	return c.delegate.Delete(ctx, resource)
-}
-
-func (c *clusterGeneratedParityClient) fail(resource *ocvpv1beta1.Cluster, err error) (servicemanager.OSOKResponse, error) {
-	if resource != nil {
-		status := &resource.Status.OsokStatus
-		status.Message = err.Error()
-		status.Reason = string(shared.Failed)
-		updatedAt := metav1.NewTime(time.Now())
-		status.UpdatedAt = &updatedAt
-
-		log := loggerutil.OSOKLogger{}
-		if c.manager != nil {
-			log = c.manager.Log
-		}
-		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(
-			resource.Status.OsokStatus,
-			shared.Failed,
-			v1.ConditionFalse,
-			"",
-			err.Error(),
-			log,
-		)
-	}
-	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	return generatedruntime.ExistingBeforeCreateDecisionAllow, nil
 }
 
 func clusterIdentityResolutionRequiresDisplayName(resource *ocvpv1beta1.Cluster) bool {
