@@ -21,6 +21,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/metrics"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -36,6 +37,7 @@ import (
 type fakeSecurityListOCIClient struct {
 	createFn func(context.Context, coresdk.CreateSecurityListRequest) (coresdk.CreateSecurityListResponse, error)
 	getFn    func(context.Context, coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error)
+	listFn   func(context.Context, coresdk.ListSecurityListsRequest) (coresdk.ListSecurityListsResponse, error)
 	updateFn func(context.Context, coresdk.UpdateSecurityListRequest) (coresdk.UpdateSecurityListResponse, error)
 	deleteFn func(context.Context, coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error)
 }
@@ -52,6 +54,13 @@ func (f *fakeSecurityListOCIClient) GetSecurityList(ctx context.Context, req cor
 		return f.getFn(ctx, req)
 	}
 	return coresdk.GetSecurityListResponse{}, nil
+}
+
+func (f *fakeSecurityListOCIClient) ListSecurityLists(ctx context.Context, req coresdk.ListSecurityListsRequest) (coresdk.ListSecurityListsResponse, error) {
+	if f.listFn != nil {
+		return f.listFn(ctx, req)
+	}
+	return coresdk.ListSecurityListsResponse{}, nil
 }
 
 func (f *fakeSecurityListOCIClient) UpdateSecurityList(ctx context.Context, req coresdk.UpdateSecurityListRequest) (coresdk.UpdateSecurityListResponse, error) {
@@ -86,22 +95,112 @@ func newSecurityListTestManager(client securityListOCIClient) *SecurityListServi
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewSecurityListServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&securityListRuntimeClient{
-			manager: manager,
-			client:  client,
-		})
+		manager.WithClient(newSecurityListServiceClientWithOCIClient(log, client))
 	}
 	return manager
 }
 
-func TestNewSecurityListServiceManager_RetainsExplicitRuntimeClient(t *testing.T) {
+func newSecurityListServiceClientWithOCIClient(log loggerutil.OSOKLogger, client securityListOCIClient) SecurityListServiceClient {
+	manager := &SecurityListServiceManager{Log: log}
+	hooks := newSecurityListRuntimeHooksWithOCIClient(client)
+	applySecurityListRuntimeHooks(manager, &hooks)
+	delegate := defaultSecurityListServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.SecurityList](
+			buildSecurityListGeneratedRuntimeConfig(manager, hooks),
+		),
+	}
+	return wrapSecurityListGeneratedClient(hooks, delegate)
+}
+
+func newSecurityListRuntimeHooksWithOCIClient(client securityListOCIClient) SecurityListRuntimeHooks {
+	return SecurityListRuntimeHooks{
+		Semantics:       newSecurityListRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*corev1beta1.SecurityList]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.SecurityList]{},
+		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.SecurityList]{},
+		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.SecurityList]{},
+		Async:           generatedruntime.AsyncHooks[*corev1beta1.SecurityList]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*corev1beta1.SecurityList]{},
+		Create: runtimeOperationHooks[coresdk.CreateSecurityListRequest, coresdk.CreateSecurityListResponse]{
+			Fields: securityListCreateFields(),
+			Call: func(ctx context.Context, request coresdk.CreateSecurityListRequest) (coresdk.CreateSecurityListResponse, error) {
+				return client.CreateSecurityList(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[coresdk.GetSecurityListRequest, coresdk.GetSecurityListResponse]{
+			Fields: securityListGetFields(),
+			Call: func(ctx context.Context, request coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error) {
+				return client.GetSecurityList(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[coresdk.ListSecurityListsRequest, coresdk.ListSecurityListsResponse]{
+			Fields: securityListListFields(),
+			Call: func(ctx context.Context, request coresdk.ListSecurityListsRequest) (coresdk.ListSecurityListsResponse, error) {
+				return client.ListSecurityLists(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[coresdk.UpdateSecurityListRequest, coresdk.UpdateSecurityListResponse]{
+			Fields: securityListUpdateFields(),
+			Call: func(ctx context.Context, request coresdk.UpdateSecurityListRequest) (coresdk.UpdateSecurityListResponse, error) {
+				return client.UpdateSecurityList(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[coresdk.DeleteSecurityListRequest, coresdk.DeleteSecurityListResponse]{
+			Fields: securityListDeleteFields(),
+			Call: func(ctx context.Context, request coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error) {
+				return client.DeleteSecurityList(ctx, request)
+			},
+		},
+	}
+}
+
+func securityListCreateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CreateSecurityListDetails", RequestName: "CreateSecurityListDetails", Contribution: "body"},
+	}
+}
+
+func securityListGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func securityListListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+	}
+}
+
+func securityListUpdateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "UpdateSecurityListDetails", RequestName: "UpdateSecurityListDetails", Contribution: "body"},
+	}
+}
+
+func securityListDeleteFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "SecurityListId", RequestName: "securityListId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func TestNewSecurityListServiceManager_UsesGeneratedRuntimeDelegate(t *testing.T) {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewSecurityListServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 
-	_, isExplicitRuntime := manager.client.(*securityListRuntimeClient)
-	assert.True(t, isExplicitRuntime)
-	_, isGeneratedRuntime := manager.client.(defaultSecurityListServiceClient)
-	assert.False(t, isGeneratedRuntime)
+	runtimeClient, isWrappedRuntime := manager.client.(*securityListRuntimeClient)
+	assert.True(t, isWrappedRuntime)
+	_, isGeneratedRuntimeDelegate := runtimeClient.delegate.(defaultSecurityListServiceClient)
+	assert.True(t, isGeneratedRuntimeDelegate)
 }
 
 func makeSpecSecurityList() *corev1beta1.SecurityList {
@@ -257,6 +356,50 @@ func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 	assert.Equal(t, 1, getCalls)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
+}
+
+func TestCreateOrUpdate_RecreatesOnStaleTrackedIdentityWithoutListReuse(t *testing.T) {
+	getCalls := 0
+	listCalls := 0
+	createCalls := 0
+	manager := newSecurityListTestManager(&fakeSecurityListOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.securitylist.oc1..stale", *req.SecurityListId)
+			return coresdk.GetSecurityListResponse{}, fakeSecurityListServiceError{
+				statusCode: 404,
+				code:       "NotFound",
+				message:    "stale tracked security list",
+			}
+		},
+		listFn: func(_ context.Context, _ coresdk.ListSecurityListsRequest) (coresdk.ListSecurityListsResponse, error) {
+			listCalls++
+			return coresdk.ListSecurityListsResponse{}, nil
+		},
+		createFn: func(_ context.Context, req coresdk.CreateSecurityListRequest) (coresdk.CreateSecurityListResponse, error) {
+			createCalls++
+			assert.Equal(t, common.String("ocid1.compartment.oc1..example"), req.CompartmentId)
+			return coresdk.CreateSecurityListResponse{
+				SecurityList: makeSDKSecurityList("ocid1.securitylist.oc1..recreated", "test-security-list", coresdk.SecurityListLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecSecurityList()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.securitylist.oc1..stale")
+	resource.Status.Id = "ocid1.securitylist.oc1..stale"
+	resource.Status.DisplayName = "stale"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, 0, listCalls)
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, "ocid1.securitylist.oc1..recreated", string(resource.Status.OsokStatus.Ocid))
+	assert.Equal(t, "ocid1.securitylist.oc1..recreated", resource.Status.Id)
+	assert.Equal(t, "test-security-list", resource.Status.DisplayName)
 }
 
 func TestCreateOrUpdate_MutableDriftTriggersUpdateForRulesAndTags(t *testing.T) {
@@ -565,6 +708,31 @@ func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	assert.False(t, deleted)
 	assert.Equal(t, "TERMINATING", resource.Status.LifecycleState)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
+func TestDelete_PostDeleteConfirmReadMarksTerminatingForNonPendingLifecycle(t *testing.T) {
+	manager := newSecurityListTestManager(&fakeSecurityListOCIClient{
+		deleteFn: func(_ context.Context, req coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error) {
+			assert.Equal(t, "ocid1.securitylist.oc1..delete", *req.SecurityListId)
+			return coresdk.DeleteSecurityListResponse{}, nil
+		},
+		getFn: func(_ context.Context, _ coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error) {
+			return coresdk.GetSecurityListResponse{
+				SecurityList: makeSDKSecurityList("ocid1.securitylist.oc1..delete", "test-security-list", coresdk.SecurityListLifecycleStateAvailable),
+			}, nil
+		},
+	})
+
+	resource := makeSpecSecurityList()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.securitylist.oc1..delete")
+
+	deleted, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, deleted)
+	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "SecurityList test-security-list is AVAILABLE", resource.Status.OsokStatus.Message)
 }
 
 func TestSecurityListClassifierCoverageMatchesManualRuntimeContract(t *testing.T) {

@@ -6,10 +6,7 @@
 package securitylist
 
 func init() {
-	// SecurityList intentionally stays on the explicit parity runtime rather than
-	// the generatedruntime baseline until nested rule status clearing can be
-	// preserved without broad generic-runtime changes.
-	newSecurityListServiceClient = func(manager *SecurityListServiceManager) SecurityListServiceClient {
-		return newExplicitSecurityListServiceClient(manager)
-	}
+	registerSecurityListRuntimeHooksMutator(func(manager *SecurityListServiceManager, hooks *SecurityListRuntimeHooks) {
+		applySecurityListRuntimeHooks(manager, hooks)
+	})
 }
