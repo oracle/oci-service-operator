@@ -71,8 +71,17 @@ func (f *fakeTableOCIClient) DeleteTable(ctx context.Context, req nosqlsdk.Delet
 	return nosqlsdk.DeleteTableResponse{}, nil
 }
 
-func testTableClient(fake *fakeTableOCIClient) *explicitTableServiceClient {
-	return newExplicitTableServiceClientWithOCIClient(loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}, fake)
+func testTableClient(fake *fakeTableOCIClient) TableServiceClient {
+	return newTableServiceClientWithOCIClient(loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}, fake)
+}
+
+func testTableRuntimeClient(fake *fakeTableOCIClient) *tableRuntimeClient {
+	return newTableRuntimeClient(
+		&TableServiceManager{Log: loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}},
+		nil,
+		fake,
+		nil,
+	)
 }
 
 func makeTableResource() *nosqlv1beta1.Table {
@@ -373,15 +382,8 @@ func TestExplicitTableServiceClientDeleteConfirmsProgress(t *testing.T) {
 	t.Parallel()
 
 	deleteCalled := false
-	getCount := 0
 	client := testTableClient(&fakeTableOCIClient{
 		getTableFn: func(_ context.Context, _ nosqlsdk.GetTableRequest) (nosqlsdk.GetTableResponse, error) {
-			getCount++
-			if getCount == 1 {
-				return nosqlsdk.GetTableResponse{
-					Table: makeSDKTable("ocid1.table.oc1..existing", "ocid1.compartment.oc1..example", nosqlsdk.TableLifecycleStateActive),
-				}, nil
-			}
 			return nosqlsdk.GetTableResponse{
 				Table: makeSDKTable("ocid1.table.oc1..existing", "ocid1.compartment.oc1..example", nosqlsdk.TableLifecycleStateDeleting),
 			}, nil
@@ -541,7 +543,7 @@ func TestExplicitTableServiceClientLifecycleProjectionUsesSharedAsyncTracker(t *
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := testTableClient(&fakeTableOCIClient{})
+			client := testTableRuntimeClient(&fakeTableOCIClient{})
 			resource := makeTableResource()
 			resource.Status.OsokStatus.Async.Current = tt.seedCurrent
 
@@ -675,8 +677,8 @@ func TestExplicitTableServiceClientDeleteConfirmationKeepsPendingTrackerUntilTab
 	if deleted {
 		t.Fatal("Delete() should keep the finalizer until OCI confirms deletion")
 	}
-	if getCount != 2 {
-		t.Fatalf("get count = %d, want 2", getCount)
+	if getCount != 1 {
+		t.Fatalf("get count = %d, want 1", getCount)
 	}
 	requireTableAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, "ACTIVE", shared.OSOKAsyncClassPending)
 }

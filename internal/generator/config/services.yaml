@@ -2110,7 +2110,7 @@ services:
         - kind: Table
           async:
             strategy: lifecycle
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: lifecycle
     observedState:
       sdkAliases:

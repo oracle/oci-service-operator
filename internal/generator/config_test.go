@@ -1924,7 +1924,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"marketplace":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"monitoring":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"mysql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"ocvp":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"objectstorage":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"oda":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2042,7 +2042,7 @@ func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContra
 		"containerengine": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"core":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"dataflow":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"nosql":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"nosql":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"objectstorage":   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
