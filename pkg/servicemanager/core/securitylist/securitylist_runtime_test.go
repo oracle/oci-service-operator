@@ -687,6 +687,34 @@ func TestDelete_AlreadyMissingOCIResourceIsTreatedAsDeleted(t *testing.T) {
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
 }
 
+func TestDelete_WithoutTrackedOCID_DoesNotListOrDelete(t *testing.T) {
+	listCalls := 0
+	deleteCalls := 0
+	manager := newSecurityListTestManager(&fakeSecurityListOCIClient{
+		listFn: func(_ context.Context, _ coresdk.ListSecurityListsRequest) (coresdk.ListSecurityListsResponse, error) {
+			listCalls++
+			return coresdk.ListSecurityListsResponse{}, nil
+		},
+		deleteFn: func(_ context.Context, _ coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error) {
+			deleteCalls++
+			return coresdk.DeleteSecurityListResponse{}, nil
+		},
+	})
+
+	resource := makeSpecSecurityList()
+	resource.Status.Id = "ocid1.securitylist.oc1..status-only"
+
+	deleted, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.True(t, deleted)
+	assert.Equal(t, 0, listCalls)
+	assert.Equal(t, 0, deleteCalls)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "OCI resource identifier is not recorded", resource.Status.OsokStatus.Message)
+	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
 func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
 	manager := newSecurityListTestManager(&fakeSecurityListOCIClient{
 		deleteFn: func(_ context.Context, _ coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error) {

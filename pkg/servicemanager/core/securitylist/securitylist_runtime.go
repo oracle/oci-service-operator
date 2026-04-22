@@ -147,6 +147,10 @@ func (c *securityListRuntimeClient) Delete(ctx context.Context, resource *corev1
 	if err := validateSecurityListSDKContract(); err != nil {
 		return false, err
 	}
+	if strings.TrimSpace(currentSecurityListTrackedOCID(resource)) == "" {
+		c.markDeleted(resource, "OCI resource identifier is not recorded")
+		return true, nil
+	}
 	return c.delegate.Delete(ctx, resource)
 }
 
@@ -685,6 +689,13 @@ func (c *securityListRuntimeClient) markDeleted(resource *corev1beta1.SecurityLi
 	status.Message = message
 	status.Reason = string(shared.Terminating)
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
+}
+
+func currentSecurityListTrackedOCID(resource *corev1beta1.SecurityList) string {
+	if resource == nil {
+		return ""
+	}
+	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
 }
 
 func (c *securityListRuntimeClient) clearTrackedIdentity(resource *corev1beta1.SecurityList) {
