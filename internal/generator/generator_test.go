@@ -2816,7 +2816,7 @@ func TestCheckedInRedisWorkRequestAsyncContractRendersRepoAuthoredHooks(t *testi
 	assertContains(t, content, []string{
 		`Async: &generatedruntime.AsyncSemantics{`,
 		`Strategy: "workrequest"`,
-		`Runtime: "handwritten"`,
+		`Runtime: "generatedruntime"`,
 		`WorkRequest: &generatedruntime.WorkRequestSemantics{`,
 		`Source: "service-sdk"`,
 		`Phases: []string{"create", "update", "delete"}`,
