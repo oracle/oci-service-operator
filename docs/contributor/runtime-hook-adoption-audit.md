@@ -12,7 +12,9 @@ moved onto the bounded async work-request seam, and refreshed again in
 refreshed again in `US-240` after `ailanguage/project` moved onto that seam,
 and refreshed again in `US-246` after `dataflow/application` moved onto the
 bounded delete/error seam, and refreshed again in `US-248` after
-`aispeech/transcriptionjob` moved onto the bounded delete-hook seam.
+`aispeech/transcriptionjob` moved onto the bounded delete-hook seam, and
+refreshed again in `US-252` after `core/securitylist` and `nosql/table` moved
+off the residual constructor-rewrite list.
 
 The live residual set comes from:
 
@@ -21,15 +23,16 @@ rg -l "new[A-Za-z0-9]+ServiceClient\s*=" pkg/servicemanager | \
   rg -v '_serviceclient\.go$|_test\.go$'
 ```
 
-That command now returns 3 live constructor rewrites. The `core` seven-package
+That command now returns 1 live constructor rewrite. The `core` seven-package
 networking family and the four-package bind-guard family are no longer in the
 residual set, the former async-resume family is no longer in the live
-inventory, and the delete-confirmation and OCI-error overlay family has now
-closed. The remaining packages collapse into one concrete blocked family:
+inventory, the delete-confirmation and OCI-error overlay family has now
+closed, and the prior three-package full-manual runtime-engine family has
+collapsed to one broader manual outlier:
 
 | Family | Count | Packages |
 | --- | --- | --- |
-| Full manual runtime engines | 3 | `core/securitylist`, `nosql/table`, `psql/dbsystem` |
+| Credential-backed broader manual outlier | 1 | `psql/dbsystem` |
 
 ## Current Hook Boundary
 
@@ -48,39 +51,36 @@ closed. The remaining packages collapse into one concrete blocked family:
   `ocvp/sddc`.
 - That surface is now also enough for the former delete-confirmation and
   OCI-error overlay family: `aispeech/transcriptionjob`.
-- The remaining 3 rewrites are still real blockers, but they no longer include
-  the core networking wrapper family, the bind-guard family, the former
-  async-resume family, or the former delete-confirmation and OCI-error overlay
-  family, and they do not justify widening the checked-in runtime surface
-  beyond the current bounded hooks.
+- The remaining rewrite is still a real blocker, but it is now one
+  credential-backed broader manual outlier rather than a multi-package family.
+  It no longer includes `core/securitylist` or `nosql/table`, and it does not
+  justify widening the checked-in runtime surface beyond the current bounded
+  hooks.
 
 ## Family Inventory
 
-### Full manual runtime engines
+### Credential-backed broader manual outlier
 
-The delete-confirmation and OCI-error overlay family is now closed, so these
-packages are the only remaining live constructor rewrites. They still keep the
-whole runtime engine in handwritten code instead of wrapping a generated
-delegate.
+The prior three-package full-manual runtime-engine family is no longer live:
+`core/securitylist` and `nosql/table` both moved onto the bounded
+generatedruntime surface in `US-250` and `US-251`. That leaves one package in
+the constructor-rewrite inventory, and it still keeps broader handwritten
+runtime behavior instead of wrapping a generated delegate.
 
-- `core/securitylist`
-- `nosql/table`
 - `psql/dbsystem`
 
-The common shape is:
+The remaining shape is:
 
-- package-local CRUD, status projection, and lifecycle handling stay explicit
-- the live runtime owns behavior that is still broader than a thin wrapper,
-  such as nested security-rule normalization, compartment moves, SDK contract
-  guards, or credential-backed create details
+- package-local create, update, delete, bind lookup, status projection, and
+  lifecycle handling still stay explicit
+- the live runtime owns credential-backed request construction and broader
+  manual behavior that is still wider than a thin generatedruntime wrapper
 
 ## Exhaustive Package Classification
 
-| Package | Primary blocked family | Current live reason |
+| Package | Primary blocked shape | Current live reason |
 | --- | --- | --- |
-| `core/securitylist` | Full manual runtime engine | The runtime still owns full CRUD because nested rule normalization, stale optional status clearing, tracked-OCID recreate behavior, and an SDK contract guard are all package-local. |
-| `nosql/table` | Full manual runtime engine | Keeps full lifecycle-aware create, update, compartment move, and delete confirmation behavior in an explicit handwritten runtime. |
-| `psql/dbsystem` | Full manual runtime engine | Keeps full create, update, delete, bind lookup, lifecycle handling, and credential-backed request construction in manual code. |
+| `psql/dbsystem` | Credential-backed broader manual outlier | Keeps full create, update, delete, bind lookup, lifecycle handling, and credential-backed request construction in manual code. |
 
 ## Residual Design Input
 
@@ -93,8 +93,8 @@ retire.
 
 The remaining residual need now stays concentrated in one shape:
 
-- full manual runtime engines whose behavior is still broader than a thin
-  wrapper
+- a credential-backed broader manual runtime whose behavior is still wider
+  than a thin generatedruntime wrapper
 
 This audit still records the live gaps only; it does not claim any broader
 hook surface beyond the current bounded runtime seams.
@@ -104,5 +104,5 @@ hook surface beyond the current bounded runtime seams.
 `docs/api-generator-contract.md` already records the checked-in bounded hook
 surface and says the remaining handwritten runtime seams stay explicit until
 later rollout work closes them. This audit refresh only updates the live
-residual inventory after `US-247` and `US-248`, so no further contract change
+residual inventory after `US-250` and `US-251`, so no further contract change
 is required here.
