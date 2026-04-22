@@ -407,8 +407,8 @@ func TestExplicitTableServiceClientDeleteConfirmsProgress(t *testing.T) {
 	if deleted {
 		t.Fatal("Delete() should keep the finalizer while OCI reports DELETING")
 	}
-	if !deleteCalled {
-		t.Fatal("DeleteTable() should be called for an existing table")
+	if deleteCalled {
+		t.Fatal("DeleteTable() should not be called when OCI already reports DELETING")
 	}
 	if got := resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type; got != shared.Terminating {
 		t.Fatalf("last condition = %q, want Terminating", got)
@@ -677,8 +677,8 @@ func TestExplicitTableServiceClientDeleteConfirmationKeepsPendingTrackerUntilTab
 	if deleted {
 		t.Fatal("Delete() should keep the finalizer until OCI confirms deletion")
 	}
-	if getCount != 1 {
-		t.Fatalf("get count = %d, want 1", getCount)
+	if getCount != 2 {
+		t.Fatalf("get count = %d, want 2", getCount)
 	}
 	requireTableAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, "ACTIVE", shared.OSOKAsyncClassPending)
 }

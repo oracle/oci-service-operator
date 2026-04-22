@@ -2279,6 +2279,7 @@ func assertNoSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	if len(override.Controller.ExtraRBACMarkers) != 0 {
 		t.Fatalf("nosql Table extra RBAC markers = %v, want no non-default markers", override.Controller.ExtraRBACMarkers)
 	}
+	assertFormalSpecFor(t, service, "Table", "table")
 }
 
 func assertPSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {

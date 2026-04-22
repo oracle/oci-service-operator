@@ -2108,6 +2108,7 @@ services:
         strategy: none
       resources:
         - kind: Table
+          formalSpec: table
           async:
             strategy: lifecycle
             runtime: generatedruntime

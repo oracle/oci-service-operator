@@ -97,6 +97,7 @@ func applyTableRuntimeHooks(
 	if hooks == nil {
 		return
 	}
+	hooks.Semantics = nil
 
 	runtimeClient := newTableRuntimeClient(manager, nil, client, initErr)
 
@@ -315,10 +316,63 @@ func (c *tableRuntimeClient) CreateOrUpdate(
 }
 
 func (c *tableRuntimeClient) Delete(ctx context.Context, resource *nosqlv1beta1.Table) (bool, error) {
-	if c.delegate == nil {
-		return false, fmt.Errorf("Table generated delegate is not configured")
+	if err := c.ensureClient(); err != nil {
+		return false, err
 	}
-	return c.delegate.Delete(ctx, resource)
+
+	target, err := c.resolveDeleteTarget(ctx, resource)
+	if err != nil {
+		c.recordErrorRequestID(resource, err)
+		return false, err
+	}
+	if target == nil {
+		c.markDeleted(resource, "OCI table no longer exists")
+		return true, nil
+	}
+
+	if err := c.projectPayload(resource, target.payload); err != nil {
+		return false, err
+	}
+
+	switch normalizeLifecycle(target.lifecycleState) {
+	case string(nosqlsdk.TableLifecycleStateDeleted):
+		c.markDeleted(resource, "OCI table deleted")
+		return true, nil
+	case string(nosqlsdk.TableLifecycleStateDeleting):
+		c.finishWithLifecycle(resource, target, shared.OSOKAsyncPhaseDelete)
+		return false, nil
+	}
+
+	if target.id == "" {
+		return false, fmt.Errorf("resolve Table delete target: missing table OCID")
+	}
+	if err := c.deleteTable(ctx, resource, target.id); err != nil {
+		if errors.Is(err, errTableNotFound) {
+			c.markDeleted(resource, "OCI table no longer exists")
+			return true, nil
+		}
+		return false, err
+	}
+
+	refreshed, err := c.readTable(ctx, resource, target.id)
+	if err != nil {
+		if errors.Is(err, errTableNotFound) {
+			c.markDeleted(resource, "OCI table deleted")
+			return true, nil
+		}
+		return false, fmt.Errorf("confirm Table delete: %w", err)
+	}
+	if err := c.projectPayload(resource, refreshed.payload); err != nil {
+		return false, err
+	}
+
+	if normalizeLifecycle(refreshed.lifecycleState) == string(nosqlsdk.TableLifecycleStateDeleted) {
+		c.markDeleted(resource, "OCI table deleted")
+		return true, nil
+	}
+
+	c.markPendingLifecycleOperation(resource, shared.OSOKAsyncPhaseDelete, "OCI table delete request accepted", refreshed.lifecycleState)
+	return false, nil
 }
 
 func (c *tableRuntimeClient) buildGeneratedUpdateBody(
@@ -562,6 +616,37 @@ func (c *tableRuntimeClient) readTable(
 	return snapshotFromSummary(*summary), nil
 }
 
+func (c *tableRuntimeClient) resolveDeleteTarget(
+	ctx context.Context,
+	resource *nosqlv1beta1.Table,
+) (*tableSnapshot, error) {
+	if currentID := currentTableID(resource); currentID != "" {
+		table, err := c.getTableByID(ctx, currentID)
+		if err == nil {
+			return snapshotFromTable(table), nil
+		}
+		if errors.Is(err, errTableNotFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("get Table %q: %w", currentID, err)
+	}
+
+	compartmentID := ""
+	name := ""
+	if resource != nil {
+		compartmentID = resource.Spec.CompartmentId
+		name = resource.Spec.Name
+	}
+	summary, err := c.findTableByName(ctx, compartmentID, name)
+	if err != nil {
+		return nil, err
+	}
+	if summary == nil {
+		return nil, nil
+	}
+	return snapshotFromSummary(*summary), nil
+}
+
 func (c *tableRuntimeClient) getTableByID(ctx context.Context, id string) (nosqlsdk.Table, error) {
 	response, err := c.client.GetTable(ctx, nosqlsdk.GetTableRequest{
 		TableNameOrId: common.String(id),
@@ -672,6 +757,26 @@ func (c *tableRuntimeClient) updateTable(
 			return errTableNotFound
 		}
 		return fmt.Errorf("update Table: %w", err)
+	}
+	c.recordResponseRequestID(resource, response)
+	return nil
+}
+
+func (c *tableRuntimeClient) deleteTable(
+	ctx context.Context,
+	resource *nosqlv1beta1.Table,
+	tableID string,
+) error {
+	response, err := c.client.DeleteTable(ctx, nosqlsdk.DeleteTableRequest{
+		TableNameOrId: common.String(tableID),
+		IsIfExists:    common.Bool(true),
+	})
+	if err != nil {
+		c.recordErrorRequestID(resource, err)
+		if isNotFoundErr(err) {
+			return errTableNotFound
+		}
+		return fmt.Errorf("delete Table: %w", err)
 	}
 	c.recordResponseRequestID(resource, response)
 	return nil
