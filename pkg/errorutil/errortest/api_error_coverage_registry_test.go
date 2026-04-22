@@ -94,7 +94,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "core/Vcn", APIErrorCoverageFamilyManualRuntime)
 	assertReviewedFamily(t, "databasetools/DatabaseToolsConnection", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datascience/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
-	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyManualRuntime)
+	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "email/Dkim", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "functions/Function", APIErrorCoverageFamilyLegacyAdapter)

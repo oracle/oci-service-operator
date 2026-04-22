@@ -1910,7 +1910,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"databasetools":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"datascience":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2041,7 +2041,7 @@ func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContra
 		"analytics":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerengine": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"core":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"dataflow":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"nosql":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"objectstorage":   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
@@ -2381,7 +2381,7 @@ func assertDataflowRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 		`driverShape: "VM.Standard.E4.Flex"`,
 		`fileUri: "oci://bucket@namespace/app/main.py"`,
 	)
-	assertAsyncContract(t, service, "Application", AsyncStrategyLifecycle, AsyncRuntimeHandwritten)
+	assertAsyncContract(t, service, "Application", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
 }
 
 func assertAIDocumentRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
