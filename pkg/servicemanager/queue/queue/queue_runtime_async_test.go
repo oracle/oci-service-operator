@@ -194,13 +194,13 @@ func TestQueueRuntimeUpdateFollowUpReadAfterSucceededWorkRequestUsesMatrix(t *te
 	})
 }
 
-func TestQueueRuntimeDeleteWorkRequestPoll404SurfacesError(t *testing.T) {
+func TestQueueRuntimeDeleteWorkRequestPoll404UsesQueueConfirmation(t *testing.T) {
 	t.Parallel()
 
 	focused := errortest.FocusedAsyncFollowUpCases(t)
 	cases := []errortest.AsyncFollowUpMatrixCase{
-		{Candidate: focused["notfound"], WantErrorType: focused["notfound"].NormalizedType},
-		{Candidate: focused["auth404"], WantErrorType: focused["auth404"].NormalizedType},
+		{Candidate: focused["notfound"], WantDeleted: true},
+		{Candidate: focused["auth404"], WantDeleted: true},
 	}
 
 	errortest.RunAsyncFollowUpMatrix(t, cases, func(t *testing.T, candidate errortest.CommonErrorCase) errortest.AsyncFollowUpResult {
@@ -218,6 +218,9 @@ func TestQueueRuntimeDeleteWorkRequestPoll404SurfacesError(t *testing.T) {
 		resource.Status.DeleteWorkRequestId = "wr-delete-missing"
 
 		deleted, err := manager.Delete(context.Background(), resource)
+		if err == nil && deleted && resource.Status.OsokStatus.DeletedAt == nil {
+			t.Fatal("status.deletedAt should be set after queue delete confirmation succeeds")
+		}
 		return errortest.AsyncFollowUpResult{
 			Err:     err,
 			Deleted: deleted,
@@ -225,13 +228,13 @@ func TestQueueRuntimeDeleteWorkRequestPoll404SurfacesError(t *testing.T) {
 	})
 }
 
-func TestQueueRuntimeDeleteWorkRequestPoll404IgnoresReadableQueueState(t *testing.T) {
+func TestQueueRuntimeDeleteWorkRequestPoll404KeepsWaitingWhileQueueExists(t *testing.T) {
 	t.Parallel()
 
 	focused := errortest.FocusedAsyncFollowUpCases(t)
 	cases := []errortest.AsyncFollowUpMatrixCase{
-		{Candidate: focused["notfound"], WantErrorType: focused["notfound"].NormalizedType},
-		{Candidate: focused["auth404"], WantErrorType: focused["auth404"].NormalizedType},
+		{Candidate: focused["notfound"]},
+		{Candidate: focused["auth404"]},
 	}
 
 	errortest.RunAsyncFollowUpMatrix(t, cases, func(t *testing.T, candidate errortest.CommonErrorCase) errortest.AsyncFollowUpResult {
@@ -251,6 +254,14 @@ func TestQueueRuntimeDeleteWorkRequestPoll404IgnoresReadableQueueState(t *testin
 		resource.Status.DeleteWorkRequestId = "wr-delete-still-visible"
 
 		deleted, err := manager.Delete(context.Background(), resource)
+		if err == nil {
+			if resource.Status.OsokStatus.Reason != string(shared.Terminating) {
+				t.Fatalf("status.reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Terminating)
+			}
+			if !strings.Contains(resource.Status.OsokStatus.Message, "waiting for Queue ocid1.queue.oc1..existing to disappear") {
+				t.Fatalf("status.message = %q, want waiting-to-disappear detail", resource.Status.OsokStatus.Message)
+			}
+		}
 		return errortest.AsyncFollowUpResult{
 			Err:     err,
 			Deleted: deleted,

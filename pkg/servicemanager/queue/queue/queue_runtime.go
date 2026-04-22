@@ -102,11 +102,10 @@ func applyQueueRuntimeHooks(
 	hooks.Async.ResolvePhase = resolveQueueGeneratedWorkRequestPhase
 	hooks.Async.RecoverResourceID = recoverQueueIDFromGeneratedWorkRequest
 	hooks.Async.Message = queueGeneratedWorkRequestMessage
-	if manager != nil {
-		hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate QueueServiceClient) QueueServiceClient {
-			return newQueueEndpointSecretClient(manager, delegate)
-		})
-	}
+
+	runtimeClient, _ := workRequestClient.(queueOCIClient)
+	appendQueueGeneratedRuntimeOverlay(manager, hooks, runtimeClient, initErr)
+	appendQueueEndpointSecretWrapper(manager, hooks)
 }
 
 func buildQueueUpdateBody(
