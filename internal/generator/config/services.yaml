@@ -2566,7 +2566,7 @@ services:
           formalSpec: rediscluster
           async:
             strategy: workrequest
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: workrequest
             workRequest:
               source: service-sdk

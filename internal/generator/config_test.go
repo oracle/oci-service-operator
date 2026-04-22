@@ -1931,7 +1931,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"opensearch":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"psql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"queue":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
-		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
+		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"streaming":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"usageapi":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
@@ -1967,7 +1967,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		t.Fatalf("queue Queue delete bridge = %q, want DeleteWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Delete)
 	}
 
-	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeHandwritten)
+	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
 	if redis.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
 		t.Fatalf("redis RedisCluster workRequest.source = %q, want %q", redis.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
 	}
