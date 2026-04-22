@@ -2759,7 +2759,7 @@ func TestCheckedInQueueSampleUsesPracticalOverride(t *testing.T) {
 	assertNotContains(t, sampleContent, []string{"spec: {}"})
 }
 
-func TestCheckedInQueueWorkRequestAsyncContractRendersHandwrittenMetadata(t *testing.T) {
+func TestCheckedInQueueWorkRequestAsyncContractRendersGeneratedRuntimeMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
@@ -2782,7 +2782,7 @@ func TestCheckedInQueueWorkRequestAsyncContractRendersHandwrittenMetadata(t *tes
 	assertContains(t, content, []string{
 		`Async: &generatedruntime.AsyncSemantics{`,
 		`Strategy: "workrequest"`,
-		`Runtime: "handwritten"`,
+		`Runtime: "generatedruntime"`,
 		`WorkRequest: &generatedruntime.WorkRequestSemantics{`,
 		`Source: "service-sdk"`,
 		`Phases: []string{"create", "update", "delete"}`,
