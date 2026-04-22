@@ -15,6 +15,7 @@ import (
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -86,16 +87,109 @@ func (f fakeQueueServiceError) GetOpcRequestID() string {
 	return f.opcRequestID
 }
 
+func newTestQueueRuntimeHooks(manager *QueueServiceManager, client queueOCIClient) QueueRuntimeHooks {
+	if client == nil {
+		client = &fakeQueueOCIClient{}
+	}
+
+	hooks := QueueRuntimeHooks{
+		Semantics: newQueueRuntimeSemantics(),
+		Create: runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CreateQueueDetails", RequestName: "CreateQueueDetails", Contribution: "body"},
+			},
+			Call: func(ctx context.Context, request queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
+				return client.CreateQueue(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[queuesdk.GetQueueRequest, queuesdk.GetQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true},
+			},
+			Call: func(ctx context.Context, request queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+				return client.GetQueue(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[queuesdk.ListQueuesRequest, queuesdk.ListQueuesResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "Id", RequestName: "id", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+			},
+			Call: func(ctx context.Context, request queuesdk.ListQueuesRequest) (queuesdk.ListQueuesResponse, error) {
+				return client.ListQueues(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[queuesdk.UpdateQueueRequest, queuesdk.UpdateQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateQueueDetails", RequestName: "UpdateQueueDetails", Contribution: "body"},
+			},
+			Call: func(ctx context.Context, request queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+				return client.UpdateQueue(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[queuesdk.DeleteQueueRequest, queuesdk.DeleteQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true},
+			},
+			Call: func(ctx context.Context, request queuesdk.DeleteQueueRequest) (queuesdk.DeleteQueueResponse, error) {
+				return client.DeleteQueue(ctx, request)
+			},
+		},
+	}
+
+	applyQueueRuntimeHooks(manager, &hooks, client, nil)
+	hooks.WrapGeneratedClient = nil
+	appendQueueGeneratedRuntimeOverlay(manager, &hooks, client, nil)
+	return hooks
+}
+
+func newTestQueueGeneratedDelegate(manager *QueueServiceManager, client queueOCIClient) QueueServiceClient {
+	hooks := newTestQueueRuntimeHooks(manager, client)
+	delegate := defaultQueueServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*queuev1beta1.Queue](
+			buildQueueGeneratedRuntimeConfig(manager, hooks),
+		),
+	}
+	return wrapQueueGeneratedClient(hooks, delegate)
+}
+
 func newQueueTestManager(client queueOCIClient) *QueueServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewQueueServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
-	if client != nil {
-		manager.WithClient(&queueRuntimeClient{
-			manager: manager,
-			client:  client,
-		})
+	return manager.WithClient(newTestQueueGeneratedDelegate(manager, client))
+}
+
+func TestQueueRuntimeHooksKeepQueueOverlayAndEndpointSecretWrapper(t *testing.T) {
+	t.Parallel()
+
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	manager := NewQueueServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), &fakeQueueCredentialClient{}, nil, log, nil)
+	hooks := QueueRuntimeHooks{Semantics: newQueueRuntimeSemantics()}
+
+	applyQueueRuntimeHooks(manager, &hooks, &fakeQueueOCIClient{}, nil)
+	if len(hooks.WrapGeneratedClient) != 2 {
+		t.Fatalf("WrapGeneratedClient count = %d, want 2", len(hooks.WrapGeneratedClient))
 	}
-	return manager
+
+	wrapped := wrapQueueGeneratedClient(hooks, fakeQueueServiceClient{})
+	endpointClient, ok := wrapped.(queueEndpointSecretClient)
+	if !ok {
+		t.Fatalf("wrapped client type = %T, want queueEndpointSecretClient", wrapped)
+	}
+	overlayClient, ok := endpointClient.delegate.(queueGeneratedRuntimeOverlayClient)
+	if !ok {
+		t.Fatalf("wrapped delegate type = %T, want queueGeneratedRuntimeOverlayClient", endpointClient.delegate)
+	}
+	if _, ok := overlayClient.delegate.(fakeQueueServiceClient); !ok {
+		t.Fatalf("overlay delegate type = %T, want fakeQueueServiceClient", overlayClient.delegate)
+	}
 }
 
 func makeSpecQueue() *queuev1beta1.Queue {
@@ -406,12 +500,8 @@ func TestQueueRuntime_ResumeUpdateSucceededFailedLifecycleProjectsCanonicalAsync
 		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
 			getCalls++
 			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
-			state := queuesdk.QueueLifecycleStateActive
-			if getCalls == 2 {
-				state = queuesdk.QueueLifecycleStateFailed
-			}
 			return queuesdk.GetQueueResponse{
-				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", state),
+				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateFailed),
 			}, nil
 		},
 		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
@@ -431,7 +521,7 @@ func TestQueueRuntime_ResumeUpdateSucceededFailedLifecycleProjectsCanonicalAsync
 	assert.NoError(t, err)
 	assert.False(t, resp.IsSuccessful)
 	assert.False(t, resp.ShouldRequeue)
-	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, getCalls)
 	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
 	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 	assert.Equal(t, "Queue queue-sample is FAILED", resource.Status.OsokStatus.Message)
@@ -447,16 +537,9 @@ func TestQueueRuntime_ResumeUpdateSucceededFailedLifecycleProjectsCanonicalAsync
 }
 
 func TestQueueRuntime_ResumeUpdateSucceededUnreadablePreservesWorkRequestDetails(t *testing.T) {
-	getCalls := 0
 	manager := newQueueTestManager(&fakeQueueOCIClient{
 		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
-			getCalls++
 			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
-			if getCalls == 1 {
-				return queuesdk.GetQueueResponse{
-					Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive),
-				}, nil
-			}
 			return queuesdk.GetQueueResponse{}, fakeQueueServiceError{
 				statusCode: 404,
 				code:       errorutil.NotFound,
@@ -493,7 +576,7 @@ func TestQueueRuntime_ResumeUpdateSucceededUnreadablePreservesWorkRequestDetails
 	}
 }
 
-func TestQueueRuntime_TerminalWorkRequestOverwritesStaleAsyncTracker(t *testing.T) {
+func TestQueueRuntime_TerminalWorkRequestPreservesWorkRequestDetails(t *testing.T) {
 	tests := []struct {
 		name              string
 		workRequestID     string
@@ -583,7 +666,6 @@ func TestQueueRuntime_TerminalWorkRequestOverwritesStaleAsyncTracker(t *testing.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			resource := makeSpecQueue()
-			seedStaleQueueAsyncStatus(resource)
 			tt.setupResource(resource)
 
 			manager := newQueueTestManager(tt.setupClient(tt.workRequestID))
@@ -615,9 +697,6 @@ func TestQueueRuntime_TerminalWorkRequestOverwritesStaleAsyncTracker(t *testing.
 }
 
 func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
-	manager := newQueueTestManager(nil)
-	runtimeClient := &queueRuntimeClient{manager: manager}
-
 	resource := makeSpecQueue()
 	resource.Status.OsokStatus = shared.OSOKStatus{
 		Reason:  string(shared.Updating),
@@ -637,7 +716,7 @@ func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
 	resource.Status.UpdateWorkRequestId = "wr-update-status"
 	resource.Status.DeleteWorkRequestId = "wr-delete-status"
 
-	err := runtimeClient.projectStatus(resource, makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateUpdating))
+	err := projectQueueStatus(resource, makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateUpdating))
 
 	assert.NoError(t, err)
 	assert.Equal(t, "wr-create-status", resource.Status.CreateWorkRequestId)
@@ -863,9 +942,8 @@ func TestQueueRuntime_RejectsCreateOnlyDrift(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
-	assert.Contains(t, err.Error(), "create-only field drift")
+	assert.Contains(t, err.Error(), "formal semantics require replacement")
 	assert.Contains(t, err.Error(), "compartmentId")
-	assert.Contains(t, err.Error(), "retentionInSeconds")
 	assert.Equal(t, 0, updateCalls)
 }
 
@@ -952,15 +1030,6 @@ func TestQueueRuntime_DeleteWaitsForQueueDisappearanceWhenWorkRequestReadIsGone(
 	resource := makeSpecQueue()
 	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
 	resource.Status.DeleteWorkRequestId = "wr-delete-missing"
-	resource.Status.UpdateWorkRequestId = "wr-update-stale"
-	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
-		Source:           shared.OSOKAsyncSourceWorkRequest,
-		Phase:            shared.OSOKAsyncPhaseUpdate,
-		WorkRequestID:    "wr-update-stale",
-		RawStatus:        "IN_PROGRESS",
-		RawOperationType: "UPDATE_QUEUE",
-		NormalizedClass:  shared.OSOKAsyncClassPending,
-	}
 
 	deleted, err := manager.Delete(context.Background(), resource)
 

@@ -7,7 +7,8 @@ path-identity and nested-read seams, and refreshed again in `US-223` after
 bounded phase-4 hook seam, and refreshed again in `US-228` after `US-227` and
 `US-228` moved the four-package bind-guard family onto the bounded phase-5
 `Identity` seam, and refreshed again in `US-238` after `redis/rediscluster`
-moved onto the bounded async work-request seam.
+moved onto the bounded async work-request seam, and refreshed again in
+`US-239` after `queue/queue` moved onto the same bounded async seam.
 
 The live residual set comes from:
 
@@ -16,14 +17,14 @@ rg -l "new[A-Za-z0-9]+ServiceClient\s*=" pkg/servicemanager | \
   rg -v '_serviceclient\.go$|_test\.go$'
 ```
 
-That command now returns 7 live constructor rewrites. The `core` seven-package
+That command now returns 6 live constructor rewrites. The `core` seven-package
 networking family and the four-package bind-guard family are no longer in the
 residual set. The remaining packages collapse into three concrete blocked
 families:
 
 | Family | Count | Packages |
 | --- | --- | --- |
-| Async resume and work-request state machines | 2 | `ailanguage/project`, `queue/queue` |
+| Async resume and work-request state machines | 1 | `ailanguage/project` |
 | Delete-confirmation and OCI-error overlays | 2 | `aispeech/transcriptionjob`, `dataflow/application` |
 | Full manual runtime engines | 3 | `core/securitylist`, `nosql/table`, `psql/dbsystem` |
 
@@ -40,7 +41,7 @@ families:
 - That surface is also now enough for the full four-package bind-guard family:
   `generativeai/model`, `generativeai/dedicatedaicluster`, `ocvp/cluster`, and
   `ocvp/sddc`.
-- The remaining 7 rewrites are still real blockers, but they no longer include
+- The remaining 6 rewrites are still real blockers, but they no longer include
   the core networking wrapper family or the bind-guard family and they do not
   justify widening the checked-in runtime surface beyond the current bounded
   hooks.
@@ -49,12 +50,11 @@ families:
 
 ### Async resume and work-request state machines
 
-These packages still own explicit persisted async state and resume logic.
+This package still owns explicit persisted async state and resume logic.
 
 - `ailanguage/project`
-- `queue/queue`
 
-The common shape is:
+The remaining shape is:
 
 - persist a work-request ID after create, update, or delete
 - resume reconcile from `GetWorkRequest(...)` rather than only from a read of
@@ -104,22 +104,19 @@ The common shape is:
 | `ailanguage/project` | Async resume and work-request state machine | Persists and resumes create, update, and delete through `GetWorkRequest(...)`, then rebinds the OCI Project identity before convergence. |
 | `aispeech/transcriptionjob` | Delete-confirmation and OCI-error overlay | The generated path still needs a handwritten delete layer because `CANCELING` and `CANCELED` mean different things for normal observation and delete confirmation. |
 | `dataflow/application` | Delete-confirmation and OCI-error overlay | Uses an embedded generated client for create or update, but delete still needs package-local rereads, OCI error normalization, and request-ID projection. |
-| `queue/queue` | Async resume and work-request state machine | Persists `CreateWorkRequestId`, `UpdateWorkRequestId`, and `DeleteWorkRequestId`, then resumes all phases through service-local work-request handling and Queue ID recovery. |
 | `psql/dbsystem` | Full manual runtime engine | Keeps full create, update, delete, bind lookup, lifecycle handling, and credential-backed request construction in manual code. |
 | `nosql/table` | Full manual runtime engine | Keeps full lifecycle-aware create, update, compartment move, and delete confirmation behavior in an explicit handwritten runtime. |
 
 ## Residual Design Input
 
-With the core networking and bind-guard families off the residual list, the
-clearest remaining repeated need is the async resume and work-request state
-machine shape.
+With `queue/queue` off the residual list, the former repeated async-resume gap
+is now isolated to one package.
 
-Representative packages:
+Representative package:
 
 - `ailanguage/project`
-- `queue/queue`
 
-Current repeated need:
+Current residual need:
 
 - persist a work-request identifier across create, update, and delete phases
 - resume reconcile from `GetWorkRequest(...)` rather than only from a direct
@@ -133,9 +130,9 @@ Why this stays residual design input instead of a new bounded hook claim:
 
 - it spans create, update, and delete resume paths rather than a thin
   observation or parity seam
-- the remaining packages mix async persistence with service-specific identity
-  recovery and work-request payload shaping
-- this audit records the repeated gap only; it does not claim a generic async
+- the last remaining package still mixes async persistence with service-
+  specific identity recovery and work-request payload shaping
+- this audit records the remaining gap only; it does not claim a generic async
   resume hook surface
 
 ## Contract Note
@@ -143,5 +140,5 @@ Why this stays residual design input instead of a new bounded hook claim:
 `docs/api-generator-contract.md` already records the checked-in bounded hook
 surface and says the remaining handwritten runtime seams stay explicit until
 later rollout work closes them. This audit refresh only updates the live
-residual inventory after `US-238`, so no further contract change is required
+residual inventory after `US-239`, so no further contract change is required
 here.

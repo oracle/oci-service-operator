@@ -55,7 +55,7 @@ func newQueueRuntimeSemantics() *generatedruntime.Semantics {
 		FormalSlug:    "queue",
 		Async: &generatedruntime.AsyncSemantics{
 			Strategy:             "workrequest",
-			Runtime:              "handwritten",
+			Runtime:              "generatedruntime",
 			FormalClassification: "workrequest",
 			WorkRequest: &generatedruntime.WorkRequestSemantics{
 				Source: "service-sdk",
