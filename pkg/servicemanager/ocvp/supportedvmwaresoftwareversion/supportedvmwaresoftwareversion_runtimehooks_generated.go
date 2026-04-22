@@ -31,6 +31,7 @@ type SupportedVmwareSoftwareVersionRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
 	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
 	Async               generatedruntime.AsyncHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
+	DeleteHooks         generatedruntime.DeleteHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]
 	List                runtimeOperationHooks[ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest, ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse]
 	WrapGeneratedClient []func(SupportedVmwareSoftwareVersionServiceClient) SupportedVmwareSoftwareVersionServiceClient
 }
@@ -53,6 +54,7 @@ func newSupportedVmwareSoftwareVersionDefaultRuntimeHooks(sdkClient ocvpsdk.Sddc
 		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
 		Async:           generatedruntime.AsyncHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{},
 		List: runtimeOperationHooks[ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest, ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Version", RequestName: "version", Contribution: "query", PreferResourceID: false}, {FieldName: "HostShapeName", RequestName: "hostShapeName", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest) (ocvpsdk.ListSupportedVmwareSoftwareVersionsResponse, error) {
@@ -86,6 +88,7 @@ func buildSupportedVmwareSoftwareVersionGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

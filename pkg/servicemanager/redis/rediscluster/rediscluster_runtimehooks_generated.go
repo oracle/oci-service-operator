@@ -31,6 +31,7 @@ type RedisClusterRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*redisv1beta1.RedisCluster]
 	ParityHooks         generatedruntime.ParityHooks[*redisv1beta1.RedisCluster]
 	Async               generatedruntime.AsyncHooks[*redisv1beta1.RedisCluster]
+	DeleteHooks         generatedruntime.DeleteHooks[*redisv1beta1.RedisCluster]
 	Create              runtimeOperationHooks[redissdk.CreateRedisClusterRequest, redissdk.CreateRedisClusterResponse]
 	Get                 runtimeOperationHooks[redissdk.GetRedisClusterRequest, redissdk.GetRedisClusterResponse]
 	List                runtimeOperationHooks[redissdk.ListRedisClustersRequest, redissdk.ListRedisClustersResponse]
@@ -114,6 +115,7 @@ func newRedisClusterDefaultRuntimeHooks(sdkClient redissdk.RedisClusterClient) R
 		StatusHooks:     generatedruntime.StatusHooks[*redisv1beta1.RedisCluster]{},
 		ParityHooks:     generatedruntime.ParityHooks[*redisv1beta1.RedisCluster]{},
 		Async:           generatedruntime.AsyncHooks[*redisv1beta1.RedisCluster]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*redisv1beta1.RedisCluster]{},
 		Create: runtimeOperationHooks[redissdk.CreateRedisClusterRequest, redissdk.CreateRedisClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRedisClusterDetails", RequestName: "CreateRedisClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request redissdk.CreateRedisClusterRequest) (redissdk.CreateRedisClusterResponse, error) {
@@ -171,6 +173,7 @@ func buildRedisClusterGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

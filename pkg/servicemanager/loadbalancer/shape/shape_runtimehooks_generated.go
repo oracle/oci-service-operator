@@ -31,6 +31,7 @@ type ShapeRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Shape]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Shape]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.Shape]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.Shape]
 	List                runtimeOperationHooks[loadbalancersdk.ListShapesRequest, loadbalancersdk.ListShapesResponse]
 	WrapGeneratedClient []func(ShapeServiceClient) ShapeServiceClient
 }
@@ -53,6 +54,7 @@ func newShapeDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient) S
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Shape]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Shape]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Shape]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.Shape]{},
 		List: runtimeOperationHooks[loadbalancersdk.ListShapesRequest, loadbalancersdk.ListShapesResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListShapesRequest) (loadbalancersdk.ListShapesResponse, error) {
@@ -86,6 +88,7 @@ func buildShapeGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

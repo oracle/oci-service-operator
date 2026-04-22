@@ -31,6 +31,7 @@ type ChannelRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.Channel]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.Channel]
 	Async               generatedruntime.AsyncHooks[*odav1beta1.Channel]
+	DeleteHooks         generatedruntime.DeleteHooks[*odav1beta1.Channel]
 	Create              runtimeOperationHooks[odasdk.CreateChannelRequest, odasdk.CreateChannelResponse]
 	Get                 runtimeOperationHooks[odasdk.GetChannelRequest, odasdk.GetChannelResponse]
 	List                runtimeOperationHooks[odasdk.ListChannelsRequest, odasdk.ListChannelsResponse]
@@ -57,6 +58,7 @@ func newChannelDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) ChannelRun
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.Channel]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.Channel]{},
 		Async:           generatedruntime.AsyncHooks[*odav1beta1.Channel]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*odav1beta1.Channel]{},
 		Create: runtimeOperationHooks[odasdk.CreateChannelRequest, odasdk.CreateChannelResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateChannelDetails", RequestName: "CreateChannelDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateChannelRequest) (odasdk.CreateChannelResponse, error) {
@@ -114,6 +116,7 @@ func buildChannelGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

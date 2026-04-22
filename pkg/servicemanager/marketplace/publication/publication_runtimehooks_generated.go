@@ -31,6 +31,7 @@ type PublicationRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Publication]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Publication]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Publication]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.Publication]
 	Create              runtimeOperationHooks[marketplacesdk.CreatePublicationRequest, marketplacesdk.CreatePublicationResponse]
 	Get                 runtimeOperationHooks[marketplacesdk.GetPublicationRequest, marketplacesdk.GetPublicationResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListPublicationsRequest, marketplacesdk.ListPublicationsResponse]
@@ -57,6 +58,7 @@ func newPublicationDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClien
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Publication]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Publication]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Publication]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.Publication]{},
 		Create: runtimeOperationHooks[marketplacesdk.CreatePublicationRequest, marketplacesdk.CreatePublicationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreatePublicationDetails", RequestName: "CreatePublicationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.CreatePublicationRequest) (marketplacesdk.CreatePublicationResponse, error) {
@@ -114,6 +116,7 @@ func buildPublicationGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

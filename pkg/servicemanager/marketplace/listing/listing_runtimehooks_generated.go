@@ -31,6 +31,7 @@ type ListingRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Listing]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Listing]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Listing]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.Listing]
 	Get                 runtimeOperationHooks[marketplacesdk.GetListingRequest, marketplacesdk.GetListingResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListListingsRequest, marketplacesdk.ListListingsResponse]
 	WrapGeneratedClient []func(ListingServiceClient) ListingServiceClient
@@ -54,6 +55,7 @@ func newListingDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) L
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Listing]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Listing]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Listing]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.Listing]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetListingRequest, marketplacesdk.GetListingResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: true}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetListingRequest) (marketplacesdk.GetListingResponse, error) {
@@ -93,6 +95,7 @@ func buildListingGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -31,6 +31,7 @@ type PackageRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.Package]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.Package]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.Package]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.Package]
 	Get                 runtimeOperationHooks[marketplacesdk.GetPackageRequest, marketplacesdk.GetPackageResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListPackagesRequest, marketplacesdk.ListPackagesResponse]
 	WrapGeneratedClient []func(PackageServiceClient) PackageServiceClient
@@ -54,6 +55,7 @@ func newPackageDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClient) P
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.Package]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.Package]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.Package]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.Package]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetPackageRequest, marketplacesdk.GetPackageResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ListingId", RequestName: "listingId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageVersion", RequestName: "packageVersion", Contribution: "path", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetPackageRequest) (marketplacesdk.GetPackageResponse, error) {
@@ -93,6 +95,7 @@ func buildPackageGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

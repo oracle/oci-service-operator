@@ -31,6 +31,7 @@ type ScheduleRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.Schedule]
 	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.Schedule]
 	Async               generatedruntime.AsyncHooks[*usageapiv1beta1.Schedule]
+	DeleteHooks         generatedruntime.DeleteHooks[*usageapiv1beta1.Schedule]
 	Create              runtimeOperationHooks[usageapisdk.CreateScheduleRequest, usageapisdk.CreateScheduleResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetScheduleRequest, usageapisdk.GetScheduleResponse]
 	List                runtimeOperationHooks[usageapisdk.ListSchedulesRequest, usageapisdk.ListSchedulesResponse]
@@ -110,6 +111,7 @@ func newScheduleDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) Schedu
 		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.Schedule]{},
 		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.Schedule]{},
 		Async:           generatedruntime.AsyncHooks[*usageapiv1beta1.Schedule]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*usageapiv1beta1.Schedule]{},
 		Create: runtimeOperationHooks[usageapisdk.CreateScheduleRequest, usageapisdk.CreateScheduleResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateScheduleDetails", RequestName: "CreateScheduleDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateScheduleRequest) (usageapisdk.CreateScheduleResponse, error) {
@@ -167,6 +169,7 @@ func buildScheduleGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

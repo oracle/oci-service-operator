@@ -31,6 +31,7 @@ type AcceptedAgreementRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.AcceptedAgreement]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.AcceptedAgreement]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.AcceptedAgreement]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.AcceptedAgreement]
 	Create              runtimeOperationHooks[marketplacesdk.CreateAcceptedAgreementRequest, marketplacesdk.CreateAcceptedAgreementResponse]
 	Get                 runtimeOperationHooks[marketplacesdk.GetAcceptedAgreementRequest, marketplacesdk.GetAcceptedAgreementResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListAcceptedAgreementsRequest, marketplacesdk.ListAcceptedAgreementsResponse]
@@ -110,6 +111,7 @@ func newAcceptedAgreementDefaultRuntimeHooks(sdkClient marketplacesdk.Marketplac
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.AcceptedAgreement]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.AcceptedAgreement]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.AcceptedAgreement]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.AcceptedAgreement]{},
 		Create: runtimeOperationHooks[marketplacesdk.CreateAcceptedAgreementRequest, marketplacesdk.CreateAcceptedAgreementResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAcceptedAgreementDetails", RequestName: "CreateAcceptedAgreementDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.CreateAcceptedAgreementRequest) (marketplacesdk.CreateAcceptedAgreementResponse, error) {
@@ -167,6 +169,7 @@ func buildAcceptedAgreementGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -31,6 +31,7 @@ type ClusterRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*containerenginev1beta1.Cluster]
 	ParityHooks         generatedruntime.ParityHooks[*containerenginev1beta1.Cluster]
 	Async               generatedruntime.AsyncHooks[*containerenginev1beta1.Cluster]
+	DeleteHooks         generatedruntime.DeleteHooks[*containerenginev1beta1.Cluster]
 	Create              runtimeOperationHooks[containerenginesdk.CreateClusterRequest, containerenginesdk.CreateClusterResponse]
 	Get                 runtimeOperationHooks[containerenginesdk.GetClusterRequest, containerenginesdk.GetClusterResponse]
 	List                runtimeOperationHooks[containerenginesdk.ListClustersRequest, containerenginesdk.ListClustersResponse]
@@ -110,6 +111,7 @@ func newClusterDefaultRuntimeHooks(sdkClient containerenginesdk.ContainerEngineC
 		StatusHooks:     generatedruntime.StatusHooks[*containerenginev1beta1.Cluster]{},
 		ParityHooks:     generatedruntime.ParityHooks[*containerenginev1beta1.Cluster]{},
 		Async:           generatedruntime.AsyncHooks[*containerenginev1beta1.Cluster]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*containerenginev1beta1.Cluster]{},
 		Create: runtimeOperationHooks[containerenginesdk.CreateClusterRequest, containerenginesdk.CreateClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request containerenginesdk.CreateClusterRequest) (containerenginesdk.CreateClusterResponse, error) {
@@ -167,6 +169,7 @@ func buildClusterGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

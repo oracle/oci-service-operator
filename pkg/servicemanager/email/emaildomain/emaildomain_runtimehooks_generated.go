@@ -31,6 +31,7 @@ type EmailDomainRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.EmailDomain]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.EmailDomain]
 	Async               generatedruntime.AsyncHooks[*emailv1beta1.EmailDomain]
+	DeleteHooks         generatedruntime.DeleteHooks[*emailv1beta1.EmailDomain]
 	Create              runtimeOperationHooks[emailsdk.CreateEmailDomainRequest, emailsdk.CreateEmailDomainResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetEmailDomainRequest, emailsdk.GetEmailDomainResponse]
 	List                runtimeOperationHooks[emailsdk.ListEmailDomainsRequest, emailsdk.ListEmailDomainsResponse]
@@ -110,6 +111,7 @@ func newEmailDomainDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) EmailDoma
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.EmailDomain]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.EmailDomain]{},
 		Async:           generatedruntime.AsyncHooks[*emailv1beta1.EmailDomain]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*emailv1beta1.EmailDomain]{},
 		Create: runtimeOperationHooks[emailsdk.CreateEmailDomainRequest, emailsdk.CreateEmailDomainResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateEmailDomainDetails", RequestName: "CreateEmailDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateEmailDomainRequest) (emailsdk.CreateEmailDomainResponse, error) {
@@ -167,6 +169,7 @@ func buildEmailDomainGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

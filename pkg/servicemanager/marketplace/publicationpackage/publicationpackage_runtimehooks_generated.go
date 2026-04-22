@@ -31,6 +31,7 @@ type PublicationPackageRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.PublicationPackage]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.PublicationPackage]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.PublicationPackage]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.PublicationPackage]
 	Get                 runtimeOperationHooks[marketplacesdk.GetPublicationPackageRequest, marketplacesdk.GetPublicationPackageResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListPublicationPackagesRequest, marketplacesdk.ListPublicationPackagesResponse]
 	WrapGeneratedClient []func(PublicationPackageServiceClient) PublicationPackageServiceClient
@@ -54,6 +55,7 @@ func newPublicationPackageDefaultRuntimeHooks(sdkClient marketplacesdk.Marketpla
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.PublicationPackage]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.PublicationPackage]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.PublicationPackage]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.PublicationPackage]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetPublicationPackageRequest, marketplacesdk.GetPublicationPackageResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "PublicationId", RequestName: "publicationId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageVersion", RequestName: "packageVersion", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetPublicationPackageRequest) (marketplacesdk.GetPublicationPackageResponse, error) {
@@ -93,6 +95,7 @@ func buildPublicationPackageGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -31,6 +31,7 @@ type PathRouteSetRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.PathRouteSet]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.PathRouteSet]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.PathRouteSet]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.PathRouteSet]
 	Create              runtimeOperationHooks[loadbalancersdk.CreatePathRouteSetRequest, loadbalancersdk.CreatePathRouteSetResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetPathRouteSetRequest, loadbalancersdk.GetPathRouteSetResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListPathRouteSetsRequest, loadbalancersdk.ListPathRouteSetsResponse]
@@ -57,6 +58,7 @@ func newPathRouteSetDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerCl
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.PathRouteSet]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.PathRouteSet]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.PathRouteSet]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.PathRouteSet]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreatePathRouteSetRequest, loadbalancersdk.CreatePathRouteSetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreatePathRouteSetDetails", RequestName: "CreatePathRouteSetDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreatePathRouteSetRequest) (loadbalancersdk.CreatePathRouteSetResponse, error) {
@@ -114,6 +116,7 @@ func buildPathRouteSetGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

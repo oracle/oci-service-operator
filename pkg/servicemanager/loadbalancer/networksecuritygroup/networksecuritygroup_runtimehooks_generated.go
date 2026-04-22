@@ -31,6 +31,7 @@ type NetworkSecurityGroupRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.NetworkSecurityGroup]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateNetworkSecurityGroupsRequest, loadbalancersdk.UpdateNetworkSecurityGroupsResponse]
 	WrapGeneratedClient []func(NetworkSecurityGroupServiceClient) NetworkSecurityGroupServiceClient
 }
@@ -53,6 +54,7 @@ func newNetworkSecurityGroupDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBa
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.NetworkSecurityGroup]{},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateNetworkSecurityGroupsRequest, loadbalancersdk.UpdateNetworkSecurityGroupsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateNetworkSecurityGroupsDetails", RequestName: "UpdateNetworkSecurityGroupsDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateNetworkSecurityGroupsRequest) (loadbalancersdk.UpdateNetworkSecurityGroupsResponse, error) {
@@ -86,6 +88,7 @@ func buildNetworkSecurityGroupGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Update: &generatedruntime.Operation{

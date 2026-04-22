@@ -31,6 +31,7 @@ type LaunchEligibilityRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.LaunchEligibility]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.LaunchEligibility]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.LaunchEligibility]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.LaunchEligibility]
 	Get                 runtimeOperationHooks[marketplacesdk.GetLaunchEligibilityRequest, marketplacesdk.GetLaunchEligibilityResponse]
 	WrapGeneratedClient []func(LaunchEligibilityServiceClient) LaunchEligibilityServiceClient
 }
@@ -53,6 +54,7 @@ func newLaunchEligibilityDefaultRuntimeHooks(sdkClient marketplacesdk.AccountCli
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.LaunchEligibility]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.LaunchEligibility]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.LaunchEligibility]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.LaunchEligibility]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetLaunchEligibilityRequest, marketplacesdk.GetLaunchEligibilityResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "ImageId", RequestName: "imageId", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.GetLaunchEligibilityRequest) (marketplacesdk.GetLaunchEligibilityResponse, error) {
@@ -86,6 +88,7 @@ func buildLaunchEligibilityGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

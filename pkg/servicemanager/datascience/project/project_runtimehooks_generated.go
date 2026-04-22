@@ -31,6 +31,7 @@ type ProjectRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*datasciencev1beta1.Project]
 	ParityHooks         generatedruntime.ParityHooks[*datasciencev1beta1.Project]
 	Async               generatedruntime.AsyncHooks[*datasciencev1beta1.Project]
+	DeleteHooks         generatedruntime.DeleteHooks[*datasciencev1beta1.Project]
 	Create              runtimeOperationHooks[datasciencesdk.CreateProjectRequest, datasciencesdk.CreateProjectResponse]
 	Get                 runtimeOperationHooks[datasciencesdk.GetProjectRequest, datasciencesdk.GetProjectResponse]
 	List                runtimeOperationHooks[datasciencesdk.ListProjectsRequest, datasciencesdk.ListProjectsResponse]
@@ -110,6 +111,7 @@ func newProjectDefaultRuntimeHooks(sdkClient datasciencesdk.DataScienceClient) P
 		StatusHooks:     generatedruntime.StatusHooks[*datasciencev1beta1.Project]{},
 		ParityHooks:     generatedruntime.ParityHooks[*datasciencev1beta1.Project]{},
 		Async:           generatedruntime.AsyncHooks[*datasciencev1beta1.Project]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*datasciencev1beta1.Project]{},
 		Create: runtimeOperationHooks[datasciencesdk.CreateProjectRequest, datasciencesdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request datasciencesdk.CreateProjectRequest) (datasciencesdk.CreateProjectResponse, error) {
@@ -167,6 +169,7 @@ func buildProjectGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

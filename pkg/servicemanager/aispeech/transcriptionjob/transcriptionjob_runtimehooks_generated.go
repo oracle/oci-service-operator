@@ -31,6 +31,7 @@ type TranscriptionJobRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*aispeechv1beta1.TranscriptionJob]
 	ParityHooks         generatedruntime.ParityHooks[*aispeechv1beta1.TranscriptionJob]
 	Async               generatedruntime.AsyncHooks[*aispeechv1beta1.TranscriptionJob]
+	DeleteHooks         generatedruntime.DeleteHooks[*aispeechv1beta1.TranscriptionJob]
 	Create              runtimeOperationHooks[aispeechsdk.CreateTranscriptionJobRequest, aispeechsdk.CreateTranscriptionJobResponse]
 	Get                 runtimeOperationHooks[aispeechsdk.GetTranscriptionJobRequest, aispeechsdk.GetTranscriptionJobResponse]
 	List                runtimeOperationHooks[aispeechsdk.ListTranscriptionJobsRequest, aispeechsdk.ListTranscriptionJobsResponse]
@@ -110,6 +111,7 @@ func newTranscriptionJobDefaultRuntimeHooks(sdkClient aispeechsdk.AIServiceSpeec
 		StatusHooks:     generatedruntime.StatusHooks[*aispeechv1beta1.TranscriptionJob]{},
 		ParityHooks:     generatedruntime.ParityHooks[*aispeechv1beta1.TranscriptionJob]{},
 		Async:           generatedruntime.AsyncHooks[*aispeechv1beta1.TranscriptionJob]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*aispeechv1beta1.TranscriptionJob]{},
 		Create: runtimeOperationHooks[aispeechsdk.CreateTranscriptionJobRequest, aispeechsdk.CreateTranscriptionJobResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTranscriptionJobDetails", RequestName: "CreateTranscriptionJobDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aispeechsdk.CreateTranscriptionJobRequest) (aispeechsdk.CreateTranscriptionJobResponse, error) {
@@ -167,6 +169,7 @@ func buildTranscriptionJobGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

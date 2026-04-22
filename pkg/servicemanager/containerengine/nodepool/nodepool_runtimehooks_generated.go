@@ -31,6 +31,7 @@ type NodePoolRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*containerenginev1beta1.NodePool]
 	ParityHooks         generatedruntime.ParityHooks[*containerenginev1beta1.NodePool]
 	Async               generatedruntime.AsyncHooks[*containerenginev1beta1.NodePool]
+	DeleteHooks         generatedruntime.DeleteHooks[*containerenginev1beta1.NodePool]
 	Create              runtimeOperationHooks[containerenginesdk.CreateNodePoolRequest, containerenginesdk.CreateNodePoolResponse]
 	Get                 runtimeOperationHooks[containerenginesdk.GetNodePoolRequest, containerenginesdk.GetNodePoolResponse]
 	List                runtimeOperationHooks[containerenginesdk.ListNodePoolsRequest, containerenginesdk.ListNodePoolsResponse]
@@ -110,6 +111,7 @@ func newNodePoolDefaultRuntimeHooks(sdkClient containerenginesdk.ContainerEngine
 		StatusHooks:     generatedruntime.StatusHooks[*containerenginev1beta1.NodePool]{},
 		ParityHooks:     generatedruntime.ParityHooks[*containerenginev1beta1.NodePool]{},
 		Async:           generatedruntime.AsyncHooks[*containerenginev1beta1.NodePool]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*containerenginev1beta1.NodePool]{},
 		Create: runtimeOperationHooks[containerenginesdk.CreateNodePoolRequest, containerenginesdk.CreateNodePoolResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNodePoolDetails", RequestName: "CreateNodePoolDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request containerenginesdk.CreateNodePoolRequest) (containerenginesdk.CreateNodePoolResponse, error) {
@@ -167,6 +169,7 @@ func buildNodePoolGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

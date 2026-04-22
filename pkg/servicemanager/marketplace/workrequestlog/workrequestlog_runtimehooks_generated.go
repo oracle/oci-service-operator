@@ -31,6 +31,7 @@ type WorkRequestLogRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.WorkRequestLog]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.WorkRequestLog]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.WorkRequestLog]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[marketplacesdk.ListWorkRequestLogsRequest, marketplacesdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -53,6 +54,7 @@ func newWorkRequestLogDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceCl
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.WorkRequestLog]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.WorkRequestLog]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.WorkRequestLog]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[marketplacesdk.ListWorkRequestLogsRequest, marketplacesdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.ListWorkRequestLogsRequest) (marketplacesdk.ListWorkRequestLogsResponse, error) {
@@ -86,6 +88,7 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

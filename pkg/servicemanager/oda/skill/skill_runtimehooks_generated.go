@@ -31,6 +31,7 @@ type SkillRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.Skill]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.Skill]
 	Async               generatedruntime.AsyncHooks[*odav1beta1.Skill]
+	DeleteHooks         generatedruntime.DeleteHooks[*odav1beta1.Skill]
 	Create              runtimeOperationHooks[odasdk.CreateSkillRequest, odasdk.CreateSkillResponse]
 	Get                 runtimeOperationHooks[odasdk.GetSkillRequest, odasdk.GetSkillResponse]
 	List                runtimeOperationHooks[odasdk.ListSkillsRequest, odasdk.ListSkillsResponse]
@@ -57,6 +58,7 @@ func newSkillDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) SkillRuntime
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.Skill]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.Skill]{},
 		Async:           generatedruntime.AsyncHooks[*odav1beta1.Skill]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*odav1beta1.Skill]{},
 		Create: runtimeOperationHooks[odasdk.CreateSkillRequest, odasdk.CreateSkillResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateSkillDetails", RequestName: "CreateSkillDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateSkillRequest) (odasdk.CreateSkillResponse, error) {
@@ -114,6 +116,7 @@ func buildSkillGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

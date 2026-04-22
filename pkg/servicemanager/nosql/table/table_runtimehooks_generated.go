@@ -31,6 +31,7 @@ type TableRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*nosqlv1beta1.Table]
 	ParityHooks         generatedruntime.ParityHooks[*nosqlv1beta1.Table]
 	Async               generatedruntime.AsyncHooks[*nosqlv1beta1.Table]
+	DeleteHooks         generatedruntime.DeleteHooks[*nosqlv1beta1.Table]
 	Create              runtimeOperationHooks[nosqlsdk.CreateTableRequest, nosqlsdk.CreateTableResponse]
 	Get                 runtimeOperationHooks[nosqlsdk.GetTableRequest, nosqlsdk.GetTableResponse]
 	List                runtimeOperationHooks[nosqlsdk.ListTablesRequest, nosqlsdk.ListTablesResponse]
@@ -57,6 +58,7 @@ func newTableDefaultRuntimeHooks(sdkClient nosqlsdk.NosqlClient) TableRuntimeHoo
 		StatusHooks:     generatedruntime.StatusHooks[*nosqlv1beta1.Table]{},
 		ParityHooks:     generatedruntime.ParityHooks[*nosqlv1beta1.Table]{},
 		Async:           generatedruntime.AsyncHooks[*nosqlv1beta1.Table]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*nosqlv1beta1.Table]{},
 		Create: runtimeOperationHooks[nosqlsdk.CreateTableRequest, nosqlsdk.CreateTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateTableDetails", RequestName: "CreateTableDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request nosqlsdk.CreateTableRequest) (nosqlsdk.CreateTableResponse, error) {
@@ -114,6 +116,7 @@ func buildTableGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

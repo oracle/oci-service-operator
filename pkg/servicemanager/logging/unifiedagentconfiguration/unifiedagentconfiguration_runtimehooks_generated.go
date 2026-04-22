@@ -31,6 +31,7 @@ type UnifiedAgentConfigurationRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.UnifiedAgentConfiguration]
 	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.UnifiedAgentConfiguration]
 	Async               generatedruntime.AsyncHooks[*loggingv1beta1.UnifiedAgentConfiguration]
+	DeleteHooks         generatedruntime.DeleteHooks[*loggingv1beta1.UnifiedAgentConfiguration]
 	Create              runtimeOperationHooks[loggingsdk.CreateUnifiedAgentConfigurationRequest, loggingsdk.CreateUnifiedAgentConfigurationResponse]
 	Get                 runtimeOperationHooks[loggingsdk.GetUnifiedAgentConfigurationRequest, loggingsdk.GetUnifiedAgentConfigurationResponse]
 	List                runtimeOperationHooks[loggingsdk.ListUnifiedAgentConfigurationsRequest, loggingsdk.ListUnifiedAgentConfigurationsResponse]
@@ -57,6 +58,7 @@ func newUnifiedAgentConfigurationDefaultRuntimeHooks(sdkClient loggingsdk.Loggin
 		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
 		Async:           generatedruntime.AsyncHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loggingv1beta1.UnifiedAgentConfiguration]{},
 		Create: runtimeOperationHooks[loggingsdk.CreateUnifiedAgentConfigurationRequest, loggingsdk.CreateUnifiedAgentConfigurationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateUnifiedAgentConfigurationDetails", RequestName: "CreateUnifiedAgentConfigurationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.CreateUnifiedAgentConfigurationRequest) (loggingsdk.CreateUnifiedAgentConfigurationResponse, error) {
@@ -114,6 +116,7 @@ func buildUnifiedAgentConfigurationGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

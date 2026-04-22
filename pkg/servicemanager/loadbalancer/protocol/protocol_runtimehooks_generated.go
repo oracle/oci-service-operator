@@ -31,6 +31,7 @@ type ProtocolRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Protocol]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Protocol]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.Protocol]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.Protocol]
 	List                runtimeOperationHooks[loadbalancersdk.ListProtocolsRequest, loadbalancersdk.ListProtocolsResponse]
 	WrapGeneratedClient []func(ProtocolServiceClient) ProtocolServiceClient
 }
@@ -53,6 +54,7 @@ func newProtocolDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Protocol]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Protocol]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Protocol]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.Protocol]{},
 		List: runtimeOperationHooks[loadbalancersdk.ListProtocolsRequest, loadbalancersdk.ListProtocolsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.ListProtocolsRequest) (loadbalancersdk.ListProtocolsResponse, error) {
@@ -86,6 +88,7 @@ func buildProtocolGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

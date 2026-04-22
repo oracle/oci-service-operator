@@ -31,6 +31,7 @@ type WorkRequestRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.WorkRequest]
 	Async               generatedruntime.AsyncHooks[*odav1beta1.WorkRequest]
+	DeleteHooks         generatedruntime.DeleteHooks[*odav1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[odasdk.GetWorkRequestRequest, odasdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[odasdk.ListWorkRequestsRequest, odasdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -54,6 +55,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient odasdk.OdaClient) WorkRequestRu
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.WorkRequest]{},
 		Async:           generatedruntime.AsyncHooks[*odav1beta1.WorkRequest]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*odav1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[odasdk.GetWorkRequestRequest, odasdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.GetWorkRequestRequest) (odasdk.GetWorkRequestResponse, error) {
@@ -93,6 +95,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

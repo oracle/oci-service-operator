@@ -31,6 +31,7 @@ type InstanceRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.Instance]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.Instance]
 	Async               generatedruntime.AsyncHooks[*corev1beta1.Instance]
+	DeleteHooks         generatedruntime.DeleteHooks[*corev1beta1.Instance]
 	Create              runtimeOperationHooks[coresdk.LaunchInstanceRequest, coresdk.LaunchInstanceResponse]
 	Get                 runtimeOperationHooks[coresdk.GetInstanceRequest, coresdk.GetInstanceResponse]
 	List                runtimeOperationHooks[coresdk.ListInstancesRequest, coresdk.ListInstancesResponse]
@@ -110,6 +111,7 @@ func newInstanceDefaultRuntimeHooks(sdkClient coresdk.ComputeClient) InstanceRun
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.Instance]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.Instance]{},
 		Async:           generatedruntime.AsyncHooks[*corev1beta1.Instance]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*corev1beta1.Instance]{},
 		Create: runtimeOperationHooks[coresdk.LaunchInstanceRequest, coresdk.LaunchInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LaunchInstanceDetails", RequestName: "LaunchInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.LaunchInstanceRequest) (coresdk.LaunchInstanceResponse, error) {
@@ -167,6 +169,7 @@ func buildInstanceGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

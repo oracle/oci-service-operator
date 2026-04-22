@@ -31,6 +31,7 @@ type BucketRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*objectstoragev1beta1.Bucket]
 	ParityHooks         generatedruntime.ParityHooks[*objectstoragev1beta1.Bucket]
 	Async               generatedruntime.AsyncHooks[*objectstoragev1beta1.Bucket]
+	DeleteHooks         generatedruntime.DeleteHooks[*objectstoragev1beta1.Bucket]
 	Create              runtimeOperationHooks[objectstoragesdk.CreateBucketRequest, objectstoragesdk.CreateBucketResponse]
 	Get                 runtimeOperationHooks[objectstoragesdk.GetBucketRequest, objectstoragesdk.GetBucketResponse]
 	List                runtimeOperationHooks[objectstoragesdk.ListBucketsRequest, objectstoragesdk.ListBucketsResponse]
@@ -110,6 +111,7 @@ func newBucketDefaultRuntimeHooks(sdkClient objectstoragesdk.ObjectStorageClient
 		StatusHooks:     generatedruntime.StatusHooks[*objectstoragev1beta1.Bucket]{},
 		ParityHooks:     generatedruntime.ParityHooks[*objectstoragev1beta1.Bucket]{},
 		Async:           generatedruntime.AsyncHooks[*objectstoragev1beta1.Bucket]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*objectstoragev1beta1.Bucket]{},
 		Create: runtimeOperationHooks[objectstoragesdk.CreateBucketRequest, objectstoragesdk.CreateBucketResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "NamespaceName", RequestName: "namespaceName", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBucketDetails", RequestName: "CreateBucketDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request objectstoragesdk.CreateBucketRequest) (objectstoragesdk.CreateBucketResponse, error) {
@@ -167,6 +169,7 @@ func buildBucketGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

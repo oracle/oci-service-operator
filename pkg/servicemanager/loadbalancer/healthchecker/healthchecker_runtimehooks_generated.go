@@ -31,6 +31,7 @@ type HealthCheckerRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.HealthChecker]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.HealthChecker]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.HealthChecker]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.HealthChecker]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetHealthCheckerRequest, loadbalancersdk.GetHealthCheckerResponse]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateHealthCheckerRequest, loadbalancersdk.UpdateHealthCheckerResponse]
 	WrapGeneratedClient []func(HealthCheckerServiceClient) HealthCheckerServiceClient
@@ -54,6 +55,7 @@ func newHealthCheckerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerC
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.HealthChecker]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.HealthChecker]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.HealthChecker]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.HealthChecker]{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetHealthCheckerRequest, loadbalancersdk.GetHealthCheckerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetHealthCheckerRequest) (loadbalancersdk.GetHealthCheckerResponse, error) {
@@ -93,6 +95,7 @@ func buildHealthCheckerGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

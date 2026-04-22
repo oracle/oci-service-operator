@@ -31,6 +31,7 @@ type ListenerRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Listener]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Listener]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.Listener]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.Listener]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateListenerRequest, loadbalancersdk.UpdateListenerResponse]
 	Delete              runtimeOperationHooks[loadbalancersdk.DeleteListenerRequest, loadbalancersdk.DeleteListenerResponse]
@@ -104,6 +105,7 @@ func newListenerDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Listener]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Listener]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Listener]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.Listener]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateListenerDetails", RequestName: "CreateListenerDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateListenerRequest) (loadbalancersdk.CreateListenerResponse, error) {
@@ -149,6 +151,7 @@ func buildListenerGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

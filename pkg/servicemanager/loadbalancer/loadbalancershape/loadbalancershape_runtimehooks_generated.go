@@ -31,6 +31,7 @@ type LoadBalancerShapeRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancerShape]
+	DeleteHooks         generatedruntime.DeleteHooks[*loadbalancerv1beta1.LoadBalancerShape]
 	Update              runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]
 	WrapGeneratedClient []func(LoadBalancerShapeServiceClient) LoadBalancerShapeServiceClient
 }
@@ -53,6 +54,7 @@ func newLoadBalancerShapeDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalan
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
 		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*loadbalancerv1beta1.LoadBalancerShape]{},
 		Update: runtimeOperationHooks[loadbalancersdk.UpdateLoadBalancerShapeRequest, loadbalancersdk.UpdateLoadBalancerShapeResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLoadBalancerShapeDetails", RequestName: "UpdateLoadBalancerShapeDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.UpdateLoadBalancerShapeRequest) (loadbalancersdk.UpdateLoadBalancerShapeResponse, error) {
@@ -86,6 +88,7 @@ func buildLoadBalancerShapeGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Update: &generatedruntime.Operation{

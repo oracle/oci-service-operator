@@ -31,6 +31,7 @@ type WorkRequestRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.WorkRequest]
 	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.WorkRequest]
+	DeleteHooks         generatedruntime.DeleteHooks[*marketplacev1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[marketplacesdk.GetWorkRequestRequest, marketplacesdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListWorkRequestsRequest, marketplacesdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -54,6 +55,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient marketplacesdk.MarketplaceClien
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.WorkRequest]{},
 		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.WorkRequest]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*marketplacev1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[marketplacesdk.GetWorkRequestRequest, marketplacesdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request marketplacesdk.GetWorkRequestRequest) (marketplacesdk.GetWorkRequestResponse, error) {
@@ -93,6 +95,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

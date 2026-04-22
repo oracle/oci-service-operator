@@ -31,6 +31,7 @@ type ModelRuntimeHooks struct {
 	StatusHooks         generatedruntime.StatusHooks[*generativeaiv1beta1.Model]
 	ParityHooks         generatedruntime.ParityHooks[*generativeaiv1beta1.Model]
 	Async               generatedruntime.AsyncHooks[*generativeaiv1beta1.Model]
+	DeleteHooks         generatedruntime.DeleteHooks[*generativeaiv1beta1.Model]
 	Create              runtimeOperationHooks[generativeaisdk.CreateModelRequest, generativeaisdk.CreateModelResponse]
 	Get                 runtimeOperationHooks[generativeaisdk.GetModelRequest, generativeaisdk.GetModelResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListModelsRequest, generativeaisdk.ListModelsResponse]
@@ -110,6 +111,7 @@ func newModelDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiClient) M
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiv1beta1.Model]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiv1beta1.Model]{},
 		Async:           generatedruntime.AsyncHooks[*generativeaiv1beta1.Model]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*generativeaiv1beta1.Model]{},
 		Create: runtimeOperationHooks[generativeaisdk.CreateModelRequest, generativeaisdk.CreateModelResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateModelDetails", RequestName: "CreateModelDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.CreateModelRequest) (generativeaisdk.CreateModelResponse, error) {
@@ -167,6 +169,7 @@ func buildModelGeneratedRuntimeConfig(
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
 		Async:           hooks.Async,
+		DeleteHooks:     hooks.DeleteHooks,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{
