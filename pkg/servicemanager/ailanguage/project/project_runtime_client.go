@@ -19,6 +19,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -54,153 +55,334 @@ type projectOCIClient interface {
 }
 
 type projectRuntimeClient struct {
-	log     loggerutil.OSOKLogger
-	client  projectOCIClient
-	initErr error
+	delegate ProjectServiceClient
+	log      loggerutil.OSOKLogger
+	client   projectOCIClient
+	initErr  error
 }
 
 var _ ProjectServiceClient = (*projectRuntimeClient)(nil)
 
 func init() {
-	newProjectServiceClient = func(manager *ProjectServiceManager) ProjectServiceClient {
-		sdkClient, err := ailanguagesdk.NewAIServiceLanguageClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &projectRuntimeClient{
-			log:    manager.Log,
-			client: sdkClient,
-		}
-		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize Project OCI client: %w", err)
-		}
-		return runtimeClient
+	registerProjectRuntimeHooksMutator(func(manager *ProjectServiceManager, hooks *ProjectRuntimeHooks) {
+		runtimeClient, initErr := newProjectSDKClient(manager)
+		applyProjectRuntimeHooks(manager, hooks, runtimeClient, initErr)
+	})
+}
+
+func newProjectSDKClient(manager *ProjectServiceManager) (projectOCIClient, error) {
+	if manager == nil {
+		return nil, fmt.Errorf("Project service manager is nil")
 	}
+	client, err := ailanguagesdk.NewAIServiceLanguageClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func applyProjectRuntimeHooks(
+	manager *ProjectServiceManager,
+	hooks *ProjectRuntimeHooks,
+	client projectOCIClient,
+	initErr error,
+) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Semantics = reviewedProjectRuntimeSemantics()
+	hooks.BuildCreateBody = func(_ context.Context, resource *ailanguagev1beta1.Project, _ string) (any, error) {
+		if resource == nil {
+			return nil, fmt.Errorf("Project resource is nil")
+		}
+		return buildCreateProjectDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = func(
+		_ context.Context,
+		resource *ailanguagev1beta1.Project,
+		_ string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildProjectUpdateBody(resource, currentResponse)
+	}
+	hooks.List.Fields = projectListFields()
+	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedProjectIdentity
+	hooks.StatusHooks.ProjectStatus = projectStatusFromResponse
+	hooks.ParityHooks.ValidateCreateOnlyDrift = validateProjectCreateOnlyDriftForResponse
+	hooks.Async.Adapter = projectWorkRequestAsyncAdapter
+	hooks.Async.GetWorkRequest = func(ctx context.Context, workRequestID string) (any, error) {
+		return getProjectWorkRequest(ctx, client, initErr, workRequestID)
+	}
+	hooks.Async.ResolveAction = resolveProjectGeneratedWorkRequestAction
+	hooks.Async.ResolvePhase = resolveProjectGeneratedWorkRequestPhase
+	hooks.Async.RecoverResourceID = recoverProjectIDFromGeneratedWorkRequest
+	hooks.Async.Message = projectGeneratedWorkRequestMessage
+
+	appendProjectGeneratedRuntimeOverlay(manager, hooks, client, initErr)
+}
+
+func appendProjectGeneratedRuntimeOverlay(
+	manager *ProjectServiceManager,
+	hooks *ProjectRuntimeHooks,
+	client projectOCIClient,
+	initErr error,
+) {
+	if hooks == nil {
+		return
+	}
+
+	var log loggerutil.OSOKLogger
+	if manager != nil {
+		log = manager.Log
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ProjectServiceClient) ProjectServiceClient {
+		return &projectRuntimeClient{
+			delegate: delegate,
+			log:      log,
+			client:   client,
+			initErr:  initErr,
+		}
+	})
 }
 
 func newProjectServiceClientWithOCIClient(log loggerutil.OSOKLogger, client projectOCIClient) ProjectServiceClient {
-	return &projectRuntimeClient{
-		log:    log,
-		client: client,
+	manager := &ProjectServiceManager{Log: log}
+	hooks := newProjectRuntimeHooksWithOCIClient(client)
+	applyProjectRuntimeHooks(manager, &hooks, client, nil)
+	delegate := defaultProjectServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*ailanguagev1beta1.Project](
+			buildProjectGeneratedRuntimeConfig(manager, hooks),
+		),
+	}
+	return wrapProjectGeneratedClient(hooks, delegate)
+}
+
+func newProjectRuntimeHooksWithOCIClient(client projectOCIClient) ProjectRuntimeHooks {
+	return ProjectRuntimeHooks{
+		Semantics: newProjectRuntimeSemantics(),
+		Create: runtimeOperationHooks[ailanguagesdk.CreateProjectRequest, ailanguagesdk.CreateProjectResponse]{
+			Fields: projectCreateFields(),
+			Call: func(ctx context.Context, request ailanguagesdk.CreateProjectRequest) (ailanguagesdk.CreateProjectResponse, error) {
+				return client.CreateProject(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[ailanguagesdk.GetProjectRequest, ailanguagesdk.GetProjectResponse]{
+			Fields: projectGetFields(),
+			Call: func(ctx context.Context, request ailanguagesdk.GetProjectRequest) (ailanguagesdk.GetProjectResponse, error) {
+				return client.GetProject(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[ailanguagesdk.ListProjectsRequest, ailanguagesdk.ListProjectsResponse]{
+			Fields: projectListFields(),
+			Call: func(ctx context.Context, request ailanguagesdk.ListProjectsRequest) (ailanguagesdk.ListProjectsResponse, error) {
+				return client.ListProjects(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[ailanguagesdk.UpdateProjectRequest, ailanguagesdk.UpdateProjectResponse]{
+			Fields: projectUpdateFields(),
+			Call: func(ctx context.Context, request ailanguagesdk.UpdateProjectRequest) (ailanguagesdk.UpdateProjectResponse, error) {
+				return client.UpdateProject(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[ailanguagesdk.DeleteProjectRequest, ailanguagesdk.DeleteProjectResponse]{
+			Fields: projectDeleteFields(),
+			Call: func(ctx context.Context, request ailanguagesdk.DeleteProjectRequest) (ailanguagesdk.DeleteProjectResponse, error) {
+				return client.DeleteProject(ctx, request)
+			},
+		},
+	}
+}
+
+func reviewedProjectRuntimeSemantics() *generatedruntime.Semantics {
+	semantics := newProjectRuntimeSemantics()
+	semantics.Async = &generatedruntime.AsyncSemantics{
+		Strategy:             "workrequest",
+		Runtime:              "generatedruntime",
+		FormalClassification: "workrequest",
+		WorkRequest: &generatedruntime.WorkRequestSemantics{
+			Source: "service-sdk",
+			Phases: []string{"create", "update", "delete"},
+		},
+	}
+	semantics.List = &generatedruntime.ListSemantics{
+		ResponseItemsField: "Items",
+		MatchFields:        []string{"compartmentId", "displayName", "id"},
+	}
+	semantics.Hooks = generatedruntime.HookSet{
+		Create: []generatedruntime.Hook{
+			{Helper: "tfresource.CreateResource"},
+			{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "project", Action: "CREATED"},
+		},
+		Update: []generatedruntime.Hook{
+			{Helper: "tfresource.UpdateResource"},
+			{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "project", Action: "UPDATED"},
+		},
+		Delete: []generatedruntime.Hook{
+			{Helper: "tfresource.DeleteResource"},
+			{Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "project", Action: "DELETED"},
+		},
+	}
+	semantics.CreateFollowUp = generatedruntime.FollowUpSemantics{
+		Strategy: "GetWorkRequest -> GetProject",
+		Hooks:    append([]generatedruntime.Hook(nil), semantics.Hooks.Create...),
+	}
+	semantics.UpdateFollowUp = generatedruntime.FollowUpSemantics{
+		Strategy: "GetWorkRequest -> GetProject",
+		Hooks:    append([]generatedruntime.Hook(nil), semantics.Hooks.Update...),
+	}
+	semantics.DeleteFollowUp = generatedruntime.FollowUpSemantics{
+		Strategy: "GetWorkRequest -> GetProject/ListProjects confirm-delete",
+		Hooks:    append([]generatedruntime.Hook(nil), semantics.Hooks.Delete...),
+	}
+	semantics.AuxiliaryOperations = nil
+	return semantics
+}
+
+func projectCreateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body"},
+	}
+}
+
+func projectGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func projectListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", LookupPaths: []string{"status.compartmentId", "spec.compartmentId", "compartmentId"}},
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", LookupPaths: []string{"status.displayName", "spec.displayName", "displayName"}},
+		{FieldName: "ProjectId", RequestName: "projectId", Contribution: "query", PreferResourceID: true},
+	}
+}
+
+func projectUpdateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "UpdateProjectDetails", RequestName: "UpdateProjectDetails", Contribution: "body"},
+	}
+}
+
+func projectDeleteFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
 	}
 }
 
 func (c *projectRuntimeClient) CreateOrUpdate(
 	ctx context.Context,
 	resource *ailanguagev1beta1.Project,
-	_ ctrl.Request,
+	req ctrl.Request,
 ) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Project generated runtime delegate is not configured")
 	}
 
-	if workRequestID, phase := currentProjectWorkRequest(resource); workRequestID != "" {
-		switch phase {
-		case shared.OSOKAsyncPhaseCreate:
-			return c.resumeCreate(ctx, resource, workRequestID)
-		case shared.OSOKAsyncPhaseUpdate:
-			return c.resumeUpdate(ctx, resource, workRequestID)
-		}
+	if response, err, handled := c.handleLifecyclePendingUpdate(ctx, resource); handled {
+		return response, err
+	}
+
+	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
+	if err == nil || resource == nil || !isRetryableProjectUpdateConflict(err) {
+		return response, err
+	}
+
+	return c.markRetryableUpdateConflict(resource, err), nil
+}
+
+func (c *projectRuntimeClient) Delete(ctx context.Context, resource *ailanguagev1beta1.Project) (bool, error) {
+	if c.delegate == nil {
+		return false, fmt.Errorf("Project generated runtime delegate is not configured")
+	}
+
+	deleted, err := c.delegate.Delete(ctx, resource)
+	if err == nil || deleted || resource == nil {
+		return deleted, err
 	}
 
 	trackedID := currentProjectID(resource)
-	if trackedID == "" {
-		return c.resolveOrCreate(ctx, resource)
+	workRequestID, phase := currentProjectWorkRequest(resource)
+	if trackedID == "" ||
+		workRequestID == "" ||
+		phase != shared.OSOKAsyncPhaseDelete ||
+		c.initErr != nil ||
+		c.client == nil ||
+		(!isProjectDeleteNotFoundOCI(err) &&
+			!strings.Contains(err.Error(), "delete confirmation returned unexpected lifecycle state")) {
+		return deleted, err
+	}
+
+	current, found, resolveErr := c.resolveProjectForDelete(ctx, resource, trackedID)
+	if resolveErr != nil {
+		return false, resolveErr
+	}
+	if !found || current.LifecycleState == ailanguagesdk.ProjectLifecycleStateDeleted {
+		c.markDeleted(resource, "OCI Project deleted")
+		return true, nil
+	}
+
+	c.projectStatus(resource, current)
+	message := fmt.Sprintf("Project delete work request %s succeeded; waiting for Project %s to disappear", workRequestID, trackedID)
+	if isProjectDeleteNotFoundOCI(err) {
+		message = fmt.Sprintf("Project delete work request %s is no longer readable; waiting for Project %s to disappear", workRequestID, trackedID)
+	}
+	c.markDeleteProgress(
+		resource,
+		message,
+	)
+	return false, nil
+}
+
+func (c *projectRuntimeClient) handleLifecyclePendingUpdate(
+	ctx context.Context,
+	resource *ailanguagev1beta1.Project,
+) (servicemanager.OSOKResponse, error, bool) {
+	pending := currentLifecyclePendingProjectUpdate(resource)
+	if pending == nil {
+		return servicemanager.OSOKResponse{}, nil, false
+	}
+
+	trackedID := currentProjectID(resource)
+	if trackedID == "" || c.initErr != nil || c.client == nil {
+		return servicemanager.OSOKResponse{}, nil, false
 	}
 
 	current, err := c.getProject(ctx, trackedID)
 	if err != nil {
 		if isProjectReadNotFoundOCI(err) {
 			c.clearTrackedIdentity(resource)
-			return c.resolveOrCreate(ctx, resource)
+			return servicemanager.OSOKResponse{}, nil, false
 		}
-		return c.fail(resource, normalizeProjectOCIError(err))
+		response, failErr := c.fail(resource, normalizeProjectOCIError(err))
+		return response, failErr, true
 	}
 
 	c.projectStatus(resource, current)
-
-	if pendingUpdate := currentLifecyclePendingProjectUpdate(resource); pendingUpdate != nil {
-		return c.resumeLifecyclePendingUpdate(ctx, resource, current, pendingUpdate)
-	}
 
 	switch current.LifecycleState {
 	case ailanguagesdk.ProjectLifecycleStateCreating,
 		ailanguagesdk.ProjectLifecycleStateUpdating,
 		ailanguagesdk.ProjectLifecycleStateDeleting,
 		ailanguagesdk.ProjectLifecycleStateFailed:
-		return c.finishWithLifecycle(resource, current, ""), nil
+		return c.finishWithLifecycle(resource, current, shared.OSOKAsyncPhaseUpdate), nil, true
 	}
 
-	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	_, updateNeeded, err := buildProjectUpdateBody(resource, current)
 	if err != nil {
-		return c.fail(resource, err)
+		response, failErr := c.fail(resource, err)
+		return response, failErr, true
 	}
 	if !updateNeeded {
-		return c.finishWithLifecycle(resource, current, ""), nil
+		return c.finishWithLifecycle(resource, current, shared.OSOKAsyncPhaseUpdate), nil, true
+	}
+	if !projectLifecyclePendingUpdateRetryDue(pending, resource.Status.OsokStatus.UpdatedAt, time.Now()) {
+		return c.keepAsyncOperation(resource, lifecyclePendingUpdateBackoffOperation(pending, current)), nil, true
 	}
 
-	return c.startUpdate(ctx, resource, updateRequest)
-}
-
-func (c *projectRuntimeClient) Delete(ctx context.Context, resource *ailanguagev1beta1.Project) (bool, error) {
-	if c.initErr != nil {
-		return false, c.initErr
-	}
-
-	trackedID := currentProjectID(resource)
-	if workRequestID, phase := currentProjectWorkRequest(resource); workRequestID != "" && phase == shared.OSOKAsyncPhaseDelete {
-		return c.resumeDelete(ctx, resource, trackedID, workRequestID)
-	}
-
-	if trackedID == "" {
-		c.markDeleted(resource, "OCI Project identifier is not recorded")
-		return true, nil
-	}
-
-	current, found, err := c.resolveProjectForDelete(ctx, resource, trackedID)
-	if err != nil {
-		return false, err
-	}
-	if !found {
-		c.markDeleted(resource, "OCI Project no longer exists")
-		return true, nil
-	}
-
-	c.projectStatus(resource, current)
-
-	switch current.LifecycleState {
-	case ailanguagesdk.ProjectLifecycleStateDeleted:
-		c.markDeleted(resource, "OCI Project deleted")
-		return true, nil
-	case ailanguagesdk.ProjectLifecycleStateDeleting:
-		c.markDeleteProgress(resource, projectLifecycleMessage(current))
-		return false, nil
-	}
-
-	response, err := c.client.DeleteProject(ctx, ailanguagesdk.DeleteProjectRequest{
-		ProjectId: common.String(trackedID),
-	})
-	if err != nil {
-		if isProjectDeleteNotFoundOCI(err) {
-			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI Project no longer exists")
-			return true, nil
-		}
-		err = normalizeProjectOCIError(err)
-		c.recordErrorRequestID(resource, err)
-		return false, err
-	}
-	c.recordResponseRequestID(resource, response)
-
-	workRequestID := strings.TrimSpace(stringValue(response.OpcWorkRequestId))
-	if workRequestID == "" {
-		return false, fmt.Errorf("Project delete did not return an opc-work-request-id")
-	}
-
-	c.trackAsyncWorkRequest(
-		resource,
-		shared.OSOKAsyncPhaseDelete,
-		workRequestID,
-		fmt.Sprintf("Project delete requested; polling work request %s", workRequestID),
-	)
-	return c.resumeDelete(ctx, resource, trackedID, workRequestID)
+	return servicemanager.OSOKResponse{}, nil, false
 }
 
 func (c *projectRuntimeClient) resolveOrCreate(
@@ -603,15 +785,42 @@ func (c *projectRuntimeClient) getWorkRequest(ctx context.Context, workRequestID
 	return response.WorkRequest, nil
 }
 
-func (c *projectRuntimeClient) buildUpdateRequest(
+func getProjectWorkRequest(
+	ctx context.Context,
+	client projectOCIClient,
+	initErr error,
+	workRequestID string,
+) (any, error) {
+	if initErr != nil {
+		return nil, fmt.Errorf("initialize Project OCI client: %w", initErr)
+	}
+	if client == nil {
+		return nil, fmt.Errorf("Project OCI client is not configured")
+	}
+
+	response, err := client.GetWorkRequest(ctx, ailanguagesdk.GetWorkRequestRequest{
+		WorkRequestId: common.String(strings.TrimSpace(workRequestID)),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return response.WorkRequest, nil
+}
+
+func buildProjectUpdateBody(
 	resource *ailanguagev1beta1.Project,
-	current ailanguagesdk.Project,
-) (ailanguagesdk.UpdateProjectRequest, bool, error) {
-	if current.Id == nil || strings.TrimSpace(*current.Id) == "" {
-		return ailanguagesdk.UpdateProjectRequest{}, false, fmt.Errorf("current Project does not expose an OCI identifier")
+	currentResponse any,
+) (ailanguagesdk.UpdateProjectDetails, bool, error) {
+	if resource == nil {
+		return ailanguagesdk.UpdateProjectDetails{}, false, fmt.Errorf("Project resource is nil")
+	}
+
+	current, ok := projectFromResponse(currentResponse)
+	if !ok {
+		return ailanguagesdk.UpdateProjectDetails{}, false, fmt.Errorf("current Project response does not expose a Project body")
 	}
 	if err := validateProjectCreateOnlyDrift(resource.Spec, current); err != nil {
-		return ailanguagesdk.UpdateProjectRequest{}, false, err
+		return ailanguagesdk.UpdateProjectDetails{}, false, err
 	}
 
 	updateDetails := ailanguagesdk.UpdateProjectDetails{}
@@ -638,6 +847,48 @@ func (c *projectRuntimeClient) buildUpdateRequest(
 		updateNeeded = true
 	}
 
+	if !updateNeeded {
+		return ailanguagesdk.UpdateProjectDetails{}, false, nil
+	}
+	return updateDetails, true, nil
+}
+
+func validateProjectCreateOnlyDriftForResponse(resource *ailanguagev1beta1.Project, currentResponse any) error {
+	if resource == nil {
+		return fmt.Errorf("Project resource is nil")
+	}
+
+	current, ok := projectFromResponse(currentResponse)
+	if !ok {
+		return fmt.Errorf("current Project response does not expose a Project body")
+	}
+	return validateProjectCreateOnlyDrift(resource.Spec, current)
+}
+
+func projectStatusFromResponse(resource *ailanguagev1beta1.Project, response any) error {
+	if resource == nil {
+		return fmt.Errorf("Project resource is nil")
+	}
+
+	current, ok := projectFromResponse(response)
+	if !ok {
+		return nil
+	}
+	projectStatus(resource, current)
+	return nil
+}
+
+func (c *projectRuntimeClient) buildUpdateRequest(
+	resource *ailanguagev1beta1.Project,
+	current ailanguagesdk.Project,
+) (ailanguagesdk.UpdateProjectRequest, bool, error) {
+	if current.Id == nil || strings.TrimSpace(*current.Id) == "" {
+		return ailanguagesdk.UpdateProjectRequest{}, false, fmt.Errorf("current Project does not expose an OCI identifier")
+	}
+	updateDetails, updateNeeded, err := buildProjectUpdateBody(resource, current)
+	if err != nil {
+		return ailanguagesdk.UpdateProjectRequest{}, false, err
+	}
 	if !updateNeeded {
 		return ailanguagesdk.UpdateProjectRequest{}, false, nil
 	}
@@ -705,6 +956,9 @@ func (c *projectRuntimeClient) markRetryableUpdateConflict(
 	c.recordErrorRequestID(resource, normalized)
 
 	message := strings.TrimSpace(serviceErrorMessage(err))
+	if message == "" || strings.Contains(strings.ToLower(message), "conflicts with its current state") {
+		message = "Project is currently being modified"
+	}
 	if message == "" {
 		message = normalized.Error()
 	}
@@ -901,10 +1155,14 @@ func (c *projectRuntimeClient) markDeleted(resource *ailanguagev1beta1.Project, 
 }
 
 func (c *projectRuntimeClient) clearTrackedIdentity(resource *ailanguagev1beta1.Project) {
-	resource.Status = ailanguagev1beta1.ProjectStatus{}
+	clearTrackedProjectIdentity(resource)
 }
 
 func (c *projectRuntimeClient) projectStatus(resource *ailanguagev1beta1.Project, current ailanguagesdk.Project) {
+	projectStatus(resource, current)
+}
+
+func projectStatus(resource *ailanguagev1beta1.Project, current ailanguagesdk.Project) {
 	resource.Status = ailanguagev1beta1.ProjectStatus{
 		OsokStatus:       resource.Status.OsokStatus,
 		Id:               stringValue(current.Id),
@@ -919,6 +1177,13 @@ func (c *projectRuntimeClient) projectStatus(resource *ailanguagev1beta1.Project
 		DefinedTags:      convertOCIToStatusDefinedTags(current.DefinedTags),
 		SystemTags:       convertOCIToStatusDefinedTags(current.SystemTags),
 	}
+}
+
+func clearTrackedProjectIdentity(resource *ailanguagev1beta1.Project) {
+	if resource == nil {
+		return
+	}
+	resource.Status = ailanguagev1beta1.ProjectStatus{}
 }
 
 func validateProjectCreateOnlyDrift(spec ailanguagev1beta1.ProjectSpec, current ailanguagesdk.Project) error {
@@ -962,6 +1227,37 @@ func resolveProjectIDFromWorkRequest(
 		return id, nil
 	}
 	return "", fmt.Errorf("Project work request %s does not expose a Project identifier", stringValue(workRequest.Id))
+}
+
+func resolveProjectWorkRequestAction(workRequest ailanguagesdk.WorkRequest) (string, error) {
+	var action string
+
+	for _, resource := range workRequest.Resources {
+		if !isProjectWorkRequestResource(resource) {
+			continue
+		}
+		candidate := strings.TrimSpace(string(resource.ActionType))
+		if candidate == "" || strings.EqualFold(candidate, string(ailanguagesdk.ActionTypeInProgress)) {
+			continue
+		}
+		if action == "" {
+			action = candidate
+			continue
+		}
+		if action != candidate {
+			return "", fmt.Errorf("Project work request %s exposes conflicting Project action types %q and %q", stringValue(workRequest.Id), action, candidate)
+		}
+	}
+
+	return action, nil
+}
+
+func resolveProjectGeneratedWorkRequestAction(workRequest any) (string, error) {
+	projectWorkRequest, err := projectWorkRequestFromAny(workRequest)
+	if err != nil {
+		return "", err
+	}
+	return resolveProjectWorkRequestAction(projectWorkRequest)
 }
 
 func resolveProjectIDFromResources(
@@ -1019,8 +1315,14 @@ func projectWorkRequestAsyncOperation(
 		fallbackPhase = derivedPhase
 	}
 
+	rawAction, err := resolveProjectWorkRequestAction(workRequest)
+	if err != nil {
+		return nil, err
+	}
+
 	current, err := servicemanager.BuildWorkRequestAsyncOperation(status, projectWorkRequestAsyncAdapter, servicemanager.WorkRequestAsyncInput{
 		RawStatus:        string(workRequest.Status),
+		RawAction:        rawAction,
 		RawOperationType: string(workRequest.OperationType),
 		WorkRequestID:    stringValue(workRequest.Id),
 		PercentComplete:  workRequest.PercentComplete,
@@ -1032,6 +1334,15 @@ func projectWorkRequestAsyncOperation(
 
 	current.Message = projectWorkRequestMessage(current.Phase, workRequest)
 	return current, nil
+}
+
+func resolveProjectGeneratedWorkRequestPhase(workRequest any) (shared.OSOKAsyncPhase, bool, error) {
+	projectWorkRequest, err := projectWorkRequestFromAny(workRequest)
+	if err != nil {
+		return "", false, err
+	}
+	phase, ok := projectWorkRequestPhaseFromOperationType(projectWorkRequest.OperationType)
+	return phase, ok, nil
 }
 
 func projectWorkRequestPhaseFromOperationType(
@@ -1054,6 +1365,53 @@ func projectWorkRequestMessage(
 	workRequest ailanguagesdk.WorkRequest,
 ) string {
 	return fmt.Sprintf("Project %s work request %s is %s", phase, stringValue(workRequest.Id), workRequest.Status)
+}
+
+func projectGeneratedWorkRequestMessage(phase shared.OSOKAsyncPhase, workRequest any) string {
+	projectWorkRequest, err := projectWorkRequestFromAny(workRequest)
+	if err != nil {
+		return ""
+	}
+	return projectWorkRequestMessage(phase, projectWorkRequest)
+}
+
+func recoverProjectIDFromGeneratedWorkRequest(
+	_ *ailanguagev1beta1.Project,
+	workRequest any,
+	phase shared.OSOKAsyncPhase,
+) (string, error) {
+	projectWorkRequest, err := projectWorkRequestFromAny(workRequest)
+	if err != nil {
+		return "", err
+	}
+	return resolveProjectIDFromWorkRequest(projectWorkRequest, projectWorkRequestActionForPhase(phase))
+}
+
+func projectWorkRequestActionForPhase(phase shared.OSOKAsyncPhase) ailanguagesdk.ActionTypeEnum {
+	switch phase {
+	case shared.OSOKAsyncPhaseCreate:
+		return ailanguagesdk.ActionTypeCreated
+	case shared.OSOKAsyncPhaseUpdate:
+		return ailanguagesdk.ActionTypeUpdated
+	case shared.OSOKAsyncPhaseDelete:
+		return ailanguagesdk.ActionTypeDeleted
+	default:
+		return ""
+	}
+}
+
+func projectWorkRequestFromAny(workRequest any) (ailanguagesdk.WorkRequest, error) {
+	switch current := workRequest.(type) {
+	case ailanguagesdk.WorkRequest:
+		return current, nil
+	case *ailanguagesdk.WorkRequest:
+		if current == nil {
+			return ailanguagesdk.WorkRequest{}, fmt.Errorf("Project work request is nil")
+		}
+		return *current, nil
+	default:
+		return ailanguagesdk.WorkRequest{}, fmt.Errorf("unexpected Project work request type %T", workRequest)
+	}
 }
 
 func isProjectWorkRequestResource(resource ailanguagesdk.WorkRequestResource) bool {
@@ -1262,7 +1620,7 @@ func isRetryableProjectUpdateConflict(err error) bool {
 
 	message := strings.ToLower(strings.TrimSpace(serviceErrorMessage(err)))
 	if classification.IsConflict() {
-		return message == "" || strings.Contains(message, "currently being modified")
+		return true
 	}
 
 	return strings.EqualFold(classification.ErrorCode, "Conflict") &&
@@ -1273,6 +1631,25 @@ func serviceErrorMessage(err error) string {
 	var serviceErr common.ServiceError
 	if errors.As(err, &serviceErr) {
 		return serviceErr.GetMessage()
+	}
+	value := reflect.ValueOf(err)
+	if value.IsValid() {
+		for value.Kind() == reflect.Pointer {
+			if value.IsNil() {
+				return ""
+			}
+			value = value.Elem()
+		}
+		if value.Kind() == reflect.Struct {
+			for _, fieldName := range []string{"Description", "Message"} {
+				field := value.FieldByName(fieldName)
+				if field.IsValid() && field.Kind() == reflect.String {
+					if message := strings.TrimSpace(field.String()); message != "" {
+						return message
+					}
+				}
+			}
+		}
 	}
 	if err == nil {
 		return ""
@@ -1326,6 +1703,41 @@ func projectSummaryMatches(
 		return false
 	}
 	return true
+}
+
+func projectFromResponse(response any) (ailanguagesdk.Project, bool) {
+	switch current := response.(type) {
+	case ailanguagesdk.CreateProjectResponse:
+		return current.Project, true
+	case *ailanguagesdk.CreateProjectResponse:
+		if current == nil {
+			return ailanguagesdk.Project{}, false
+		}
+		return current.Project, true
+	case ailanguagesdk.GetProjectResponse:
+		return current.Project, true
+	case *ailanguagesdk.GetProjectResponse:
+		if current == nil {
+			return ailanguagesdk.Project{}, false
+		}
+		return current.Project, true
+	case ailanguagesdk.Project:
+		return current, true
+	case *ailanguagesdk.Project:
+		if current == nil {
+			return ailanguagesdk.Project{}, false
+		}
+		return *current, true
+	case ailanguagesdk.ProjectSummary:
+		return projectFromSummary(current), true
+	case *ailanguagesdk.ProjectSummary:
+		if current == nil {
+			return ailanguagesdk.Project{}, false
+		}
+		return projectFromSummary(*current), true
+	default:
+		return ailanguagesdk.Project{}, false
+	}
 }
 
 func projectFromSummary(summary ailanguagesdk.ProjectSummary) ailanguagesdk.Project {

@@ -96,8 +96,15 @@ services:
         - kind: Project
           formalSpec: project
           async:
-            strategy: lifecycle
+            strategy: workrequest
             runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
         - kind: Endpoint
           controller:
             strategy: none
