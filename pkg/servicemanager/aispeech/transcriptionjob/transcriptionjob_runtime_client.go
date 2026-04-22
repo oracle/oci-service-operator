@@ -7,7 +7,6 @@ package transcriptionjob
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -37,108 +36,131 @@ type transcriptionJobOCIClient interface {
 	DeleteTranscriptionJob(context.Context, aispeech.DeleteTranscriptionJobRequest) (aispeech.DeleteTranscriptionJobResponse, error)
 }
 
-// Speech jobs need a narrow handwritten layer because CANCELING/CANCELED have
-// different meanings during normal status observation and delete confirmation.
-// Generatedruntime still owns the CRUD request projection, lifecycle rereads,
-// and update-drift enforcement for the steady-state create/update path.
 type transcriptionJobRuntimeClient struct {
-	generated generatedruntime.ServiceClient[*aispeechv1beta1.TranscriptionJob]
-	client    transcriptionJobOCIClient
-	log       loggerutil.OSOKLogger
-	initErr   error
+	delegate TranscriptionJobServiceClient
+	client   transcriptionJobOCIClient
+	log      loggerutil.OSOKLogger
+	initErr  error
 }
 
+var _ TranscriptionJobServiceClient = (*transcriptionJobRuntimeClient)(nil)
+
 func init() {
-	newTranscriptionJobServiceClient = func(manager *TranscriptionJobServiceManager) TranscriptionJobServiceClient {
-		sdkClient, err := aispeech.NewAIServiceSpeechClientWithConfigurationProvider(manager.Provider)
-		config := newTranscriptionJobRuntimeConfig(manager.Log, sdkClient)
-		initErr := err
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize TranscriptionJob OCI client: %w", err)
-		}
-		return &transcriptionJobRuntimeClient{
-			generated: generatedruntime.NewServiceClient[*aispeechv1beta1.TranscriptionJob](config),
-			client:    sdkClient,
-			log:       manager.Log,
-			initErr:   initErr,
-		}
+	registerTranscriptionJobRuntimeHooksMutator(func(manager *TranscriptionJobServiceManager, hooks *TranscriptionJobRuntimeHooks) {
+		client, initErr := newTranscriptionJobSDKClient(manager)
+		applyTranscriptionJobRuntimeHooks(manager, hooks, client, initErr)
+	})
+}
+
+func newTranscriptionJobSDKClient(manager *TranscriptionJobServiceManager) (transcriptionJobOCIClient, error) {
+	if manager == nil {
+		return nil, fmt.Errorf("TranscriptionJob service manager is nil")
 	}
+	client, err := aispeech.NewAIServiceSpeechClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func applyTranscriptionJobRuntimeHooks(
+	manager *TranscriptionJobServiceManager,
+	hooks *TranscriptionJobRuntimeHooks,
+	client transcriptionJobOCIClient,
+	initErr error,
+) {
+	if hooks == nil {
+		return
+	}
+
+	runtimeClient := newTranscriptionJobRuntimeClient(manager, nil, client, initErr)
+	hooks.Semantics = reviewedTranscriptionJobRuntimeSemantics()
+	hooks.Create.Fields = transcriptionJobCreateFields()
+	hooks.Get.Fields = transcriptionJobGetFields()
+	hooks.List.Fields = transcriptionJobListFields()
+	hooks.Update.Fields = transcriptionJobUpdateFields()
+	hooks.Delete.Fields = transcriptionJobDeleteFields()
+	hooks.DeleteHooks.ConfirmRead = runtimeClient.confirmDeleteRead
+	hooks.DeleteHooks.HandleError = runtimeClient.handleDeleteError
+	hooks.DeleteHooks.ApplyOutcome = runtimeClient.applyDeleteOutcome
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate TranscriptionJobServiceClient) TranscriptionJobServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
+}
+
+func newTranscriptionJobRuntimeClient(
+	manager *TranscriptionJobServiceManager,
+	delegate TranscriptionJobServiceClient,
+	client transcriptionJobOCIClient,
+	initErr error,
+) *transcriptionJobRuntimeClient {
+	runtimeClient := &transcriptionJobRuntimeClient{
+		delegate: delegate,
+		client:   client,
+		initErr:  initErr,
+	}
+	if manager != nil {
+		runtimeClient.log = manager.Log
+	}
+	return runtimeClient
 }
 
 func newTranscriptionJobServiceClientWithOCIClient(
 	log loggerutil.OSOKLogger,
 	client transcriptionJobOCIClient,
 ) TranscriptionJobServiceClient {
-	return &transcriptionJobRuntimeClient{
-		generated: generatedruntime.NewServiceClient[*aispeechv1beta1.TranscriptionJob](
-			newTranscriptionJobRuntimeConfig(log, client),
+	manager := &TranscriptionJobServiceManager{Log: log}
+	hooks := newTranscriptionJobRuntimeHooksWithOCIClient(client)
+	applyTranscriptionJobRuntimeHooks(manager, &hooks, client, nil)
+	delegate := defaultTranscriptionJobServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*aispeechv1beta1.TranscriptionJob](
+			buildTranscriptionJobGeneratedRuntimeConfig(manager, hooks),
 		),
-		client: client,
-		log:    log,
 	}
+	return wrapTranscriptionJobGeneratedClient(hooks, delegate)
 }
 
-func newTranscriptionJobRuntimeConfig(
-	log loggerutil.OSOKLogger,
-	sdkClient transcriptionJobOCIClient,
-) generatedruntime.Config[*aispeechv1beta1.TranscriptionJob] {
-	return generatedruntime.Config[*aispeechv1beta1.TranscriptionJob]{
-		Kind:      "TranscriptionJob",
-		SDKName:   "TranscriptionJob",
-		Log:       log,
-		Semantics: transcriptionJobRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeech.CreateTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateTranscriptionJob(ctx, *request.(*aispeech.CreateTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CreateTranscriptionJobDetails", RequestName: "CreateTranscriptionJobDetails", Contribution: "body"},
+func newTranscriptionJobRuntimeHooksWithOCIClient(client transcriptionJobOCIClient) TranscriptionJobRuntimeHooks {
+	return TranscriptionJobRuntimeHooks{
+		Semantics: reviewedTranscriptionJobRuntimeSemantics(),
+		Create: runtimeOperationHooks[aispeech.CreateTranscriptionJobRequest, aispeech.CreateTranscriptionJobResponse]{
+			Fields: transcriptionJobCreateFields(),
+			Call: func(ctx context.Context, request aispeech.CreateTranscriptionJobRequest) (aispeech.CreateTranscriptionJobResponse, error) {
+				return client.CreateTranscriptionJob(ctx, request)
 			},
 		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeech.GetTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetTranscriptionJob(ctx, *request.(*aispeech.GetTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true},
+		Get: runtimeOperationHooks[aispeech.GetTranscriptionJobRequest, aispeech.GetTranscriptionJobResponse]{
+			Fields: transcriptionJobGetFields(),
+			Call: func(ctx context.Context, request aispeech.GetTranscriptionJobRequest) (aispeech.GetTranscriptionJobResponse, error) {
+				return client.GetTranscriptionJob(ctx, request)
 			},
 		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeech.ListTranscriptionJobsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListTranscriptionJobs(ctx, *request.(*aispeech.ListTranscriptionJobsRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", LookupPaths: []string{"status.compartmentId", "spec.compartmentId", "compartmentId"}},
-				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", LookupPaths: []string{"status.displayName", "spec.displayName", "displayName"}},
-				{FieldName: "Id", RequestName: "id", Contribution: "query", LookupPaths: []string{"status.id", "status.ocid", "id", "ocid"}},
+		List: runtimeOperationHooks[aispeech.ListTranscriptionJobsRequest, aispeech.ListTranscriptionJobsResponse]{
+			Fields: transcriptionJobListFields(),
+			Call: func(ctx context.Context, request aispeech.ListTranscriptionJobsRequest) (aispeech.ListTranscriptionJobsResponse, error) {
+				return client.ListTranscriptionJobs(ctx, request)
 			},
 		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeech.UpdateTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateTranscriptionJob(ctx, *request.(*aispeech.UpdateTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true},
-				{FieldName: "UpdateTranscriptionJobDetails", RequestName: "UpdateTranscriptionJobDetails", Contribution: "body"},
+		Update: runtimeOperationHooks[aispeech.UpdateTranscriptionJobRequest, aispeech.UpdateTranscriptionJobResponse]{
+			Fields: transcriptionJobUpdateFields(),
+			Call: func(ctx context.Context, request aispeech.UpdateTranscriptionJobRequest) (aispeech.UpdateTranscriptionJobResponse, error) {
+				return client.UpdateTranscriptionJob(ctx, request)
 			},
 		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &aispeech.DeleteTranscriptionJobRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteTranscriptionJob(ctx, *request.(*aispeech.DeleteTranscriptionJobRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true},
+		Delete: runtimeOperationHooks[aispeech.DeleteTranscriptionJobRequest, aispeech.DeleteTranscriptionJobResponse]{
+			Fields: transcriptionJobDeleteFields(),
+			Call: func(ctx context.Context, request aispeech.DeleteTranscriptionJobRequest) (aispeech.DeleteTranscriptionJobResponse, error) {
+				return client.DeleteTranscriptionJob(ctx, request)
 			},
 		},
 	}
 }
 
-func transcriptionJobRuntimeSemantics() *generatedruntime.Semantics {
+// Delete confirmation stays on DeleteHooks so the steady-state observe path can
+// keep CANCELED distinct from a completed delete.
+func reviewedTranscriptionJobRuntimeSemantics() *generatedruntime.Semantics {
 	return &generatedruntime.Semantics{
 		FormalService: "aispeech",
 		FormalSlug:    "transcriptionjob",
@@ -159,10 +181,9 @@ func transcriptionJobRuntimeSemantics() *generatedruntime.Semantics {
 				string(aispeech.TranscriptionJobLifecycleStateSucceeded),
 			},
 		},
-		// Delete confirmation stays in the handwritten layer so normal observe
-		// does not misclassify CANCELED as a completed delete.
 		Delete: generatedruntime.DeleteSemantics{
-			Policy: "not-supported",
+			Policy:         "required",
+			TerminalStates: []string{"NOT_FOUND"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
 			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
@@ -182,8 +203,45 @@ func transcriptionJobRuntimeSemantics() *generatedruntime.Semantics {
 			Strategy: "read-after-write",
 			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
 		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+		},
 		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+	}
+}
+
+func transcriptionJobCreateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CreateTranscriptionJobDetails", RequestName: "CreateTranscriptionJobDetails", Contribution: "body"},
+	}
+}
+
+func transcriptionJobGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func transcriptionJobListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", LookupPaths: []string{"status.compartmentId", "spec.compartmentId", "compartmentId"}},
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", LookupPaths: []string{"status.displayName", "spec.displayName", "displayName"}},
+		{FieldName: "Id", RequestName: "id", Contribution: "query", LookupPaths: []string{"status.id", "status.ocid", "id", "ocid"}},
+	}
+}
+
+func transcriptionJobUpdateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "UpdateTranscriptionJobDetails", RequestName: "UpdateTranscriptionJobDetails", Contribution: "body"},
+	}
+}
+
+func transcriptionJobDeleteFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "TranscriptionJobId", RequestName: "transcriptionJobId", Contribution: "path", PreferResourceID: true},
 	}
 }
 
@@ -192,7 +250,11 @@ func (c *transcriptionJobRuntimeClient) CreateOrUpdate(
 	resource *aispeechv1beta1.TranscriptionJob,
 	req ctrl.Request,
 ) (servicemanager.OSOKResponse, error) {
-	response, err := c.generated.CreateOrUpdate(ctx, resource, req)
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("TranscriptionJob generated runtime delegate is not configured")
+	}
+
+	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
 	if err != nil {
 		return response, err
 	}
@@ -228,130 +290,81 @@ func (c *transcriptionJobRuntimeClient) CreateOrUpdate(
 }
 
 func (c *transcriptionJobRuntimeClient) Delete(ctx context.Context, resource *aispeechv1beta1.TranscriptionJob) (bool, error) {
-	if c.initErr != nil {
-		return false, c.initErr
-	}
-
-	currentID := currentTranscriptionJobID(resource)
-	if currentID == "" {
+	if resource != nil && currentTranscriptionJobID(resource) == "" {
 		c.markDeleted(resource, "OCI resource identifier is not recorded")
 		return true, nil
 	}
-
-	current, err := c.getTranscriptionJob(ctx, currentID)
-	if err != nil {
-		if isTranscriptionJobDeleteNotFoundOCI(err) {
-			normalizedErr := normalizeTranscriptionJobOCIError(err)
-			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, normalizedErr)
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
+	if c.delegate == nil {
+		if c.initErr != nil {
+			return false, c.initErr
 		}
-
-		normalizedErr := normalizeTranscriptionJobOCIError(err)
-		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, normalizedErr)
-		return false, normalizedErr
+		return false, fmt.Errorf("TranscriptionJob generated runtime delegate is not configured")
 	}
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
-	}
-
-	lifecycleState := normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState)
-	if transcriptionJobDeletePending(resource) && transcriptionJobDeleteInProgress(lifecycleState) {
-		c.markDeletePending(resource, lifecycleState)
-		return false, nil
-	}
-	if lifecycleState == string(aispeech.TranscriptionJobLifecycleStateCanceling) {
-		c.markDeleteWaitingForCancel(resource, lifecycleState)
-		return false, nil
-	}
-	if transcriptionJobDeletePending(resource) {
-		c.markDeleteRetry(resource, lifecycleState)
-	}
-
-	response, err := c.client.DeleteTranscriptionJob(ctx, aispeech.DeleteTranscriptionJobRequest{
-		TranscriptionJobId: common.String(currentID),
-	})
-	if err != nil {
-		if isTranscriptionJobDeleteNotFoundOCI(err) {
-			normalizedErr := normalizeTranscriptionJobOCIError(err)
-			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, normalizedErr)
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-
-		retryableConflict := isRetryableTranscriptionJobDeleteConflict(err)
-		normalizedErr := normalizeTranscriptionJobOCIError(err)
-		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, normalizedErr)
-		if !retryableConflict {
-			return false, normalizedErr
-		}
-	} else {
-		servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
-	}
-
-	return c.confirmDelete(ctx, resource, currentID)
+	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *transcriptionJobRuntimeClient) confirmDelete(
+func (c *transcriptionJobRuntimeClient) confirmDeleteRead(
 	ctx context.Context,
 	resource *aispeechv1beta1.TranscriptionJob,
 	currentID string,
-) (bool, error) {
-	current, err := c.getTranscriptionJob(ctx, currentID)
-	if err != nil {
-		if isTranscriptionJobDeleteNotFoundOCI(err) {
-			normalizedErr := normalizeTranscriptionJobOCIError(err)
-			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, normalizedErr)
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
+) (any, error) {
+	if c.client == nil {
+		if c.initErr != nil {
+			return nil, c.initErr
 		}
-
-		normalizedErr := normalizeTranscriptionJobOCIError(err)
-		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, normalizedErr)
-		return false, normalizedErr
+		return nil, fmt.Errorf("TranscriptionJob OCI client is not configured")
 	}
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
+	if strings.TrimSpace(currentID) == "" {
+		currentID = currentTranscriptionJobID(resource)
 	}
-
-	lifecycleState := normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState)
-	if transcriptionJobDeleteInProgress(lifecycleState) {
-		c.markDeletePending(resource, lifecycleState)
-		return false, nil
+	if currentID == "" {
+		return nil, fmt.Errorf("TranscriptionJob OCI resource identifier is not recorded")
 	}
-
-	c.markDeleteRetry(resource, lifecycleState)
-	return false, nil
-}
-
-func (c *transcriptionJobRuntimeClient) getTranscriptionJob(
-	ctx context.Context,
-	currentID string,
-) (aispeech.TranscriptionJob, error) {
-	response, err := c.client.GetTranscriptionJob(ctx, aispeech.GetTranscriptionJobRequest{
+	return c.client.GetTranscriptionJob(ctx, aispeech.GetTranscriptionJobRequest{
 		TranscriptionJobId: common.String(currentID),
 	})
-	if err != nil {
-		return aispeech.TranscriptionJob{}, err
-	}
-	return response.TranscriptionJob, nil
 }
 
-func (c *transcriptionJobRuntimeClient) projectStatus(
+func (c *transcriptionJobRuntimeClient) handleDeleteError(
 	resource *aispeechv1beta1.TranscriptionJob,
-	current aispeech.TranscriptionJob,
+	err error,
 ) error {
-	payload, err := json.Marshal(current)
-	if err != nil {
-		return fmt.Errorf("marshal TranscriptionJob response body: %w", err)
+	normalizedErr := normalizeTranscriptionJobOCIError(err)
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, normalizedErr)
+	return normalizedErr
+}
+
+func (c *transcriptionJobRuntimeClient) applyDeleteOutcome(
+	resource *aispeechv1beta1.TranscriptionJob,
+	_ any,
+	stage generatedruntime.DeleteConfirmStage,
+) (generatedruntime.DeleteOutcome, error) {
+	lifecycleState := normalizedTranscriptionJobLifecycle(resource.Status.LifecycleState)
+
+	switch stage {
+	case generatedruntime.DeleteConfirmStageAlreadyPending:
+		if transcriptionJobDeletePending(resource) {
+			if transcriptionJobDeleteInProgress(lifecycleState) {
+				c.markDeletePending(resource, lifecycleState)
+				return generatedruntime.DeleteOutcome{Handled: true}, nil
+			}
+			c.markDeleteRetry(resource, lifecycleState)
+		}
+		if lifecycleState == string(aispeech.TranscriptionJobLifecycleStateCanceling) {
+			c.markDeleteWaitingForCancel(resource, lifecycleState)
+			return generatedruntime.DeleteOutcome{Handled: true}, nil
+		}
+		return generatedruntime.DeleteOutcome{}, nil
+	case generatedruntime.DeleteConfirmStageAfterRequest:
+		if transcriptionJobDeleteInProgress(lifecycleState) {
+			c.markDeletePending(resource, lifecycleState)
+			return generatedruntime.DeleteOutcome{Handled: true}, nil
+		}
+		c.markDeleteRetry(resource, lifecycleState)
+		return generatedruntime.DeleteOutcome{Handled: true}, nil
+	default:
+		return generatedruntime.DeleteOutcome{}, nil
 	}
-	if err := json.Unmarshal(payload, &resource.Status); err != nil {
-		return fmt.Errorf("project TranscriptionJob response body into status: %w", err)
-	}
-	if id := strings.TrimSpace(stringValue(current.Id)); id != "" {
-		resource.Status.OsokStatus.Ocid = shared.OCID(id)
-	}
-	return nil
 }
 
 func (c *transcriptionJobRuntimeClient) applyLifecycleOverride(
@@ -522,20 +535,4 @@ func normalizeTranscriptionJobOCIError(err error) error {
 		return normalized
 	}
 	return err
-}
-
-func isTranscriptionJobDeleteNotFoundOCI(err error) bool {
-	classification := errorutil.ClassifyDeleteError(err)
-	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
-}
-
-func isRetryableTranscriptionJobDeleteConflict(err error) bool {
-	return errorutil.ClassifyDeleteError(err).IsConflict()
-}
-
-func stringValue(value *string) string {
-	if value == nil {
-		return ""
-	}
-	return *value
 }
