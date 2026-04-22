@@ -1102,6 +1102,71 @@ func TestQueueRuntime_DeleteConfirmationTreatsDeletedLifecycleAsSuccess(t *testi
 	assert.True(t, deleted)
 }
 
+func TestQueueRuntime_DeleteConfirmationUnexpectedLifecycleKeepsWaiting(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		state queuesdk.QueueLifecycleStateEnum
+	}{
+		{
+			name:  "active",
+			state: queuesdk.QueueLifecycleStateActive,
+		},
+		{
+			name:  "failed",
+			state: queuesdk.QueueLifecycleStateFailed,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			getCalls := 0
+			manager := newQueueTestManager(&fakeQueueOCIClient{
+				getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+					assert.Equal(t, "wr-delete-visible", *req.WorkRequestId)
+					return queuesdk.GetWorkRequestResponse{
+						WorkRequest: makeWorkRequest("wr-delete-visible", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeDeleted, "ocid1.queue.oc1..existing"),
+					}, nil
+				},
+				getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+					getCalls++
+					assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+					return queuesdk.GetQueueResponse{
+						Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", tt.state),
+					}, nil
+				},
+			})
+
+			resource := makeSpecQueue()
+			resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+			resource.Status.DeleteWorkRequestId = "wr-delete-visible"
+
+			deleted, err := manager.Delete(context.Background(), resource)
+
+			assert.NoError(t, err)
+			assert.False(t, deleted)
+			assert.Equal(t, 2, getCalls)
+			assert.Equal(t, "wr-delete-visible", resource.Status.DeleteWorkRequestId)
+			assert.Equal(t, string(tt.state), resource.Status.LifecycleState)
+			assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+			assert.Equal(t, "Queue delete work request wr-delete-visible succeeded; waiting for Queue ocid1.queue.oc1..existing to disappear", resource.Status.OsokStatus.Message)
+			if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+				assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+				assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+				assert.Equal(t, "wr-delete-visible", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+				assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+				assert.Equal(t, "Queue delete work request wr-delete-visible succeeded; waiting for Queue ocid1.queue.oc1..existing to disappear", resource.Status.OsokStatus.Async.Current.Message)
+				assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawStatus)
+				assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawOperationType)
+			}
+		})
+	}
+}
+
 func TestQueueRuntime_DeleteRequestNotFoundIsSuccess(t *testing.T) {
 	manager := newQueueTestManager(&fakeQueueOCIClient{
 		deleteFn: func(_ context.Context, req queuesdk.DeleteQueueRequest) (queuesdk.DeleteQueueResponse, error) {

@@ -110,11 +110,12 @@ func (c queueGeneratedRuntimeOverlayClient) Delete(ctx context.Context, resource
 	}
 
 	trackedID := currentQueueID(resource)
+	workRequestID := strings.TrimSpace(resource.Status.DeleteWorkRequestId)
 	if trackedID == "" ||
-		strings.TrimSpace(resource.Status.DeleteWorkRequestId) == "" ||
+		workRequestID == "" ||
 		c.initErr != nil ||
 		c.client == nil ||
-		!isQueueDeleteNotFoundOCI(err) {
+		(!isQueueDeleteNotFoundOCI(err) && !isQueueDeleteConfirmUnexpectedLifecycle(err)) {
 		return deleted, err
 	}
 
@@ -133,14 +134,13 @@ func (c queueGeneratedRuntimeOverlayClient) Delete(ctx context.Context, resource
 		queueMarkDeleted(resource, "OCI Queue deleted", c.log())
 		return true, nil
 	}
+	if err := projectQueueStatus(resource, current); err != nil {
+		return false, err
+	}
 
 	queueMarkDeleteProgress(
 		resource,
-		fmt.Sprintf(
-			"Queue delete work request %s is no longer readable; waiting for Queue %s to disappear",
-			strings.TrimSpace(resource.Status.DeleteWorkRequestId),
-			trackedID,
-		),
+		queueDeleteProgressMessage(workRequestID, trackedID, err),
 		c.log(),
 	)
 	return false, nil
@@ -390,6 +390,25 @@ func normalizeQueueOCIError(err error) error {
 func isQueueDeleteNotFoundOCI(err error) bool {
 	classification := errorutil.ClassifyDeleteError(err)
 	return classification.IsUnambiguousNotFound() || classification.IsAuthShapedNotFound()
+}
+
+func isQueueDeleteConfirmUnexpectedLifecycle(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "delete confirmation returned unexpected lifecycle state")
+}
+
+func queueDeleteProgressMessage(workRequestID, queueID string, cause error) string {
+	if isQueueDeleteNotFoundOCI(cause) {
+		return fmt.Sprintf(
+			"Queue delete work request %s is no longer readable; waiting for Queue %s to disappear",
+			workRequestID,
+			queueID,
+		)
+	}
+	return fmt.Sprintf(
+		"Queue delete work request %s succeeded; waiting for Queue %s to disappear",
+		workRequestID,
+		queueID,
+	)
 }
 
 func currentQueueID(resource *queuev1beta1.Queue) string {
