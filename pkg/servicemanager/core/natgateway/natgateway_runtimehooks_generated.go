@@ -30,6 +30,7 @@ type NatGatewayRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.NatGateway]
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.NatGateway]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.NatGateway]
+	Async               generatedruntime.AsyncHooks[*corev1beta1.NatGateway]
 	Create              runtimeOperationHooks[coresdk.CreateNatGatewayRequest, coresdk.CreateNatGatewayResponse]
 	Get                 runtimeOperationHooks[coresdk.GetNatGatewayRequest, coresdk.GetNatGatewayResponse]
 	List                runtimeOperationHooks[coresdk.ListNatGatewaysRequest, coresdk.ListNatGatewaysResponse]
@@ -108,6 +109,7 @@ func newNatGatewayDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) Na
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.NatGateway]{},
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.NatGateway]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.NatGateway]{},
+		Async:           generatedruntime.AsyncHooks[*corev1beta1.NatGateway]{},
 		Create: runtimeOperationHooks[coresdk.CreateNatGatewayRequest, coresdk.CreateNatGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNatGatewayDetails", RequestName: "CreateNatGatewayDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
@@ -164,6 +166,7 @@ func buildNatGatewayGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

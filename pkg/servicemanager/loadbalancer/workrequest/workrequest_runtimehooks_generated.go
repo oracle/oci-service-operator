@@ -30,6 +30,7 @@ type WorkRequestRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.WorkRequest]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.WorkRequest]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetWorkRequestRequest, loadbalancersdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListWorkRequestsRequest, loadbalancersdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -52,6 +53,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerCli
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.WorkRequest]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.WorkRequest]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[loadbalancersdk.GetWorkRequestRequest, loadbalancersdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request loadbalancersdk.GetWorkRequestRequest) (loadbalancersdk.GetWorkRequestResponse, error) {
@@ -90,6 +92,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

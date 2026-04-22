@@ -30,6 +30,7 @@ type ApplicationRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*dataflowv1beta1.Application]
 	StatusHooks         generatedruntime.StatusHooks[*dataflowv1beta1.Application]
 	ParityHooks         generatedruntime.ParityHooks[*dataflowv1beta1.Application]
+	Async               generatedruntime.AsyncHooks[*dataflowv1beta1.Application]
 	Create              runtimeOperationHooks[dataflowsdk.CreateApplicationRequest, dataflowsdk.CreateApplicationResponse]
 	Get                 runtimeOperationHooks[dataflowsdk.GetApplicationRequest, dataflowsdk.GetApplicationResponse]
 	List                runtimeOperationHooks[dataflowsdk.ListApplicationsRequest, dataflowsdk.ListApplicationsResponse]
@@ -108,6 +109,7 @@ func newApplicationDefaultRuntimeHooks(sdkClient dataflowsdk.DataFlowClient) App
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*dataflowv1beta1.Application]{},
 		StatusHooks:     generatedruntime.StatusHooks[*dataflowv1beta1.Application]{},
 		ParityHooks:     generatedruntime.ParityHooks[*dataflowv1beta1.Application]{},
+		Async:           generatedruntime.AsyncHooks[*dataflowv1beta1.Application]{},
 		Create: runtimeOperationHooks[dataflowsdk.CreateApplicationRequest, dataflowsdk.CreateApplicationResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateApplicationDetails", RequestName: "CreateApplicationDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error) {
@@ -164,6 +166,7 @@ func buildApplicationGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

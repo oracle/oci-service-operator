@@ -30,6 +30,7 @@ type DigitalAssistantRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.DigitalAssistant]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.DigitalAssistant]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.DigitalAssistant]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.DigitalAssistant]
 	Create              runtimeOperationHooks[odasdk.CreateDigitalAssistantRequest, odasdk.CreateDigitalAssistantResponse]
 	Get                 runtimeOperationHooks[odasdk.GetDigitalAssistantRequest, odasdk.GetDigitalAssistantResponse]
 	List                runtimeOperationHooks[odasdk.ListDigitalAssistantsRequest, odasdk.ListDigitalAssistantsResponse]
@@ -55,6 +56,7 @@ func newDigitalAssistantDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) D
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.DigitalAssistant]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.DigitalAssistant]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.DigitalAssistant]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.DigitalAssistant]{},
 		Create: runtimeOperationHooks[odasdk.CreateDigitalAssistantRequest, odasdk.CreateDigitalAssistantResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateDigitalAssistantDetails", RequestName: "CreateDigitalAssistantDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateDigitalAssistantRequest) (odasdk.CreateDigitalAssistantResponse, error) {
@@ -111,6 +113,7 @@ func buildDigitalAssistantGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

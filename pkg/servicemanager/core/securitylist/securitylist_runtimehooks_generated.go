@@ -30,6 +30,7 @@ type SecurityListRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.SecurityList]
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.SecurityList]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.SecurityList]
+	Async               generatedruntime.AsyncHooks[*corev1beta1.SecurityList]
 	Create              runtimeOperationHooks[coresdk.CreateSecurityListRequest, coresdk.CreateSecurityListResponse]
 	Get                 runtimeOperationHooks[coresdk.GetSecurityListRequest, coresdk.GetSecurityListResponse]
 	List                runtimeOperationHooks[coresdk.ListSecurityListsRequest, coresdk.ListSecurityListsResponse]
@@ -108,6 +109,7 @@ func newSecurityListDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) 
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.SecurityList]{},
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.SecurityList]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.SecurityList]{},
+		Async:           generatedruntime.AsyncHooks[*corev1beta1.SecurityList]{},
 		Create: runtimeOperationHooks[coresdk.CreateSecurityListRequest, coresdk.CreateSecurityListResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSecurityListDetails", RequestName: "CreateSecurityListDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateSecurityListRequest) (coresdk.CreateSecurityListResponse, error) {
@@ -164,6 +166,7 @@ func buildSecurityListGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type CustomTableRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.CustomTable]
 	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.CustomTable]
 	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.CustomTable]
+	Async               generatedruntime.AsyncHooks[*usageapiv1beta1.CustomTable]
 	Create              runtimeOperationHooks[usageapisdk.CreateCustomTableRequest, usageapisdk.CreateCustomTableResponse]
 	Get                 runtimeOperationHooks[usageapisdk.GetCustomTableRequest, usageapisdk.GetCustomTableResponse]
 	List                runtimeOperationHooks[usageapisdk.ListCustomTablesRequest, usageapisdk.ListCustomTablesResponse]
@@ -108,6 +109,7 @@ func newCustomTableDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) Cus
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.CustomTable]{},
 		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.CustomTable]{},
 		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.CustomTable]{},
+		Async:           generatedruntime.AsyncHooks[*usageapiv1beta1.CustomTable]{},
 		Create: runtimeOperationHooks[usageapisdk.CreateCustomTableRequest, usageapisdk.CreateCustomTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateCustomTableDetails", RequestName: "CreateCustomTableDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request usageapisdk.CreateCustomTableRequest) (usageapisdk.CreateCustomTableResponse, error) {
@@ -164,6 +166,7 @@ func buildCustomTableGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

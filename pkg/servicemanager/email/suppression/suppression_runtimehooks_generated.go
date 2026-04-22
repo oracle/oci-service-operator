@@ -30,6 +30,7 @@ type SuppressionRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.Suppression]
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.Suppression]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.Suppression]
+	Async               generatedruntime.AsyncHooks[*emailv1beta1.Suppression]
 	Create              runtimeOperationHooks[emailsdk.CreateSuppressionRequest, emailsdk.CreateSuppressionResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetSuppressionRequest, emailsdk.GetSuppressionResponse]
 	List                runtimeOperationHooks[emailsdk.ListSuppressionsRequest, emailsdk.ListSuppressionsResponse]
@@ -54,6 +55,7 @@ func newSuppressionDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) Suppressi
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.Suppression]{},
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.Suppression]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.Suppression]{},
+		Async:           generatedruntime.AsyncHooks[*emailv1beta1.Suppression]{},
 		Create: runtimeOperationHooks[emailsdk.CreateSuppressionRequest, emailsdk.CreateSuppressionResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSuppressionDetails", RequestName: "CreateSuppressionDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateSuppressionRequest) (emailsdk.CreateSuppressionResponse, error) {
@@ -104,6 +106,7 @@ func buildSuppressionGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

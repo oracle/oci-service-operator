@@ -30,6 +30,7 @@ type ModelRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.Model]
 	StatusHooks         generatedruntime.StatusHooks[*generativeaiv1beta1.Model]
 	ParityHooks         generatedruntime.ParityHooks[*generativeaiv1beta1.Model]
+	Async               generatedruntime.AsyncHooks[*generativeaiv1beta1.Model]
 	Create              runtimeOperationHooks[generativeaisdk.CreateModelRequest, generativeaisdk.CreateModelResponse]
 	Get                 runtimeOperationHooks[generativeaisdk.GetModelRequest, generativeaisdk.GetModelResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListModelsRequest, generativeaisdk.ListModelsResponse]
@@ -108,6 +109,7 @@ func newModelDefaultRuntimeHooks(sdkClient generativeaisdk.GenerativeAiClient) M
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.Model]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiv1beta1.Model]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiv1beta1.Model]{},
+		Async:           generatedruntime.AsyncHooks[*generativeaiv1beta1.Model]{},
 		Create: runtimeOperationHooks[generativeaisdk.CreateModelRequest, generativeaisdk.CreateModelResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateModelDetails", RequestName: "CreateModelDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.CreateModelRequest) (generativeaisdk.CreateModelResponse, error) {
@@ -164,6 +166,7 @@ func buildModelGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

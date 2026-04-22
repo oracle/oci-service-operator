@@ -30,6 +30,7 @@ type WorkRequestRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.WorkRequest]
 	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.WorkRequest]
 	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.WorkRequest]
+	Async               generatedruntime.AsyncHooks[*ocvpv1beta1.WorkRequest]
 	Get                 runtimeOperationHooks[ocvpsdk.GetWorkRequestRequest, ocvpsdk.GetWorkRequestResponse]
 	List                runtimeOperationHooks[ocvpsdk.ListWorkRequestsRequest, ocvpsdk.ListWorkRequestsResponse]
 	WrapGeneratedClient []func(WorkRequestServiceClient) WorkRequestServiceClient
@@ -52,6 +53,7 @@ func newWorkRequestDefaultRuntimeHooks(sdkClient ocvpsdk.WorkRequestClient) Work
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.WorkRequest]{},
 		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.WorkRequest]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.WorkRequest]{},
+		Async:           generatedruntime.AsyncHooks[*ocvpv1beta1.WorkRequest]{},
 		Get: runtimeOperationHooks[ocvpsdk.GetWorkRequestRequest, ocvpsdk.GetWorkRequestResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request ocvpsdk.GetWorkRequestRequest) (ocvpsdk.GetWorkRequestResponse, error) {
@@ -90,6 +92,7 @@ func buildWorkRequestGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

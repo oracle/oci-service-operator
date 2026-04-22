@@ -30,6 +30,7 @@ type RouteTableRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*corev1beta1.RouteTable]
 	StatusHooks         generatedruntime.StatusHooks[*corev1beta1.RouteTable]
 	ParityHooks         generatedruntime.ParityHooks[*corev1beta1.RouteTable]
+	Async               generatedruntime.AsyncHooks[*corev1beta1.RouteTable]
 	Create              runtimeOperationHooks[coresdk.CreateRouteTableRequest, coresdk.CreateRouteTableResponse]
 	Get                 runtimeOperationHooks[coresdk.GetRouteTableRequest, coresdk.GetRouteTableResponse]
 	List                runtimeOperationHooks[coresdk.ListRouteTablesRequest, coresdk.ListRouteTablesResponse]
@@ -108,6 +109,7 @@ func newRouteTableDefaultRuntimeHooks(sdkClient coresdk.VirtualNetworkClient) Ro
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*corev1beta1.RouteTable]{},
 		StatusHooks:     generatedruntime.StatusHooks[*corev1beta1.RouteTable]{},
 		ParityHooks:     generatedruntime.ParityHooks[*corev1beta1.RouteTable]{},
+		Async:           generatedruntime.AsyncHooks[*corev1beta1.RouteTable]{},
 		Create: runtimeOperationHooks[coresdk.CreateRouteTableRequest, coresdk.CreateRouteTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRouteTableDetails", RequestName: "CreateRouteTableDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
@@ -164,6 +166,7 @@ func buildRouteTableGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type ScheduledRunRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.ScheduledRun]
 	StatusHooks         generatedruntime.StatusHooks[*usageapiv1beta1.ScheduledRun]
 	ParityHooks         generatedruntime.ParityHooks[*usageapiv1beta1.ScheduledRun]
+	Async               generatedruntime.AsyncHooks[*usageapiv1beta1.ScheduledRun]
 	Get                 runtimeOperationHooks[usageapisdk.GetScheduledRunRequest, usageapisdk.GetScheduledRunResponse]
 	List                runtimeOperationHooks[usageapisdk.ListScheduledRunsRequest, usageapisdk.ListScheduledRunsResponse]
 	WrapGeneratedClient []func(ScheduledRunServiceClient) ScheduledRunServiceClient
@@ -52,6 +53,7 @@ func newScheduledRunDefaultRuntimeHooks(sdkClient usageapisdk.UsageapiClient) Sc
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*usageapiv1beta1.ScheduledRun]{},
 		StatusHooks:     generatedruntime.StatusHooks[*usageapiv1beta1.ScheduledRun]{},
 		ParityHooks:     generatedruntime.ParityHooks[*usageapiv1beta1.ScheduledRun]{},
+		Async:           generatedruntime.AsyncHooks[*usageapiv1beta1.ScheduledRun]{},
 		Get: runtimeOperationHooks[usageapisdk.GetScheduledRunRequest, usageapisdk.GetScheduledRunResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ScheduledRunId", RequestName: "scheduledRunId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request usageapisdk.GetScheduledRunRequest) (usageapisdk.GetScheduledRunResponse, error) {
@@ -90,6 +92,7 @@ func buildScheduledRunGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

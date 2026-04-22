@@ -30,6 +30,7 @@ type AnalyticsInstanceRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*analyticsv1beta1.AnalyticsInstance]
 	StatusHooks         generatedruntime.StatusHooks[*analyticsv1beta1.AnalyticsInstance]
 	ParityHooks         generatedruntime.ParityHooks[*analyticsv1beta1.AnalyticsInstance]
+	Async               generatedruntime.AsyncHooks[*analyticsv1beta1.AnalyticsInstance]
 	Create              runtimeOperationHooks[analyticssdk.CreateAnalyticsInstanceRequest, analyticssdk.CreateAnalyticsInstanceResponse]
 	Get                 runtimeOperationHooks[analyticssdk.GetAnalyticsInstanceRequest, analyticssdk.GetAnalyticsInstanceResponse]
 	List                runtimeOperationHooks[analyticssdk.ListAnalyticsInstancesRequest, analyticssdk.ListAnalyticsInstancesResponse]
@@ -108,6 +109,7 @@ func newAnalyticsInstanceDefaultRuntimeHooks(sdkClient analyticssdk.AnalyticsCli
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*analyticsv1beta1.AnalyticsInstance]{},
 		StatusHooks:     generatedruntime.StatusHooks[*analyticsv1beta1.AnalyticsInstance]{},
 		ParityHooks:     generatedruntime.ParityHooks[*analyticsv1beta1.AnalyticsInstance]{},
+		Async:           generatedruntime.AsyncHooks[*analyticsv1beta1.AnalyticsInstance]{},
 		Create: runtimeOperationHooks[analyticssdk.CreateAnalyticsInstanceRequest, analyticssdk.CreateAnalyticsInstanceResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAnalyticsInstanceDetails", RequestName: "CreateAnalyticsInstanceDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request analyticssdk.CreateAnalyticsInstanceRequest) (analyticssdk.CreateAnalyticsInstanceResponse, error) {
@@ -164,6 +166,7 @@ func buildAnalyticsInstanceGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

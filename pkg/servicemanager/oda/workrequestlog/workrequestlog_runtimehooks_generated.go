@@ -30,6 +30,7 @@ type WorkRequestLogRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestLog]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.WorkRequestLog]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.WorkRequestLog]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[odasdk.ListWorkRequestLogsRequest, odasdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -51,6 +52,7 @@ func newWorkRequestLogDefaultRuntimeHooks(sdkClient odasdk.OdaClient) WorkReques
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.WorkRequestLog]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.WorkRequestLog]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.WorkRequestLog]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[odasdk.ListWorkRequestLogsRequest, odasdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.ListWorkRequestLogsRequest) (odasdk.ListWorkRequestLogsResponse, error) {
@@ -83,6 +85,7 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

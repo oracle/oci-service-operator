@@ -30,6 +30,7 @@ type HostnameRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Hostname]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Hostname]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Hostname]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.Hostname]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateHostnameRequest, loadbalancersdk.CreateHostnameResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetHostnameRequest, loadbalancersdk.GetHostnameResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListHostnamesRequest, loadbalancersdk.ListHostnamesResponse]
@@ -55,6 +56,7 @@ func newHostnameDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Hostname]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Hostname]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Hostname]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Hostname]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateHostnameRequest, loadbalancersdk.CreateHostnameResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateHostnameDetails", RequestName: "CreateHostnameDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateHostnameRequest) (loadbalancersdk.CreateHostnameResponse, error) {
@@ -111,6 +113,7 @@ func buildHostnameGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

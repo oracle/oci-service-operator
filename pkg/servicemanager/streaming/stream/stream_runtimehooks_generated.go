@@ -30,6 +30,7 @@ type StreamRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*streamingv1beta1.Stream]
 	StatusHooks         generatedruntime.StatusHooks[*streamingv1beta1.Stream]
 	ParityHooks         generatedruntime.ParityHooks[*streamingv1beta1.Stream]
+	Async               generatedruntime.AsyncHooks[*streamingv1beta1.Stream]
 	Create              runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]
 	Get                 runtimeOperationHooks[streamingsdk.GetStreamRequest, streamingsdk.GetStreamResponse]
 	List                runtimeOperationHooks[streamingsdk.ListStreamsRequest, streamingsdk.ListStreamsResponse]
@@ -108,6 +109,7 @@ func newStreamDefaultRuntimeHooks(sdkClient streamingsdk.StreamAdminClient) Stre
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*streamingv1beta1.Stream]{},
 		StatusHooks:     generatedruntime.StatusHooks[*streamingv1beta1.Stream]{},
 		ParityHooks:     generatedruntime.ParityHooks[*streamingv1beta1.Stream]{},
+		Async:           generatedruntime.AsyncHooks[*streamingv1beta1.Stream]{},
 		Create: runtimeOperationHooks[streamingsdk.CreateStreamRequest, streamingsdk.CreateStreamResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateStreamDetails", RequestName: "CreateStreamDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request streamingsdk.CreateStreamRequest) (streamingsdk.CreateStreamResponse, error) {
@@ -164,6 +166,7 @@ func buildStreamGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

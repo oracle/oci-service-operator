@@ -30,6 +30,7 @@ type LogRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.Log]
 	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.Log]
 	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.Log]
+	Async               generatedruntime.AsyncHooks[*loggingv1beta1.Log]
 	Create              runtimeOperationHooks[loggingsdk.CreateLogRequest, loggingsdk.CreateLogResponse]
 	Get                 runtimeOperationHooks[loggingsdk.GetLogRequest, loggingsdk.GetLogResponse]
 	List                runtimeOperationHooks[loggingsdk.ListLogsRequest, loggingsdk.ListLogsResponse]
@@ -108,6 +109,7 @@ func newLogDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagementClient) Log
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loggingv1beta1.Log]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.Log]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.Log]{},
+		Async:           generatedruntime.AsyncHooks[*loggingv1beta1.Log]{},
 		Create: runtimeOperationHooks[loggingsdk.CreateLogRequest, loggingsdk.CreateLogResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LogGroupId", RequestName: "logGroupId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateLogDetails", RequestName: "CreateLogDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.CreateLogRequest) (loggingsdk.CreateLogResponse, error) {
@@ -164,6 +166,7 @@ func buildLogGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

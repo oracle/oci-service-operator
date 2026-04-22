@@ -30,6 +30,7 @@ type BackendRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Backend]
 	StatusHooks         generatedruntime.StatusHooks[*loadbalancerv1beta1.Backend]
 	ParityHooks         generatedruntime.ParityHooks[*loadbalancerv1beta1.Backend]
+	Async               generatedruntime.AsyncHooks[*loadbalancerv1beta1.Backend]
 	Create              runtimeOperationHooks[loadbalancersdk.CreateBackendRequest, loadbalancersdk.CreateBackendResponse]
 	Get                 runtimeOperationHooks[loadbalancersdk.GetBackendRequest, loadbalancersdk.GetBackendResponse]
 	List                runtimeOperationHooks[loadbalancersdk.ListBackendsRequest, loadbalancersdk.ListBackendsResponse]
@@ -108,6 +109,7 @@ func newBackendDefaultRuntimeHooks(sdkClient loadbalancersdk.LoadBalancerClient)
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loadbalancerv1beta1.Backend]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loadbalancerv1beta1.Backend]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loadbalancerv1beta1.Backend]{},
+		Async:           generatedruntime.AsyncHooks[*loadbalancerv1beta1.Backend]{},
 		Create: runtimeOperationHooks[loadbalancersdk.CreateBackendRequest, loadbalancersdk.CreateBackendResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: false}, {FieldName: "BackendSetName", RequestName: "backendSetName", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateBackendDetails", RequestName: "CreateBackendDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loadbalancersdk.CreateBackendRequest) (loadbalancersdk.CreateBackendResponse, error) {
@@ -164,6 +166,7 @@ func buildBackendGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

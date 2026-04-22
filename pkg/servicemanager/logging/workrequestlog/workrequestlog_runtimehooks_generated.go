@@ -30,6 +30,7 @@ type WorkRequestLogRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*loggingv1beta1.WorkRequestLog]
 	StatusHooks         generatedruntime.StatusHooks[*loggingv1beta1.WorkRequestLog]
 	ParityHooks         generatedruntime.ParityHooks[*loggingv1beta1.WorkRequestLog]
+	Async               generatedruntime.AsyncHooks[*loggingv1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[loggingsdk.ListWorkRequestLogsRequest, loggingsdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -51,6 +52,7 @@ func newWorkRequestLogDefaultRuntimeHooks(sdkClient loggingsdk.LoggingManagement
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*loggingv1beta1.WorkRequestLog]{},
 		StatusHooks:     generatedruntime.StatusHooks[*loggingv1beta1.WorkRequestLog]{},
 		ParityHooks:     generatedruntime.ParityHooks[*loggingv1beta1.WorkRequestLog]{},
+		Async:           generatedruntime.AsyncHooks[*loggingv1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[loggingsdk.ListWorkRequestLogsRequest, loggingsdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request loggingsdk.ListWorkRequestLogsRequest) (loggingsdk.ListWorkRequestLogsResponse, error) {
@@ -83,6 +85,7 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

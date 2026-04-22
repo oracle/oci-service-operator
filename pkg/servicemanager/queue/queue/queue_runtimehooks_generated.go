@@ -30,6 +30,7 @@ type QueueRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*queuev1beta1.Queue]
 	StatusHooks         generatedruntime.StatusHooks[*queuev1beta1.Queue]
 	ParityHooks         generatedruntime.ParityHooks[*queuev1beta1.Queue]
+	Async               generatedruntime.AsyncHooks[*queuev1beta1.Queue]
 	Create              runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]
 	Get                 runtimeOperationHooks[queuesdk.GetQueueRequest, queuesdk.GetQueueResponse]
 	List                runtimeOperationHooks[queuesdk.ListQueuesRequest, queuesdk.ListQueuesResponse]
@@ -117,6 +118,7 @@ func newQueueDefaultRuntimeHooks(sdkClient queuesdk.QueueAdminClient) QueueRunti
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*queuev1beta1.Queue]{},
 		StatusHooks:     generatedruntime.StatusHooks[*queuev1beta1.Queue]{},
 		ParityHooks:     generatedruntime.ParityHooks[*queuev1beta1.Queue]{},
+		Async:           generatedruntime.AsyncHooks[*queuev1beta1.Queue]{},
 		Create: runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueueDetails", RequestName: "CreateQueueDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
@@ -173,6 +175,7 @@ func buildQueueGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

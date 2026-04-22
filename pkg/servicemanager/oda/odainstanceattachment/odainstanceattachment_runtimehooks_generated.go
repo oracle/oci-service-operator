@@ -30,6 +30,7 @@ type OdaInstanceAttachmentRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaInstanceAttachment]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.OdaInstanceAttachment]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.OdaInstanceAttachment]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.OdaInstanceAttachment]
 	Create              runtimeOperationHooks[odasdk.CreateOdaInstanceAttachmentRequest, odasdk.CreateOdaInstanceAttachmentResponse]
 	Get                 runtimeOperationHooks[odasdk.GetOdaInstanceAttachmentRequest, odasdk.GetOdaInstanceAttachmentResponse]
 	List                runtimeOperationHooks[odasdk.ListOdaInstanceAttachmentsRequest, odasdk.ListOdaInstanceAttachmentsResponse]
@@ -55,6 +56,7 @@ func newOdaInstanceAttachmentDefaultRuntimeHooks(sdkClient odasdk.OdaClient) Oda
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.OdaInstanceAttachment]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.OdaInstanceAttachment]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.OdaInstanceAttachment]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.OdaInstanceAttachment]{},
 		Create: runtimeOperationHooks[odasdk.CreateOdaInstanceAttachmentRequest, odasdk.CreateOdaInstanceAttachmentResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateOdaInstanceAttachmentDetails", RequestName: "CreateOdaInstanceAttachmentDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateOdaInstanceAttachmentRequest) (odasdk.CreateOdaInstanceAttachmentResponse, error) {
@@ -111,6 +113,7 @@ func buildOdaInstanceAttachmentGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

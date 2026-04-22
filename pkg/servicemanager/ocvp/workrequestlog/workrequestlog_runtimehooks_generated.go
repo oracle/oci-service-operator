@@ -30,6 +30,7 @@ type WorkRequestLogRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.WorkRequestLog]
 	StatusHooks         generatedruntime.StatusHooks[*ocvpv1beta1.WorkRequestLog]
 	ParityHooks         generatedruntime.ParityHooks[*ocvpv1beta1.WorkRequestLog]
+	Async               generatedruntime.AsyncHooks[*ocvpv1beta1.WorkRequestLog]
 	List                runtimeOperationHooks[ocvpsdk.ListWorkRequestLogsRequest, ocvpsdk.ListWorkRequestLogsResponse]
 	WrapGeneratedClient []func(WorkRequestLogServiceClient) WorkRequestLogServiceClient
 }
@@ -51,6 +52,7 @@ func newWorkRequestLogDefaultRuntimeHooks(sdkClient ocvpsdk.WorkRequestClient) W
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.WorkRequestLog]{},
 		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.WorkRequestLog]{},
 		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.WorkRequestLog]{},
+		Async:           generatedruntime.AsyncHooks[*ocvpv1beta1.WorkRequestLog]{},
 		List: runtimeOperationHooks[ocvpsdk.ListWorkRequestLogsRequest, ocvpsdk.ListWorkRequestLogsResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "WorkRequestId", RequestName: "workRequestId", Contribution: "path", PreferResourceID: true}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request ocvpsdk.ListWorkRequestLogsRequest) (ocvpsdk.ListWorkRequestLogsResponse, error) {
@@ -83,6 +85,7 @@ func buildWorkRequestLogGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		List: &generatedruntime.Operation{

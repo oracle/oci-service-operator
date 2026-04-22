@@ -30,6 +30,7 @@ type SenderRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*emailv1beta1.Sender]
 	StatusHooks         generatedruntime.StatusHooks[*emailv1beta1.Sender]
 	ParityHooks         generatedruntime.ParityHooks[*emailv1beta1.Sender]
+	Async               generatedruntime.AsyncHooks[*emailv1beta1.Sender]
 	Create              runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]
 	Get                 runtimeOperationHooks[emailsdk.GetSenderRequest, emailsdk.GetSenderResponse]
 	List                runtimeOperationHooks[emailsdk.ListSendersRequest, emailsdk.ListSendersResponse]
@@ -108,6 +109,7 @@ func newSenderDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) SenderRuntimeH
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*emailv1beta1.Sender]{},
 		StatusHooks:     generatedruntime.StatusHooks[*emailv1beta1.Sender]{},
 		ParityHooks:     generatedruntime.ParityHooks[*emailv1beta1.Sender]{},
+		Async:           generatedruntime.AsyncHooks[*emailv1beta1.Sender]{},
 		Create: runtimeOperationHooks[emailsdk.CreateSenderRequest, emailsdk.CreateSenderResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSenderDetails", RequestName: "CreateSenderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.CreateSenderRequest) (emailsdk.CreateSenderResponse, error) {
@@ -164,6 +166,7 @@ func buildSenderGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

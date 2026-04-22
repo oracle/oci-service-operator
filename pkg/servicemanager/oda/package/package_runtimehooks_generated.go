@@ -30,6 +30,7 @@ type PackageRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.Package]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.Package]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.Package]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.Package]
 	Get                 runtimeOperationHooks[odasdk.GetPackageRequest, odasdk.GetPackageResponse]
 	List                runtimeOperationHooks[odasdk.ListPackagesRequest, odasdk.ListPackagesResponse]
 	WrapGeneratedClient []func(PackageServiceClient) PackageServiceClient
@@ -52,6 +53,7 @@ func newPackageDefaultRuntimeHooks(sdkClient odasdk.OdapackageClient) PackageRun
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.Package]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.Package]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.Package]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.Package]{},
 		Get: runtimeOperationHooks[odasdk.GetPackageRequest, odasdk.GetPackageResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "PackageId", RequestName: "packageId", Contribution: "path", PreferResourceID: true}},
 			Call: func(ctx context.Context, request odasdk.GetPackageRequest) (odasdk.GetPackageResponse, error) {
@@ -90,6 +92,7 @@ func buildPackageGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Get: &generatedruntime.Operation{

@@ -30,6 +30,7 @@ type TranslatorRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*odav1beta1.Translator]
 	StatusHooks         generatedruntime.StatusHooks[*odav1beta1.Translator]
 	ParityHooks         generatedruntime.ParityHooks[*odav1beta1.Translator]
+	Async               generatedruntime.AsyncHooks[*odav1beta1.Translator]
 	Create              runtimeOperationHooks[odasdk.CreateTranslatorRequest, odasdk.CreateTranslatorResponse]
 	Get                 runtimeOperationHooks[odasdk.GetTranslatorRequest, odasdk.GetTranslatorResponse]
 	List                runtimeOperationHooks[odasdk.ListTranslatorsRequest, odasdk.ListTranslatorsResponse]
@@ -55,6 +56,7 @@ func newTranslatorDefaultRuntimeHooks(sdkClient odasdk.ManagementClient) Transla
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*odav1beta1.Translator]{},
 		StatusHooks:     generatedruntime.StatusHooks[*odav1beta1.Translator]{},
 		ParityHooks:     generatedruntime.ParityHooks[*odav1beta1.Translator]{},
+		Async:           generatedruntime.AsyncHooks[*odav1beta1.Translator]{},
 		Create: runtimeOperationHooks[odasdk.CreateTranslatorRequest, odasdk.CreateTranslatorResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "OdaInstanceId", RequestName: "odaInstanceId", Contribution: "path", PreferResourceID: false}, {FieldName: "CreateTranslatorDetails", RequestName: "CreateTranslatorDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request odasdk.CreateTranslatorRequest) (odasdk.CreateTranslatorResponse, error) {
@@ -111,6 +113,7 @@ func buildTranslatorGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

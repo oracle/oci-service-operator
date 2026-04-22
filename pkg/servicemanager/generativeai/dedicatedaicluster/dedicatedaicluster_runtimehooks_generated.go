@@ -30,6 +30,7 @@ type DedicatedAiClusterRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.DedicatedAiCluster]
 	StatusHooks         generatedruntime.StatusHooks[*generativeaiv1beta1.DedicatedAiCluster]
 	ParityHooks         generatedruntime.ParityHooks[*generativeaiv1beta1.DedicatedAiCluster]
+	Async               generatedruntime.AsyncHooks[*generativeaiv1beta1.DedicatedAiCluster]
 	Create              runtimeOperationHooks[generativeaisdk.CreateDedicatedAiClusterRequest, generativeaisdk.CreateDedicatedAiClusterResponse]
 	Get                 runtimeOperationHooks[generativeaisdk.GetDedicatedAiClusterRequest, generativeaisdk.GetDedicatedAiClusterResponse]
 	List                runtimeOperationHooks[generativeaisdk.ListDedicatedAiClustersRequest, generativeaisdk.ListDedicatedAiClustersResponse]
@@ -108,6 +109,7 @@ func newDedicatedAiClusterDefaultRuntimeHooks(sdkClient generativeaisdk.Generati
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
 		StatusHooks:     generatedruntime.StatusHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
 		ParityHooks:     generatedruntime.ParityHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
+		Async:           generatedruntime.AsyncHooks[*generativeaiv1beta1.DedicatedAiCluster]{},
 		Create: runtimeOperationHooks[generativeaisdk.CreateDedicatedAiClusterRequest, generativeaisdk.CreateDedicatedAiClusterResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateDedicatedAiClusterDetails", RequestName: "CreateDedicatedAiClusterDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request generativeaisdk.CreateDedicatedAiClusterRequest) (generativeaisdk.CreateDedicatedAiClusterResponse, error) {
@@ -164,6 +166,7 @@ func buildDedicatedAiClusterGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

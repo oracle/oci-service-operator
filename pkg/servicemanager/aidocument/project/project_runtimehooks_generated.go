@@ -30,6 +30,7 @@ type ProjectRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*aidocumentv1beta1.Project]
 	StatusHooks         generatedruntime.StatusHooks[*aidocumentv1beta1.Project]
 	ParityHooks         generatedruntime.ParityHooks[*aidocumentv1beta1.Project]
+	Async               generatedruntime.AsyncHooks[*aidocumentv1beta1.Project]
 	Create              runtimeOperationHooks[aidocumentsdk.CreateProjectRequest, aidocumentsdk.CreateProjectResponse]
 	Get                 runtimeOperationHooks[aidocumentsdk.GetProjectRequest, aidocumentsdk.GetProjectResponse]
 	List                runtimeOperationHooks[aidocumentsdk.ListProjectsRequest, aidocumentsdk.ListProjectsResponse]
@@ -108,6 +109,7 @@ func newProjectDefaultRuntimeHooks(sdkClient aidocumentsdk.AIServiceDocumentClie
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*aidocumentv1beta1.Project]{},
 		StatusHooks:     generatedruntime.StatusHooks[*aidocumentv1beta1.Project]{},
 		ParityHooks:     generatedruntime.ParityHooks[*aidocumentv1beta1.Project]{},
+		Async:           generatedruntime.AsyncHooks[*aidocumentv1beta1.Project]{},
 		Create: runtimeOperationHooks[aidocumentsdk.CreateProjectRequest, aidocumentsdk.CreateProjectResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aidocumentsdk.CreateProjectRequest) (aidocumentsdk.CreateProjectResponse, error) {
@@ -164,6 +166,7 @@ func buildProjectGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{

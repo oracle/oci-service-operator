@@ -30,6 +30,7 @@ type AcceptedAgreementRuntimeHooks struct {
 	TrackedRecreate     generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.AcceptedAgreement]
 	StatusHooks         generatedruntime.StatusHooks[*marketplacev1beta1.AcceptedAgreement]
 	ParityHooks         generatedruntime.ParityHooks[*marketplacev1beta1.AcceptedAgreement]
+	Async               generatedruntime.AsyncHooks[*marketplacev1beta1.AcceptedAgreement]
 	Create              runtimeOperationHooks[marketplacesdk.CreateAcceptedAgreementRequest, marketplacesdk.CreateAcceptedAgreementResponse]
 	Get                 runtimeOperationHooks[marketplacesdk.GetAcceptedAgreementRequest, marketplacesdk.GetAcceptedAgreementResponse]
 	List                runtimeOperationHooks[marketplacesdk.ListAcceptedAgreementsRequest, marketplacesdk.ListAcceptedAgreementsResponse]
@@ -108,6 +109,7 @@ func newAcceptedAgreementDefaultRuntimeHooks(sdkClient marketplacesdk.Marketplac
 		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*marketplacev1beta1.AcceptedAgreement]{},
 		StatusHooks:     generatedruntime.StatusHooks[*marketplacev1beta1.AcceptedAgreement]{},
 		ParityHooks:     generatedruntime.ParityHooks[*marketplacev1beta1.AcceptedAgreement]{},
+		Async:           generatedruntime.AsyncHooks[*marketplacev1beta1.AcceptedAgreement]{},
 		Create: runtimeOperationHooks[marketplacesdk.CreateAcceptedAgreementRequest, marketplacesdk.CreateAcceptedAgreementResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateAcceptedAgreementDetails", RequestName: "CreateAcceptedAgreementDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request marketplacesdk.CreateAcceptedAgreementRequest) (marketplacesdk.CreateAcceptedAgreementResponse, error) {
@@ -164,6 +166,7 @@ func buildAcceptedAgreementGeneratedRuntimeConfig(
 		TrackedRecreate: hooks.TrackedRecreate,
 		StatusHooks:     hooks.StatusHooks,
 		ParityHooks:     hooks.ParityHooks,
+		Async:           hooks.Async,
 		BuildCreateBody: hooks.BuildCreateBody,
 		BuildUpdateBody: hooks.BuildUpdateBody,
 		Create: &generatedruntime.Operation{
