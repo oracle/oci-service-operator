@@ -268,12 +268,19 @@ and service-manager generation is enabled.
   sync with `status.async.current`. It is only active when
   `Semantics.Async` explicitly resolves to `strategy=workrequest` and
   `runtime=generatedruntime`.
+- The runtime-hooks surface now also carries an additive bounded delete-only
+  `DeleteHooks` seam for the two confirm-delete stages:
+  `already-pending` before generatedruntime decides whether to reissue delete,
+  and `after-request` after a delete call or retryable conflict. `DeleteHooks`
+  may override confirm-delete rereads, normalize or project delete-phase OCI
+  errors, and short-circuit delete outcome handling, but only for that
+  delete-confirmation path.
 - The nested `Read` seam is only for read adaptation such as synthesizing
   `Get` or `List` from a parent-shaped SDK call. It does not widen
   create/update/delete into a generic untyped CRUD contract, and this contract
   still does not expose generic `CurrentID`, cross-service identity-repair,
   generic bind lookup or payload-sanitization hooks, generic untyped async, or
-  OCI-error overlay hooks.
+  non-delete OCI-error overlay hooks.
 - `<file-stem>_serviceclient.go` now limits itself to OCI client construction,
   hook assembly, generated-runtime config creation, default delegate creation,
   and optional wrapper application.

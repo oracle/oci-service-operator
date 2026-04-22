@@ -1036,6 +1036,7 @@ type {{ .Kind }}RuntimeHooks struct {
 	StatusHooks     generatedruntime.StatusHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 	ParityHooks     generatedruntime.ParityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 	Async           generatedruntime.AsyncHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
+	DeleteHooks     generatedruntime.DeleteHooks[*{{ .APIImportAlias }}.{{ .Kind }}]
 {{- if .CreateOperation }}
 	Create          runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]
 {{- end }}
@@ -1148,6 +1149,7 @@ func new{{ .Kind }}DefaultRuntimeHooks(sdkClient {{ .SDKImportAlias }}.{{ .SDKCl
 		StatusHooks:     generatedruntime.StatusHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 		ParityHooks:     generatedruntime.ParityHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 		Async:           generatedruntime.AsyncHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
+		DeleteHooks:     generatedruntime.DeleteHooks[*{{ .APIImportAlias }}.{{ .Kind }}]{},
 {{- if .CreateOperation }}
 		Create: runtimeOperationHooks[{{ .SDKImportAlias }}.{{ .CreateOperation.RequestTypeName }}, {{ .SDKImportAlias }}.{{ .CreateOperation.ResponseTypeName }}]{
 			Fields: {{ requestFieldsLiteral .CreateOperation.RequestFields }},
@@ -1238,6 +1240,7 @@ func build{{ .Kind }}GeneratedRuntimeConfig(
 		StatusHooks:      hooks.StatusHooks,
 		ParityHooks:      hooks.ParityHooks,
 		Async:            hooks.Async,
+		DeleteHooks:      hooks.DeleteHooks,
 		BuildCreateBody:  hooks.BuildCreateBody,
 		BuildUpdateBody:  hooks.BuildUpdateBody,
 {{- if .CreateOperation }}
