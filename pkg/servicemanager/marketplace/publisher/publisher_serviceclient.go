@@ -19,7 +19,7 @@ import (
 )
 
 // PublisherServiceClient is the handwritten extension seam for Publisher runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*PublisherServiceManager).WithClient.
 type PublisherServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.Publisher, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ PublisherServiceClient = defaultPublisherServiceClient{}
 
 var newPublisherServiceClient = func(manager *PublisherServiceManager) PublisherServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.Publisher]{
-		Kind:    "Publisher",
-		SDKName: "Publisher",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListPublishersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListPublishers(ctx, *request.(*marketplacesdk.ListPublishersRequest))
-			},
-		},
-	}
+	hooks := newPublisherRuntimeHooks(manager, sdkClient)
+	config := buildPublisherGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Publisher OCI client: %w", err)
 	}
-	return defaultPublisherServiceClient{
+	delegate := defaultPublisherServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.Publisher](config),
 	}
+	return wrapPublisherGeneratedClient(hooks, delegate)
 }

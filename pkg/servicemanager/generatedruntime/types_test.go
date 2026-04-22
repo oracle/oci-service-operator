@@ -85,3 +85,55 @@ func TestValidateFormalSemanticsBlocksAuxiliaryOperations(t *testing.T) {
 		t.Fatalf("validateFormalSemantics() error = %v, want auxiliary-operation detail", err)
 	}
 }
+
+func TestValidateFormalSemanticsAllowsGeneratedRuntimeWorkRequestRuntime(t *testing.T) {
+	t.Parallel()
+
+	err := validateFormalSemantics("Queue", &Semantics{
+		Async: &AsyncSemantics{
+			Strategy:             "workrequest",
+			Runtime:              "generatedruntime",
+			FormalClassification: "workrequest",
+			WorkRequest: &WorkRequestSemantics{
+				Source: "service-sdk",
+				Phases: []string{"create", "update", "delete"},
+			},
+		},
+		Delete: DeleteSemantics{
+			Policy:         "required",
+			TerminalStates: []string{"DELETED"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("validateFormalSemantics() error = %v, want nil", err)
+	}
+}
+
+func TestValidateGeneratedWorkRequestAsyncHooksRequiresGetWorkRequest(t *testing.T) {
+	t.Parallel()
+
+	err := validateGeneratedWorkRequestAsyncHooks(Config[*fakeResource]{
+		Kind: "Queue",
+		Semantics: &Semantics{
+			Async: &AsyncSemantics{
+				Strategy:             "workrequest",
+				Runtime:              "generatedruntime",
+				FormalClassification: "workrequest",
+				WorkRequest: &WorkRequestSemantics{
+					Source: "service-sdk",
+					Phases: []string{"create", "update", "delete"},
+				},
+			},
+			Delete: DeleteSemantics{
+				Policy:         "required",
+				TerminalStates: []string{"DELETED"},
+			},
+		},
+	})
+	if err == nil {
+		t.Fatal("validateGeneratedWorkRequestAsyncHooks() error = nil, want missing GetWorkRequest failure")
+	}
+	if !strings.Contains(err.Error(), "Async.GetWorkRequest") {
+		t.Fatalf("validateGeneratedWorkRequestAsyncHooks() error = %v, want GetWorkRequest detail", err)
+	}
+}

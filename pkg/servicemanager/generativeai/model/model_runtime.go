@@ -7,11 +7,9 @@ package model
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v65/common"
 	generativeaisdk "github.com/oracle/oci-go-sdk/v65/generativeai"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
@@ -21,33 +19,83 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-type modelOCIClient interface {
-	GetModel(context.Context, generativeaisdk.GetModelRequest) (generativeaisdk.GetModelResponse, error)
-}
-
-type modelGeneratedParityClient struct {
-	delegate ModelServiceClient
-	client   modelOCIClient
-	initErr  error
-}
+type modelDeletedLifecycleReadGuardContextKey struct{}
 
 func init() {
-	generatedFactory := newModelServiceClient
-	newModelServiceClient = func(manager *ModelServiceManager) ModelServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := generativeaisdk.NewGenerativeAiClientWithConfigurationProvider(manager.Provider)
-		parityClient := &modelGeneratedParityClient{
-			delegate: delegate,
-			client:   sdkClient,
-		}
-		if err != nil {
-			parityClient.initErr = fmt.Errorf("initialize Model OCI client: %w", err)
-		}
-		return parityClient
+	registerModelRuntimeHooksMutator(func(_ *ModelServiceManager, hooks *ModelRuntimeHooks) {
+		applyModelRuntimeHooks(hooks)
+	})
+}
+
+func applyModelRuntimeHooks(hooks *ModelRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Identity.GuardExistingBeforeCreate = guardModelExistingBeforeCreate
+	hooks.TrackedRecreate.ClearTrackedIdentity = clearModelIdentity
+	hooks.Read.Get = modelDeletedLifecycleReadOperation(hooks.Get)
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ModelServiceClient) ModelServiceClient {
+		return modelDeletedLifecycleGuardClient{delegate: delegate}
+	})
+}
+
+func guardModelExistingBeforeCreate(
+	_ context.Context,
+	resource *generativeaiv1beta1.Model,
+) (generatedruntime.ExistingBeforeCreateDecision, error) {
+	if resource == nil {
+		return generatedruntime.ExistingBeforeCreateDecisionAllow, nil
+	}
+	if strings.TrimSpace(resource.Spec.DisplayName) == "" {
+		return generatedruntime.ExistingBeforeCreateDecisionSkip, nil
+	}
+	return generatedruntime.ExistingBeforeCreateDecisionAllow, nil
+}
+
+func modelDeletedLifecycleReadOperation(
+	get runtimeOperationHooks[generativeaisdk.GetModelRequest, generativeaisdk.GetModelResponse],
+) *generatedruntime.Operation {
+	return &generatedruntime.Operation{
+		NewRequest: func() any { return &generativeaisdk.GetModelRequest{} },
+		Fields:     append([]generatedruntime.RequestField(nil), get.Fields...),
+		Call: func(ctx context.Context, request any) (any, error) {
+			response, err := get.Call(ctx, *request.(*generativeaisdk.GetModelRequest))
+			if err != nil {
+				return nil, err
+			}
+			if modelDeletedLifecycleReadGuardEnabled(ctx) && response.Model.LifecycleState == generativeaisdk.ModelLifecycleStateDeleted {
+				return nil, errorutil.NotFoundOciError{
+					HTTPStatusCode: 404,
+					ErrorCode:      errorutil.NotFound,
+					Description:    "Model lifecycle state DELETED is treated as not found during stale tracked identity recovery",
+				}
+			}
+			return response, nil
+		},
 	}
 }
 
-func (c *modelGeneratedParityClient) CreateOrUpdate(
+func withModelDeletedLifecycleReadGuard(ctx context.Context) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return context.WithValue(ctx, modelDeletedLifecycleReadGuardContextKey{}, true)
+}
+
+func modelDeletedLifecycleReadGuardEnabled(ctx context.Context) bool {
+	if ctx == nil {
+		return false
+	}
+	enabled, _ := ctx.Value(modelDeletedLifecycleReadGuardContextKey{}).(bool)
+	return enabled
+}
+
+type modelDeletedLifecycleGuardClient struct {
+	delegate ModelServiceClient
+}
+
+func (c modelDeletedLifecycleGuardClient) CreateOrUpdate(
 	ctx context.Context,
 	resource *generativeaiv1beta1.Model,
 	req ctrl.Request,
@@ -58,37 +106,13 @@ func (c *modelGeneratedParityClient) CreateOrUpdate(
 	if resource == nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Model resource must not be nil")
 	}
-
 	if strings.TrimSpace(resource.Spec.DisplayName) != "" {
 		return c.delegate.CreateOrUpdate(ctx, resource, req)
 	}
-
-	trackedID := currentModelID(resource)
-	if trackedID == "" {
-		return c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-	}
-
-	if c.initErr != nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, c.initErr
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isModelReadNotFoundOCI(err) {
-			clearModelIdentity(resource)
-			return c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-		}
-		return servicemanager.OSOKResponse{IsSuccessful: false}, normalizeModelOCIError(err)
-	}
-	if current.LifecycleState == generativeaisdk.ModelLifecycleStateDeleted {
-		clearModelIdentity(resource)
-		return c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-	}
-
-	return c.delegate.CreateOrUpdate(ctx, resource, req)
+	return c.delegate.CreateOrUpdate(withModelDeletedLifecycleReadGuard(ctx), resource, req)
 }
 
-func (c *modelGeneratedParityClient) Delete(
+func (c modelDeletedLifecycleGuardClient) Delete(
 	ctx context.Context,
 	resource *generativeaiv1beta1.Model,
 ) (bool, error) {
@@ -98,46 +122,10 @@ func (c *modelGeneratedParityClient) Delete(
 	return c.delegate.Delete(ctx, resource)
 }
 
-func (c *modelGeneratedParityClient) get(ctx context.Context, ocid string) (generativeaisdk.Model, error) {
-	response, err := c.client.GetModel(ctx, generativeaisdk.GetModelRequest{
-		ModelId: common.String(ocid),
-	})
-	if err != nil {
-		return generativeaisdk.Model{}, err
-	}
-	return response.Model, nil
-}
-
-func currentModelID(resource *generativeaiv1beta1.Model) string {
-	if resource == nil {
-		return ""
-	}
-	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
-		return ocid
-	}
-	return strings.TrimSpace(resource.Status.Id)
-}
-
 func clearModelIdentity(resource *generativeaiv1beta1.Model) {
 	if resource == nil {
 		return
 	}
 	resource.Status.Id = ""
 	resource.Status.OsokStatus.Ocid = shared.OCID("")
-}
-
-func normalizeModelOCIError(err error) error {
-	var serviceErr common.ServiceError
-	if !errors.As(err, &serviceErr) {
-		return err
-	}
-	if _, normalized := errorutil.OciErrorTypeResponse(err); normalized != nil {
-		return normalized
-	}
-	return err
-}
-
-func isModelReadNotFoundOCI(err error) bool {
-	classification := errorutil.ClassifyDeleteError(err)
-	return classification.IsUnambiguousNotFound()
 }

@@ -19,7 +19,7 @@ import (
 )
 
 // DigitalAssistantServiceClient is the handwritten extension seam for DigitalAssistant runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*DigitalAssistantServiceManager).WithClient.
 type DigitalAssistantServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.DigitalAssistant, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ DigitalAssistantServiceClient = defaultDigitalAssistantServiceClient{}
 
 var newDigitalAssistantServiceClient = func(manager *DigitalAssistantServiceManager) DigitalAssistantServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.DigitalAssistant]{
-		Kind:    "DigitalAssistant",
-		SDKName: "DigitalAssistant",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateDigitalAssistantRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateDigitalAssistant(ctx, *request.(*odasdk.CreateDigitalAssistantRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetDigitalAssistantRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetDigitalAssistant(ctx, *request.(*odasdk.GetDigitalAssistantRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListDigitalAssistantsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListDigitalAssistants(ctx, *request.(*odasdk.ListDigitalAssistantsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateDigitalAssistantRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateDigitalAssistant(ctx, *request.(*odasdk.UpdateDigitalAssistantRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteDigitalAssistantRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteDigitalAssistant(ctx, *request.(*odasdk.DeleteDigitalAssistantRequest))
-			},
-		},
-	}
+	hooks := newDigitalAssistantRuntimeHooks(manager, sdkClient)
+	config := buildDigitalAssistantGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize DigitalAssistant OCI client: %w", err)
 	}
-	return defaultDigitalAssistantServiceClient{
+	delegate := defaultDigitalAssistantServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.DigitalAssistant](config),
 	}
+	return wrapDigitalAssistantGeneratedClient(hooks, delegate)
 }

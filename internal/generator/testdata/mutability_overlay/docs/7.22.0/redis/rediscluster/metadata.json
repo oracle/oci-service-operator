@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "redis",
+  "kind": "RedisCluster",
+  "formalSlug": "rediscluster",
+  "providerResource": "oci_redis_redis_cluster",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/redis_redis_cluster",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/redis_redis_cluster",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/redis/rediscluster/page.html",
+  "bodySHA256": "9b5e4e17c4b9483c5e95783f0203d430880930d9d5db3ee6bebefb0248130735",
+  "bodyBytes": 3111,
+  "fixtureBodyPath": "7.22.0/redis/rediscluster/page.html"
+}

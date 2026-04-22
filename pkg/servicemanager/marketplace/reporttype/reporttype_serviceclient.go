@@ -19,7 +19,7 @@ import (
 )
 
 // ReportTypeServiceClient is the handwritten extension seam for ReportType runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ReportTypeServiceManager).WithClient.
 type ReportTypeServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.ReportType, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ ReportTypeServiceClient = defaultReportTypeServiceClient{}
 
 var newReportTypeServiceClient = func(manager *ReportTypeServiceManager) ReportTypeServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.ReportType]{
-		Kind:    "ReportType",
-		SDKName: "ReportType",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListReportTypesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListReportTypes(ctx, *request.(*marketplacesdk.ListReportTypesRequest))
-			},
-		},
-	}
+	hooks := newReportTypeRuntimeHooks(manager, sdkClient)
+	config := buildReportTypeGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize ReportType OCI client: %w", err)
 	}
-	return defaultReportTypeServiceClient{
+	delegate := defaultReportTypeServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.ReportType](config),
 	}
+	return wrapReportTypeGeneratedClient(hooks, delegate)
 }

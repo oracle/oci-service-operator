@@ -19,7 +19,7 @@ import (
 )
 
 // AnalyticsInstanceServiceClient is the handwritten extension seam for AnalyticsInstance runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*AnalyticsInstanceServiceManager).WithClient.
 type AnalyticsInstanceServiceClient interface {
 	CreateOrUpdate(context.Context, *analyticsv1beta1.AnalyticsInstance, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultAnalyticsInstanceServiceClient struct {
 	generatedruntime.ServiceClient[*analyticsv1beta1.AnalyticsInstance]
 }
 
-func newAnalyticsInstanceRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "analytics",
-		FormalSlug:    "analyticsinstance",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"capacityType", "compartmentId", "featureSet", "name", "state"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"capacity.capacityValue", "compartmentId", "definedTags", "description", "emailNotification", "freeformTags", "idcsAccessToken", "kmsKeyId", "licenseType", "networkEndpointDetails.networkSecurityGroupIds", "networkEndpointDetails.subnetId", "networkEndpointDetails.vcnId", "networkEndpointDetails.whitelistedIps", "networkEndpointDetails.whitelistedServices", "networkEndpointDetails.whitelistedVcns.id", "networkEndpointDetails.whitelistedVcns.whitelistedIps"},
-			ForceNew:      []string{"capacity.capacityType", "featureSet", "name", "networkEndpointDetails.networkEndpointType"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{},
-			Update: []generatedruntime.Hook{},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "none",
-			Hooks:    []generatedruntime.Hook{},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "none",
-			Hooks:    []generatedruntime.Hook{},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeAnalyticsInstanceCompartment", RequestTypeName: "analytics.ChangeAnalyticsInstanceCompartmentRequest", ResponseTypeName: "analytics.ChangeAnalyticsInstanceCompartmentResponse"}, {Phase: "update", MethodName: "ChangeAnalyticsInstanceNetworkEndpoint", RequestTypeName: "analytics.ChangeAnalyticsInstanceNetworkEndpointRequest", ResponseTypeName: "analytics.ChangeAnalyticsInstanceNetworkEndpointResponse"}, {Phase: "update", MethodName: "ScaleAnalyticsInstance", RequestTypeName: "analytics.ScaleAnalyticsInstanceRequest", ResponseTypeName: "analytics.ScaleAnalyticsInstanceResponse"}},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ AnalyticsInstanceServiceClient = defaultAnalyticsInstanceServiceClient{}
 
 var newAnalyticsInstanceServiceClient = func(manager *AnalyticsInstanceServiceManager) AnalyticsInstanceServiceClient {
 	sdkClient, err := analyticssdk.NewAnalyticsClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
-		Kind:      "AnalyticsInstance",
-		SDKName:   "AnalyticsInstance",
-		Log:       manager.Log,
-		Semantics: newAnalyticsInstanceRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &analyticssdk.CreateAnalyticsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateAnalyticsInstance(ctx, *request.(*analyticssdk.CreateAnalyticsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateAnalyticsInstanceDetails", RequestName: "CreateAnalyticsInstanceDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &analyticssdk.GetAnalyticsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetAnalyticsInstance(ctx, *request.(*analyticssdk.GetAnalyticsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "AnalyticsInstanceId", RequestName: "analyticsInstanceId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &analyticssdk.ListAnalyticsInstancesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListAnalyticsInstances(ctx, *request.(*analyticssdk.ListAnalyticsInstancesRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "CapacityType", RequestName: "capacityType", Contribution: "query", PreferResourceID: false}, {FieldName: "FeatureSet", RequestName: "featureSet", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &analyticssdk.UpdateAnalyticsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateAnalyticsInstance(ctx, *request.(*analyticssdk.UpdateAnalyticsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "AnalyticsInstanceId", RequestName: "analyticsInstanceId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateAnalyticsInstanceDetails", RequestName: "UpdateAnalyticsInstanceDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &analyticssdk.DeleteAnalyticsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteAnalyticsInstance(ctx, *request.(*analyticssdk.DeleteAnalyticsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "AnalyticsInstanceId", RequestName: "analyticsInstanceId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newAnalyticsInstanceRuntimeHooks(manager, sdkClient)
+	config := buildAnalyticsInstanceGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize AnalyticsInstance OCI client: %w", err)
 	}
-	return defaultAnalyticsInstanceServiceClient{
+	delegate := defaultAnalyticsInstanceServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*analyticsv1beta1.AnalyticsInstance](config),
 	}
+	return wrapAnalyticsInstanceGeneratedClient(hooks, delegate)
 }

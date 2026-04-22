@@ -77,82 +77,26 @@ func (f *fakeVcnOCIClient) DeleteVcn(ctx context.Context, req coresdk.DeleteVcnR
 	return coresdk.DeleteVcnResponse{}, nil
 }
 
-func newTestGeneratedDelegate(manager *VcnServiceManager, client vcnOCIClient) VcnServiceClient {
+func newTestVcnRuntimeHooks(manager *VcnServiceManager, client vcnOCIClient) VcnRuntimeHooks {
 	if client == nil {
 		client = &fakeVcnOCIClient{}
 	}
 
-	config := generatedruntime.Config[*corev1beta1.Vcn]{
-		Kind:    "Vcn",
-		SDKName: "Vcn",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService: "core",
-			FormalSlug:    "vcn",
-			Async: &generatedruntime.AsyncSemantics{
-				Strategy:             "lifecycle",
-				Runtime:              "generatedruntime",
-				FormalClassification: "lifecycle",
-			},
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"AVAILABLE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATED", "TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-				ForceNew:      []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"},
-				ConflictsWith: map[string][]string{"cidrBlock": {"cidrBlocks"}, "cidrBlocks": {"cidrBlock"}},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateVcn(ctx, *request.(*coresdk.CreateVcnRequest))
-			},
+	hooks := VcnRuntimeHooks{
+		Semantics: newVcnRuntimeSemantics(),
+		Create: runtimeOperationHooks[coresdk.CreateVcnRequest, coresdk.CreateVcnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateVcnDetails", RequestName: "CreateVcnDetails", Contribution: "body"}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetVcn(ctx, *request.(*coresdk.GetVcnRequest))
+			Call: func(ctx context.Context, request coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
+				return client.CreateVcn(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[coresdk.GetVcnRequest, coresdk.GetVcnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListVcnsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListVcns(ctx, *request.(*coresdk.ListVcnsRequest))
+			Call: func(ctx context.Context, request coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+				return client.GetVcn(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[coresdk.ListVcnsRequest, coresdk.ListVcnsResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
@@ -162,40 +106,43 @@ func newTestGeneratedDelegate(manager *VcnServiceManager, client vcnOCIClient) V
 				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateVcn(ctx, *request.(*coresdk.UpdateVcnRequest))
+			Call: func(ctx context.Context, request coresdk.ListVcnsRequest) (coresdk.ListVcnsResponse, error) {
+				return client.ListVcns(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[coresdk.UpdateVcnRequest, coresdk.UpdateVcnResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true},
 				{FieldName: "UpdateVcnDetails", RequestName: "UpdateVcnDetails", Contribution: "body"},
 			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteVcnRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteVcn(ctx, *request.(*coresdk.DeleteVcnRequest))
+			Call: func(ctx context.Context, request coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+				return client.UpdateVcn(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[coresdk.DeleteVcnRequest, coresdk.DeleteVcnResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "VcnId", RequestName: "vcnId", Contribution: "path", PreferResourceID: true}},
+			Call: func(ctx context.Context, request coresdk.DeleteVcnRequest) (coresdk.DeleteVcnResponse, error) {
+				return client.DeleteVcn(ctx, request)
+			},
 		},
 	}
+	applyVcnRuntimeHooks(manager, &hooks, client)
+	return hooks
+}
 
-	return defaultVcnServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Vcn](config),
+func newTestGeneratedDelegate(manager *VcnServiceManager, client vcnOCIClient) VcnServiceClient {
+	hooks := newTestVcnRuntimeHooks(manager, client)
+	delegate := defaultVcnServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Vcn](buildVcnGeneratedRuntimeConfig(manager, hooks)),
 	}
+	return wrapVcnGeneratedClient(hooks, delegate)
 }
 
 func newTestManager(client vcnOCIClient) *VcnServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewVcnServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&vcnGeneratedParityClient{
-			manager:  manager,
-			client:   client,
-			delegate: newTestGeneratedDelegate(manager, client),
-		})
+		manager.WithClient(newTestGeneratedDelegate(manager, client))
 	}
 	return manager
 }

@@ -18,23 +18,48 @@ func (c ServiceClient[T]) Delete(ctx context.Context, resource T) (bool, error) 
 	if err := c.validateDeleteRequest(resource); err != nil {
 		return false, err
 	}
-	if c.config.Semantics != nil {
-		return c.deleteWithSemantics(ctx, resource)
-	}
-	if c.config.Delete == nil {
-		c.markDeleted(resource, "OCI delete is not supported for this generated resource")
-		return true, nil
+	identity, err := c.prepareIdentity(resource)
+	if err != nil {
+		return false, err
 	}
 
-	currentID := c.currentID(resource)
-	if currentID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
-		return true, nil
+	var restoreSyntheticTrackedID func()
+	if c.currentID(resource) == "" && c.config.Identity.SeedSyntheticTrackedID != nil {
+		restoreSyntheticTrackedID = c.config.Identity.SeedSyntheticTrackedID(resource, identity)
 	}
-	if deleted, err := c.invokeDeleteOperation(ctx, resource, currentID); deleted || err != nil {
-		return deleted, err
+	if workRequestID, phase := c.currentGeneratedWorkRequest(resource); workRequestID != "" && phase == shared.OSOKAsyncPhaseDelete {
+		deleted, err := c.resumeGeneratedWorkRequestDelete(ctx, resource, workRequestID)
+		if err != nil {
+			if restoreSyntheticTrackedID != nil {
+				restoreSyntheticTrackedID()
+			}
+			return false, err
+		}
+		c.recordTrackedIdentity(resource, identity, c.currentID(resource))
+		if restoreSyntheticTrackedID != nil && c.config.Identity.RecordTracked == nil {
+			restoreSyntheticTrackedID()
+		}
+		return deleted, nil
 	}
-	return c.confirmDeleteWithoutSemantics(ctx, resource, currentID)
+
+	var deleted bool
+	if c.config.Semantics != nil {
+		deleted, err = c.deleteWithSemantics(ctx, resource)
+	} else {
+		deleted, err = c.deleteWithoutSemantics(ctx, resource)
+	}
+	if err != nil {
+		if restoreSyntheticTrackedID != nil {
+			restoreSyntheticTrackedID()
+		}
+		return false, err
+	}
+
+	c.recordTrackedIdentity(resource, identity, c.currentID(resource))
+	if restoreSyntheticTrackedID != nil && c.config.Identity.RecordTracked == nil {
+		restoreSyntheticTrackedID()
+	}
+	return deleted, nil
 }
 
 func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
@@ -48,36 +73,72 @@ func (c ServiceClient[T]) validateDeleteRequest(resource T) error {
 func (c ServiceClient[T]) invokeDeleteOperation(ctx context.Context, resource T, currentID string) (bool, error) {
 	response, err := c.invoke(ctx, c.config.Delete, resource, currentID, requestBuildOptions{})
 	if err != nil {
+		err = c.handleDeleteError(resource, err)
 		if isDeleteNotFound(err) {
 			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource no longer exists")
+			c.markDeletedWithHooks(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
 	}
 	c.seedOpeningRequestID(resource, response)
+	if c.generatedWorkRequestPhaseEnabled(shared.OSOKAsyncPhaseDelete) {
+		_, err := c.startGeneratedWorkRequest(resource, response, shared.OSOKAsyncPhaseDelete, nil)
+		return false, err
+	}
 	c.seedOpeningWorkRequestID(resource, response, shared.OSOKAsyncPhaseDelete)
 	return false, nil
 }
 
-func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, resource T, currentID string) (bool, error) {
-	if c.config.Get == nil && c.config.List == nil {
-		c.markDeleted(resource, "OCI delete request accepted")
+func (c ServiceClient[T]) deleteWithoutSemantics(ctx context.Context, resource T) (bool, error) {
+	if c.config.Delete == nil {
+		c.markDeletedWithHooks(resource, "OCI delete is not supported for this generated resource")
 		return true, nil
 	}
 
-	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	currentID := c.currentID(resource)
+	if currentID == "" {
+		c.markDeletedWithHooks(resource, "OCI resource identifier is not recorded")
+		return true, nil
+	}
+	if deleted, err := c.invokeDeleteOperation(ctx, resource, currentID); deleted || err != nil {
+		return deleted, err
+	}
+	if workRequestID, phase := c.currentGeneratedWorkRequest(resource); workRequestID != "" && phase == shared.OSOKAsyncPhaseDelete {
+		return c.resumeGeneratedWorkRequestDelete(ctx, resource, workRequestID)
+	}
+	return c.confirmDeleteWithoutSemantics(ctx, resource, currentID)
+}
+
+func (c ServiceClient[T]) confirmDeleteWithoutSemantics(ctx context.Context, resource T, currentID string) (bool, error) {
+	if !c.hasDeleteConfirmRead() {
+		c.markDeletedWithHooks(resource, "OCI delete request accepted")
+		return true, nil
+	}
+
+	response, err := c.confirmDeleteRead(ctx, resource, currentID)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource deleted")
+			c.markDeletedWithHooks(resource, "OCI resource deleted")
 			return true, nil
 		}
 		return false, err
 	}
 
-	_ = mergeResponseIntoStatus(resource, response)
-	c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return false, err
+	}
+	outcome, err := c.applyDeleteOutcomeHooks(resource, response, DeleteConfirmStageAfterRequest)
+	if err != nil {
+		return false, err
+	}
+	if outcome.Handled {
+		return outcome.Deleted, nil
+	}
+	if err := c.markTerminatingWithHooks(resource, response); err != nil {
+		return false, err
+	}
 	return false, nil
 }
 
@@ -85,7 +146,7 @@ func (c ServiceClient[T]) followUpAfterWrite(ctx context.Context, resource T, pr
 	if !c.requiresWriteFollowUp(phase) {
 		return response, nil
 	}
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasReadableOperation() {
 		if c.config.Semantics != nil {
 			return nil, fmt.Errorf("%s formal semantics require %s follow-up without a readable OCI operation", c.config.Kind, phase)
 		}
@@ -104,7 +165,7 @@ func (c ServiceClient[T]) followUpAfterWrite(ctx context.Context, resource T, pr
 
 func (c ServiceClient[T]) requiresWriteFollowUp(phase string) bool {
 	if c.config.Semantics == nil {
-		return c.config.Get != nil || c.config.List != nil
+		return c.hasReadableOperation()
 	}
 
 	switch phase {
@@ -139,7 +200,7 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 	currentID, err := c.resolveDeleteID(ctx, resource)
 	if err != nil {
 		if errors.Is(err, errResourceNotFound) {
-			c.markDeleted(resource, "OCI resource no longer exists")
+			c.markDeletedWithHooks(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, err
@@ -154,6 +215,9 @@ func (c ServiceClient[T]) deleteWithSemantics(ctx context.Context, resource T) (
 	if err != nil && !c.shouldConfirmDeleteAfterError(err) {
 		return false, err
 	}
+	if workRequestID, phase := c.currentGeneratedWorkRequest(resource); workRequestID != "" && phase == shared.OSOKAsyncPhaseDelete {
+		return c.resumeGeneratedWorkRequestDelete(ctx, resource, workRequestID)
+	}
 	return c.confirmDeleteWithSemantics(ctx, resource, currentID, semantics)
 }
 
@@ -161,17 +225,30 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		return false, nil, false
 	}
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasDeleteConfirmRead() {
 		return false, nil, false
 	}
 
-	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	response, err := c.confirmDeleteRead(ctx, resource, currentID)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
-			c.markDeleted(resource, "OCI resource deleted")
+			c.markDeletedWithHooks(resource, "OCI resource deleted")
 			return true, nil, true
 		}
 		return false, nil, false
+	}
+
+	if c.config.DeleteHooks.ApplyOutcome != nil {
+		if err := c.projectStatusWithHooks(resource, response); err != nil {
+			return false, err, true
+		}
+		outcome, err := c.applyDeleteOutcomeHooks(resource, response, DeleteConfirmStageAlreadyPending)
+		if err != nil {
+			return false, err, true
+		}
+		if outcome.Handled {
+			return outcome.Deleted, nil, true
+		}
 	}
 
 	lifecycleState := strings.ToUpper(responseLifecycleState(response))
@@ -180,7 +257,11 @@ func (c ServiceClient[T]) confirmDeleteIfAlreadyPending(ctx context.Context, res
 		return false, nil, false
 	}
 
-	_ = mergeResponseIntoStatus(resource, response)
+	if c.config.DeleteHooks.ApplyOutcome == nil {
+		if err := c.projectStatusWithHooks(resource, response); err != nil {
+			return false, err, true
+		}
+	}
 	deleted, err := c.applyDeletePolicy(resource, response, semantics)
 	return deleted, err, true
 }
@@ -192,7 +273,7 @@ func (c ServiceClient[T]) shouldConfirmDeleteAfterError(err error) bool {
 	if c.config.Semantics == nil || c.config.Semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		return false
 	}
-	return c.config.Get != nil || c.config.List != nil
+	return c.hasDeleteConfirmRead()
 }
 
 func (c ServiceClient[T]) semanticDeleteConfig() (*Semantics, error) {
@@ -208,24 +289,33 @@ func (c ServiceClient[T]) semanticDeleteConfig() (*Semantics, error) {
 
 func (c ServiceClient[T]) confirmDeleteWithSemantics(ctx context.Context, resource T, currentID string, semantics *Semantics) (bool, error) {
 	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
-		c.markDeleted(resource, "OCI delete request accepted")
+		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return true, nil
 	}
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasDeleteConfirmRead() {
 		return false, fmt.Errorf("%s formal delete confirmation requires a readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.readResource(ctx, resource, currentID, readPhaseDelete)
+	response, err := c.confirmDeleteRead(ctx, resource, currentID)
 	if err != nil {
 		if isDeleteNotFound(err) || errors.Is(err, errResourceNotFound) {
 			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource deleted")
+			c.markDeletedWithHooks(resource, "OCI resource deleted")
 			return true, nil
 		}
 		return false, err
 	}
 
-	_ = mergeResponseIntoStatus(resource, response)
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return false, err
+	}
+	outcome, err := c.applyDeleteOutcomeHooks(resource, response, DeleteConfirmStageAfterRequest)
+	if err != nil {
+		return false, err
+	}
+	if outcome.Handled {
+		return outcome.Deleted, nil
+	}
 	return c.applyDeletePolicy(resource, response, semantics)
 }
 
@@ -233,33 +323,37 @@ func (c ServiceClient[T]) applyDeletePolicy(resource T, response any, semantics 
 	lifecycleState := strings.ToUpper(responseLifecycleState(response))
 	switch semantics.Delete.Policy {
 	case "best-effort":
-		return c.bestEffortDeleteOutcome(resource, lifecycleState, semantics)
+		return c.bestEffortDeleteOutcome(resource, response, lifecycleState, semantics)
 	case "required":
-		return c.requiredDeleteOutcome(resource, lifecycleState, semantics)
+		return c.requiredDeleteOutcome(resource, response, lifecycleState, semantics)
 	default:
 		return false, fmt.Errorf("%s formal delete confirmation policy %q is not supported", c.config.Kind, semantics.Delete.Policy)
 	}
 }
 
-func (c ServiceClient[T]) bestEffortDeleteOutcome(resource T, lifecycleState string, semantics *Semantics) (bool, error) {
+func (c ServiceClient[T]) bestEffortDeleteOutcome(resource T, response any, lifecycleState string, semantics *Semantics) (bool, error) {
 	if lifecycleState == "" ||
 		containsString(semantics.Delete.PendingStates, lifecycleState) ||
 		containsString(semantics.Delete.TerminalStates, lifecycleState) {
-		c.markDeleted(resource, "OCI delete request accepted")
+		c.markDeletedWithHooks(resource, "OCI delete request accepted")
 		return true, nil
 	}
 
-	c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+	if err := c.markTerminatingWithHooks(resource, response); err != nil {
+		return false, err
+	}
 	return false, nil
 }
 
-func (c ServiceClient[T]) requiredDeleteOutcome(resource T, lifecycleState string, semantics *Semantics) (bool, error) {
+func (c ServiceClient[T]) requiredDeleteOutcome(resource T, response any, lifecycleState string, semantics *Semantics) (bool, error) {
 	switch {
 	case containsString(semantics.Delete.TerminalStates, lifecycleState):
-		c.markDeleted(resource, "OCI resource deleted")
+		c.markDeletedWithHooks(resource, "OCI resource deleted")
 		return true, nil
 	case lifecycleState == "" || containsString(semantics.Delete.PendingStates, lifecycleState):
-		c.markCondition(resource, shared.Terminating, "OCI resource delete is in progress")
+		if err := c.markTerminatingWithHooks(resource, response); err != nil {
+			return false, err
+		}
 		return false, nil
 	default:
 		return false, fmt.Errorf("%s delete confirmation returned unexpected lifecycle state %q", c.config.Kind, lifecycleState)
@@ -272,11 +366,11 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 		return currentID, nil
 	}
 
-	if c.config.Get == nil && c.config.List == nil {
+	if !c.hasDeleteConfirmRead() {
 		return "", errResourceNotFound
 	}
 
-	response, err := c.readResource(ctx, resource, "", readPhaseDelete)
+	response, err := c.confirmDeleteRead(ctx, resource, "")
 	if err != nil {
 		return "", err
 	}
@@ -284,6 +378,8 @@ func (c ServiceClient[T]) resolveDeleteID(ctx context.Context, resource T) (stri
 	if currentID == "" {
 		return "", fmt.Errorf("%s delete confirmation could not resolve a resource OCID", c.config.Kind)
 	}
-	_ = mergeResponseIntoStatus(resource, response)
+	if err := c.projectStatusWithHooks(resource, response); err != nil {
+		return "", err
+	}
 	return currentID, nil
 }

@@ -17,6 +17,7 @@ import (
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
@@ -71,6 +72,14 @@ type RequestField struct {
 	LookupPaths      []string
 }
 
+type ExistingBeforeCreateDecision string
+
+const (
+	ExistingBeforeCreateDecisionAllow ExistingBeforeCreateDecision = "allow"
+	ExistingBeforeCreateDecisionSkip  ExistingBeforeCreateDecision = "skip"
+	ExistingBeforeCreateDecisionFail  ExistingBeforeCreateDecision = "fail"
+)
+
 type Hook struct {
 	Helper     string
 	EntityType string
@@ -105,6 +114,68 @@ type HookSet struct {
 	Create []Hook
 	Update []Hook
 	Delete []Hook
+}
+
+type IdentityHooks[T any] struct {
+	Resolve                   func(T) (any, error)
+	RecordPath                func(T, any)
+	RecordTracked             func(T, any, string)
+	GuardExistingBeforeCreate func(context.Context, T) (ExistingBeforeCreateDecision, error)
+	LookupExisting            func(context.Context, T, any) (any, error)
+	SeedSyntheticTrackedID    func(T, any) func()
+}
+
+type ReadHooks struct {
+	Get  *Operation
+	List *Operation
+}
+
+type TrackedRecreateHooks[T any] struct {
+	ClearTrackedIdentity func(T)
+}
+
+type StatusHooks[T any] struct {
+	ClearProjectedStatus   func(T) any
+	ShouldRestoreOnFailure func(T, any) bool
+	RestoreStatus          func(T, any)
+	ProjectStatus          func(T, any) error
+	ApplyLifecycle         func(T, any) (servicemanager.OSOKResponse, error)
+	MarkDeleted            func(T, string)
+	MarkTerminating        func(T, any)
+}
+
+type ParityHooks[T any] struct {
+	NormalizeDesiredState   func(T, any)
+	ValidateCreateOnlyDrift func(T, any) error
+	RequiresParityHandling  func(T, any) bool
+	ApplyParityUpdate       func(context.Context, T, any) (servicemanager.OSOKResponse, error)
+}
+
+type AsyncHooks[T any] struct {
+	Adapter           servicemanager.WorkRequestAsyncAdapter
+	GetWorkRequest    func(context.Context, string) (any, error)
+	ResolveAction     func(any) (string, error)
+	ResolvePhase      func(any) (shared.OSOKAsyncPhase, bool, error)
+	RecoverResourceID func(T, any, shared.OSOKAsyncPhase) (string, error)
+	Message           func(shared.OSOKAsyncPhase, any) string
+}
+
+type DeleteConfirmStage string
+
+const (
+	DeleteConfirmStageAlreadyPending DeleteConfirmStage = "already-pending"
+	DeleteConfirmStageAfterRequest   DeleteConfirmStage = "after-request"
+)
+
+type DeleteOutcome struct {
+	Handled bool
+	Deleted bool
+}
+
+type DeleteHooks[T any] struct {
+	ConfirmRead  func(context.Context, T, string) (any, error)
+	HandleError  func(T, error) error
+	ApplyOutcome func(T, any, DeleteConfirmStage) (DeleteOutcome, error)
 }
 
 type LifecycleSemantics struct {
@@ -172,6 +243,14 @@ type Config[T any] struct {
 	BuildCreateBody  func(context.Context, T, string) (any, error)
 	BuildUpdateBody  func(context.Context, T, string, any) (any, bool, error)
 
+	Identity        IdentityHooks[T]
+	Read            ReadHooks
+	TrackedRecreate TrackedRecreateHooks[T]
+	StatusHooks     StatusHooks[T]
+	ParityHooks     ParityHooks[T]
+	Async           AsyncHooks[T]
+	DeleteHooks     DeleteHooks[T]
+
 	Create *Operation
 	Get    *Operation
 	List   *Operation
@@ -186,8 +265,10 @@ type ServiceClient[T any] struct {
 type readPhase string
 
 type createOrUpdateState struct {
-	currentID    string
-	liveResponse any
+	identity                  any
+	currentID                 string
+	liveResponse              any
+	restoreSyntheticTrackedID func()
 }
 
 type readResourceState struct {
@@ -206,6 +287,9 @@ const (
 
 func NewServiceClient[T any](cfg Config[T]) ServiceClient[T] {
 	if err := validateFormalSemantics(cfg.Kind, cfg.Semantics); err != nil {
+		cfg.InitError = errors.Join(cfg.InitError, err)
+	}
+	if err := validateGeneratedWorkRequestAsyncHooks(cfg); err != nil {
 		cfg.InitError = errors.Join(cfg.InitError, err)
 	}
 	return ServiceClient[T]{config: cfg}
@@ -306,9 +390,6 @@ func invalidAsyncSemanticsProblems(semantics *Semantics) []string {
 	workRequestConfigured := hasWorkRequestSemantics(async.WorkRequest)
 	switch strategy {
 	case asyncStrategyWorkRequest:
-		if runtime == asyncRuntimeGeneratedRuntime {
-			problems = append(problems, "generatedruntime does not support explicit workrequest strategy")
-		}
 		if !workRequestConfigured {
 			problems = append(problems, "workrequest async semantics require workRequest metadata")
 		} else {

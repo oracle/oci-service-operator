@@ -1,0 +1,73 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: aispeech
+slug: transcriptionjob
+kind: TranscriptionJob
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+  - failed
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - ACCEPTED
+      - IN_PROGRESS
+    updatePending:
+      - ACCEPTED
+      - IN_PROGRESS
+    deletePending:
+      - CANCELING
+      - CANCELED
+  listLookup:
+    filters:
+      - compartment_id
+      - display_name
+      - id
+    matchRule: Exact displayName or tracked OCID match within the requested compartment.
+  mutation:
+    mutable:
+      - defined_tags
+      - description
+      - display_name
+      - freeform_tags
+    forceNew:
+      - compartment_id
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - >-
+    TranscriptionJob keeps the generated controller and service-manager shell,
+    but the handwritten runtime client overrides lifecycle handling for
+    FAILED, CANCELING, and CANCELED while still using generatedruntime request
+    projection plus read-after-write follow-up.
+  - >-
+    ACCEPTED and IN_PROGRESS remain the provisioning states for both create and
+    update. SUCCEEDED is the only steady success state, FAILED is terminal, and
+    CANCELING is a terminating breadcrumb during normal observe.
+  - >-
+    Delete confirmation is explicit repo-authored behavior: CANCELING and
+    CANCELED are intermediate delete breadcrumbs only, and the finalizer is
+    retained until GetTranscriptionJob confirms the resource is absent rather
+    than stopping at CANCELED.
+  - >-
+    Only displayName, description, freeformTags, and definedTags reconcile in
+    place. compartmentId is replacement-only, there are no secret side
+    effects, and the auxiliary CancelTranscriptionJob API remains outside the
+    published controller surface.
+  - >-
+    The pinned terraform-provider-oci revision has no matching speech
+    resource, so the import catalog for this row is SDK-shaped and
+    repo-curated; the runtime semantics in this file are the authoritative
+    formal input for diagrams and generator binding.

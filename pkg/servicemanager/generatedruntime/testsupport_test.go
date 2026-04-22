@@ -37,6 +37,9 @@ type fakeSpec struct {
 
 type fakeStatus struct {
 	OsokStatus           shared.OSOKStatus     `json:"status"`
+	CreateWorkRequestId  string                `json:"createWorkRequestId,omitempty"`
+	UpdateWorkRequestId  string                `json:"updateWorkRequestId,omitempty"`
+	DeleteWorkRequestId  string                `json:"deleteWorkRequestId,omitempty"`
 	Id                   string                `json:"id,omitempty"`
 	CompartmentId        string                `json:"compartmentId,omitempty"`
 	Name                 string                `json:"name,omitempty"`
@@ -163,6 +166,21 @@ type fakeNamedThingCollection struct {
 
 type fakeNamedListThingResponse struct {
 	Collection fakeNamedThingCollection `presentIn:"body"`
+}
+
+type fakePathIdentity struct {
+	parentID    string
+	thingName   string
+	syntheticID string
+}
+
+type fakeNestedGetThingRequest struct {
+	ParentId  *string `contributesTo:"path" name:"parentId"`
+	ThingName *string `contributesTo:"path" name:"thingName"`
+}
+
+type fakeNestedListThingRequest struct {
+	ParentId *string `contributesTo:"path" name:"parentId"`
 }
 
 type fakeCredentialClient struct {

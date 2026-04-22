@@ -13,33 +13,51 @@ import (
 	"strings"
 )
 
-func (c ServiceClient[T]) prepareCreateOrUpdateState(ctx context.Context, resource T) (createOrUpdateState, error) {
-	currentID, existingResponse, resolvedBeforeCreate, err := c.resolveCurrentResource(ctx, resource)
+func (c ServiceClient[T]) prepareCreateOrUpdateState(ctx context.Context, resource T, identity any) (createOrUpdateState, error) {
+	currentID, existingResponse, resolvedBeforeCreate, restoreSyntheticTrackedID, err := c.resolveCurrentResource(ctx, resource, identity)
 	if err != nil {
 		return createOrUpdateState{}, err
 	}
 
 	currentID, liveResponse, err := c.loadLiveMutationResponse(ctx, resource, currentID, existingResponse, resolvedBeforeCreate)
 	if err != nil {
+		if restoreSyntheticTrackedID != nil {
+			restoreSyntheticTrackedID()
+		}
 		return createOrUpdateState{}, err
 	}
+	c.normalizeDesiredState(resource, liveResponse)
 
-	return createOrUpdateState{currentID: currentID, liveResponse: liveResponse}, nil
+	return createOrUpdateState{
+		identity:                  identity,
+		currentID:                 currentID,
+		liveResponse:              liveResponse,
+		restoreSyntheticTrackedID: restoreSyntheticTrackedID,
+	}, nil
 }
 
-func (c ServiceClient[T]) resolveCurrentResource(ctx context.Context, resource T) (string, any, bool, error) {
+func (c ServiceClient[T]) resolveCurrentResource(ctx context.Context, resource T, identity any) (string, any, bool, func(), error) {
 	currentID := c.currentID(resource)
-	existingResponse, trackedIDStale, err := c.resolveExistingBeforeCreate(ctx, resource)
+	existingResponse, trackedIDStale, err := c.resolveExistingBeforeCreate(ctx, resource, identity)
 	if err != nil {
-		return "", nil, false, err
+		return "", nil, false, nil, err
+	}
+
+	var restoreSyntheticTrackedID func()
+	if existingResponse != nil && currentID == "" && c.config.Identity.SeedSyntheticTrackedID != nil {
+		restoreSyntheticTrackedID = c.config.Identity.SeedSyntheticTrackedID(resource, identity)
+		currentID = c.currentID(resource)
 	}
 
 	currentID, resolvedBeforeCreate := c.resolveTrackedCurrentID(resource, currentID, existingResponse, trackedIDStale)
-	return currentID, existingResponse, resolvedBeforeCreate, nil
+	return currentID, existingResponse, resolvedBeforeCreate, restoreSyntheticTrackedID, nil
 }
 
 func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, existingResponse any, trackedIDStale bool) (string, bool) {
 	originalCurrentID := currentID
+	if trackedIDStale {
+		c.clearTrackedIdentity(resource)
+	}
 	if existingResponse != nil {
 		resolvedID := responseID(existingResponse)
 		if currentID == "" && resolvedID != "" {
@@ -56,7 +74,8 @@ func (c ServiceClient[T]) resolveTrackedCurrentID(resource T, currentID string, 
 }
 
 func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T, preferredID string) bool {
-	if preferredID == "" || !c.usesStatusOnlyCurrentID(resource, preferredID) || c.config.Get == nil {
+	getOp := c.getReadOperation()
+	if preferredID == "" || !c.usesStatusOnlyCurrentID(resource, preferredID) || getOp == nil {
 		return false
 	}
 
@@ -65,8 +84,8 @@ func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T
 		return false
 	}
 
-	if len(c.config.Get.Fields) > 0 {
-		for _, field := range c.config.Get.Fields {
+	if len(getOp.Fields) > 0 {
+		for _, field := range getOp.Fields {
 			if !requestFieldRequiresResourceID(field, c.idFieldAliases()) {
 				continue
 			}
@@ -77,7 +96,7 @@ func (c ServiceClient[T]) trackedStatusIDCanBeClearedAfterGetNotFound(resource T
 		return false
 	}
 
-	requestStruct, ok := operationRequestStruct(c.config.Get.NewRequest)
+	requestStruct, ok := operationRequestStruct(getOp.NewRequest)
 	if !ok {
 		return false
 	}
@@ -109,38 +128,101 @@ func (c ServiceClient[T]) readResourceForExistingBeforeCreate(ctx context.Contex
 }
 
 func (c ServiceClient[T]) readResourceWithGetForExistingBeforeCreate(ctx context.Context, resource T, state readResourceState) (readResourceState, any, bool, bool, error) {
-	if c.config.Get == nil || !c.canInvokeGet(resource, state.readID) {
+	getOp := c.getReadOperation()
+	if getOp == nil || !c.canInvokeGet(resource, state.readID) {
 		return state, nil, false, false, nil
 	}
 
 	trackedIDStale := c.trackedStatusIDCanBeClearedAfterGetNotFound(resource, state.readID)
-	response, err := c.invoke(ctx, c.config.Get, resource, state.readID, requestBuildOptions{})
+	response, err := c.invoke(ctx, getOp, resource, state.readID, requestBuildOptions{})
 	if err == nil {
 		return state, response, true, false, nil
 	}
-	if !isReadNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.listReadOperation() == nil {
 		return state, nil, true, false, err
 	}
 
 	return c.fallbackReadResourceState(resource, state, readPhaseCreate), nil, false, trackedIDStale, nil
 }
 
-func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T) (any, bool, error) {
+func (c ServiceClient[T]) resolveExistingBeforeCreate(ctx context.Context, resource T, identity any) (any, bool, error) {
 	if skipExistingBeforeCreate(ctx) {
 		return nil, false, nil
 	}
-	if !c.shouldResolveExistingBeforeCreate() {
+	if c.config.Create == nil {
 		return nil, false, nil
 	}
 
-	response, trackedIDStale, err := c.readResourceForExistingBeforeCreate(ctx, resource)
+	trackedIDStale := false
+	statePrepared := false
+	var state readResourceState
+
+	if c.currentID(resource) != "" {
+		getOp := c.getReadOperation()
+		if getOp == nil {
+			return nil, false, nil
+		}
+
+		var err error
+		state, err = c.prepareReadResourceState(resource, "")
+		if err != nil {
+			return nil, false, err
+		}
+		if !c.canInvokeGet(resource, state.readID) {
+			return nil, false, nil
+		}
+
+		response, handled, getTrackedIDStale, err := func() (any, bool, bool, error) {
+			nextState, nextResponse, handled, trackedIDStale, err := c.readResourceWithGetForExistingBeforeCreate(ctx, resource, state)
+			state = nextState
+			return nextResponse, handled, trackedIDStale, err
+		}()
+		trackedIDStale = getTrackedIDStale
+		switch {
+		case handled && err == nil:
+			return response, false, nil
+		case handled && !errors.Is(err, errResourceNotFound):
+			return nil, trackedIDStale, err
+		case !handled:
+			statePrepared = true
+		}
+	}
+
+	decision, err := c.guardExistingBeforeCreate(ctx, resource)
+	if err != nil {
+		if trackedIDStale {
+			c.clearTrackedIdentity(resource)
+		}
+		return nil, trackedIDStale, err
+	}
+	if decision == ExistingBeforeCreateDecisionSkip {
+		return nil, trackedIDStale, nil
+	}
+
+	if response, err := c.lookupExistingByIdentity(ctx, resource, identity); err != nil {
+		return nil, trackedIDStale, err
+	} else if response != nil {
+		return response, trackedIDStale, nil
+	}
+	if !c.shouldResolveExistingBeforeCreate() {
+		return nil, trackedIDStale, nil
+	}
+
+	if !statePrepared {
+		state, err = c.prepareReadResourceState(resource, "")
+		if err != nil {
+			return nil, trackedIDStale, err
+		}
+	}
+
+	response, err := c.readResourceWithList(ctx, resource, state, readPhaseCreate)
 	if err == nil {
 		return response, trackedIDStale, nil
 	}
 	if errors.Is(err, errResourceNotFound) {
 		return nil, trackedIDStale, nil
 	}
-	return nil, false, err
+	return nil, trackedIDStale, err
 }
 
 func (c ServiceClient[T]) loadLiveMutationResponse(ctx context.Context, resource T, currentID string, existingResponse any, resolvedBeforeCreate bool) (string, any, error) {
@@ -150,7 +232,7 @@ func (c ServiceClient[T]) loadLiveMutationResponse(ctx context.Context, resource
 		return currentID, liveResponse, nil
 	}
 
-	forceLiveGet := resolvedBeforeCreate && c.config.Get != nil
+	forceLiveGet := resolvedBeforeCreate && c.getReadOperation() != nil
 	if liveResponse == nil || forceLiveGet {
 		var err error
 		currentID, liveResponse, err = c.readMutationAssessmentResponse(ctx, resource, currentID, forceLiveGet)
@@ -192,13 +274,13 @@ func skipExistingBeforeCreate(ctx context.Context) bool {
 }
 
 func (c ServiceClient[T]) shouldResolveExistingBeforeCreate() bool {
-	return c.config.Create != nil && c.config.List != nil && c.config.Semantics != nil && c.config.Semantics.List != nil
+	return c.config.Create != nil && c.listReadOperation() != nil && c.config.Semantics != nil && c.config.Semantics.List != nil
 }
 
 func (c ServiceClient[T]) requiresLiveMutationAssessment() bool {
 	return c.config.Semantics != nil &&
 		(len(c.config.Semantics.Mutation.ForceNew) > 0 || len(c.config.Semantics.Mutation.Mutable) > 0) &&
-		(c.config.Get != nil || c.config.List != nil)
+		c.hasReadableOperation()
 }
 
 func (c ServiceClient[T]) readResource(ctx context.Context, resource T, preferredID string, phase readPhase) (any, error) {
@@ -218,11 +300,12 @@ func (c ServiceClient[T]) readResourceForMutationValidation(ctx context.Context,
 	if !forceLiveGet {
 		return c.readResource(ctx, resource, currentID, readPhaseUpdate)
 	}
-	if c.config.Get == nil {
+	getOp := c.getReadOperation()
+	if getOp == nil {
 		return nil, fmt.Errorf("%s generated runtime has no OCI Get operation for live mutation validation", c.config.Kind)
 	}
 
-	response, err := c.invoke(ctx, c.config.Get, resource, currentID, requestBuildOptions{})
+	response, err := c.invoke(ctx, getOp, resource, currentID, requestBuildOptions{})
 	if err != nil {
 		if isReadNotFound(err) {
 			return nil, errResourceNotFound
@@ -252,15 +335,16 @@ func (c ServiceClient[T]) prepareReadResourceState(resource T, preferredID strin
 }
 
 func (c ServiceClient[T]) readResourceWithGet(ctx context.Context, resource T, state readResourceState, phase readPhase) (readResourceState, any, bool, error) {
-	if c.config.Get == nil || !c.canInvokeGet(resource, state.readID) {
+	getOp := c.getReadOperation()
+	if getOp == nil || !c.canInvokeGet(resource, state.readID) {
 		return state, nil, false, nil
 	}
 
-	response, err := c.invoke(ctx, c.config.Get, resource, state.readID, requestBuildOptions{})
+	response, err := c.invoke(ctx, getOp, resource, state.readID, requestBuildOptions{})
 	if err == nil {
 		return state, response, true, nil
 	}
-	if !isReadNotFound(err) || c.config.List == nil {
+	if !isReadNotFound(err) || c.listReadOperation() == nil {
 		return state, nil, true, err
 	}
 
@@ -276,11 +360,12 @@ func (c ServiceClient[T]) fallbackReadResourceState(resource T, state readResour
 }
 
 func (c ServiceClient[T]) readResourceWithList(ctx context.Context, resource T, state readResourceState, phase readPhase) (any, error) {
-	if c.config.List == nil {
+	listOp := c.listReadOperation()
+	if listOp == nil {
 		return nil, fmt.Errorf("%s generated runtime has no readable OCI operation", c.config.Kind)
 	}
 
-	response, err := c.invokeWithValues(ctx, c.config.List, resource, state.listValues, state.listID, requestBuildOptions{})
+	response, err := c.invokeWithValues(ctx, listOp, resource, state.listValues, state.listID, requestBuildOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +378,12 @@ func (c ServiceClient[T]) readResourceWithList(ctx context.Context, resource T, 
 }
 
 func (c ServiceClient[T]) canInvokeExplicitGet(values map[string]any, preferredID string) bool {
-	for _, field := range c.config.Get.Fields {
+	getOp := c.getReadOperation()
+	if getOp == nil {
+		return false
+	}
+
+	for _, field := range getOp.Fields {
 		if !requestFieldRequiresResourceID(field, c.idFieldAliases()) {
 			continue
 		}
@@ -305,7 +395,12 @@ func (c ServiceClient[T]) canInvokeExplicitGet(values map[string]any, preferredI
 }
 
 func (c ServiceClient[T]) canInvokeHeuristicGet(values map[string]any, preferredID string) bool {
-	requestStruct, ok := operationRequestStruct(c.config.Get.NewRequest)
+	getOp := c.getReadOperation()
+	if getOp == nil {
+		return false
+	}
+
+	requestStruct, ok := operationRequestStruct(getOp.NewRequest)
 	if !ok {
 		return true
 	}
@@ -348,7 +443,8 @@ func (c ServiceClient[T]) canPopulateHeuristicGetField(values map[string]any, pr
 }
 
 func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
-	if c.config.Get == nil {
+	getOp := c.getReadOperation()
+	if getOp == nil {
 		return false
 	}
 
@@ -357,7 +453,7 @@ func (c ServiceClient[T]) canInvokeGet(resource T, preferredID string) bool {
 		return true
 	}
 
-	if len(c.config.Get.Fields) > 0 {
+	if len(getOp.Fields) > 0 {
 		return c.canInvokeExplicitGet(values, preferredID)
 	}
 	return c.canInvokeHeuristicGet(values, preferredID)

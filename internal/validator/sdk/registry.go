@@ -6,6 +6,7 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/aidocument"
 	"github.com/oracle/oci-go-sdk/v65/ailanguage"
+	"github.com/oracle/oci-go-sdk/v65/aispeech"
 	"github.com/oracle/oci-go-sdk/v65/aivision"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/bds"
@@ -451,6 +452,13 @@ var seedTargets = []Target{
 	newTarget("ailanguage", "Project", reflect.TypeOf(ailanguage.Project{})),
 	newTarget("ailanguage", "ProjectCollection", reflect.TypeOf(ailanguage.ProjectCollection{})),
 	newTarget("ailanguage", "ProjectSummary", reflect.TypeOf(ailanguage.ProjectSummary{})),
+
+	// Aispeech CRD support
+	newTarget("aispeech", "CreateTranscriptionJobDetails", reflect.TypeOf(aispeech.CreateTranscriptionJobDetails{})),
+	newTarget("aispeech", "UpdateTranscriptionJobDetails", reflect.TypeOf(aispeech.UpdateTranscriptionJobDetails{})),
+	newTarget("aispeech", "TranscriptionJob", reflect.TypeOf(aispeech.TranscriptionJob{})),
+	newTarget("aispeech", "TranscriptionJobCollection", reflect.TypeOf(aispeech.TranscriptionJobCollection{})),
+	newTarget("aispeech", "TranscriptionJobSummary", reflect.TypeOf(aispeech.TranscriptionJobSummary{})),
 
 	// Aivision CRD support
 	newTarget("aivision", "CreateProjectDetails", reflect.TypeOf(aivision.CreateProjectDetails{})),

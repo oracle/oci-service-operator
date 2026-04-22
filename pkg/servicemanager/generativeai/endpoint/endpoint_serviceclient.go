@@ -19,7 +19,7 @@ import (
 )
 
 // EndpointServiceClient is the handwritten extension seam for Endpoint runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*EndpointServiceManager).WithClient.
 type EndpointServiceClient interface {
 	CreateOrUpdate(context.Context, *generativeaiv1beta1.Endpoint, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultEndpointServiceClient struct {
 	generatedruntime.ServiceClient[*generativeaiv1beta1.Endpoint]
 }
 
-func newEndpointRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "generativeai",
-		FormalSlug:    "endpoint",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "dedicatedAiClusterId", "displayName", "id", "modelId", "state"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"contentModerationConfig", "definedTags", "description", "displayName", "freeformTags"},
-			ForceNew:      []string{"compartmentId", "dedicatedAiClusterId", "modelId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ EndpointServiceClient = defaultEndpointServiceClient{}
 
 var newEndpointServiceClient = func(manager *EndpointServiceManager) EndpointServiceClient {
 	sdkClient, err := generativeaisdk.NewGenerativeAiClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*generativeaiv1beta1.Endpoint]{
-		Kind:      "Endpoint",
-		SDKName:   "Endpoint",
-		Log:       manager.Log,
-		Semantics: newEndpointRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.CreateEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateEndpoint(ctx, *request.(*generativeaisdk.CreateEndpointRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateEndpointDetails", RequestName: "CreateEndpointDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.GetEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetEndpoint(ctx, *request.(*generativeaisdk.GetEndpointRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "EndpointId", RequestName: "endpointId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.ListEndpointsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListEndpoints(ctx, *request.(*generativeaisdk.ListEndpointsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.UpdateEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateEndpoint(ctx, *request.(*generativeaisdk.UpdateEndpointRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "EndpointId", RequestName: "endpointId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateEndpointDetails", RequestName: "UpdateEndpointDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.DeleteEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteEndpoint(ctx, *request.(*generativeaisdk.DeleteEndpointRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "EndpointId", RequestName: "endpointId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newEndpointRuntimeHooks(manager, sdkClient)
+	config := buildEndpointGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Endpoint OCI client: %w", err)
 	}
-	return defaultEndpointServiceClient{
+	delegate := defaultEndpointServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*generativeaiv1beta1.Endpoint](config),
 	}
+	return wrapEndpointGeneratedClient(hooks, delegate)
 }

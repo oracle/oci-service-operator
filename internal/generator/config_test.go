@@ -1132,6 +1132,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	wantActiveServices := []string{
 		"aidocument",
 		"ailanguage",
+		"aispeech",
 		"aivision",
 		"analytics",
 		"bds",
@@ -1172,6 +1173,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		cfg,
 		"aidocument",
 		"ailanguage",
+		"aispeech",
 		"aivision",
 		"analytics",
 		"bds",
@@ -1206,6 +1208,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	)
 	assertServiceSelection(t, services["aidocument"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["ailanguage"], true, SelectionModeExplicit, []string{"Project"})
+	assertServiceSelection(t, services["aispeech"], true, SelectionModeExplicit, []string{"TranscriptionJob"})
 	assertServiceSelection(t, services["aivision"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
 	assertServiceSelection(t, services["bds"], true, SelectionModeExplicit, []string{"BdsInstance"})
@@ -1243,9 +1246,10 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasetools", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "ocvp", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasetools", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "ocvp", "psql", "redis", "streaming")
 	assertAIDocumentRuntimeRolloutMetadata(t, services["aidocument"])
 	assertAILanguageRuntimeRolloutMetadata(t, services["ailanguage"])
+	assertAISpeechRuntimeRolloutMetadata(t, services["aispeech"])
 	assertAIVisionRuntimeRolloutMetadata(t, services["aivision"])
 	assertBDSRuntimeRolloutMetadata(t, services["bds"])
 	assertDatabaseToolsRuntimeRolloutMetadata(t, services["databasetools"])
@@ -1315,9 +1319,10 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "database", "databasetools", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "database", "databasetools", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
+	assertFormalSpecFor(t, services["aispeech"], "TranscriptionJob", "transcriptionjob")
 	assertFormalSpecFor(t, services["aivision"], "Project", "project")
 	assertFormalSpecFor(t, services["analytics"], "AnalyticsInstance", "analyticsinstance")
 	assertFormalSpecFor(t, services["bds"], "BdsInstance", "bdsinstance")
@@ -1653,6 +1658,52 @@ func TestValidateSelectedAsyncMetadataAllowsResourceOverridesToClearInheritedWor
 	}
 }
 
+func TestValidateSelectedAsyncMetadataAllowsGeneratedRuntimeWorkRequestContracts(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		SchemaVersion:  "v1alpha1",
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+		PackageProfiles: map[string]PackageProfile{
+			"controller-backed": {Description: "runtime-integrated groups"},
+		},
+		Services: []ServiceConfig{
+			{
+				Service:        "queue",
+				SDKPackage:     "example/queue",
+				Group:          "queue",
+				PackageProfile: "controller-backed",
+				Selection:      selectionExplicit(true, "Queue"),
+				Generation: GenerationConfig{
+					Resources: []ResourceGenerationOverride{
+						{
+							Kind: "Queue",
+							Async: AsyncConfig{
+								Strategy: AsyncStrategyWorkRequest,
+								Runtime:  AsyncRuntimeGeneratedRuntime,
+								WorkRequest: AsyncWorkRequestConfig{
+									Source: AsyncWorkRequestSourceServiceSDK,
+									Phases: []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete},
+									LegacyFieldBridge: AsyncLegacyFieldBridge{
+										Create: "CreateWorkRequestId",
+										Update: "UpdateWorkRequestId",
+										Delete: "DeleteWorkRequestId",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v, want nil", err)
+	}
+}
+
 func TestServiceConfigAsyncConfigForMergesServiceAndResourceOverrides(t *testing.T) {
 	t.Parallel()
 
@@ -1851,14 +1902,15 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		runtime  string
 	}{
 		"aidocument":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ailanguage":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ailanguage":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"aispeech":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"aivision":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"analytics":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"bds":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"databasetools":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"datascience":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -1872,14 +1924,14 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"marketplace":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"monitoring":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"mysql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"ocvp":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"objectstorage":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"oda":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"opensearch":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"psql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"queue":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
-		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeHandwritten},
+		"queue":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"streaming":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"usageapi":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
@@ -1898,7 +1950,18 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		assertAsyncContract(t, service, target.Kind, expected.strategy, expected.runtime)
 	}
 
-	queue := assertAsyncContract(t, services["queue"], "Queue", AsyncStrategyWorkRequest, AsyncRuntimeHandwritten)
+	ailanguage := assertAsyncContract(t, services["ailanguage"], "Project", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if ailanguage.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("ailanguage Project workRequest.source = %q, want %q", ailanguage.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(ailanguage.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("ailanguage Project workRequest.phases = %v", ailanguage.WorkRequest.Phases)
+	}
+	if ailanguage.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("ailanguage Project workRequest.legacyFieldBridge = %#v, want empty legacy bridge", ailanguage.WorkRequest.LegacyFieldBridge)
+	}
+
+	queue := assertAsyncContract(t, services["queue"], "Queue", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
 	if queue.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
 		t.Fatalf("queue Queue workRequest.source = %q, want %q", queue.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
 	}
@@ -1915,7 +1978,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		t.Fatalf("queue Queue delete bridge = %q, want DeleteWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Delete)
 	}
 
-	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeHandwritten)
+	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
 	if redis.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
 		t.Fatalf("redis RedisCluster workRequest.source = %q, want %q", redis.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
 	}
@@ -1978,8 +2041,8 @@ func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContra
 		"analytics":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerengine": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"core":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"nosql":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"dataflow":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"nosql":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"objectstorage":   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
@@ -2216,6 +2279,7 @@ func assertNoSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 	if len(override.Controller.ExtraRBACMarkers) != 0 {
 		t.Fatalf("nosql Table extra RBAC markers = %v, want no non-default markers", override.Controller.ExtraRBACMarkers)
 	}
+	assertFormalSpecFor(t, service, "Table", "table")
 }
 
 func assertPSQLRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
@@ -2318,7 +2382,7 @@ func assertDataflowRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) 
 		`driverShape: "VM.Standard.E4.Flex"`,
 		`fileUri: "oci://bucket@namespace/app/main.py"`,
 	)
-	assertAsyncContract(t, service, "Application", AsyncStrategyLifecycle, AsyncRuntimeHandwritten)
+	assertAsyncContract(t, service, "Application", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
 }
 
 func assertAIDocumentRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
@@ -2349,12 +2413,37 @@ func assertAILanguageRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig
 		webhook:        GenerationStrategyNone,
 	})
 	assertResourceOverrideCount(t, service, 8)
-	assertAsyncContract(t, service, "Project", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+	project := assertAsyncContract(t, service, "Project", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if project.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("ailanguage Project workRequest.source = %q, want %q", project.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(project.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("ailanguage Project workRequest.phases = %v", project.WorkRequest.Phases)
+	}
+	if project.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf("ailanguage Project workRequest.legacyFieldBridge = %#v, want empty legacy bridge", project.WorkRequest.LegacyFieldBridge)
+	}
 
 	overrides := overridesByKind(service)
 	for _, kind := range []string{"Endpoint", "EvaluationResult", "Model", "ModelType", "WorkRequest", "WorkRequestError", "WorkRequestLog"} {
 		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
 	}
+}
+
+func assertAISpeechRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 2)
+	assertAsyncContract(t, service, "TranscriptionJob", AsyncStrategyLifecycle, AsyncRuntimeGeneratedRuntime)
+
+	overrides := overridesByKind(service)
+	assertDisabledResourceOverride(t, service.Service, "TranscriptionTask", overrides["TranscriptionTask"])
 }
 
 func assertAIVisionRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {

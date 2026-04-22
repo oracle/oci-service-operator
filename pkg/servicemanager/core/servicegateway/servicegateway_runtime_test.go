@@ -91,82 +91,26 @@ func (f fakeServiceGatewayServiceError) GetOpcRequestID() string {
 	return ""
 }
 
-func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client serviceGatewayOCIClient) ServiceGatewayServiceClient {
+func newTestServiceGatewayRuntimeHooks(manager *ServiceGatewayServiceManager, client serviceGatewayOCIClient) ServiceGatewayRuntimeHooks {
 	if client == nil {
 		client = &fakeServiceGatewayOCIClient{}
 	}
 
-	config := generatedruntime.Config[*corev1beta1.ServiceGateway]{
-		Kind:    "ServiceGateway",
-		SDKName: "ServiceGateway",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService: "core",
-			FormalSlug:    "servicegateway",
-			Async: &generatedruntime.AsyncSemantics{
-				Strategy:             "lifecycle",
-				Runtime:              "generatedruntime",
-				FormalClassification: "lifecycle",
-			},
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{},
-				ActiveStates:       []string{"AVAILABLE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATED", "TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId", "services"},
-				ForceNew:      []string{"compartmentId", "vcnId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateServiceGateway(ctx, *request.(*coresdk.CreateServiceGatewayRequest))
-			},
+	hooks := ServiceGatewayRuntimeHooks{
+		Semantics: newServiceGatewayRuntimeSemantics(),
+		Create: runtimeOperationHooks[coresdk.CreateServiceGatewayRequest, coresdk.CreateServiceGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateServiceGatewayDetails", RequestName: "CreateServiceGatewayDetails", Contribution: "body"}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetServiceGateway(ctx, *request.(*coresdk.GetServiceGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
+				return client.CreateServiceGateway(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[coresdk.GetServiceGatewayRequest, coresdk.GetServiceGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListServiceGatewaysRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListServiceGateways(ctx, *request.(*coresdk.ListServiceGatewaysRequest))
+			Call: func(ctx context.Context, request coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error) {
+				return client.GetServiceGateway(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[coresdk.ListServiceGatewaysRequest, coresdk.ListServiceGatewaysResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
@@ -176,40 +120,43 @@ func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client
 				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateServiceGateway(ctx, *request.(*coresdk.UpdateServiceGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.ListServiceGatewaysRequest) (coresdk.ListServiceGatewaysResponse, error) {
+				return client.ListServiceGateways(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[coresdk.UpdateServiceGatewayRequest, coresdk.UpdateServiceGatewayResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true},
 				{FieldName: "UpdateServiceGatewayDetails", RequestName: "UpdateServiceGatewayDetails", Contribution: "body"},
 			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteServiceGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteServiceGateway(ctx, *request.(*coresdk.DeleteServiceGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.UpdateServiceGatewayRequest) (coresdk.UpdateServiceGatewayResponse, error) {
+				return client.UpdateServiceGateway(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[coresdk.DeleteServiceGatewayRequest, coresdk.DeleteServiceGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "ServiceGatewayId", RequestName: "serviceGatewayId", Contribution: "path", PreferResourceID: true}},
+			Call: func(ctx context.Context, request coresdk.DeleteServiceGatewayRequest) (coresdk.DeleteServiceGatewayResponse, error) {
+				return client.DeleteServiceGateway(ctx, request)
+			},
 		},
 	}
+	applyServiceGatewayRuntimeHooks(manager, &hooks, client)
+	return hooks
+}
 
-	return defaultServiceGatewayServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.ServiceGateway](config),
+func newTestServiceGatewayDelegate(manager *ServiceGatewayServiceManager, client serviceGatewayOCIClient) ServiceGatewayServiceClient {
+	hooks := newTestServiceGatewayRuntimeHooks(manager, client)
+	delegate := defaultServiceGatewayServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.ServiceGateway](buildServiceGatewayGeneratedRuntimeConfig(manager, hooks)),
 	}
+	return wrapServiceGatewayGeneratedClient(hooks, delegate)
 }
 
 func newServiceGatewayTestManager(client serviceGatewayOCIClient) *ServiceGatewayServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewServiceGatewayServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&serviceGatewayRuntimeClient{
-			manager:  manager,
-			delegate: newTestServiceGatewayDelegate(manager, client),
-			client:   client,
-		})
+		manager.WithClient(newTestServiceGatewayDelegate(manager, client))
 	}
 	return manager
 }

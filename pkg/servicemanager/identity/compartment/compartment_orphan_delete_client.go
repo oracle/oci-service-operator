@@ -21,10 +21,9 @@ import (
 )
 
 func init() {
-	generatedFactory := newCompartmentServiceClient
-	newCompartmentServiceClient = func(manager *CompartmentServiceManager) CompartmentServiceClient {
-		return newCompartmentOrphanDeleteClient(manager, generatedFactory(manager))
-	}
+	registerCompartmentRuntimeHooksMutator(func(manager *CompartmentServiceManager, hooks *CompartmentRuntimeHooks) {
+		appendCompartmentOrphanDeleteRuntimeWrapper(manager, hooks)
+	})
 }
 
 type compartmentOrphanDeleteClient struct {
@@ -34,6 +33,16 @@ type compartmentOrphanDeleteClient struct {
 }
 
 var _ CompartmentServiceClient = compartmentOrphanDeleteClient{}
+
+func appendCompartmentOrphanDeleteRuntimeWrapper(manager *CompartmentServiceManager, hooks *CompartmentRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate CompartmentServiceClient) CompartmentServiceClient {
+		return newCompartmentOrphanDeleteClient(manager, delegate)
+	})
+}
 
 func newCompartmentOrphanDeleteClient(manager *CompartmentServiceManager, delegate CompartmentServiceClient) CompartmentServiceClient {
 	client := compartmentOrphanDeleteClient{delegate: delegate}

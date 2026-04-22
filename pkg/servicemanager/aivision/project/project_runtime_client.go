@@ -7,7 +7,6 @@ package project
 
 import (
 	"context"
-	"fmt"
 
 	aivisionsdk "github.com/oracle/oci-go-sdk/v65/aivision"
 	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
@@ -24,16 +23,18 @@ type projectOCIClient interface {
 }
 
 func init() {
-	newProjectServiceClient = func(manager *ProjectServiceManager) ProjectServiceClient {
-		sdkClient, err := aivisionsdk.NewAIServiceVisionClientWithConfigurationProvider(manager.Provider)
-		config := newProjectRuntimeConfig(manager.Log, sdkClient)
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Project OCI client: %w", err)
-		}
-		return defaultProjectServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*aivisionv1beta1.Project](config),
-		}
+	registerProjectRuntimeHooksMutator(func(_ *ProjectServiceManager, hooks *ProjectRuntimeHooks) {
+		applyProjectRuntimeHooks(hooks)
+	})
+}
+
+func applyProjectRuntimeHooks(hooks *ProjectRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
+
+	hooks.Semantics = projectRuntimeSemantics()
+	hooks.List.Fields = projectListFields()
 }
 
 func projectRuntimeSemantics() *generatedruntime.Semantics {
@@ -93,63 +94,81 @@ func newProjectRuntimeConfig(
 	log loggerutil.OSOKLogger,
 	sdkClient projectOCIClient,
 ) generatedruntime.Config[*aivisionv1beta1.Project] {
-	return generatedruntime.Config[*aivisionv1beta1.Project]{
-		Kind:      "Project",
-		SDKName:   "Project",
-		Log:       log,
-		Semantics: projectRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &aivisionsdk.CreateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateProject(ctx, *request.(*aivisionsdk.CreateProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body"},
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &aivisionsdk.GetProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetProject(ctx, *request.(*aivisionsdk.GetProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
+	hooks := newProjectRuntimeHooksWithOCIClient(sdkClient)
+	applyProjectRuntimeHooks(&hooks)
+	return buildProjectGeneratedRuntimeConfig(&ProjectServiceManager{Log: log}, hooks)
+}
+
+func newProjectRuntimeHooksWithOCIClient(client projectOCIClient) ProjectRuntimeHooks {
+	return ProjectRuntimeHooks{
+		Semantics: newProjectRuntimeSemantics(),
+		Create: runtimeOperationHooks[aivisionsdk.CreateProjectRequest, aivisionsdk.CreateProjectResponse]{
+			Fields: projectCreateFields(),
+			Call: func(ctx context.Context, request aivisionsdk.CreateProjectRequest) (aivisionsdk.CreateProjectResponse, error) {
+				return client.CreateProject(ctx, request)
 			},
 		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &aivisionsdk.ListProjectsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListProjects(ctx, *request.(*aivisionsdk.ListProjectsRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
-				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
-				{FieldName: "Id", RequestName: "id", Contribution: "query", LookupPaths: []string{"id", "ocid"}},
-				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
-				{FieldName: "Page", RequestName: "page", Contribution: "query"},
-				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
-				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+		Get: runtimeOperationHooks[aivisionsdk.GetProjectRequest, aivisionsdk.GetProjectResponse]{
+			Fields: projectGetFields(),
+			Call: func(ctx context.Context, request aivisionsdk.GetProjectRequest) (aivisionsdk.GetProjectResponse, error) {
+				return client.GetProject(ctx, request)
 			},
 		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &aivisionsdk.UpdateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateProject(ctx, *request.(*aivisionsdk.UpdateProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
-				{FieldName: "UpdateProjectDetails", RequestName: "UpdateProjectDetails", Contribution: "body"},
+		List: runtimeOperationHooks[aivisionsdk.ListProjectsRequest, aivisionsdk.ListProjectsResponse]{
+			Fields: projectListFields(),
+			Call: func(ctx context.Context, request aivisionsdk.ListProjectsRequest) (aivisionsdk.ListProjectsResponse, error) {
+				return client.ListProjects(ctx, request)
 			},
 		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &aivisionsdk.DeleteProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteProject(ctx, *request.(*aivisionsdk.DeleteProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
+		Update: runtimeOperationHooks[aivisionsdk.UpdateProjectRequest, aivisionsdk.UpdateProjectResponse]{
+			Fields: projectUpdateFields(),
+			Call: func(ctx context.Context, request aivisionsdk.UpdateProjectRequest) (aivisionsdk.UpdateProjectResponse, error) {
+				return client.UpdateProject(ctx, request)
 			},
 		},
+		Delete: runtimeOperationHooks[aivisionsdk.DeleteProjectRequest, aivisionsdk.DeleteProjectResponse]{
+			Fields: projectDeleteFields(),
+			Call: func(ctx context.Context, request aivisionsdk.DeleteProjectRequest) (aivisionsdk.DeleteProjectResponse, error) {
+				return client.DeleteProject(ctx, request)
+			},
+		},
+	}
+}
+
+func projectCreateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body"},
+	}
+}
+
+func projectGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func projectListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+		{FieldName: "Id", RequestName: "id", Contribution: "query", LookupPaths: []string{"id", "ocid"}},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+	}
+}
+
+func projectUpdateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "UpdateProjectDetails", RequestName: "UpdateProjectDetails", Contribution: "body"},
+	}
+}
+
+func projectDeleteFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true},
 	}
 }

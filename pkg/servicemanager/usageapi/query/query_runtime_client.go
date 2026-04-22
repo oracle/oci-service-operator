@@ -25,13 +25,22 @@ type synchronousQueryServiceClient struct {
 }
 
 func init() {
-	delegateFactory := newQueryServiceClient
-	newQueryServiceClient = func(manager *QueryServiceManager) QueryServiceClient {
+	registerQueryRuntimeHooksMutator(func(manager *QueryServiceManager, hooks *QueryRuntimeHooks) {
+		appendSynchronousQueryRuntimeWrapper(manager, hooks)
+	})
+}
+
+func appendSynchronousQueryRuntimeWrapper(manager *QueryServiceManager, hooks *QueryRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate QueryServiceClient) QueryServiceClient {
 		return &synchronousQueryServiceClient{
-			delegate: delegateFactory(manager),
+			delegate: delegate,
 			log:      manager.Log,
 		}
-	}
+	})
 }
 
 func (c *synchronousQueryServiceClient) CreateOrUpdate(

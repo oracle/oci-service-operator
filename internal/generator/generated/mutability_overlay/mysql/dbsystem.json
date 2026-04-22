@@ -1,0 +1,2073 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "sourceContract": {
+    "astPrimaryFacts": [
+      "forceNew",
+      "conflictsWith",
+      "lifecycle",
+      "hooks",
+      "crud",
+      "listLookup"
+    ],
+    "astMutableAlias": "updateCandidate",
+    "docsOverlayScope": "terraform-argument-reference-for-ast-update-candidate-fields",
+    "docsEvidenceSource": "terraform-argument-reference"
+  },
+  "resource": {
+    "service": "mysql",
+    "kind": "DbSystem",
+    "formalSlug": "dbsystem",
+    "providerResource": "oci_mysql_mysql_db_system",
+    "repoAuthoredSpecPath": "controllers/mysql/dbsystem/spec.cfg",
+    "formalImportPath": "imports/mysql/dbsystem.json"
+  },
+  "fields": [
+    {
+      "astFieldPath": "accessMode",
+      "terraformFieldPath": "accessMode",
+      "canonicalJoinKey": "accessMode",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"accessMode\" did not resolve to exactly one canonical join key",
+          "segment \"accessMode\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "adminPassword",
+      "terraformFieldPath": "adminPassword",
+      "canonicalJoinKey": "adminPassword",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "adminUsername",
+      "terraformFieldPath": "adminUsername",
+      "canonicalJoinKey": "adminUsername",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "availabilityDomain",
+      "terraformFieldPath": "availabilityDomain",
+      "canonicalJoinKey": "availabilityDomain",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.copyPolicies.backupCopyRetentionInDays",
+      "terraformFieldPath": "backupPolicy.copyPolicies.backupCopyRetentionInDays",
+      "canonicalJoinKey": "backupPolicy.copyPolicies.backupCopyRetentionInDays",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"backupPolicy.copyPolicies.backupCopyRetentionInDays\" did not resolve to exactly one canonical join key",
+          "segment \"copyPolicies\" did not match any generated field under backupPolicy"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.copyPolicies.copyToRegion",
+      "terraformFieldPath": "backupPolicy.copyPolicies.copyToRegion",
+      "canonicalJoinKey": "backupPolicy.copyPolicies.copyToRegion",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"backupPolicy.copyPolicies.copyToRegion\" did not resolve to exactly one canonical join key",
+          "segment \"copyPolicies\" did not match any generated field under backupPolicy"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.definedTags",
+      "terraformFieldPath": "backup_policy.defined_tags",
+      "canonicalJoinKey": "backupPolicy.definedTags",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.freeformTags",
+      "terraformFieldPath": "backup_policy.freeform_tags",
+      "canonicalJoinKey": "backupPolicy.freeformTags",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.isEnabled",
+      "terraformFieldPath": "backup_policy.is_enabled",
+      "canonicalJoinKey": "backupPolicy.isEnabled",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.pitrPolicy.isEnabled",
+      "terraformFieldPath": "backup_policy.pitr_policy.is_enabled",
+      "canonicalJoinKey": "backupPolicy.pitrPolicy.isEnabled",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.retentionInDays",
+      "terraformFieldPath": "backup_policy.retention_in_days",
+      "canonicalJoinKey": "backupPolicy.retentionInDays",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.softDelete",
+      "terraformFieldPath": "backupPolicy.softDelete",
+      "canonicalJoinKey": "backupPolicy.softDelete",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"backupPolicy.softDelete\" did not resolve to exactly one canonical join key",
+          "segment \"softDelete\" did not match any generated field under backupPolicy"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "backupPolicy.windowStartTime",
+      "terraformFieldPath": "backup_policy.window_start_time",
+      "canonicalJoinKey": "backupPolicy.windowStartTime",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "compartmentId",
+      "terraformFieldPath": "compartmentId",
+      "canonicalJoinKey": "compartmentId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "configurationId",
+      "terraformFieldPath": "configuration_id",
+      "canonicalJoinKey": "configurationId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "crashRecovery",
+      "terraformFieldPath": "crash_recovery",
+      "canonicalJoinKey": "crashRecovery",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "customerContacts.email",
+      "terraformFieldPath": "customerContacts.email",
+      "canonicalJoinKey": "customerContacts.email",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"customerContacts.email\" did not resolve to exactly one canonical join key",
+          "segment \"customerContacts\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "dataStorage.isAutoExpandStorageEnabled",
+      "terraformFieldPath": "dataStorage.isAutoExpandStorageEnabled",
+      "canonicalJoinKey": "dataStorage.isAutoExpandStorageEnabled",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"dataStorage.isAutoExpandStorageEnabled\" did not resolve to exactly one canonical join key",
+          "segment \"dataStorage\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "dataStorage.maxStorageSizeInGbs",
+      "terraformFieldPath": "dataStorage.maxStorageSizeInGbs",
+      "canonicalJoinKey": "dataStorage.maxStorageSizeInGbs",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"dataStorage.maxStorageSizeInGbs\" did not resolve to exactly one canonical join key",
+          "segment \"dataStorage\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "dataStorageSizeInGb",
+      "terraformFieldPath": "dataStorageSizeInGb",
+      "canonicalJoinKey": "dataStorageSizeInGb",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"dataStorageSizeInGb\" did not resolve to exactly one canonical join key",
+          "segment \"dataStorageSizeInGb\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "databaseConsole.port",
+      "terraformFieldPath": "databaseConsole.port",
+      "canonicalJoinKey": "databaseConsole.port",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"databaseConsole.port\" did not resolve to exactly one canonical join key",
+          "segment \"databaseConsole\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "databaseConsole.status",
+      "terraformFieldPath": "databaseConsole.status",
+      "canonicalJoinKey": "databaseConsole.status",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"databaseConsole.status\" did not resolve to exactly one canonical join key",
+          "segment \"databaseConsole\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "databaseManagement",
+      "terraformFieldPath": "database_management",
+      "canonicalJoinKey": "databaseManagement",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "databaseMode",
+      "terraformFieldPath": "databaseMode",
+      "canonicalJoinKey": "databaseMode",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"databaseMode\" did not resolve to exactly one canonical join key",
+          "segment \"databaseMode\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "definedTags",
+      "terraformFieldPath": "defined_tags",
+      "canonicalJoinKey": "definedTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "deletionPolicy.automaticBackupRetention",
+      "terraformFieldPath": "deletion_policy.automatic_backup_retention",
+      "canonicalJoinKey": "deletionPolicy.automaticBackupRetention",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "deletionPolicy.finalBackup",
+      "terraformFieldPath": "deletion_policy.final_backup",
+      "canonicalJoinKey": "deletionPolicy.finalBackup",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "deletionPolicy.isDeleteProtected",
+      "terraformFieldPath": "deletion_policy.is_delete_protected",
+      "canonicalJoinKey": "deletionPolicy.isDeleteProtected",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "description",
+      "terraformFieldPath": "description",
+      "canonicalJoinKey": "description",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "displayName",
+      "terraformFieldPath": "display_name",
+      "canonicalJoinKey": "displayName",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "encryptData.keyGenerationType",
+      "terraformFieldPath": "encryptData.keyGenerationType",
+      "canonicalJoinKey": "encryptData.keyGenerationType",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"encryptData.keyGenerationType\" did not resolve to exactly one canonical join key",
+          "segment \"encryptData\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "encryptData.keyId",
+      "terraformFieldPath": "encryptData.keyId",
+      "canonicalJoinKey": "encryptData.keyId",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"encryptData.keyId\" did not resolve to exactly one canonical join key",
+          "segment \"encryptData\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "faultDomain",
+      "terraformFieldPath": "faultDomain",
+      "canonicalJoinKey": "faultDomain",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "freeformTags",
+      "terraformFieldPath": "freeform_tags",
+      "canonicalJoinKey": "freeformTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "hostnameLabel",
+      "terraformFieldPath": "hostname_label",
+      "canonicalJoinKey": "hostnameLabel",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "ipAddress",
+      "terraformFieldPath": "ipAddress",
+      "canonicalJoinKey": "ipAddress",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "isHighlyAvailable",
+      "terraformFieldPath": "is_highly_available",
+      "canonicalJoinKey": "isHighlyAvailable",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "maintenance.maintenanceDisabledWindows.timeEnd",
+      "terraformFieldPath": "maintenance.maintenanceDisabledWindows.timeEnd",
+      "canonicalJoinKey": "maintenance.maintenanceDisabledWindows.timeEnd",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"maintenance.maintenanceDisabledWindows.timeEnd\" did not resolve to exactly one canonical join key",
+          "segment \"maintenanceDisabledWindows\" did not match any generated field under maintenance"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "maintenance.maintenanceDisabledWindows.timeStart",
+      "terraformFieldPath": "maintenance.maintenanceDisabledWindows.timeStart",
+      "canonicalJoinKey": "maintenance.maintenanceDisabledWindows.timeStart",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"maintenance.maintenanceDisabledWindows.timeStart\" did not resolve to exactly one canonical join key",
+          "segment \"maintenanceDisabledWindows\" did not match any generated field under maintenance"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "maintenance.maintenanceScheduleType",
+      "terraformFieldPath": "maintenance.maintenanceScheduleType",
+      "canonicalJoinKey": "maintenance.maintenanceScheduleType",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"maintenance.maintenanceScheduleType\" did not resolve to exactly one canonical join key",
+          "segment \"maintenanceScheduleType\" did not match any generated field under maintenance"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "maintenance.versionPreference",
+      "terraformFieldPath": "maintenance.versionPreference",
+      "canonicalJoinKey": "maintenance.versionPreference",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"maintenance.versionPreference\" did not resolve to exactly one canonical join key",
+          "segment \"versionPreference\" did not match any generated field under maintenance"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "maintenance.versionTrackPreference",
+      "terraformFieldPath": "maintenance.versionTrackPreference",
+      "canonicalJoinKey": "maintenance.versionTrackPreference",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"maintenance.versionTrackPreference\" did not resolve to exactly one canonical join key",
+          "segment \"versionTrackPreference\" did not match any generated field under maintenance"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "maintenance.windowStartTime",
+      "terraformFieldPath": "maintenance.window_start_time",
+      "canonicalJoinKey": "maintenance.windowStartTime",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "mysqlVersion",
+      "terraformFieldPath": "mysqlVersion",
+      "canonicalJoinKey": "mysqlVersion",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "nsgIds",
+      "terraformFieldPath": "nsgIds",
+      "canonicalJoinKey": "nsgIds",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"nsgIds\" did not resolve to exactly one canonical join key",
+          "segment \"nsgIds\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "port",
+      "terraformFieldPath": "port",
+      "canonicalJoinKey": "port",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "portX",
+      "terraformFieldPath": "portX",
+      "canonicalJoinKey": "portX",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "readEndpoint.excludeIps",
+      "terraformFieldPath": "readEndpoint.excludeIps",
+      "canonicalJoinKey": "readEndpoint.excludeIps",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"readEndpoint.excludeIps\" did not resolve to exactly one canonical join key",
+          "segment \"readEndpoint\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "readEndpoint.isEnabled",
+      "terraformFieldPath": "readEndpoint.isEnabled",
+      "canonicalJoinKey": "readEndpoint.isEnabled",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"readEndpoint.isEnabled\" did not resolve to exactly one canonical join key",
+          "segment \"readEndpoint\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "readEndpoint.readEndpointHostnameLabel",
+      "terraformFieldPath": "readEndpoint.readEndpointHostnameLabel",
+      "canonicalJoinKey": "readEndpoint.readEndpointHostnameLabel",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"readEndpoint.readEndpointHostnameLabel\" did not resolve to exactly one canonical join key",
+          "segment \"readEndpoint\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "readEndpoint.readEndpointIpAddress",
+      "terraformFieldPath": "readEndpoint.readEndpointIpAddress",
+      "canonicalJoinKey": "readEndpoint.readEndpointIpAddress",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"readEndpoint.readEndpointIpAddress\" did not resolve to exactly one canonical join key",
+          "segment \"readEndpoint\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "rest.configuration",
+      "terraformFieldPath": "rest.configuration",
+      "canonicalJoinKey": "rest.configuration",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"rest.configuration\" did not resolve to exactly one canonical join key",
+          "segment \"rest\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "rest.port",
+      "terraformFieldPath": "rest.port",
+      "canonicalJoinKey": "rest.port",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"rest.port\" did not resolve to exactly one canonical join key",
+          "segment \"rest\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "secureConnections.certificateGenerationType",
+      "terraformFieldPath": "secure_connections.certificate_generation_type",
+      "canonicalJoinKey": "secureConnections.certificateGenerationType",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "secureConnections.certificateId",
+      "terraformFieldPath": "secure_connections.certificate_id",
+      "canonicalJoinKey": "secureConnections.certificateId",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "securityAttributes",
+      "terraformFieldPath": "securityAttributes",
+      "canonicalJoinKey": "securityAttributes",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"securityAttributes\" did not resolve to exactly one canonical join key",
+          "segment \"securityAttributes\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "shapeName",
+      "terraformFieldPath": "shape_name",
+      "canonicalJoinKey": "shapeName",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "shutdownType",
+      "terraformFieldPath": "shutdownType",
+      "canonicalJoinKey": "shutdownType",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"shutdownType\" did not resolve to exactly one canonical join key",
+          "segment \"shutdownType\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "source",
+      "terraformFieldPath": "source",
+      "canonicalJoinKey": "source",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "source.backupId",
+      "terraformFieldPath": "source.backupId",
+      "canonicalJoinKey": "source.backupId",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "source.dbSystemId",
+      "terraformFieldPath": "source.dbSystemId",
+      "canonicalJoinKey": "source.dbSystemId",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "source.recoveryPoint",
+      "terraformFieldPath": "source.recoveryPoint",
+      "canonicalJoinKey": "source.recoveryPoint",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "source.sourceType",
+      "terraformFieldPath": "source.sourceType",
+      "canonicalJoinKey": "source.sourceType",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "source.sourceUrl",
+      "terraformFieldPath": "source.sourceUrl",
+      "canonicalJoinKey": "source.sourceUrl",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "state",
+      "terraformFieldPath": "state",
+      "canonicalJoinKey": "state",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"state\" did not resolve to exactly one canonical join key",
+          "segment \"state\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "subnetId",
+      "terraformFieldPath": "subnetId",
+      "canonicalJoinKey": "subnetId",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "notUpdateCandidate",
+        "forceNew": true,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "replacementRequired",
+        "finalPolicy": "replacementRequired"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.forceNew",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "telemetryConfiguration.logs.destination",
+      "terraformFieldPath": "telemetryConfiguration.logs.destination",
+      "canonicalJoinKey": "telemetryConfiguration.logs.destination",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"telemetryConfiguration.logs.destination\" did not resolve to exactly one canonical join key",
+          "segment \"telemetryConfiguration\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "telemetryConfiguration.logs.destinationConfigurations.key",
+      "terraformFieldPath": "telemetryConfiguration.logs.destinationConfigurations.key",
+      "canonicalJoinKey": "telemetryConfiguration.logs.destinationConfigurations.key",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"telemetryConfiguration.logs.destinationConfigurations.key\" did not resolve to exactly one canonical join key",
+          "segment \"telemetryConfiguration\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "telemetryConfiguration.logs.destinationConfigurations.value",
+      "terraformFieldPath": "telemetryConfiguration.logs.destinationConfigurations.value",
+      "canonicalJoinKey": "telemetryConfiguration.logs.destinationConfigurations.value",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"telemetryConfiguration.logs.destinationConfigurations.value\" did not resolve to exactly one canonical join key",
+          "segment \"telemetryConfiguration\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    },
+    {
+      "astFieldPath": "telemetryConfiguration.logs.logTypes",
+      "terraformFieldPath": "telemetryConfiguration.logs.logTypes",
+      "canonicalJoinKey": "telemetryConfiguration.logs.logTypes",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "unresolved",
+        "mergeCase": "unresolvedJoin",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/mysql/dbsystem.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "mysql_mysql_db_system#argument-reference",
+        "terraformDocsSection": "Argument Reference",
+        "notes": [
+          "AST field path \"telemetryConfiguration.logs.logTypes\" did not resolve to exactly one canonical join key",
+          "segment \"telemetryConfiguration\" did not match any generated field under \u003croot\u003e"
+        ]
+      }
+    }
+  ]
+}

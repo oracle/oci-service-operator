@@ -45,20 +45,68 @@ type vcnGeneratedParityClient struct {
 }
 
 func init() {
-	generatedFactory := newVcnServiceClient
-	newVcnServiceClient = func(manager *VcnServiceManager) VcnServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		parityClient := &vcnGeneratedParityClient{
-			manager:  manager,
-			delegate: delegate,
-			client:   sdkClient,
-		}
-		if err != nil {
-			parityClient.initErr = fmt.Errorf("initialize Vcn OCI client: %w", err)
-		}
-		return parityClient
+	registerVcnRuntimeHooksMutator(func(manager *VcnServiceManager, hooks *VcnRuntimeHooks) {
+		applyVcnRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applyVcnRuntimeHooks(
+	manager *VcnServiceManager,
+	hooks *VcnRuntimeHooks,
+	client vcnOCIClient,
+) {
+	if hooks == nil {
+		return
 	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedVcnIdentity
+	hooks.ParityHooks.NormalizeDesiredState = func(resource *corev1beta1.Vcn, currentResponse any) {
+		current, ok := vcnFromResponse(currentResponse)
+		if !ok {
+			return
+		}
+		normalizeEquivalentVcnCreateOnlyLists(resource, current)
+	}
+	hooks.ParityHooks.ValidateCreateOnlyDrift = func(resource *corev1beta1.Vcn, currentResponse any) error {
+		current, ok := vcnFromResponse(currentResponse)
+		if !ok {
+			return fmt.Errorf("unexpected Vcn current response type %T", currentResponse)
+		}
+		return validateCreateOnlyDrift(resource.Spec, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate VcnServiceClient) VcnServiceClient {
+		return newVcnTrackedRecreateClient(manager, delegate, client)
+	})
+}
+
+func newVcnTrackedRecreateClient(
+	manager *VcnServiceManager,
+	delegate VcnServiceClient,
+	client vcnOCIClient,
+) VcnServiceClient {
+	runtimeClient := &vcnGeneratedParityClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
+		return runtimeClient
+	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize Vcn OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *vcnGeneratedParityClient) CreateOrUpdate(
@@ -80,26 +128,19 @@ func (c *vcnGeneratedParityClient) CreateOrUpdate(
 		current, err := c.get(ctx, trackedID)
 		if err != nil {
 			if isReadNotFoundOCI(err) {
-				c.clearTrackedIdentity(resource)
+				clearTrackedVcnIdentity(resource)
 				explicitRecreate = true
 			} else {
 				return c.fail(resource, normalizeOCIError(err))
 			}
 		} else if current.LifecycleState == coresdk.VcnLifecycleStateTerminated {
-			c.clearTrackedIdentity(resource)
+			clearTrackedVcnIdentity(resource)
 			explicitRecreate = true
-		} else {
-			c.normalizeEquivalentCreateOnlyLists(resource, current)
-			if !vcnLifecycleIsRetryable(current.LifecycleState) {
-				if err := validateCreateOnlyDrift(resource.Spec, current); err != nil {
-					return c.fail(resource, err)
-				}
-			}
 		}
 	}
 
 	previousStatus := resource.Status
-	c.clearProjectedStatus(resource)
+	clearVcnProjectedStatus(resource)
 
 	delegateCtx := ctx
 	if explicitRecreate {
@@ -108,7 +149,7 @@ func (c *vcnGeneratedParityClient) CreateOrUpdate(
 
 	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
 	if err != nil {
-		c.restoreStatus(resource, previousStatus)
+		restoreVcnStatus(resource, previousStatus)
 	}
 	return response, err
 }
@@ -130,7 +171,7 @@ func (c *vcnGeneratedParityClient) get(ctx context.Context, ocid string) (coresd
 	return response.Vcn, nil
 }
 
-func (c *vcnGeneratedParityClient) normalizeEquivalentCreateOnlyLists(resource *corev1beta1.Vcn, current coresdk.Vcn) {
+func normalizeEquivalentVcnCreateOnlyLists(resource *corev1beta1.Vcn, current coresdk.Vcn) {
 	if resource == nil {
 		return
 	}
@@ -148,7 +189,7 @@ func (c *vcnGeneratedParityClient) normalizeEquivalentCreateOnlyLists(resource *
 	}
 }
 
-func (c *vcnGeneratedParityClient) clearProjectedStatus(resource *corev1beta1.Vcn) {
+func clearVcnProjectedStatus(resource *corev1beta1.Vcn) {
 	if resource == nil {
 		return
 	}
@@ -159,7 +200,7 @@ func (c *vcnGeneratedParityClient) clearProjectedStatus(resource *corev1beta1.Vc
 	}
 }
 
-func (c *vcnGeneratedParityClient) restoreStatus(resource *corev1beta1.Vcn, previous corev1beta1.VcnStatus) {
+func restoreVcnStatus(resource *corev1beta1.Vcn, previous corev1beta1.VcnStatus) {
 	if resource == nil {
 		return
 	}
@@ -179,9 +220,24 @@ func (c *vcnGeneratedParityClient) fail(resource *corev1beta1.Vcn, err error) (s
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
 }
 
-func (c *vcnGeneratedParityClient) clearTrackedIdentity(resource *corev1beta1.Vcn) {
+func clearTrackedVcnIdentity(resource *corev1beta1.Vcn) {
 	resource.Status.Id = ""
 	resource.Status.OsokStatus = shared.OSOKStatus{}
+}
+
+func vcnFromResponse(response any) (coresdk.Vcn, bool) {
+	switch typed := response.(type) {
+	case coresdk.Vcn:
+		return typed, true
+	case coresdk.CreateVcnResponse:
+		return typed.Vcn, true
+	case coresdk.GetVcnResponse:
+		return typed.Vcn, true
+	case coresdk.UpdateVcnResponse:
+		return typed.Vcn, true
+	default:
+		return coresdk.Vcn{}, false
+	}
 }
 
 func currentVcnID(resource *corev1beta1.Vcn) string {

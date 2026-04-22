@@ -59,6 +59,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - analytics.oracle.com
   resources:
   - analyticsinstances

@@ -1,0 +1,39 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs/status
+  verbs:
+  - get
+  - patch
+  - update

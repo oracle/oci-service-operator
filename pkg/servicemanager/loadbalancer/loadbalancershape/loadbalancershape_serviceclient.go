@@ -19,7 +19,7 @@ import (
 )
 
 // LoadBalancerShapeServiceClient is the handwritten extension seam for LoadBalancerShape runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*LoadBalancerShapeServiceManager).WithClient.
 type LoadBalancerShapeServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.LoadBalancerShape, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ LoadBalancerShapeServiceClient = defaultLoadBalancerShapeServiceClient{}
 
 var newLoadBalancerShapeServiceClient = func(manager *LoadBalancerShapeServiceManager) LoadBalancerShapeServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.LoadBalancerShape]{
-		Kind:    "LoadBalancerShape",
-		SDKName: "LoadBalancerShape",
-		Log:     manager.Log,
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateLoadBalancerShapeRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateLoadBalancerShape(ctx, *request.(*loadbalancersdk.UpdateLoadBalancerShapeRequest))
-			},
-		},
-	}
+	hooks := newLoadBalancerShapeRuntimeHooks(manager, sdkClient)
+	config := buildLoadBalancerShapeGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize LoadBalancerShape OCI client: %w", err)
 	}
-	return defaultLoadBalancerShapeServiceClient{
+	delegate := defaultLoadBalancerShapeServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.LoadBalancerShape](config),
 	}
+	return wrapLoadBalancerShapeGeneratedClient(hooks, delegate)
 }

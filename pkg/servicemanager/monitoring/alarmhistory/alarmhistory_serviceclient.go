@@ -19,7 +19,7 @@ import (
 )
 
 // AlarmHistoryServiceClient is the handwritten extension seam for AlarmHistory runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*AlarmHistoryServiceManager).WithClient.
 type AlarmHistoryServiceClient interface {
 	CreateOrUpdate(context.Context, *monitoringv1beta1.AlarmHistory, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ AlarmHistoryServiceClient = defaultAlarmHistoryServiceClient{}
 
 var newAlarmHistoryServiceClient = func(manager *AlarmHistoryServiceManager) AlarmHistoryServiceClient {
 	sdkClient, err := monitoringsdk.NewMonitoringClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*monitoringv1beta1.AlarmHistory]{
-		Kind:    "AlarmHistory",
-		SDKName: "AlarmHistory",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.GetAlarmHistoryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetAlarmHistory(ctx, *request.(*monitoringsdk.GetAlarmHistoryRequest))
-			},
-		},
-	}
+	hooks := newAlarmHistoryRuntimeHooks(manager, sdkClient)
+	config := buildAlarmHistoryGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize AlarmHistory OCI client: %w", err)
 	}
-	return defaultAlarmHistoryServiceClient{
+	delegate := defaultAlarmHistoryServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*monitoringv1beta1.AlarmHistory](config),
 	}
+	return wrapAlarmHistoryGeneratedClient(hooks, delegate)
 }

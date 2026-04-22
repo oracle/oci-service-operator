@@ -18,6 +18,10 @@ import (
 )
 
 func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared.OSOKConditionType) (servicemanager.OSOKResponse, error) {
+	return c.applySuccessWithIdentity(resource, response, fallback, nil)
+}
+
+func (c ServiceClient[T]) applySuccessWithIdentity(resource T, response any, fallback shared.OSOKConditionType, identity any) (servicemanager.OSOKResponse, error) {
 	if err := mergeResponseIntoStatus(resource, response); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
@@ -32,7 +36,9 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 	if resourceID == "" {
 		resourceID = c.currentID(resource)
 	}
-	if resourceID != "" {
+	if c.config.Identity.RecordTracked != nil {
+		c.recordTrackedIdentity(resource, identity, resourceID)
+	} else if resourceID != "" {
 		status.Ocid = shared.OCID(resourceID)
 	}
 
@@ -43,7 +49,7 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 	evaluation := c.classifyLifecycleAsync(response, status, fallback)
 	if evaluation.current != nil {
 		evaluation.current.UpdatedAt = &now
-		projection := servicemanager.ApplyAsyncOperation(status, evaluation.current, c.config.Log)
+		projection := c.applyAsyncOperation(status, resource, evaluation.current)
 		return servicemanager.OSOKResponse{
 			IsSuccessful:    projection.Condition != shared.Failed,
 			ShouldRequeue:   projection.ShouldRequeue,
@@ -51,7 +57,7 @@ func (c ServiceClient[T]) applySuccess(resource T, response any, fallback shared
 		}, nil
 	}
 
-	servicemanager.ClearAsyncOperation(status)
+	c.clearAsyncOperation(status, resource)
 	status.Message = evaluation.message
 	status.Reason = string(evaluation.condition)
 	status.UpdatedAt = &now
@@ -79,7 +85,7 @@ func (c ServiceClient[T]) markFailure(resource T, err error) error {
 		current.NormalizedClass = shared.OSOKAsyncClassFailed
 		current.Message = err.Error()
 		current.UpdatedAt = &now
-		_ = servicemanager.ApplyAsyncOperation(status, &current, c.config.Log)
+		_ = c.applyAsyncOperation(status, resource, &current)
 		return err
 	}
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.config.Log)
@@ -98,7 +104,7 @@ func (c ServiceClient[T]) markDeleted(resource T, message string) {
 		status.Message = message
 	}
 	status.Reason = string(shared.Terminating)
-	servicemanager.ClearAsyncOperation(status)
+	c.clearAsyncOperation(status, resource)
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, c.config.Log)
 }
 
@@ -119,7 +125,7 @@ func (c ServiceClient[T]) markCondition(resource T, condition shared.OSOKConditi
 			Message:         message,
 			UpdatedAt:       &now,
 		}
-		_ = servicemanager.ApplyAsyncOperation(status, current, c.config.Log)
+		_ = c.applyAsyncOperation(status, resource, current)
 		return
 	}
 	*status = util.UpdateOSOKStatusCondition(*status, condition, v1.ConditionTrue, "", message, c.config.Log)
@@ -186,13 +192,13 @@ func (c ServiceClient[T]) seedOpeningWorkRequestID(resource T, response any, pha
 	}
 
 	now := metav1.Now()
-	_ = servicemanager.ApplyAsyncOperation(status, &shared.OSOKAsyncOperation{
+	_ = c.applyAsyncOperation(status, resource, &shared.OSOKAsyncOperation{
 		Source:          shared.OSOKAsyncSourceWorkRequest,
 		Phase:           phase,
 		WorkRequestID:   workRequestID,
 		NormalizedClass: shared.OSOKAsyncClassPending,
 		UpdatedAt:       &now,
-	}, c.config.Log)
+	})
 }
 
 func (c ServiceClient[T]) seedOpeningRequestID(resource T, response any) {
@@ -373,6 +379,19 @@ func fallbackAsyncPhase(condition shared.OSOKConditionType) shared.OSOKAsyncPhas
 		return shared.OSOKAsyncPhaseDelete
 	default:
 		return ""
+	}
+}
+
+func fallbackConditionForAsyncPhase(phase shared.OSOKAsyncPhase) shared.OSOKConditionType {
+	switch phase {
+	case shared.OSOKAsyncPhaseCreate:
+		return shared.Provisioning
+	case shared.OSOKAsyncPhaseUpdate:
+		return shared.Updating
+	case shared.OSOKAsyncPhaseDelete:
+		return shared.Terminating
+	default:
+		return shared.Active
 	}
 }
 

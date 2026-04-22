@@ -101,6 +101,58 @@ func TestBuildClusterCreateDetailsPreservesNestedFalseAndPolymorphicOptions(t *t
 	}
 }
 
+func TestApplyClusterRuntimeHooksInstallsCustomBodyBuilders(t *testing.T) {
+	t.Parallel()
+
+	hooks := newClusterDefaultRuntimeHooks(containerenginesdk.ContainerEngineClient{})
+	applyClusterRuntimeHooks(&ClusterServiceManager{}, &hooks)
+
+	if hooks.Semantics == nil {
+		t.Fatal("hooks.Semantics = nil, want runtime semantics")
+	}
+	if hooks.BuildCreateBody == nil {
+		t.Fatal("hooks.BuildCreateBody = nil, want custom create builder")
+	}
+	if hooks.BuildUpdateBody == nil {
+		t.Fatal("hooks.BuildUpdateBody = nil, want custom update builder")
+	}
+
+	createBody, err := hooks.BuildCreateBody(context.Background(), newClusterTestResource(), "default")
+	if err != nil {
+		t.Fatalf("hooks.BuildCreateBody() error = %v", err)
+	}
+	createDetails, ok := createBody.(containerenginesdk.CreateClusterDetails)
+	if !ok {
+		t.Fatalf("hooks.BuildCreateBody() body type = %T, want containerengine.CreateClusterDetails", createBody)
+	}
+	if createDetails.Name == nil || *createDetails.Name != "cluster-sample" {
+		t.Fatalf("hooks.BuildCreateBody() name = %#v, want cluster-sample", createDetails.Name)
+	}
+
+	resource := newExistingClusterTestResource("ocid1.cluster.oc1..existing")
+	resource.Spec.Name = "renamed-cluster"
+	updateBody, updateNeeded, err := hooks.BuildUpdateBody(
+		context.Background(),
+		resource,
+		resource.Namespace,
+		observedClusterFromSpec("ocid1.cluster.oc1..existing", newClusterTestResource().Spec, "ACTIVE"),
+	)
+	if err != nil {
+		t.Fatalf("hooks.BuildUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("hooks.BuildUpdateBody() updateNeeded = false, want true after mutable drift")
+	}
+
+	updateDetails, ok := updateBody.(containerenginesdk.UpdateClusterDetails)
+	if !ok {
+		t.Fatalf("hooks.BuildUpdateBody() body type = %T, want containerengine.UpdateClusterDetails", updateBody)
+	}
+	if updateDetails.Name == nil || *updateDetails.Name != resource.Spec.Name {
+		t.Fatalf("hooks.BuildUpdateBody() name = %#v, want %q", updateDetails.Name, resource.Spec.Name)
+	}
+}
+
 func TestBuildClusterCreateDetailsOmitsEmptyBlocks(t *testing.T) {
 	t.Parallel()
 
@@ -390,6 +442,105 @@ func TestClusterCreateOrUpdateFallsBackFromStaleTrackedIDToListWithoutLifecycleQ
 	}
 	requireClusterIDPointer(t, "list request compartmentId", listRequest.CompartmentId, resource.Spec.CompartmentId)
 	requireClusterIDPointer(t, "list request name", listRequest.Name, resource.Spec.Name)
+	requireClusterOCID(t, resource, replacementID)
+	if resource.Status.Id != replacementID {
+		t.Fatalf("status.id = %q, want %q", resource.Status.Id, replacementID)
+	}
+}
+
+func TestClusterHookBackedServiceClientFallsBackFromStaleTrackedIDWithoutLifecycleQuery(t *testing.T) {
+	t.Parallel()
+
+	const staleID = "ocid1.cluster.oc1..stale"
+	const replacementID = "ocid1.cluster.oc1..replacement"
+
+	resource := newExistingClusterTestResource(staleID)
+	resource.Status.LifecycleState = "ACTIVE"
+
+	hooks := newClusterDefaultRuntimeHooks(containerenginesdk.ContainerEngineClient{})
+	hooks.Create.Call = func(_ context.Context, _ containerenginesdk.CreateClusterRequest) (containerenginesdk.CreateClusterResponse, error) {
+		t.Fatal("CreateCluster() should not be called when hook-backed list fallback rebinds a replacement cluster")
+		return containerenginesdk.CreateClusterResponse{}, nil
+	}
+	updateCalls := 0
+	var updateRequest containerenginesdk.UpdateClusterRequest
+	hooks.Update.Call = func(_ context.Context, request containerenginesdk.UpdateClusterRequest) (containerenginesdk.UpdateClusterResponse, error) {
+		updateCalls++
+		updateRequest = request
+		return containerenginesdk.UpdateClusterResponse{}, nil
+	}
+	hooks.Delete.Call = func(_ context.Context, _ containerenginesdk.DeleteClusterRequest) (containerenginesdk.DeleteClusterResponse, error) {
+		t.Fatal("DeleteCluster() should not be called during CreateOrUpdate hook-backed fallback")
+		return containerenginesdk.DeleteClusterResponse{}, nil
+	}
+	getCalls := 0
+	hooks.Get.Call = func(_ context.Context, request containerenginesdk.GetClusterRequest) (containerenginesdk.GetClusterResponse, error) {
+		getCalls++
+		gotClusterID := ""
+		if request.ClusterId != nil {
+			gotClusterID = *request.ClusterId
+		}
+		switch getCalls {
+		case 1:
+			if gotClusterID != staleID {
+				t.Fatalf("first get request clusterId = %q, want %q", gotClusterID, staleID)
+			}
+			return containerenginesdk.GetClusterResponse{}, errortest.NewServiceError(404, "NotFound", "cluster not found")
+		default:
+			if gotClusterID != replacementID {
+				t.Fatalf("follow-up get request clusterId = %q, want %q", gotClusterID, replacementID)
+			}
+			return containerenginesdk.GetClusterResponse{
+				Cluster: observedClusterFromSpec(replacementID, resource.Spec, "ACTIVE"),
+			}, nil
+		}
+	}
+
+	var listRequest containerenginesdk.ListClustersRequest
+	hooks.List.Call = func(_ context.Context, request containerenginesdk.ListClustersRequest) (containerenginesdk.ListClustersResponse, error) {
+		listRequest = request
+		return containerenginesdk.ListClustersResponse{
+			Items: []containerenginesdk.ClusterSummary{
+				observedClusterSummaryFromSpec(replacementID, resource.Spec, "ACTIVE"),
+			},
+		}, nil
+	}
+
+	manager := &ClusterServiceManager{}
+	applyClusterRuntimeHooks(manager, &hooks)
+	client := wrapClusterGeneratedClient(
+		hooks,
+		defaultClusterServiceClient{
+			ServiceClient: generatedruntime.NewServiceClient[*containerenginev1beta1.Cluster](
+				buildClusterGeneratedRuntimeConfig(manager, hooks),
+			),
+		},
+	)
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should succeed when the hook-backed list fallback rebinds a replacement cluster")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue when hook-backed list fallback observes ACTIVE")
+	}
+	if getCalls < 2 {
+		t.Fatalf("GetCluster() calls = %d, want at least stale-id read plus replacement follow-up", getCalls)
+	}
+	if len(listRequest.LifecycleState) != 0 {
+		t.Fatalf("hook-backed list request lifecycleState = %#v, want empty after stale tracked ID fallback", listRequest.LifecycleState)
+	}
+	requireClusterIDPointer(t, "hook-backed list request compartmentId", listRequest.CompartmentId, resource.Spec.CompartmentId)
+	requireClusterIDPointer(t, "hook-backed list request name", listRequest.Name, resource.Spec.Name)
+	if updateCalls > 1 {
+		t.Fatalf("UpdateCluster() calls = %d, want at most 1 post-rebind reconcile", updateCalls)
+	}
+	if updateCalls == 1 {
+		requireClusterIDPointer(t, "hook-backed update request clusterId", updateRequest.ClusterId, replacementID)
+	}
 	requireClusterOCID(t, resource, replacementID)
 	if resource.Status.Id != replacementID {
 		t.Fatalf("status.id = %q, want %q", resource.Status.Id, replacementID)

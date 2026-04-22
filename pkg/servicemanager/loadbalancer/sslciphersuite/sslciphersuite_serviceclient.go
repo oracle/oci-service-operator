@@ -19,7 +19,7 @@ import (
 )
 
 // SSLCipherSuiteServiceClient is the handwritten extension seam for SSLCipherSuite runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SSLCipherSuiteServiceManager).WithClient.
 type SSLCipherSuiteServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.SSLCipherSuite, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ SSLCipherSuiteServiceClient = defaultSSLCipherSuiteServiceClient{}
 
 var newSSLCipherSuiteServiceClient = func(manager *SSLCipherSuiteServiceManager) SSLCipherSuiteServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.SSLCipherSuite]{
-		Kind:    "SSLCipherSuite",
-		SDKName: "SSLCipherSuite",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateSSLCipherSuiteRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateSSLCipherSuite(ctx, *request.(*loadbalancersdk.CreateSSLCipherSuiteRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetSSLCipherSuiteRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetSSLCipherSuite(ctx, *request.(*loadbalancersdk.GetSSLCipherSuiteRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListSSLCipherSuitesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSSLCipherSuites(ctx, *request.(*loadbalancersdk.ListSSLCipherSuitesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateSSLCipherSuiteRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateSSLCipherSuite(ctx, *request.(*loadbalancersdk.UpdateSSLCipherSuiteRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteSSLCipherSuiteRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteSSLCipherSuite(ctx, *request.(*loadbalancersdk.DeleteSSLCipherSuiteRequest))
-			},
-		},
-	}
+	hooks := newSSLCipherSuiteRuntimeHooks(manager, sdkClient)
+	config := buildSSLCipherSuiteGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize SSLCipherSuite OCI client: %w", err)
 	}
-	return defaultSSLCipherSuiteServiceClient{
+	delegate := defaultSSLCipherSuiteServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.SSLCipherSuite](config),
 	}
+	return wrapSSLCipherSuiteGeneratedClient(hooks, delegate)
 }

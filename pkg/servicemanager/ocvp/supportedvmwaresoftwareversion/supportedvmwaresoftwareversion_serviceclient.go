@@ -19,7 +19,7 @@ import (
 )
 
 // SupportedVmwareSoftwareVersionServiceClient is the handwritten extension seam for SupportedVmwareSoftwareVersion runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SupportedVmwareSoftwareVersionServiceManager).WithClient.
 type SupportedVmwareSoftwareVersionServiceClient interface {
 	CreateOrUpdate(context.Context, *ocvpv1beta1.SupportedVmwareSoftwareVersion, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ SupportedVmwareSoftwareVersionServiceClient = defaultSupportedVmwareSoftwa
 
 var newSupportedVmwareSoftwareVersionServiceClient = func(manager *SupportedVmwareSoftwareVersionServiceManager) SupportedVmwareSoftwareVersionServiceClient {
 	sdkClient, err := ocvpsdk.NewSddcClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*ocvpv1beta1.SupportedVmwareSoftwareVersion]{
-		Kind:    "SupportedVmwareSoftwareVersion",
-		SDKName: "SupportedVmwareSoftwareVersion",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSupportedVmwareSoftwareVersions(ctx, *request.(*ocvpsdk.ListSupportedVmwareSoftwareVersionsRequest))
-			},
-		},
-	}
+	hooks := newSupportedVmwareSoftwareVersionRuntimeHooks(manager, sdkClient)
+	config := buildSupportedVmwareSoftwareVersionGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize SupportedVmwareSoftwareVersion OCI client: %w", err)
 	}
-	return defaultSupportedVmwareSoftwareVersionServiceClient{
+	delegate := defaultSupportedVmwareSoftwareVersionServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.SupportedVmwareSoftwareVersion](config),
 	}
+	return wrapSupportedVmwareSoftwareVersionGeneratedClient(hooks, delegate)
 }

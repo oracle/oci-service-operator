@@ -19,7 +19,7 @@ import (
 )
 
 // InstanceServiceClient is the handwritten extension seam for Instance runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*InstanceServiceManager).WithClient.
 type InstanceServiceClient interface {
 	CreateOrUpdate(context.Context, *corev1beta1.Instance, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultInstanceServiceClient struct {
 	generatedruntime.ServiceClient[*corev1beta1.Instance]
 }
 
-func newInstanceRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "core",
-		FormalSlug:    "instance",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"PROVISIONING", "STARTING"},
-			UpdatingStates:     []string{"MOVING", "STOPPING"},
-			ActiveStates:       []string{"RUNNING", "STOPPED"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"TERMINATING"},
-			TerminalStates: []string{"NOT_FOUND", "TERMINATED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"availabilityDomain", "compartmentId", "displayName", "lifecycleState"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-			ForceNew:      []string{"availabilityDomain", "compartmentId", "shape", "shapeConfig", "sourceDetails", "subnetId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ InstanceServiceClient = defaultInstanceServiceClient{}
 
 var newInstanceServiceClient = func(manager *InstanceServiceManager) InstanceServiceClient {
 	sdkClient, err := coresdk.NewComputeClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*corev1beta1.Instance]{
-		Kind:      "Instance",
-		SDKName:   "Instance",
-		Log:       manager.Log,
-		Semantics: newInstanceRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.LaunchInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.LaunchInstance(ctx, *request.(*coresdk.LaunchInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LaunchInstanceDetails", RequestName: "LaunchInstanceDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetInstance(ctx, *request.(*coresdk.GetInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListInstancesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListInstances(ctx, *request.(*coresdk.ListInstancesRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "AvailabilityDomain", RequestName: "availabilityDomain", Contribution: "query", PreferResourceID: false}, {FieldName: "CapacityReservationId", RequestName: "capacityReservationId", Contribution: "query", PreferResourceID: false}, {FieldName: "ComputeClusterId", RequestName: "computeClusterId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateInstance(ctx, *request.(*coresdk.UpdateInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateInstanceDetails", RequestName: "UpdateInstanceDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.TerminateInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.TerminateInstance(ctx, *request.(*coresdk.TerminateInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}, {FieldName: "PreserveBootVolume", RequestName: "preserveBootVolume", Contribution: "query", PreferResourceID: false}, {FieldName: "PreserveDataVolumesCreatedAtLaunch", RequestName: "preserveDataVolumesCreatedAtLaunch", Contribution: "query", PreferResourceID: false}},
-		},
-	}
+	hooks := newInstanceRuntimeHooks(manager, sdkClient)
+	config := buildInstanceGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Instance OCI client: %w", err)
 	}
-	return defaultInstanceServiceClient{
+	delegate := defaultInstanceServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Instance](config),
 	}
+	return wrapInstanceGeneratedClient(hooks, delegate)
 }

@@ -71,34 +71,63 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING; update
 UPDATING; delete DELETING
-follow-up: create=read-after-write;
-update=read-after-write; delete=confirm-delete
+follow-up: create=GetWorkRequest -> GetProject;
+update=GetWorkRequest -> GetProject;
+delete=GetWorkRequest -> GetProject/ListProjects
+confirm-delete
 supported drift: defined_tags, description,
 display_name, freeform_tags
 reject before mutate: force-new fields
 compartment_id
 create-only fields: none
 list lookup: oci_ai_language_projects filters
-compartment_id, display_name, id, state
+compartment_id, display_name, id; Adopt only a
+unique paginated non-DELETED ListProjects match;
+delete fallback prefers status.compartmentId and
+status.displayName before spec values and adds
+the tracked projectId when GetProject returns
+NotFound.
 conflicts: none
 open gaps: none
-Generated runtime uses read-after-write
-follow-up for create and update plus
-confirm-delete for delete; `CREATING` maps to
-provisioning, `ACTIVE` to success, `UPDATING` to
-updating, and `DELETING` keeps reconcile in the
-terminating bucket until `DELETED` or NotFound.
-Pre-create lookup queries `ListProjects` with
-`compartmentId`, `displayName`, and an optional
-tracked `projectId`; delete fallback can
-re-resolve the tracked project through
-`ListProjects` when `GetProject` returns
-NotFound.
+Create, update, and delete persist the in-flight
+OCI work request in `status.async.current`,
+normalize AI Language `OperationStatus*` values
+into shared async classes, and normalize
+work-request `OperationType*` values into
+create/update/delete phases before deriving
+conditions and requeue.
+Create recovers the Project OCID from the create
+response when OCI returns it or from
+work-request resources when the response omits
+it, then polls `GetProject` until the Project
+becomes readable. Update also gates completion
+on a succeeded work request plus a readable
+`GetProject`. Retryable 409 "currently being
+modified" conflicts project a lifecycle-sourced
+pending update when OCI omits a work-request ID;
+later reconciles reread `GetProject`, clear
+async if mutable drift is already gone, and
+otherwise back off for one normal requeue
+interval before retrying `UpdateProject` instead
+of hot-looping on every `ACTIVE` reread.
+Pre-create lookup adopts only a unique paginated
+non-`DELETED` `ListProjects` match on
+`compartmentId` and `displayName`. Delete
+fallback reuses `status.compartmentId`,
+`status.displayName`, and tracked `projectId`
+when `GetProject` returns NotFound so finalizer
+release does not depend on stale spec values.
 Only `displayName`, `description`,
 `freeformTags`, and `definedTags` reconcile in
 place. `compartmentId` remains replacement-only
-drift and the runtime has no secret side
-effects.
+drift, so the live runtime never exercises
+provider-only `ChangeProjectCompartment`, and
+the runtime has no secret side effects.
+Delete is not best-effort. The finalizer stays
+until the delete work request is terminal and
+`GetProject` or fallback `ListProjects` confirms
+the Project is gone or exposes lifecycle state
+`DELETED`.
 end note
 note right of delete_pending
 delete policy: required

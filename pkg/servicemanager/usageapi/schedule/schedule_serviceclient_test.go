@@ -66,9 +66,27 @@ func (f *fakeScheduleOCIClient) DeleteSchedule(ctx context.Context, req usageapi
 
 func testScheduleClient(fake *fakeScheduleOCIClient) ScheduleServiceClient {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	manager := &ScheduleServiceManager{Log: log}
+	hooks := newScheduleDefaultRuntimeHooks(usageapisdk.UsageapiClient{})
+	hooks.Create.Call = func(ctx context.Context, request usageapisdk.CreateScheduleRequest) (usageapisdk.CreateScheduleResponse, error) {
+		return fake.CreateSchedule(ctx, request)
+	}
+	hooks.Get.Call = func(ctx context.Context, request usageapisdk.GetScheduleRequest) (usageapisdk.GetScheduleResponse, error) {
+		return fake.GetSchedule(ctx, request)
+	}
+	hooks.List.Call = func(ctx context.Context, request usageapisdk.ListSchedulesRequest) (usageapisdk.ListSchedulesResponse, error) {
+		return fake.ListSchedules(ctx, request)
+	}
+	hooks.Update.Call = func(ctx context.Context, request usageapisdk.UpdateScheduleRequest) (usageapisdk.UpdateScheduleResponse, error) {
+		return fake.UpdateSchedule(ctx, request)
+	}
+	hooks.Delete.Call = func(ctx context.Context, request usageapisdk.DeleteScheduleRequest) (usageapisdk.DeleteScheduleResponse, error) {
+		return fake.DeleteSchedule(ctx, request)
+	}
+	applyScheduleRuntimeHooks(&hooks)
 	return defaultScheduleServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*usageapiv1beta1.Schedule](
-			newScheduleGeneratedRuntimeConfig(log, fake, nil),
+			buildScheduleGeneratedRuntimeConfig(manager, hooks),
 		),
 	}
 }

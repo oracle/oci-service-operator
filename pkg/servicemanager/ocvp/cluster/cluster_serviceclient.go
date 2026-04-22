@@ -19,7 +19,7 @@ import (
 )
 
 // ClusterServiceClient is the handwritten extension seam for Cluster runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ClusterServiceManager).WithClient.
 type ClusterServiceClient interface {
 	CreateOrUpdate(context.Context, *ocvpv1beta1.Cluster, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultClusterServiceClient struct {
 	generatedruntime.ServiceClient[*ocvpv1beta1.Cluster]
 }
 
-func newClusterRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "ocvp",
-		FormalSlug:    "cluster",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING", "UPDATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "lifecycleState", "sddcId"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "esxiSoftwareVersion", "freeformTags", "networkConfiguration", "vmwareSoftwareVersion"},
-			ForceNew:      []string{"capacityReservationId", "computeAvailabilityDomain", "datastores", "esxiHostsCount", "initialCommitment", "initialHostOcpuCount", "initialHostShapeName", "instanceDisplayNamePrefix", "isShieldedInstanceEnabled", "sddcId", "workloadNetworkCidr"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ ClusterServiceClient = defaultClusterServiceClient{}
 
 var newClusterServiceClient = func(manager *ClusterServiceManager) ClusterServiceClient {
 	sdkClient, err := ocvpsdk.NewClusterClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*ocvpv1beta1.Cluster]{
-		Kind:      "Cluster",
-		SDKName:   "Cluster",
-		Log:       manager.Log,
-		Semantics: newClusterRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.CreateClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateCluster(ctx, *request.(*ocvpsdk.CreateClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.GetClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetCluster(ctx, *request.(*ocvpsdk.GetClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.ListClustersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListClusters(ctx, *request.(*ocvpsdk.ListClustersRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "SddcId", RequestName: "sddcId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.UpdateClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateCluster(ctx, *request.(*ocvpsdk.UpdateClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateClusterDetails", RequestName: "UpdateClusterDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.DeleteClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteCluster(ctx, *request.(*ocvpsdk.DeleteClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newClusterRuntimeHooks(manager, sdkClient)
+	config := buildClusterGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Cluster OCI client: %w", err)
 	}
-	return defaultClusterServiceClient{
+	delegate := defaultClusterServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.Cluster](config),
 	}
+	return wrapClusterGeneratedClient(hooks, delegate)
 }

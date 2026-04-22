@@ -15,101 +15,29 @@ import (
 	bdssdk "github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
-type bdsInstanceOCIClient interface {
-	CreateBdsInstance(context.Context, bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error)
-	GetBdsInstance(context.Context, bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error)
-	ListBdsInstances(context.Context, bdssdk.ListBdsInstancesRequest) (bdssdk.ListBdsInstancesResponse, error)
-	UpdateBdsInstance(context.Context, bdssdk.UpdateBdsInstanceRequest) (bdssdk.UpdateBdsInstanceResponse, error)
-	DeleteBdsInstance(context.Context, bdssdk.DeleteBdsInstanceRequest) (bdssdk.DeleteBdsInstanceResponse, error)
-}
-
 func init() {
-	newBdsInstanceServiceClient = func(manager *BdsInstanceServiceManager) BdsInstanceServiceClient {
-		sdkClient, err := bdssdk.NewBdsClientWithConfigurationProvider(manager.Provider)
-		config := newBdsInstanceRuntimeConfig(manager.Log, sdkClient)
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize BdsInstance OCI client: %w", err)
-		}
-		return defaultBdsInstanceServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*bdsv1beta1.BdsInstance](config),
-		}
-	}
+	registerBdsInstanceRuntimeHooksMutator(func(_ *BdsInstanceServiceManager, hooks *BdsInstanceRuntimeHooks) {
+		applyBdsInstanceRuntimeHooks(hooks)
+	})
 }
 
-func newBdsInstanceRuntimeConfig(
-	log loggerutil.OSOKLogger,
-	sdkClient bdsInstanceOCIClient,
-) generatedruntime.Config[*bdsv1beta1.BdsInstance] {
-	return generatedruntime.Config[*bdsv1beta1.BdsInstance]{
-		Kind:      "BdsInstance",
-		SDKName:   "BdsInstance",
-		Log:       log,
-		Semantics: reviewedBdsInstanceRuntimeSemantics(),
-		BuildUpdateBody: func(
-			_ context.Context,
-			resource *bdsv1beta1.BdsInstance,
-			_ string,
-			currentResponse any,
-		) (any, bool, error) {
-			return buildBdsInstanceUpdateBody(resource, currentResponse)
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.CreateBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateBdsInstance(ctx, *request.(*bdssdk.CreateBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CreateBdsInstanceDetails", RequestName: "CreateBdsInstanceDetails", Contribution: "body"},
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.GetBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetBdsInstance(ctx, *request.(*bdssdk.GetBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "BdsInstanceId", RequestName: "bdsInstanceId", Contribution: "path", PreferResourceID: true},
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.ListBdsInstancesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListBdsInstances(ctx, *request.(*bdssdk.ListBdsInstancesRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
-				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
-				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
-				{FieldName: "Page", RequestName: "page", Contribution: "query"},
-				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
-				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.UpdateBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateBdsInstance(ctx, *request.(*bdssdk.UpdateBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "BdsInstanceId", RequestName: "bdsInstanceId", Contribution: "path", PreferResourceID: true},
-				{FieldName: "UpdateBdsInstanceDetails", RequestName: "UpdateBdsInstanceDetails", Contribution: "body"},
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.DeleteBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteBdsInstance(ctx, *request.(*bdssdk.DeleteBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "BdsInstanceId", RequestName: "bdsInstanceId", Contribution: "path", PreferResourceID: true},
-			},
-		},
+func applyBdsInstanceRuntimeHooks(hooks *BdsInstanceRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Semantics = reviewedBdsInstanceRuntimeSemantics()
+	hooks.BuildUpdateBody = func(
+		_ context.Context,
+		resource *bdsv1beta1.BdsInstance,
+		_ string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildBdsInstanceUpdateBody(resource, currentResponse)
 	}
 }
 

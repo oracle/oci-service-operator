@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "streaming",
+  "kind": "Stream",
+  "formalSlug": "stream",
+  "providerResource": "oci_streaming_stream",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/streaming_stream",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/streaming_stream",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/streaming/stream/page.html",
+  "bodySHA256": "4a85ab165ba7f640073995ef38506761a917837465d3f2d0acc4cfb1d5b829db",
+  "bodyBytes": 1805,
+  "fixtureBodyPath": "7.22.0/streaming/stream/page.html"
+}

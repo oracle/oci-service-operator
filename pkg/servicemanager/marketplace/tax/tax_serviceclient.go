@@ -19,7 +19,7 @@ import (
 )
 
 // TaxServiceClient is the handwritten extension seam for Tax runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*TaxServiceManager).WithClient.
 type TaxServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.Tax, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ TaxServiceClient = defaultTaxServiceClient{}
 
 var newTaxServiceClient = func(manager *TaxServiceManager) TaxServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.Tax]{
-		Kind:    "Tax",
-		SDKName: "Tax",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListTaxesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListTaxes(ctx, *request.(*marketplacesdk.ListTaxesRequest))
-			},
-		},
-	}
+	hooks := newTaxRuntimeHooks(manager, sdkClient)
+	config := buildTaxGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Tax OCI client: %w", err)
 	}
-	return defaultTaxServiceClient{
+	delegate := defaultTaxServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.Tax](config),
 	}
+	return wrapTaxGeneratedClient(hooks, delegate)
 }

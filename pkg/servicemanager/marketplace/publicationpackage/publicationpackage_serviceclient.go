@@ -19,7 +19,7 @@ import (
 )
 
 // PublicationPackageServiceClient is the handwritten extension seam for PublicationPackage runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*PublicationPackageServiceManager).WithClient.
 type PublicationPackageServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.PublicationPackage, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,27 +34,13 @@ var _ PublicationPackageServiceClient = defaultPublicationPackageServiceClient{}
 
 var newPublicationPackageServiceClient = func(manager *PublicationPackageServiceManager) PublicationPackageServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.PublicationPackage]{
-		Kind:    "PublicationPackage",
-		SDKName: "PublicationPackage",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.GetPublicationPackageRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetPublicationPackage(ctx, *request.(*marketplacesdk.GetPublicationPackageRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListPublicationPackagesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListPublicationPackages(ctx, *request.(*marketplacesdk.ListPublicationPackagesRequest))
-			},
-		},
-	}
+	hooks := newPublicationPackageRuntimeHooks(manager, sdkClient)
+	config := buildPublicationPackageGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize PublicationPackage OCI client: %w", err)
 	}
-	return defaultPublicationPackageServiceClient{
+	delegate := defaultPublicationPackageServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.PublicationPackage](config),
 	}
+	return wrapPublicationPackageGeneratedClient(hooks, delegate)
 }

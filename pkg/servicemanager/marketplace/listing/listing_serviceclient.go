@@ -19,7 +19,7 @@ import (
 )
 
 // ListingServiceClient is the handwritten extension seam for Listing runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ListingServiceManager).WithClient.
 type ListingServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.Listing, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,27 +34,13 @@ var _ ListingServiceClient = defaultListingServiceClient{}
 
 var newListingServiceClient = func(manager *ListingServiceManager) ListingServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.Listing]{
-		Kind:    "Listing",
-		SDKName: "Listing",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.GetListingRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetListing(ctx, *request.(*marketplacesdk.GetListingRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListListingsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListListings(ctx, *request.(*marketplacesdk.ListListingsRequest))
-			},
-		},
-	}
+	hooks := newListingRuntimeHooks(manager, sdkClient)
+	config := buildListingGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Listing OCI client: %w", err)
 	}
-	return defaultListingServiceClient{
+	delegate := defaultListingServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.Listing](config),
 	}
+	return wrapListingGeneratedClient(hooks, delegate)
 }

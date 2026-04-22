@@ -7,57 +7,47 @@ package cluster
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ocvpsdk "github.com/oracle/oci-go-sdk/v65/ocvp"
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-type stubClusterClient struct {
-	createOrUpdateFn func(context.Context, *ocvpv1beta1.Cluster, ctrl.Request) (servicemanager.OSOKResponse, error)
-	deleteFn         func(context.Context, *ocvpv1beta1.Cluster) (bool, error)
-}
-
-func (s stubClusterClient) CreateOrUpdate(ctx context.Context, resource *ocvpv1beta1.Cluster, req ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if s.createOrUpdateFn != nil {
-		return s.createOrUpdateFn(ctx, resource, req)
-	}
-	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
-}
-
-func (s stubClusterClient) Delete(ctx context.Context, resource *ocvpv1beta1.Cluster) (bool, error) {
-	if s.deleteFn != nil {
-		return s.deleteFn(ctx, resource)
-	}
-	return true, nil
-}
-
 func TestClusterCreateOrUpdateRejectsCreateWithoutDisplayNameWhenUntracked(t *testing.T) {
 	t.Parallel()
 
 	resource := newClusterTestResource()
 	resource.Spec.DisplayName = ""
-	delegateCalled := false
+	createCalled := false
+	listCalled := false
 
-	manager := &ClusterServiceManager{
-		client: &clusterGeneratedParityClient{
-			manager: &ClusterServiceManager{},
-			delegate: stubClusterClient{
-				createOrUpdateFn: func(context.Context, *ocvpv1beta1.Cluster, ctrl.Request) (servicemanager.OSOKResponse, error) {
-					delegateCalled = true
-					t.Fatal("delegate CreateOrUpdate() should not be called when displayName is missing")
-					return servicemanager.OSOKResponse{}, nil
-				},
+	manager := newClusterRuntimeTestManager(generatedruntime.Config[*ocvpv1beta1.Cluster]{
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &ocvpsdk.CreateClusterRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				t.Fatal("Create() should not be called when displayName is missing")
+				return nil, nil
 			},
+			Fields: clusterCreateFields(),
 		},
-	}
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &ocvpsdk.ListClustersRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				listCalled = true
+				t.Fatal("List() should not be called when displayName is missing")
+				return nil, nil
+			},
+			Fields: clusterListFields(),
+		},
+	})
 
 	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	if err == nil {
@@ -69,8 +59,11 @@ func TestClusterCreateOrUpdateRejectsCreateWithoutDisplayNameWhenUntracked(t *te
 	if response.IsSuccessful {
 		t.Fatal("CreateOrUpdate() should report failure when displayName is missing")
 	}
-	if delegateCalled {
-		t.Fatal("delegate CreateOrUpdate() should not be called when displayName is missing")
+	if createCalled {
+		t.Fatal("Create() should not be called when displayName is missing")
+	}
+	if listCalled {
+		t.Fatal("List() should not be called when displayName is missing")
 	}
 	requireClusterCondition(t, resource, shared.Failed)
 }
@@ -411,23 +404,101 @@ func TestClusterDeleteConfirmsDeleteOutcomes(t *testing.T) {
 
 func newClusterRuntimeTestManager(cfg generatedruntime.Config[*ocvpv1beta1.Cluster]) *ClusterServiceManager {
 	manager := &ClusterServiceManager{}
-	if cfg.Kind == "" {
-		cfg.Kind = "Cluster"
+	hooks := ClusterRuntimeHooks{
+		Semantics:       newClusterRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*ocvpv1beta1.Cluster]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.Cluster]{},
+		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.Cluster]{},
+		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.Cluster]{},
+		Create: clusterRuntimeTestOperation[ocvpsdk.CreateClusterRequest, ocvpsdk.CreateClusterResponse](
+			clusterCreateFields(),
+			cfg.Create,
+		),
+		Get: clusterRuntimeTestOperation[ocvpsdk.GetClusterRequest, ocvpsdk.GetClusterResponse](
+			clusterGetFields(),
+			cfg.Get,
+		),
+		List: clusterRuntimeTestOperation[ocvpsdk.ListClustersRequest, ocvpsdk.ListClustersResponse](
+			clusterListFields(),
+			cfg.List,
+		),
+		Update: clusterRuntimeTestOperation[ocvpsdk.UpdateClusterRequest, ocvpsdk.UpdateClusterResponse](
+			clusterUpdateFields(),
+			cfg.Update,
+		),
+		Delete: clusterRuntimeTestOperation[ocvpsdk.DeleteClusterRequest, ocvpsdk.DeleteClusterResponse](
+			clusterDeleteFields(),
+			cfg.Delete,
+		),
+		WrapGeneratedClient: []func(ClusterServiceClient) ClusterServiceClient{},
 	}
-	if cfg.SDKName == "" {
-		cfg.SDKName = "Cluster"
+	if cfg.Semantics != nil {
+		hooks.Semantics = cfg.Semantics
 	}
-	if cfg.Semantics == nil {
-		cfg.Semantics = newClusterRuntimeSemantics()
+	applyClusterRuntimeHooks(&hooks)
+	config := buildClusterGeneratedRuntimeConfig(manager, hooks)
+	config.InitError = cfg.InitError
+	if cfg.Create == nil {
+		config.Create = nil
+	}
+	if cfg.Get == nil {
+		config.Get = nil
+		config.Read.Get = nil
+	}
+	if cfg.List == nil {
+		config.List = nil
+		config.Read.List = nil
+	}
+	if cfg.Update == nil {
+		config.Update = nil
+	}
+	if cfg.Delete == nil {
+		config.Delete = nil
 	}
 	delegate := defaultClusterServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.Cluster](cfg),
+		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.Cluster](config),
 	}
-	manager.client = &clusterGeneratedParityClient{
-		manager:  manager,
-		delegate: delegate,
-	}
+	manager.client = wrapClusterGeneratedClient(hooks, delegate)
 	return manager
+}
+
+func clusterRuntimeTestOperation[Req any, Resp any](
+	defaultFields []generatedruntime.RequestField,
+	override *generatedruntime.Operation,
+) runtimeOperationHooks[Req, Resp] {
+	op := runtimeOperationHooks[Req, Resp]{
+		Fields: append([]generatedruntime.RequestField(nil), defaultFields...),
+		Call: func(context.Context, Req) (Resp, error) {
+			var zero Resp
+			return zero, nil
+		},
+	}
+	if override == nil {
+		return op
+	}
+	if len(override.Fields) != 0 {
+		op.Fields = append([]generatedruntime.RequestField(nil), override.Fields...)
+	}
+	op.Call = func(ctx context.Context, request Req) (Resp, error) {
+		var zero Resp
+		if override.Call == nil {
+			return zero, nil
+		}
+		response, err := override.Call(ctx, &request)
+		if err != nil {
+			return zero, err
+		}
+		if response == nil {
+			return zero, nil
+		}
+		typed, ok := response.(Resp)
+		if !ok {
+			return zero, fmt.Errorf("cluster test operation returned %T, want %T", response, zero)
+		}
+		return typed, nil
+	}
+	return op
 }
 
 func newClusterTestResource() *ocvpv1beta1.Cluster {

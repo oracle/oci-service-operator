@@ -19,7 +19,7 @@ import (
 )
 
 // ScheduleServiceClient is the handwritten extension seam for Schedule runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ScheduleServiceManager).WithClient.
 type ScheduleServiceClient interface {
 	CreateOrUpdate(context.Context, *usageapiv1beta1.Schedule, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultScheduleServiceClient struct {
 	generatedruntime.ServiceClient[*usageapiv1beta1.Schedule]
 }
 
-func newScheduleRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "usageapi",
-		FormalSlug:    "schedule",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"name"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "description", "freeformTags", "outputFileFormat", "resultLocation"},
-			ForceNew:      []string{"compartmentId", "name", "queryProperties", "savedReportId", "scheduleRecurrences", "timeScheduled"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ ScheduleServiceClient = defaultScheduleServiceClient{}
 
 var newScheduleServiceClient = func(manager *ScheduleServiceManager) ScheduleServiceClient {
 	sdkClient, err := usageapisdk.NewUsageapiClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*usageapiv1beta1.Schedule]{
-		Kind:      "Schedule",
-		SDKName:   "Schedule",
-		Log:       manager.Log,
-		Semantics: newScheduleRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.CreateScheduleRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateSchedule(ctx, *request.(*usageapisdk.CreateScheduleRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateScheduleDetails", RequestName: "CreateScheduleDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.GetScheduleRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetSchedule(ctx, *request.(*usageapisdk.GetScheduleRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ScheduleId", RequestName: "scheduleId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.ListSchedulesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSchedules(ctx, *request.(*usageapisdk.ListSchedulesRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.UpdateScheduleRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateSchedule(ctx, *request.(*usageapisdk.UpdateScheduleRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ScheduleId", RequestName: "scheduleId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateScheduleDetails", RequestName: "UpdateScheduleDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.DeleteScheduleRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteSchedule(ctx, *request.(*usageapisdk.DeleteScheduleRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ScheduleId", RequestName: "scheduleId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newScheduleRuntimeHooks(manager, sdkClient)
+	config := buildScheduleGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Schedule OCI client: %w", err)
 	}
-	return defaultScheduleServiceClient{
+	delegate := defaultScheduleServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*usageapiv1beta1.Schedule](config),
 	}
+	return wrapScheduleGeneratedClient(hooks, delegate)
 }

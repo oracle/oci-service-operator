@@ -133,4 +133,5 @@ resources:
 - usageapi_v1beta1_schedule.yaml
 - usageapi_v1beta1_scheduledrun.yaml
 - usageapi_v1beta1_usagecarbonemissionsquery.yaml
+- aispeech_v1beta1_transcriptionjob.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

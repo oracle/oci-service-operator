@@ -182,6 +182,55 @@ func TestParseMutabilityOverlayDocsArgumentReferenceRejectsMissingArgumentRefere
 	}
 }
 
+func TestParseMutabilityOverlayDocsArgumentReferenceIgnoresNestedProseBullets(t *testing.T) {
+	t.Parallel()
+
+	input := mutabilityOverlayDocsInput{
+		Metadata: mutabilityOverlayDocsInputMetadata{
+			Service:          "core",
+			Kind:             "Subnet",
+			ProviderResource: "oci_core_subnet",
+			RegistryURL:      "https://registry.terraform.io/providers/oracle/oci/contract-example-v1/docs/resources/core_subnet",
+		},
+		Body: `<!DOCTYPE html><html><body><h2 id="argument-reference">Argument Reference</h2><ul>
+<li><code>ipv4cidr_blocks</code> - (Optional) The list of all IPv4 CIDR blocks.
+  <ul>
+    <li>Ipv4 CIDR blocks must be valid.</li>
+    <li>Multiple Ipv4 CIDR blocks must not overlap each other.</li>
+  </ul>
+</li>
+<li><code>settings</code> - (Optional) Field group.
+  <ul>
+    <li><code>display_name</code> - (Optional) (Updatable) Friendly name.</li>
+  </ul>
+</li>
+</ul></body></html>`,
+	}
+
+	got, err := parseMutabilityOverlayDocsArgumentReference(input)
+	if err != nil {
+		t.Fatalf("parseMutabilityOverlayDocsArgumentReference() error = %v", err)
+	}
+	if len(got.Diagnostics) != 0 {
+		t.Fatalf("Diagnostics = %+v, want none", got.Diagnostics)
+	}
+
+	indexed := indexMutabilityOverlayParsedDocsEvidence(got.Fields)
+	if _, ok := indexed["ipv4cidr_blocks"]; !ok {
+		t.Fatalf("parsed fields missing %q; got keys %v", "ipv4cidr_blocks", sortedMutabilityOverlayEvidenceKeys(indexed))
+	}
+	if _, ok := indexed["settings"]; !ok {
+		t.Fatalf("parsed fields missing %q; got keys %v", "settings", sortedMutabilityOverlayEvidenceKeys(indexed))
+	}
+	displayName, ok := indexed["settings.display_name"]
+	if !ok {
+		t.Fatalf("parsed fields missing %q; got keys %v", "settings.display_name", sortedMutabilityOverlayEvidenceKeys(indexed))
+	}
+	if displayName.EvidenceState != mutabilityOverlayDocsStateConfirmedUpdatable {
+		t.Fatalf("field %q EvidenceState = %q, want %q", "settings.display_name", displayName.EvidenceState, mutabilityOverlayDocsStateConfirmedUpdatable)
+	}
+}
+
 func loadMutabilityOverlayDocsFixtureForParserTest(
 	t *testing.T,
 	root string,

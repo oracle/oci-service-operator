@@ -65,6 +65,9 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 	if err := c.validateForceNewFields(resource, specValues, currentValues); err != nil {
 		return err
 	}
+	if err := c.validateCreateOnlyDrift(resource, currentResponse); err != nil {
+		return err
+	}
 	if c.config.Update == nil {
 		return nil
 	}
@@ -74,6 +77,13 @@ func (c ServiceClient[T]) validateMutationPolicy(resource T, existing bool, curr
 		return nil
 	}
 	return fmt.Errorf("%s formal semantics reject unsupported update drift for %s", c.config.Kind, strings.Join(unsupportedPaths, ", "))
+}
+
+func (c ServiceClient[T]) validateCreateOnlyDrift(resource T, currentResponse any) error {
+	if currentResponse == nil || c.config.ParityHooks.ValidateCreateOnlyDrift == nil {
+		return nil
+	}
+	return c.config.ParityHooks.ValidateCreateOnlyDrift(resource, currentResponse)
 }
 
 func mutationValues(resource any, currentResponse any) (map[string]any, map[string]any, error) {

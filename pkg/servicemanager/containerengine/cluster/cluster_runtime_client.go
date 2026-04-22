@@ -20,83 +20,44 @@ import (
 )
 
 func init() {
-	newClusterServiceClient = func(manager *ClusterServiceManager) ClusterServiceClient {
-		sdkClient, err := containerenginesdk.NewContainerEngineClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*containerenginev1beta1.Cluster]{
-			Kind:             "Cluster",
-			SDKName:          "Cluster",
-			Log:              manager.Log,
-			CredentialClient: manager.CredentialClient,
-			BuildCreateBody: func(_ context.Context, resource *containerenginev1beta1.Cluster, _ string) (any, error) {
-				return buildClusterCreateDetails(resource)
-			},
-			BuildUpdateBody: func(
-				ctx context.Context,
-				resource *containerenginev1beta1.Cluster,
-				namespace string,
-				currentResponse any,
-			) (any, bool, error) {
-				return buildClusterUpdateBody(ctx, manager.CredentialClient, resource, namespace, currentResponse)
-			},
-			Semantics: newClusterRuntimeSemantics(),
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.CreateClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateCluster(ctx, *request.(*containerenginesdk.CreateClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body"},
-				},
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.GetClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetCluster(ctx, *request.(*containerenginesdk.GetClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
-				},
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListClusters(ctx, *request.(*containerenginesdk.ListClustersRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-					{FieldName: "Name", RequestName: "name", Contribution: "query"},
-					{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
-					{FieldName: "Page", RequestName: "page", Contribution: "query"},
-					{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
-					{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
-				},
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.UpdateClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateCluster(ctx, *request.(*containerenginesdk.UpdateClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
-					{FieldName: "UpdateClusterDetails", RequestName: "UpdateClusterDetails", Contribution: "body"},
-				},
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.DeleteClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteCluster(ctx, *request.(*containerenginesdk.DeleteClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
-				},
-			},
-		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Cluster OCI client: %w", err)
-		}
-		return defaultClusterServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*containerenginev1beta1.Cluster](config),
-		}
+	registerClusterRuntimeHooksMutator(func(manager *ClusterServiceManager, hooks *ClusterRuntimeHooks) {
+		applyClusterRuntimeHooks(manager, hooks)
+	})
+}
+
+func applyClusterRuntimeHooks(manager *ClusterServiceManager, hooks *ClusterRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	var credentialClient credhelper.CredentialClient
+	if manager != nil {
+		credentialClient = manager.CredentialClient
+	}
+
+	hooks.Semantics = newClusterRuntimeSemantics()
+	hooks.BuildCreateBody = func(_ context.Context, resource *containerenginev1beta1.Cluster, _ string) (any, error) {
+		return buildClusterCreateDetails(resource)
+	}
+	hooks.List.Fields = reviewedClusterListFields()
+	hooks.BuildUpdateBody = func(
+		ctx context.Context,
+		resource *containerenginev1beta1.Cluster,
+		namespace string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildClusterUpdateBody(ctx, credentialClient, resource, namespace, currentResponse)
+	}
+}
+
+func reviewedClusterListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "Name", RequestName: "name", Contribution: "query"},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
 	}
 }
 

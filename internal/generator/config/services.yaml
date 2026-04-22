@@ -96,8 +96,15 @@ services:
         - kind: Project
           formalSpec: project
           async:
-            strategy: lifecycle
+            strategy: workrequest
             runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
         - kind: Endpoint
           controller:
             strategy: none
@@ -129,6 +136,38 @@ services:
           serviceManager:
             strategy: none
         - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: aispeech
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aispeech
+    group: aispeech
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - TranscriptionJob
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: TranscriptionJob
+          formalSpec: transcriptionjob
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: TranscriptionTask
           controller:
             strategy: none
           serviceManager:
@@ -866,7 +905,7 @@ services:
           formalSpec: application
           async:
             strategy: lifecycle
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: lifecycle
           serviceManager:
             packagePath: dataflow/application
@@ -2069,9 +2108,10 @@ services:
         strategy: none
       resources:
         - kind: Table
+          formalSpec: table
           async:
             strategy: lifecycle
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: lifecycle
     observedState:
       sdkAliases:
@@ -2454,7 +2494,7 @@ services:
           formalSpec: queue
           async:
             strategy: workrequest
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: workrequest
             workRequest:
               source: service-sdk
@@ -2534,7 +2574,7 @@ services:
           formalSpec: rediscluster
           async:
             strategy: workrequest
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: workrequest
             workRequest:
               source: service-sdk

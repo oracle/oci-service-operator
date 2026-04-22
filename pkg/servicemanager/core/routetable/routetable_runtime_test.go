@@ -95,82 +95,26 @@ func (f fakeRouteTableServiceError) GetOpcRequestID() string {
 	return ""
 }
 
-func newTestGeneratedDelegate(manager *RouteTableServiceManager, client routeTableOCIClient) RouteTableServiceClient {
+func newTestRouteTableRuntimeHooks(manager *RouteTableServiceManager, client routeTableOCIClient) RouteTableRuntimeHooks {
 	if client == nil {
 		client = &fakeRouteTableOCIClient{}
 	}
 
-	config := generatedruntime.Config[*corev1beta1.RouteTable]{
-		Kind:    "RouteTable",
-		SDKName: "RouteTable",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService: "core",
-			FormalSlug:    "routetable",
-			Async: &generatedruntime.AsyncSemantics{
-				Strategy:             "lifecycle",
-				Runtime:              "generatedruntime",
-				FormalClassification: "lifecycle",
-			},
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"AVAILABLE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATED", "TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "freeformTags", "routeRules"},
-				ForceNew:      []string{"compartmentId", "vcnId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateRouteTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateRouteTable(ctx, *request.(*coresdk.CreateRouteTableRequest))
-			},
+	hooks := RouteTableRuntimeHooks{
+		Semantics: newRouteTableRuntimeSemantics(),
+		Create: runtimeOperationHooks[coresdk.CreateRouteTableRequest, coresdk.CreateRouteTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateRouteTableDetails", RequestName: "CreateRouteTableDetails", Contribution: "body"}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetRouteTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetRouteTable(ctx, *request.(*coresdk.GetRouteTableRequest))
+			Call: func(ctx context.Context, request coresdk.CreateRouteTableRequest) (coresdk.CreateRouteTableResponse, error) {
+				return client.CreateRouteTable(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[coresdk.GetRouteTableRequest, coresdk.GetRouteTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListRouteTablesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListRouteTables(ctx, *request.(*coresdk.ListRouteTablesRequest))
+			Call: func(ctx context.Context, request coresdk.GetRouteTableRequest) (coresdk.GetRouteTableResponse, error) {
+				return client.GetRouteTable(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[coresdk.ListRouteTablesRequest, coresdk.ListRouteTablesResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
@@ -181,40 +125,43 @@ func newTestGeneratedDelegate(manager *RouteTableServiceManager, client routeTab
 				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateRouteTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateRouteTable(ctx, *request.(*coresdk.UpdateRouteTableRequest))
+			Call: func(ctx context.Context, request coresdk.ListRouteTablesRequest) (coresdk.ListRouteTablesResponse, error) {
+				return client.ListRouteTables(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[coresdk.UpdateRouteTableRequest, coresdk.UpdateRouteTableResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true},
 				{FieldName: "UpdateRouteTableDetails", RequestName: "UpdateRouteTableDetails", Contribution: "body"},
 			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteRouteTableRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteRouteTable(ctx, *request.(*coresdk.DeleteRouteTableRequest))
+			Call: func(ctx context.Context, request coresdk.UpdateRouteTableRequest) (coresdk.UpdateRouteTableResponse, error) {
+				return client.UpdateRouteTable(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[coresdk.DeleteRouteTableRequest, coresdk.DeleteRouteTableResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "RtId", RequestName: "rtId", Contribution: "path", PreferResourceID: true}},
+			Call: func(ctx context.Context, request coresdk.DeleteRouteTableRequest) (coresdk.DeleteRouteTableResponse, error) {
+				return client.DeleteRouteTable(ctx, request)
+			},
 		},
 	}
+	applyRouteTableRuntimeHooks(manager, &hooks, client)
+	return hooks
+}
 
-	return defaultRouteTableServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.RouteTable](config),
+func newTestGeneratedDelegate(manager *RouteTableServiceManager, client routeTableOCIClient) RouteTableServiceClient {
+	hooks := newTestRouteTableRuntimeHooks(manager, client)
+	delegate := defaultRouteTableServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.RouteTable](buildRouteTableGeneratedRuntimeConfig(manager, hooks)),
 	}
+	return wrapRouteTableGeneratedClient(hooks, delegate)
 }
 
 func newRouteTableTestManager(client routeTableOCIClient) *RouteTableServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewRouteTableServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&routeTableRuntimeClient{
-			manager:  manager,
-			delegate: newTestGeneratedDelegate(manager, client),
-			client:   client,
-		})
+		manager.WithClient(newTestGeneratedDelegate(manager, client))
 	}
 	return manager
 }

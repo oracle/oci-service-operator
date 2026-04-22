@@ -19,7 +19,7 @@ import (
 )
 
 // AlarmStatusServiceClient is the handwritten extension seam for AlarmStatus runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*AlarmStatusServiceManager).WithClient.
 type AlarmStatusServiceClient interface {
 	CreateOrUpdate(context.Context, *monitoringv1beta1.AlarmStatus, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ AlarmStatusServiceClient = defaultAlarmStatusServiceClient{}
 
 var newAlarmStatusServiceClient = func(manager *AlarmStatusServiceManager) AlarmStatusServiceClient {
 	sdkClient, err := monitoringsdk.NewMonitoringClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*monitoringv1beta1.AlarmStatus]{
-		Kind:    "AlarmStatus",
-		SDKName: "AlarmStatus",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &monitoringsdk.ListAlarmsStatusRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListAlarmsStatus(ctx, *request.(*monitoringsdk.ListAlarmsStatusRequest))
-			},
-		},
-	}
+	hooks := newAlarmStatusRuntimeHooks(manager, sdkClient)
+	config := buildAlarmStatusGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize AlarmStatus OCI client: %w", err)
 	}
-	return defaultAlarmStatusServiceClient{
+	delegate := defaultAlarmStatusServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*monitoringv1beta1.AlarmStatus](config),
 	}
+	return wrapAlarmStatusGeneratedClient(hooks, delegate)
 }

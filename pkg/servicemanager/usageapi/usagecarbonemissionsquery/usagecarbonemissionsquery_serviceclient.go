@@ -19,7 +19,7 @@ import (
 )
 
 // UsageCarbonEmissionsQueryServiceClient is the handwritten extension seam for UsageCarbonEmissionsQuery runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*UsageCarbonEmissionsQueryServiceManager).WithClient.
 type UsageCarbonEmissionsQueryServiceClient interface {
 	CreateOrUpdate(context.Context, *usageapiv1beta1.UsageCarbonEmissionsQuery, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ UsageCarbonEmissionsQueryServiceClient = defaultUsageCarbonEmissionsQueryS
 
 var newUsageCarbonEmissionsQueryServiceClient = func(manager *UsageCarbonEmissionsQueryServiceManager) UsageCarbonEmissionsQueryServiceClient {
 	sdkClient, err := usageapisdk.NewUsageapiClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*usageapiv1beta1.UsageCarbonEmissionsQuery]{
-		Kind:    "UsageCarbonEmissionsQuery",
-		SDKName: "UsageCarbonEmissionsQuery",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.CreateUsageCarbonEmissionsQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateUsageCarbonEmissionsQuery(ctx, *request.(*usageapisdk.CreateUsageCarbonEmissionsQueryRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.GetUsageCarbonEmissionsQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetUsageCarbonEmissionsQuery(ctx, *request.(*usageapisdk.GetUsageCarbonEmissionsQueryRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.ListUsageCarbonEmissionsQueriesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListUsageCarbonEmissionsQueries(ctx, *request.(*usageapisdk.ListUsageCarbonEmissionsQueriesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.UpdateUsageCarbonEmissionsQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateUsageCarbonEmissionsQuery(ctx, *request.(*usageapisdk.UpdateUsageCarbonEmissionsQueryRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &usageapisdk.DeleteUsageCarbonEmissionsQueryRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteUsageCarbonEmissionsQuery(ctx, *request.(*usageapisdk.DeleteUsageCarbonEmissionsQueryRequest))
-			},
-		},
-	}
+	hooks := newUsageCarbonEmissionsQueryRuntimeHooks(manager, sdkClient)
+	config := buildUsageCarbonEmissionsQueryGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize UsageCarbonEmissionsQuery OCI client: %w", err)
 	}
-	return defaultUsageCarbonEmissionsQueryServiceClient{
+	delegate := defaultUsageCarbonEmissionsQueryServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*usageapiv1beta1.UsageCarbonEmissionsQuery](config),
 	}
+	return wrapUsageCarbonEmissionsQueryGeneratedClient(hooks, delegate)
 }

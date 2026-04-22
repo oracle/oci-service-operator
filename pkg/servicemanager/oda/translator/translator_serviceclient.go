@@ -19,7 +19,7 @@ import (
 )
 
 // TranslatorServiceClient is the handwritten extension seam for Translator runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*TranslatorServiceManager).WithClient.
 type TranslatorServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.Translator, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ TranslatorServiceClient = defaultTranslatorServiceClient{}
 
 var newTranslatorServiceClient = func(manager *TranslatorServiceManager) TranslatorServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.Translator]{
-		Kind:    "Translator",
-		SDKName: "Translator",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateTranslatorRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateTranslator(ctx, *request.(*odasdk.CreateTranslatorRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetTranslatorRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetTranslator(ctx, *request.(*odasdk.GetTranslatorRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListTranslatorsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListTranslators(ctx, *request.(*odasdk.ListTranslatorsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateTranslatorRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateTranslator(ctx, *request.(*odasdk.UpdateTranslatorRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteTranslatorRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteTranslator(ctx, *request.(*odasdk.DeleteTranslatorRequest))
-			},
-		},
-	}
+	hooks := newTranslatorRuntimeHooks(manager, sdkClient)
+	config := buildTranslatorGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Translator OCI client: %w", err)
 	}
-	return defaultTranslatorServiceClient{
+	delegate := defaultTranslatorServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.Translator](config),
 	}
+	return wrapTranslatorGeneratedClient(hooks, delegate)
 }

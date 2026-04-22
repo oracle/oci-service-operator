@@ -798,9 +798,6 @@ func validateEffectiveAsyncConfig(field string, async AsyncConfig) error {
 	}
 
 	if async.Strategy == AsyncStrategyWorkRequest {
-		if async.Runtime == AsyncRuntimeGeneratedRuntime {
-			return fmt.Errorf("%s runtime %q does not support strategy %q", field, async.Runtime, async.Strategy)
-		}
 		if !async.WorkRequest.hasOverride() {
 			return fmt.Errorf("%s.workRequest metadata is required for strategy %q", field, async.Strategy)
 		}

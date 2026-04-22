@@ -19,7 +19,7 @@ import (
 )
 
 // AgreementServiceClient is the handwritten extension seam for Agreement runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*AgreementServiceManager).WithClient.
 type AgreementServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.Agreement, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,27 +34,13 @@ var _ AgreementServiceClient = defaultAgreementServiceClient{}
 
 var newAgreementServiceClient = func(manager *AgreementServiceManager) AgreementServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.Agreement]{
-		Kind:    "Agreement",
-		SDKName: "Agreement",
-		Log:     manager.Log,
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.GetAgreementRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetAgreement(ctx, *request.(*marketplacesdk.GetAgreementRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListAgreementsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListAgreements(ctx, *request.(*marketplacesdk.ListAgreementsRequest))
-			},
-		},
-	}
+	hooks := newAgreementRuntimeHooks(manager, sdkClient)
+	config := buildAgreementGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Agreement OCI client: %w", err)
 	}
-	return defaultAgreementServiceClient{
+	delegate := defaultAgreementServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.Agreement](config),
 	}
+	return wrapAgreementGeneratedClient(hooks, delegate)
 }

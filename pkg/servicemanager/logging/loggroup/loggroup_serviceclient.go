@@ -19,7 +19,7 @@ import (
 )
 
 // LogGroupServiceClient is the handwritten extension seam for LogGroup runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*LogGroupServiceManager).WithClient.
 type LogGroupServiceClient interface {
 	CreateOrUpdate(context.Context, *loggingv1beta1.LogGroup, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ LogGroupServiceClient = defaultLogGroupServiceClient{}
 
 var newLogGroupServiceClient = func(manager *LogGroupServiceManager) LogGroupServiceClient {
 	sdkClient, err := loggingsdk.NewLoggingManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loggingv1beta1.LogGroup]{
-		Kind:    "LogGroup",
-		SDKName: "LogGroup",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.CreateLogGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateLogGroup(ctx, *request.(*loggingsdk.CreateLogGroupRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.GetLogGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetLogGroup(ctx, *request.(*loggingsdk.GetLogGroupRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.ListLogGroupsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListLogGroups(ctx, *request.(*loggingsdk.ListLogGroupsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.UpdateLogGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateLogGroup(ctx, *request.(*loggingsdk.UpdateLogGroupRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.DeleteLogGroupRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteLogGroup(ctx, *request.(*loggingsdk.DeleteLogGroupRequest))
-			},
-		},
-	}
+	hooks := newLogGroupRuntimeHooks(manager, sdkClient)
+	config := buildLogGroupGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize LogGroup OCI client: %w", err)
 	}
-	return defaultLogGroupServiceClient{
+	delegate := defaultLogGroupServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loggingv1beta1.LogGroup](config),
 	}
+	return wrapLogGroupGeneratedClient(hooks, delegate)
 }

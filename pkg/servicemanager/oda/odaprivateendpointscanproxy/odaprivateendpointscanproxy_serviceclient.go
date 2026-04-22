@@ -19,7 +19,7 @@ import (
 )
 
 // OdaPrivateEndpointScanProxyServiceClient is the handwritten extension seam for OdaPrivateEndpointScanProxy runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*OdaPrivateEndpointScanProxyServiceManager).WithClient.
 type OdaPrivateEndpointScanProxyServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.OdaPrivateEndpointScanProxy, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,39 +34,13 @@ var _ OdaPrivateEndpointScanProxyServiceClient = defaultOdaPrivateEndpointScanPr
 
 var newOdaPrivateEndpointScanProxyServiceClient = func(manager *OdaPrivateEndpointScanProxyServiceManager) OdaPrivateEndpointScanProxyServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.OdaPrivateEndpointScanProxy]{
-		Kind:    "OdaPrivateEndpointScanProxy",
-		SDKName: "OdaPrivateEndpointScanProxy",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateOdaPrivateEndpointScanProxyRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateOdaPrivateEndpointScanProxy(ctx, *request.(*odasdk.CreateOdaPrivateEndpointScanProxyRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetOdaPrivateEndpointScanProxyRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetOdaPrivateEndpointScanProxy(ctx, *request.(*odasdk.GetOdaPrivateEndpointScanProxyRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListOdaPrivateEndpointScanProxiesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListOdaPrivateEndpointScanProxies(ctx, *request.(*odasdk.ListOdaPrivateEndpointScanProxiesRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteOdaPrivateEndpointScanProxyRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteOdaPrivateEndpointScanProxy(ctx, *request.(*odasdk.DeleteOdaPrivateEndpointScanProxyRequest))
-			},
-		},
-	}
+	hooks := newOdaPrivateEndpointScanProxyRuntimeHooks(manager, sdkClient)
+	config := buildOdaPrivateEndpointScanProxyGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize OdaPrivateEndpointScanProxy OCI client: %w", err)
 	}
-	return defaultOdaPrivateEndpointScanProxyServiceClient{
+	delegate := defaultOdaPrivateEndpointScanProxyServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.OdaPrivateEndpointScanProxy](config),
 	}
+	return wrapOdaPrivateEndpointScanProxyGeneratedClient(hooks, delegate)
 }

@@ -130,6 +130,7 @@ nav:
       - API Versions:
           - aidocument.oracle.com/v1beta1: reference/api/aidocument/v1beta1/index.md
           - ailanguage.oracle.com/v1beta1: reference/api/ailanguage/v1beta1/index.md
+          - aispeech.oracle.com/v1beta1: reference/api/aispeech/v1beta1/index.md
           - aivision.oracle.com/v1beta1: reference/api/aivision/v1beta1/index.md
           - analytics.oracle.com/v1beta1: reference/api/analytics/v1beta1/index.md
           - apigateway.oracle.com/v1beta1: reference/api/apigateway/v1beta1/index.md

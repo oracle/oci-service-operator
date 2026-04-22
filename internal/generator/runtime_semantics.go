@@ -127,7 +127,7 @@ func buildRuntimeAsyncModel(async AsyncConfig) *RuntimeAsyncModel {
 
 func filteredRuntimeHooks(hooks []formal.Hook, async *RuntimeAsyncModel) []RuntimeHookModel {
 	models := buildRuntimeHookModels(hooks)
-	if async == nil || async.Strategy == AsyncStrategyWorkRequest {
+	if async != nil && async.Strategy == AsyncStrategyWorkRequest {
 		return models
 	}
 

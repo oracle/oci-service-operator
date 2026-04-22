@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "dataflow",
+    "apiVersion": "dataflow.oracle.com/v1beta1",
+    "kind": "Application",
+    "formalSlug": "application",
+    "providerResource": "oci_dataflow_application",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "applicationLogConfig",
+      "archiveUri",
+      "arguments",
+      "className",
+      "configuration",
+      "definedTags",
+      "description",
+      "displayName",
+      "driverShape",
+      "driverShapeConfig",
+      "execute",
+      "executorShape",
+      "executorShapeConfig",
+      "fileUri",
+      "freeformTags",
+      "idleTimeoutInMinutes",
+      "language",
+      "logsBucketUri",
+      "maxDurationInMinutes",
+      "metastoreId",
+      "numExecutors",
+      "parameters",
+      "poolId",
+      "privateEndpointId",
+      "sparkVersion",
+      "warehouseBucketUri"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "type",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

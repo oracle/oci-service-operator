@@ -19,7 +19,7 @@ import (
 )
 
 // ProjectServiceClient is the handwritten extension seam for Project runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ProjectServiceManager).WithClient.
 type ProjectServiceClient interface {
 	CreateOrUpdate(context.Context, *aidocumentv1beta1.Project, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultProjectServiceClient struct {
 	generatedruntime.ServiceClient[*aidocumentv1beta1.Project]
 }
 
-func newProjectRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "aidocument",
-		FormalSlug:    "project",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags"},
-			ForceNew:      []string{"compartmentId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeProjectCompartment", RequestTypeName: "aidocument.ChangeProjectCompartmentRequest", ResponseTypeName: "aidocument.ChangeProjectCompartmentResponse"}},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ ProjectServiceClient = defaultProjectServiceClient{}
 
 var newProjectServiceClient = func(manager *ProjectServiceManager) ProjectServiceClient {
 	sdkClient, err := aidocumentsdk.NewAIServiceDocumentClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*aidocumentv1beta1.Project]{
-		Kind:      "Project",
-		SDKName:   "Project",
-		Log:       manager.Log,
-		Semantics: newProjectRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.CreateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateProject(ctx, *request.(*aidocumentsdk.CreateProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateProjectDetails", RequestName: "CreateProjectDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.GetProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetProject(ctx, *request.(*aidocumentsdk.GetProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.ListProjectsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListProjects(ctx, *request.(*aidocumentsdk.ListProjectsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.UpdateProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateProject(ctx, *request.(*aidocumentsdk.UpdateProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateProjectDetails", RequestName: "UpdateProjectDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &aidocumentsdk.DeleteProjectRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteProject(ctx, *request.(*aidocumentsdk.DeleteProjectRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newProjectRuntimeHooks(manager, sdkClient)
+	config := buildProjectGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Project OCI client: %w", err)
 	}
-	return defaultProjectServiceClient{
+	delegate := defaultProjectServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*aidocumentv1beta1.Project](config),
 	}
+	return wrapProjectGeneratedClient(hooks, delegate)
 }

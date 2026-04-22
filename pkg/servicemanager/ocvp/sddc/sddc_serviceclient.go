@@ -19,7 +19,7 @@ import (
 )
 
 // SddcServiceClient is the handwritten extension seam for Sddc runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SddcServiceManager).WithClient.
 type SddcServiceClient interface {
 	CreateOrUpdate(context.Context, *ocvpv1beta1.Sddc, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultSddcServiceClient struct {
 	generatedruntime.ServiceClient[*ocvpv1beta1.Sddc]
 }
 
-func newSddcRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "ocvp",
-		FormalSlug:    "sddc",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING", "UPDATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "lifecycleState"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "esxiSoftwareVersion", "freeformTags", "sshAuthorizedKeys", "vmwareSoftwareVersion"},
-			ForceNew:      []string{"compartmentId", "hcxMode", "initialConfiguration", "isSingleHostSddc"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ SddcServiceClient = defaultSddcServiceClient{}
 
 var newSddcServiceClient = func(manager *SddcServiceManager) SddcServiceClient {
 	sdkClient, err := ocvpsdk.NewSddcClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*ocvpv1beta1.Sddc]{
-		Kind:      "Sddc",
-		SDKName:   "Sddc",
-		Log:       manager.Log,
-		Semantics: newSddcRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.CreateSddcRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateSddc(ctx, *request.(*ocvpsdk.CreateSddcRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateSddcDetails", RequestName: "CreateSddcDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.GetSddcRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetSddc(ctx, *request.(*ocvpsdk.GetSddcRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "SddcId", RequestName: "sddcId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.ListSddcsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSddcs(ctx, *request.(*ocvpsdk.ListSddcsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "ComputeAvailabilityDomain", RequestName: "computeAvailabilityDomain", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.UpdateSddcRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateSddc(ctx, *request.(*ocvpsdk.UpdateSddcRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "SddcId", RequestName: "sddcId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSddcDetails", RequestName: "UpdateSddcDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.DeleteSddcRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteSddc(ctx, *request.(*ocvpsdk.DeleteSddcRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "SddcId", RequestName: "sddcId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newSddcRuntimeHooks(manager, sdkClient)
+	config := buildSddcGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Sddc OCI client: %w", err)
 	}
-	return defaultSddcServiceClient{
+	delegate := defaultSddcServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.Sddc](config),
 	}
+	return wrapSddcGeneratedClient(hooks, delegate)
 }

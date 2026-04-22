@@ -19,7 +19,7 @@ import (
 )
 
 // OdaPrivateEndpointServiceClient is the handwritten extension seam for OdaPrivateEndpoint runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*OdaPrivateEndpointServiceManager).WithClient.
 type OdaPrivateEndpointServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.OdaPrivateEndpoint, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ OdaPrivateEndpointServiceClient = defaultOdaPrivateEndpointServiceClient{}
 
 var newOdaPrivateEndpointServiceClient = func(manager *OdaPrivateEndpointServiceManager) OdaPrivateEndpointServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.OdaPrivateEndpoint]{
-		Kind:    "OdaPrivateEndpoint",
-		SDKName: "OdaPrivateEndpoint",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateOdaPrivateEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateOdaPrivateEndpoint(ctx, *request.(*odasdk.CreateOdaPrivateEndpointRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetOdaPrivateEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetOdaPrivateEndpoint(ctx, *request.(*odasdk.GetOdaPrivateEndpointRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListOdaPrivateEndpointsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListOdaPrivateEndpoints(ctx, *request.(*odasdk.ListOdaPrivateEndpointsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateOdaPrivateEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateOdaPrivateEndpoint(ctx, *request.(*odasdk.UpdateOdaPrivateEndpointRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteOdaPrivateEndpointRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteOdaPrivateEndpoint(ctx, *request.(*odasdk.DeleteOdaPrivateEndpointRequest))
-			},
-		},
-	}
+	hooks := newOdaPrivateEndpointRuntimeHooks(manager, sdkClient)
+	config := buildOdaPrivateEndpointGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize OdaPrivateEndpoint OCI client: %w", err)
 	}
-	return defaultOdaPrivateEndpointServiceClient{
+	delegate := defaultOdaPrivateEndpointServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.OdaPrivateEndpoint](config),
 	}
+	return wrapOdaPrivateEndpointGeneratedClient(hooks, delegate)
 }

@@ -12,6 +12,17 @@ import (
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
+type legacyBridgeResource struct {
+	Status legacyBridgeStatus `json:"status,omitempty"`
+}
+
+type legacyBridgeStatus struct {
+	OsokStatus          shared.OSOKStatus `json:"status,omitempty"`
+	CreateWorkRequestId string            `json:"createWorkRequestId,omitempty"`
+	UpdateWorkRequestId string            `json:"updateWorkRequestId,omitempty"`
+	DeleteWorkRequestId string            `json:"deleteWorkRequestId,omitempty"`
+}
+
 func TestProjectAsyncCondition(t *testing.T) {
 	t.Parallel()
 
@@ -243,6 +254,183 @@ func TestApplyAsyncOperationPreservesWorkRequestIDOnlyWhileInFlight(t *testing.T
 				t.Fatalf("status.async.current.workRequestId = %q, want %q", status.Async.Current.WorkRequestID, tt.wantID)
 			}
 		})
+	}
+}
+
+func TestResolveTrackedWorkRequestFallsBackToLegacyBridge(t *testing.T) {
+	t.Parallel()
+
+	resource := &legacyBridgeResource{
+		Status: legacyBridgeStatus{
+			UpdateWorkRequestId: "wr-update-legacy",
+		},
+	}
+
+	workRequestID, phase := ResolveTrackedWorkRequest(
+		&resource.Status.OsokStatus,
+		resource,
+		WorkRequestLegacyBridge{
+			Create: "CreateWorkRequestId",
+			Update: "UpdateWorkRequestId",
+			Delete: "DeleteWorkRequestId",
+		},
+		"",
+	)
+	if workRequestID != "wr-update-legacy" {
+		t.Fatalf("ResolveTrackedWorkRequest() workRequestID = %q, want %q", workRequestID, "wr-update-legacy")
+	}
+	if phase != shared.OSOKAsyncPhaseUpdate {
+		t.Fatalf("ResolveTrackedWorkRequest() phase = %q, want %q", phase, shared.OSOKAsyncPhaseUpdate)
+	}
+}
+
+func TestResolveTrackedWorkRequestUsesCurrentPhaseToRecoverLegacyBridgeID(t *testing.T) {
+	t.Parallel()
+
+	resource := &legacyBridgeResource{
+		Status: legacyBridgeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Async: shared.OSOKAsyncTracker{
+					Current: &shared.OSOKAsyncOperation{
+						Source: shared.OSOKAsyncSourceWorkRequest,
+						Phase:  shared.OSOKAsyncPhaseCreate,
+					},
+				},
+			},
+			CreateWorkRequestId: "wr-create-legacy",
+		},
+	}
+
+	workRequestID, phase := ResolveTrackedWorkRequest(
+		&resource.Status.OsokStatus,
+		resource,
+		WorkRequestLegacyBridge{
+			Create: "CreateWorkRequestId",
+			Update: "UpdateWorkRequestId",
+			Delete: "DeleteWorkRequestId",
+		},
+		"",
+	)
+	if workRequestID != "wr-create-legacy" {
+		t.Fatalf("ResolveTrackedWorkRequest() workRequestID = %q, want %q", workRequestID, "wr-create-legacy")
+	}
+	if phase != shared.OSOKAsyncPhaseCreate {
+		t.Fatalf("ResolveTrackedWorkRequest() phase = %q, want %q", phase, shared.OSOKAsyncPhaseCreate)
+	}
+}
+
+func TestResolveTrackedWorkRequestIgnoresLegacyBridgeWhenCurrentSourceIsLifecycle(t *testing.T) {
+	t.Parallel()
+
+	resource := &legacyBridgeResource{
+		Status: legacyBridgeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Async: shared.OSOKAsyncTracker{
+					Current: &shared.OSOKAsyncOperation{
+						Source:        shared.OSOKAsyncSourceLifecycle,
+						Phase:         shared.OSOKAsyncPhaseDelete,
+						WorkRequestID: "wr-delete-preserved",
+					},
+				},
+			},
+			DeleteWorkRequestId: "wr-delete-legacy",
+		},
+	}
+
+	workRequestID, phase := ResolveTrackedWorkRequest(
+		&resource.Status.OsokStatus,
+		resource,
+		WorkRequestLegacyBridge{
+			Create: "CreateWorkRequestId",
+			Update: "UpdateWorkRequestId",
+			Delete: "DeleteWorkRequestId",
+		},
+		"",
+	)
+	if workRequestID != "" || phase != "" {
+		t.Fatalf("ResolveTrackedWorkRequest() = (%q, %q), want empty values once lifecycle owns the current tracker", workRequestID, phase)
+	}
+}
+
+func TestApplyAsyncOperationWithLegacyBridgeMirrorsPreservedWorkRequestID(t *testing.T) {
+	t.Parallel()
+
+	resource := &legacyBridgeResource{
+		Status: legacyBridgeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Async: shared.OSOKAsyncTracker{
+					Current: &shared.OSOKAsyncOperation{
+						Source:          shared.OSOKAsyncSourceWorkRequest,
+						Phase:           shared.OSOKAsyncPhaseUpdate,
+						WorkRequestID:   "wr-update-preserved",
+						NormalizedClass: shared.OSOKAsyncClassPending,
+					},
+				},
+			},
+		},
+	}
+
+	projection := ApplyAsyncOperationWithLegacyBridge(
+		&resource.Status.OsokStatus,
+		resource,
+		WorkRequestLegacyBridge{
+			Create: "CreateWorkRequestId",
+			Update: "UpdateWorkRequestId",
+			Delete: "DeleteWorkRequestId",
+		},
+		&shared.OSOKAsyncOperation{
+			Source:          shared.OSOKAsyncSourceLifecycle,
+			Phase:           shared.OSOKAsyncPhaseUpdate,
+			RawStatus:       "UPDATING",
+			NormalizedClass: shared.OSOKAsyncClassPending,
+		},
+		loggerutil.OSOKLogger{},
+	)
+	if projection.Condition != shared.Updating {
+		t.Fatalf("projection condition = %q, want %q", projection.Condition, shared.Updating)
+	}
+	if resource.Status.UpdateWorkRequestId != "wr-update-preserved" {
+		t.Fatalf("status.updateWorkRequestId = %q, want %q", resource.Status.UpdateWorkRequestId, "wr-update-preserved")
+	}
+	if resource.Status.CreateWorkRequestId != "" || resource.Status.DeleteWorkRequestId != "" {
+		t.Fatalf("legacy bridge fields = %#v, want only update bridge populated", resource.Status)
+	}
+}
+
+func TestClearAsyncOperationWithLegacyBridgeClearsCompatibilityFields(t *testing.T) {
+	t.Parallel()
+
+	resource := &legacyBridgeResource{
+		Status: legacyBridgeStatus{
+			OsokStatus: shared.OSOKStatus{
+				Async: shared.OSOKAsyncTracker{
+					Current: &shared.OSOKAsyncOperation{
+						Source:        shared.OSOKAsyncSourceWorkRequest,
+						Phase:         shared.OSOKAsyncPhaseDelete,
+						WorkRequestID: "wr-delete-1",
+					},
+				},
+			},
+			CreateWorkRequestId: "wr-create-1",
+			UpdateWorkRequestId: "wr-update-1",
+			DeleteWorkRequestId: "wr-delete-1",
+		},
+	}
+
+	ClearAsyncOperationWithLegacyBridge(
+		&resource.Status.OsokStatus,
+		resource,
+		WorkRequestLegacyBridge{
+			Create: "CreateWorkRequestId",
+			Update: "UpdateWorkRequestId",
+			Delete: "DeleteWorkRequestId",
+		},
+	)
+	if resource.Status.OsokStatus.Async.Current != nil {
+		t.Fatalf("status.async.current = %#v, want nil", resource.Status.OsokStatus.Async.Current)
+	}
+	if resource.Status.CreateWorkRequestId != "" || resource.Status.UpdateWorkRequestId != "" || resource.Status.DeleteWorkRequestId != "" {
+		t.Fatalf("legacy bridge fields = %#v, want cleared values", resource.Status)
 	}
 }
 

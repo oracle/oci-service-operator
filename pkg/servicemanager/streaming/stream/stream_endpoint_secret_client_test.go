@@ -328,6 +328,32 @@ func TestStreamEndpointSecretClientCreatesSecretAfterActiveReconcile(t *testing.
 	requireEndpointSecretData(t, createdData, testStreamEndpoint, "secret")
 }
 
+func TestStreamEndpointSecretRuntimeHooksWrapGeneratedClient(t *testing.T) {
+	t.Parallel()
+
+	credClient := &fakeCredentialClient{}
+	manager := &StreamServiceManager{
+		CredentialClient: credClient,
+	}
+
+	hooks := newStreamRuntimeHooks(manager, streamingsdk.StreamAdminClient{})
+	wrapped := wrapStreamGeneratedClient(hooks, fakeStreamServiceClient{})
+
+	endpointClient, ok := wrapped.(streamEndpointSecretClient)
+	if !ok {
+		t.Fatalf("wrapStreamGeneratedClient() returned %T, want streamEndpointSecretClient", wrapped)
+	}
+	if endpointClient.credentialClient != credClient {
+		t.Fatalf("wrapped credential client = %T, want %T", endpointClient.credentialClient, credClient)
+	}
+	if reader, ok := endpointClient.secretRecordReader.(*fakeCredentialClient); !ok || reader != credClient {
+		t.Fatalf("wrapped secret record reader = %T, want *fakeCredentialClient", endpointClient.secretRecordReader)
+	}
+	if mutator, ok := endpointClient.guardedSecretMutator.(*fakeCredentialClient); !ok || mutator != credClient {
+		t.Fatalf("wrapped guarded secret mutator = %T, want *fakeCredentialClient", endpointClient.guardedSecretMutator)
+	}
+}
+
 func TestStreamEndpointSecretClientRecoversFromCreateAlreadyExistsAfterStaleRead(t *testing.T) {
 	t.Parallel()
 

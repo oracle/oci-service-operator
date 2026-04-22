@@ -19,7 +19,7 @@ import (
 )
 
 // OdaInstanceServiceClient is the handwritten extension seam for OdaInstance runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*OdaInstanceServiceManager).WithClient.
 type OdaInstanceServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.OdaInstance, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ OdaInstanceServiceClient = defaultOdaInstanceServiceClient{}
 
 var newOdaInstanceServiceClient = func(manager *OdaInstanceServiceManager) OdaInstanceServiceClient {
 	sdkClient, err := odasdk.NewOdaClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.OdaInstance]{
-		Kind:    "OdaInstance",
-		SDKName: "OdaInstance",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateOdaInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateOdaInstance(ctx, *request.(*odasdk.CreateOdaInstanceRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetOdaInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetOdaInstance(ctx, *request.(*odasdk.GetOdaInstanceRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListOdaInstancesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListOdaInstances(ctx, *request.(*odasdk.ListOdaInstancesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateOdaInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateOdaInstance(ctx, *request.(*odasdk.UpdateOdaInstanceRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteOdaInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteOdaInstance(ctx, *request.(*odasdk.DeleteOdaInstanceRequest))
-			},
-		},
-	}
+	hooks := newOdaInstanceRuntimeHooks(manager, sdkClient)
+	config := buildOdaInstanceGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize OdaInstance OCI client: %w", err)
 	}
-	return defaultOdaInstanceServiceClient{
+	delegate := defaultOdaInstanceServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.OdaInstance](config),
 	}
+	return wrapOdaInstanceGeneratedClient(hooks, delegate)
 }

@@ -20,6 +20,7 @@ import (
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
@@ -40,15 +41,17 @@ var (
 type securityListOCIClient interface {
 	CreateSecurityList(ctx context.Context, request coresdk.CreateSecurityListRequest) (coresdk.CreateSecurityListResponse, error)
 	GetSecurityList(ctx context.Context, request coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error)
+	ListSecurityLists(ctx context.Context, request coresdk.ListSecurityListsRequest) (coresdk.ListSecurityListsResponse, error)
 	UpdateSecurityList(ctx context.Context, request coresdk.UpdateSecurityListRequest) (coresdk.UpdateSecurityListResponse, error)
 	DeleteSecurityList(ctx context.Context, request coresdk.DeleteSecurityListRequest) (coresdk.DeleteSecurityListResponse, error)
 }
 
 type securityListRuntimeClient struct {
-	manager *SecurityListServiceManager
-	client  securityListOCIClient
-	initErr error
+	manager  *SecurityListServiceManager
+	delegate SecurityListServiceClient
 }
+
+var _ SecurityListServiceClient = (*securityListRuntimeClient)(nil)
 
 type normalizedSecurityRule struct {
 	endpointType  string
@@ -75,137 +78,146 @@ type normalizedSecurityRule struct {
 	hasUDPSrc     bool
 }
 
-// SecurityList keeps an explicit handwritten runtime because its parity contract
-// depends on nested rule normalization, stale optional status clearing, tracked
-// OCID recreate behavior, and an SDK surface guard that are still narrower than
-// a safe generatedruntime adaptation.
-func newExplicitSecurityListServiceClient(manager *SecurityListServiceManager) SecurityListServiceClient {
-	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-	runtimeClient := &securityListRuntimeClient{
-		manager: manager,
-		client:  sdkClient,
+func applySecurityListRuntimeHooks(manager *SecurityListServiceManager, hooks *SecurityListRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
-	if err != nil {
-		runtimeClient.initErr = fmt.Errorf("initialize SecurityList OCI client: %w", err)
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		semantics.List = nil
+		semantics.CreateFollowUp = generatedruntime.FollowUpSemantics{}
+		semantics.UpdateFollowUp = generatedruntime.FollowUpSemantics{}
+		hooks.Semantics = &semantics
 	}
-	return runtimeClient
+
+	runtimeClient := &securityListRuntimeClient{manager: manager}
+
+	hooks.BuildCreateBody = func(_ context.Context, resource *corev1beta1.SecurityList, _ string) (any, error) {
+		if resource == nil {
+			return nil, fmt.Errorf("SecurityList resource is nil")
+		}
+		return buildCreateSecurityListDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = runtimeClient.buildGeneratedUpdateBody
+	hooks.Identity.GuardExistingBeforeCreate = func(context.Context, *corev1beta1.SecurityList) (generatedruntime.ExistingBeforeCreateDecision, error) {
+		return generatedruntime.ExistingBeforeCreateDecisionSkip, nil
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ClearProjectedStatus = func(resource *corev1beta1.SecurityList) any {
+		return runtimeClient.clearProjectedStatus(resource)
+	}
+	hooks.StatusHooks.RestoreStatus = func(resource *corev1beta1.SecurityList, baseline any) {
+		previous, ok := baseline.(corev1beta1.SecurityListStatus)
+		if !ok {
+			return
+		}
+		runtimeClient.restoreStatus(resource, previous)
+	}
+	hooks.StatusHooks.ProjectStatus = runtimeClient.projectStatusFromResponse
+	hooks.StatusHooks.ApplyLifecycle = runtimeClient.applyLifecycleFromResponse
+	hooks.StatusHooks.MarkDeleted = runtimeClient.markDeleted
+	hooks.StatusHooks.MarkTerminating = runtimeClient.markTerminatingFromResponse
+	hooks.DeleteHooks.ApplyOutcome = runtimeClient.applyDeleteOutcome
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate SecurityListServiceClient) SecurityListServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
 }
 
-func (c *securityListRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.SecurityList, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.fail(resource, c.initErr)
+func (c *securityListRuntimeClient) CreateOrUpdate(
+	ctx context.Context,
+	resource *corev1beta1.SecurityList,
+	req ctrl.Request,
+) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return c.fail(resource, fmt.Errorf("SecurityList generated runtime delegate is not configured"))
 	}
 	if err := validateSecurityListSDKContract(); err != nil {
 		return c.fail(resource, err)
 	}
+	return c.delegate.CreateOrUpdate(ctx, resource, req)
+}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		return c.create(ctx, resource)
+func (c *securityListRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.SecurityList) (bool, error) {
+	if c.delegate == nil {
+		return false, fmt.Errorf("SecurityList generated runtime delegate is not configured")
 	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isSecurityListReadNotFoundOCI(err) {
-			c.clearTrackedIdentity(resource)
-			return c.create(ctx, resource)
-		}
-		return c.fail(resource, normalizeSecurityListOCIError(err))
+	if err := validateSecurityListSDKContract(); err != nil {
+		return false, err
 	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
+	if strings.TrimSpace(currentSecurityListTrackedOCID(resource)) == "" {
+		c.markDeleted(resource, "OCI resource identifier is not recorded")
+		return true, nil
 	}
+	return c.delegate.Delete(ctx, resource)
+}
 
-	switch current.LifecycleState {
-	case coresdk.SecurityListLifecycleStateProvisioning, securityListLifecycleStateUpdate, coresdk.SecurityListLifecycleStateTerminating, coresdk.SecurityListLifecycleStateTerminated:
-		return c.applyLifecycle(resource, current)
+func (c *securityListRuntimeClient) buildGeneratedUpdateBody(
+	_ context.Context,
+	resource *corev1beta1.SecurityList,
+	_ string,
+	currentResponse any,
+) (any, bool, error) {
+	current, ok := securityListFromResponse(currentResponse)
+	if !ok {
+		return nil, false, fmt.Errorf("unexpected SecurityList current response type %T", currentResponse)
 	}
 
 	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
 	if err != nil {
-		return c.fail(resource, err)
+		return nil, false, err
 	}
-
-	if updateNeeded {
-		response, err := c.client.UpdateSecurityList(ctx, updateRequest)
-		if err != nil {
-			return c.fail(resource, normalizeSecurityListOCIError(err))
-		}
-		current = response.SecurityList
+	if !updateNeeded {
+		return nil, false, nil
 	}
+	return updateRequest.UpdateSecurityListDetails, true, nil
+}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return c.fail(resource, err)
+func (c *securityListRuntimeClient) projectStatusFromResponse(resource *corev1beta1.SecurityList, response any) error {
+	current, ok := securityListFromResponse(response)
+	if !ok {
+		return fmt.Errorf("unexpected SecurityList status response type %T", response)
+	}
+	return c.projectStatus(resource, current)
+}
+
+func (c *securityListRuntimeClient) applyLifecycleFromResponse(
+	resource *corev1beta1.SecurityList,
+	response any,
+) (servicemanager.OSOKResponse, error) {
+	current, ok := securityListFromResponse(response)
+	if !ok {
+		return c.fail(resource, fmt.Errorf("unexpected SecurityList lifecycle response type %T", response))
 	}
 	return c.applyLifecycle(resource, current)
 }
 
-func (c *securityListRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.SecurityList) (bool, error) {
-	if c.initErr != nil {
-		return false, c.initErr
-	}
-	if err := validateSecurityListSDKContract(); err != nil {
-		return false, err
-	}
-
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
-		c.markDeleted(resource, "OCI resource identifier is not recorded")
-		return true, nil
-	}
-
-	deleteRequest := coresdk.DeleteSecurityListRequest{
-		SecurityListId: common.String(trackedID),
-	}
-	if _, err := c.client.DeleteSecurityList(ctx, deleteRequest); err != nil {
-		if isSecurityListDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
-		return false, normalizeSecurityListOCIError(err)
-	}
-
-	current, err := c.get(ctx, trackedID)
-	if err != nil {
-		if isSecurityListDeleteNotFoundOCI(err) {
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
-		}
-		return false, normalizeSecurityListOCIError(err)
-	}
-
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
+func (c *securityListRuntimeClient) markTerminatingFromResponse(resource *corev1beta1.SecurityList, response any) {
+	current, ok := securityListFromResponse(response)
+	if !ok {
+		return
 	}
 	c.markTerminating(resource, current)
-	return false, nil
 }
 
-func (c *securityListRuntimeClient) create(ctx context.Context, resource *corev1beta1.SecurityList) (servicemanager.OSOKResponse, error) {
-	request := coresdk.CreateSecurityListRequest{
-		CreateSecurityListDetails: buildCreateSecurityListDetails(resource.Spec),
+func (c *securityListRuntimeClient) applyDeleteOutcome(
+	resource *corev1beta1.SecurityList,
+	response any,
+	stage generatedruntime.DeleteConfirmStage,
+) (generatedruntime.DeleteOutcome, error) {
+	current, ok := securityListFromResponse(response)
+	if !ok {
+		return generatedruntime.DeleteOutcome{}, fmt.Errorf("unexpected SecurityList delete response type %T", response)
 	}
 
-	response, err := c.client.CreateSecurityList(ctx, request)
-	if err != nil {
-		return c.fail(resource, normalizeSecurityListOCIError(err))
+	if stage == generatedruntime.DeleteConfirmStageAlreadyPending {
+		return generatedruntime.DeleteOutcome{}, nil
 	}
 
-	if err := c.projectStatus(resource, response.SecurityList); err != nil {
-		return c.fail(resource, err)
-	}
-	return c.applyLifecycle(resource, response.SecurityList)
-}
-
-func (c *securityListRuntimeClient) get(ctx context.Context, ocid string) (coresdk.SecurityList, error) {
-	response, err := c.client.GetSecurityList(ctx, coresdk.GetSecurityListRequest{
-		SecurityListId: common.String(ocid),
-	})
-	if err != nil {
-		return coresdk.SecurityList{}, err
-	}
-	return response.SecurityList, nil
+	c.markTerminating(resource, current)
+	return generatedruntime.DeleteOutcome{Handled: true, Deleted: false}, nil
 }
 
 func (c *securityListRuntimeClient) buildUpdateRequest(resource *corev1beta1.SecurityList, current coresdk.SecurityList) (coresdk.UpdateSecurityListRequest, bool, error) {
@@ -679,8 +691,42 @@ func (c *securityListRuntimeClient) markDeleted(resource *corev1beta1.SecurityLi
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
 }
 
+func currentSecurityListTrackedOCID(resource *corev1beta1.SecurityList) string {
+	if resource == nil {
+		return ""
+	}
+	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+}
+
 func (c *securityListRuntimeClient) clearTrackedIdentity(resource *corev1beta1.SecurityList) {
 	resource.Status = corev1beta1.SecurityListStatus{}
+}
+
+func (c *securityListRuntimeClient) clearProjectedStatus(resource *corev1beta1.SecurityList) corev1beta1.SecurityListStatus {
+	if resource == nil {
+		return corev1beta1.SecurityListStatus{}
+	}
+
+	previous := resource.Status
+	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	previousID := resource.Status.Id
+	resource.Status = corev1beta1.SecurityListStatus{
+		OsokStatus: resource.Status.OsokStatus,
+	}
+	if trackedID != "" {
+		resource.Status.Id = previousID
+	}
+	return previous
+}
+
+func (c *securityListRuntimeClient) restoreStatus(resource *corev1beta1.SecurityList, previous corev1beta1.SecurityListStatus) {
+	if resource == nil {
+		return
+	}
+
+	failedStatus := resource.Status.OsokStatus
+	resource.Status = previous
+	resource.Status.OsokStatus = failedStatus
 }
 
 func (c *securityListRuntimeClient) markTerminating(resource *corev1beta1.SecurityList, current coresdk.SecurityList) {
@@ -707,6 +753,21 @@ func (c *securityListRuntimeClient) projectStatus(resource *corev1beta1.Security
 		FreeformTags:         cloneStringMap(current.FreeformTags),
 	}
 	return nil
+}
+
+func securityListFromResponse(response any) (coresdk.SecurityList, bool) {
+	switch typed := response.(type) {
+	case coresdk.SecurityList:
+		return typed, true
+	case coresdk.CreateSecurityListResponse:
+		return typed.SecurityList, true
+	case coresdk.GetSecurityListResponse:
+		return typed.SecurityList, true
+	case coresdk.UpdateSecurityListResponse:
+		return typed.SecurityList, true
+	default:
+		return coresdk.SecurityList{}, false
+	}
 }
 
 func securityListLifecycleMessage(current coresdk.SecurityList) string {

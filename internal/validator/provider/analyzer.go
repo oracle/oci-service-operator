@@ -138,6 +138,11 @@ func compositeLiteralUsages(
 	if qualifiedTypeName(loadedPackage.TypesInfo.TypeOf(composite)) == "generatedruntime.Operation" {
 		usages = append(usages, generatedOperationUsages(loadedPackage.TypesInfo, loadedPackage.Fset, filePath, targets, composite)...)
 	}
+	if requestType := runtimeOperationHookRequestType(loadedPackage.TypesInfo, composite); requestType != "" {
+		if fieldsLiteral := generatedOperationFieldsLiteral(composite); fieldsLiteral != nil {
+			usages = append(usages, generatedRequestFieldUsages(loadedPackage.TypesInfo, loadedPackage.Fset, filePath, requestType, fieldsLiteral)...)
+		}
+	}
 
 	structType := seedStructName(loadedPackage.TypesInfo.TypeOf(composite), targets)
 	if structType == "" {
@@ -273,6 +278,24 @@ func generatedOperationRequestType(typesInfo *types.Info, operation *ast.Composi
 	return returnedTypeName(typesInfo, requestFactory)
 }
 
+func runtimeOperationHookRequestType(typesInfo *types.Info, hook *ast.CompositeLit) string {
+	if !strings.HasSuffix(qualifiedTypeName(typesInfo.TypeOf(hook)), ".runtimeOperationHooks") {
+		return ""
+	}
+	call := compositeFuncValue(hook, "Call")
+	if call == nil || call.Type == nil || call.Type.Params == nil {
+		return ""
+	}
+	for _, param := range call.Type.Params.List {
+		requestType := qualifiedTypeName(typesInfo.TypeOf(param.Type))
+		if requestType == "" || requestType == "context.Context" {
+			continue
+		}
+		return requestType
+	}
+	return ""
+}
+
 func generatedOperationFieldsLiteral(operation *ast.CompositeLit) *ast.CompositeLit {
 	return compositeFieldValue(operation, "Fields")
 }
@@ -352,6 +375,24 @@ func compositeFieldValue(literal *ast.CompositeLit, fieldName string) *ast.Compo
 			continue
 		}
 		value, ok := keyValue.Value.(*ast.CompositeLit)
+		if ok {
+			return value
+		}
+	}
+	return nil
+}
+
+func compositeFuncValue(literal *ast.CompositeLit, fieldName string) *ast.FuncLit {
+	for _, element := range literal.Elts {
+		keyValue, ok := element.(*ast.KeyValueExpr)
+		if !ok {
+			continue
+		}
+		fieldIdentifier, ok := keyValue.Key.(*ast.Ident)
+		if !ok || fieldIdentifier.Name != fieldName {
+			continue
+		}
+		value, ok := keyValue.Value.(*ast.FuncLit)
 		if ok {
 			return value
 		}

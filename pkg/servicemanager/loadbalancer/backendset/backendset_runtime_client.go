@@ -15,24 +15,16 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	loadbalancersdk "github.com/oracle/oci-go-sdk/v65/loadbalancer"
 	loadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/loadbalancer/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-type backendSetLookupClient interface {
+type backendSetRuntimeOCIClient interface {
+	CreateBackendSet(context.Context, loadbalancersdk.CreateBackendSetRequest) (loadbalancersdk.CreateBackendSetResponse, error)
 	GetBackendSet(context.Context, loadbalancersdk.GetBackendSetRequest) (loadbalancersdk.GetBackendSetResponse, error)
-}
-
-type backendSetRuntimeDelegate interface {
-	CreateOrUpdate(context.Context, *loadbalancerv1beta1.BackendSet, ctrl.Request) (servicemanager.OSOKResponse, error)
-	Delete(context.Context, *loadbalancerv1beta1.BackendSet) (bool, error)
-}
-
-type backendSetRuntimeServiceClient struct {
-	delegate backendSetRuntimeDelegate
-	lookup   backendSetLookupClient
+	ListBackendSets(context.Context, loadbalancersdk.ListBackendSetsRequest) (loadbalancersdk.ListBackendSetsResponse, error)
+	UpdateBackendSet(context.Context, loadbalancersdk.UpdateBackendSetRequest) (loadbalancersdk.UpdateBackendSetResponse, error)
+	DeleteBackendSet(context.Context, loadbalancersdk.DeleteBackendSetRequest) (loadbalancersdk.DeleteBackendSetResponse, error)
 }
 
 type backendSetIdentity struct {
@@ -41,68 +33,89 @@ type backendSetIdentity struct {
 }
 
 func init() {
-	newBackendSetServiceClient = func(manager *BackendSetServiceManager) BackendSetServiceClient {
-		sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*loadbalancerv1beta1.BackendSet]{
-			Kind:      "BackendSet",
-			SDKName:   "BackendSet",
-			Log:       manager.Log,
-			Semantics: newBackendSetRuntimeSemantics(),
-			BuildUpdateBody: func(
-				ctx context.Context,
-				resource *loadbalancerv1beta1.BackendSet,
-				namespace string,
-				currentResponse any,
-			) (any, bool, error) {
-				return buildBackendSetUpdateBody(ctx, resource, namespace, currentResponse)
-			},
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &loadbalancersdk.CreateBackendSetRequest{} },
-				Fields:     backendSetCreateFields(),
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateBackendSet(ctx, *request.(*loadbalancersdk.CreateBackendSetRequest))
-				},
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &loadbalancersdk.GetBackendSetRequest{} },
-				Fields:     backendSetGetFields(),
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetBackendSet(ctx, *request.(*loadbalancersdk.GetBackendSetRequest))
-				},
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &loadbalancersdk.ListBackendSetsRequest{} },
-				Fields:     backendSetListFields(),
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListBackendSets(ctx, *request.(*loadbalancersdk.ListBackendSetsRequest))
-				},
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &loadbalancersdk.UpdateBackendSetRequest{} },
-				Fields:     backendSetUpdateFields(),
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateBackendSet(ctx, *request.(*loadbalancersdk.UpdateBackendSetRequest))
-				},
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &loadbalancersdk.DeleteBackendSetRequest{} },
-				Fields:     backendSetDeleteFields(),
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteBackendSet(ctx, *request.(*loadbalancersdk.DeleteBackendSetRequest))
-				},
-			},
-		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize BackendSet OCI client: %w", err)
-		}
+	registerBackendSetRuntimeHooksMutator(func(_ *BackendSetServiceManager, hooks *BackendSetRuntimeHooks) {
+		applyBackendSetRuntimeHooks(hooks)
+	})
+}
 
-		delegate := defaultBackendSetServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.BackendSet](config),
-		}
-		return &backendSetRuntimeServiceClient{
-			delegate: delegate,
-			lookup:   sdkClient,
-		}
+func applyBackendSetRuntimeHooks(hooks *BackendSetRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	getCall := hooks.Get.Call
+	hooks.Semantics = newBackendSetRuntimeSemantics()
+	hooks.BuildUpdateBody = func(
+		ctx context.Context,
+		resource *loadbalancerv1beta1.BackendSet,
+		namespace string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildBackendSetUpdateBody(ctx, resource, namespace, currentResponse)
+	}
+	hooks.Identity = generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendSet]{
+		Resolve: func(resource *loadbalancerv1beta1.BackendSet) (any, error) {
+			return resolveBackendSetIdentity(resource)
+		},
+		RecordPath: func(resource *loadbalancerv1beta1.BackendSet, identity any) {
+			recordBackendSetPathIdentity(resource, identity.(backendSetIdentity))
+		},
+		RecordTracked: func(resource *loadbalancerv1beta1.BackendSet, identity any, _ string) {
+			recordBackendSetTrackedIdentity(resource, identity.(backendSetIdentity))
+		},
+		LookupExisting: func(ctx context.Context, resource *loadbalancerv1beta1.BackendSet, identity any) (any, error) {
+			if backendSetHasTrackedID(resource) {
+				return nil, nil
+			}
+			return lookupExistingBackendSet(ctx, getCall, identity.(backendSetIdentity))
+		},
+		SeedSyntheticTrackedID: func(resource *loadbalancerv1beta1.BackendSet, identity any) func() {
+			return seedSyntheticBackendSetOCID(resource, identity.(backendSetIdentity))
+		},
+	}
+	hooks.Create.Fields = backendSetCreateFields()
+	hooks.Get.Fields = backendSetGetFields()
+	hooks.List.Fields = backendSetListFields()
+	hooks.Update.Fields = backendSetUpdateFields()
+	hooks.Delete.Fields = backendSetDeleteFields()
+}
+
+func newBackendSetRuntimeHooksWithOCIClient(client backendSetRuntimeOCIClient) BackendSetRuntimeHooks {
+	return BackendSetRuntimeHooks{
+		Semantics: newBackendSetRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*loadbalancerv1beta1.BackendSet]{},
+		Read:      generatedruntime.ReadHooks{},
+		Create: runtimeOperationHooks[loadbalancersdk.CreateBackendSetRequest, loadbalancersdk.CreateBackendSetResponse]{
+			Fields: backendSetCreateFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.CreateBackendSetRequest) (loadbalancersdk.CreateBackendSetResponse, error) {
+				return client.CreateBackendSet(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[loadbalancersdk.GetBackendSetRequest, loadbalancersdk.GetBackendSetResponse]{
+			Fields: backendSetGetFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.GetBackendSetRequest) (loadbalancersdk.GetBackendSetResponse, error) {
+				return client.GetBackendSet(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[loadbalancersdk.ListBackendSetsRequest, loadbalancersdk.ListBackendSetsResponse]{
+			Fields: backendSetListFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.ListBackendSetsRequest) (loadbalancersdk.ListBackendSetsResponse, error) {
+				return client.ListBackendSets(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[loadbalancersdk.UpdateBackendSetRequest, loadbalancersdk.UpdateBackendSetResponse]{
+			Fields: backendSetUpdateFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.UpdateBackendSetRequest) (loadbalancersdk.UpdateBackendSetResponse, error) {
+				return client.UpdateBackendSet(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[loadbalancersdk.DeleteBackendSetRequest, loadbalancersdk.DeleteBackendSetResponse]{
+			Fields: backendSetDeleteFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.DeleteBackendSetRequest) (loadbalancersdk.DeleteBackendSetResponse, error) {
+				return client.DeleteBackendSet(ctx, request)
+			},
+		},
+		WrapGeneratedClient: []func(BackendSetServiceClient) BackendSetServiceClient{},
 	}
 }
 
@@ -209,82 +222,19 @@ func backendSetNameField() generatedruntime.RequestField {
 	}
 }
 
-func (c *backendSetRuntimeServiceClient) CreateOrUpdate(ctx context.Context, resource *loadbalancerv1beta1.BackendSet, req ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if resource == nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("backendset resource is nil")
+func lookupExistingBackendSet(
+	ctx context.Context,
+	getCall func(context.Context, loadbalancersdk.GetBackendSetRequest) (loadbalancersdk.GetBackendSetResponse, error),
+	identity backendSetIdentity,
+) (any, error) {
+	if getCall == nil {
+		return nil, nil
 	}
 
-	identity, err := resolveBackendSetIdentity(resource)
-	if err != nil {
-		return servicemanager.OSOKResponse{IsSuccessful: false}, err
-	}
-
-	recordBackendSetPathIdentity(resource, identity)
-	restore := func() {}
-	if !backendSetHasTrackedID(resource) {
-		existing, err := c.lookupExistingBackendSet(ctx, identity)
-		if err != nil {
-			return servicemanager.OSOKResponse{IsSuccessful: false}, err
-		}
-		if existing {
-			restore = seedSyntheticBackendSetOCID(resource, identity)
-		}
-	}
-
-	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
-	if err != nil {
-		restore()
-		return response, err
-	}
-
-	recordBackendSetTrackedIdentity(resource, identity)
-	return response, nil
-}
-
-func (c *backendSetRuntimeServiceClient) Delete(ctx context.Context, resource *loadbalancerv1beta1.BackendSet) (bool, error) {
-	if resource == nil {
-		return false, fmt.Errorf("backendset resource is nil")
-	}
-
-	identity, err := resolveBackendSetIdentity(resource)
-	if err != nil {
-		return false, err
-	}
-
-	recordBackendSetPathIdentity(resource, identity)
-	restore := func() {}
-	if !backendSetHasTrackedID(resource) {
-		restore = seedSyntheticBackendSetOCID(resource, identity)
-	}
-
-	deleted, err := c.delegate.Delete(ctx, resource)
-	if err != nil {
-		restore()
-		return false, err
-	}
-
-	recordBackendSetTrackedIdentity(resource, identity)
-	return deleted, nil
-}
-
-func (c *backendSetRuntimeServiceClient) lookupExistingBackendSet(ctx context.Context, identity backendSetIdentity) (bool, error) {
-	if c.lookup == nil {
-		return false, nil
-	}
-
-	request := loadbalancersdk.GetBackendSetRequest{
+	return getCall(ctx, loadbalancersdk.GetBackendSetRequest{
 		LoadBalancerId: common.String(identity.loadBalancerID),
 		BackendSetName: common.String(identity.backendSetName),
-	}
-	_, err := c.lookup.GetBackendSet(ctx, request)
-	switch {
-	case err == nil:
-		return true, nil
-	case servicemanager.IsNotFoundServiceError(err):
-		return false, nil
-	default:
-		return false, fmt.Errorf("lookup BackendSet %q: %w", identity.backendSetName, err)
-	}
+	})
 }
 
 func resolveBackendSetIdentity(resource *loadbalancerv1beta1.BackendSet) (backendSetIdentity, error) {

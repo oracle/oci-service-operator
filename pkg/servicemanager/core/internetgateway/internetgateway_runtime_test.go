@@ -95,82 +95,26 @@ func (f fakeInternetGatewayServiceError) GetOpcRequestID() string {
 	return ""
 }
 
-func newTestGeneratedInternetGatewayDelegate(manager *InternetGatewayServiceManager, client internetGatewayOCIClient) InternetGatewayServiceClient {
+func newTestInternetGatewayRuntimeHooks(manager *InternetGatewayServiceManager, client internetGatewayOCIClient) InternetGatewayRuntimeHooks {
 	if client == nil {
 		client = &fakeInternetGatewayOCIClient{}
 	}
 
-	config := generatedruntime.Config[*corev1beta1.InternetGateway]{
-		Kind:    "InternetGateway",
-		SDKName: "InternetGateway",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService: "core",
-			FormalSlug:    "internetgateway",
-			Async: &generatedruntime.AsyncSemantics{
-				Strategy:             "lifecycle",
-				Runtime:              "generatedruntime",
-				FormalClassification: "lifecycle",
-			},
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{},
-				ActiveStates:       []string{"AVAILABLE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATED", "TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"definedTags", "displayName", "freeformTags", "isEnabled", "routeTableId"},
-				ForceNew:      []string{"compartmentId", "vcnId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateInternetGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateInternetGateway(ctx, *request.(*coresdk.CreateInternetGatewayRequest))
-			},
+	hooks := InternetGatewayRuntimeHooks{
+		Semantics: newInternetGatewayRuntimeSemantics(),
+		Create: runtimeOperationHooks[coresdk.CreateInternetGatewayRequest, coresdk.CreateInternetGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateInternetGatewayDetails", RequestName: "CreateInternetGatewayDetails", Contribution: "body"}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetInternetGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetInternetGateway(ctx, *request.(*coresdk.GetInternetGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.CreateInternetGatewayRequest) (coresdk.CreateInternetGatewayResponse, error) {
+				return client.CreateInternetGateway(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[coresdk.GetInternetGatewayRequest, coresdk.GetInternetGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListInternetGatewaysRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListInternetGateways(ctx, *request.(*coresdk.ListInternetGatewaysRequest))
+			Call: func(ctx context.Context, request coresdk.GetInternetGatewayRequest) (coresdk.GetInternetGatewayResponse, error) {
+				return client.GetInternetGateway(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[coresdk.ListInternetGatewaysRequest, coresdk.ListInternetGatewaysResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
@@ -181,40 +125,43 @@ func newTestGeneratedInternetGatewayDelegate(manager *InternetGatewayServiceMana
 				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateInternetGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateInternetGateway(ctx, *request.(*coresdk.UpdateInternetGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.ListInternetGatewaysRequest) (coresdk.ListInternetGatewaysResponse, error) {
+				return client.ListInternetGateways(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[coresdk.UpdateInternetGatewayRequest, coresdk.UpdateInternetGatewayResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true},
 				{FieldName: "UpdateInternetGatewayDetails", RequestName: "UpdateInternetGatewayDetails", Contribution: "body"},
 			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteInternetGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteInternetGateway(ctx, *request.(*coresdk.DeleteInternetGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.UpdateInternetGatewayRequest) (coresdk.UpdateInternetGatewayResponse, error) {
+				return client.UpdateInternetGateway(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[coresdk.DeleteInternetGatewayRequest, coresdk.DeleteInternetGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "IgId", RequestName: "igId", Contribution: "path", PreferResourceID: true}},
+			Call: func(ctx context.Context, request coresdk.DeleteInternetGatewayRequest) (coresdk.DeleteInternetGatewayResponse, error) {
+				return client.DeleteInternetGateway(ctx, request)
+			},
 		},
 	}
+	applyInternetGatewayRuntimeHooks(manager, &hooks, client)
+	return hooks
+}
 
-	return defaultInternetGatewayServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.InternetGateway](config),
+func newTestGeneratedInternetGatewayDelegate(manager *InternetGatewayServiceManager, client internetGatewayOCIClient) InternetGatewayServiceClient {
+	hooks := newTestInternetGatewayRuntimeHooks(manager, client)
+	delegate := defaultInternetGatewayServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.InternetGateway](buildInternetGatewayGeneratedRuntimeConfig(manager, hooks)),
 	}
+	return wrapInternetGatewayGeneratedClient(hooks, delegate)
 }
 
 func newInternetGatewayTestManager(client internetGatewayOCIClient) *InternetGatewayServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewInternetGatewayServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&internetGatewayGeneratedParityClient{
-			manager:  manager,
-			delegate: newTestGeneratedInternetGatewayDelegate(manager, client),
-			client:   client,
-		})
+		manager.WithClient(newTestGeneratedInternetGatewayDelegate(manager, client))
 	}
 	return manager
 }

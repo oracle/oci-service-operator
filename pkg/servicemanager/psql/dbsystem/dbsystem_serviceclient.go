@@ -19,7 +19,7 @@ import (
 )
 
 // DbSystemServiceClient is the handwritten extension seam for DbSystem runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*DbSystemServiceManager).WithClient.
 type DbSystemServiceClient interface {
 	CreateOrUpdate(context.Context, *psqlv1beta1.DbSystem, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,109 +30,17 @@ type defaultDbSystemServiceClient struct {
 	generatedruntime.ServiceClient[*psqlv1beta1.DbSystem]
 }
 
-func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "psql",
-		FormalSlug:    "dbsystem",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "handwritten",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE", "NEEDS_ATTENTION"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"dbConfigurationParams.applyConfig", "dbConfigurationParams.configId", "definedTags", "description", "displayName", "freeformTags", "managementPolicy", "storageDetails.iops"},
-			ForceNew:      []string{"compartmentId", "dbVersion", "instanceCount", "instanceMemorySizeInGBs", "instanceOcpuCount", "networkDetails", "shape", "storageDetails.availabilityDomain", "storageDetails.isRegionallyDurable", "storageDetails.systemType", "systemType"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForUpdatedState", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeDbSystemCompartment", RequestTypeName: "psql.ChangeDbSystemCompartmentRequest", ResponseTypeName: "psql.ChangeDbSystemCompartmentResponse"}, {Phase: "update", MethodName: "PatchDbSystem", RequestTypeName: "psql.PatchDbSystemRequest", ResponseTypeName: "psql.PatchDbSystemResponse"}, {Phase: "update", MethodName: "ResetMasterUserPassword", RequestTypeName: "psql.ResetMasterUserPasswordRequest", ResponseTypeName: "psql.ResetMasterUserPasswordResponse"}},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ DbSystemServiceClient = defaultDbSystemServiceClient{}
 
 var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
 	sdkClient, err := psqlsdk.NewPostgresqlClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*psqlv1beta1.DbSystem]{
-		Kind:             "DbSystem",
-		SDKName:          "DbSystem",
-		Log:              manager.Log,
-		CredentialClient: manager.CredentialClient,
-		Semantics:        newDbSystemRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &psqlsdk.CreateDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateDbSystem(ctx, *request.(*psqlsdk.CreateDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &psqlsdk.GetDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetDbSystem(ctx, *request.(*psqlsdk.GetDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}, {FieldName: "ExcludedFields", RequestName: "excludedFields", Contribution: "query", PreferResourceID: false}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &psqlsdk.ListDbSystemsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListDbSystems(ctx, *request.(*psqlsdk.ListDbSystemsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &psqlsdk.UpdateDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateDbSystem(ctx, *request.(*psqlsdk.UpdateDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDbSystemDetails", RequestName: "UpdateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &psqlsdk.DeleteDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteDbSystem(ctx, *request.(*psqlsdk.DeleteDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newDbSystemRuntimeHooks(manager, sdkClient)
+	config := buildDbSystemGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize DbSystem OCI client: %w", err)
 	}
-	return defaultDbSystemServiceClient{
+	delegate := defaultDbSystemServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*psqlv1beta1.DbSystem](config),
 	}
+	return wrapDbSystemGeneratedClient(hooks, delegate)
 }

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "core",
+  "kind": "NatGateway",
+  "formalSlug": "natgateway",
+  "providerResource": "oci_core_nat_gateway",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/core_nat_gateway",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/core_nat_gateway",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/core/natgateway/page.html",
+  "bodySHA256": "55720f40e5d3a608f3671731323066a52257c997c092f2ef7896fb73b7259371",
+  "bodyBytes": 2405,
+  "fixtureBodyPath": "7.22.0/core/natgateway/page.html"
+}

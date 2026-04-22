@@ -19,7 +19,7 @@ import (
 )
 
 // DbSystemServiceClient is the handwritten extension seam for DbSystem runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*DbSystemServiceManager).WithClient.
 type DbSystemServiceClient interface {
 	CreateOrUpdate(context.Context, *mysqlv1beta1.DbSystem, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,109 +30,17 @@ type defaultDbSystemServiceClient struct {
 	generatedruntime.ServiceClient[*mysqlv1beta1.DbSystem]
 }
 
-func newDbSystemRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "mysql",
-		FormalSlug:    "dbsystem",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING", "UPDATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "configurationId", "databaseManagement", "dbSystemId", "displayName", "isHeatWaveClusterAttached", "isUpToDate", "state"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"accessMode", "backupPolicy.copyPolicies.backupCopyRetentionInDays", "backupPolicy.copyPolicies.copyToRegion", "backupPolicy.definedTags", "backupPolicy.freeformTags", "backupPolicy.isEnabled", "backupPolicy.pitrPolicy.isEnabled", "backupPolicy.retentionInDays", "backupPolicy.softDelete", "backupPolicy.windowStartTime", "configurationId", "crashRecovery", "customerContacts.email", "dataStorage.isAutoExpandStorageEnabled", "dataStorage.maxStorageSizeInGbs", "dataStorageSizeInGb", "databaseConsole.port", "databaseConsole.status", "databaseManagement", "databaseMode", "definedTags", "deletionPolicy.automaticBackupRetention", "deletionPolicy.finalBackup", "deletionPolicy.isDeleteProtected", "description", "displayName", "encryptData.keyGenerationType", "encryptData.keyId", "freeformTags", "hostnameLabel", "isHighlyAvailable", "maintenance.maintenanceDisabledWindows.timeEnd", "maintenance.maintenanceDisabledWindows.timeStart", "maintenance.maintenanceScheduleType", "maintenance.versionPreference", "maintenance.versionTrackPreference", "maintenance.windowStartTime", "nsgIds", "readEndpoint.excludeIps", "readEndpoint.isEnabled", "readEndpoint.readEndpointHostnameLabel", "readEndpoint.readEndpointIpAddress", "rest.configuration", "rest.port", "secureConnections.certificateGenerationType", "secureConnections.certificateId", "securityAttributes", "shapeName", "shutdownType", "state", "telemetryConfiguration.logs.destination", "telemetryConfiguration.logs.destinationConfigurations.key", "telemetryConfiguration.logs.destinationConfigurations.value", "telemetryConfiguration.logs.logTypes"},
-			ForceNew:      []string{"adminPassword", "adminUsername", "availabilityDomain", "compartmentId", "faultDomain", "ipAddress", "mysqlVersion", "port", "portX", "source", "source.backupId", "source.dbSystemId", "source.recoveryPoint", "source.sourceType", "source.sourceUrl", "subnetId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ DbSystemServiceClient = defaultDbSystemServiceClient{}
 
 var newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
 	sdkClient, err := mysqlsdk.NewDbSystemClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*mysqlv1beta1.DbSystem]{
-		Kind:             "DbSystem",
-		SDKName:          "DbSystem",
-		Log:              manager.Log,
-		CredentialClient: manager.CredentialClient,
-		Semantics:        newDbSystemRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateDbSystem(ctx, *request.(*mysqlsdk.CreateDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &mysqlsdk.GetDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetDbSystem(ctx, *request.(*mysqlsdk.GetDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &mysqlsdk.ListDbSystemsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListDbSystems(ctx, *request.(*mysqlsdk.ListDbSystemsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsHeatWaveClusterAttached", RequestName: "isHeatWaveClusterAttached", Contribution: "query", PreferResourceID: false}, {FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfigurationId", RequestName: "configurationId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsUpToDate", RequestName: "isUpToDate", Contribution: "query", PreferResourceID: false}, {FieldName: "DatabaseManagement", RequestName: "databaseManagement", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &mysqlsdk.UpdateDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateDbSystem(ctx, *request.(*mysqlsdk.UpdateDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDbSystemDetails", RequestName: "UpdateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &mysqlsdk.DeleteDbSystemRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteDbSystem(ctx, *request.(*mysqlsdk.DeleteDbSystemRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newDbSystemRuntimeHooks(manager, sdkClient)
+	config := buildDbSystemGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize DbSystem OCI client: %w", err)
 	}
-	return defaultDbSystemServiceClient{
+	delegate := defaultDbSystemServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](config),
 	}
+	return wrapDbSystemGeneratedClient(hooks, delegate)
 }

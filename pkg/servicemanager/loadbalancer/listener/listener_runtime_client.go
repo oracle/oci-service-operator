@@ -19,6 +19,7 @@ import (
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
+	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
 type listenerRuntimeOCIClient interface {
@@ -39,6 +40,11 @@ type listenerListRequest struct {
 
 type listenerListResult struct {
 	Items []listenerRuntimeView `json:"items"`
+}
+
+type listenerIdentity struct {
+	loadBalancerID string
+	listenerName   string
 }
 
 type listenerRuntimeView struct {
@@ -73,10 +79,10 @@ func (e listenerNotFoundServiceError) GetOpcRequestID() string {
 }
 
 func init() {
-	newListenerServiceClient = func(manager *ListenerServiceManager) ListenerServiceClient {
-		sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-		return newGeneratedListenerServiceClient(sdkClient, manager.Log, manager.CredentialClient, err)
-	}
+	registerListenerRuntimeHooksMutator(func(manager *ListenerServiceManager, hooks *ListenerRuntimeHooks) {
+		applyListenerRuntimeHooks(listenerCredentialClient(manager), hooks)
+		applyListenerReadHooks(hooks, providerListenerGetLoadBalancerCall(manager))
+	})
 }
 
 func newGeneratedListenerServiceClient(
@@ -85,61 +91,151 @@ func newGeneratedListenerServiceClient(
 	credentialClient credhelper.CredentialClient,
 	initErr error,
 ) ListenerServiceClient {
-	config := generatedruntime.Config[*loadbalancerv1beta1.Listener]{
-		Kind:             "Listener",
-		SDKName:          "Listener",
-		Log:              log,
-		CredentialClient: credentialClient,
-		InitError:        initErr,
-		Semantics:        listenerRuntimeSemantics(),
-		BuildUpdateBody: func(
-			ctx context.Context,
-			resource *loadbalancerv1beta1.Listener,
-			namespace string,
-			currentResponse any,
-		) (any, bool, error) {
-			return buildListenerUpdateBody(ctx, resource, credentialClient, namespace, currentResponse)
+	hooks := newListenerRuntimeHooksWithOCIClient(client)
+	applyListenerRuntimeHooks(credentialClient, &hooks)
+	applyListenerReadHooks(&hooks, client.GetLoadBalancer)
+	config := buildListenerGeneratedRuntimeConfig(&ListenerServiceManager{Log: log}, hooks)
+	config.CredentialClient = credentialClient
+	config.InitError = initErr
+
+	return defaultListenerServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Listener](config),
+	}
+}
+
+func applyListenerRuntimeHooks(credentialClient credhelper.CredentialClient, hooks *ListenerRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Semantics = listenerRuntimeSemantics()
+	hooks.BuildUpdateBody = func(
+		ctx context.Context,
+		resource *loadbalancerv1beta1.Listener,
+		namespace string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildListenerUpdateBody(ctx, resource, credentialClient, namespace, currentResponse)
+	}
+	hooks.Identity = generatedruntime.IdentityHooks[*loadbalancerv1beta1.Listener]{
+		Resolve: func(resource *loadbalancerv1beta1.Listener) (any, error) {
+			return resolveListenerIdentity(resource)
 		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateListenerRequest{} },
-			Fields:     listenerCreateFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateListener(ctx, *request.(*loadbalancersdk.CreateListenerRequest))
-			},
+		RecordPath: func(resource *loadbalancerv1beta1.Listener, identity any) {
+			recordListenerPathIdentity(resource, identity.(listenerIdentity))
 		},
+		RecordTracked: func(resource *loadbalancerv1beta1.Listener, identity any, resourceID string) {
+			recordListenerTrackedIdentity(resource, identity.(listenerIdentity), resourceID)
+		},
+	}
+	hooks.Create.Fields = listenerCreateFields()
+	hooks.Update.Fields = listenerUpdateFields()
+	hooks.Delete.Fields = listenerDeleteFields()
+}
+
+func applyListenerReadHooks(
+	hooks *ListenerRuntimeHooks,
+	getLoadBalancer func(context.Context, loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error),
+) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Read = generatedruntime.ReadHooks{
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &listenerReadRequest{} },
 			Fields:     listenerGetFields(),
 			Call: func(ctx context.Context, request any) (any, error) {
-				return getListenerRuntimeView(ctx, client, request.(*listenerReadRequest))
+				return getListenerRuntimeView(ctx, listenerReadCallAdapter(getLoadBalancer), request.(*listenerReadRequest))
 			},
 		},
 		List: &generatedruntime.Operation{
 			NewRequest: func() any { return &listenerListRequest{} },
 			Fields:     listenerListFields(),
 			Call: func(ctx context.Context, request any) (any, error) {
-				return listListenerRuntimeViews(ctx, client, request.(*listenerListRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateListenerRequest{} },
-			Fields:     listenerUpdateFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateListener(ctx, *request.(*loadbalancersdk.UpdateListenerRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteListenerRequest{} },
-			Fields:     listenerDeleteFields(),
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteListener(ctx, *request.(*loadbalancersdk.DeleteListenerRequest))
+				return listListenerRuntimeViews(ctx, listenerReadCallAdapter(getLoadBalancer), request.(*listenerListRequest))
 			},
 		},
 	}
+}
 
-	return defaultListenerServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Listener](config),
+func newListenerRuntimeHooksWithOCIClient(client listenerRuntimeOCIClient) ListenerRuntimeHooks {
+	return ListenerRuntimeHooks{
+		Semantics: listenerRuntimeSemantics(),
+		Identity:  generatedruntime.IdentityHooks[*loadbalancerv1beta1.Listener]{},
+		Read:      generatedruntime.ReadHooks{},
+		Create: runtimeOperationHooks[loadbalancersdk.CreateListenerRequest, loadbalancersdk.CreateListenerResponse]{
+			Fields: listenerCreateFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.CreateListenerRequest) (loadbalancersdk.CreateListenerResponse, error) {
+				return client.CreateListener(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[loadbalancersdk.UpdateListenerRequest, loadbalancersdk.UpdateListenerResponse]{
+			Fields: listenerUpdateFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.UpdateListenerRequest) (loadbalancersdk.UpdateListenerResponse, error) {
+				return client.UpdateListener(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[loadbalancersdk.DeleteListenerRequest, loadbalancersdk.DeleteListenerResponse]{
+			Fields: listenerDeleteFields(),
+			Call: func(ctx context.Context, request loadbalancersdk.DeleteListenerRequest) (loadbalancersdk.DeleteListenerResponse, error) {
+				return client.DeleteListener(ctx, request)
+			},
+		},
+		WrapGeneratedClient: []func(ListenerServiceClient) ListenerServiceClient{},
 	}
+}
+
+func listenerCredentialClient(manager *ListenerServiceManager) credhelper.CredentialClient {
+	if manager == nil {
+		return nil
+	}
+	return manager.CredentialClient
+}
+
+func providerListenerGetLoadBalancerCall(
+	manager *ListenerServiceManager,
+) func(context.Context, loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error) {
+	return func(ctx context.Context, request loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error) {
+		if manager == nil || manager.Provider == nil {
+			return loadbalancersdk.GetLoadBalancerResponse{}, fmt.Errorf("listener read OCI client is not configured")
+		}
+
+		client, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
+		if err != nil {
+			return loadbalancersdk.GetLoadBalancerResponse{}, fmt.Errorf("initialize Listener OCI client: %w", err)
+		}
+		return client.GetLoadBalancer(ctx, request)
+	}
+}
+
+func listenerReadCallAdapter(
+	getLoadBalancer func(context.Context, loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error),
+) listenerRuntimeOCIClient {
+	return listenerReadClient{getLoadBalancer: getLoadBalancer}
+}
+
+type listenerReadClient struct {
+	getLoadBalancer func(context.Context, loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error)
+}
+
+func (c listenerReadClient) CreateListener(context.Context, loadbalancersdk.CreateListenerRequest) (loadbalancersdk.CreateListenerResponse, error) {
+	return loadbalancersdk.CreateListenerResponse{}, fmt.Errorf("listener read client does not support CreateListener")
+}
+
+func (c listenerReadClient) GetLoadBalancer(ctx context.Context, request loadbalancersdk.GetLoadBalancerRequest) (loadbalancersdk.GetLoadBalancerResponse, error) {
+	if c.getLoadBalancer == nil {
+		return loadbalancersdk.GetLoadBalancerResponse{}, fmt.Errorf("listener read OCI call is not configured")
+	}
+	return c.getLoadBalancer(ctx, request)
+}
+
+func (c listenerReadClient) UpdateListener(context.Context, loadbalancersdk.UpdateListenerRequest) (loadbalancersdk.UpdateListenerResponse, error) {
+	return loadbalancersdk.UpdateListenerResponse{}, fmt.Errorf("listener read client does not support UpdateListener")
+}
+
+func (c listenerReadClient) DeleteListener(context.Context, loadbalancersdk.DeleteListenerRequest) (loadbalancersdk.DeleteListenerResponse, error) {
+	return loadbalancersdk.DeleteListenerResponse{}, fmt.Errorf("listener read client does not support DeleteListener")
 }
 
 func listenerRuntimeSemantics() *generatedruntime.Semantics {
@@ -264,6 +360,37 @@ func listenerNameField() generatedruntime.RequestField {
 		Contribution: "path",
 		LookupPaths:  []string{"status.name", "spec.name", "name"},
 	}
+}
+
+func resolveListenerIdentity(resource *loadbalancerv1beta1.Listener) (listenerIdentity, error) {
+	identity := listenerIdentity{
+		loadBalancerID: firstNonEmptyTrim(resource.Status.LoadBalancerId, resource.Spec.LoadBalancerId),
+		listenerName:   firstNonEmptyTrim(resource.Status.Name, resource.Spec.Name, resource.Name),
+	}
+	if identity.loadBalancerID == "" {
+		return listenerIdentity{}, fmt.Errorf("resolve Listener identity: loadBalancerId is empty")
+	}
+	if identity.listenerName == "" {
+		return listenerIdentity{}, fmt.Errorf("resolve Listener identity: listener name is empty")
+	}
+	return identity, nil
+}
+
+func recordListenerPathIdentity(resource *loadbalancerv1beta1.Listener, identity listenerIdentity) {
+	if resource == nil {
+		return
+	}
+	resource.Status.LoadBalancerId = identity.loadBalancerID
+	resource.Status.Name = identity.listenerName
+}
+
+func recordListenerTrackedIdentity(resource *loadbalancerv1beta1.Listener, identity listenerIdentity, resourceID string) {
+	recordListenerPathIdentity(resource, identity)
+	resourceID = strings.TrimSpace(resourceID)
+	if resourceID == "" {
+		resourceID = listenerSyntheticOCID(identity.loadBalancerID, identity.listenerName)
+	}
+	resource.Status.OsokStatus.Ocid = shared.OCID(resourceID)
 }
 
 func buildListenerUpdateBody(
@@ -794,4 +921,13 @@ func listenerSetValue(values map[string]any, path string, value any) {
 		}
 		current = next
 	}
+}
+
+func firstNonEmptyTrim(values ...string) string {
+	for _, value := range values {
+		if trimmed := strings.TrimSpace(value); trimmed != "" {
+			return trimmed
+		}
+	}
+	return ""
 }

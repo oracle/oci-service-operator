@@ -19,7 +19,7 @@ import (
 )
 
 // ProtocolServiceClient is the handwritten extension seam for Protocol runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*ProtocolServiceManager).WithClient.
 type ProtocolServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.Protocol, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ ProtocolServiceClient = defaultProtocolServiceClient{}
 
 var newProtocolServiceClient = func(manager *ProtocolServiceManager) ProtocolServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.Protocol]{
-		Kind:    "Protocol",
-		SDKName: "Protocol",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListProtocolsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListProtocols(ctx, *request.(*loadbalancersdk.ListProtocolsRequest))
-			},
-		},
-	}
+	hooks := newProtocolRuntimeHooks(manager, sdkClient)
+	config := buildProtocolGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Protocol OCI client: %w", err)
 	}
-	return defaultProtocolServiceClient{
+	delegate := defaultProtocolServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Protocol](config),
 	}
+	return wrapProtocolGeneratedClient(hooks, delegate)
 }

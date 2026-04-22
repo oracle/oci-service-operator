@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "nosql",
+    "apiVersion": "nosql.oracle.com/v1beta1",
+    "kind": "Table",
+    "formalSlug": "table",
+    "providerResource": "oci_nosql_table",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "compartmentId",
+      "tableLimits.capacityMode",
+      "tableLimits.maxReadUnits",
+      "tableLimits.maxStorageInGbs",
+      "tableLimits.maxWriteUnits"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "definedTags",
+        "decision": "unknown",
+        "mergeCase": "astOnlyCandidate",
+        "docsEvidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      {
+        "fieldPath": "freeformTags",
+        "decision": "unknown",
+        "mergeCase": "astOnlyCandidate",
+        "docsEvidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      {
+        "fieldPath": "isAutoReclaimable",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "name",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

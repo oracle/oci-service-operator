@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 128,
-    "mappings": 408,
-    "trackedMappings": 404,
+    "specs": 129,
+    "mappings": 413,
+    "trackedMappings": 409,
     "untrackedMappings": 4,
-    "presentFields": 3694,
-    "missingFields": 52,
-    "mandatoryPresentFields": 1341,
-    "mandatoryMissingFields": 52,
-    "extraSpecFields": 367,
-    "overallCoveragePercent": 98.611852642819,
-    "mandatoryCoveragePercent": 96.26704953338118
+    "presentFields": 3747,
+    "missingFields": 53,
+    "mandatoryPresentFields": 1352,
+    "mandatoryMissingFields": 53,
+    "extraSpecFields": 373,
+    "overallCoveragePercent": 98.60526315789474,
+    "mandatoryCoveragePercent": 96.22775800711743
   },
   "services": [
     {
@@ -39,6 +39,20 @@
       "mandatoryMissingFields": 1,
       "extraSpecFields": 1,
       "overallCoveragePercent": 96.875,
+      "mandatoryCoveragePercent": 91.66666666666666
+    },
+    {
+      "service": "aispeech",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 53,
+      "missingFields": 1,
+      "mandatoryPresentFields": 11,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 6,
+      "overallCoveragePercent": 98.14814814814815,
       "mandatoryCoveragePercent": 91.66666666666666
     },
     {

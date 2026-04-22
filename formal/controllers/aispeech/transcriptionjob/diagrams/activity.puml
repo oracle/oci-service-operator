@@ -1,0 +1,141 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - aispeech/TranscriptionJob
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired TranscriptionJob spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetTranscriptionJob;
+else (no)
+:Resolve an existing OCI resource through\nListTranscriptionJobs using filters\ncompartment_id, display_name, id;
+:Create the OCI resource via\nCreateTranscriptionJob when no reusable match\nis found;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteTranscriptionJob with\nrequired via GetTranscriptionJob or\nListTranscriptionJobs to NOT_FOUND\nconfirmation;
+:Confirm deletion via GetTranscriptionJob or\nListTranscriptionJobs until OCI reaches\nNOT_FOUND;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in ACCEPTED,\nIN_PROGRESS, CANCELING, CANCELED;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches SUCCEEDED;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields compartment_id;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateTranscriptionJob only for mutable\nfields defined_tags, description,\ndisplay_name, freeform_tags;
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Apply explicit follow-up semantics\ncreate=read-after-write;\nupdate=read-after-write; delete=confirm-delete;
+:Return success for the SUCCEEDED success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: aispeech
+slug: transcriptionjob
+kind: TranscriptionJob
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create ACCEPTED, IN_PROGRESS;
+update ACCEPTED, IN_PROGRESS; delete CANCELING,
+CANCELED
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: defined_tags, description,
+display_name, freeform_tags
+reject before mutate: force-new fields
+compartment_id
+create-only fields: none
+list lookup: oci_ai_speech_transcription_jobs
+filters compartment_id, display_name, id; Exact
+displayName or tracked OCID match within the
+requested compartment.
+conflicts: none
+open gaps: none
+TranscriptionJob keeps the generated controller
+and service-manager shell, but the handwritten
+runtime client overrides lifecycle handling for
+FAILED, CANCELING, and CANCELED while still
+using generatedruntime request projection plus
+read-after-write follow-up.
+ACCEPTED and IN_PROGRESS remain the provisioning
+states for both create and update. SUCCEEDED is
+the only steady success state, FAILED is
+terminal, and CANCELING is a terminating
+breadcrumb during normal observe.
+Delete confirmation is explicit repo-authored
+behavior: CANCELING and CANCELED are
+intermediate delete breadcrumbs only, and the
+finalizer is retained until GetTranscriptionJob
+confirms the resource is absent rather than
+stopping at CANCELED.
+Only displayName, description, freeformTags, and
+definedTags reconcile in place. compartmentId is
+replacement-only, there are no secret side
+effects, and the auxiliary
+CancelTranscriptionJob API remains outside the
+published controller surface.
+The pinned terraform-provider-oci revision has
+no matching speech resource, so the import
+catalog for this row is SDK-shaped and
+repo-curated; the runtime semantics in this file
+are the authoritative formal input for diagrams
+and generator binding.
+end note
+@enduml

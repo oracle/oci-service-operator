@@ -19,7 +19,7 @@ import (
 )
 
 // LoadBalancerServiceClient is the handwritten extension seam for LoadBalancer runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*LoadBalancerServiceManager).WithClient.
 type LoadBalancerServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.LoadBalancer, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultLoadBalancerServiceClient struct {
 	generatedruntime.ServiceClient[*loadbalancerv1beta1.LoadBalancer]
 }
 
-func newLoadBalancerRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "loadbalancer",
-		FormalSlug:    "loadbalancer",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "displayName", "freeformTags"},
-			ForceNew:      []string{"backendSets", "certificates", "compartmentId", "hostnames", "ipMode", "isPrivate", "listeners", "networkSecurityGroupIds", "pathRouteSets", "reservedIps", "ruleSets", "shapeDetails", "shapeName", "sslCipherSuites", "subnetIds"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ LoadBalancerServiceClient = defaultLoadBalancerServiceClient{}
 
 var newLoadBalancerServiceClient = func(manager *LoadBalancerServiceManager) LoadBalancerServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.LoadBalancer]{
-		Kind:      "LoadBalancer",
-		SDKName:   "LoadBalancer",
-		Log:       manager.Log,
-		Semantics: newLoadBalancerRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateLoadBalancerRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateLoadBalancer(ctx, *request.(*loadbalancersdk.CreateLoadBalancerRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateLoadBalancerDetails", RequestName: "CreateLoadBalancerDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetLoadBalancerRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetLoadBalancer(ctx, *request.(*loadbalancersdk.GetLoadBalancerRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListLoadBalancersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListLoadBalancers(ctx, *request.(*loadbalancersdk.ListLoadBalancersRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Detail", RequestName: "detail", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateLoadBalancerRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateLoadBalancer(ctx, *request.(*loadbalancersdk.UpdateLoadBalancerRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateLoadBalancerDetails", RequestName: "UpdateLoadBalancerDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteLoadBalancerRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteLoadBalancer(ctx, *request.(*loadbalancersdk.DeleteLoadBalancerRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "LoadBalancerId", RequestName: "loadBalancerId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newLoadBalancerRuntimeHooks(manager, sdkClient)
+	config := buildLoadBalancerGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize LoadBalancer OCI client: %w", err)
 	}
-	return defaultLoadBalancerServiceClient{
+	delegate := defaultLoadBalancerServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.LoadBalancer](config),
 	}
+	return wrapLoadBalancerGeneratedClient(hooks, delegate)
 }

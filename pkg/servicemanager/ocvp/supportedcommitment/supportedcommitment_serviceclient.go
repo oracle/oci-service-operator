@@ -19,7 +19,7 @@ import (
 )
 
 // SupportedCommitmentServiceClient is the handwritten extension seam for SupportedCommitment runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*SupportedCommitmentServiceManager).WithClient.
 type SupportedCommitmentServiceClient interface {
 	CreateOrUpdate(context.Context, *ocvpv1beta1.SupportedCommitment, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,21 +34,13 @@ var _ SupportedCommitmentServiceClient = defaultSupportedCommitmentServiceClient
 
 var newSupportedCommitmentServiceClient = func(manager *SupportedCommitmentServiceManager) SupportedCommitmentServiceClient {
 	sdkClient, err := ocvpsdk.NewSddcClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*ocvpv1beta1.SupportedCommitment]{
-		Kind:    "SupportedCommitment",
-		SDKName: "SupportedCommitment",
-		Log:     manager.Log,
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.ListSupportedCommitmentsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListSupportedCommitments(ctx, *request.(*ocvpsdk.ListSupportedCommitmentsRequest))
-			},
-		},
-	}
+	hooks := newSupportedCommitmentRuntimeHooks(manager, sdkClient)
+	config := buildSupportedCommitmentGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize SupportedCommitment OCI client: %w", err)
 	}
-	return defaultSupportedCommitmentServiceClient{
+	delegate := defaultSupportedCommitmentServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.SupportedCommitment](config),
 	}
+	return wrapSupportedCommitmentGeneratedClient(hooks, delegate)
 }

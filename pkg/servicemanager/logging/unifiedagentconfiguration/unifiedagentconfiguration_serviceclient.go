@@ -19,7 +19,7 @@ import (
 )
 
 // UnifiedAgentConfigurationServiceClient is the handwritten extension seam for UnifiedAgentConfiguration runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*UnifiedAgentConfigurationServiceManager).WithClient.
 type UnifiedAgentConfigurationServiceClient interface {
 	CreateOrUpdate(context.Context, *loggingv1beta1.UnifiedAgentConfiguration, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ UnifiedAgentConfigurationServiceClient = defaultUnifiedAgentConfigurationS
 
 var newUnifiedAgentConfigurationServiceClient = func(manager *UnifiedAgentConfigurationServiceManager) UnifiedAgentConfigurationServiceClient {
 	sdkClient, err := loggingsdk.NewLoggingManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loggingv1beta1.UnifiedAgentConfiguration]{
-		Kind:    "UnifiedAgentConfiguration",
-		SDKName: "UnifiedAgentConfiguration",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.CreateUnifiedAgentConfigurationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateUnifiedAgentConfiguration(ctx, *request.(*loggingsdk.CreateUnifiedAgentConfigurationRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.GetUnifiedAgentConfigurationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetUnifiedAgentConfiguration(ctx, *request.(*loggingsdk.GetUnifiedAgentConfigurationRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.ListUnifiedAgentConfigurationsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListUnifiedAgentConfigurations(ctx, *request.(*loggingsdk.ListUnifiedAgentConfigurationsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.UpdateUnifiedAgentConfigurationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateUnifiedAgentConfiguration(ctx, *request.(*loggingsdk.UpdateUnifiedAgentConfigurationRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.DeleteUnifiedAgentConfigurationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteUnifiedAgentConfiguration(ctx, *request.(*loggingsdk.DeleteUnifiedAgentConfigurationRequest))
-			},
-		},
-	}
+	hooks := newUnifiedAgentConfigurationRuntimeHooks(manager, sdkClient)
+	config := buildUnifiedAgentConfigurationGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize UnifiedAgentConfiguration OCI client: %w", err)
 	}
-	return defaultUnifiedAgentConfigurationServiceClient{
+	delegate := defaultUnifiedAgentConfigurationServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loggingv1beta1.UnifiedAgentConfiguration](config),
 	}
+	return wrapUnifiedAgentConfigurationGeneratedClient(hooks, delegate)
 }
