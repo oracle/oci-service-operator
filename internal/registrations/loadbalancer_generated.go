@@ -14,26 +14,15 @@ import (
 	loadbalancercontrollers "github.com/oracle/oci-service-operator/controllers/loadbalancer"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	loadbalancerbackendservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/backend"
-	loadbalancerbackendhealthservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/backendhealth"
 	loadbalancerbackendsetservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/backendset"
-	loadbalancerbackendsethealthservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/backendsethealth"
 	loadbalancercertificateservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/certificate"
-	loadbalancerhealthcheckerservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/healthchecker"
 	loadbalancerhostnameservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/hostname"
 	loadbalancerlistenerservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/listener"
-	loadbalancerlistenerruleservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/listenerrule"
 	loadbalancerloadbalancerservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/loadbalancer"
-	loadbalancerloadbalancerhealthservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/loadbalancerhealth"
-	loadbalancerloadbalancershapeservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/loadbalancershape"
-	loadbalancernetworksecuritygroupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/networksecuritygroup"
 	loadbalancerpathroutesetservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/pathrouteset"
-	loadbalancerpolicyservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/policy"
-	loadbalancerprotocolservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/protocol"
 	loadbalancerroutingpolicyservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/routingpolicy"
 	loadbalancerrulesetservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/ruleset"
-	loadbalancershapeservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/shape"
 	loadbalancersslciphersuiteservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/sslciphersuite"
-	loadbalancerworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/loadbalancer/workrequest"
 )
 
 func init() {
@@ -52,17 +41,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Backend controller: %w", err)
 			}
-			if err := (&loadbalancercontrollers.BackendHealthReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"BackendHealth",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerbackendhealthservicemanager.NewBackendHealthServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup BackendHealth controller: %w", err)
-			}
 			if err := (&loadbalancercontrollers.BackendSetReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -74,17 +52,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup BackendSet controller: %w", err)
 			}
-			if err := (&loadbalancercontrollers.BackendSetHealthReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"BackendSetHealth",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerbackendsethealthservicemanager.NewBackendSetHealthServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup BackendSetHealth controller: %w", err)
-			}
 			if err := (&loadbalancercontrollers.CertificateReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -95,17 +62,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Certificate controller: %w", err)
-			}
-			if err := (&loadbalancercontrollers.HealthCheckerReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"HealthChecker",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerhealthcheckerservicemanager.NewHealthCheckerServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup HealthChecker controller: %w", err)
 			}
 			if err := (&loadbalancercontrollers.HostnameReconciler{
 				Reconciler: NewBaseReconciler(
@@ -129,17 +85,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Listener controller: %w", err)
 			}
-			if err := (&loadbalancercontrollers.ListenerRuleReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"ListenerRule",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerlistenerruleservicemanager.NewListenerRuleServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup ListenerRule controller: %w", err)
-			}
 			if err := (&loadbalancercontrollers.LoadBalancerReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -151,39 +96,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup LoadBalancer controller: %w", err)
 			}
-			if err := (&loadbalancercontrollers.LoadBalancerHealthReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"LoadBalancerHealth",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerloadbalancerhealthservicemanager.NewLoadBalancerHealthServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup LoadBalancerHealth controller: %w", err)
-			}
-			if err := (&loadbalancercontrollers.LoadBalancerShapeReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"LoadBalancerShape",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerloadbalancershapeservicemanager.NewLoadBalancerShapeServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup LoadBalancerShape controller: %w", err)
-			}
-			if err := (&loadbalancercontrollers.NetworkSecurityGroupReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"NetworkSecurityGroup",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancernetworksecuritygroupservicemanager.NewNetworkSecurityGroupServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup NetworkSecurityGroup controller: %w", err)
-			}
 			if err := (&loadbalancercontrollers.PathRouteSetReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -194,28 +106,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup PathRouteSet controller: %w", err)
-			}
-			if err := (&loadbalancercontrollers.PolicyReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Policy",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerpolicyservicemanager.NewPolicyServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Policy controller: %w", err)
-			}
-			if err := (&loadbalancercontrollers.ProtocolReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Protocol",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerprotocolservicemanager.NewProtocolServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Protocol controller: %w", err)
 			}
 			if err := (&loadbalancercontrollers.RoutingPolicyReconciler{
 				Reconciler: NewBaseReconciler(
@@ -249,28 +139,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup SSLCipherSuite controller: %w", err)
-			}
-			if err := (&loadbalancercontrollers.ShapeReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Shape",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancershapeservicemanager.NewShapeServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Shape controller: %w", err)
-			}
-			if err := (&loadbalancercontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loadbalancerworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
 			}
 			return nil
 		},

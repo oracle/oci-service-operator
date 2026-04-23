@@ -26,5 +26,4 @@ Manage OCI Usage API resources from Kubernetes.
 | `usageapi/CustomTable` | `usageapi.oracle.com/v1beta1` | — | — | [Sample](../../samples/usageapi/v1beta1/customtable.md) | [Reference](../../api/usageapi/v1beta1/index.md#kind-customtable) |
 | `usageapi/Query` | `usageapi.oracle.com/v1beta1` | — | — | [Sample](../../samples/usageapi/v1beta1/query.md) | [Reference](../../api/usageapi/v1beta1/index.md#kind-query) |
 | `usageapi/Schedule` | `usageapi.oracle.com/v1beta1` | — | — | [Sample](../../samples/usageapi/v1beta1/schedule.md) | [Reference](../../api/usageapi/v1beta1/index.md#kind-schedule) |
-| `usageapi/ScheduledRun` | `usageapi.oracle.com/v1beta1` | — | — | [Sample](../../samples/usageapi/v1beta1/scheduledrun.md) | [Reference](../../api/usageapi/v1beta1/index.md#kind-scheduledrun) |
 | `usageapi/UsageCarbonEmissionsQuery` | `usageapi.oracle.com/v1beta1` | — | — | [Sample](../../samples/usageapi/v1beta1/usagecarbonemissionsquery.md) | [Reference](../../api/usageapi/v1beta1/index.md#kind-usagecarbonemissionsquery) |

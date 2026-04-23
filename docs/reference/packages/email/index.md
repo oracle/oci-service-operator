@@ -27,6 +27,3 @@ Manage OCI Email Delivery resources from Kubernetes.
 | `email/EmailDomain` | `email.oracle.com/v1beta1` | — | — | [Sample](../../samples/email/v1beta1/emaildomain.md) | [Reference](../../api/email/v1beta1/index.md#kind-emaildomain) |
 | `email/Sender` | `email.oracle.com/v1beta1` | — | — | [Sample](../../samples/email/v1beta1/sender.md) | [Reference](../../api/email/v1beta1/index.md#kind-sender) |
 | `email/Suppression` | `email.oracle.com/v1beta1` | — | — | [Sample](../../samples/email/v1beta1/suppression.md) | [Reference](../../api/email/v1beta1/index.md#kind-suppression) |
-| `email/WorkRequest` | `email.oracle.com/v1beta1` | — | — | [Sample](../../samples/email/v1beta1/workrequest.md) | [Reference](../../api/email/v1beta1/index.md#kind-workrequest) |
-| `email/WorkRequestError` | `email.oracle.com/v1beta1` | — | — | [Sample](../../samples/email/v1beta1/workrequesterror.md) | [Reference](../../api/email/v1beta1/index.md#kind-workrequesterror) |
-| `email/WorkRequestLog` | `email.oracle.com/v1beta1` | — | — | [Sample](../../samples/email/v1beta1/workrequestlog.md) | [Reference](../../api/email/v1beta1/index.md#kind-workrequestlog) |

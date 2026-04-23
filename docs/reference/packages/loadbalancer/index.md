@@ -24,23 +24,12 @@ Manage OCI Load Balancer resources from Kubernetes.
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `loadbalancer/Backend` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/backend.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-backend) |
-| `loadbalancer/BackendHealth` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/backendhealth.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-backendhealth) |
 | `loadbalancer/BackendSet` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/backendset.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-backendset) |
-| `loadbalancer/BackendSetHealth` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/backendsethealth.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-backendsethealth) |
 | `loadbalancer/Certificate` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/certificate.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-certificate) |
-| `loadbalancer/HealthChecker` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/healthchecker.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-healthchecker) |
 | `loadbalancer/Hostname` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/hostname.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-hostname) |
 | `loadbalancer/Listener` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/listener.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-listener) |
-| `loadbalancer/ListenerRule` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/listenerrule.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-listenerrule) |
 | `loadbalancer/LoadBalancer` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/loadbalancer.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-loadbalancer) |
-| `loadbalancer/LoadBalancerHealth` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/loadbalancerhealth.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-loadbalancerhealth) |
-| `loadbalancer/LoadBalancerShape` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/loadbalancershape.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-loadbalancershape) |
-| `loadbalancer/NetworkSecurityGroup` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/networksecuritygroup.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-networksecuritygroup) |
 | `loadbalancer/PathRouteSet` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/pathrouteset.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-pathrouteset) |
-| `loadbalancer/Policy` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/policy.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-policy) |
-| `loadbalancer/Protocol` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/protocol.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-protocol) |
 | `loadbalancer/RoutingPolicy` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/routingpolicy.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-routingpolicy) |
 | `loadbalancer/RuleSet` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/ruleset.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-ruleset) |
 | `loadbalancer/SSLCipherSuite` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/sslciphersuite.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-sslciphersuite) |
-| `loadbalancer/Shape` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/shape.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-shape) |
-| `loadbalancer/WorkRequest` | `loadbalancer.oracle.com/v1beta1` | — | — | [Sample](../../samples/loadbalancer/v1beta1/workrequest.md) | [Reference](../../api/loadbalancer/v1beta1/index.md#kind-workrequest) |

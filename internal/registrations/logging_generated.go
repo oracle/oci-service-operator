@@ -16,11 +16,7 @@ import (
 	logginglogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/log"
 	loggingloggroupservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/loggroup"
 	logginglogsavedsearchservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/logsavedsearch"
-	loggingserviceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/service"
 	loggingunifiedagentconfigurationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/unifiedagentconfiguration"
-	loggingworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/workrequest"
-	loggingworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/workrequesterror"
-	loggingworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/logging/workrequestlog"
 )
 
 func init() {
@@ -61,17 +57,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup LogSavedSearch controller: %w", err)
 			}
-			if err := (&loggingcontrollers.ServiceReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Service",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loggingserviceservicemanager.NewServiceServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Service controller: %w", err)
-			}
 			if err := (&loggingcontrollers.UnifiedAgentConfigurationReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -82,39 +67,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup UnifiedAgentConfiguration controller: %w", err)
-			}
-			if err := (&loggingcontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loggingworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&loggingcontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loggingworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&loggingcontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return loggingworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

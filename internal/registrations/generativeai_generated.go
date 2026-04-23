@@ -16,9 +16,6 @@ import (
 	generativeaidedicatedaiclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeai/dedicatedaicluster"
 	generativeaiendpointservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeai/endpoint"
 	generativeaimodelservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeai/model"
-	generativeaiworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeai/workrequest"
-	generativeaiworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeai/workrequesterror"
-	generativeaiworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/generativeai/workrequestlog"
 )
 
 func init() {
@@ -58,39 +55,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Model controller: %w", err)
-			}
-			if err := (&generativeaicontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return generativeaiworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&generativeaicontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return generativeaiworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&generativeaicontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return generativeaiworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

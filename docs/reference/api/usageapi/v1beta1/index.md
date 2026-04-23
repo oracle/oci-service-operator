@@ -21,7 +21,6 @@ No customer-visible package currently exposes `usageapi.oracle.com/v1beta1`.
 | [CustomTable](#kind-customtable) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/customtable.md) | - |
 | [Query](#kind-query) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/query.md) | - |
 | [Schedule](#kind-schedule) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/schedule.md) | - |
-| [ScheduledRun](#kind-scheduledrun) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/scheduledrun.md) | - |
 | [UsageCarbonEmissionsQuery](#kind-usagecarbonemissionsquery) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/usagecarbonemissionsquery.md) | - |
 
 <a id="kind-customtable"></a>
@@ -795,98 +794,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to Schedule status](#kind-schedule-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-scheduledrun"></a>
-## ScheduledRun
-
-ScheduledRun is the Schema for the scheduledruns API.
-
-- `Plural`: `scheduledruns`
-- `Scope`: `Namespaced`
-- `APIVersion`: `usageapi.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/usageapi/v1beta1/scheduledrun.md) (`config/samples/usageapi_v1beta1_scheduledrun.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-scheduledrun-spec"></a>
-### Spec
-
-ScheduledRunSpec defines the desired state of ScheduledRun.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-scheduledrun-status"></a>
-### Status
-
-ScheduledRunStatus defines the observed state of ScheduledRun.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `id` | The ocid representing unique shedule run | `string` | No | - | - |
-| `lifecycleDetails` | Additional details about scheduled run failure | `string` | No | - | - |
-| `lifecycleState` | Specifies if the schedule job was run successfully or not. | `string` | No | - | - |
-| `scheduleId` | The ocid representing unique shedule | `string` | No | - | - |
-| [`status`](#kind-scheduledrun-status-status) | - | `object` | Yes | - | - |
-| `timeCreated` | The time when schedule started executing | `string` | No | - | - |
-| `timeFinished` | The time when schedule finished executing | `string` | No | - | - |
-
-<a id="kind-scheduledrun-status-status"></a>
-#### Status.status
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-scheduledrun-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-scheduledrun-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-scheduledrun-status-status-async"></a>
-##### Status.status.async
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-scheduledrun-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-scheduledrun-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-scheduledrun-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |

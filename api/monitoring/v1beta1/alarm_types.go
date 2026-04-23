@@ -156,8 +156,8 @@ type AlarmSuppressionFields struct {
 	Description string `json:"description,omitempty"`
 }
 
-// AlarmObservedState defines the observed state of Alarm.
-type AlarmObservedState struct {
+// AlarmStatus defines the observed state of Alarm.
+type AlarmStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm.
 	Id string `json:"id,omitempty"`
@@ -281,8 +281,8 @@ type Alarm struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   AlarmSpec          `json:"spec,omitempty"`
-	Status AlarmObservedState `json:"status,omitempty"`
+	Spec   AlarmSpec   `json:"spec,omitempty"`
+	Status AlarmStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

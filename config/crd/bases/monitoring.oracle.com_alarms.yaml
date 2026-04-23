@@ -236,7 +236,7 @@ spec:
             - severity
             type: object
           status:
-            description: AlarmObservedState defines the observed state of Alarm.
+            description: AlarmStatus defines the observed state of Alarm.
             properties:
               body:
                 description: |-

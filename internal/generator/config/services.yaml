@@ -1226,9 +1226,6 @@ services:
         - EmailDomain
         - Sender
         - Suppression
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1351,9 +1348,6 @@ services:
         - DedicatedAiCluster
         - Endpoint
         - Model
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1623,26 +1617,15 @@ services:
       mode: explicit
       includeKinds:
         - Backend
-        - BackendHealth
         - BackendSet
-        - BackendSetHealth
         - Certificate
-        - HealthChecker
         - Hostname
         - Listener
-        - ListenerRule
         - LoadBalancer
-        - LoadBalancerHealth
-        - LoadBalancerShape
-        - NetworkSecurityGroup
         - PathRouteSet
-        - Policy
-        - Protocol
         - RoutingPolicy
         - RuleSet
         - SSLCipherSuite
-        - Shape
-        - WorkRequest
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1791,11 +1774,7 @@ services:
         - Log
         - LogGroup
         - LogSavedSearch
-        - Service
         - UnifiedAgentConfiguration
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1853,10 +1832,7 @@ services:
       mode: explicit
       includeKinds:
         - Alarm
-        - AlarmHistory
-        - AlarmStatus
         - AlarmSuppression
-        - Metric
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1910,21 +1886,7 @@ services:
       mode: explicit
       includeKinds:
         - AcceptedAgreement
-        - Agreement
-        - Category
-        - LaunchEligibility
-        - Listing
-        - Package
         - Publication
-        - PublicationPackage
-        - Publisher
-        - Report
-        - ReportType
-        - Tax
-        - ThirdPartyPaidListingEligibility
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -2165,12 +2127,6 @@ services:
         - Cluster
         - EsxiHost
         - Sddc
-        - SupportedCommitment
-        - SupportedHostShape
-        - SupportedVmwareSoftwareVersion
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -2266,20 +2222,15 @@ services:
         - AuthenticationProvider
         - Channel
         - DigitalAssistant
-        - DigitalAssistantParameter
         - ImportedPackage
         - OdaInstance
         - OdaInstanceAttachment
         - OdaPrivateEndpoint
         - OdaPrivateEndpointAttachment
         - OdaPrivateEndpointScanProxy
-        - Package
         - Skill
         - SkillParameter
         - Translator
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -2660,7 +2611,6 @@ services:
         - CustomTable
         - Query
         - Schedule
-        - ScheduledRun
         - UsageCarbonEmissionsQuery
     async:
       strategy: lifecycle

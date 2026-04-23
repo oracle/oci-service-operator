@@ -26,8 +26,4 @@ Manage OCI Logging resources from Kubernetes.
 | `logging/Log` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/log.md) | [Reference](../../api/logging/v1beta1/index.md#kind-log) |
 | `logging/LogGroup` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/loggroup.md) | [Reference](../../api/logging/v1beta1/index.md#kind-loggroup) |
 | `logging/LogSavedSearch` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/logsavedsearch.md) | [Reference](../../api/logging/v1beta1/index.md#kind-logsavedsearch) |
-| `logging/Service` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/service.md) | [Reference](../../api/logging/v1beta1/index.md#kind-service) |
 | `logging/UnifiedAgentConfiguration` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/unifiedagentconfiguration.md) | [Reference](../../api/logging/v1beta1/index.md#kind-unifiedagentconfiguration) |
-| `logging/WorkRequest` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/workrequest.md) | [Reference](../../api/logging/v1beta1/index.md#kind-workrequest) |
-| `logging/WorkRequestError` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/workrequesterror.md) | [Reference](../../api/logging/v1beta1/index.md#kind-workrequesterror) |
-| `logging/WorkRequestLog` | `logging.oracle.com/v1beta1` | — | — | [Sample](../../samples/logging/v1beta1/workrequestlog.md) | [Reference](../../api/logging/v1beta1/index.md#kind-workrequestlog) |

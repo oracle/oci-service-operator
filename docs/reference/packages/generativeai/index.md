@@ -26,6 +26,3 @@ Manage OCI Generative AI resources from Kubernetes.
 | `generativeai/DedicatedAiCluster` | `generativeai.oracle.com/v1beta1` | — | — | [Sample](../../samples/generativeai/v1beta1/dedicatedaicluster.md) | [Reference](../../api/generativeai/v1beta1/index.md#kind-dedicatedaicluster) |
 | `generativeai/Endpoint` | `generativeai.oracle.com/v1beta1` | — | — | [Sample](../../samples/generativeai/v1beta1/endpoint.md) | [Reference](../../api/generativeai/v1beta1/index.md#kind-endpoint) |
 | `generativeai/Model` | `generativeai.oracle.com/v1beta1` | — | — | [Sample](../../samples/generativeai/v1beta1/model.md) | [Reference](../../api/generativeai/v1beta1/index.md#kind-model) |
-| `generativeai/WorkRequest` | `generativeai.oracle.com/v1beta1` | — | — | [Sample](../../samples/generativeai/v1beta1/workrequest.md) | [Reference](../../api/generativeai/v1beta1/index.md#kind-workrequest) |
-| `generativeai/WorkRequestError` | `generativeai.oracle.com/v1beta1` | — | — | [Sample](../../samples/generativeai/v1beta1/workrequesterror.md) | [Reference](../../api/generativeai/v1beta1/index.md#kind-workrequesterror) |
-| `generativeai/WorkRequestLog` | `generativeai.oracle.com/v1beta1` | — | — | [Sample](../../samples/generativeai/v1beta1/workrequestlog.md) | [Reference](../../api/generativeai/v1beta1/index.md#kind-workrequestlog) |

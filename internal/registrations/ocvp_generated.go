@@ -16,12 +16,6 @@ import (
 	ocvpclusterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/cluster"
 	ocvpesxihostservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/esxihost"
 	ocvpsddcservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/sddc"
-	ocvpsupportedcommitmentservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/supportedcommitment"
-	ocvpsupportedhostshapeservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/supportedhostshape"
-	ocvpsupportedvmwaresoftwareversionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/supportedvmwaresoftwareversion"
-	ocvpworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/workrequest"
-	ocvpworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/workrequesterror"
-	ocvpworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/ocvp/workrequestlog"
 )
 
 func init() {
@@ -61,72 +55,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Sddc controller: %w", err)
-			}
-			if err := (&ocvpcontrollers.SupportedCommitmentReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"SupportedCommitment",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return ocvpsupportedcommitmentservicemanager.NewSupportedCommitmentServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup SupportedCommitment controller: %w", err)
-			}
-			if err := (&ocvpcontrollers.SupportedHostShapeReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"SupportedHostShape",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return ocvpsupportedhostshapeservicemanager.NewSupportedHostShapeServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup SupportedHostShape controller: %w", err)
-			}
-			if err := (&ocvpcontrollers.SupportedVmwareSoftwareVersionReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"SupportedVmwareSoftwareVersion",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return ocvpsupportedvmwaresoftwareversionservicemanager.NewSupportedVmwareSoftwareVersionServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup SupportedVmwareSoftwareVersion controller: %w", err)
-			}
-			if err := (&ocvpcontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return ocvpworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&ocvpcontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return ocvpworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&ocvpcontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return ocvpworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

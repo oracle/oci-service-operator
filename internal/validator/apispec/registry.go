@@ -152,45 +152,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "EmailWorkRequest",
-		SpecType:   reflect.TypeOf(emailv1beta1.WorkRequestSpec{}),
-		StatusType: reflect.TypeOf(emailv1beta1.WorkRequestStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "email.WorkRequest",
-			},
-			{
-				SDKStruct: "email.WorkRequestSummary",
-			},
-		},
-	},
-	{
-		Name:       "EmailWorkRequestError",
-		SpecType:   reflect.TypeOf(emailv1beta1.WorkRequestErrorSpec{}),
-		StatusType: reflect.TypeOf(emailv1beta1.WorkRequestErrorStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "email.WorkRequestError",
-			},
-			{
-				SDKStruct: "email.WorkRequestErrorCollection",
-			},
-		},
-	},
-	{
-		Name:       "EmailWorkRequestLog",
-		SpecType:   reflect.TypeOf(emailv1beta1.WorkRequestLogSpec{}),
-		StatusType: reflect.TypeOf(emailv1beta1.WorkRequestLogStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "email.WorkRequestLogEntry",
-			},
-			{
-				SDKStruct: "email.WorkRequestLogEntryCollection",
-			},
-		},
-	},
-	{
 		Name:       "GenerativeAIDedicatedAiCluster",
 		SpecType:   reflect.TypeOf(generativeaiv1beta1.DedicatedAiClusterSpec{}),
 		StatusType: reflect.TypeOf(generativeaiv1beta1.DedicatedAiClusterStatus{}),
@@ -253,45 +214,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "generativeai.ModelSummary",
-			},
-		},
-	},
-	{
-		Name:       "GenerativeAIWorkRequest",
-		SpecType:   reflect.TypeOf(generativeaiv1beta1.WorkRequestSpec{}),
-		StatusType: reflect.TypeOf(generativeaiv1beta1.WorkRequestStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "generativeai.WorkRequest",
-			},
-			{
-				SDKStruct: "generativeai.WorkRequestSummary",
-			},
-		},
-	},
-	{
-		Name:       "GenerativeAIWorkRequestError",
-		SpecType:   reflect.TypeOf(generativeaiv1beta1.WorkRequestErrorSpec{}),
-		StatusType: reflect.TypeOf(generativeaiv1beta1.WorkRequestErrorStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "generativeai.WorkRequestError",
-			},
-			{
-				SDKStruct: "generativeai.WorkRequestErrorCollection",
-			},
-		},
-	},
-	{
-		Name:       "GenerativeAIWorkRequestLog",
-		SpecType:   reflect.TypeOf(generativeaiv1beta1.WorkRequestLogSpec{}),
-		StatusType: reflect.TypeOf(generativeaiv1beta1.WorkRequestLogStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "generativeai.WorkRequestLogEntry",
-			},
-			{
-				SDKStruct: "generativeai.WorkRequestLogEntryCollection",
 			},
 		},
 	},
@@ -425,58 +347,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "MarketplaceAgreement",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.AgreementSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.AgreementStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.Agreement",
-			},
-			{
-				SDKStruct: "marketplace.AgreementSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceCategory",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.CategorySpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.CategoryStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.CategorySummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceLaunchEligibility",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.LaunchEligibilitySpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.LaunchEligibilityStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.LaunchEligibility",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceListing",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.ListingSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.ListingStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.Listing",
-			},
-			{
-				SDKStruct: "marketplace.ListingSummary",
-			},
-		},
-	},
-	{
-		Name:        "MarketplacePackage",
-		SpecType:    reflect.TypeOf(marketplacev1beta1.PackageSpec{}),
-		StatusType:  reflect.TypeOf(marketplacev1beta1.PackageStatus{}),
-		SDKMappings: []SDKMapping{},
-	},
-	{
 		Name:       "MarketplacePublication",
 		SpecType:   reflect.TypeOf(marketplacev1beta1.PublicationSpec{}),
 		StatusType: reflect.TypeOf(marketplacev1beta1.PublicationStatus{}),
@@ -492,117 +362,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "marketplace.PublicationSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplacePublicationPackage",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.PublicationPackageSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.PublicationPackageStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.PublicationPackageSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplacePublisher",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.PublisherSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.PublisherStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.Publisher",
-			},
-			{
-				SDKStruct: "marketplace.PublisherSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceReport",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.ReportSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.ReportStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.ReportCollection",
-			},
-			{
-				SDKStruct: "marketplace.ReportSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceReportType",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.ReportTypeSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.ReportTypeStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.ReportTypeCollection",
-			},
-			{
-				SDKStruct: "marketplace.ReportTypeSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceTax",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.TaxSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.TaxStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.TaxSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceThirdPartyPaidListingEligibility",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.ThirdPartyPaidListingEligibilitySpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.ThirdPartyPaidListingEligibilityStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.ThirdPartyPaidListingEligibility",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceWorkRequest",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.WorkRequestSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.WorkRequestStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.WorkRequest",
-			},
-			{
-				SDKStruct: "marketplace.WorkRequestCollection",
-			},
-			{
-				SDKStruct: "marketplace.WorkRequestSummary",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceWorkRequestError",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.WorkRequestErrorSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.WorkRequestErrorStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.WorkRequestError",
-			},
-			{
-				SDKStruct: "marketplace.WorkRequestErrorCollection",
-			},
-		},
-	},
-	{
-		Name:       "MarketplaceWorkRequestLog",
-		SpecType:   reflect.TypeOf(marketplacev1beta1.WorkRequestLogSpec{}),
-		StatusType: reflect.TypeOf(marketplacev1beta1.WorkRequestLogStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "marketplace.WorkRequestLogEntry",
-			},
-			{
-				SDKStruct: "marketplace.WorkRequestLogEntryCollection",
 			},
 		},
 	},
@@ -720,81 +479,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "OCVPSupportedCommitment",
-		SpecType:   reflect.TypeOf(ocvpv1beta1.SupportedCommitmentSpec{}),
-		StatusType: reflect.TypeOf(ocvpv1beta1.SupportedCommitmentStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "ocvp.SupportedCommitmentSummary",
-			},
-		},
-	},
-	{
-		Name:       "OCVPSupportedHostShape",
-		SpecType:   reflect.TypeOf(ocvpv1beta1.SupportedHostShapeSpec{}),
-		StatusType: reflect.TypeOf(ocvpv1beta1.SupportedHostShapeStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "ocvp.SupportedHostShapeCollection",
-			},
-			{
-				SDKStruct: "ocvp.SupportedHostShapeSummary",
-			},
-		},
-	},
-	{
-		Name:       "OCVPSupportedVmwareSoftwareVersion",
-		SpecType:   reflect.TypeOf(ocvpv1beta1.SupportedVmwareSoftwareVersionSpec{}),
-		StatusType: reflect.TypeOf(ocvpv1beta1.SupportedVmwareSoftwareVersionStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "ocvp.SupportedVmwareSoftwareVersionCollection",
-			},
-			{
-				SDKStruct: "ocvp.SupportedVmwareSoftwareVersionSummary",
-			},
-		},
-	},
-	{
-		Name:       "OCVPWorkRequest",
-		SpecType:   reflect.TypeOf(ocvpv1beta1.WorkRequestSpec{}),
-		StatusType: reflect.TypeOf(ocvpv1beta1.WorkRequestStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "ocvp.WorkRequest",
-			},
-			{
-				SDKStruct: "ocvp.WorkRequestCollection",
-			},
-		},
-	},
-	{
-		Name:       "OCVPWorkRequestError",
-		SpecType:   reflect.TypeOf(ocvpv1beta1.WorkRequestErrorSpec{}),
-		StatusType: reflect.TypeOf(ocvpv1beta1.WorkRequestErrorStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "ocvp.WorkRequestError",
-			},
-			{
-				SDKStruct: "ocvp.WorkRequestErrorCollection",
-			},
-		},
-	},
-	{
-		Name:       "OCVPWorkRequestLog",
-		SpecType:   reflect.TypeOf(ocvpv1beta1.WorkRequestLogSpec{}),
-		StatusType: reflect.TypeOf(ocvpv1beta1.WorkRequestLogStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "ocvp.WorkRequestLogEntry",
-			},
-			{
-				SDKStruct: "ocvp.WorkRequestLogEntryCollection",
-			},
-		},
-	},
-	{
 		Name:       "ODAAuthenticationProvider",
 		SpecType:   reflect.TypeOf(odav1beta1.AuthenticationProviderSpec{}),
 		StatusType: reflect.TypeOf(odav1beta1.AuthenticationProviderStatus{}),
@@ -845,25 +529,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "oda.DigitalAssistantSummary",
-			},
-		},
-	},
-	{
-		Name:       "ODADigitalAssistantParameter",
-		SpecType:   reflect.TypeOf(odav1beta1.DigitalAssistantParameterSpec{}),
-		StatusType: reflect.TypeOf(odav1beta1.DigitalAssistantParameterStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "oda.UpdateDigitalAssistantParameterDetails",
-			},
-			{
-				SDKStruct: "oda.DigitalAssistantParameter",
-			},
-			{
-				SDKStruct: "oda.DigitalAssistantParameterCollection",
-			},
-			{
-				SDKStruct: "oda.DigitalAssistantParameterSummary",
 			},
 		},
 	},
@@ -988,16 +653,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "ODAPackage",
-		SpecType:   reflect.TypeOf(odav1beta1.PackageSpec{}),
-		StatusType: reflect.TypeOf(odav1beta1.PackageStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "oda.PackageSummary",
-			},
-		},
-	},
-	{
 		Name:       "ODASkill",
 		SpecType:   reflect.TypeOf(odav1beta1.SkillSpec{}),
 		StatusType: reflect.TypeOf(odav1beta1.SkillStatus{}),
@@ -1057,39 +712,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "oda.TranslatorSummary",
-			},
-		},
-	},
-	{
-		Name:       "ODAWorkRequest",
-		SpecType:   reflect.TypeOf(odav1beta1.WorkRequestSpec{}),
-		StatusType: reflect.TypeOf(odav1beta1.WorkRequestStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "oda.WorkRequest",
-			},
-			{
-				SDKStruct: "oda.WorkRequestSummary",
-			},
-		},
-	},
-	{
-		Name:       "ODAWorkRequestError",
-		SpecType:   reflect.TypeOf(odav1beta1.WorkRequestErrorSpec{}),
-		StatusType: reflect.TypeOf(odav1beta1.WorkRequestErrorStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "oda.WorkRequestError",
-			},
-		},
-	},
-	{
-		Name:       "ODAWorkRequestLog",
-		SpecType:   reflect.TypeOf(odav1beta1.WorkRequestLogSpec{}),
-		StatusType: reflect.TypeOf(odav1beta1.WorkRequestLogStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "oda.WorkRequestLogEntry",
 			},
 		},
 	},
@@ -1156,16 +778,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "LoggingService",
-		SpecType:   reflect.TypeOf(loggingv1beta1.ServiceSpec{}),
-		StatusType: reflect.TypeOf(loggingv1beta1.ServiceStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "logging.ServiceSummary",
-			},
-		},
-	},
-	{
 		Name:       "LoggingUnifiedAgentConfiguration",
 		SpecType:   reflect.TypeOf(loggingv1beta1.UnifiedAgentConfigurationSpec{}),
 		StatusType: reflect.TypeOf(loggingv1beta1.UnifiedAgentConfigurationStatus{}),
@@ -1185,39 +797,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "logging.UnifiedAgentConfigurationSummary",
-			},
-		},
-	},
-	{
-		Name:       "LoggingWorkRequest",
-		SpecType:   reflect.TypeOf(loggingv1beta1.WorkRequestSpec{}),
-		StatusType: reflect.TypeOf(loggingv1beta1.WorkRequestStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "logging.WorkRequest",
-			},
-			{
-				SDKStruct: "logging.WorkRequestSummary",
-			},
-		},
-	},
-	{
-		Name:       "LoggingWorkRequestError",
-		SpecType:   reflect.TypeOf(loggingv1beta1.WorkRequestErrorSpec{}),
-		StatusType: reflect.TypeOf(loggingv1beta1.WorkRequestErrorStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "logging.WorkRequestError",
-			},
-		},
-	},
-	{
-		Name:       "LoggingWorkRequestLog",
-		SpecType:   reflect.TypeOf(loggingv1beta1.WorkRequestLogSpec{}),
-		StatusType: reflect.TypeOf(loggingv1beta1.WorkRequestLogStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "logging.WorkRequestLog",
 			},
 		},
 	},
@@ -1317,22 +896,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "UsageAPIScheduledRun",
-		SpecType:   reflect.TypeOf(usageapiv1beta1.ScheduledRunSpec{}),
-		StatusType: reflect.TypeOf(usageapiv1beta1.ScheduledRunStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "usageapi.ScheduledRun",
-			},
-			{
-				SDKStruct: "usageapi.ScheduledRunCollection",
-			},
-			{
-				SDKStruct: "usageapi.ScheduledRunSummary",
-			},
-		},
-	},
-	{
 		Name:       "UsageAPIUsageCarbonEmissionsQuery",
 		SpecType:   reflect.TypeOf(usageapiv1beta1.UsageCarbonEmissionsQuerySpec{}),
 		StatusType: reflect.TypeOf(usageapiv1beta1.UsageCarbonEmissionsQueryStatus{}),
@@ -1357,7 +920,7 @@ var targets = []Target{
 	{
 		Name:       "MonitoringAlarm",
 		SpecType:   reflect.TypeOf(monitoringv1beta1.AlarmSpec{}),
-		StatusType: reflect.TypeOf(monitoringv1beta1.AlarmObservedState{}),
+		StatusType: reflect.TypeOf(monitoringv1beta1.AlarmStatus{}),
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "monitoring.CreateAlarmDetails",
@@ -1372,32 +935,6 @@ var targets = []Target{
 			{
 				SDKStruct:  "monitoring.AlarmSummary",
 				APISurface: "status",
-			},
-		},
-	},
-	{
-		Name:       "MonitoringAlarmHistory",
-		SpecType:   reflect.TypeOf(monitoringv1beta1.AlarmHistorySpec{}),
-		StatusType: reflect.TypeOf(monitoringv1beta1.AlarmHistoryStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct:  "monitoring.AlarmHistoryCollection",
-				APISurface: "status",
-			},
-			{
-				SDKStruct: "monitoring.AlarmHistoryEntry",
-				Exclude:   true,
-				Reason:    "Intentionally untracked: alarm history entries are represented as nested elements under AlarmHistory.status.entries, not a top-level reusable status surface.",
-			},
-		},
-	},
-	{
-		Name:       "MonitoringAlarmStatus",
-		SpecType:   reflect.TypeOf(monitoringv1beta1.AlarmStatusSpec{}),
-		StatusType: reflect.TypeOf(monitoringv1beta1.AlarmStatusObservedState{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "monitoring.AlarmStatusSummary",
 			},
 		},
 	},
@@ -1425,17 +962,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "MonitoringMetric",
-		SpecType:   reflect.TypeOf(monitoringv1beta1.MetricSpec{}),
-		StatusType: reflect.TypeOf(monitoringv1beta1.MetricStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct:  "monitoring.Metric",
-				APISurface: "status",
-			},
-		},
-	},
-	{
 		Name:       "LoadBalancerBackend",
 		SpecType:   reflect.TypeOf(loadbalancerv1beta1.BackendSpec{}),
 		StatusType: reflect.TypeOf(loadbalancerv1beta1.BackendStatus{}),
@@ -1452,16 +978,6 @@ var targets = []Target{
 			{
 				SDKStruct:  "loadbalancer.Backend",
 				APISurface: "status",
-			},
-		},
-	},
-	{
-		Name:       "LoadBalancerBackendHealth",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.BackendHealthSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.BackendHealthStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.BackendHealth",
 			},
 		},
 	},
@@ -1486,16 +1002,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "LoadBalancerBackendSetHealth",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.BackendSetHealthSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.BackendSetHealthStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.BackendSetHealth",
-			},
-		},
-	},
-	{
 		Name:       "LoadBalancerCertificate",
 		SpecType:   reflect.TypeOf(loadbalancerv1beta1.CertificateSpec{}),
 		StatusType: reflect.TypeOf(loadbalancerv1beta1.CertificateStatus{}),
@@ -1508,23 +1014,6 @@ var targets = []Target{
 			},
 			{
 				SDKStruct:  "loadbalancer.Certificate",
-				APISurface: "spec",
-			},
-		},
-	},
-	{
-		Name:       "LoadBalancerHealthChecker",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.HealthCheckerSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.HealthCheckerStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.UpdateHealthCheckerDetails",
-			},
-			{
-				SDKStruct: "loadbalancer.HealthCheckerDetails",
-			},
-			{
-				SDKStruct:  "loadbalancer.HealthChecker",
 				APISurface: "spec",
 			},
 		},
@@ -1570,16 +1059,6 @@ var targets = []Target{
 		},
 	},
 	{
-		Name:       "LoadBalancerListenerRule",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.ListenerRuleSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.ListenerRuleStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.ListenerRuleSummary",
-			},
-		},
-	},
-	{
 		Name:       "LoadBalancerLoadBalancer",
 		SpecType:   reflect.TypeOf(loadbalancerv1beta1.LoadBalancerSpec{}),
 		StatusType: reflect.TypeOf(loadbalancerv1beta1.LoadBalancerStatus{}),
@@ -1593,42 +1072,6 @@ var targets = []Target{
 			{
 				SDKStruct:  "loadbalancer.LoadBalancer",
 				APISurface: "status",
-			},
-		},
-	},
-	{
-		Name:       "LoadBalancerLoadBalancerHealth",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.LoadBalancerHealthSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.LoadBalancerHealthStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.LoadBalancerHealth",
-			},
-			{
-				SDKStruct: "loadbalancer.LoadBalancerHealthSummary",
-			},
-		},
-	},
-	{
-		Name:       "LoadBalancerLoadBalancerShape",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.LoadBalancerShapeSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.LoadBalancerShapeStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.UpdateLoadBalancerShapeDetails",
-			},
-			{
-				SDKStruct: "loadbalancer.LoadBalancerShape",
-			},
-		},
-	},
-	{
-		Name:       "LoadBalancerNetworkSecurityGroup",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.NetworkSecurityGroupSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.NetworkSecurityGroupStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.UpdateNetworkSecurityGroupsDetails",
 			},
 		},
 	},
@@ -1651,18 +1094,6 @@ var targets = []Target{
 				APISurface: "spec",
 			},
 		},
-	},
-	{
-		Name:        "LoadBalancerPolicy",
-		SpecType:    reflect.TypeOf(loadbalancerv1beta1.PolicySpec{}),
-		StatusType:  reflect.TypeOf(loadbalancerv1beta1.PolicyStatus{}),
-		SDKMappings: []SDKMapping{},
-	},
-	{
-		Name:        "LoadBalancerProtocol",
-		SpecType:    reflect.TypeOf(loadbalancerv1beta1.ProtocolSpec{}),
-		StatusType:  reflect.TypeOf(loadbalancerv1beta1.ProtocolStatus{}),
-		SDKMappings: []SDKMapping{},
 	},
 	{
 		Name:       "LoadBalancerRoutingPolicy",
@@ -1721,22 +1152,6 @@ var targets = []Target{
 			{
 				SDKStruct:  "loadbalancer.SslCipherSuite",
 				APISurface: "spec",
-			},
-		},
-	},
-	{
-		Name:        "LoadBalancerShape",
-		SpecType:    reflect.TypeOf(loadbalancerv1beta1.ShapeSpec{}),
-		StatusType:  reflect.TypeOf(loadbalancerv1beta1.ShapeStatus{}),
-		SDKMappings: []SDKMapping{},
-	},
-	{
-		Name:       "LoadBalancerWorkRequest",
-		SpecType:   reflect.TypeOf(loadbalancerv1beta1.WorkRequestSpec{}),
-		StatusType: reflect.TypeOf(loadbalancerv1beta1.WorkRequestStatus{}),
-		SDKMappings: []SDKMapping{
-			{
-				SDKStruct: "loadbalancer.WorkRequest",
 			},
 		},
 	},
