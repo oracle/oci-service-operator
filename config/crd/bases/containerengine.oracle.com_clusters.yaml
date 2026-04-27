@@ -78,7 +78,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               endpointConfig:
@@ -107,7 +107,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               imagePolicyConfig:
@@ -170,6 +170,12 @@ spec:
                           admission controller.
                         type: boolean
                     type: object
+                  ipFamilies:
+                    description: IP family to use for single stack or define the order
+                      of IP families for dual-stack
+                    items:
+                      type: string
+                    type: array
                   kubernetesNetworkConfig:
                     description: Network configuration for Kubernetes.
                     properties:
@@ -182,6 +188,86 @@ spec:
                           defaults to 10.96.0.0/16.
                         type: string
                     type: object
+                  openIdConnectDiscovery:
+                    description: ClusterOptionsOpenIdConnectDiscovery defines nested
+                      fields for Cluster.Options.OpenIdConnectDiscovery.
+                    properties:
+                      isOpenIdConnectDiscoveryEnabled:
+                        description: Whether the cluster has OIDC Discovery enabled.
+                          Defaults to false. If set to true, the cluster will be assigned
+                          a public OIDC Discovery endpoint.
+                        type: boolean
+                    type: object
+                  openIdConnectTokenAuthenticationConfig:
+                    description: ClusterOptionsOpenIdConnectTokenAuthenticationConfig
+                      defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.
+                    properties:
+                      caCertificate:
+                        description: A Base64 encoded public RSA or ECDSA certificates
+                          used to signed your identity provider's web certificate.
+                        type: string
+                      clientId:
+                        description: A client id that all tokens must be issued for.
+                        type: string
+                      configurationFile:
+                        description: A Base64 encoded string of a Kubernetes OIDC
+                          Auth Config file. More info here (https://kubernetes.io/docs/reference/access-authn-authz/authentication/#using-authentication-configuration)
+                        type: string
+                      groupsClaim:
+                        description: JWT claim to use as the user's group. If the
+                          claim is present it must be an array of strings.
+                        type: string
+                      groupsPrefix:
+                        description: Prefix prepended to group claims to prevent clashes
+                          with existing names (such as system:groups).
+                        type: string
+                      isOpenIdConnectAuthEnabled:
+                        description: Whether the cluster has OIDC Auth Config enabled.
+                          Defaults to false.
+                        type: boolean
+                      issuerUrl:
+                        description: |-
+                          URL of the provider that allows the API server to discover public signing keys.
+                          Only URLs that use the https:// scheme are accepted. This is typically the provider's discovery URL,
+                          changed to have an empty path.
+                        type: string
+                      requiredClaims:
+                        description: |-
+                          A key=value pair that describes a required claim in the ID Token. If set, the claim is verified to be present
+                          in the ID Token with a matching value. Repeat this flag to specify multiple claims.
+                        items:
+                          description: ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim
+                            defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaim.
+                          properties:
+                            key:
+                              description: The key of the pair.
+                              type: string
+                            value:
+                              description: The value of the pair.
+                              type: string
+                          type: object
+                        type: array
+                      signingAlgorithms:
+                        description: The signing algorithms accepted. Default is ["RS256"].
+                        items:
+                          type: string
+                        type: array
+                      usernameClaim:
+                        description: |-
+                          JWT claim to use as the user name. By default sub, which is expected to be a unique identifier of the end
+                          user. Admins can choose other claims, such as email or name, depending on their provider. However, claims
+                          other than email will be prefixed with the issuer URL to prevent naming clashes with other plugins.
+                        type: string
+                      usernamePrefix:
+                        description: |-
+                          Prefix prepended to username claims to prevent clashes with existing names (such as system:users).
+                          For example, the value oidc: will create usernames like oidc:jane.doe. If this flag isn't provided and
+                          --oidc-username-claim is a value other than email the prefix defaults to ( Issuer URL )# where
+                          ( Issuer URL ) is the value of --oidc-issuer-url. The value - can be used to disable all prefixing.
+                        type: string
+                    required:
+                    - isOpenIdConnectAuthEnabled
+                    type: object
                   persistentVolumeConfig:
                     description: ClusterOptionsPersistentVolumeConfig defines nested
                       fields for Cluster.Options.PersistentVolumeConfig.
@@ -193,7 +279,7 @@ spec:
                           type: object
                         description: |-
                           Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Operations": {"CostCenter": "42"}}`
                         type: object
                       freeformTags:
@@ -201,7 +287,7 @@ spec:
                           type: string
                         description: |-
                           Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Department": "Finance"}`
                         type: object
                     type: object
@@ -209,6 +295,15 @@ spec:
                     description: ClusterOptionsServiceLbConfig defines nested fields
                       for Cluster.Options.ServiceLbConfig.
                     properties:
+                      backendNsgIds:
+                        description: A list of the OCIDs of the network security groups
+                          (NSGs) associated to backends to LBs (pods/nodes/virtual
+                          pods, etc.). Rules necessary for LB to backend communication
+                          would be added when rule management mode is set to NSG via
+                          annotations. see NetworkSecurityGroup.
+                        items:
+                          type: string
+                        type: array
                       definedTags:
                         additionalProperties:
                           additionalProperties:
@@ -216,7 +311,7 @@ spec:
                           type: object
                         description: |-
                           Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Operations": {"CostCenter": "42"}}`
                         type: object
                       freeformTags:
@@ -224,7 +319,7 @@ spec:
                           type: string
                         description: |-
                           Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Department": "Finance"}`
                         type: object
                     type: object
@@ -279,7 +374,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               endpointConfig:
@@ -306,6 +401,9 @@ spec:
               endpoints:
                 description: Endpoints served up by the cluster masters.
                 properties:
+                  ipv6Endpoint:
+                    description: The IPv6 networking Kubernetes API server endpoint.
+                    type: string
                   kubernetes:
                     description: The non-native networking Kubernetes API server endpoint.
                     type: string
@@ -328,7 +426,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
@@ -367,7 +465,8 @@ spec:
                 description: Details about the state of the cluster masters.
                 type: string
               lifecycleState:
-                description: The state of the cluster masters.
+                description: The state of the cluster masters. For more information,
+                  see Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm)
                 type: string
               metadata:
                 description: Metadata about the cluster.
@@ -406,6 +505,13 @@ spec:
               name:
                 description: The name of the cluster.
                 type: string
+              openIdConnectDiscoveryEndpoint:
+                description: The cluster-specific OpenID Connect Discovery endpoint
+                type: string
+              openIdConnectDiscoveryKey:
+                description: The cluster-specific OpenID Connect Discovery Key to
+                  derive the DiscoveryEndpoint
+                type: string
               options:
                 description: Optional attributes for the cluster.
                 properties:
@@ -428,6 +534,12 @@ spec:
                           admission controller.
                         type: boolean
                     type: object
+                  ipFamilies:
+                    description: IP family to use for single stack or define the order
+                      of IP families for dual-stack
+                    items:
+                      type: string
+                    type: array
                   kubernetesNetworkConfig:
                     description: Network configuration for Kubernetes.
                     properties:
@@ -440,6 +552,86 @@ spec:
                           defaults to 10.96.0.0/16.
                         type: string
                     type: object
+                  openIdConnectDiscovery:
+                    description: ClusterOptionsOpenIdConnectDiscovery defines nested
+                      fields for Cluster.Options.OpenIdConnectDiscovery.
+                    properties:
+                      isOpenIdConnectDiscoveryEnabled:
+                        description: Whether the cluster has OIDC Discovery enabled.
+                          Defaults to false. If set to true, the cluster will be assigned
+                          a public OIDC Discovery endpoint.
+                        type: boolean
+                    type: object
+                  openIdConnectTokenAuthenticationConfig:
+                    description: ClusterOptionsOpenIdConnectTokenAuthenticationConfig
+                      defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.
+                    properties:
+                      caCertificate:
+                        description: A Base64 encoded public RSA or ECDSA certificates
+                          used to signed your identity provider's web certificate.
+                        type: string
+                      clientId:
+                        description: A client id that all tokens must be issued for.
+                        type: string
+                      configurationFile:
+                        description: A Base64 encoded string of a Kubernetes OIDC
+                          Auth Config file. More info here (https://kubernetes.io/docs/reference/access-authn-authz/authentication/#using-authentication-configuration)
+                        type: string
+                      groupsClaim:
+                        description: JWT claim to use as the user's group. If the
+                          claim is present it must be an array of strings.
+                        type: string
+                      groupsPrefix:
+                        description: Prefix prepended to group claims to prevent clashes
+                          with existing names (such as system:groups).
+                        type: string
+                      isOpenIdConnectAuthEnabled:
+                        description: Whether the cluster has OIDC Auth Config enabled.
+                          Defaults to false.
+                        type: boolean
+                      issuerUrl:
+                        description: |-
+                          URL of the provider that allows the API server to discover public signing keys.
+                          Only URLs that use the https:// scheme are accepted. This is typically the provider's discovery URL,
+                          changed to have an empty path.
+                        type: string
+                      requiredClaims:
+                        description: |-
+                          A key=value pair that describes a required claim in the ID Token. If set, the claim is verified to be present
+                          in the ID Token with a matching value. Repeat this flag to specify multiple claims.
+                        items:
+                          description: ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim
+                            defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaim.
+                          properties:
+                            key:
+                              description: The key of the pair.
+                              type: string
+                            value:
+                              description: The value of the pair.
+                              type: string
+                          type: object
+                        type: array
+                      signingAlgorithms:
+                        description: The signing algorithms accepted. Default is ["RS256"].
+                        items:
+                          type: string
+                        type: array
+                      usernameClaim:
+                        description: |-
+                          JWT claim to use as the user name. By default sub, which is expected to be a unique identifier of the end
+                          user. Admins can choose other claims, such as email or name, depending on their provider. However, claims
+                          other than email will be prefixed with the issuer URL to prevent naming clashes with other plugins.
+                        type: string
+                      usernamePrefix:
+                        description: |-
+                          Prefix prepended to username claims to prevent clashes with existing names (such as system:users).
+                          For example, the value oidc: will create usernames like oidc:jane.doe. If this flag isn't provided and
+                          --oidc-username-claim is a value other than email the prefix defaults to ( Issuer URL )# where
+                          ( Issuer URL ) is the value of --oidc-issuer-url. The value - can be used to disable all prefixing.
+                        type: string
+                    required:
+                    - isOpenIdConnectAuthEnabled
+                    type: object
                   persistentVolumeConfig:
                     description: ClusterOptionsPersistentVolumeConfig defines nested
                       fields for Cluster.Options.PersistentVolumeConfig.
@@ -451,7 +643,7 @@ spec:
                           type: object
                         description: |-
                           Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Operations": {"CostCenter": "42"}}`
                         type: object
                       freeformTags:
@@ -459,7 +651,7 @@ spec:
                           type: string
                         description: |-
                           Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Department": "Finance"}`
                         type: object
                     type: object
@@ -467,6 +659,15 @@ spec:
                     description: ClusterOptionsServiceLbConfig defines nested fields
                       for Cluster.Options.ServiceLbConfig.
                     properties:
+                      backendNsgIds:
+                        description: A list of the OCIDs of the network security groups
+                          (NSGs) associated to backends to LBs (pods/nodes/virtual
+                          pods, etc.). Rules necessary for LB to backend communication
+                          would be added when rule management mode is set to NSG via
+                          annotations. see NetworkSecurityGroup.
+                        items:
+                          type: string
+                        type: array
                       definedTags:
                         additionalProperties:
                           additionalProperties:
@@ -474,7 +675,7 @@ spec:
                           type: object
                         description: |-
                           Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Operations": {"CostCenter": "42"}}`
                         type: object
                       freeformTags:
@@ -482,7 +683,7 @@ spec:
                           type: string
                         description: |-
                           Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                          For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                          For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                           Example: `{"Department": "Finance"}`
                         type: object
                     type: object

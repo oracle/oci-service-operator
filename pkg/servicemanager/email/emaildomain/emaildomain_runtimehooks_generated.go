@@ -131,13 +131,13 @@ func newEmailDomainDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) EmailDoma
 			},
 		},
 		Update: runtimeOperationHooks[emailsdk.UpdateEmailDomainRequest, emailsdk.UpdateEmailDomainResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "EmailDomainId", RequestName: "emailDomainId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateEmailDomainDetails", RequestName: "UpdateEmailDomainDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "EmailDomainId", RequestName: "emailDomainId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdateEmailDomainDetails", RequestName: "UpdateEmailDomainDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.UpdateEmailDomainRequest) (emailsdk.UpdateEmailDomainResponse, error) {
 				return sdkClient.UpdateEmailDomain(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[emailsdk.DeleteEmailDomainRequest, emailsdk.DeleteEmailDomainResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "EmailDomainId", RequestName: "emailDomainId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "EmailDomainId", RequestName: "emailDomainId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.DeleteEmailDomainRequest) (emailsdk.DeleteEmailDomainResponse, error) {
 				return sdkClient.DeleteEmailDomain(ctx, request)
 			},

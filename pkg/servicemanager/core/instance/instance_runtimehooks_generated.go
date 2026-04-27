@@ -137,7 +137,7 @@ func newInstanceDefaultRuntimeHooks(sdkClient coresdk.ComputeClient) InstanceRun
 			},
 		},
 		Delete: runtimeOperationHooks[coresdk.TerminateInstanceRequest, coresdk.TerminateInstanceResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}, {FieldName: "PreserveBootVolume", RequestName: "preserveBootVolume", Contribution: "query", PreferResourceID: false}, {FieldName: "PreserveDataVolumesCreatedAtLaunch", RequestName: "preserveDataVolumesCreatedAtLaunch", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "InstanceId", RequestName: "instanceId", Contribution: "path", PreferResourceID: true}, {FieldName: "PreserveBootVolume", RequestName: "preserveBootVolume", Contribution: "query", PreferResourceID: false}, {FieldName: "PreserveDataVolumesCreatedAtLaunch", RequestName: "preserveDataVolumesCreatedAtLaunch", Contribution: "query", PreferResourceID: false}, {FieldName: "RecycleLevel", RequestName: "recycleLevel", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request coresdk.TerminateInstanceRequest) (coresdk.TerminateInstanceResponse, error) {
 				return sdkClient.TerminateInstance(ctx, request)
 			},

@@ -46,14 +46,21 @@ type FunctionSpec struct {
 	TimeoutInSeconds int `json:"timeoutInSeconds,omitempty"`
 	// +kubebuilder:validation:Optional
 	ProvisionedConcurrencyConfig FunctionProvisionedConcurrencyConfig `json:"provisionedConcurrencyConfig,omitempty"`
+	// Timeout for detached function invocations. Value in seconds.
+	// +kubebuilder:validation:Optional
+	DetachedModeTimeoutInSeconds int `json:"detachedModeTimeoutInSeconds,omitempty"`
+	// +kubebuilder:validation:Optional
+	FailureDestination FunctionFailureDestination `json:"failureDestination,omitempty"`
+	// +kubebuilder:validation:Optional
+	SuccessDestination FunctionSuccessDestination `json:"successDestination,omitempty"`
 	// +kubebuilder:validation:Optional
 	TraceConfig FunctionTraceConfig `json:"traceConfig,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
-	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -65,7 +72,7 @@ type FunctionSourceDetails struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
 	// function is sourced from.
 	// +kubebuilder:validation:Optional
 	PbfListingId string `json:"pbfListingId,omitempty"`
@@ -82,6 +89,46 @@ type FunctionProvisionedConcurrencyConfig struct {
 	Count int `json:"count,omitempty"`
 }
 
+// FunctionFailureDestination defines nested fields for Function.FailureDestination.
+type FunctionFailureDestination struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Kind string `json:"kind,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream.
+	// +kubebuilder:validation:Optional
+	StreamId string `json:"streamId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the queue.
+	// +kubebuilder:validation:Optional
+	QueueId string `json:"queueId,omitempty"`
+	// The ID of the channel in the queue.
+	// +kubebuilder:validation:Optional
+	ChannelId string `json:"channelId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic.
+	// +kubebuilder:validation:Optional
+	TopicId string `json:"topicId,omitempty"`
+}
+
+// FunctionSuccessDestination defines nested fields for Function.SuccessDestination.
+type FunctionSuccessDestination struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Kind string `json:"kind,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream.
+	// +kubebuilder:validation:Optional
+	StreamId string `json:"streamId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic.
+	// +kubebuilder:validation:Optional
+	TopicId string `json:"topicId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the queue.
+	// +kubebuilder:validation:Optional
+	QueueId string `json:"queueId,omitempty"`
+	// The ID of the channel in the queue.
+	// +kubebuilder:validation:Optional
+	ChannelId string `json:"channelId,omitempty"`
+}
+
 // FunctionTraceConfig defines nested fields for Function.TraceConfig.
 type FunctionTraceConfig struct {
 	// Define if tracing is enabled for the resource.
@@ -92,7 +139,7 @@ type FunctionTraceConfig struct {
 // FunctionStatus defines the observed state of Function.
 type FunctionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the function.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the function.
 	Id string `json:"id,omitempty"`
 	// The display name of the function. The display name is unique within the application containing the function.
 	DisplayName string `json:"displayName,omitempty"`
@@ -123,14 +170,19 @@ type FunctionStatus struct {
 	// Timeout for executions of the function. Value in seconds.
 	TimeoutInSeconds             int                                  `json:"timeoutInSeconds,omitempty"`
 	ProvisionedConcurrencyConfig FunctionProvisionedConcurrencyConfig `json:"provisionedConcurrencyConfig,omitempty"`
-	TraceConfig                  FunctionTraceConfig                  `json:"traceConfig,omitempty"`
+	// Timeout for detached function invocations. Value in seconds.
+	// Example: `{"detachedModeTimeoutInSeconds": 900}`
+	DetachedModeTimeoutInSeconds int                        `json:"detachedModeTimeoutInSeconds,omitempty"`
+	FailureDestination           FunctionFailureDestination `json:"failureDestination,omitempty"`
+	SuccessDestination           FunctionSuccessDestination `json:"successDestination,omitempty"`
+	TraceConfig                  FunctionTraceConfig        `json:"traceConfig,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The base https invoke URL to set on a client in order to invoke a function. This URL will never change over the lifetime of the function and can be cached.
 	InvokeEndpoint string `json:"invokeEndpoint,omitempty"`
-	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// The time the function was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)

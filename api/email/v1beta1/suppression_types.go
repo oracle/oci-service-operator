@@ -35,14 +35,14 @@ type SuppressionStatus struct {
 	EmailAddress string `json:"emailAddress,omitempty"`
 	// The unique ID of the suppression.
 	Id string `json:"id,omitempty"`
-	// The reason that the email address was suppressed. For more information on the types of bounces, see Suppression List (https://docs.cloud.oracle.com/Content/Email/Concepts/overview.htm#components).
+	// The reason that the email address was suppressed. For more information on the types of bounces, see Suppression List (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
 	Reason string `json:"reason,omitempty"`
 	// The date and time the suppression was added in "YYYY-MM-ddThh:mmZ"
-	// format with a Z offset, as defined by RFC 3339.
+	// format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The last date and time the suppression prevented submission
 	// in "YYYY-MM-ddThh:mmZ"
-	// format with a Z offset, as defined by RFC 3339.
+	// format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
 	TimeLastSuppressed string `json:"timeLastSuppressed,omitempty"`
 	// The value of the Message-ID header from the email that triggered a suppression.
 	// This value is as defined in RFC 5322 section 3.6.4, excluding angle-brackets.

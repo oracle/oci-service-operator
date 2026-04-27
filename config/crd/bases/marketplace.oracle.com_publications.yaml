@@ -57,7 +57,7 @@ spec:
             description: PublicationSpec defines the desired state of Publication.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment where you want to create the publication.
                 type: string
               definedTags:
@@ -67,7 +67,7 @@ spec:
                   type: object
                 description: |-
                   The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               freeformTags:
@@ -75,7 +75,7 @@ spec:
                   type: string
                 description: |-
                   The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               isAgreementAcknowledged:
@@ -158,7 +158,7 @@ spec:
             description: PublicationStatus defines the observed state of Publication.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment where the publication exists.
                 type: string
               definedTags:
@@ -168,7 +168,7 @@ spec:
                   type: object
                 description: |-
                   The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               freeformTags:
@@ -176,7 +176,7 @@ spec:
                   type: string
                 description: |-
                   The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               icon:
@@ -358,7 +358,7 @@ spec:
                   type: object
                 description: |-
                   The system tags associated with this resource, if any. The system tags are set by Oracle Cloud Infrastructure services. Each key is predefined and scoped to namespaces.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{orcl-cloud: {free-tier-retain: true}}`
                 type: object
               timeCreated:

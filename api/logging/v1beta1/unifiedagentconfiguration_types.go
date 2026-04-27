@@ -14,6 +14,10 @@ import (
 
 // UnifiedAgentConfigurationSpec defines the desired state of UnifiedAgentConfiguration.
 type UnifiedAgentConfigurationSpec struct {
+	// The user-friendly display name. This must be unique within the enclosing resource,
+	// and it's changeable. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
 	// Whether or not this resource is currently enabled.
 	// +kubebuilder:validation:Required
 	IsEnabled bool `json:"isEnabled"`
@@ -22,23 +26,19 @@ type UnifiedAgentConfigurationSpec struct {
 	// The OCID of the compartment that the resource belongs to.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
-	// The user-friendly display name. This must be unique within the enclosing resource,
-	// and it's changeable. Avoid entering confidential information.
-	// +kubebuilder:validation:Optional
-	DisplayName string `json:"displayName,omitempty"`
+	// Description for this resource.
+	// +kubebuilder:validation:Required
+	Description string `json:"description"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
-	// Description for this resource.
-	// +kubebuilder:validation:Optional
-	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:Optional
 	GroupAssociation UnifiedAgentConfigurationGroupAssociation `json:"groupAssociation,omitempty"`
 }
@@ -60,6 +60,19 @@ type UnifiedAgentConfigurationServiceConfigurationSourceParserPattern struct {
 	// Use the specified time zone. The time value can be parsed or formatted in the specified time zone.
 	// +kubebuilder:validation:Optional
 	FieldTimeZone string `json:"fieldTimeZone,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.RecordInput.
+type UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput struct {
+	// Namespace to emit metrics.
+	// +kubebuilder:validation:Optional
+	Namespace string `json:"namespace,omitempty"`
+	// Resource group to emit metrics.
+	// +kubebuilder:validation:Optional
+	ResourceGroup string `json:"resourceGroup,omitempty"`
+	// Dimensions to be added for metrics.
+	// +kubebuilder:validation:Optional
+	Dimensions map[string]string `json:"dimensions,omitempty"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationSourceParserNestedParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.NestedParser.
@@ -105,6 +118,12 @@ type UnifiedAgentConfigurationServiceConfigurationSourceParserNestedParser struc
 	// Process time value using the specified format.
 	// +kubebuilder:validation:Optional
 	TimeFormat string `json:"timeFormat,omitempty"`
+	// If true, a separator parameter can be further defined.
+	// +kubebuilder:validation:Optional
+	ParseNested bool `json:"parseNested,omitempty"`
+	// Keys of adjacent levels are joined by the separator.
+	// +kubebuilder:validation:Optional
+	Separator string `json:"separator,omitempty"`
 	// JSON parser time type.
 	// +kubebuilder:validation:Optional
 	TimeType string `json:"timeType,omitempty"`
@@ -169,6 +188,12 @@ type UnifiedAgentConfigurationServiceConfigurationSourceParser struct {
 	// Process time value using the specified format.
 	// +kubebuilder:validation:Optional
 	TimeFormat string `json:"timeFormat,omitempty"`
+	// If true, a separator parameter can be further defined.
+	// +kubebuilder:validation:Optional
+	ParseNested bool `json:"parseNested,omitempty"`
+	// Keys of adjacent levels are joined by the separator.
+	// +kubebuilder:validation:Optional
+	Separator string `json:"separator,omitempty"`
 	// JSON parser time type.
 	// +kubebuilder:validation:Optional
 	TimeType string `json:"timeType,omitempty"`
@@ -190,6 +215,8 @@ type UnifiedAgentConfigurationServiceConfigurationSourceParser struct {
 	// Syslog parser type.
 	// +kubebuilder:validation:Optional
 	SyslogParserType string `json:"syslogParserType,omitempty"`
+	// +kubebuilder:validation:Optional
+	RecordInput UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput `json:"recordInput,omitempty"`
 	// Regex pattern.
 	// +kubebuilder:validation:Optional
 	Expression string `json:"expression,omitempty"`
@@ -213,6 +240,13 @@ type UnifiedAgentConfigurationServiceConfigurationSourceParser struct {
 	NestedParser UnifiedAgentConfigurationServiceConfigurationSourceParserNestedParser `json:"nestedParser,omitempty"`
 }
 
+// UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions.
+type UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions struct {
+	// Starts to read the logs from the head of the file or the last read position recorded in pos_file, not tail.
+	// +kubebuilder:validation:Optional
+	IsReadFromHead bool `json:"isReadFromHead,omitempty"`
+}
+
 // UnifiedAgentConfigurationServiceConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.
 type UnifiedAgentConfigurationServiceConfigurationSource struct {
 	// +kubebuilder:validation:Optional
@@ -222,6 +256,9 @@ type UnifiedAgentConfigurationServiceConfigurationSource struct {
 	Name string `json:"name"`
 	// +kubebuilder:validation:Optional
 	SourceType string `json:"sourceType,omitempty"`
+	// User customized source plugin.
+	// +kubebuilder:validation:Optional
+	CustomPlugin string `json:"customPlugin,omitempty"`
 	// Windows event log channels.
 	// +kubebuilder:validation:Optional
 	Channels []string `json:"channels,omitempty"`
@@ -230,6 +267,8 @@ type UnifiedAgentConfigurationServiceConfigurationSource struct {
 	Paths []string `json:"paths,omitempty"`
 	// +kubebuilder:validation:Optional
 	Parser UnifiedAgentConfigurationServiceConfigurationSourceParser `json:"parser,omitempty"`
+	// +kubebuilder:validation:Optional
+	AdvancedOptions UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions `json:"advancedOptions,omitempty"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Source.RecordInput.
@@ -247,11 +286,11 @@ type UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsC
 	// Type of the unified monitoring agent operational metrics source object.
 	// +kubebuilder:validation:Required
 	Type string `json:"type"`
+	// +kubebuilder:validation:Required
+	RecordInput UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput `json:"recordInput"`
 	// List of unified monitoring agent operational metrics.
 	// +kubebuilder:validation:Optional
 	Metrics []string `json:"metrics,omitempty"`
-	// +kubebuilder:validation:Optional
-	RecordInput UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput `json:"recordInput,omitempty"`
 }
 
 // UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Destination.
@@ -278,6 +317,588 @@ type UnifiedAgentConfigurationServiceConfigurationDestination struct {
 	OperationalMetricsConfiguration UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfiguration `json:"operationalMetricsConfiguration,omitempty"`
 }
 
+// UnifiedAgentConfigurationServiceConfigurationFilterCustomSection defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.CustomSection.
+type UnifiedAgentConfigurationServiceConfigurationFilterCustomSection struct {
+	// The name of the custom section
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+	// Parameters in the custom section
+	// +kubebuilder:validation:Optional
+	Params map[string]string `json:"params,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilterParserPattern defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.Pattern.
+type UnifiedAgentConfigurationServiceConfigurationFilterParserPattern struct {
+	// The Grok pattern.
+	// +kubebuilder:validation:Required
+	Pattern string `json:"pattern"`
+	// The name key to tag this Grok pattern.
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+	// Specify the time field for the event time. If the event doesn't have this field, the current time is used.
+	// +kubebuilder:validation:Optional
+	FieldTimeKey string `json:"fieldTimeKey,omitempty"`
+	// Process value using the specified format. This is available only when time_type is a string.
+	// +kubebuilder:validation:Optional
+	FieldTimeFormat string `json:"fieldTimeFormat,omitempty"`
+	// Use the specified time zone. The time value can be parsed or formatted in the specified time zone.
+	// +kubebuilder:validation:Optional
+	FieldTimeZone string `json:"fieldTimeZone,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.RecordInput.
+type UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput struct {
+	// Namespace to emit metrics.
+	// +kubebuilder:validation:Optional
+	Namespace string `json:"namespace,omitempty"`
+	// Resource group to emit metrics.
+	// +kubebuilder:validation:Optional
+	ResourceGroup string `json:"resourceGroup,omitempty"`
+	// Dimensions to be added for metrics.
+	// +kubebuilder:validation:Optional
+	Dimensions map[string]string `json:"dimensions,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilterParserNestedParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.NestedParser.
+type UnifiedAgentConfigurationServiceConfigurationFilterParserNestedParser struct {
+	// Specifies the time field for the event time. If the event doesn't have this field, the current time is used.
+	// +kubebuilder:validation:Optional
+	FieldTimeKey string `json:"fieldTimeKey,omitempty"`
+	// Specify types for converting a field into another type.
+	// For example,
+	//   With this configuration:
+	//       <parse>
+	//         @type csv
+	//         keys time,host,req_id,user
+	//         time_key time
+	//       </parse>
+	//   This incoming event:
+	//     "2013/02/28 12:00:00,192.168.0.1,111,-"
+	//   is parsed as:
+	//     1362020400 (2013/02/28/ 12:00:00)
+	//     record:
+	//     {
+	//       "host"   : "192.168.0.1",
+	//       "req_id" : "111",
+	//       "user"   : "-"
+	//     }
+	// +kubebuilder:validation:Optional
+	Types map[string]string `json:"types,omitempty"`
+	// Specify the null value pattern.
+	// +kubebuilder:validation:Optional
+	NullValuePattern string `json:"nullValuePattern,omitempty"`
+	// If true, an empty string field is replaced with a null value.
+	// +kubebuilder:validation:Optional
+	IsNullEmptyString bool `json:"isNullEmptyString,omitempty"`
+	// If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified.
+	// +kubebuilder:validation:Optional
+	IsEstimateCurrentEvent bool `json:"isEstimateCurrentEvent,omitempty"`
+	// If true, keep the time field in the record.
+	// +kubebuilder:validation:Optional
+	IsKeepTimeKey bool `json:"isKeepTimeKey,omitempty"`
+	// Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern.
+	// +kubebuilder:validation:Optional
+	TimeoutInMilliseconds int `json:"timeoutInMilliseconds,omitempty"`
+	// Process time value using the specified format.
+	// +kubebuilder:validation:Optional
+	TimeFormat string `json:"timeFormat,omitempty"`
+	// If true, a separator parameter can be further defined.
+	// +kubebuilder:validation:Optional
+	ParseNested bool `json:"parseNested,omitempty"`
+	// Keys of adjacent levels are joined by the separator.
+	// +kubebuilder:validation:Optional
+	Separator string `json:"separator,omitempty"`
+	// JSON parser time type.
+	// +kubebuilder:validation:Optional
+	TimeType string `json:"timeType,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilterParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.
+type UnifiedAgentConfigurationServiceConfigurationFilterParser struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// Specifies the time field for the event time. If the event doesn't have this field, the current time is used.
+	// +kubebuilder:validation:Optional
+	FieldTimeKey string `json:"fieldTimeKey,omitempty"`
+	// Specify types for converting a field into another type.
+	// For example,
+	//   With this configuration:
+	//       <parse>
+	//         @type csv
+	//         keys time,host,req_id,user
+	//         time_key time
+	//       </parse>
+	//   This incoming event:
+	//     "2013/02/28 12:00:00,192.168.0.1,111,-"
+	//   is parsed as:
+	//     1362020400 (2013/02/28/ 12:00:00)
+	//     record:
+	//     {
+	//       "host"   : "192.168.0.1",
+	//       "req_id" : "111",
+	//       "user"   : "-"
+	//     }
+	// +kubebuilder:validation:Optional
+	Types map[string]string `json:"types,omitempty"`
+	// Specify the null value pattern.
+	// +kubebuilder:validation:Optional
+	NullValuePattern string `json:"nullValuePattern,omitempty"`
+	// If true, an empty string field is replaced with a null value.
+	// +kubebuilder:validation:Optional
+	IsNullEmptyString bool `json:"isNullEmptyString,omitempty"`
+	// If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified.
+	// +kubebuilder:validation:Optional
+	IsEstimateCurrentEvent bool `json:"isEstimateCurrentEvent,omitempty"`
+	// If true, keep the time field in the record.
+	// +kubebuilder:validation:Optional
+	IsKeepTimeKey bool `json:"isKeepTimeKey,omitempty"`
+	// Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern.
+	// +kubebuilder:validation:Optional
+	TimeoutInMilliseconds int `json:"timeoutInMilliseconds,omitempty"`
+	// +kubebuilder:validation:Optional
+	ParserType string `json:"parserType,omitempty"`
+	// Grok pattern object.
+	// +kubebuilder:validation:Optional
+	Patterns []UnifiedAgentConfigurationServiceConfigurationFilterParserPattern `json:"patterns,omitempty"`
+	// Grok name key.
+	// +kubebuilder:validation:Optional
+	GrokNameKey string `json:"grokNameKey,omitempty"`
+	// Grok failure key.
+	// +kubebuilder:validation:Optional
+	GrokFailureKey string `json:"grokFailureKey,omitempty"`
+	// Multiline start regexp pattern.
+	// +kubebuilder:validation:Optional
+	MultiLineStartRegexp string `json:"multiLineStartRegexp,omitempty"`
+	// Process time value using the specified format.
+	// +kubebuilder:validation:Optional
+	TimeFormat string `json:"timeFormat,omitempty"`
+	// If true, a separator parameter can be further defined.
+	// +kubebuilder:validation:Optional
+	ParseNested bool `json:"parseNested,omitempty"`
+	// Keys of adjacent levels are joined by the separator.
+	// +kubebuilder:validation:Optional
+	Separator string `json:"separator,omitempty"`
+	// JSON parser time type.
+	// +kubebuilder:validation:Optional
+	TimeType string `json:"timeType,omitempty"`
+	// Specifies the field name to contain logs.
+	// +kubebuilder:validation:Optional
+	MessageKey string `json:"messageKey,omitempty"`
+	// RFC 5424 time format.
+	// +kubebuilder:validation:Optional
+	Rfc5424TimeFormat string `json:"rfc5424TimeFormat,omitempty"`
+	// Specifies with priority or not. Corresponds to the Fluentd with_priority parameter.
+	// +kubebuilder:validation:Optional
+	IsWithPriority bool `json:"isWithPriority,omitempty"`
+	// Specifies whether or not to support colonless ident. Corresponds to the Fluentd support_colonless_ident parameter.
+	// +kubebuilder:validation:Optional
+	IsSupportColonlessIdent bool `json:"isSupportColonlessIdent,omitempty"`
+	// Syslog message format.
+	// +kubebuilder:validation:Optional
+	MessageFormat string `json:"messageFormat,omitempty"`
+	// Syslog parser type.
+	// +kubebuilder:validation:Optional
+	SyslogParserType string `json:"syslogParserType,omitempty"`
+	// +kubebuilder:validation:Optional
+	RecordInput UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput `json:"recordInput,omitempty"`
+	// Regex pattern.
+	// +kubebuilder:validation:Optional
+	Expression string `json:"expression,omitempty"`
+	// Mutiline pattern format.
+	// +kubebuilder:validation:Optional
+	Format []string `json:"format,omitempty"`
+	// First line pattern format.
+	// +kubebuilder:validation:Optional
+	FormatFirstline string `json:"formatFirstline,omitempty"`
+	// TSV keys.
+	// +kubebuilder:validation:Optional
+	Keys []string `json:"keys,omitempty"`
+	// TSV delimiter.
+	// +kubebuilder:validation:Optional
+	Delimiter string `json:"delimiter,omitempty"`
+	// If you don't need stream or logtag fields, set this to false.
+	// +kubebuilder:validation:Optional
+	IsMergeCriFields bool `json:"isMergeCriFields,omitempty"`
+	// Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
+	// +kubebuilder:validation:Optional
+	NestedParser UnifiedAgentConfigurationServiceConfigurationFilterParserNestedParser `json:"nestedParser,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilterAllowList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.AllowList.
+type UnifiedAgentConfigurationServiceConfigurationFilterAllowList struct {
+	// The field name to which the regular expression is applied
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// The regular expression
+	// +kubebuilder:validation:Optional
+	Pattern string `json:"pattern,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilterDenyList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.DenyList.
+type UnifiedAgentConfigurationServiceConfigurationFilterDenyList struct {
+	// The field name to which the regular expression is applied
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// The regular expression
+	// +kubebuilder:validation:Optional
+	Pattern string `json:"pattern,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilterRecordList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.RecordList.
+type UnifiedAgentConfigurationServiceConfigurationFilterRecordList struct {
+	// A new key
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// A new value
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.
+type UnifiedAgentConfigurationServiceConfigurationFilter struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// Unique name for the filter.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// +kubebuilder:validation:Optional
+	FilterType string `json:"filterType,omitempty"`
+	// Type of the custom filter
+	// +kubebuilder:validation:Optional
+	CustomFilterType string `json:"customFilterType,omitempty"`
+	// Parameters of the custom filter
+	// +kubebuilder:validation:Optional
+	Params map[string]string `json:"params,omitempty"`
+	// List of custom sections in custom filter
+	// +kubebuilder:validation:Optional
+	CustomSections []UnifiedAgentConfigurationServiceConfigurationFilterCustomSection `json:"customSections,omitempty"`
+	// +kubebuilder:validation:Optional
+	Parser UnifiedAgentConfigurationServiceConfigurationFilterParser `json:"parser,omitempty"`
+	// The field name in the record to parse.
+	// +kubebuilder:validation:Optional
+	KeyName string `json:"keyName,omitempty"`
+	// If true, keep the original event time in the parsed result.
+	// +kubebuilder:validation:Optional
+	ReserveTime bool `json:"reserveTime,omitempty"`
+	// If true, keep the original key-value pair in the parsed result.
+	// +kubebuilder:validation:Optional
+	ReserveData bool `json:"reserveData,omitempty"`
+	// If true, remove the keyName field when parsing is succeeded.
+	// +kubebuilder:validation:Optional
+	RemoveKeyNameField bool `json:"removeKeyNameField,omitempty"`
+	// If true, the invalid string is replaced with safe characters and is re-parsed.
+	// +kubebuilder:validation:Optional
+	ReplaceInvalidSequence bool `json:"replaceInvalidSequence,omitempty"`
+	// Store the parsed values with the specified key name prefix.
+	// +kubebuilder:validation:Optional
+	InjectKeyPrefix string `json:"injectKeyPrefix,omitempty"`
+	// Store the parsed values as a hash value in a field.
+	// +kubebuilder:validation:Optional
+	HashValueField string `json:"hashValueField,omitempty"`
+	// If true, emit invalid record to @ERROR label. Invalid cases are: 1) key does not exist; 2) the format
+	// does not match; or 3) an unexpected error. You can rescue unexpected format logs in the @ERROR lable.
+	// If you want to ignore these errors, set this to false.
+	// +kubebuilder:validation:Optional
+	EmitInvalidRecordToError bool `json:"emitInvalidRecordToError,omitempty"`
+	// A list of filtering rules to include logs
+	// +kubebuilder:validation:Optional
+	AllowList []UnifiedAgentConfigurationServiceConfigurationFilterAllowList `json:"allowList,omitempty"`
+	// A list of filtering rules to reject logs
+	// +kubebuilder:validation:Optional
+	DenyList []UnifiedAgentConfigurationServiceConfigurationFilterDenyList `json:"denyList,omitempty"`
+	// Add new key-value pairs in logs
+	// +kubebuilder:validation:Optional
+	RecordList []UnifiedAgentConfigurationServiceConfigurationFilterRecordList `json:"recordList,omitempty"`
+	// When set to true, the full Ruby syntax is enabled in the ${} expression.
+	// +kubebuilder:validation:Optional
+	IsRubyEnabled bool `json:"isRubyEnabled,omitempty"`
+	// If true, automatically casts the field types.
+	// +kubebuilder:validation:Optional
+	IsAutoTypecastEnabled bool `json:"isAutoTypecastEnabled,omitempty"`
+	// If true, it modifies a new empty hash
+	// +kubebuilder:validation:Optional
+	IsRenewRecordEnabled bool `json:"isRenewRecordEnabled,omitempty"`
+	// Overwrites the time of logs with this value, this value must be a Unix timestamp.
+	// +kubebuilder:validation:Optional
+	RenewTimeKey string `json:"renewTimeKey,omitempty"`
+	// A list of keys to keep. Only relevant if isRenewRecordEnabled is set to true
+	// +kubebuilder:validation:Optional
+	KeepKeys []string `json:"keepKeys,omitempty"`
+	// A list of keys to delete
+	// +kubebuilder:validation:Optional
+	RemoveKeys []string `json:"removeKeys,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget struct {
+	// Type of resource to scrape metrics.
+	// +kubebuilder:validation:Required
+	ResourceType string `json:"resourceType"`
+	// K8s namespace of the resource.
+	// +kubebuilder:validation:Required
+	K8sNamespace string `json:"k8sNamespace"`
+	// Name of the service prepended to the endpoints.
+	// +kubebuilder:validation:Optional
+	ServiceName string `json:"serviceName,omitempty"`
+	// Resource group in OCI monitoring.
+	// +kubebuilder:validation:Optional
+	ResourceGroup string `json:"resourceGroup,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource struct {
+	// Unique name for the source.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// List of UnifiedAgentKubernetesScrapeTarget.
+	// +kubebuilder:validation:Required
+	ScrapeTargets []UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget `json:"scrapeTargets"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Destination.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination struct {
+	// The OCID of the compartment that the resource belongs to.
+	// +kubebuilder:validation:Required
+	CompartmentId string `json:"compartmentId"`
+	// Namespace to which metrics will be emitted.
+	// +kubebuilder:validation:Required
+	MetricsNamespace string `json:"metricsNamespace"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Filter.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter struct {
+	// Unique name for the filter.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// List of metrics regex to be allowed.
+	// +kubebuilder:validation:Optional
+	AllowList []string `json:"allowList,omitempty"`
+	// List of metrics regex to be denied.
+	// +kubebuilder:validation:Optional
+	DenyList []string `json:"denyList,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserPattern defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.Parser.Pattern.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserPattern struct {
+	// The Grok pattern.
+	// +kubebuilder:validation:Required
+	Pattern string `json:"pattern"`
+	// The name key to tag this Grok pattern.
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+	// Specify the time field for the event time. If the event doesn't have this field, the current time is used.
+	// +kubebuilder:validation:Optional
+	FieldTimeKey string `json:"fieldTimeKey,omitempty"`
+	// Process value using the specified format. This is available only when time_type is a string.
+	// +kubebuilder:validation:Optional
+	FieldTimeFormat string `json:"fieldTimeFormat,omitempty"`
+	// Use the specified time zone. The time value can be parsed or formatted in the specified time zone.
+	// +kubebuilder:validation:Optional
+	FieldTimeZone string `json:"fieldTimeZone,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.Parser.RecordInput.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserRecordInput struct {
+	// Namespace to emit metrics.
+	// +kubebuilder:validation:Optional
+	Namespace string `json:"namespace,omitempty"`
+	// Resource group to emit metrics.
+	// +kubebuilder:validation:Optional
+	ResourceGroup string `json:"resourceGroup,omitempty"`
+	// Dimensions to be added for metrics.
+	// +kubebuilder:validation:Optional
+	Dimensions map[string]string `json:"dimensions,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserNestedParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.Parser.NestedParser.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserNestedParser struct {
+	// Specifies the time field for the event time. If the event doesn't have this field, the current time is used.
+	// +kubebuilder:validation:Optional
+	FieldTimeKey string `json:"fieldTimeKey,omitempty"`
+	// Specify types for converting a field into another type.
+	// For example,
+	//   With this configuration:
+	//       <parse>
+	//         @type csv
+	//         keys time,host,req_id,user
+	//         time_key time
+	//       </parse>
+	//   This incoming event:
+	//     "2013/02/28 12:00:00,192.168.0.1,111,-"
+	//   is parsed as:
+	//     1362020400 (2013/02/28/ 12:00:00)
+	//     record:
+	//     {
+	//       "host"   : "192.168.0.1",
+	//       "req_id" : "111",
+	//       "user"   : "-"
+	//     }
+	// +kubebuilder:validation:Optional
+	Types map[string]string `json:"types,omitempty"`
+	// Specify the null value pattern.
+	// +kubebuilder:validation:Optional
+	NullValuePattern string `json:"nullValuePattern,omitempty"`
+	// If true, an empty string field is replaced with a null value.
+	// +kubebuilder:validation:Optional
+	IsNullEmptyString bool `json:"isNullEmptyString,omitempty"`
+	// If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified.
+	// +kubebuilder:validation:Optional
+	IsEstimateCurrentEvent bool `json:"isEstimateCurrentEvent,omitempty"`
+	// If true, keep the time field in the record.
+	// +kubebuilder:validation:Optional
+	IsKeepTimeKey bool `json:"isKeepTimeKey,omitempty"`
+	// Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern.
+	// +kubebuilder:validation:Optional
+	TimeoutInMilliseconds int `json:"timeoutInMilliseconds,omitempty"`
+	// Process time value using the specified format.
+	// +kubebuilder:validation:Optional
+	TimeFormat string `json:"timeFormat,omitempty"`
+	// If true, a separator parameter can be further defined.
+	// +kubebuilder:validation:Optional
+	ParseNested bool `json:"parseNested,omitempty"`
+	// Keys of adjacent levels are joined by the separator.
+	// +kubebuilder:validation:Optional
+	Separator string `json:"separator,omitempty"`
+	// JSON parser time type.
+	// +kubebuilder:validation:Optional
+	TimeType string `json:"timeType,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.Parser.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParser struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// Specifies the time field for the event time. If the event doesn't have this field, the current time is used.
+	// +kubebuilder:validation:Optional
+	FieldTimeKey string `json:"fieldTimeKey,omitempty"`
+	// Specify types for converting a field into another type.
+	// For example,
+	//   With this configuration:
+	//       <parse>
+	//         @type csv
+	//         keys time,host,req_id,user
+	//         time_key time
+	//       </parse>
+	//   This incoming event:
+	//     "2013/02/28 12:00:00,192.168.0.1,111,-"
+	//   is parsed as:
+	//     1362020400 (2013/02/28/ 12:00:00)
+	//     record:
+	//     {
+	//       "host"   : "192.168.0.1",
+	//       "req_id" : "111",
+	//       "user"   : "-"
+	//     }
+	// +kubebuilder:validation:Optional
+	Types map[string]string `json:"types,omitempty"`
+	// Specify the null value pattern.
+	// +kubebuilder:validation:Optional
+	NullValuePattern string `json:"nullValuePattern,omitempty"`
+	// If true, an empty string field is replaced with a null value.
+	// +kubebuilder:validation:Optional
+	IsNullEmptyString bool `json:"isNullEmptyString,omitempty"`
+	// If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified.
+	// +kubebuilder:validation:Optional
+	IsEstimateCurrentEvent bool `json:"isEstimateCurrentEvent,omitempty"`
+	// If true, keep the time field in the record.
+	// +kubebuilder:validation:Optional
+	IsKeepTimeKey bool `json:"isKeepTimeKey,omitempty"`
+	// Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern.
+	// +kubebuilder:validation:Optional
+	TimeoutInMilliseconds int `json:"timeoutInMilliseconds,omitempty"`
+	// +kubebuilder:validation:Optional
+	ParserType string `json:"parserType,omitempty"`
+	// Grok pattern object.
+	// +kubebuilder:validation:Optional
+	Patterns []UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserPattern `json:"patterns,omitempty"`
+	// Grok name key.
+	// +kubebuilder:validation:Optional
+	GrokNameKey string `json:"grokNameKey,omitempty"`
+	// Grok failure key.
+	// +kubebuilder:validation:Optional
+	GrokFailureKey string `json:"grokFailureKey,omitempty"`
+	// Multiline start regexp pattern.
+	// +kubebuilder:validation:Optional
+	MultiLineStartRegexp string `json:"multiLineStartRegexp,omitempty"`
+	// Process time value using the specified format.
+	// +kubebuilder:validation:Optional
+	TimeFormat string `json:"timeFormat,omitempty"`
+	// If true, a separator parameter can be further defined.
+	// +kubebuilder:validation:Optional
+	ParseNested bool `json:"parseNested,omitempty"`
+	// Keys of adjacent levels are joined by the separator.
+	// +kubebuilder:validation:Optional
+	Separator string `json:"separator,omitempty"`
+	// JSON parser time type.
+	// +kubebuilder:validation:Optional
+	TimeType string `json:"timeType,omitempty"`
+	// Specifies the field name to contain logs.
+	// +kubebuilder:validation:Optional
+	MessageKey string `json:"messageKey,omitempty"`
+	// RFC 5424 time format.
+	// +kubebuilder:validation:Optional
+	Rfc5424TimeFormat string `json:"rfc5424TimeFormat,omitempty"`
+	// Specifies with priority or not. Corresponds to the Fluentd with_priority parameter.
+	// +kubebuilder:validation:Optional
+	IsWithPriority bool `json:"isWithPriority,omitempty"`
+	// Specifies whether or not to support colonless ident. Corresponds to the Fluentd support_colonless_ident parameter.
+	// +kubebuilder:validation:Optional
+	IsSupportColonlessIdent bool `json:"isSupportColonlessIdent,omitempty"`
+	// Syslog message format.
+	// +kubebuilder:validation:Optional
+	MessageFormat string `json:"messageFormat,omitempty"`
+	// Syslog parser type.
+	// +kubebuilder:validation:Optional
+	SyslogParserType string `json:"syslogParserType,omitempty"`
+	// +kubebuilder:validation:Optional
+	RecordInput UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserRecordInput `json:"recordInput,omitempty"`
+	// Regex pattern.
+	// +kubebuilder:validation:Optional
+	Expression string `json:"expression,omitempty"`
+	// Mutiline pattern format.
+	// +kubebuilder:validation:Optional
+	Format []string `json:"format,omitempty"`
+	// First line pattern format.
+	// +kubebuilder:validation:Optional
+	FormatFirstline string `json:"formatFirstline,omitempty"`
+	// TSV keys.
+	// +kubebuilder:validation:Optional
+	Keys []string `json:"keys,omitempty"`
+	// TSV delimiter.
+	// +kubebuilder:validation:Optional
+	Delimiter string `json:"delimiter,omitempty"`
+	// If you don't need stream or logtag fields, set this to false.
+	// +kubebuilder:validation:Optional
+	IsMergeCriFields bool `json:"isMergeCriFields,omitempty"`
+	// Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
+	// +kubebuilder:validation:Optional
+	NestedParser UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceParserNestedParser `json:"nestedParser,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.AdvancedOptions.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceAdvancedOptions struct {
+	// Starts to read the logs from the head of the file or the last read position recorded in pos_file, not tail.
+	// +kubebuilder:validation:Optional
+	IsReadFromHead bool `json:"isReadFromHead,omitempty"`
+}
+
+// UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.
+type UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// +kubebuilder:validation:Optional
+	Source UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource `json:"source,omitempty"`
+	// +kubebuilder:validation:Optional
+	Destination UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination `json:"destination,omitempty"`
+	// +kubebuilder:validation:Optional
+	Filter UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter `json:"filter,omitempty"`
+	// Tail log source objects.
+	// +kubebuilder:validation:Optional
+	Sources []UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource `json:"sources,omitempty"`
+}
+
 // UnifiedAgentConfigurationServiceConfiguration defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.
 type UnifiedAgentConfigurationServiceConfiguration struct {
 	// +kubebuilder:validation:Optional
@@ -289,6 +910,12 @@ type UnifiedAgentConfigurationServiceConfiguration struct {
 	Sources []UnifiedAgentConfigurationServiceConfigurationSource `json:"sources,omitempty"`
 	// +kubebuilder:validation:Optional
 	Destination UnifiedAgentConfigurationServiceConfigurationDestination `json:"destination,omitempty"`
+	// Logging filter object.
+	// +kubebuilder:validation:Optional
+	Filter []UnifiedAgentConfigurationServiceConfigurationFilter `json:"filter,omitempty"`
+	// Unified Agent monitoring application configuration details.
+	// +kubebuilder:validation:Optional
+	ApplicationConfigurations []UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration `json:"applicationConfigurations,omitempty"`
 }
 
 // UnifiedAgentConfigurationGroupAssociation defines nested fields for UnifiedAgentConfiguration.GroupAssociation.
@@ -319,11 +946,11 @@ type UnifiedAgentConfigurationStatus struct {
 	// Description for this resource.
 	Description string `json:"description,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Time the resource was created.

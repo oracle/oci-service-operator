@@ -57,7 +57,7 @@ spec:
             description: SddcSpec defines the desired state of Sddc.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment to contain the SDDC.
                 type: string
               definedTags:
@@ -67,7 +67,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a
-                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               displayName:
@@ -88,7 +88,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               hcxMode:
@@ -105,14 +105,34 @@ spec:
                         defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.
                       properties:
                         capacityReservationId:
-                          description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                             of the Capacity Reservation.
                           type: string
+                        clusterByolAllocationDetails:
+                          description: SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails
+                            defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.ClusterByolAllocationDetails.
+                          properties:
+                            firewallByolAllocationId:
+                              description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                of the VMware BYOL Allocation used to deploy VMware
+                                vDefend Firewall.
+                              type: string
+                            vsanByolAllocationId:
+                              description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                of the VMware BYOL Allocation used to deploy VMware
+                                vSAN.
+                              type: string
+                          type: object
                         computeAvailabilityDomain:
                           description: The availability domain to create the Cluster's
                             ESXi hosts in. For multi-AD Cluster deployment, set to
                             `multi-AD`.
                           type: string
+                        datastoreClusterIds:
+                          description: A list of datastore clusters.
+                          items:
+                            type: string
+                          type: array
                         datastores:
                           description: |-
                             A list of datastore info for the Cluster.
@@ -122,7 +142,7 @@ spec:
                               defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.Datastore.
                             properties:
                               blockVolumeIds:
-                                description: A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s
+                                description: A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                                   of Block Storage Volumes.
                                 items:
                                   type: string
@@ -138,7 +158,7 @@ spec:
                         displayName:
                           description: |-
                             A descriptive name for the Cluster.
-                            Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
+                            Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
                             Avoid entering confidential information.
                           type: string
                         esxiHostsCount:
@@ -165,6 +185,11 @@ spec:
                             The initial compute shape of the Cluster's ESXi hosts.
                             ListSupportedHostShapes.
                           type: string
+                        initialVcfByolAllocationId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the initial VMware BYOL Allocation used to deploy VMware
+                            Cloud Foundation.
+                          type: string
                         instanceDisplayNamePrefix:
                           description: |-
                             A prefix used in the name of each ESXi host and Compute instance in the Cluster.
@@ -182,7 +207,7 @@ spec:
                           properties:
                             hcxVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the HCX component of the VMware environment. This VLAN is a mandatory attribute
                                 for Management Cluster when HCX is enabled.
                                 This attribute is not guaranteed to reflect the HCX VLAN
@@ -197,7 +222,7 @@ spec:
                               type: string
                             nsxEdgeUplink1VlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory
                                 attribute for Management Cluster.
                                 This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN
@@ -212,7 +237,7 @@ spec:
                               type: string
                             nsxEdgeUplink2VlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory
                                 attribute for Management Cluster.
                                 This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN
@@ -227,7 +252,7 @@ spec:
                               type: string
                             nsxEdgeVTepVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the NSX Edge VTEP component of the VMware environment.
                                 This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -241,7 +266,7 @@ spec:
                               type: string
                             nsxVTepVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the NSX VTEP component of the VMware environment.
                                 This attribute is not guaranteed to reflect the NSX VTEP VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -255,22 +280,22 @@ spec:
                               type: string
                             provisioningSubnetId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used
                                 to provision the Cluster.
                               type: string
                             provisioningVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the Provisioning component of the VMware environment.
                               type: string
                             replicationVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the vSphere Replication component of the VMware environment.
                               type: string
                             vmotionVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the vMotion component of the VMware environment.
                                 This attribute is not guaranteed to reflect the vMotion VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -284,7 +309,7 @@ spec:
                               type: string
                             vsanVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the vSAN component of the VMware environment.
                                 This attribute is not guaranteed to reflect the vSAN VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -298,7 +323,7 @@ spec:
                               type: string
                             vsphereVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the vSphere component of the VMware environment. This VLAN is a mandatory attribute
                                 for Management Cluster.
                                 This attribute is not guaranteed to reflect the vSphere VLAN
@@ -340,6 +365,19 @@ spec:
                 description: Indicates whether this SDDC is designated for only single
                   ESXi host.
                 type: boolean
+              sddcByolAllocationDetails:
+                description: SddcByolAllocationDetails defines nested fields for Sddc.SddcByolAllocationDetails.
+                properties:
+                  loadBalancerByolAllocationId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the VMware BYOL Allocation used to deploy VMware Avi Load
+                      Balancer.
+                    type: string
+                  loadBalancerInstanceCount:
+                    description: The number of VMware Avi Load Balancer instances
+                      to be deployed on VMware SDDC.
+                    type: integer
+                type: object
               sshAuthorizedKeys:
                 description: |-
                   One or more public SSH keys to be included in the `~/.ssh/authorized_keys` file for
@@ -367,7 +405,7 @@ spec:
                 type: integer
               compartmentId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
                   contains the SDDC.
                 type: string
               definedTags:
@@ -377,7 +415,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a
-                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               displayName:
@@ -407,7 +445,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               hcxFqdn:
@@ -439,12 +477,12 @@ spec:
                 type: array
               hcxPrivateIpId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
                   the virtual IP (VIP) for HCX Manager. For information about `PrivateIp` objects, see the
                   Core Services API.
                 type: string
               id:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the SDDC.
                 type: string
               initialConfiguration:
@@ -458,14 +496,34 @@ spec:
                         defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.
                       properties:
                         capacityReservationId:
-                          description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                             of the Capacity Reservation.
                           type: string
+                        clusterByolAllocationDetails:
+                          description: SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails
+                            defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.ClusterByolAllocationDetails.
+                          properties:
+                            firewallByolAllocationId:
+                              description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                of the VMware BYOL Allocation used to deploy VMware
+                                vDefend Firewall.
+                              type: string
+                            vsanByolAllocationId:
+                              description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                of the VMware BYOL Allocation used to deploy VMware
+                                vSAN.
+                              type: string
+                          type: object
                         computeAvailabilityDomain:
                           description: The availability domain to create the Cluster's
                             ESXi hosts in. For multi-AD Cluster deployment, set to
                             `multi-AD`.
                           type: string
+                        datastoreClusterIds:
+                          description: A list of datastore clusters.
+                          items:
+                            type: string
+                          type: array
                         datastores:
                           description: |-
                             A list of datastore info for the Cluster.
@@ -475,7 +533,7 @@ spec:
                               defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.Datastore.
                             properties:
                               blockVolumeIds:
-                                description: A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s
+                                description: A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                                   of Block Storage Volumes.
                                 items:
                                   type: string
@@ -491,7 +549,7 @@ spec:
                         displayName:
                           description: |-
                             A descriptive name for the Cluster.
-                            Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
+                            Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
                             Avoid entering confidential information.
                           type: string
                         esxiHostsCount:
@@ -518,6 +576,11 @@ spec:
                             The initial compute shape of the Cluster's ESXi hosts.
                             ListSupportedHostShapes.
                           type: string
+                        initialVcfByolAllocationId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the initial VMware BYOL Allocation used to deploy VMware
+                            Cloud Foundation.
+                          type: string
                         instanceDisplayNamePrefix:
                           description: |-
                             A prefix used in the name of each ESXi host and Compute instance in the Cluster.
@@ -535,7 +598,7 @@ spec:
                           properties:
                             hcxVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the HCX component of the VMware environment. This VLAN is a mandatory attribute
                                 for Management Cluster when HCX is enabled.
                                 This attribute is not guaranteed to reflect the HCX VLAN
@@ -550,7 +613,7 @@ spec:
                               type: string
                             nsxEdgeUplink1VlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory
                                 attribute for Management Cluster.
                                 This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN
@@ -565,7 +628,7 @@ spec:
                               type: string
                             nsxEdgeUplink2VlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory
                                 attribute for Management Cluster.
                                 This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN
@@ -580,7 +643,7 @@ spec:
                               type: string
                             nsxEdgeVTepVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the NSX Edge VTEP component of the VMware environment.
                                 This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -594,7 +657,7 @@ spec:
                               type: string
                             nsxVTepVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the NSX VTEP component of the VMware environment.
                                 This attribute is not guaranteed to reflect the NSX VTEP VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -608,22 +671,22 @@ spec:
                               type: string
                             provisioningSubnetId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used
                                 to provision the Cluster.
                               type: string
                             provisioningVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the Provisioning component of the VMware environment.
                               type: string
                             replicationVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the vSphere Replication component of the VMware environment.
                               type: string
                             vmotionVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the vMotion component of the VMware environment.
                                 This attribute is not guaranteed to reflect the vMotion VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -637,7 +700,7 @@ spec:
                               type: string
                             vsanVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
                                 for the vSAN component of the VMware environment.
                                 This attribute is not guaranteed to reflect the vSAN VLAN
                                 currently used by the ESXi hosts in the Cluster. The purpose
@@ -651,7 +714,7 @@ spec:
                               type: string
                             vsphereVlanId:
                               description: |-
-                                The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+                                The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
                                 for the vSphere component of the VMware environment. This VLAN is a mandatory attribute
                                 for Management Cluster.
                                 This attribute is not guaranteed to reflect the vSphere VLAN
@@ -702,7 +765,7 @@ spec:
                 type: string
               nsxEdgeUplinkIpId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
                   the virtual IP (VIP) for the NSX Edge Uplink. Use this OCID as the route target for
                   route table rules when setting up connectivity between the SDDC and other networks.
                   For information about `PrivateIp` objects, see the Core Services API.
@@ -714,7 +777,7 @@ spec:
                 type: string
               nsxManagerPrivateIpId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
                   the virtual IP (VIP) for NSX Manager. For information about `PrivateIp` objects, see the
                   Core Services API.
                 type: string
@@ -723,6 +786,19 @@ spec:
                   The SDDC includes an administrator username and initial password for NSX Manager. You
                   can change this initial username to a different value in NSX Manager.
                 type: string
+              sddcByolAllocationDetails:
+                description: SddcByolAllocationDetails defines nested fields for Sddc.SddcByolAllocationDetails.
+                properties:
+                  loadBalancerByolAllocationId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the VMware BYOL Allocation used to deploy VMware Avi Load
+                      Balancer.
+                    type: string
+                  loadBalancerInstanceCount:
+                    description: The number of VMware Avi Load Balancer instances
+                      to be deployed on VMware SDDC.
+                    type: integer
+                type: object
               sshAuthorizedKeys:
                 description: |-
                   One or more public SSH keys to be included in the `~/.ssh/authorized_keys` file for
@@ -837,6 +913,15 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
               timeCreated:
                 description: |-
                   The date and time the SDDC was created, in the format defined by
@@ -866,7 +951,7 @@ spec:
                 type: string
               vcenterPrivateIpId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
                   the virtual IP (VIP) for vCenter. For information about `PrivateIp` objects, see the
                   Core Services API.
                 type: string

@@ -69,7 +69,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a
-                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
@@ -85,7 +85,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               groupAssociation:
@@ -106,6 +106,127 @@ spec:
                 description: UnifiedAgentConfigurationServiceConfiguration defines
                   nested fields for UnifiedAgentConfiguration.ServiceConfiguration.
                 properties:
+                  applicationConfigurations:
+                    description: Unified Agent monitoring application configuration
+                      details.
+                    items:
+                      description: UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration
+                        defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.
+                      properties:
+                        destination:
+                          description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Destination.
+                          properties:
+                            compartmentId:
+                              description: The OCID of the compartment that the resource
+                                belongs to.
+                              type: string
+                            metricsNamespace:
+                              description: Namespace to which metrics will be emitted.
+                              type: string
+                          required:
+                          - compartmentId
+                          - metricsNamespace
+                          type: object
+                        filter:
+                          description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Filter.
+                          properties:
+                            allowList:
+                              description: List of metrics regex to be allowed.
+                              items:
+                                type: string
+                              type: array
+                            denyList:
+                              description: List of metrics regex to be denied.
+                              items:
+                                type: string
+                              type: array
+                            name:
+                              description: Unique name for the filter.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        jsonData:
+                          type: string
+                        source:
+                          description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+                          properties:
+                            name:
+                              description: Unique name for the source.
+                              type: string
+                            scrapeTargets:
+                              description: List of UnifiedAgentKubernetesScrapeTarget.
+                              items:
+                                description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget
+                                  defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+                                properties:
+                                  k8sNamespace:
+                                    description: K8s namespace of the resource.
+                                    type: string
+                                  resourceGroup:
+                                    description: Resource group in OCI monitoring.
+                                    type: string
+                                  resourceType:
+                                    description: Type of resource to scrape metrics.
+                                    type: string
+                                  serviceName:
+                                    description: Name of the service prepended to
+                                      the endpoints.
+                                    type: string
+                                required:
+                                - k8sNamespace
+                                - resourceType
+                                type: object
+                              type: array
+                          required:
+                          - name
+                          - scrapeTargets
+                          type: object
+                        sourceType:
+                          type: string
+                        sources:
+                          description: Tail log source objects.
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+                            properties:
+                              name:
+                                description: Unique name for the source.
+                                type: string
+                              scrapeTargets:
+                                description: List of UnifiedAgentKubernetesScrapeTarget.
+                                items:
+                                  description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget
+                                    defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+                                  properties:
+                                    k8sNamespace:
+                                      description: K8s namespace of the resource.
+                                      type: string
+                                    resourceGroup:
+                                      description: Resource group in OCI monitoring.
+                                      type: string
+                                    resourceType:
+                                      description: Type of resource to scrape metrics.
+                                      type: string
+                                    serviceName:
+                                      description: Name of the service prepended to
+                                        the endpoints.
+                                      type: string
+                                  required:
+                                  - k8sNamespace
+                                  - resourceType
+                                  type: object
+                                type: array
+                            required:
+                            - name
+                            - scrapeTargets
+                            type: object
+                          type: array
+                      type: object
+                    type: array
                   configurationType:
                     type: string
                   destination:
@@ -160,6 +281,7 @@ spec:
                                   operational metrics source object.
                                 type: string
                             required:
+                            - recordInput
                             - type
                             type: object
                         required:
@@ -169,6 +291,387 @@ spec:
                     required:
                     - logObjectId
                     type: object
+                  filter:
+                    description: Logging filter object.
+                    items:
+                      description: UnifiedAgentConfigurationServiceConfigurationFilter
+                        defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.
+                      properties:
+                        allowList:
+                          description: A list of filtering rules to include logs
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterAllowList
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.AllowList.
+                            properties:
+                              key:
+                                description: The field name to which the regular expression
+                                  is applied
+                                type: string
+                              pattern:
+                                description: The regular expression
+                                type: string
+                            type: object
+                          type: array
+                        customFilterType:
+                          description: Type of the custom filter
+                          type: string
+                        customSections:
+                          description: List of custom sections in custom filter
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterCustomSection
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.CustomSection.
+                            properties:
+                              name:
+                                description: The name of the custom section
+                                type: string
+                              params:
+                                additionalProperties:
+                                  type: string
+                                description: Parameters in the custom section
+                                type: object
+                            type: object
+                          type: array
+                        denyList:
+                          description: A list of filtering rules to reject logs
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterDenyList
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.DenyList.
+                            properties:
+                              key:
+                                description: The field name to which the regular expression
+                                  is applied
+                                type: string
+                              pattern:
+                                description: The regular expression
+                                type: string
+                            type: object
+                          type: array
+                        emitInvalidRecordToError:
+                          description: |-
+                            If true, emit invalid record to @ERROR label. Invalid cases are: 1) key does not exist; 2) the format
+                            does not match; or 3) an unexpected error. You can rescue unexpected format logs in the @ERROR lable.
+                            If you want to ignore these errors, set this to false.
+                          type: boolean
+                        filterType:
+                          type: string
+                        hashValueField:
+                          description: Store the parsed values as a hash value in
+                            a field.
+                          type: string
+                        injectKeyPrefix:
+                          description: Store the parsed values with the specified
+                            key name prefix.
+                          type: string
+                        isAutoTypecastEnabled:
+                          description: If true, automatically casts the field types.
+                          type: boolean
+                        isRenewRecordEnabled:
+                          description: If true, it modifies a new empty hash
+                          type: boolean
+                        isRubyEnabled:
+                          description: When set to true, the full Ruby syntax is enabled
+                            in the ${} expression.
+                          type: boolean
+                        jsonData:
+                          type: string
+                        keepKeys:
+                          description: A list of keys to keep. Only relevant if isRenewRecordEnabled
+                            is set to true
+                          items:
+                            type: string
+                          type: array
+                        keyName:
+                          description: The field name in the record to parse.
+                          type: string
+                        name:
+                          description: Unique name for the filter.
+                          type: string
+                        params:
+                          additionalProperties:
+                            type: string
+                          description: Parameters of the custom filter
+                          type: object
+                        parser:
+                          description: UnifiedAgentConfigurationServiceConfigurationFilterParser
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.
+                          properties:
+                            delimiter:
+                              description: TSV delimiter.
+                              type: string
+                            expression:
+                              description: Regex pattern.
+                              type: string
+                            fieldTimeKey:
+                              description: Specifies the time field for the event
+                                time. If the event doesn't have this field, the current
+                                time is used.
+                              type: string
+                            format:
+                              description: Mutiline pattern format.
+                              items:
+                                type: string
+                              type: array
+                            formatFirstline:
+                              description: First line pattern format.
+                              type: string
+                            grokFailureKey:
+                              description: Grok failure key.
+                              type: string
+                            grokNameKey:
+                              description: Grok name key.
+                              type: string
+                            isEstimateCurrentEvent:
+                              description: If true, use Fluent::EventTime.now(current
+                                time) as a timestamp when the time_key is specified.
+                              type: boolean
+                            isKeepTimeKey:
+                              description: If true, keep the time field in the record.
+                              type: boolean
+                            isMergeCriFields:
+                              description: If you don't need stream or logtag fields,
+                                set this to false.
+                              type: boolean
+                            isNullEmptyString:
+                              description: If true, an empty string field is replaced
+                                with a null value.
+                              type: boolean
+                            isSupportColonlessIdent:
+                              description: Specifies whether or not to support colonless
+                                ident. Corresponds to the Fluentd support_colonless_ident
+                                parameter.
+                              type: boolean
+                            isWithPriority:
+                              description: Specifies with priority or not. Corresponds
+                                to the Fluentd with_priority parameter.
+                              type: boolean
+                            jsonData:
+                              type: string
+                            keys:
+                              description: TSV keys.
+                              items:
+                                type: string
+                              type: array
+                            messageFormat:
+                              description: Syslog message format.
+                              type: string
+                            messageKey:
+                              description: Specifies the field name to contain logs.
+                              type: string
+                            multiLineStartRegexp:
+                              description: Multiline start regexp pattern.
+                              type: string
+                            nestedParser:
+                              description: Optional nested JSON Parser for CRI. Supported
+                                fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
+                              properties:
+                                fieldTimeKey:
+                                  description: Specifies the time field for the event
+                                    time. If the event doesn't have this field, the
+                                    current time is used.
+                                  type: string
+                                isEstimateCurrentEvent:
+                                  description: If true, use Fluent::EventTime.now(current
+                                    time) as a timestamp when the time_key is specified.
+                                  type: boolean
+                                isKeepTimeKey:
+                                  description: If true, keep the time field in the
+                                    record.
+                                  type: boolean
+                                isNullEmptyString:
+                                  description: If true, an empty string field is replaced
+                                    with a null value.
+                                  type: boolean
+                                nullValuePattern:
+                                  description: Specify the null value pattern.
+                                  type: string
+                                parseNested:
+                                  description: If true, a separator parameter can
+                                    be further defined.
+                                  type: boolean
+                                separator:
+                                  description: Keys of adjacent levels are joined
+                                    by the separator.
+                                  type: string
+                                timeFormat:
+                                  description: Process time value using the specified
+                                    format.
+                                  type: string
+                                timeType:
+                                  description: JSON parser time type.
+                                  type: string
+                                timeoutInMilliseconds:
+                                  description: Specify the timeout for parse processing.
+                                    This is mainly for detecting an incorrect regexp
+                                    pattern.
+                                  type: integer
+                                types:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Specify types for converting a field into another type.
+                                    For example,
+                                      With this configuration:
+                                          <parse>
+                                            @type csv
+                                            keys time,host,req_id,user
+                                            time_key time
+                                          </parse>
+                                      This incoming event:
+                                        "2013/02/28 12:00:00,192.168.0.1,111,-"
+                                      is parsed as:
+                                        1362020400 (2013/02/28/ 12:00:00)
+                                        record:
+                                        {
+                                          "host"   : "192.168.0.1",
+                                          "req_id" : "111",
+                                          "user"   : "-"
+                                        }
+                                  type: object
+                              type: object
+                            nullValuePattern:
+                              description: Specify the null value pattern.
+                              type: string
+                            parseNested:
+                              description: If true, a separator parameter can be further
+                                defined.
+                              type: boolean
+                            parserType:
+                              type: string
+                            patterns:
+                              description: Grok pattern object.
+                              items:
+                                description: UnifiedAgentConfigurationServiceConfigurationFilterParserPattern
+                                  defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.Pattern.
+                                properties:
+                                  fieldTimeFormat:
+                                    description: Process value using the specified
+                                      format. This is available only when time_type
+                                      is a string.
+                                    type: string
+                                  fieldTimeKey:
+                                    description: Specify the time field for the event
+                                      time. If the event doesn't have this field,
+                                      the current time is used.
+                                    type: string
+                                  fieldTimeZone:
+                                    description: Use the specified time zone. The
+                                      time value can be parsed or formatted in the
+                                      specified time zone.
+                                    type: string
+                                  name:
+                                    description: The name key to tag this Grok pattern.
+                                    type: string
+                                  pattern:
+                                    description: The Grok pattern.
+                                    type: string
+                                required:
+                                - pattern
+                                type: object
+                              type: array
+                            recordInput:
+                              description: UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput
+                                defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.RecordInput.
+                              properties:
+                                dimensions:
+                                  additionalProperties:
+                                    type: string
+                                  description: Dimensions to be added for metrics.
+                                  type: object
+                                namespace:
+                                  description: Namespace to emit metrics.
+                                  type: string
+                                resourceGroup:
+                                  description: Resource group to emit metrics.
+                                  type: string
+                              type: object
+                            rfc5424TimeFormat:
+                              description: RFC 5424 time format.
+                              type: string
+                            separator:
+                              description: Keys of adjacent levels are joined by the
+                                separator.
+                              type: string
+                            syslogParserType:
+                              description: Syslog parser type.
+                              type: string
+                            timeFormat:
+                              description: Process time value using the specified
+                                format.
+                              type: string
+                            timeType:
+                              description: JSON parser time type.
+                              type: string
+                            timeoutInMilliseconds:
+                              description: Specify the timeout for parse processing.
+                                This is mainly for detecting an incorrect regexp pattern.
+                              type: integer
+                            types:
+                              additionalProperties:
+                                type: string
+                              description: |-
+                                Specify types for converting a field into another type.
+                                For example,
+                                  With this configuration:
+                                      <parse>
+                                        @type csv
+                                        keys time,host,req_id,user
+                                        time_key time
+                                      </parse>
+                                  This incoming event:
+                                    "2013/02/28 12:00:00,192.168.0.1,111,-"
+                                  is parsed as:
+                                    1362020400 (2013/02/28/ 12:00:00)
+                                    record:
+                                    {
+                                      "host"   : "192.168.0.1",
+                                      "req_id" : "111",
+                                      "user"   : "-"
+                                    }
+                              type: object
+                          type: object
+                        recordList:
+                          description: Add new key-value pairs in logs
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterRecordList
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.RecordList.
+                            properties:
+                              key:
+                                description: A new key
+                                type: string
+                              value:
+                                description: A new value
+                                type: string
+                            type: object
+                          type: array
+                        removeKeyNameField:
+                          description: If true, remove the keyName field when parsing
+                            is succeeded.
+                          type: boolean
+                        removeKeys:
+                          description: A list of keys to delete
+                          items:
+                            type: string
+                          type: array
+                        renewTimeKey:
+                          description: Overwrites the time of logs with this value,
+                            this value must be a Unix timestamp.
+                          type: string
+                        replaceInvalidSequence:
+                          description: If true, the invalid string is replaced with
+                            safe characters and is re-parsed.
+                          type: boolean
+                        reserveData:
+                          description: If true, keep the original key-value pair in
+                            the parsed result.
+                          type: boolean
+                        reserveTime:
+                          description: If true, keep the original event time in the
+                            parsed result.
+                          type: boolean
+                      required:
+                      - name
+                      type: object
+                    type: array
                   jsonData:
                     type: string
                   sources:
@@ -177,11 +680,24 @@ spec:
                       description: UnifiedAgentConfigurationServiceConfigurationSource
                         defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.
                       properties:
+                        advancedOptions:
+                          description: UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions.
+                          properties:
+                            isReadFromHead:
+                              description: Starts to read the logs from the head of
+                                the file or the last read position recorded in pos_file,
+                                not tail.
+                              type: boolean
+                          type: object
                         channels:
                           description: Windows event log channels.
                           items:
                             type: string
                           type: array
+                        customPlugin:
+                          description: User customized source plugin.
+                          type: string
                         jsonData:
                           type: string
                         name:
@@ -280,6 +796,14 @@ spec:
                                 nullValuePattern:
                                   description: Specify the null value pattern.
                                   type: string
+                                parseNested:
+                                  description: If true, a separator parameter can
+                                    be further defined.
+                                  type: boolean
+                                separator:
+                                  description: Keys of adjacent levels are joined
+                                    by the separator.
+                                  type: string
                                 timeFormat:
                                   description: Process time value using the specified
                                     format.
@@ -319,6 +843,10 @@ spec:
                             nullValuePattern:
                               description: Specify the null value pattern.
                               type: string
+                            parseNested:
+                              description: If true, a separator parameter can be further
+                                defined.
+                              type: boolean
                             parserType:
                               type: string
                             patterns:
@@ -352,8 +880,28 @@ spec:
                                 - pattern
                                 type: object
                               type: array
+                            recordInput:
+                              description: UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput
+                                defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.RecordInput.
+                              properties:
+                                dimensions:
+                                  additionalProperties:
+                                    type: string
+                                  description: Dimensions to be added for metrics.
+                                  type: object
+                                namespace:
+                                  description: Namespace to emit metrics.
+                                  type: string
+                                resourceGroup:
+                                  description: Resource group to emit metrics.
+                                  type: string
+                              type: object
                             rfc5424TimeFormat:
                               description: RFC 5424 time format.
+                              type: string
+                            separator:
+                              description: Keys of adjacent levels are joined by the
+                                separator.
                               type: string
                             syslogParserType:
                               description: Syslog parser type.
@@ -408,6 +956,8 @@ spec:
                 type: object
             required:
             - compartmentId
+            - description
+            - displayName
             - isEnabled
             - serviceConfiguration
             type: object
@@ -432,7 +982,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a
-                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
@@ -448,7 +998,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               groupAssociation:
@@ -475,6 +1025,127 @@ spec:
                 description: UnifiedAgentConfigurationServiceConfiguration defines
                   nested fields for UnifiedAgentConfiguration.ServiceConfiguration.
                 properties:
+                  applicationConfigurations:
+                    description: Unified Agent monitoring application configuration
+                      details.
+                    items:
+                      description: UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration
+                        defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.
+                      properties:
+                        destination:
+                          description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Destination.
+                          properties:
+                            compartmentId:
+                              description: The OCID of the compartment that the resource
+                                belongs to.
+                              type: string
+                            metricsNamespace:
+                              description: Namespace to which metrics will be emitted.
+                              type: string
+                          required:
+                          - compartmentId
+                          - metricsNamespace
+                          type: object
+                        filter:
+                          description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Filter.
+                          properties:
+                            allowList:
+                              description: List of metrics regex to be allowed.
+                              items:
+                                type: string
+                              type: array
+                            denyList:
+                              description: List of metrics regex to be denied.
+                              items:
+                                type: string
+                              type: array
+                            name:
+                              description: Unique name for the filter.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        jsonData:
+                          type: string
+                        source:
+                          description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+                          properties:
+                            name:
+                              description: Unique name for the source.
+                              type: string
+                            scrapeTargets:
+                              description: List of UnifiedAgentKubernetesScrapeTarget.
+                              items:
+                                description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget
+                                  defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+                                properties:
+                                  k8sNamespace:
+                                    description: K8s namespace of the resource.
+                                    type: string
+                                  resourceGroup:
+                                    description: Resource group in OCI monitoring.
+                                    type: string
+                                  resourceType:
+                                    description: Type of resource to scrape metrics.
+                                    type: string
+                                  serviceName:
+                                    description: Name of the service prepended to
+                                      the endpoints.
+                                    type: string
+                                required:
+                                - k8sNamespace
+                                - resourceType
+                                type: object
+                              type: array
+                          required:
+                          - name
+                          - scrapeTargets
+                          type: object
+                        sourceType:
+                          type: string
+                        sources:
+                          description: Tail log source objects.
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+                            properties:
+                              name:
+                                description: Unique name for the source.
+                                type: string
+                              scrapeTargets:
+                                description: List of UnifiedAgentKubernetesScrapeTarget.
+                                items:
+                                  description: UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget
+                                    defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+                                  properties:
+                                    k8sNamespace:
+                                      description: K8s namespace of the resource.
+                                      type: string
+                                    resourceGroup:
+                                      description: Resource group in OCI monitoring.
+                                      type: string
+                                    resourceType:
+                                      description: Type of resource to scrape metrics.
+                                      type: string
+                                    serviceName:
+                                      description: Name of the service prepended to
+                                        the endpoints.
+                                      type: string
+                                  required:
+                                  - k8sNamespace
+                                  - resourceType
+                                  type: object
+                                type: array
+                            required:
+                            - name
+                            - scrapeTargets
+                            type: object
+                          type: array
+                      type: object
+                    type: array
                   configurationType:
                     type: string
                   destination:
@@ -529,6 +1200,7 @@ spec:
                                   operational metrics source object.
                                 type: string
                             required:
+                            - recordInput
                             - type
                             type: object
                         required:
@@ -538,6 +1210,387 @@ spec:
                     required:
                     - logObjectId
                     type: object
+                  filter:
+                    description: Logging filter object.
+                    items:
+                      description: UnifiedAgentConfigurationServiceConfigurationFilter
+                        defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.
+                      properties:
+                        allowList:
+                          description: A list of filtering rules to include logs
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterAllowList
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.AllowList.
+                            properties:
+                              key:
+                                description: The field name to which the regular expression
+                                  is applied
+                                type: string
+                              pattern:
+                                description: The regular expression
+                                type: string
+                            type: object
+                          type: array
+                        customFilterType:
+                          description: Type of the custom filter
+                          type: string
+                        customSections:
+                          description: List of custom sections in custom filter
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterCustomSection
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.CustomSection.
+                            properties:
+                              name:
+                                description: The name of the custom section
+                                type: string
+                              params:
+                                additionalProperties:
+                                  type: string
+                                description: Parameters in the custom section
+                                type: object
+                            type: object
+                          type: array
+                        denyList:
+                          description: A list of filtering rules to reject logs
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterDenyList
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.DenyList.
+                            properties:
+                              key:
+                                description: The field name to which the regular expression
+                                  is applied
+                                type: string
+                              pattern:
+                                description: The regular expression
+                                type: string
+                            type: object
+                          type: array
+                        emitInvalidRecordToError:
+                          description: |-
+                            If true, emit invalid record to @ERROR label. Invalid cases are: 1) key does not exist; 2) the format
+                            does not match; or 3) an unexpected error. You can rescue unexpected format logs in the @ERROR lable.
+                            If you want to ignore these errors, set this to false.
+                          type: boolean
+                        filterType:
+                          type: string
+                        hashValueField:
+                          description: Store the parsed values as a hash value in
+                            a field.
+                          type: string
+                        injectKeyPrefix:
+                          description: Store the parsed values with the specified
+                            key name prefix.
+                          type: string
+                        isAutoTypecastEnabled:
+                          description: If true, automatically casts the field types.
+                          type: boolean
+                        isRenewRecordEnabled:
+                          description: If true, it modifies a new empty hash
+                          type: boolean
+                        isRubyEnabled:
+                          description: When set to true, the full Ruby syntax is enabled
+                            in the ${} expression.
+                          type: boolean
+                        jsonData:
+                          type: string
+                        keepKeys:
+                          description: A list of keys to keep. Only relevant if isRenewRecordEnabled
+                            is set to true
+                          items:
+                            type: string
+                          type: array
+                        keyName:
+                          description: The field name in the record to parse.
+                          type: string
+                        name:
+                          description: Unique name for the filter.
+                          type: string
+                        params:
+                          additionalProperties:
+                            type: string
+                          description: Parameters of the custom filter
+                          type: object
+                        parser:
+                          description: UnifiedAgentConfigurationServiceConfigurationFilterParser
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.
+                          properties:
+                            delimiter:
+                              description: TSV delimiter.
+                              type: string
+                            expression:
+                              description: Regex pattern.
+                              type: string
+                            fieldTimeKey:
+                              description: Specifies the time field for the event
+                                time. If the event doesn't have this field, the current
+                                time is used.
+                              type: string
+                            format:
+                              description: Mutiline pattern format.
+                              items:
+                                type: string
+                              type: array
+                            formatFirstline:
+                              description: First line pattern format.
+                              type: string
+                            grokFailureKey:
+                              description: Grok failure key.
+                              type: string
+                            grokNameKey:
+                              description: Grok name key.
+                              type: string
+                            isEstimateCurrentEvent:
+                              description: If true, use Fluent::EventTime.now(current
+                                time) as a timestamp when the time_key is specified.
+                              type: boolean
+                            isKeepTimeKey:
+                              description: If true, keep the time field in the record.
+                              type: boolean
+                            isMergeCriFields:
+                              description: If you don't need stream or logtag fields,
+                                set this to false.
+                              type: boolean
+                            isNullEmptyString:
+                              description: If true, an empty string field is replaced
+                                with a null value.
+                              type: boolean
+                            isSupportColonlessIdent:
+                              description: Specifies whether or not to support colonless
+                                ident. Corresponds to the Fluentd support_colonless_ident
+                                parameter.
+                              type: boolean
+                            isWithPriority:
+                              description: Specifies with priority or not. Corresponds
+                                to the Fluentd with_priority parameter.
+                              type: boolean
+                            jsonData:
+                              type: string
+                            keys:
+                              description: TSV keys.
+                              items:
+                                type: string
+                              type: array
+                            messageFormat:
+                              description: Syslog message format.
+                              type: string
+                            messageKey:
+                              description: Specifies the field name to contain logs.
+                              type: string
+                            multiLineStartRegexp:
+                              description: Multiline start regexp pattern.
+                              type: string
+                            nestedParser:
+                              description: Optional nested JSON Parser for CRI. Supported
+                                fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
+                              properties:
+                                fieldTimeKey:
+                                  description: Specifies the time field for the event
+                                    time. If the event doesn't have this field, the
+                                    current time is used.
+                                  type: string
+                                isEstimateCurrentEvent:
+                                  description: If true, use Fluent::EventTime.now(current
+                                    time) as a timestamp when the time_key is specified.
+                                  type: boolean
+                                isKeepTimeKey:
+                                  description: If true, keep the time field in the
+                                    record.
+                                  type: boolean
+                                isNullEmptyString:
+                                  description: If true, an empty string field is replaced
+                                    with a null value.
+                                  type: boolean
+                                nullValuePattern:
+                                  description: Specify the null value pattern.
+                                  type: string
+                                parseNested:
+                                  description: If true, a separator parameter can
+                                    be further defined.
+                                  type: boolean
+                                separator:
+                                  description: Keys of adjacent levels are joined
+                                    by the separator.
+                                  type: string
+                                timeFormat:
+                                  description: Process time value using the specified
+                                    format.
+                                  type: string
+                                timeType:
+                                  description: JSON parser time type.
+                                  type: string
+                                timeoutInMilliseconds:
+                                  description: Specify the timeout for parse processing.
+                                    This is mainly for detecting an incorrect regexp
+                                    pattern.
+                                  type: integer
+                                types:
+                                  additionalProperties:
+                                    type: string
+                                  description: |-
+                                    Specify types for converting a field into another type.
+                                    For example,
+                                      With this configuration:
+                                          <parse>
+                                            @type csv
+                                            keys time,host,req_id,user
+                                            time_key time
+                                          </parse>
+                                      This incoming event:
+                                        "2013/02/28 12:00:00,192.168.0.1,111,-"
+                                      is parsed as:
+                                        1362020400 (2013/02/28/ 12:00:00)
+                                        record:
+                                        {
+                                          "host"   : "192.168.0.1",
+                                          "req_id" : "111",
+                                          "user"   : "-"
+                                        }
+                                  type: object
+                              type: object
+                            nullValuePattern:
+                              description: Specify the null value pattern.
+                              type: string
+                            parseNested:
+                              description: If true, a separator parameter can be further
+                                defined.
+                              type: boolean
+                            parserType:
+                              type: string
+                            patterns:
+                              description: Grok pattern object.
+                              items:
+                                description: UnifiedAgentConfigurationServiceConfigurationFilterParserPattern
+                                  defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.Pattern.
+                                properties:
+                                  fieldTimeFormat:
+                                    description: Process value using the specified
+                                      format. This is available only when time_type
+                                      is a string.
+                                    type: string
+                                  fieldTimeKey:
+                                    description: Specify the time field for the event
+                                      time. If the event doesn't have this field,
+                                      the current time is used.
+                                    type: string
+                                  fieldTimeZone:
+                                    description: Use the specified time zone. The
+                                      time value can be parsed or formatted in the
+                                      specified time zone.
+                                    type: string
+                                  name:
+                                    description: The name key to tag this Grok pattern.
+                                    type: string
+                                  pattern:
+                                    description: The Grok pattern.
+                                    type: string
+                                required:
+                                - pattern
+                                type: object
+                              type: array
+                            recordInput:
+                              description: UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput
+                                defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.RecordInput.
+                              properties:
+                                dimensions:
+                                  additionalProperties:
+                                    type: string
+                                  description: Dimensions to be added for metrics.
+                                  type: object
+                                namespace:
+                                  description: Namespace to emit metrics.
+                                  type: string
+                                resourceGroup:
+                                  description: Resource group to emit metrics.
+                                  type: string
+                              type: object
+                            rfc5424TimeFormat:
+                              description: RFC 5424 time format.
+                              type: string
+                            separator:
+                              description: Keys of adjacent levels are joined by the
+                                separator.
+                              type: string
+                            syslogParserType:
+                              description: Syslog parser type.
+                              type: string
+                            timeFormat:
+                              description: Process time value using the specified
+                                format.
+                              type: string
+                            timeType:
+                              description: JSON parser time type.
+                              type: string
+                            timeoutInMilliseconds:
+                              description: Specify the timeout for parse processing.
+                                This is mainly for detecting an incorrect regexp pattern.
+                              type: integer
+                            types:
+                              additionalProperties:
+                                type: string
+                              description: |-
+                                Specify types for converting a field into another type.
+                                For example,
+                                  With this configuration:
+                                      <parse>
+                                        @type csv
+                                        keys time,host,req_id,user
+                                        time_key time
+                                      </parse>
+                                  This incoming event:
+                                    "2013/02/28 12:00:00,192.168.0.1,111,-"
+                                  is parsed as:
+                                    1362020400 (2013/02/28/ 12:00:00)
+                                    record:
+                                    {
+                                      "host"   : "192.168.0.1",
+                                      "req_id" : "111",
+                                      "user"   : "-"
+                                    }
+                              type: object
+                          type: object
+                        recordList:
+                          description: Add new key-value pairs in logs
+                          items:
+                            description: UnifiedAgentConfigurationServiceConfigurationFilterRecordList
+                              defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.RecordList.
+                            properties:
+                              key:
+                                description: A new key
+                                type: string
+                              value:
+                                description: A new value
+                                type: string
+                            type: object
+                          type: array
+                        removeKeyNameField:
+                          description: If true, remove the keyName field when parsing
+                            is succeeded.
+                          type: boolean
+                        removeKeys:
+                          description: A list of keys to delete
+                          items:
+                            type: string
+                          type: array
+                        renewTimeKey:
+                          description: Overwrites the time of logs with this value,
+                            this value must be a Unix timestamp.
+                          type: string
+                        replaceInvalidSequence:
+                          description: If true, the invalid string is replaced with
+                            safe characters and is re-parsed.
+                          type: boolean
+                        reserveData:
+                          description: If true, keep the original key-value pair in
+                            the parsed result.
+                          type: boolean
+                        reserveTime:
+                          description: If true, keep the original event time in the
+                            parsed result.
+                          type: boolean
+                      required:
+                      - name
+                      type: object
+                    type: array
                   jsonData:
                     type: string
                   sources:
@@ -546,11 +1599,24 @@ spec:
                       description: UnifiedAgentConfigurationServiceConfigurationSource
                         defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.
                       properties:
+                        advancedOptions:
+                          description: UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions
+                            defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions.
+                          properties:
+                            isReadFromHead:
+                              description: Starts to read the logs from the head of
+                                the file or the last read position recorded in pos_file,
+                                not tail.
+                              type: boolean
+                          type: object
                         channels:
                           description: Windows event log channels.
                           items:
                             type: string
                           type: array
+                        customPlugin:
+                          description: User customized source plugin.
+                          type: string
                         jsonData:
                           type: string
                         name:
@@ -649,6 +1715,14 @@ spec:
                                 nullValuePattern:
                                   description: Specify the null value pattern.
                                   type: string
+                                parseNested:
+                                  description: If true, a separator parameter can
+                                    be further defined.
+                                  type: boolean
+                                separator:
+                                  description: Keys of adjacent levels are joined
+                                    by the separator.
+                                  type: string
                                 timeFormat:
                                   description: Process time value using the specified
                                     format.
@@ -688,6 +1762,10 @@ spec:
                             nullValuePattern:
                               description: Specify the null value pattern.
                               type: string
+                            parseNested:
+                              description: If true, a separator parameter can be further
+                                defined.
+                              type: boolean
                             parserType:
                               type: string
                             patterns:
@@ -721,8 +1799,28 @@ spec:
                                 - pattern
                                 type: object
                               type: array
+                            recordInput:
+                              description: UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput
+                                defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.RecordInput.
+                              properties:
+                                dimensions:
+                                  additionalProperties:
+                                    type: string
+                                  description: Dimensions to be added for metrics.
+                                  type: object
+                                namespace:
+                                  description: Namespace to emit metrics.
+                                  type: string
+                                resourceGroup:
+                                  description: Resource group to emit metrics.
+                                  type: string
+                              type: object
                             rfc5424TimeFormat:
                               description: RFC 5424 time format.
+                              type: string
+                            separator:
+                              description: Keys of adjacent levels are joined by the
+                                separator.
                               type: string
                             syslogParserType:
                               description: Syslog parser type.

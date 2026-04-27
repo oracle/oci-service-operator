@@ -58,7 +58,7 @@ spec:
             description: OdaPrivateEndpointSpec defines the desired state of OdaPrivateEndpoint.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment that the ODA private endpoint belongs to.
                 type: string
               definedTags:
@@ -86,13 +86,13 @@ spec:
                   Example: `{"bar-key": "value"}`
                 type: object
               nsgIds:
-                description: List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
-                  of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
+                description: List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
                 items:
                   type: string
                 type: array
               subnetId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the subnet that the private endpoint belongs to.
                 type: string
             required:
@@ -103,7 +103,7 @@ spec:
             description: OdaPrivateEndpointStatus defines the observed state of OdaPrivateEndpoint.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment that the ODA private endpoint belongs to.
                 type: string
               definedTags:
@@ -131,15 +131,15 @@ spec:
                   Example: `{"bar-key": "value"}`
                 type: object
               id:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   that was assigned when the ODA private endpoint was created.
                 type: string
               lifecycleState:
                 description: The current state of the ODA private endpoint.
                 type: string
               nsgIds:
-                description: List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
-                  of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
+                description: List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
                 items:
                   type: string
                 type: array
@@ -244,7 +244,7 @@ spec:
                     type: string
                 type: object
               subnetId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the subnet that the private endpoint belongs to.
                 type: string
               timeCreated:

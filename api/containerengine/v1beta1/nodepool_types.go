@@ -63,12 +63,12 @@ type NodePoolSpec struct {
 	// +kubebuilder:validation:Optional
 	NodeConfigDetails NodePoolNodeConfigDetails `json:"nodeConfigDetails,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -87,7 +87,7 @@ type NodePoolNodeSourceDetails struct {
 	// The OCID of the image used to boot the node.
 	// +kubebuilder:validation:Optional
 	ImageId string `json:"imageId,omitempty"`
-	// The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements.
+	// The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.oracle.com/iaas/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements.
 	// +kubebuilder:validation:Optional
 	BootVolumeSizeInGBs int64 `json:"bootVolumeSizeInGBs,omitempty"`
 }
@@ -95,7 +95,7 @@ type NodePoolNodeSourceDetails struct {
 // NodePoolNodeShapeConfig defines nested fields for NodePool.NodeShapeConfig.
 type NodePoolNodeShapeConfig struct {
 	// The total number of OCPUs available to each node in the node pool.
-	// See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
+	// See here (https://docs.oracle.com/iaas/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
 	// +kubebuilder:validation:Optional
 	Ocpus float32 `json:"ocpus,omitempty"`
 	// The total amount of memory available to each node, in gigabytes.
@@ -155,15 +155,15 @@ type NodePoolNodeConfigDetailsNodePoolPodNetworkOptionDetails struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	CniType string `json:"cniType,omitempty"`
-	// The OCIDs of the subnets in which to place pods for this node pool. This can be one of the node pool subnet IDs
-	// +kubebuilder:validation:Optional
-	PodSubnetIds []string `json:"podSubnetIds,omitempty"`
 	// The max number of pods per node in the node pool. This value will be limited by the number of VNICs attachable to the node pool shape
 	// +kubebuilder:validation:Optional
 	MaxPodsPerNode int `json:"maxPodsPerNode,omitempty"`
 	// The OCIDs of the Network Security Group(s) to associate pods for this node pool with. For more information about NSGs, see NetworkSecurityGroup.
 	// +kubebuilder:validation:Optional
 	PodNsgIds []string `json:"podNsgIds,omitempty"`
+	// The OCIDs of the subnets in which to place pods for this node pool. This can be one of the node pool subnet IDs
+	// +kubebuilder:validation:Optional
+	PodSubnetIds []string `json:"podSubnetIds,omitempty"`
 }
 
 // NodePoolNodeConfigDetails defines nested fields for NodePool.NodeConfigDetails.
@@ -188,12 +188,12 @@ type NodePoolNodeConfigDetails struct {
 	// +kubebuilder:validation:Optional
 	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -211,6 +211,9 @@ type NodePoolNodeEvictionNodePoolSettings struct {
 	// If the underlying compute instance should be deleted if you cannot evict all the pods in grace period
 	// +kubebuilder:validation:Optional
 	IsForceDeleteAfterGraceDuration bool `json:"isForceDeleteAfterGraceDuration,omitempty"`
+	// If the node action should be performed if not all the pods can be evicted in the grace period
+	// +kubebuilder:validation:Optional
+	IsForceActionAfterGraceDuration bool `json:"isForceActionAfterGraceDuration,omitempty"`
 }
 
 // NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails.
@@ -225,9 +228,12 @@ type NodePoolCyclingDetails struct {
 	// Defaults to 1, Ranges from 0 to Nodepool size or 0% to 100%
 	// +kubebuilder:validation:Optional
 	MaximumSurge string `json:"maximumSurge,omitempty"`
-	// If nodes in the nodepool will be cycled to have new changes.
+	// If cycling operation should be performed on the nodes in the node pool.
 	// +kubebuilder:validation:Optional
 	IsNodeCyclingEnabled bool `json:"isNodeCyclingEnabled,omitempty"`
+	// An ordered list of cycle modes that should be performed on the OKE nodes.
+	// +kubebuilder:validation:Optional
+	CycleModes []string `json:"cycleModes,omitempty"`
 }
 
 // NodePoolNodeSource defines nested fields for NodePool.NodeSource.
@@ -242,7 +248,7 @@ type NodePoolNodeSource struct {
 
 // NodePoolNodeNodeError defines nested fields for NodePool.Node.NodeError.
 type NodePoolNodeNodeError struct {
-	// A short error code that defines the upstream error, meant for programmatic parsing. See API Errors (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm).
+	// A short error code that defines the upstream error, meant for programmatic parsing. See API Errors (https://docs.oracle.com/iaas/Content/API/References/apierrors.htm).
 	Code string `json:"code,omitempty"`
 	// A human-readable error string of the upstream error.
 	Message string `json:"message,omitempty"`
@@ -275,17 +281,17 @@ type NodePoolNode struct {
 	// An error that may be associated with the node.
 	NodeError NodePoolNodeNodeError `json:"nodeError,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
-	// The state of the node.
+	// The state of the node. For more information, see Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm)
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Details about the state of the node.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
@@ -296,7 +302,7 @@ type NodePoolStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The OCID of the node pool.
 	Id string `json:"id,omitempty"`
-	// The state of the nodepool.
+	// The state of the nodepool. For more information, see Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm)
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Details about the state of the nodepool.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
@@ -335,11 +341,11 @@ type NodePoolStatus struct {
 	// The configuration of nodes in the node pool.
 	NodeConfigDetails NodePoolNodeConfigDetails `json:"nodeConfigDetails,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.

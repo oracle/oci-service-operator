@@ -57,7 +57,7 @@ spec:
             description: ProjectSpec defines the desired state of Project.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   for the project's compartment.
                 type: string
               definedTags:
@@ -91,7 +91,7 @@ spec:
             description: ProjectStatus defines the observed state of Project.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)  for
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)  for
                   the project's compartment.
                 type: string
               definedTags:

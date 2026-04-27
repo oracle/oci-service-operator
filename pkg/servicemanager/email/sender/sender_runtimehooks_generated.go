@@ -125,19 +125,19 @@ func newSenderDefaultRuntimeHooks(sdkClient emailsdk.EmailClient) SenderRuntimeH
 			},
 		},
 		List: runtimeOperationHooks[emailsdk.ListSendersRequest, emailsdk.ListSendersResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Domain", RequestName: "domain", Contribution: "query", PreferResourceID: false}, {FieldName: "EmailAddress", RequestName: "emailAddress", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "Domain", RequestName: "domain", Contribution: "query", PreferResourceID: false}, {FieldName: "EmailAddress", RequestName: "emailAddress", Contribution: "query", PreferResourceID: false}, {FieldName: "EmailIpPoolId", RequestName: "emailIpPoolId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.ListSendersRequest) (emailsdk.ListSendersResponse, error) {
 				return sdkClient.ListSenders(ctx, request)
 			},
 		},
 		Update: runtimeOperationHooks[emailsdk.UpdateSenderRequest, emailsdk.UpdateSenderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SenderId", RequestName: "senderId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateSenderDetails", RequestName: "UpdateSenderDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SenderId", RequestName: "senderId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdateSenderDetails", RequestName: "UpdateSenderDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.UpdateSenderRequest) (emailsdk.UpdateSenderResponse, error) {
 				return sdkClient.UpdateSender(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[emailsdk.DeleteSenderRequest, emailsdk.DeleteSenderResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "SenderId", RequestName: "senderId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "SenderId", RequestName: "senderId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request emailsdk.DeleteSenderRequest) (emailsdk.DeleteSenderResponse, error) {
 				return sdkClient.DeleteSender(ctx, request)
 			},

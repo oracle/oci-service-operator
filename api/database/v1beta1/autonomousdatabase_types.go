@@ -14,86 +14,94 @@ import (
 
 // AutonomousDatabaseSpec defines the desired state of AutonomousDatabase.
 type AutonomousDatabaseSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment of the Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment of the Autonomous AI Database.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
-	// The character set for the autonomous database. The default is AL32UTF8. Allowed values for an Autonomous Database Serverless instance as as returned by List Autonomous Database Character Sets (https://docs.oracle.com/iaas/autonomous-database-serverless/doc/autonomous-character-set-selection.html)
-	// For an Autonomous Database on dedicated infrastructure, the allowed values are:
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription with which resource needs to be associated with.
+	// +kubebuilder:validation:Optional
+	SubscriptionId string `json:"subscriptionId,omitempty"`
+	// The character set for the Autonomous AI Database. The default is AL32UTF8. Allowed values for an Autonomous AI Database Serverless instance as as returned by List Autonomous AI Database Character Sets (https://docs.oracle.com/iaas/autonomous-database-serverless/doc/autonomous-character-set-selection.html)
+	// For an Autonomous AI Database on dedicated infrastructure, the allowed values are:
 	// AL32UTF8, AR8ADOS710, AR8ADOS720, AR8APTEC715, AR8ARABICMACS, AR8ASMO8X, AR8ISO8859P6, AR8MSWIN1256, AR8MUSSAD768, AR8NAFITHA711, AR8NAFITHA721, AR8SAKHR706, AR8SAKHR707, AZ8ISO8859P9E, BG8MSWIN, BG8PC437S, BLT8CP921, BLT8ISO8859P13, BLT8MSWIN1257, BLT8PC775, BN8BSCII, CDN8PC863, CEL8ISO8859P14, CL8ISO8859P5, CL8ISOIR111, CL8KOI8R, CL8KOI8U, CL8MACCYRILLICS, CL8MSWIN1251, EE8ISO8859P2, EE8MACCES, EE8MACCROATIANS, EE8MSWIN1250, EE8PC852, EL8DEC, EL8ISO8859P7, EL8MACGREEKS, EL8MSWIN1253, EL8PC437S, EL8PC851, EL8PC869, ET8MSWIN923, HU8ABMOD, HU8CWI2, IN8ISCII, IS8PC861, IW8ISO8859P8, IW8MACHEBREWS, IW8MSWIN1255, IW8PC1507, JA16EUC, JA16EUCTILDE, JA16SJIS, JA16SJISTILDE, JA16VMS, KO16KSC5601, KO16KSCCS, KO16MSWIN949, LA8ISO6937, LA8PASSPORT, LT8MSWIN921, LT8PC772, LT8PC774, LV8PC1117, LV8PC8LR, LV8RST104090, N8PC865, NE8ISO8859P10, NEE8ISO8859P4, RU8BESTA, RU8PC855, RU8PC866, SE8ISO8859P3, TH8MACTHAIS, TH8TISASCII, TR8DEC, TR8MACTURKISHS, TR8MSWIN1254, TR8PC857, US7ASCII, US8PC437, UTF8, VN8MSWIN1258, VN8VN3, WE8DEC, WE8DG, WE8ISO8859P1, WE8ISO8859P15, WE8ISO8859P9, WE8MACROMAN8S, WE8MSWIN1252, WE8NCR4970, WE8NEXTSTEP, WE8PC850, WE8PC858, WE8PC860, WE8ROMAN8, ZHS16CGB231280, ZHS16GBK, ZHT16BIG5, ZHT16CCDC, ZHT16DBT, ZHT16HKSCS, ZHT16MSWIN950, ZHT32EUC, ZHT32SOPS, ZHT32TRIS
 	// +kubebuilder:validation:Optional
 	CharacterSet string `json:"characterSet,omitempty"`
-	// The character set for the Autonomous Database. The default is AL32UTF8. Use List Autonomous Database Character Sets (https://docs.oracle.com/iaas/autonomous-database-serverless/doc/autonomous-character-set-selection.html) to list the allowed values for an Autonomous Database Serverless instance.
-	// For an Autonomous Database on dedicated Exadata infrastructure, the allowed values are:
+	// The character set for the Autonomous AI Database. The default is AL32UTF8. Use List Autonomous AI Database Character Sets (https://docs.oracle.com/iaas/autonomous-database-serverless/doc/autonomous-character-set-selection.html) to list the allowed values for an Autonomous AI Database Serverless instance.
+	// For an Autonomous AI Database on dedicated Exadata infrastructure, the allowed values are:
 	// AL16UTF16 or UTF8.
 	// +kubebuilder:validation:Optional
 	NcharacterSet string `json:"ncharacterSet,omitempty"`
 	// The database name. The name must begin with an alphabetic character and can contain a maximum of 30 alphanumeric characters. Special characters are not permitted. The database name must be unique in the tenancy. It is required in all cases except when creating a cross-region Autonomous Data Guard standby instance or a cross-region disaster recovery standby instance.
 	// +kubebuilder:validation:Optional
 	DbName string `json:"dbName,omitempty"`
-	// The number of CPU cores to be made available to the database. For Autonomous Databases on dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database&id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.
+	// The number of CPU cores to be made available to the database. For Autonomous AI Databases on dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/) for shape details.
 	// **Note:** This parameter cannot be used with the `ocpuCount` parameter.
 	// +kubebuilder:validation:Optional
 	CpuCoreCount int `json:"cpuCoreCount,omitempty"`
 	// Retention period, in days, for long-term backups
 	// +kubebuilder:validation:Optional
 	BackupRetentionPeriodInDays int `json:"backupRetentionPeriodInDays,omitempty"`
-	// The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous Database Serverless instance or an Autonomous Database on Dedicated Exadata Infrastructure.
-	// For an Autonomous Database Serverless instance, the 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU.
+	// The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous AI Database Serverless instance or an Autonomous AI Database on Dedicated Exadata Infrastructure.
+	// The 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU.
 	// +kubebuilder:validation:Optional
 	ComputeCount float32 `json:"computeCount,omitempty"`
 	// The number of OCPU cores to be made available to the database.
 	// The following points apply:
-	// - For Autonomous Databases on Dedicated Exadata infrastructure, to provision less than 1 core, enter a fractional value in an increment of 0.1. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. (Note that fractional OCPU values are not supported for Autonomous Database Serverless instances.)
-	// - To provision 1 or more cores, you must enter an integer between 1 and the maximum number of cores available for the infrastructure shape. For example, you can provision 2 cores or 3 cores, but not 2.5 cores. This applies to an Autonomous Database Serverless instance or an Autonomous Database on Dedicated Exadata Infrastructure.
-	// - For Autonomous Database Serverless instances, this parameter is not used.
-	// For Autonomous Databases on Dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database&id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.
+	// - For Autonomous AI Databases on Dedicated Exadata infrastructure, to provision less than 1 core, enter a fractional value in an increment of 0.1. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. (Note that fractional OCPU values are not supported for Autonomous AI Database Serverless instances.)
+	// - To provision 1 or more cores, you must enter an integer between 1 and the maximum number of cores available for the infrastructure shape. For example, you can provision 2 cores or 3 cores, but not 2.5 cores. This applies to an Autonomous AI Database Serverless instance or an Autonomous AI Database on Dedicated Exadata Infrastructure.
+	// - For Autonomous AI Database Serverless instances, this parameter is not used.
+	// For Autonomous AI Databases on Dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/) for shape details.
 	// **Note:** This parameter cannot be used with the `cpuCoreCount` parameter.
 	// +kubebuilder:validation:Optional
 	OcpuCount float32 `json:"ocpuCount,omitempty"`
-	// The size, in terabytes, of the data volume that will be created and attached to the database. This storage can later be scaled up if needed. For Autonomous Databases on dedicated Exadata infrastructure, the maximum storage value is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database&id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.
-	// A full Exadata service is allocated when the Autonomous Database size is set to the upper limit (384 TB).
+	// The size, in terabytes, of the data volume that will be created and attached to the database. This storage can later be scaled up if needed. For Autonomous AI Databases on dedicated Exadata infrastructure, the maximum storage value is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/) for shape details.
+	// A full Exadata service is allocated when the Autonomous AI Database size is set to the upper limit (384 TB).
 	// **Note:** This parameter cannot be used with the `dataStorageSizeInGBs` parameter.
 	// +kubebuilder:validation:Optional
 	DataStorageSizeInTBs int `json:"dataStorageSizeInTBs,omitempty"`
-	// The size, in gigabytes, of the data volume that will be created and attached to the database. This storage can later be scaled up if needed. The maximum storage value is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database&id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.
+	// The size, in gigabytes, of the data volume that will be created and attached to the database. This storage can later be scaled up if needed. The maximum storage value is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/) for shape details.
 	// **Notes**
 	// - This parameter is only supported for dedicated Exadata infrastructure.
 	// - This parameter cannot be used with the `dataStorageSizeInTBs` parameter.
 	// +kubebuilder:validation:Optional
 	DataStorageSizeInGBs int `json:"dataStorageSizeInGBs,omitempty"`
-	// Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.
+	// Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous AI Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isLocalDataGuardEnabled
 	// +kubebuilder:validation:Optional
 	IsFreeTier bool `json:"isFreeTier,omitempty"`
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	// +kubebuilder:validation:Optional
 	KmsKeyId string `json:"kmsKeyId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	// +kubebuilder:validation:Optional
 	VaultId string `json:"vaultId,omitempty"`
+	// +kubebuilder:validation:Optional
+	EncryptionKey AutonomousDatabaseEncryptionKey `json:"encryptionKey,omitempty"`
 	// The administrative password sourced from a Kubernetes Secret in the same namespace.
 	// The referenced Secret must contain a `password` key. Use `secretId` and `secretVersionNumber` instead to reference an OCI Vault secret.
 	// +kubebuilder:validation:Optional
 	AdminPassword shared.PasswordSource `json:"adminPassword,omitempty,omitzero"`
-	// The user-friendly name for the Autonomous Database. The name does not have to be unique.
+	// The user-friendly name for the Autonomous AI Database. The name does not have to be unique.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
-	// If set to `TRUE`, indicates that an Autonomous Database preview version is being provisioned, and that the preview version's terms of service have been accepted. Note that preview version software is only available for Autonomous Database Serverless instances (https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/).
+	// The maximum number of CPUs allowed with a Bring Your Own License (BYOL), including those used for auto-scaling, disaster recovery, tools, etc. Any CPU usage above this limit is considered as License Included and billed.
+	// +kubebuilder:validation:Optional
+	ByolComputeCountLimit float32 `json:"byolComputeCountLimit,omitempty"`
+	// If set to `TRUE`, indicates that an Autonomous AI Database preview version is being provisioned, and that the preview version's terms of service have been accepted. Note that preview version software is only available for Autonomous AI Database Serverless instances (https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/).
 	// +kubebuilder:validation:Optional
 	IsPreviewVersionWithServiceTermsAccepted bool `json:"isPreviewVersionWithServiceTermsAccepted,omitempty"`
-	// Indicates if auto scaling is enabled for the Autonomous Database CPU core count. The default value is `TRUE`.
+	// Indicates if auto scaling is enabled for the Autonomous AI Database CPU core count. The default value is `TRUE`.
 	// +kubebuilder:validation:Optional
 	IsAutoScalingEnabled bool `json:"isAutoScalingEnabled,omitempty"`
-	// This project introduces Autonomous Database for Developers (ADB-Dev), a free tier on dedicated infrastructure, and Cloud@Customer for database development purposes. ADB-Dev enables ExaDB customers to experiment with ADB for free and incentivizes enterprises to use ADB for new development projects.Note that ADB-Dev have 4 CPU and 20GB of memory. For ADB-Dev , memory and CPU cannot be scaled
+	// Autonomous AI Database for Developers are fixed-shape Autonomous AI Databases that developers can use to build and test new applications. On Serverless, these are low-cost and billed per instance, on Dedicated and Cloud@Customer there is no additional cost to create Developer databases. Developer databases come with limited resources and is not intended for large-scale testing and production deployments. When you need more compute or storage resources, you may upgrade to a full paid production database.
 	// +kubebuilder:validation:Optional
 	IsDevTier bool `json:"isDevTier,omitempty"`
 	// True if the database is on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
 	// +kubebuilder:validation:Optional
 	IsDedicated bool `json:"isDedicated,omitempty"`
-	// The Autonomous Container Database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). Used only by Autonomous Database on Dedicated Exadata Infrastructure.
+	// The Autonomous Container Database OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). Used only by Autonomous AI Database on Dedicated Exadata Infrastructure.
 	// +kubebuilder:validation:Optional
 	AutonomousContainerDatabaseId string `json:"autonomousContainerDatabaseId,omitempty"`
-	// The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous Database. This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform.
+	// The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous AI Database. This property is applicable only to Autonomous AI Databases on the Exadata Cloud@Customer platform.
 	// +kubebuilder:validation:Optional
 	InMemoryPercentage int `json:"inMemoryPercentage,omitempty"`
 	// Indicates if the database-level access control is enabled.
@@ -101,13 +109,13 @@ type AutonomousDatabaseSpec struct {
 	// If enabled, database access is restricted to the IP addresses defined by the rules specified with the `whitelistedIps` property. While specifying `whitelistedIps` rules is optional,
 	//  if database-level access control is enabled and no rules are specified, the database will become inaccessible. The rules can be added later using the `UpdateAutonomousDatabase` API operation or edit option in console.
 	// When creating a database clone, the desired access control setting should be specified. By default, database-level access control will be disabled for the clone.
-	// This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform. For Autonomous Database Serverless instances, `whitelistedIps` is used.
+	// This property is applicable only to Autonomous AI Databases on the Exadata Cloud@Customer platform. For Autonomous AI Database Serverless instances, `whitelistedIps` is used.
 	// +kubebuilder:validation:Optional
 	IsAccessControlEnabled bool `json:"isAccessControlEnabled,omitempty"`
-	// The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
-	// Only clients connecting from an IP address included in the ACL may access the Autonomous Database instance.
-	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
-	// For Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
+	// The client IP access control list (ACL). This feature is available for Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
+	// Only clients connecting from an IP address included in the ACL may access the Autonomous AI Database instance.
+	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous AI Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
+	// For Autonomous AI Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
 	// Multiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.
 	// Example: `["1.1.1.1","1.1.1.0/24","ocid1.vcn.oc1.sea.<unique_id>","ocid1.vcn.oc1.sea.<unique_id1>;1.1.1.1","ocid1.vcn.oc1.sea.<unique_id2>;1.1.0.0/16"]`
 	// For Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.
@@ -116,15 +124,15 @@ type AutonomousDatabaseSpec struct {
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	WhitelistedIps []string `json:"whitelistedIps,omitempty"`
-	// This field will be null if the Autonomous Database is not Data Guard enabled or Access Control is disabled.
-	// It's value would be `TRUE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses primary IP access control list (ACL) for standby.
-	// It's value would be `FALSE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses different IP access control list (ACL) for standby compared to primary.
+	// This field will be null if the Autonomous AI Database is not Data Guard enabled or Access Control is disabled.
+	// It's value would be `TRUE` if Autonomous AI Database is Data Guard enabled and Access Control is enabled and if the Autonomous AI Database uses primary IP access control list (ACL) for standby.
+	// It's value would be `FALSE` if Autonomous AI Database is Data Guard enabled and Access Control is enabled and if the Autonomous AI Database uses different IP access control list (ACL) for standby compared to primary.
 	// +kubebuilder:validation:Optional
 	ArePrimaryWhitelistedIpsUsed bool `json:"arePrimaryWhitelistedIpsUsed,omitempty"`
-	// The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
-	// Only clients connecting from an IP address included in the ACL may access the Autonomous Database instance.
-	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
-	// For Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
+	// The client IP access control list (ACL). This feature is available for Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
+	// Only clients connecting from an IP address included in the ACL may access the Autonomous AI Database instance.
+	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous AI Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
+	// For Autonomous AI Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
 	// Multiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.
 	// Example: `["1.1.1.1","1.1.1.0/24","ocid1.vcn.oc1.sea.<unique_id>","ocid1.vcn.oc1.sea.<unique_id1>;1.1.1.1","ocid1.vcn.oc1.sea.<unique_id2>;1.1.0.0/16"]`
 	// For Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.
@@ -133,25 +141,25 @@ type AutonomousDatabaseSpec struct {
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	StandbyWhitelistedIps []string `json:"standbyWhitelistedIps,omitempty"`
-	// **Deprecated.** Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// **Deprecated.** Indicates whether the Autonomous AI Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	// +kubebuilder:validation:Optional
 	IsDataGuardEnabled bool `json:"isDataGuardEnabled,omitempty"`
-	// Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// Indicates whether the Autonomous AI Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	// +kubebuilder:validation:Optional
 	IsLocalDataGuardEnabled bool `json:"isLocalDataGuardEnabled,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.
 	// **Subnet Restrictions:**
 	// - For bare metal DB systems and for single node virtual machine DB systems, do not use a subnet that overlaps with 192.168.16.16/28.
 	// - For Exadata and virtual machine 2-node RAC systems, do not use a subnet that overlaps with 192.168.128.0/20.
-	// - For Autonomous Database, setting this will disable public secure access to the database.
+	// - For Autonomous AI Database, setting this will disable public secure access to the database.
 	// These subnets are used by the Oracle Clusterware private interconnect on the database instance.
 	// Specifying an overlapping subnet will cause the private interconnect to malfunction.
 	// This restriction applies to both the client subnet and the backup subnet.
 	// +kubebuilder:validation:Optional
 	SubnetId string `json:"subnetId,omitempty"`
-	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
 	// **NsgIds restrictions:**
-	// - A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty.
+	// - A network security group (NSG) is optional for Autonomous AI Databases with private access. The nsgIds list can be empty.
 	// +kubebuilder:validation:Optional
 	NsgIds []string `json:"nsgIds,omitempty"`
 	// The resource's private endpoint label.
@@ -162,50 +170,64 @@ type AutonomousDatabaseSpec struct {
 	// +kubebuilder:validation:Optional
 	PrivateEndpointLabel string `json:"privateEndpointLabel,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// The private endpoint Ip address for the resource.
 	// +kubebuilder:validation:Optional
 	PrivateEndpointIp string `json:"privateEndpointIp,omitempty"`
-	// A valid Oracle Database version for Autonomous Database.
+	// A valid Oracle AI Database version for Autonomous AI Database.
+	// When you specify 23ai for dbversion, the system will provision a 23ai database, but the UI will display it as 26ai.
+	// When you specify 26ai for dbversion, the system will provision and display a 26ai database as expected.
+	// For new databases, it is recommended to use either 19c or 26ai.
+	// **Note** Starting December 2026, 23ai will not be supported as a valid value for this parameter.
 	// +kubebuilder:validation:Optional
 	DbVersion string `json:"dbVersion,omitempty"`
 	// Customer Contacts.
 	// +kubebuilder:validation:Optional
 	CustomerContacts []AutonomousDatabaseCustomerContact `json:"customerContacts,omitempty"`
-	// Specifies if the Autonomous Database requires mTLS connections.
+	// Specifies if the Autonomous AI Database requires mTLS connections.
 	// This may not be updated in parallel with any of the following: licenseModel, databaseEdition, cpuCoreCount, computeCount, dataStorageSizeInTBs, whitelistedIps, openMode, permissionLevel, db-workload, privateEndpointLabel, nsgIds, customerContacts, dbVersion, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// Service Change: The default value of the isMTLSConnectionRequired attribute will change from true to false on July 1, 2023 in the following APIs:
 	// - CreateAutonomousDatabase
 	// - GetAutonomousDatabase
 	// - UpdateAutonomousDatabase
-	// Details: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous Database Serverless.
+	// Details: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous AI Database Serverless.
 	// Does this impact me? If you use or maintain custom scripts or Terraform scripts referencing the CreateAutonomousDatabase, GetAutonomousDatabase, or UpdateAutonomousDatabase APIs, you want to check, and possibly modify, the scripts for the changed default value of the attribute. Should you choose not to leave your scripts unchanged, the API calls containing this attribute will continue to work, but the default value will switch from true to false.
 	// How do I make this change? Using either OCI SDKs or command line tools, update your custom scripts to explicitly set the isMTLSConnectionRequired attribute to true.
 	// +kubebuilder:validation:Optional
 	IsMtlsConnectionRequired bool `json:"isMtlsConnectionRequired,omitempty"`
-	// The unique identifier for leader autonomous database OCID OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The unique identifier for leader Autonomous AI Database OCID OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	// +kubebuilder:validation:Optional
 	ResourcePoolLeaderId string `json:"resourcePoolLeaderId,omitempty"`
 	// +kubebuilder:validation:Optional
 	ResourcePoolSummary AutonomousDatabaseResourcePoolSummary `json:"resourcePoolSummary,omitempty"`
+	// +kubebuilder:validation:Optional
+	AutonomousDatabaseMaintenanceWindow AutonomousDatabaseMaintenanceWindow `json:"autonomousDatabaseMaintenanceWindow,omitempty"`
 	// The list of scheduled operations. Consists of values such as dayOfWeek, scheduledStartTime, scheduledStopTime.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	ScheduledOperations []AutonomousDatabaseScheduledOperation `json:"scheduledOperations,omitempty"`
-	// Indicates if auto scaling is enabled for the Autonomous Database storage. The default value is `FALSE`.
+	// Indicates if auto scaling is enabled for the Autonomous AI Database storage. The default value is `FALSE`.
 	// +kubebuilder:validation:Optional
 	IsAutoScalingForStorageEnabled bool `json:"isAutoScalingForStorageEnabled,omitempty"`
 	// The list of database tools details.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	DbToolsDetails []AutonomousDatabaseDbToolsDetail `json:"dbToolsDetails,omitempty"`
+	// True if the Autonomous AI Database is backup retention locked.
+	// +kubebuilder:validation:Optional
+	IsBackupRetentionLocked bool `json:"isBackupRetentionLocked,omitempty"`
 	// The OCI vault secret [/Content/General/Concepts/identifiers.htm]OCID.
 	// This cannot be used in conjunction with adminPassword.
 	// +kubebuilder:validation:Optional
@@ -213,28 +235,33 @@ type AutonomousDatabaseSpec struct {
 	// The version of the vault secret. If no version is specified, the latest version will be used.
 	// +kubebuilder:validation:Optional
 	SecretVersionNumber int `json:"secretVersionNumber,omitempty"`
-	// The Oracle Database Edition that applies to the Autonomous databases.
+	// +kubebuilder:validation:Optional
+	TransportableTablespace AutonomousDatabaseTransportableTablespace `json:"transportableTablespace,omitempty"`
+	// The Oracle AI Database Edition that applies to the Autonomous AI Databases. This parameter accepts options `STANDARD_EDITION` and `ENTERPRISE_EDITION`.
 	// +kubebuilder:validation:Optional
 	DatabaseEdition string `json:"databaseEdition,omitempty"`
-	// The compute model of the Autonomous Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy.
+	// The compute model of the Autonomous AI Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy.
 	// +kubebuilder:validation:Optional
 	ComputeModel string `json:"computeModel,omitempty"`
-	// The Autonomous Database workload type. The following values are valid:
-	// - OLTP - indicates an Autonomous Transaction Processing database
-	// - DW - indicates an Autonomous Data Warehouse database
-	// - AJD - indicates an Autonomous JSON Database
-	// - APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.
+	// The Autonomous AI Database workload type. The following values are valid:
+	// - OLTP - indicates an Autonomous AI Transaction Processing database
+	// - DW - indicates an Autonomous AI Lakehouse database
+	// - AJD - indicates an Autonomous AI JSON Database
+	// - APEX - indicates an Autonomous AI Database with the Oracle APEX AI Application Development workload type.
+	// - LH - indicates an Oracle Autonomous AI Lakehouse database
+	// **Note** Starting December 2026, DW will not be supported as a valid value for this parameter.
+	//
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	DbWorkload string `json:"dbWorkload,omitempty"`
-	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
-	// License Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.
-	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
-	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
+	// The Oracle license model that applies to the Oracle Autonomous AI Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
+	// License Included allows you to subscribe to new Oracle AI Database software licenses and the Oracle AI Database service.
+	// Note that when provisioning an Autonomous AI Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
+	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	LicenseModel string `json:"licenseModel,omitempty"`
-	// The maintenance schedule type of the Autonomous Database Serverless. An EARLY maintenance schedule
+	// The maintenance schedule type of the Autonomous AI Database Serverless. An EARLY maintenance schedule
 	// follows a schedule applying patches prior to the REGULAR schedule. A REGULAR maintenance schedule follows the normal cycle
 	// +kubebuilder:validation:Optional
 	AutonomousMaintenanceScheduleType string `json:"autonomousMaintenanceScheduleType,omitempty"`
@@ -243,55 +270,154 @@ type AutonomousDatabaseSpec struct {
 	LocalAdgAutoFailoverMaxDataLossLimit int `json:"localAdgAutoFailoverMaxDataLossLimit,omitempty"`
 	// +kubebuilder:validation:Optional
 	LongTermBackupSchedule AutonomousDatabaseLongTermBackupSchedule `json:"longTermBackupSchedule,omitempty"`
-	// Indicates if the Autonomous Database is a refreshable clone.
+	// Indicates if the Autonomous AI Database is a refreshable clone.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	IsRefreshableClone bool `json:"isRefreshableClone,omitempty"`
-	// The refresh mode of the clone. AUTOMATIC indicates that the clone is automatically being refreshed with data from the source Autonomous Database.
+	// The refresh mode of the clone. AUTOMATIC indicates that the clone is automatically being refreshed with data from the source Autonomous AI Database.
 	// +kubebuilder:validation:Optional
 	RefreshableMode string `json:"refreshableMode,omitempty"`
 	// The database OCID(/Content/General/Concepts/identifiers.htm) of the Disaster Recovery peer (source Primary) database, which is located in a different (remote) region from the current peer database.
 	// To create or delete a local (in-region) standby, see the `isDataGuardEnabled` parameter.
 	// +kubebuilder:validation:Optional
 	PeerDbId string `json:"peerDbId,omitempty"`
-	// Indicates the Autonomous Database mode. The database can be opened in `READ_ONLY` or `READ_WRITE` mode.
+	// Indicates the Autonomous AI Database mode. The database can be opened in `READ_ONLY` or `READ_WRITE` mode.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	OpenMode string `json:"openMode,omitempty"`
-	// The Autonomous Database permission level. Restricted mode allows access only by admin users.
+	// The Autonomous AI Database permission level. Restricted mode allows access only by admin users.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	// +kubebuilder:validation:Optional
 	PermissionLevel string `json:"permissionLevel,omitempty"`
+	// The frequency a refreshable clone is refreshed after auto-refresh is enabled. The minimum is 1 hour. The maximum is 7 days. The date and time that auto-refresh is enabled is controlled by the `timeOfAutoRefreshStart` parameter.
+	// +kubebuilder:validation:Optional
+	AutoRefreshFrequencyInSeconds int `json:"autoRefreshFrequencyInSeconds,omitempty"`
+	// The time, in seconds, the data of the refreshable clone lags the primary database at the point of refresh. The minimum is 0 minutes (0 mins means refresh to the latest available timestamp). The maximum is 7 days. The lag time increases after refreshing until the next data refresh happens.
+	// +kubebuilder:validation:Optional
+	AutoRefreshPointLagInSeconds int `json:"autoRefreshPointLagInSeconds,omitempty"`
+	// The the date and time that auto-refreshing will begin for an Autonomous AI Database refreshable clone. This value controls only the start time for the first refresh operation. Subsequent (ongoing) refresh operations have start times controlled by the value of the `autoRefreshFrequencyInSeconds` parameter.
+	// +kubebuilder:validation:Optional
+	TimeOfAutoRefreshStart string `json:"timeOfAutoRefreshStart,omitempty"`
+	// The date until which Autonomous AI Database maintenance is temporarily paused.
+	// +kubebuilder:validation:Optional
+	TimeMaintenancePauseUntil string `json:"timeMaintenancePauseUntil,omitempty"`
+	// The date and time the Autonomous AI Database scheduled to upgrade to 26ai.
+	// +kubebuilder:validation:Optional
+	TimeScheduledDbVersionUpgrade string `json:"timeScheduledDbVersionUpgrade,omitempty"`
+	// True if user wants to disable Autonomous AI Database scheduled upgrade to 26ai.
+	// +kubebuilder:validation:Optional
+	IsDisableDbVersionUpgradeSchedule bool `json:"isDisableDbVersionUpgradeSchedule,omitempty"`
+	// True if user wants to schedule Autonomous AI Database upgrade to the earliest available time.
+	// +kubebuilder:validation:Optional
+	IsScheduleDbVersionUpgradeToEarliest bool `json:"isScheduleDbVersionUpgradeToEarliest,omitempty"`
+	// +kubebuilder:validation:Optional
+	VanityUrlDetails AutonomousDatabaseVanityUrlDetails `json:"vanityUrlDetails,omitempty"`
+	// If true, this will disconnect the Autonomous AI Database from its peer and the Autonomous AI Database can work permanently as a standalone database.
+	// To disconnect a cross region standby, please also provide the OCID of the standby database in the `peerDbId` parameter.
+	// +kubebuilder:validation:Optional
+	IsDisconnectPeer bool `json:"isDisconnectPeer,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a dedicated resource pool leader Autonomous AI Database in the same region, that is required when local Autonomous Data Guard is enabled for a dedicated resource pool member using the parameter `isLocalDataGuardEnabled`.
+	// This field applies only to dedicated resource pool members, and the specified leader must be different from the primary’s leader.
+	// Local Autonomous Data Guard can be enabled only if more than one dedicated resource pool exists in the region.
+	// +kubebuilder:validation:Optional
+	LocalAdgResourcePoolLeaderId string `json:"localAdgResourcePoolLeaderId,omitempty"`
 	// +kubebuilder:validation:Optional
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	Source string `json:"source,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database that you will clone to create a new Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Autonomous AI Database that you want to undelete.
 	// +kubebuilder:validation:Optional
 	SourceId string `json:"sourceId,omitempty"`
-	// The Autonomous Database clone type.
+	// The Autonomous AI Database clone type.
 	// +kubebuilder:validation:Optional
 	CloneType string `json:"cloneType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database Backup that you will clone to create a new Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the source Autonomous AI Database Backup that you will clone to create a new Autonomous AI Database.
 	// +kubebuilder:validation:Optional
 	AutonomousDatabaseBackupId string `json:"autonomousDatabaseBackupId,omitempty"`
+	// A list of the source Autonomous AI Database's table space number(s) used to create this partial clone from the backup.
+	// +kubebuilder:validation:Optional
+	CloneTableSpaceList []int `json:"cloneTableSpaceList,omitempty"`
 	// If true, 7 days worth of backups are replicated across regions for Cross-Region ADB or Backup-Based DR between Primary and Standby. If false, the backups taken on the Primary are not replicated to the Standby database.
 	// +kubebuilder:validation:Optional
 	IsReplicateAutomaticBackups bool `json:"isReplicateAutomaticBackups,omitempty"`
-	// Indicates the cross-region disaster recovery (DR) type of the standby Autonomous Database Serverless instance.
+	// Indicates the cross-region disaster recovery (DR) type of the standby Autonomous AI Database Serverless instance.
 	// Autonomous Data Guard (ADG) DR type provides business critical DR with a faster recovery time objective (RTO) during failover or switchover.
 	// Backup-based DR type provides lower cost DR with a slower RTO during failover or switchover.
 	// +kubebuilder:validation:Optional
 	RemoteDisasterRecoveryType string `json:"remoteDisasterRecoveryType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database that you will clone to create a new Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the source Autonomous AI Database that you will clone to create a new Autonomous AI Database.
 	// +kubebuilder:validation:Optional
 	AutonomousDatabaseId string `json:"autonomousDatabaseId,omitempty"`
-	// The timestamp specified for the point-in-time clone of the source Autonomous Database. The timestamp must be in the past.
+	// The timestamp specified for the point-in-time clone of the source Autonomous AI Database. The timestamp must be in the past.
 	// +kubebuilder:validation:Optional
 	Timestamp string `json:"timestamp,omitempty"`
 	// Clone from latest available backup timestamp.
 	// +kubebuilder:validation:Optional
 	UseLatestAvailableBackupTimeStamp bool `json:"useLatestAvailableBackupTimeStamp,omitempty"`
+	// Indicates the disaster recovery (DR) type of the standby Autonomous AI Database Serverless instance.
+	// Autonomous Data Guard (ADG) DR type provides business critical DR with a faster recovery time objective (RTO) during failover or switchover.
+	// Backup-based DR type provides lower cost DR with a slower RTO during failover or switchover.
+	// +kubebuilder:validation:Optional
+	DisasterRecoveryType string `json:"disasterRecoveryType,omitempty"`
+}
+
+// AutonomousDatabaseEncryptionKey defines nested fields for AutonomousDatabase.EncryptionKey.
+type AutonomousDatabaseEncryptionKey struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Provider string `json:"provider,omitempty"`
+	// URI of OKV server
+	// +kubebuilder:validation:Optional
+	OkvUri string `json:"okvUri,omitempty"`
+	// UUID of OKV KMS Key
+	// +kubebuilder:validation:Optional
+	OkvKmsKey string `json:"okvKmsKey,omitempty"`
+	// OKV wallet directory name
+	// +kubebuilder:validation:Optional
+	DirectoryName string `json:"directoryName,omitempty"`
+	// OKV certificate directory name
+	// +kubebuilder:validation:Optional
+	CertificateDirectoryName string `json:"certificateDirectoryName,omitempty"`
+	// OKV certificate id
+	// +kubebuilder:validation:Optional
+	CertificateId string `json:"certificateId,omitempty"`
+	// Azure vault URI
+	// +kubebuilder:validation:Optional
+	VaultUri string `json:"vaultUri,omitempty"`
+	// Azure key name
+	// +kubebuilder:validation:Optional
+	KeyName string `json:"keyName,omitempty"`
+	// AWS key service endpoint URI
+	// +kubebuilder:validation:Optional
+	ServiceEndpointUri string `json:"serviceEndpointUri,omitempty"`
+	// AWS key ARN
+	// +kubebuilder:validation:Optional
+	KeyArn string `json:"keyArn,omitempty"`
+	// AWS ARN role
+	// +kubebuilder:validation:Optional
+	ArnRole string `json:"arnRole,omitempty"`
+	// AWS external ID
+	// +kubebuilder:validation:Optional
+	ExternalId string `json:"externalId,omitempty"`
+	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	// +kubebuilder:validation:Optional
+	VaultId string `json:"vaultId,omitempty"`
+	// GCP project name
+	// +kubebuilder:validation:Optional
+	Project string `json:"project,omitempty"`
+	// GCP key ring location
+	// +kubebuilder:validation:Optional
+	Location string `json:"location,omitempty"`
+	// GCP key ring
+	// +kubebuilder:validation:Optional
+	KeyRing string `json:"keyRing,omitempty"`
+	// GCP kms REST API endpoint
+	// +kubebuilder:validation:Optional
+	KmsRestEndpoint string `json:"kmsRestEndpoint,omitempty"`
 }
 
 // AutonomousDatabaseCustomerContact defines nested fields for AutonomousDatabase.CustomerContact.
@@ -306,9 +432,40 @@ type AutonomousDatabaseResourcePoolSummary struct {
 	// Resource pool size.
 	// +kubebuilder:validation:Optional
 	PoolSize int `json:"poolSize,omitempty"`
-	// Indicates if the resource pool should be deleted for the Autonomous Database.
+	// Resource pool storage size in TBs.
+	// +kubebuilder:validation:Optional
+	PoolStorageSizeInTBs int `json:"poolStorageSizeInTBs,omitempty"`
+	// Available storage capacity (in TB) that can be used for adding new members or scaling existing members in a dedicated elastic pool.
+	// +kubebuilder:validation:Optional
+	AvailableStorageCapacityInTBs float64 `json:"availableStorageCapacityInTBs,omitempty"`
+	// Resource Pool total capacity, it's currently 4x of pool size
+	// +kubebuilder:validation:Optional
+	TotalComputeCapacity int `json:"totalComputeCapacity,omitempty"`
+	// Available capacity left for new elastic pool members provision
+	// +kubebuilder:validation:Optional
+	AvailableComputeCapacity int `json:"availableComputeCapacity,omitempty"`
+	// Indicates if the resource pool should be deleted for the Autonomous AI Database.
 	// +kubebuilder:validation:Optional
 	IsDisabled bool `json:"isDisabled,omitempty"`
+}
+
+// AutonomousDatabaseMaintenanceWindowDayOfWeek defines nested fields for AutonomousDatabase.AutonomousDatabaseMaintenanceWindow.DayOfWeek.
+type AutonomousDatabaseMaintenanceWindowDayOfWeek struct {
+	// Name of the day of the week.
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+}
+
+// AutonomousDatabaseMaintenanceWindow defines nested fields for AutonomousDatabase.AutonomousDatabaseMaintenanceWindow.
+type AutonomousDatabaseMaintenanceWindow struct {
+	// +kubebuilder:validation:Required
+	DayOfWeek AutonomousDatabaseMaintenanceWindowDayOfWeek `json:"dayOfWeek"`
+	// The maintenance start time. The value must use the ISO-8601 format "hh:mm".
+	// +kubebuilder:validation:Optional
+	MaintenanceStartTime string `json:"maintenanceStartTime,omitempty"`
+	// The maintenance end time. The value must use the ISO-8601 format "hh:mm".
+	// +kubebuilder:validation:Optional
+	MaintenanceEndTime string `json:"maintenanceEndTime,omitempty"`
 }
 
 // AutonomousDatabaseScheduledOperationDayOfWeek defines nested fields for AutonomousDatabase.ScheduledOperation.DayOfWeek.
@@ -346,6 +503,13 @@ type AutonomousDatabaseDbToolsDetail struct {
 	MaxIdleTimeInMinutes int `json:"maxIdleTimeInMinutes,omitempty"`
 }
 
+// AutonomousDatabaseTransportableTablespace defines nested fields for AutonomousDatabase.TransportableTablespace.
+type AutonomousDatabaseTransportableTablespace struct {
+	// URL for OCI Storage location for a Transportable Tablespace (TTS) bundle.
+	// +kubebuilder:validation:Required
+	TtsBundleUrl string `json:"ttsBundleUrl"`
+}
+
 // AutonomousDatabaseLongTermBackupSchedule defines nested fields for AutonomousDatabase.LongTermBackupSchedule.
 type AutonomousDatabaseLongTermBackupSchedule struct {
 	// The frequency of the long-term backup schedule
@@ -362,9 +526,36 @@ type AutonomousDatabaseLongTermBackupSchedule struct {
 	IsDisabled bool `json:"isDisabled,omitempty"`
 }
 
+// AutonomousDatabaseVanityUrlDetails defines nested fields for AutonomousDatabase.VanityUrlDetails.
+type AutonomousDatabaseVanityUrlDetails struct {
+	// Indicates if the vanity url details should be deleted for the Autonomous AI Database.
+	// +kubebuilder:validation:Optional
+	IsDisabled bool `json:"isDisabled,omitempty"`
+	// API Gateway ID.
+	// +kubebuilder:validation:Optional
+	ApiGatewayId string `json:"apiGatewayId,omitempty"`
+	// Custom URL prefix provided by the customer to access dbTools.
+	// +kubebuilder:validation:Optional
+	VanityUrlHostName string `json:"vanityUrlHostName,omitempty"`
+}
+
+// AutonomousDatabaseEncryptionKeyLocationDetails defines nested fields for AutonomousDatabase.EncryptionKeyLocationDetails.
+type AutonomousDatabaseEncryptionKeyLocationDetails struct {
+	JsonData     string `json:"jsonData,omitempty"`
+	ProviderType string `json:"providerType,omitempty"`
+	// Provide the HSM password as you would in RDBMS for External HSM.
+	HsmPassword string `json:"hsmPassword,omitempty"`
+	// Provide the key OCID of a registered Google Cloud Provider key.
+	GoogleCloudProviderEncryptionKeyId string `json:"googleCloudProviderEncryptionKeyId,omitempty"`
+	// Provide the key OCID of a registered Azure key.
+	AzureEncryptionKeyId string `json:"azureEncryptionKeyId,omitempty"`
+	// Provide the key OCID of a registered AWS key.
+	AwsEncryptionKeyId string `json:"awsEncryptionKeyId,omitempty"`
+}
+
 // AutonomousDatabaseBackupConfig defines nested fields for AutonomousDatabase.BackupConfig.
 type AutonomousDatabaseBackupConfig struct {
-	// Name of Object Storage (https://docs.cloud.oracle.com/Content/Object/Concepts/objectstorageoverview.htm) bucket to use for storing manual backups.
+	// Name of Object Storage (https://docs.oracle.com/iaas/Content/Object/Concepts/objectstorageoverview.htm) bucket to use for storing manual backups.
 	ManualBackupBucketName string `json:"manualBackupBucketName,omitempty"`
 	// The manual backup destination type.
 	ManualBackupType string `json:"manualBackupType,omitempty"`
@@ -372,13 +563,60 @@ type AutonomousDatabaseBackupConfig struct {
 
 // AutonomousDatabaseKeyHistoryEntry defines nested fields for AutonomousDatabase.KeyHistoryEntry.
 type AutonomousDatabaseKeyHistoryEntry struct {
-	// The id of the Autonomous Database Vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts) service key management history entry.
+	// The id of the Autonomous AI Database Vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts) service key management history entry.
 	Id string `json:"id,omitempty"`
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous AI Database Serverless does not use key versions, hence is not applicable for Autonomous AI Database Serverless instances.
 	KmsKeyVersionId string `json:"kmsKeyVersionId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId string `json:"vaultId,omitempty"`
 	// The date and time the kms key activated.
+	TimeActivated string `json:"timeActivated,omitempty"`
+}
+
+// AutonomousDatabaseEncryptionKeyHistoryEntryEncryptionKey defines nested fields for AutonomousDatabase.EncryptionKeyHistoryEntry.EncryptionKey.
+type AutonomousDatabaseEncryptionKeyHistoryEntryEncryptionKey struct {
+	JsonData string `json:"jsonData,omitempty"`
+	Provider string `json:"provider,omitempty"`
+	// URI of OKV server
+	OkvUri string `json:"okvUri,omitempty"`
+	// UUID of OKV KMS Key
+	OkvKmsKey string `json:"okvKmsKey,omitempty"`
+	// OKV wallet directory name
+	DirectoryName string `json:"directoryName,omitempty"`
+	// OKV certificate directory name
+	CertificateDirectoryName string `json:"certificateDirectoryName,omitempty"`
+	// OKV certificate id
+	CertificateId string `json:"certificateId,omitempty"`
+	// Azure vault URI
+	VaultUri string `json:"vaultUri,omitempty"`
+	// Azure key name
+	KeyName string `json:"keyName,omitempty"`
+	// AWS key service endpoint URI
+	ServiceEndpointUri string `json:"serviceEndpointUri,omitempty"`
+	// AWS key ARN
+	KeyArn string `json:"keyArn,omitempty"`
+	// AWS ARN role
+	ArnRole string `json:"arnRole,omitempty"`
+	// AWS external ID
+	ExternalId string `json:"externalId,omitempty"`
+	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	VaultId string `json:"vaultId,omitempty"`
+	// GCP project name
+	Project string `json:"project,omitempty"`
+	// GCP key ring location
+	Location string `json:"location,omitempty"`
+	// GCP key ring
+	KeyRing string `json:"keyRing,omitempty"`
+	// GCP kms REST API endpoint
+	KmsRestEndpoint string `json:"kmsRestEndpoint,omitempty"`
+}
+
+// AutonomousDatabaseEncryptionKeyHistoryEntry defines nested fields for AutonomousDatabase.EncryptionKeyHistoryEntry.
+type AutonomousDatabaseEncryptionKeyHistoryEntry struct {
+	EncryptionKey AutonomousDatabaseEncryptionKeyHistoryEntryEncryptionKey `json:"encryptionKey,omitempty"`
+	// The date and time the encryption key was activated.
 	TimeActivated string `json:"timeActivated,omitempty"`
 }
 
@@ -395,7 +633,7 @@ type AutonomousDatabaseConnectionStringsProfile struct {
 	// Specifies whether the listener performs a direct hand-off of the session, or redirects the session. In RAC deployments where SCAN is used, sessions are redirected to a Node VIP. Use `DIRECT` for direct hand-offs. Use `REDIRECT` to redirect the session.
 	SessionMode string `json:"sessionMode,omitempty"`
 	// Specifies whether the connection string is using the long (`LONG`), Easy Connect (`EZCONNECT`), or Easy Connect Plus (`EZCONNECTPLUS`) format.
-	// Autonomous Database Serverless instances always use the long format.
+	// Autonomous AI Database Serverless instances always use the long format.
 	SyntaxFormat string `json:"syntaxFormat,omitempty"`
 	// Consumer group used by the connection.
 	ConsumerGroup string `json:"consumerGroup,omitempty"`
@@ -415,8 +653,8 @@ type AutonomousDatabaseConnectionStrings struct {
 	Low string `json:"low,omitempty"`
 	// The database service provides the least level of resources to each SQL statement, but supports the most number of concurrent SQL statements.
 	Dedicated string `json:"dedicated,omitempty"`
-	// Returns all connection strings that can be used to connect to the Autonomous Database.
-	// For more information, please see Predefined Database Service Names for Autonomous Transaction Processing (https://docs.oracle.com/en/cloud/paas/atp-cloud/atpug/connect-predefined.html#GUID-9747539B-FD46-44F1-8FF8-F5AC650F15BE)
+	// Returns all connection strings that can be used to connect to the Autonomous AI Database.
+	// For more information, please see Predefined Database Service Names for Autonomous AI Transaction Processing (https://docs.oracle.com/en/cloud/paas/atp-cloud/atpug/connect-predefined.html#GUID-9747539B-FD46-44F1-8FF8-F5AC650F15BE)
 	AllConnectionStrings map[string]string `json:"allConnectionStrings,omitempty"`
 	// A list of connection string profiles to allow clients to group, filter and select connection string values based on structured metadata.
 	Profiles []AutonomousDatabaseConnectionStringsProfile `json:"profiles,omitempty"`
@@ -430,21 +668,61 @@ type AutonomousDatabaseConnectionUrls struct {
 	ApexUrl string `json:"apexUrl,omitempty"`
 	// Oracle Machine Learning user management URL.
 	MachineLearningUserManagementUrl string `json:"machineLearningUserManagementUrl,omitempty"`
-	// The URL of the Graph Studio for the Autonomous Database.
+	// The URL of the Graph Studio for the Autonomous AI Database.
 	GraphStudioUrl string `json:"graphStudioUrl,omitempty"`
-	// The URL of the MongoDB API for the Autonomous Database.
+	// The URL of the MongoDB API for the Autonomous AI Database.
 	MongoDbUrl string `json:"mongoDbUrl,omitempty"`
-	// The URL of the Oracle Machine Learning (OML) Notebook for the Autonomous Database.
+	// The URL of the Oracle Machine Learning (OML) Notebook for the Autonomous AI Database.
 	MachineLearningNotebookUrl string `json:"machineLearningNotebookUrl,omitempty"`
-	// The Oracle REST Data Services (ORDS) URL of the Web Access for the Autonomous Database.
+	// The Oracle REST Data Services (ORDS) URL of the Web Access for the Autonomous AI Database.
 	OrdsUrl string `json:"ordsUrl,omitempty"`
-	// The URL of the Database Transforms for the Autonomous Database.
+	// The URL of the Database Transforms for the Autonomous AI Database.
+	DatabaseTransformsUrl string `json:"databaseTransformsUrl,omitempty"`
+}
+
+// AutonomousDatabasePublicConnectionUrls defines nested fields for AutonomousDatabase.PublicConnectionUrls.
+type AutonomousDatabasePublicConnectionUrls struct {
+	// Oracle SQL Developer Web URL.
+	SqlDevWebUrl string `json:"sqlDevWebUrl,omitempty"`
+	// Oracle Application Express (APEX) URL.
+	ApexUrl string `json:"apexUrl,omitempty"`
+	// Oracle Machine Learning user management URL.
+	MachineLearningUserManagementUrl string `json:"machineLearningUserManagementUrl,omitempty"`
+	// The URL of the Graph Studio for the Autonomous AI Database.
+	GraphStudioUrl string `json:"graphStudioUrl,omitempty"`
+	// The URL of the MongoDB API for the Autonomous AI Database.
+	MongoDbUrl string `json:"mongoDbUrl,omitempty"`
+	// The URL of the Oracle Machine Learning (OML) Notebook for the Autonomous AI Database.
+	MachineLearningNotebookUrl string `json:"machineLearningNotebookUrl,omitempty"`
+	// The Oracle REST Data Services (ORDS) URL of the Web Access for the Autonomous AI Database.
+	OrdsUrl string `json:"ordsUrl,omitempty"`
+	// The URL of the Database Transforms for the Autonomous AI Database.
+	DatabaseTransformsUrl string `json:"databaseTransformsUrl,omitempty"`
+}
+
+// AutonomousDatabaseVanityConnectionUrls defines nested fields for AutonomousDatabase.VanityConnectionUrls.
+type AutonomousDatabaseVanityConnectionUrls struct {
+	// Oracle SQL Developer Web URL.
+	SqlDevWebUrl string `json:"sqlDevWebUrl,omitempty"`
+	// Oracle Application Express (APEX) URL.
+	ApexUrl string `json:"apexUrl,omitempty"`
+	// Oracle Machine Learning user management URL.
+	MachineLearningUserManagementUrl string `json:"machineLearningUserManagementUrl,omitempty"`
+	// The URL of the Graph Studio for the Autonomous AI Database.
+	GraphStudioUrl string `json:"graphStudioUrl,omitempty"`
+	// The URL of the MongoDB API for the Autonomous AI Database.
+	MongoDbUrl string `json:"mongoDbUrl,omitempty"`
+	// The URL of the Oracle Machine Learning (OML) Notebook for the Autonomous AI Database.
+	MachineLearningNotebookUrl string `json:"machineLearningNotebookUrl,omitempty"`
+	// The Oracle REST Data Services (ORDS) URL of the Web Access for the Autonomous AI Database.
+	OrdsUrl string `json:"ordsUrl,omitempty"`
+	// The URL of the Database Transforms for the Autonomous AI Database.
 	DatabaseTransformsUrl string `json:"databaseTransformsUrl,omitempty"`
 }
 
 // AutonomousDatabaseApexDetails defines nested fields for AutonomousDatabase.ApexDetails.
 type AutonomousDatabaseApexDetails struct {
-	// The Oracle APEX Application Development version.
+	// The Oracle APEX AI Application Development version.
 	ApexVersion string `json:"apexVersion,omitempty"`
 	// The Oracle REST Data Services (ORDS) version.
 	OrdsVersion string `json:"ordsVersion,omitempty"`
@@ -454,33 +732,49 @@ type AutonomousDatabaseApexDetails struct {
 type AutonomousDatabaseStandbyDb struct {
 	// The amount of time, in seconds, that the data of the standby database lags the data of the primary database. Can be used to determine the potential data loss in the event of a failover.
 	LagTimeInSeconds int `json:"lagTimeInSeconds,omitempty"`
-	// The current state of the Autonomous Database.
+	// The current state of the Autonomous AI Database.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Additional information about the current lifecycle state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
-	// The date and time the Autonomous Data Guard role was switched for the standby Autonomous Database.
+	// The date and time the Autonomous Data Guard role was switched for the standby Autonomous AI Database.
 	TimeDataGuardRoleChanged string `json:"timeDataGuardRoleChanged,omitempty"`
-	// The date and time the Disaster Recovery role was switched for the standby Autonomous Database.
+	// The date and time the Disaster Recovery role was switched for the standby Autonomous AI Database.
 	TimeDisasterRecoveryRoleChanged string `json:"timeDisasterRecoveryRoleChanged,omitempty"`
+	// The date and time when maintenance will begin.
+	TimeMaintenanceBegin string `json:"timeMaintenanceBegin,omitempty"`
+	// The date and time when maintenance will end.
+	TimeMaintenanceEnd string `json:"timeMaintenanceEnd,omitempty"`
+	// The component chosen for maintenance.
+	MaintenanceTargetComponent string `json:"maintenanceTargetComponent,omitempty"`
+	// The availability domain of a local Autonomous Data Guard standby database of an Autonomous AI Database Serverless instance.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 }
 
 // AutonomousDatabaseLocalStandbyDb defines nested fields for AutonomousDatabase.LocalStandbyDb.
 type AutonomousDatabaseLocalStandbyDb struct {
 	// The amount of time, in seconds, that the data of the standby database lags the data of the primary database. Can be used to determine the potential data loss in the event of a failover.
 	LagTimeInSeconds int `json:"lagTimeInSeconds,omitempty"`
-	// The current state of the Autonomous Database.
+	// The current state of the Autonomous AI Database.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Additional information about the current lifecycle state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
-	// The date and time the Autonomous Data Guard role was switched for the standby Autonomous Database.
+	// The date and time the Autonomous Data Guard role was switched for the standby Autonomous AI Database.
 	TimeDataGuardRoleChanged string `json:"timeDataGuardRoleChanged,omitempty"`
-	// The date and time the Disaster Recovery role was switched for the standby Autonomous Database.
+	// The date and time the Disaster Recovery role was switched for the standby Autonomous AI Database.
 	TimeDisasterRecoveryRoleChanged string `json:"timeDisasterRecoveryRoleChanged,omitempty"`
+	// The date and time when maintenance will begin.
+	TimeMaintenanceBegin string `json:"timeMaintenanceBegin,omitempty"`
+	// The date and time when maintenance will end.
+	TimeMaintenanceEnd string `json:"timeMaintenanceEnd,omitempty"`
+	// The component chosen for maintenance.
+	MaintenanceTargetComponent string `json:"maintenanceTargetComponent,omitempty"`
+	// The availability domain of a local Autonomous Data Guard standby database of an Autonomous AI Database Serverless instance.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
 }
 
 // AutonomousDatabaseRemoteDisasterRecoveryConfiguration defines nested fields for AutonomousDatabase.RemoteDisasterRecoveryConfiguration.
 type AutonomousDatabaseRemoteDisasterRecoveryConfiguration struct {
-	// Indicates the disaster recovery (DR) type of the Autonomous Database Serverless instance.
+	// Indicates the disaster recovery (DR) type of the Autonomous AI Database Serverless instance.
 	// Autonomous Data Guard (ADG) DR type provides business critical DR with a faster recovery time objective (RTO) during failover or switchover.
 	// Backup-based DR type provides lower cost DR with a slower RTO during failover or switchover.
 	DisasterRecoveryType string `json:"disasterRecoveryType,omitempty"`
@@ -495,44 +789,51 @@ type AutonomousDatabaseRemoteDisasterRecoveryConfiguration struct {
 // AutonomousDatabaseStatus defines the observed state of AutonomousDatabase.
 type AutonomousDatabaseStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Autonomous AI Database.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The current state of the Autonomous Database.
+	// The current state of the Autonomous AI Database.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The database name.
 	DbName string `json:"dbName,omitempty"`
 	// The quantity of data in the database, in terabytes.
+	// The following points apply to Autonomous AI Databases on Serverless Infrastructure:
+	// - This is an integer field whose value remains null when the data size is in GBs and cannot be converted to TBs (by dividing the GB value by 1024) without rounding error.
+	// - To get the exact value of data storage size without rounding error, please see `dataStorageSizeInGBs` of Autonomous AI Database.
 	DataStorageSizeInTBs int `json:"dataStorageSizeInTBs,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription with which resource needs to be associated with.
+	SubscriptionId string `json:"subscriptionId,omitempty"`
 	// Information about the current lifecycle state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId string `json:"kmsKeyId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId string `json:"vaultId,omitempty"`
 	// KMS key lifecycle details.
-	KmsKeyLifecycleDetails string `json:"kmsKeyLifecycleDetails,omitempty"`
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
-	KmsKeyVersionId string `json:"kmsKeyVersionId,omitempty"`
-	// The character set for the autonomous database.  The default is AL32UTF8. Allowed values are:
+	KmsKeyLifecycleDetails string                          `json:"kmsKeyLifecycleDetails,omitempty"`
+	EncryptionKey          AutonomousDatabaseEncryptionKey `json:"encryptionKey,omitempty"`
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous AI Database Serverless does not use key versions, hence is not applicable for Autonomous AI Database Serverless instances.
+	KmsKeyVersionId              string                                         `json:"kmsKeyVersionId,omitempty"`
+	EncryptionKeyLocationDetails AutonomousDatabaseEncryptionKeyLocationDetails `json:"encryptionKeyLocationDetails,omitempty"`
+	// The character set for the Autonomous AI Database.  The default is AL32UTF8. Allowed values are:
 	// AL32UTF8, AR8ADOS710, AR8ADOS720, AR8APTEC715, AR8ARABICMACS, AR8ASMO8X, AR8ISO8859P6, AR8MSWIN1256, AR8MUSSAD768, AR8NAFITHA711, AR8NAFITHA721, AR8SAKHR706, AR8SAKHR707, AZ8ISO8859P9E, BG8MSWIN, BG8PC437S, BLT8CP921, BLT8ISO8859P13, BLT8MSWIN1257, BLT8PC775, BN8BSCII, CDN8PC863, CEL8ISO8859P14, CL8ISO8859P5, CL8ISOIR111, CL8KOI8R, CL8KOI8U, CL8MACCYRILLICS, CL8MSWIN1251, EE8ISO8859P2, EE8MACCES, EE8MACCROATIANS, EE8MSWIN1250, EE8PC852, EL8DEC, EL8ISO8859P7, EL8MACGREEKS, EL8MSWIN1253, EL8PC437S, EL8PC851, EL8PC869, ET8MSWIN923, HU8ABMOD, HU8CWI2, IN8ISCII, IS8PC861, IW8ISO8859P8, IW8MACHEBREWS, IW8MSWIN1255, IW8PC1507, JA16EUC, JA16EUCTILDE, JA16SJIS, JA16SJISTILDE, JA16VMS, KO16KSC5601, KO16KSCCS, KO16MSWIN949, LA8ISO6937, LA8PASSPORT, LT8MSWIN921, LT8PC772, LT8PC774, LV8PC1117, LV8PC8LR, LV8RST104090, N8PC865, NE8ISO8859P10, NEE8ISO8859P4, RU8BESTA, RU8PC855, RU8PC866, SE8ISO8859P3, TH8MACTHAIS, TH8TISASCII, TR8DEC, TR8MACTURKISHS, TR8MSWIN1254, TR8PC857, US7ASCII, US8PC437, UTF8, VN8MSWIN1258, VN8VN3, WE8DEC, WE8DG, WE8ISO8859P1, WE8ISO8859P15, WE8ISO8859P9, WE8MACROMAN8S, WE8MSWIN1252, WE8NCR4970, WE8NEXTSTEP, WE8PC850, WE8PC858, WE8PC860, WE8ROMAN8, ZHS16CGB231280, ZHS16GBK, ZHT16BIG5, ZHT16CCDC, ZHT16DBT, ZHT16HKSCS, ZHT16MSWIN950, ZHT32EUC, ZHT32SOPS, ZHT32TRIS
 	CharacterSet string `json:"characterSet,omitempty"`
-	// The national character set for the autonomous database.  The default is AL16UTF16. Allowed values are:
+	// The national character set for the Autonomous AI Database.  The default is AL16UTF16. Allowed values are:
 	// AL16UTF16 or UTF8.
 	NcharacterSet string `json:"ncharacterSet,omitempty"`
-	// The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous Database. This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform.
+	// The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous AI Database. This property is applicable only to Autonomous AI Databases on the Exadata Cloud@Customer platform.
 	InMemoryPercentage int `json:"inMemoryPercentage,omitempty"`
-	// The area assigned to In-Memory tables in Autonomous Database.
+	// The area assigned to In-Memory tables in Autonomous AI Database.
 	InMemoryAreaInGBs int `json:"inMemoryAreaInGBs,omitempty"`
 	// The date and time when the next long-term backup would be created.
 	NextLongTermBackupTimeStamp string                                   `json:"nextLongTermBackupTimeStamp,omitempty"`
 	LongTermBackupSchedule      AutonomousDatabaseLongTermBackupSchedule `json:"longTermBackupSchedule,omitempty"`
-	// Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.
+	// Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous AI Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isLocalDataGuardEnabled
 	IsFreeTier bool `json:"isFreeTier,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 	// The date and time the Always Free database will be stopped because of inactivity. If this time is reached without any database activity, the database will automatically be put into the STOPPED state.
 	TimeReclamationOfFreeAutonomousDatabase string `json:"timeReclamationOfFreeAutonomousDatabase,omitempty"`
@@ -541,15 +842,17 @@ type AutonomousDatabaseStatus struct {
 	BackupConfig                         AutonomousDatabaseBackupConfig `json:"backupConfig,omitempty"`
 	// Key History Entry.
 	KeyHistoryEntry []AutonomousDatabaseKeyHistoryEntry `json:"keyHistoryEntry,omitempty"`
-	// The number of CPU cores to be made available to the database. When the ECPU is selected, the value for cpuCoreCount is 0. For Autonomous Database on Dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database&id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.
+	// Key History Entry.
+	EncryptionKeyHistoryEntry []AutonomousDatabaseEncryptionKeyHistoryEntry `json:"encryptionKeyHistoryEntry,omitempty"`
+	// The number of CPU cores to be made available to the database. When the ECPU is selected, the value for cpuCoreCount is 0. For Autonomous AI Database on Dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/) for shape details.
 	// **Note:** This parameter cannot be used with the `ocpuCount` parameter.
 	CpuCoreCount int `json:"cpuCoreCount,omitempty"`
 	// Parameter that allows users to select an acceptable maximum data loss limit in seconds, up to which Automatic Failover will be triggered when necessary for a Local Autonomous Data Guard
 	LocalAdgAutoFailoverMaxDataLossLimit int `json:"localAdgAutoFailoverMaxDataLossLimit,omitempty"`
-	// The compute model of the Autonomous Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy.
+	// The compute model of the Autonomous AI Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy.
 	ComputeModel string `json:"computeModel,omitempty"`
-	// The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous Database Serverless instance or an Autonomous Database on Dedicated Exadata Infrastructure.
-	// For an Autonomous Database Serverless instance, the 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU.
+	// The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous AI Database Serverless instance or an Autonomous AI Database on Dedicated Exadata Infrastructure.
+	// The 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU.
 	ComputeCount float32 `json:"computeCount,omitempty"`
 	// Retention period, in days, for long-term backups
 	BackupRetentionPeriodInDays int `json:"backupRetentionPeriodInDays,omitempty"`
@@ -557,65 +860,89 @@ type AutonomousDatabaseStatus struct {
 	TotalBackupStorageSizeInGBs float64 `json:"totalBackupStorageSizeInGBs,omitempty"`
 	// The number of OCPU cores to be made available to the database.
 	// The following points apply:
-	// - For Autonomous Databases on Dedicated Exadata Infrastructure, to provision less than 1 core, enter a fractional value in an increment of 0.1. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. (Note that fractional OCPU values are not supported for Autonomous Database Serverless instances.)
-	// - To provision cores, enter an integer between 1 and the maximum number of cores available for the infrastructure shape. For example, you can provision 2 cores or 3 cores, but not 2.5 cores. This applies to Autonomous Databases on both serverless and dedicated Exadata infrastructure.
-	// - For Autonomous Database Serverless instances, this parameter is not used.
-	// For Autonomous Databases on Dedicated Exadata Infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/index.html) for shape details.
+	// - For Autonomous AI Databases on Dedicated Exadata Infrastructure, to provision less than 1 core, enter a fractional value in an increment of 0.1. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. (Note that fractional OCPU values are not supported for Autonomous AI Database Serverless instances.)
+	// - To provision cores, enter an integer between 1 and the maximum number of cores available for the infrastructure shape. For example, you can provision 2 cores or 3 cores, but not 2.5 cores. This applies to Autonomous AI Databases on both serverless and dedicated Exadata infrastructure.
+	// - For Autonomous AI Database Serverless instances, this parameter is not used.
+	// For Autonomous AI Databases on Dedicated Exadata Infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/index.html) for shape details.
 	// **Note:** This parameter cannot be used with the `cpuCoreCount` parameter.
 	OcpuCount float32 `json:"ocpuCount,omitempty"`
-	// An array of CPU values that an Autonomous Database can be scaled to.
+	// An array of CPU values that an Autonomous AI Database can be scaled to.
 	ProvisionableCpus []float32 `json:"provisionableCpus,omitempty"`
-	// The amount of memory (in GBs) enabled per ECPU or OCPU.
+	// The amount of memory (in GBs rounded off to nearest integer value) enabled per ECPU or OCPU. This is deprecated. Please refer to memoryPerComputeUnitInGBs for accurate value.
 	MemoryPerOracleComputeUnitInGBs int `json:"memoryPerOracleComputeUnitInGBs,omitempty"`
+	// The amount of memory (in GBs) to be enabled per OCPU or ECPU.
+	MemoryPerComputeUnitInGBs float32 `json:"memoryPerComputeUnitInGBs,omitempty"`
 	// The quantity of data in the database, in gigabytes.
+	// For Autonomous AI Transaction Processing databases using ECPUs on Serverless Infrastructure, this value is always populated. In all the other cases, this value will be null and `dataStorageSizeInTBs` will be populated instead.
 	DataStorageSizeInGBs int `json:"dataStorageSizeInGBs,omitempty"`
-	// The storage space consumed by Autonomous Database in GBs.
+	// The storage space consumed by Autonomous AI Database in GBs.
 	UsedDataStorageSizeInGBs int `json:"usedDataStorageSizeInGBs,omitempty"`
 	// The infrastructure type this resource belongs to.
 	InfrastructureType string `json:"infrastructureType,omitempty"`
 	// True if the database uses dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
 	IsDedicated bool `json:"isDedicated,omitempty"`
-	// The Autonomous Container Database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). Used only by Autonomous Database on Dedicated Exadata Infrastructure.
+	// The Autonomous Container Database OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). Used only by Autonomous AI Database on Dedicated Exadata Infrastructure.
 	AutonomousContainerDatabaseId string `json:"autonomousContainerDatabaseId,omitempty"`
-	// The date and time the Autonomous Database was created.
+	// Indicates if the Autonomous AI Database is backup retention locked.
+	IsBackupRetentionLocked bool `json:"isBackupRetentionLocked,omitempty"`
+	// The date and time the Autonomous AI Database was most recently undeleted.
+	TimeUndeleted string `json:"timeUndeleted,omitempty"`
+	// The earliest(min) date and time the Autonomous AI Database can be scheduled to upgrade to 26ai.
+	TimeEarliestAvailableDbVersionUpgrade string `json:"timeEarliestAvailableDbVersionUpgrade,omitempty"`
+	// The max date and time the Autonomous AI Database can be scheduled to upgrade to 26ai.
+	TimeLatestAvailableDbVersionUpgrade string `json:"timeLatestAvailableDbVersionUpgrade,omitempty"`
+	// The date and time the Autonomous AI Database scheduled to upgrade to 26ai.
+	TimeScheduledDbVersionUpgrade string `json:"timeScheduledDbVersionUpgrade,omitempty"`
+	// The date and time the Autonomous AI Database was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
-	// The user-friendly name for the Autonomous Database. The name does not have to be unique.
+	// The user-friendly name for the Autonomous AI Database. The name does not have to be unique.
 	DisplayName string `json:"displayName,omitempty"`
-	// The URL of the Service Console for the Autonomous Database.
+	// The URL of the Service Console for the Autonomous AI Database.
 	ServiceConsoleUrl string `json:"serviceConsoleUrl,omitempty"`
-	// The connection string used to connect to the Autonomous Database. The username for the Service Console is ADMIN. Use the password you entered when creating the Autonomous Database for the password value.
+	// The connection string used to connect to the Autonomous AI Database. The username for the Service Console is ADMIN. Use the password you entered when creating the Autonomous AI Database for the password value.
 	ConnectionStrings AutonomousDatabaseConnectionStrings `json:"connectionStrings,omitempty"`
 	ConnectionUrls    AutonomousDatabaseConnectionUrls    `json:"connectionUrls,omitempty"`
-	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
-	// License Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.
-	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
-	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
+	// The Public URLs of Private Endpoint database for accessing Oracle Application Express (APEX) and SQL Developer Web with a browser from a Compute instance within your VCN or that has a direct connection to your VCN.
+	PublicConnectionUrls AutonomousDatabasePublicConnectionUrls `json:"publicConnectionUrls,omitempty"`
+	VanityConnectionUrls AutonomousDatabaseVanityConnectionUrls `json:"vanityConnectionUrls,omitempty"`
+	// The Oracle license model that applies to the Oracle Autonomous AI Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
+	// License Included allows you to subscribe to new Oracle AI Database software licenses and the Oracle AI Database service.
+	// Note that when provisioning an Autonomous AI Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
+	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	LicenseModel string `json:"licenseModel,omitempty"`
-	// The amount of storage that has been used, in terabytes.
+	// The maximum number of CPUs allowed with a Bring Your Own License (BYOL), including those used for auto-scaling, disaster recovery, tools, etc. Any CPU usage above this limit is considered as License Included and billed.
+	ByolComputeCountLimit float32 `json:"byolComputeCountLimit,omitempty"`
+	// The amount of storage that has been used for Autonomous AI Databases in dedicated infrastructure, in terabytes.
 	UsedDataStorageSizeInTBs int `json:"usedDataStorageSizeInTBs,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.
 	// **Subnet Restrictions:**
 	// - For bare metal DB systems and for single node virtual machine DB systems, do not use a subnet that overlaps with 192.168.16.16/28.
 	// - For Exadata and virtual machine 2-node RAC systems, do not use a subnet that overlaps with 192.168.128.0/20.
-	// - For Autonomous Database, setting this will disable public secure access to the database.
+	// - For Autonomous AI Database, setting this will disable public secure access to the database.
 	// These subnets are used by the Oracle Clusterware private interconnect on the database instance.
 	// Specifying an overlapping subnet will cause the private interconnect to malfunction.
 	// This restriction applies to both the client subnet and the backup subnet.
 	SubnetId string `json:"subnetId,omitempty"`
-	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
 	// **NsgIds restrictions:**
-	// - A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty.
+	// - A network security group (NSG) is optional for Autonomous AI Databases with private access. The nsgIds list can be empty.
 	NsgIds []string `json:"nsgIds,omitempty"`
 	// The private endpoint for the resource.
 	PrivateEndpoint string `json:"privateEndpoint,omitempty"`
+	// The public endpoint for the private endpoint enabled resource.
+	PublicEndpoint string `json:"publicEndpoint,omitempty"`
 	// The resource's private endpoint label.
 	// - Setting the endpoint label to a non-empty string creates a private endpoint database.
 	// - Resetting the endpoint label to an empty string, after the creation of the private endpoint database, changes the private endpoint database to a public endpoint database.
@@ -624,30 +951,37 @@ type AutonomousDatabaseStatus struct {
 	PrivateEndpointLabel string `json:"privateEndpointLabel,omitempty"`
 	// The private endpoint Ip address for the resource.
 	PrivateEndpointIp string `json:"privateEndpointIp,omitempty"`
-	// A valid Oracle Database version for Autonomous Database.
+	// A valid Oracle AI Database version for Autonomous AI Database.
+	// When you specify 23ai for dbversion, the system will provision a 23ai database, but the UI will display it as 26ai.
+	// When you specify 26ai for dbversion, the system will provision and display a 26ai database as expected.
+	// For new databases, it is recommended to use either 19c or 26ai.
+	// **Note** Starting December 2026, 23ai will not be supported as a valid value for this parameter.
 	DbVersion string `json:"dbVersion,omitempty"`
-	// Indicates if the Autonomous Database version is a preview version.
+	// Indicates if the Autonomous AI Database version is a preview version.
 	IsPreview bool `json:"isPreview,omitempty"`
-	// The Autonomous Database workload type. The following values are valid:
-	// - OLTP - indicates an Autonomous Transaction Processing database
-	// - DW - indicates an Autonomous Data Warehouse database
-	// - AJD - indicates an Autonomous JSON Database
-	// - APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.
+	// The Autonomous AI Database workload type. The following values are valid:
+	// - OLTP - indicates an Autonomous AI Transaction Processing database
+	// - DW - indicates an Autonomous AI Lakehouse database
+	// - AJD - indicates an Autonomous AI JSON Database
+	// - APEX - indicates an Autonomous AI Database with the Oracle APEX AI Application Development workload type.
+	// - LH - indicates an Oracle Autonomous AI Lakehouse database
+	// **Note** Starting December 2026, DW will not be supported as a valid value for this parameter.
+	//
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	DbWorkload string `json:"dbWorkload,omitempty"`
-	// This project introduces Autonomous Database for Developers (ADB-Dev), a free tier on dedicated infrastructure, and Cloud@Customer for database development purposes. ADB-Dev enables ExaDB customers to experiment with ADB for free and incentivizes enterprises to use ADB for new development projects.Note that ADB-Dev have 4 CPU and 20GB of memory. For ADB-Dev , memory and CPU cannot be scaled
+	// Autonomous AI Database for Developers are fixed-shape Autonomous AI Databases that developers can use to build and test new applications. On Serverless, these are low-cost and billed per instance, on Dedicated and Cloud@Customer there is no additional cost to create Developer databases. Developer databases come with limited resources and is not intended for large-scale testing and production deployments. When you need more compute or storage resources, you may upgrade to a full paid production database.
 	IsDevTier bool `json:"isDevTier,omitempty"`
 	// Indicates if the database-level access control is enabled.
 	// If disabled, database access is defined by the network security rules.
 	// If enabled, database access is restricted to the IP addresses defined by the rules specified with the `whitelistedIps` property. While specifying `whitelistedIps` rules is optional,
 	//  if database-level access control is enabled and no rules are specified, the database will become inaccessible. The rules can be added later using the `UpdateAutonomousDatabase` API operation or edit option in console.
 	// When creating a database clone, the desired access control setting should be specified. By default, database-level access control will be disabled for the clone.
-	// This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform. For Autonomous Database Serverless instances, `whitelistedIps` is used.
+	// This property is applicable only to Autonomous AI Databases on the Exadata Cloud@Customer platform. For Autonomous AI Database Serverless instances, `whitelistedIps` is used.
 	IsAccessControlEnabled bool `json:"isAccessControlEnabled,omitempty"`
-	// The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
-	// Only clients connecting from an IP address included in the ACL may access the Autonomous Database instance.
-	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
-	// For Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
+	// The client IP access control list (ACL). This feature is available for Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
+	// Only clients connecting from an IP address included in the ACL may access the Autonomous AI Database instance.
+	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous AI Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
+	// For Autonomous AI Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
 	// Multiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.
 	// Example: `["1.1.1.1","1.1.1.0/24","ocid1.vcn.oc1.sea.<unique_id>","ocid1.vcn.oc1.sea.<unique_id1>;1.1.1.1","ocid1.vcn.oc1.sea.<unique_id2>;1.1.0.0/16"]`
 	// For Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.
@@ -655,14 +989,14 @@ type AutonomousDatabaseStatus struct {
 	// For an update operation, if you want to delete all the IPs in the ACL, use an array with a single empty string entry.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	WhitelistedIps []string `json:"whitelistedIps,omitempty"`
-	// This field will be null if the Autonomous Database is not Data Guard enabled or Access Control is disabled.
-	// It's value would be `TRUE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses primary IP access control list (ACL) for standby.
-	// It's value would be `FALSE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses different IP access control list (ACL) for standby compared to primary.
+	// This field will be null if the Autonomous AI Database is not Data Guard enabled or Access Control is disabled.
+	// It's value would be `TRUE` if Autonomous AI Database is Data Guard enabled and Access Control is enabled and if the Autonomous AI Database uses primary IP access control list (ACL) for standby.
+	// It's value would be `FALSE` if Autonomous AI Database is Data Guard enabled and Access Control is enabled and if the Autonomous AI Database uses different IP access control list (ACL) for standby compared to primary.
 	ArePrimaryWhitelistedIpsUsed bool `json:"arePrimaryWhitelistedIpsUsed,omitempty"`
-	// The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
-	// Only clients connecting from an IP address included in the ACL may access the Autonomous Database instance.
-	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
-	// For Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
+	// The client IP access control list (ACL). This feature is available for Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
+	// Only clients connecting from an IP address included in the ACL may access the Autonomous AI Database instance.
+	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous AI Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
+	// For Autonomous AI Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
 	// Multiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.
 	// Example: `["1.1.1.1","1.1.1.0/24","ocid1.vcn.oc1.sea.<unique_id>","ocid1.vcn.oc1.sea.<unique_id1>;1.1.1.1","ocid1.vcn.oc1.sea.<unique_id2>;1.1.0.0/16"]`
 	// For Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.
@@ -670,21 +1004,23 @@ type AutonomousDatabaseStatus struct {
 	// For an update operation, if you want to delete all the IPs in the ACL, use an array with a single empty string entry.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	StandbyWhitelistedIps []string `json:"standbyWhitelistedIps,omitempty"`
-	// Information about Oracle APEX Application Development.
+	// Information about Oracle APEX AI Application Development.
 	ApexDetails AutonomousDatabaseApexDetails `json:"apexDetails,omitempty"`
-	// Indicates if auto scaling is enabled for the Autonomous Database CPU core count. The default value is `TRUE`.
+	// Indicates if auto scaling is enabled for the Autonomous AI Database CPU core count. The default value is `TRUE`.
 	IsAutoScalingEnabled bool `json:"isAutoScalingEnabled,omitempty"`
-	// Status of the Data Safe registration for this Autonomous Database.
+	// Status of the Data Safe registration for this Autonomous AI Database.
 	DataSafeStatus string `json:"dataSafeStatus,omitempty"`
-	// Status of Operations Insights for this Autonomous Database.
+	// Status of Operations Insights for this Autonomous AI Database.
 	OperationsInsightsStatus string `json:"operationsInsightsStatus,omitempty"`
-	// Status of Database Management for this Autonomous Database.
+	// Status of Database Management for this Autonomous AI Database.
 	DatabaseManagementStatus string `json:"databaseManagementStatus,omitempty"`
 	// The date and time when maintenance will begin.
 	TimeMaintenanceBegin string `json:"timeMaintenanceBegin,omitempty"`
 	// The date and time when maintenance will end.
 	TimeMaintenanceEnd string `json:"timeMaintenanceEnd,omitempty"`
-	// Indicates if the Autonomous Database is a refreshable clone.
+	// The component chosen for maintenance.
+	MaintenanceTargetComponent string `json:"maintenanceTargetComponent,omitempty"`
+	// Indicates if the Autonomous AI Database is a refreshable clone.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	IsRefreshableClone bool `json:"isRefreshableClone,omitempty"`
 	// The date and time when last refresh happened.
@@ -693,101 +1029,124 @@ type AutonomousDatabaseStatus struct {
 	TimeOfLastRefreshPoint string `json:"timeOfLastRefreshPoint,omitempty"`
 	// The date and time of next refresh.
 	TimeOfNextRefresh string `json:"timeOfNextRefresh,omitempty"`
-	// Indicates the Autonomous Database mode. The database can be opened in `READ_ONLY` or `READ_WRITE` mode.
+	// Indicates the Autonomous AI Database mode. The database can be opened in `READ_ONLY` or `READ_WRITE` mode.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	OpenMode string `json:"openMode,omitempty"`
-	// The refresh status of the clone. REFRESHING indicates that the clone is currently being refreshed with data from the source Autonomous Database.
+	// The refresh status of the clone. REFRESHING indicates that the clone is currently being refreshed with data from the source Autonomous AI Database.
 	RefreshableStatus string `json:"refreshableStatus,omitempty"`
-	// The refresh mode of the clone. AUTOMATIC indicates that the clone is automatically being refreshed with data from the source Autonomous Database.
+	// The refresh mode of the clone. AUTOMATIC indicates that the clone is automatically being refreshed with data from the source Autonomous AI Database.
 	RefreshableMode string `json:"refreshableMode,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database that was cloned to create the current Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the source Autonomous AI Database that was cloned to create the current Autonomous AI Database.
 	SourceId string `json:"sourceId,omitempty"`
-	// The Autonomous Database permission level. Restricted mode allows access only by admin users.
+	// The Autonomous AI Database permission level. Restricted mode allows access only by admin users.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	PermissionLevel string `json:"permissionLevel,omitempty"`
-	// The timestamp of the last switchover operation for the Autonomous Database.
+	// The timestamp of the last switchover operation for the Autonomous AI Database.
 	TimeOfLastSwitchover string `json:"timeOfLastSwitchover,omitempty"`
 	// The timestamp of the last failover operation.
 	TimeOfLastFailover string `json:"timeOfLastFailover,omitempty"`
-	// **Deprecated.** Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// **Deprecated.** Indicates whether the Autonomous AI Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	IsDataGuardEnabled bool `json:"isDataGuardEnabled,omitempty"`
 	// Indicates the number of seconds of data loss for a Data Guard failover.
 	FailedDataRecoveryInSeconds int `json:"failedDataRecoveryInSeconds,omitempty"`
 	// **Deprecated** Autonomous Data Guard standby database details.
 	StandbyDb AutonomousDatabaseStandbyDb `json:"standbyDb,omitempty"`
-	// Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// Indicates whether the Autonomous AI Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	IsLocalDataGuardEnabled bool `json:"isLocalDataGuardEnabled,omitempty"`
-	// Indicates whether the Autonomous Database has Cross Region Data Guard enabled. Not applicable to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// Indicates whether the Autonomous AI Database has Cross Region Data Guard enabled. Not applicable to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	IsRemoteDataGuardEnabled bool                             `json:"isRemoteDataGuardEnabled,omitempty"`
 	LocalStandbyDb           AutonomousDatabaseLocalStandbyDb `json:"localStandbyDb,omitempty"`
-	// The Data Guard role of the Autonomous Container Database or Autonomous Database, if Autonomous Data Guard is enabled.
+	// The Data Guard role of the Autonomous Container Database or Autonomous AI Database, if Autonomous Data Guard is enabled.
 	Role string `json:"role,omitempty"`
-	// List of Oracle Database versions available for a database upgrade. If there are no version upgrades available, this list is empty.
+	// List of Oracle AI Database versions available for a database upgrade. If there are no version upgrades available, this list is empty.
 	AvailableUpgradeVersions []string `json:"availableUpgradeVersions,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
 	KeyStoreId string `json:"keyStoreId,omitempty"`
 	// The wallet name for Oracle Key Vault.
 	KeyStoreWalletName string `json:"keyStoreWalletName,omitempty"`
-	// The list of regions that support the creation of an Autonomous Database clone or an Autonomous Data Guard standby database.
+	// The frequency a refreshable clone is refreshed after auto-refresh is enabled. The minimum is 1 hour. The maximum is 7 days. The date and time that auto-refresh is enabled is controlled by the `timeOfAutoRefreshStart` parameter.
+	AutoRefreshFrequencyInSeconds int `json:"autoRefreshFrequencyInSeconds,omitempty"`
+	// The time, in seconds, the data of the refreshable clone lags the primary database at the point of refresh. The minimum is 0 minutes (0 mins means refresh to the latest available timestamp). The maximum is 7 days. The lag time increases after refreshing until the next data refresh happens.
+	AutoRefreshPointLagInSeconds int `json:"autoRefreshPointLagInSeconds,omitempty"`
+	// The the date and time that auto-refreshing will begin for an Autonomous AI Database refreshable clone. This value controls only the start time for the first refresh operation. Subsequent (ongoing) refresh operations have start times controlled by the value of the `autoRefreshFrequencyInSeconds` parameter.
+	TimeOfAutoRefreshStart string `json:"timeOfAutoRefreshStart,omitempty"`
+	// The list of regions that support the creation of an Autonomous AI Database clone or an Autonomous Data Guard standby database.
 	SupportedRegionsToCloneTo []string `json:"supportedRegionsToCloneTo,omitempty"`
 	// Customer Contacts.
 	CustomerContacts []AutonomousDatabaseCustomerContact `json:"customerContacts,omitempty"`
-	// The date and time that Autonomous Data Guard was enabled for an Autonomous Database where the standby was provisioned in the same region as the primary database.
+	// The date and time that Autonomous Data Guard was enabled for an Autonomous AI Database where the standby was provisioned in the same region as the primary database.
 	TimeLocalDataGuardEnabled string `json:"timeLocalDataGuardEnabled,omitempty"`
-	// The Autonomous Data Guard region type of the Autonomous Database. For Autonomous Database Serverless, Autonomous Data Guard associations have designated primary and standby regions, and these region types do not change when the database changes roles. The standby regions in Autonomous Data Guard associations can be the same region designated as the primary region, or they can be remote regions. Certain database administrative operations may be available only in the primary region of the Autonomous Data Guard association, and cannot be performed when the database using the primary role is operating in a remote Autonomous Data Guard standby region.
+	// **Deprecated.** The Autonomous Data Guard region type of the Autonomous AI Database. For Autonomous AI Database Serverless, Autonomous Data Guard associations have designated primary and standby regions, and these region types do not change when the database changes roles. The standby regions in Autonomous Data Guard associations can be the same region designated as the primary region, or they can be remote regions. Certain database administrative operations may be available only in the primary region of the Autonomous Data Guard association, and cannot be performed when the database using the primary role is operating in a remote Autonomous Data Guard standby region.
 	DataguardRegionType string `json:"dataguardRegionType,omitempty"`
-	// The date and time the Autonomous Data Guard role was switched for the Autonomous Database. For databases that have standbys in both the primary Data Guard region and a remote Data Guard standby region, this is the latest timestamp of either the database using the "primary" role in the primary Data Guard region, or database located in the remote Data Guard standby region.
+	// The date and time the Autonomous Data Guard role was switched for the Autonomous AI Database. For databases that have standbys in both the primary Data Guard region and a remote Data Guard standby region, this is the latest timestamp of either the database using the "primary" role in the primary Data Guard region, or database located in the remote Data Guard standby region.
 	TimeDataGuardRoleChanged string `json:"timeDataGuardRoleChanged,omitempty"`
-	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of standby databases located in Autonomous Data Guard remote regions that are associated with the source database. Note that for Autonomous Database Serverless instances, standby databases located in the same region as the source primary database do not have OCIDs.
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of standby databases located in Autonomous Data Guard remote regions that are associated with the source database. Note that for Autonomous AI Database Serverless instances, standby databases located in the same region as the source primary database do not have OCIDs.
 	PeerDbIds []string `json:"peerDbIds,omitempty"`
-	// Specifies if the Autonomous Database requires mTLS connections.
+	// Specifies if the Autonomous AI Database requires mTLS connections.
 	// This may not be updated in parallel with any of the following: licenseModel, databaseEdition, cpuCoreCount, computeCount, dataStorageSizeInTBs, whitelistedIps, openMode, permissionLevel, db-workload, privateEndpointLabel, nsgIds, customerContacts, dbVersion, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// Service Change: The default value of the isMTLSConnectionRequired attribute will change from true to false on July 1, 2023 in the following APIs:
 	// - CreateAutonomousDatabase
 	// - GetAutonomousDatabase
 	// - UpdateAutonomousDatabase
-	// Details: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous Database Serverless.
+	// Details: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous AI Database Serverless.
 	// Does this impact me? If you use or maintain custom scripts or Terraform scripts referencing the CreateAutonomousDatabase, GetAutonomousDatabase, or UpdateAutonomousDatabase APIs, you want to check, and possibly modify, the scripts for the changed default value of the attribute. Should you choose not to leave your scripts unchanged, the API calls containing this attribute will continue to work, but the default value will switch from true to false.
 	// How do I make this change? Using either OCI SDKs or command line tools, update your custom scripts to explicitly set the isMTLSConnectionRequired attribute to true.
 	IsMtlsConnectionRequired bool `json:"isMtlsConnectionRequired,omitempty"`
 	// The time the member joined the resource pool.
 	TimeOfJoiningResourcePool string `json:"timeOfJoiningResourcePool,omitempty"`
-	// The unique identifier for leader autonomous database OCID OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The unique identifier for leader Autonomous AI Database OCID OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	ResourcePoolLeaderId string                                `json:"resourcePoolLeaderId,omitempty"`
 	ResourcePoolSummary  AutonomousDatabaseResourcePoolSummary `json:"resourcePoolSummary,omitempty"`
 	// Indicates if the refreshable clone can be reconnected to its source database.
 	IsReconnectCloneEnabled bool `json:"isReconnectCloneEnabled,omitempty"`
 	// The time and date as an RFC3339 formatted string, e.g., 2022-01-01T12:00:00.000Z, to set the limit for a refreshable clone to be reconnected to its source database.
 	TimeUntilReconnectCloneEnabled string `json:"timeUntilReconnectCloneEnabled,omitempty"`
-	// The maintenance schedule type of the Autonomous Database Serverless. An EARLY maintenance schedule
+	// The maintenance schedule type of the Autonomous AI Database Serverless. An EARLY maintenance schedule
 	// follows a schedule applying patches prior to the REGULAR schedule. A REGULAR maintenance schedule follows the normal cycle
-	AutonomousMaintenanceScheduleType string `json:"autonomousMaintenanceScheduleType,omitempty"`
+	AutonomousMaintenanceScheduleType   string                              `json:"autonomousMaintenanceScheduleType,omitempty"`
+	AutonomousDatabaseMaintenanceWindow AutonomousDatabaseMaintenanceWindow `json:"autonomousDatabaseMaintenanceWindow,omitempty"`
+	// The date until which Autonomous AI Database maintenance is temporarily paused.
+	TimeMaintenancePauseUntil string `json:"timeMaintenancePauseUntil,omitempty"`
 	// The list of scheduled operations. Consists of values such as dayOfWeek, scheduledStartTime, scheduledStopTime.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	ScheduledOperations []AutonomousDatabaseScheduledOperation `json:"scheduledOperations,omitempty"`
-	// Indicates if auto scaling is enabled for the Autonomous Database storage. The default value is `FALSE`.
+	// Indicates if auto scaling is enabled for the Autonomous AI Database storage. The default value is `FALSE`.
 	IsAutoScalingForStorageEnabled bool `json:"isAutoScalingForStorageEnabled,omitempty"`
 	// The amount of storage currently allocated for the database tables and billed for, rounded up. When auto-scaling is not enabled, this value is equal to the `dataStorageSizeInTBs` value. You can compare this value to the `actualUsedDataStorageSizeInTBs` value to determine if a manual shrink operation is appropriate for your allocated storage.
 	// **Note:** Auto-scaling does not automatically decrease allocated storage when data is deleted from the database.
 	AllocatedStorageSizeInTBs float64 `json:"allocatedStorageSizeInTBs,omitempty"`
 	// The current amount of storage in use for user and system data, in terabytes (TB).
 	ActualUsedDataStorageSizeInTBs float64 `json:"actualUsedDataStorageSizeInTBs,omitempty"`
-	// The Oracle Database Edition that applies to the Autonomous databases.
+	// The Oracle AI Database Edition that applies to the Autonomous AI Databases.
 	DatabaseEdition string `json:"databaseEdition,omitempty"`
 	// The list of database tools details.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, isLocalDataGuardEnabled, or isFreeTier.
-	DbToolsDetails []AutonomousDatabaseDbToolsDetail `json:"dbToolsDetails,omitempty"`
-	// Indicates the local disaster recovery (DR) type of the Autonomous Database Serverless instance.
+	DbToolsDetails   []AutonomousDatabaseDbToolsDetail  `json:"dbToolsDetails,omitempty"`
+	VanityUrlDetails AutonomousDatabaseVanityUrlDetails `json:"vanityUrlDetails,omitempty"`
+	// Indicates the local disaster recovery (DR) type of the Autonomous AI Database Serverless instance.
 	// Autonomous Data Guard (ADG) DR type provides business critical DR with a faster recovery time objective (RTO) during failover or switchover.
 	// Backup-based DR type provides lower cost DR with a slower RTO during failover or switchover.
 	LocalDisasterRecoveryType string `json:"localDisasterRecoveryType,omitempty"`
-	// The disaster recovery (DR) region type of the Autonomous Database. For Autonomous Database Serverless instances, DR associations have designated primary and standby regions. These region types do not change when the database changes roles. The standby region in DR associations can be the same region as the primary region, or they can be in a remote regions. Some database administration operations may be available only in the primary region of the DR association, and cannot be performed when the database using the primary role is operating in a remote region.
+	// **Deprecated.** The disaster recovery (DR) region type of the Autonomous AI Database. For Autonomous AI Database Serverless instances, DR associations have designated primary and standby regions. These region types do not change when the database changes roles. The standby region in DR associations can be the same region as the primary region, or they can be in a remote regions. Some database administration operations may be available only in the primary region of the DR association, and cannot be performed when the database using the primary role is operating in a remote region.
 	DisasterRecoveryRegionType string `json:"disasterRecoveryRegionType,omitempty"`
-	// The date and time the Disaster Recovery role was switched for the standby Autonomous Database.
+	// The date and time the Disaster Recovery role was switched for the standby Autonomous AI Database.
 	TimeDisasterRecoveryRoleChanged     string                                                `json:"timeDisasterRecoveryRoleChanged,omitempty"`
 	RemoteDisasterRecoveryConfiguration AutonomousDatabaseRemoteDisasterRecoveryConfiguration `json:"remoteDisasterRecoveryConfiguration,omitempty"`
 	// Enabling SHARED server architecture enables a database server to allow many client processes to share very few server processes, thereby increasing the number of supported users.
 	NetServicesArchitecture string `json:"netServicesArchitecture,omitempty"`
+	// The availability domain where the Autonomous AI Database Serverless instance is located.
+	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cluster placement group of the Autonomous Serverless Database.
+	ClusterPlacementGroupId string `json:"clusterPlacementGroupId,omitempty"`
+	// A list of the source Autonomous AI Database's table space number(s) used to create this partial clone from the backup.
+	CloneTableSpaceList []int `json:"cloneTableSpaceList,omitempty"`
+	// The Autonomous AI Database clone type.
+	CloneType string `json:"cloneType,omitempty"`
+	// Additional attributes for this resource. Each attribute is a simple key-value pair with no predefined name, type, or namespace.
+	// Example: `{ "gcpAccountName": "gcpName" }`
+	AdditionalAttributes map[string]string `json:"additionalAttributes,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated resource pool leader Autonomous AI Database in the same region, associated with local Autonomous Data Guard for a dedicated resource pool member.
+	LocalAdgResourcePoolLeaderId string `json:"localAdgResourcePoolLeaderId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

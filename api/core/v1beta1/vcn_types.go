@@ -14,7 +14,7 @@ import (
 
 // VcnSpec defines the desired state of Vcn.
 type VcnSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the VCN.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the VCN.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// **Deprecated.** Do *not* set this value. Use `cidrBlocks` instead.
@@ -43,7 +43,7 @@ type VcnSpec struct {
 	// +kubebuilder:validation:Optional
 	Byoipv6CidrDetails []VcnByoipv6CidrDetail `json:"byoipv6CidrDetails,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -61,27 +61,36 @@ type VcnSpec struct {
 	// resolve other instances in the VCN. Otherwise the Internet and VCN Resolver
 	// will not work.
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// Example: `vcn1`
 	// +kubebuilder:validation:Optional
 	DnsLabel string `json:"dnsLabel,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Security attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm#security-attributes) are labels
+	// for a resource that can be referenced in a Zero Trust Packet Routing (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/overview.htm)
+	// (ZPR) policy to control access to ZPR-supported resources.
+	// Example: `{"Oracle-DataSecurity-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// Whether IPv6 is enabled for the VCN. Default is `false`.
 	// If enabled, Oracle will assign the VCN a IPv6 /56 CIDR block.
 	// You may skip having Oracle allocate the VCN a IPv6 /56 CIDR block by setting isOracleGuaAllocationEnabled to `false`.
-	// For important details about IPv6 addressing in a VCN, see IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// For important details about IPv6 addressing in a VCN, see IPv6 Addresses (https://docs.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	IsIpv6Enabled bool `json:"isIpv6Enabled,omitempty"`
+	// Indicates whether ZPR Only mode is enforced.
+	// +kubebuilder:validation:Optional
+	IsZprOnly bool `json:"isZprOnly,omitempty"`
 }
 
 // VcnByoipv6CidrDetail defines nested fields for Vcn.Byoipv6CidrDetail.
 type VcnByoipv6CidrDetail struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `ByoipRange` resource to which the CIDR block belongs.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `ByoipRange` resource to which the CIDR block belongs.
 	// +kubebuilder:validation:Required
 	Byoipv6RangeId string `json:"byoipv6RangeId"`
 	// An IPv6 prefix required to create a VCN with a BYOIP prefix. It could be the whole prefix identified in `byoipv6RangeId`, or a subrange.
@@ -98,9 +107,9 @@ type VcnStatus struct {
 	CidrBlock string `json:"cidrBlock,omitempty"`
 	// The list of IPv4 CIDR blocks the VCN will use.
 	CidrBlocks []string `json:"cidrBlocks,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the VCN.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the VCN.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The VCN's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	// The VCN's Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// The VCN's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
@@ -108,14 +117,14 @@ type VcnStatus struct {
 	Byoipv6CidrBlocks []string `json:"byoipv6CidrBlocks,omitempty"`
 	// For an IPv6-enabled VCN, this is the list of Private IPv6 prefixes for the VCN's IP address space.
 	Ipv6PrivateCidrBlocks []string `json:"ipv6PrivateCidrBlocks,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default set of DHCP options.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default set of DHCP options.
 	DefaultDhcpOptionsId string `json:"defaultDhcpOptionsId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default route table.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default route table.
 	DefaultRouteTableId string `json:"defaultRouteTableId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default security list.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the VCN's default security list.
 	DefaultSecurityListId string `json:"defaultSecurityListId,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
@@ -129,13 +138,18 @@ type VcnStatus struct {
 	// The absence of this parameter means the Internet and VCN Resolver will
 	// not work for this VCN.
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// Example: `vcn1`
 	DnsLabel string `json:"dnsLabel,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Security attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm#security-attributes) are labels
+	// for a resource that can be referenced in a Zero Trust Packet Routing (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/overview.htm)
+	// (ZPR) policy to control access to ZPR-supported resources.
+	// Example: `{"Oracle-DataSecurity-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit"}}}`
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// For an IPv6-enabled VCN, this is the list of IPv6 prefixes for the VCN's IP address space.
 	// The prefixes are provided by Oracle and the sizes are always /56.
 	Ipv6CidrBlocks []string `json:"ipv6CidrBlocks,omitempty"`
@@ -145,9 +159,11 @@ type VcnStatus struct {
 	// The VCN's domain name, which consists of the VCN's DNS label, and the
 	// `oraclevcn.com` domain.
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// Example: `vcn1.oraclevcn.com`
 	VcnDomainName string `json:"vcnDomainName,omitempty"`
+	// Indicates whether ZPR Only mode is enforced.
+	IsZprOnly bool `json:"isZprOnly,omitempty"`
 }
 
 // +kubebuilder:object:root=true

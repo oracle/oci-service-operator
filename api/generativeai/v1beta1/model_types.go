@@ -35,12 +35,12 @@ type ModelSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -88,6 +88,15 @@ type ModelFineTuneDetailsTrainingConfig struct {
 	LogModelMetricsIntervalInSteps int `json:"logModelMetricsIntervalInSteps,omitempty"`
 	// +kubebuilder:validation:Optional
 	TrainingConfigType string `json:"trainingConfigType,omitempty"`
+	// This parameter represents the LoRA rank of the update matrices.
+	// +kubebuilder:validation:Optional
+	LoraR int `json:"loraR,omitempty"`
+	// This parameter represents the scaling factor for the weight matrices in LoRA.
+	// +kubebuilder:validation:Optional
+	LoraAlpha int `json:"loraAlpha,omitempty"`
+	// This parameter indicates the dropout probability for LoRA layers.
+	// +kubebuilder:validation:Optional
+	LoraDropout float64 `json:"loraDropout,omitempty"`
 	// The number of last layers to be fine-tuned.
 	// +kubebuilder:validation:Optional
 	NumOfLastLayers int `json:"numOfLastLayers,omitempty"`
@@ -149,12 +158,16 @@ type ModelStatus struct {
 	IsLongTermSupported bool `json:"isLongTermSupported,omitempty"`
 	// Corresponds to the time when the custom model and its associated foundation model will be deprecated.
 	TimeDeprecated string `json:"timeDeprecated,omitempty"`
+	// The timestamp indicating when the base model will no longer be available for on-demand usage.
+	TimeOnDemandRetired string `json:"timeOnDemandRetired,omitempty"`
+	// The timestamp indicating when the custom model and its associated foundation model will be fully retired.
+	TimeDedicatedRetired string `json:"timeDedicatedRetired,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.

@@ -14,7 +14,7 @@ import (
 
 // TranscriptionJobSpec defines the desired state of TranscriptionJob.
 type TranscriptionJobSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// +kubebuilder:validation:Required
@@ -97,6 +97,9 @@ type TranscriptionJobModelDetailsTranscriptionSettingsDiarization struct {
 type TranscriptionJobModelDetailsTranscriptionSettings struct {
 	// +kubebuilder:validation:Optional
 	Diarization TranscriptionJobModelDetailsTranscriptionSettingsDiarization `json:"diarization,omitempty"`
+	// Simple key-value pair for setting model specific properties. For more details, refer the documentation.
+	// +kubebuilder:validation:Optional
+	AdditionalSettings map[string]string `json:"additionalSettings,omitempty"`
 }
 
 // TranscriptionJobModelDetails defines nested fields for TranscriptionJob.ModelDetails.
@@ -122,6 +125,7 @@ type TranscriptionJobModelDetails struct {
 	// - de-DE: German - Germany
 	// - it-IT: Italian - Italy
 	// Whisper supported language codes are (Whisper models are locale agnostic).
+	// - auto: Auto-detect language
 	// - af: Afrikaans
 	// - ar: Arabic
 	// - az: Azerbaijani
@@ -211,9 +215,9 @@ type TranscriptionJobNormalization struct {
 // TranscriptionJobStatus defines the observed state of TranscriptionJob.
 type TranscriptionJobStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
 	CompartmentId  string                         `json:"compartmentId,omitempty"`
 	ModelDetails   TranscriptionJobModelDetails   `json:"modelDetails,omitempty"`
 	InputLocation  TranscriptionJobInputLocation  `json:"inputLocation,omitempty"`
@@ -239,7 +243,7 @@ type TranscriptionJobStatus struct {
 	TtlInDays int `json:"ttlInDays,omitempty"`
 	// How much progress the operation has made, vs the total amount of work that must be performed.
 	PercentComplete int `json:"percentComplete,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job.
 	CreatedBy string `json:"createdBy,omitempty"`
 	// Transcription format. JSON format will always be provided in addition to any formats in this list.
 	AdditionalTranscriptionFormats []string `json:"additionalTranscriptionFormats,omitempty"`

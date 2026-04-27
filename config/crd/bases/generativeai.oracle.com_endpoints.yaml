@@ -66,6 +66,12 @@ spec:
                   isEnabled:
                     description: Whether to enable the content moderation feature.
                     type: boolean
+                  mode:
+                    description: Enum for the modes of operation for inference protection.
+                    type: string
+                  modelId:
+                    description: The OCID of the model used for the feature.
+                    type: string
                 required:
                 - isEnabled
                 type: object
@@ -80,7 +86,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
@@ -95,12 +101,48 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
-              modelId:
-                description: The ID of the model that's used to create this endpoint.
+              generativeAiPrivateEndpointId:
+                description: The OCID of the Generative AI private endpoint to which
+                  this endpoint is attached to.
                 type: string
+              modelId:
+                description: The OCID of the model that's used to create this endpoint.
+                type: string
+              piiDetectionConfig:
+                description: EndpointPiiDetectionConfig defines nested fields for
+                  Endpoint.PiiDetectionConfig.
+                properties:
+                  isEnabled:
+                    description: Whether to enable the PII detection feature.
+                    type: boolean
+                  mode:
+                    description: The mode of operation for PII detection.
+                    type: string
+                  modelId:
+                    description: The OCID of the model used for the feature.
+                    type: string
+                required:
+                - isEnabled
+                type: object
+              promptInjectionConfig:
+                description: EndpointPromptInjectionConfig defines nested fields for
+                  Endpoint.PromptInjectionConfig.
+                properties:
+                  isEnabled:
+                    description: Whether to enable the prompt injection feature.
+                    type: boolean
+                  mode:
+                    description: The mode of operation for prompt injection detection.
+                    type: string
+                  modelId:
+                    description: The OCID of the model used for the feature.
+                    type: string
+                required:
+                - isEnabled
+                type: object
             required:
             - compartmentId
             - dedicatedAiClusterId
@@ -119,6 +161,12 @@ spec:
                   isEnabled:
                     description: Whether to enable the content moderation feature.
                     type: boolean
+                  mode:
+                    description: Enum for the modes of operation for inference protection.
+                    type: string
+                  modelId:
+                    description: The OCID of the model used for the feature.
+                    type: string
                 required:
                 - isEnabled
                 type: object
@@ -133,7 +181,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
@@ -148,9 +196,13 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
+              generativeAiPrivateEndpointId:
+                description: The OCID of the Generative AI private endpoint to which
+                  this endpoint is attached to.
+                type: string
               id:
                 description: An OCID that uniquely identifies this endpoint resource.
                 type: string
@@ -164,6 +216,38 @@ spec:
               modelId:
                 description: The OCID of the model that's used to create this endpoint.
                 type: string
+              piiDetectionConfig:
+                description: EndpointPiiDetectionConfig defines nested fields for
+                  Endpoint.PiiDetectionConfig.
+                properties:
+                  isEnabled:
+                    description: Whether to enable the PII detection feature.
+                    type: boolean
+                  mode:
+                    description: The mode of operation for PII detection.
+                    type: string
+                  modelId:
+                    description: The OCID of the model used for the feature.
+                    type: string
+                required:
+                - isEnabled
+                type: object
+              promptInjectionConfig:
+                description: EndpointPromptInjectionConfig defines nested fields for
+                  Endpoint.PromptInjectionConfig.
+                properties:
+                  isEnabled:
+                    description: Whether to enable the prompt injection feature.
+                    type: boolean
+                  mode:
+                    description: The mode of operation for prompt injection detection.
+                    type: string
+                  modelId:
+                    description: The OCID of the model used for the feature.
+                    type: string
+                required:
+                - isEnabled
+                type: object
               status:
                 properties:
                   async:

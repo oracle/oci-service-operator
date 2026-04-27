@@ -84,8 +84,16 @@ spec:
                         description: The compartment depth level.
                         type: integer
                       dateRangeName:
-                        description: The UI date range, for example, LAST_THREE_MONTHS.
-                          It will override timeUsageStarted and timeUsageEnded properties.
+                        description: The user interface date range, for example, LAST_THREE_MONTHS.
+                          Overrides the timeUsageStarted and timeUsageEnded properties.
+                        type: string
+                      emissionCalculationMethod:
+                        description: Specifies the method used for emission calculation,
+                          such as POWER_BASED or SPEND_BASED
+                        type: string
+                      emissionType:
+                        description: Specifies the type of emission, such as MARKET_BASED
+                          or LOCATION_BASED.
                         type: string
                       filter:
                         description: UsageCarbonEmissionsQueryQueryDefinitionReportQueryFilter
@@ -130,6 +138,10 @@ spec:
                               type: object
                             type: array
                         type: object
+                      granularity:
+                        description: The carbon emission granularity. DAILY - Daily
+                          data aggregation. MONTHLY - Monthly data aggregation.
+                        type: string
                       groupBy:
                         description: |-
                           Specifies what to aggregate the result by.
@@ -162,8 +174,8 @@ spec:
                         type: array
                       isAggregateByTime:
                         description: Specifies whether aggregated by time. If isAggregateByTime
-                          is true, all usage or cost over the query time period will
-                          be added up.
+                          is true, all usage or costs over the query time period are
+                          summed.
                         type: boolean
                       tenantId:
                         description: Tenant ID.
@@ -227,8 +239,16 @@ spec:
                         description: The compartment depth level.
                         type: integer
                       dateRangeName:
-                        description: The UI date range, for example, LAST_THREE_MONTHS.
-                          It will override timeUsageStarted and timeUsageEnded properties.
+                        description: The user interface date range, for example, LAST_THREE_MONTHS.
+                          Overrides the timeUsageStarted and timeUsageEnded properties.
+                        type: string
+                      emissionCalculationMethod:
+                        description: Specifies the method used for emission calculation,
+                          such as POWER_BASED or SPEND_BASED
+                        type: string
+                      emissionType:
+                        description: Specifies the type of emission, such as MARKET_BASED
+                          or LOCATION_BASED.
                         type: string
                       filter:
                         description: UsageCarbonEmissionsQueryQueryDefinitionReportQueryFilter
@@ -273,6 +293,10 @@ spec:
                               type: object
                             type: array
                         type: object
+                      granularity:
+                        description: The carbon emission granularity. DAILY - Daily
+                          data aggregation. MONTHLY - Monthly data aggregation.
+                        type: string
                       groupBy:
                         description: |-
                           Specifies what to aggregate the result by.
@@ -305,8 +329,8 @@ spec:
                         type: array
                       isAggregateByTime:
                         description: Specifies whether aggregated by time. If isAggregateByTime
-                          is true, all usage or cost over the query time period will
-                          be added up.
+                          is true, all usage or costs over the query time period are
+                          summed.
                         type: boolean
                       tenantId:
                         description: Tenant ID.

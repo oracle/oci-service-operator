@@ -56,6 +56,36 @@ spec:
           spec:
             description: QueueSpec defines the desired state of Queue.
             properties:
+              capabilities:
+                description: The capability to add on the queue
+                items:
+                  description: QueueCapability defines nested fields for Queue.Capability.
+                  properties:
+                    isPrimaryConsumerGroupEnabled:
+                      description: Specifies if the primary consumer group should
+                        be automatically enabled after adding the capability.
+                      type: boolean
+                    jsonData:
+                      type: string
+                    primaryConsumerGroupDeadLetterQueueDeliveryCount:
+                      description: |-
+                        The number of times a message can be delivered to a consumer before being moved to the dead letter queue.
+                        A value of 0 indicates that the DLQ is not used.
+                        If the value isn't set, it will be using the value defined at the queue level.
+                      type: integer
+                    primaryConsumerGroupDisplayName:
+                      description: Name of the primary consumer group. If omitted,
+                        it will be named "Primary Consumer Group".
+                      type: string
+                    primaryConsumerGroupFilter:
+                      description: |-
+                        The filter used by the primary consumer group. Only messages matching the filter will be available by consumers of the group.
+                        An empty value means that all messages will be available in the group.
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: array
               channelConsumptionLimit:
                 description: The percentage of allocated queue resources that can
                   be consumed by a single channel. For example, if a queue has a storage
@@ -65,11 +95,11 @@ spec:
                   up-to all allocated queue's resources.
                 type: integer
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment containing the queue.
                 type: string
               customEncryptionKeyId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the custom encryption key to be used to encrypt messages content.
                 type: string
               deadLetterQueueDeliveryCount:
@@ -114,6 +144,36 @@ spec:
           status:
             description: QueueStatus defines the observed state of Queue.
             properties:
+              capabilities:
+                description: The list of capabilities enabled on the queue
+                items:
+                  description: QueueCapability defines nested fields for Queue.Capability.
+                  properties:
+                    isPrimaryConsumerGroupEnabled:
+                      description: Specifies if the primary consumer group should
+                        be automatically enabled after adding the capability.
+                      type: boolean
+                    jsonData:
+                      type: string
+                    primaryConsumerGroupDeadLetterQueueDeliveryCount:
+                      description: |-
+                        The number of times a message can be delivered to a consumer before being moved to the dead letter queue.
+                        A value of 0 indicates that the DLQ is not used.
+                        If the value isn't set, it will be using the value defined at the queue level.
+                      type: integer
+                    primaryConsumerGroupDisplayName:
+                      description: Name of the primary consumer group. If omitted,
+                        it will be named "Primary Consumer Group".
+                      type: string
+                    primaryConsumerGroupFilter:
+                      description: |-
+                        The filter used by the primary consumer group. Only messages matching the filter will be available by consumers of the group.
+                        An empty value means that all messages will be available in the group.
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: array
               channelConsumptionLimit:
                 description: The percentage of allocated queue resources that can
                   be consumed by a single channel. For example, if a queue has a storage
@@ -123,14 +183,14 @@ spec:
                   up-to all allocated queue's resources.
                 type: integer
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment containing the queue.
                 type: string
               createWorkRequestId:
                 description: The work request OCID tracking the in-flight create operation.
                 type: string
               customEncryptionKeyId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the custom encryption key to be used to encrypt messages content.
                 type: string
               deadLetterQueueDeliveryCount:

@@ -79,11 +79,11 @@ spec:
                     type: object
                 type: object
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment that contains the database system.
                 type: string
               configId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the configuration associated with the database system.
                 type: string
               credentials:
@@ -101,7 +101,7 @@ spec:
                       passwordType:
                         type: string
                       secretId:
-                        description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                        description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                           of the secret where the password is stored.
                         type: string
                       secretVersion:
@@ -125,7 +125,7 @@ spec:
                       Some configuration changes require a restart of database instances to be applied.
                     type: string
                   configId:
-                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       of the configuration.
                     type: string
                 required:
@@ -201,6 +201,24 @@ spec:
                       backupStart:
                         description: Hour of the day when the backup starts.
                         type: string
+                      copyPolicy:
+                        description: DbSystemManagementPolicyBackupPolicyCopyPolicy
+                          defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.CopyPolicy.
+                        properties:
+                          compartmentId:
+                            description: target compartment to place a new backup
+                            type: string
+                          regions:
+                            description: List of region names of the remote region
+                            items:
+                              type: string
+                            type: array
+                          retentionPeriod:
+                            description: Retention period in days of the backup copy.
+                            type: integer
+                        required:
+                        - compartmentId
+                        type: object
                       daysOfTheMonth:
                         description: |-
                           Day of the month when the backup should start.
@@ -223,14 +241,22 @@ spec:
                         type: integer
                     type: object
                   maintenanceWindowStart:
-                    description: The start of the maintenance window.
+                    description: |-
+                      The start of the maintenance window in UTC.
+                      This string is of the format: "{day-of-week} {time-of-day}".
+                      "{day-of-week}" is a case-insensitive string like "mon", "tue", &c.
+                      "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
                     type: string
                 type: object
               networkDetails:
                 description: DbSystemNetworkDetails defines nested fields for DbSystem.NetworkDetails.
                 properties:
+                  isReaderEndpointEnabled:
+                    description: Specifies if the reader endpoint is enabled on the
+                      dbSystem.
+                    type: boolean
                   nsgIds:
-                    description: List of customer Network Security Group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    description: List of customer Network Security Group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       associated with the database system.
                     items:
                       type: string
@@ -241,7 +267,7 @@ spec:
                       If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet.
                     type: string
                   subnetId:
-                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       of the customer subnet associated with the database system.
                     type: string
                 required:
@@ -256,7 +282,7 @@ spec:
                 description: DbSystemSource defines nested fields for DbSystem.Source.
                 properties:
                   backupId:
-                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       of the database system backup.
                     type: string
                   isHavingRestoreConfigOverrides:
@@ -300,6 +326,7 @@ spec:
                 type: string
             required:
             - compartmentId
+            - credentials
             - dbVersion
             - displayName
             - networkDetails
@@ -333,11 +360,11 @@ spec:
                     type: object
                 type: object
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment that contains the database system.
                 type: string
               configId:
-                description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the configuration associated with the database system.
                 type: string
               dbVersion:
@@ -441,6 +468,24 @@ spec:
                       backupStart:
                         description: Hour of the day when the backup starts.
                         type: string
+                      copyPolicy:
+                        description: DbSystemManagementPolicyBackupPolicyCopyPolicy
+                          defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.CopyPolicy.
+                        properties:
+                          compartmentId:
+                            description: target compartment to place a new backup
+                            type: string
+                          regions:
+                            description: List of region names of the remote region
+                            items:
+                              type: string
+                            type: array
+                          retentionPeriod:
+                            description: Retention period in days of the backup copy.
+                            type: integer
+                        required:
+                        - compartmentId
+                        type: object
                       daysOfTheMonth:
                         description: |-
                           Day of the month when the backup should start.
@@ -463,14 +508,22 @@ spec:
                         type: integer
                     type: object
                   maintenanceWindowStart:
-                    description: The start of the maintenance window.
+                    description: |-
+                      The start of the maintenance window in UTC.
+                      This string is of the format: "{day-of-week} {time-of-day}".
+                      "{day-of-week}" is a case-insensitive string like "mon", "tue", &c.
+                      "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
                     type: string
                 type: object
               networkDetails:
                 description: DbSystemNetworkDetails defines nested fields for DbSystem.NetworkDetails.
                 properties:
+                  isReaderEndpointEnabled:
+                    description: Specifies if the reader endpoint is enabled on the
+                      dbSystem.
+                    type: boolean
                   nsgIds:
-                    description: List of customer Network Security Group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    description: List of customer Network Security Group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       associated with the database system.
                     items:
                       type: string
@@ -481,7 +534,7 @@ spec:
                       If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet.
                     type: string
                   subnetId:
-                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       of the customer subnet associated with the database system.
                     type: string
                 required:
@@ -496,7 +549,7 @@ spec:
                 description: DbSystemSource defines nested fields for DbSystem.Source.
                 properties:
                   backupId:
-                    description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                       of the database system backup.
                     type: string
                   isHavingRestoreConfigOverrides:

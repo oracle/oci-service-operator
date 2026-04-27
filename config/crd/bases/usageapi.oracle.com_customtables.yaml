@@ -62,7 +62,7 @@ spec:
                   columnGroupBy:
                     description: |-
                       The column groupBy key list.
-                      example:
+                      For example:
                         `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
                           "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
                           "resourceId", "tenantId", "tenantName"]`
@@ -98,7 +98,7 @@ spec:
                   rowGroupBy:
                     description: |-
                       The row groupBy key list.
-                      example:
+                      For example:
                         `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
                           "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
                           "resourceId", "tenantId", "tenantName"]`
@@ -135,7 +135,7 @@ spec:
                   columnGroupBy:
                     description: |-
                       The column groupBy key list.
-                      example:
+                      For example:
                         `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
                           "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
                           "resourceId", "tenantId", "tenantName"]`
@@ -171,7 +171,7 @@ spec:
                   rowGroupBy:
                     description: |-
                       The row groupBy key list.
-                      example:
+                      For example:
                         `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
                           "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
                           "resourceId", "tenantId", "tenantName"]`

@@ -29,9 +29,56 @@ type DedicatedAiClusterSpec struct {
 	// The shape of dedicated unit in this AI cluster. The underlying hardware configuration is hidden from customers.
 	// Allowed values are:
 	// - LARGE_COHERE
+	// - LARGE_COHERE_V2
 	// - SMALL_COHERE
+	// - SMALL_COHERE_V2
+	// - SMALL_COHERE_4
 	// - EMBED_COHERE
 	// - LLAMA2_70
+	// - LARGE_GENERIC
+	// - LARGE_COHERE_V2_2
+	// - LARGE_GENERIC_4
+	// - SMALL_GENERIC_V2
+	// - LARGE_GENERIC_2
+	// - LARGE_GENERIC_V3
+	// - LARGE_COHERE_V3
+	// - RERANK_COHERE
+	// - SMALL_GENERIC_V1
+	// - MEDIUM_GENERIC_V1
+	// - LARGE_GENERIC_V1
+	// - A10_X1
+	// - A10_X2
+	// - A10_X4
+	// - A100_40G_X1
+	// - A100_40G_X2
+	// - A100_40G_X4
+	// - A100_40G_X8
+	// - A100_80G_X1
+	// - A100_80G_X2
+	// - A100_80G_X4
+	// - A100_80G_X8
+	// - H100_X1
+	// - H100_X2
+	// - H100_X4
+	// - H100_X8
+	// - H200_X1
+	// - H200_X2
+	// - H200_X4
+	// - H200_X8
+	// The following shapes can only be used to deploy imported models:
+	// - A10_X1, A10_X2, A10_X4
+	// - A100_40G_X1, A100_40G_X2, A100_40G_X4, A100_40G_X8
+	// - A100_80G_X1, A100_80G_X2, A100_80G_X4, A100_80G_X8
+	// - H100_X1, H100_X2, H100_X4, H100_X8
+	// - H200_X1, H200_X2, H200_X4, H200_X8
+	// - OAI_A10_X2
+	// - OAI_H100_X1
+	// - OAI_H100_X2
+	// - OAI_H200_X1
+	// - OAI_A100_80G_X1
+	// - OAI_A100_80G_X2
+	// - OAI_A100_40G_X1
+	// - OAI_A100_40G_X4
 	// +kubebuilder:validation:Required
 	UnitShape string `json:"unitShape"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
@@ -41,12 +88,12 @@ type DedicatedAiClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -65,7 +112,7 @@ type DedicatedAiClusterCapacity struct {
 // DedicatedAiClusterStatus defines the observed state of DedicatedAiCluster.
 type DedicatedAiClusterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster.
 	Id string `json:"id,omitempty"`
 	// The dedicated AI cluster type indicating whether this is a fine-tuning/training processor or hosting/inference processor.
 	Type string `json:"type,omitempty"`
@@ -89,11 +136,11 @@ type DedicatedAiClusterStatus struct {
 	LifecycleDetails string                     `json:"lifecycleDetails,omitempty"`
 	Capacity         DedicatedAiClusterCapacity `json:"capacity,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.

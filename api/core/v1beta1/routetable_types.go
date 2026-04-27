@@ -14,17 +14,17 @@ import (
 
 // RouteTableSpec defines the desired state of RouteTable.
 type RouteTableSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the route table.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the route table.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// The collection of rules used for routing destination IPs to network devices.
 	// +kubebuilder:validation:Required
 	RouteRules []RouteTableRouteRule `json:"routeRules"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the route table belongs to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the route table belongs to.
 	// +kubebuilder:validation:Required
 	VcnId string `json:"vcnId"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -33,7 +33,7 @@ type RouteTableSpec struct {
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
@@ -41,9 +41,9 @@ type RouteTableSpec struct {
 
 // RouteTableRouteRule defines nested fields for RouteTable.RouteRule.
 type RouteTableRouteRule struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the route rule's target. For information about the type of
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the route rule's target. For information about the type of
 	// targets you can specify, see
-	// Route Tables (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingroutetables.htm).
+	// Route Tables (https://docs.oracle.com/iaas/Content/Network/Tasks/managingroutetables.htm).
 	// +kubebuilder:validation:Required
 	NetworkEntityId string `json:"networkEntityId"`
 	// Deprecated. Instead use `destination` and `destinationType`. Requests that include both
@@ -61,7 +61,7 @@ type RouteTableRouteRule struct {
 	//   or `2001:0db8:0123:45::/56`. If you set this to an IPv6 prefix, the route rule's target
 	//   can only be a DRG or internet gateway.
 	//   IPv6 addressing is supported for all commercial and government regions.
-	//   See IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	//   See IPv6 Addresses (https://docs.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
 	//   * The `cidrBlock` value for a Service, if you're
 	//     setting up a route rule for traffic destined for a particular `Service` through
 	//     a service gateway. For example: `oci-phx-objectstorage`.
@@ -85,25 +85,25 @@ type RouteTableRouteRule struct {
 // RouteTableStatus defines the observed state of RouteTable.
 type RouteTableStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the route table.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the route table.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The route table's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	// The route table's Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// The route table's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The collection of rules for routing destination IPs to network devices.
 	RouteRules []RouteTableRouteRule `json:"routeRules,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the route table list belongs to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the route table list belongs to.
 	VcnId string `json:"vcnId,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// The date and time the route table was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).

@@ -69,7 +69,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               freeformTags:
@@ -77,7 +77,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               initialNodeLabels:
@@ -115,7 +115,7 @@ spec:
                       type: object
                     description: |-
                       Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                       Example: `{"Operations": {"CostCenter": "42"}}`
                     type: object
                   freeformTags:
@@ -123,7 +123,7 @@ spec:
                       type: string
                     description: |-
                       Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                       Example: `{"Department": "Finance"}`
                     type: object
                   isPvEncryptionInTransitEnabled:
@@ -241,6 +241,10 @@ spec:
                       Duration after which OKE will give up eviction of the pods on the node. PT0M will indicate you want to delete the node without cordon and drain.
                       Default PT60M, Min PT0M, Max: PT60M. Format ISO 8601 e.g PT30M
                     type: string
+                  isForceActionAfterGraceDuration:
+                    description: If the node action should be performed if not all
+                      the pods can be evicted in the grace period
+                    type: boolean
                   isForceDeleteAfterGraceDuration:
                     description: If the underlying compute instance should be deleted
                       if you cannot evict all the pods in grace period
@@ -261,9 +265,15 @@ spec:
               nodePoolCyclingDetails:
                 description: NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails.
                 properties:
+                  cycleModes:
+                    description: An ordered list of cycle modes that should be performed
+                      on the OKE nodes.
+                    items:
+                      type: string
+                    type: array
                   isNodeCyclingEnabled:
-                    description: If nodes in the nodepool will be cycled to have new
-                      changes.
+                    description: If cycling operation should be performed on the nodes
+                      in the node pool.
                     type: boolean
                   maximumSurge:
                     description: |-
@@ -292,7 +302,7 @@ spec:
                   ocpus:
                     description: |-
                       The total number of OCPUs available to each node in the node pool.
-                      See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
+                      See here (https://docs.oracle.com/iaas/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
                     type: number
                 type: object
               nodeSourceDetails:
@@ -301,7 +311,7 @@ spec:
                 properties:
                   bootVolumeSizeInGBs:
                     description: The size of the boot volume in GBs. Minimum value
-                      is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm)
+                      is 50 GB. See here (https://docs.oracle.com/iaas/en-us/iaas/Content/Block/Concepts/bootvolumes.htm)
                       for max custom boot volume sizing and OS-specific requirements.
                     format: int64
                     type: integer
@@ -351,7 +361,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               freeformTags:
@@ -359,7 +369,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
@@ -388,7 +398,8 @@ spec:
                 description: Details about the state of the nodepool.
                 type: string
               lifecycleState:
-                description: The state of the nodepool.
+                description: The state of the nodepool. For more information, see
+                  Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm)
                 type: string
               name:
                 description: The name of the node pool.
@@ -403,7 +414,7 @@ spec:
                       type: object
                     description: |-
                       Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                       Example: `{"Operations": {"CostCenter": "42"}}`
                     type: object
                   freeformTags:
@@ -411,7 +422,7 @@ spec:
                       type: string
                     description: |-
                       Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                      For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                      For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                       Example: `{"Department": "Finance"}`
                     type: object
                   isPvEncryptionInTransitEnabled:
@@ -529,6 +540,10 @@ spec:
                       Duration after which OKE will give up eviction of the pods on the node. PT0M will indicate you want to delete the node without cordon and drain.
                       Default PT60M, Min PT0M, Max: PT60M. Format ISO 8601 e.g PT30M
                     type: string
+                  isForceActionAfterGraceDuration:
+                    description: If the node action should be performed if not all
+                      the pods can be evicted in the grace period
+                    type: boolean
                   isForceDeleteAfterGraceDuration:
                     description: If the underlying compute instance should be deleted
                       if you cannot evict all the pods in grace period
@@ -551,9 +566,15 @@ spec:
               nodePoolCyclingDetails:
                 description: NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails.
                 properties:
+                  cycleModes:
+                    description: An ordered list of cycle modes that should be performed
+                      on the OKE nodes.
+                    items:
+                      type: string
+                    type: array
                   isNodeCyclingEnabled:
-                    description: If nodes in the nodepool will be cycled to have new
-                      changes.
+                    description: If cycling operation should be performed on the nodes
+                      in the node pool.
                     type: boolean
                   maximumSurge:
                     description: |-
@@ -581,7 +602,7 @@ spec:
                   ocpus:
                     description: |-
                       The total number of OCPUs available to each node in the node pool.
-                      See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
+                      See here (https://docs.oracle.com/iaas/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
                     type: number
                 type: object
               nodeSource:
@@ -605,7 +626,7 @@ spec:
                 properties:
                   bootVolumeSizeInGBs:
                     description: The size of the boot volume in GBs. Minimum value
-                      is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm)
+                      is 50 GB. See here (https://docs.oracle.com/iaas/en-us/iaas/Content/Block/Concepts/bootvolumes.htm)
                       for max custom boot volume sizing and OS-specific requirements.
                     format: int64
                     type: integer
@@ -633,7 +654,7 @@ spec:
                         type: object
                       description: |-
                         Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                        For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                         Example: `{"Operations": {"CostCenter": "42"}}`
                       type: object
                     faultDomain:
@@ -644,7 +665,7 @@ spec:
                         type: string
                       description: |-
                         Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                        For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                        For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                         Example: `{"Department": "Finance"}`
                       type: object
                     id:
@@ -657,7 +678,8 @@ spec:
                       description: Details about the state of the node.
                       type: string
                     lifecycleState:
-                      description: The state of the node.
+                      description: The state of the node. For more information, see
+                        Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm)
                       type: string
                     name:
                       description: The name of the node.
@@ -668,7 +690,7 @@ spec:
                         code:
                           description: A short error code that defines the upstream
                             error, meant for programmatic parsing. See API Errors
-                            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm).
+                            (https://docs.oracle.com/iaas/Content/API/References/apierrors.htm).
                           type: string
                         message:
                           description: A human-readable error string of the upstream

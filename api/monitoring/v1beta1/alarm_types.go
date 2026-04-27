@@ -20,10 +20,10 @@ type AlarmSpec struct {
 	// Example: `High CPU Utilization`
 	// +kubebuilder:validation:Required
 	DisplayName string `json:"displayName"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
 	// being evaluated by the alarm.
 	// +kubebuilder:validation:Required
 	MetricCompartmentId string `json:"metricCompartmentId"`
@@ -37,13 +37,16 @@ type AlarmSpec struct {
 	// rule condition has been met. The query must specify a metric, statistic, interval, and trigger
 	// rule (threshold or absence). Supported values for interval depend on the specified time range. More
 	// interval values are supported for smaller time ranges. You can optionally
-	// specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+	// specify dimensions and grouping functions.
+	// Also, you can customize the
+	// absence detection period (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/create-edit-alarm-query-absence-detection-period.htm).
+	// Supported grouping functions: `grouping()`, `groupBy()`.
 	// For information about writing MQL expressions, see
-	// Editing the MQL Expression for a Query (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
+	// Editing the MQL Expression for a Query (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
 	// For details about MQL, see
-	// Monitoring Query Language (MQL) Reference (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
+	// Monitoring Query Language (MQL) Reference (https://docs.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
 	// For available dimensions, review the metric definition for the supported service. See
-	// Supported Services (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
+	// Supported Services (https://docs.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
 	// Example of threshold alarm:
 	//   -----
 	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
@@ -52,6 +55,12 @@ type AlarmSpec struct {
 	//   -----
 	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent()
 	//   -----
+	// Example of absence alarm with custom absence detection period of 20 hours:
+	//   -----
+	//
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent(20h)
+	//
+	//   -----
 	// +kubebuilder:validation:Required
 	Query string `json:"query"`
 	// The perceived type of response required when the alarm is in the "FIRING" state.
@@ -59,7 +68,7 @@ type AlarmSpec struct {
 	// +kubebuilder:validation:Required
 	Severity string `json:"severity"`
 	// A list of destinations for alarm notifications.
-	// Each destination is represented by the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	// Each destination is represented by the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
 	// of a related resource, such as a NotificationTopic.
 	// Supported destination services: Notifications, Streaming.
 	// Limit: One destination per supported destination service.
@@ -99,7 +108,9 @@ type AlarmSpec struct {
 	// Example: `PT5M`
 	// +kubebuilder:validation:Optional
 	PendingDuration string `json:"pendingDuration,omitempty"`
-	// The human-readable content of the delivered alarm notification. Oracle recommends providing guidance
+	// The human-readable content of the delivered alarm notification.
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// Oracle recommends providing guidance
 	// to operators for resolving the alarm condition. Consider adding links to standard runbook
 	// practices. Avoid entering confidential information.
 	// Example: `High CPU usage alert. Follow runbook instructions for resolution.`
@@ -134,6 +145,40 @@ type AlarmSpec struct {
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A set of overrides that control evaluations of the alarm.
+	// Each override can specify values for query, severity, body, and pending duration.
+	// When an alarm contains overrides, the Monitoring service evaluates each override in order, beginning with the first override in the array (index position `0`),
+	// and then evaluates the alarm's base values (`ruleName` value of `BASE`).
+	// +kubebuilder:validation:Optional
+	Overrides []AlarmOverride `json:"overrides,omitempty"`
+	// Identifier of the alarm's base values for alarm evaluation, for use when the alarm contains overrides.
+	// Default value is `BASE`. For information about alarm overrides, see AlarmOverride.
+	// +kubebuilder:validation:Optional
+	RuleName string `json:"ruleName,omitempty"`
+	// The version of the alarm notification to be delivered. Allowed value: `1.X`
+	// The value must start with a number (up to four digits), followed by a period and an uppercase X.
+	// +kubebuilder:validation:Optional
+	NotificationVersion string `json:"notificationVersion,omitempty"`
+	// Customizable notification title (`title` alarm message parameter (https://docs.oracle.com/iaas/Content/Monitoring/alarm-message-format.htm)).
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// The notification title appears as the subject line in a formatted email message and as the title in a Slack message.
+	// +kubebuilder:validation:Optional
+	NotificationTitle string `json:"notificationTitle,omitempty"`
+	// Customizable slack period to wait for metric ingestion before evaluating the alarm.
+	// Specify a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+	// for one hour). Minimum: PT3M. Maximum: PT2H. Default: PT3M.
+	// For more information about the slack period, see
+	// About the Internal Reset Period (https://docs.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#reset).
+	// +kubebuilder:validation:Optional
+	EvaluationSlackDuration string `json:"evaluationSlackDuration,omitempty"`
+	// Customizable alarm summary (`alarmSummary` alarm message parameter (https://docs.oracle.com/iaas/Content/Monitoring/alarm-message-format.htm)).
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// The alarm summary appears within the body of the alarm message and in responses to
+	// ListAlarmsStatus
+	// GetAlarmHistory and
+	// RetrieveDimensionStates.
+	// +kubebuilder:validation:Optional
+	AlarmSummary string `json:"alarmSummary,omitempty"`
 }
 
 // AlarmSuppressionFields defines nested fields for Alarm.Suppression.
@@ -156,18 +201,82 @@ type AlarmSuppressionFields struct {
 	Description string `json:"description,omitempty"`
 }
 
+// AlarmOverride defines nested fields for Alarm.Override.
+type AlarmOverride struct {
+	// The period of time that the condition defined in the alarm must persist before the alarm state
+	// changes from "OK" to "FIRING". For example, a value of 5 minutes means that the
+	// alarm must persist in breaching the condition for five minutes before the alarm updates its
+	// state to "FIRING".
+	// The duration is specified as a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+	// for one hour). Minimum: PT1M. Maximum: PT1H. Default: PT1M.
+	// Under the default value of PT1M, the first evaluation that breaches the alarm updates the
+	// state to "FIRING".
+	// The alarm updates its status to "OK" when the breaching condition has been clear for
+	// the most recent minute.
+	// Example: `PT5M`
+	// +kubebuilder:validation:Optional
+	PendingDuration string `json:"pendingDuration,omitempty"`
+	// The perceived severity of the alarm with regard to the affected system.
+	// Example: `CRITICAL`
+	// +kubebuilder:validation:Optional
+	Severity string `json:"severity,omitempty"`
+	// The human-readable content of the delivered alarm notification.
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// Oracle recommends providing guidance
+	// to operators for resolving the alarm condition. Consider adding links to standard runbook
+	// practices. Avoid entering confidential information.
+	// Example: `High CPU usage alert. Follow runbook instructions for resolution.`
+	// +kubebuilder:validation:Optional
+	Body string `json:"body,omitempty"`
+	// A user-friendly description for this alarm override. Must be unique across all `ruleName` values for the alarm.
+	// +kubebuilder:validation:Optional
+	RuleName string `json:"ruleName,omitempty"`
+	// The Monitoring Query Language (MQL) expression to evaluate for the alarm. The Alarms feature of
+	// the Monitoring service interprets results for each returned time series as Boolean values,
+	// where zero represents false and a non-zero value represents true. A true value means that the trigger
+	// rule condition has been met. The query must specify a metric, statistic, interval, and trigger
+	// rule (threshold or absence). Supported values for interval depend on the specified time range. More
+	// interval values are supported for smaller time ranges. You can optionally
+	// specify dimensions and grouping functions.
+	// Also, you can customize the
+	// absence detection period (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/create-edit-alarm-query-absence-detection-period.htm).
+	// Supported grouping functions: `grouping()`, `groupBy()`.
+	// For information about writing MQL expressions, see
+	// Editing the MQL Expression for a Query (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
+	// For details about MQL, see
+	// Monitoring Query Language (MQL) Reference (https://docs.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
+	// For available dimensions, review the metric definition for the supported service. See
+	// Supported Services (https://docs.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
+	// Example of threshold alarm:
+	//   -----
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
+	//   -----
+	// Example of absence alarm:
+	//   -----
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent()
+	//   -----
+	// Example of absence alarm with custom absence detection period of 20 hours:
+	//   -----
+	//
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent(20h)
+	//
+	//   -----
+	// +kubebuilder:validation:Optional
+	Query string `json:"query,omitempty"`
+}
+
 // AlarmStatus defines the observed state of Alarm.
 type AlarmStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm.
 	Id string `json:"id,omitempty"`
 	// A user-friendly name for the alarm. It does not have to be unique, and it's changeable.
 	// This value determines the title of each alarm notification.
 	// Example: `High CPU Utilization`
 	DisplayName string `json:"displayName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
 	// being evaluated by the alarm.
 	MetricCompartmentId string `json:"metricCompartmentId,omitempty"`
 	// The source service or application emitting the metric that is evaluated by the alarm.
@@ -179,13 +288,16 @@ type AlarmStatus struct {
 	// rule condition has been met. The query must specify a metric, statistic, interval, and trigger
 	// rule (threshold or absence). Supported values for interval depend on the specified time range. More
 	// interval values are supported for smaller time ranges. You can optionally
-	// specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+	// specify dimensions and grouping functions.
+	// Also, you can customize the
+	// absence detection period (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/create-edit-alarm-query-absence-detection-period.htm).
+	// Supported grouping functions: `grouping()`, `groupBy()`.
 	// For information about writing MQL expressions, see
-	// Editing the MQL Expression for a Query (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
+	// Editing the MQL Expression for a Query (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
 	// For details about MQL, see
-	// Monitoring Query Language (MQL) Reference (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
+	// Monitoring Query Language (MQL) Reference (https://docs.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
 	// For available dimensions, review the metric definition for the supported service. See
-	// Supported Services (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
+	// Supported Services (https://docs.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
 	// Example of threshold alarm:
 	//   -----
 	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
@@ -194,12 +306,18 @@ type AlarmStatus struct {
 	//   -----
 	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent()
 	//   -----
+	// Example of absence alarm with custom absence detection period of 20 hours:
+	//   -----
+	//
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent(20h)
+	//
+	//   -----
 	Query string `json:"query,omitempty"`
 	// The perceived type of response required when the alarm is in the "FIRING" state.
 	// Example: `CRITICAL`
 	Severity string `json:"severity,omitempty"`
 	// A list of destinations for alarm notifications.
-	// Each destination is represented by the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	// Each destination is represented by the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
 	// of a related resource, such as a NotificationTopic.
 	// Supported destination services: Notifications, Streaming.
 	// Limit: One destination per supported destination service.
@@ -241,7 +359,9 @@ type AlarmStatus struct {
 	// the most recent minute.
 	// Example: `PT5M`
 	PendingDuration string `json:"pendingDuration,omitempty"`
-	// The human-readable content of the delivered alarm notification. Oracle recommends providing guidance
+	// The human-readable content of the delivered alarm notification.
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// Oracle recommends providing guidance
 	// to operators for resolving the alarm condition. Consider adding links to standard runbook
 	// practices. Avoid entering confidential information.
 	// Example: `High CPU usage alert. Follow runbook instructions for resolution.`
@@ -268,6 +388,34 @@ type AlarmStatus struct {
 	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A set of overrides that control evaluations of the alarm.
+	// Each override can specify values for query, severity, body, and pending duration.
+	// When an alarm contains overrides, the Monitoring service evaluates each override in order, beginning with the first override in the array (index position `0`),
+	// and then evaluates the alarm's base values (`ruleName` value of `BASE`).
+	Overrides []AlarmOverride `json:"overrides,omitempty"`
+	// Identifier of the alarm's base values for alarm evaluation, for use when the alarm contains overrides.
+	// Default value is `BASE`. For information about alarm overrides, see AlarmOverride.
+	RuleName string `json:"ruleName,omitempty"`
+	// The version of the alarm notification to be delivered. Allowed value: `1.X`
+	// The value must start with a number (up to four digits), followed by a period and an uppercase X.
+	NotificationVersion string `json:"notificationVersion,omitempty"`
+	// Customizable notification title (`title` alarm message parameter (https://docs.oracle.com/iaas/Content/Monitoring/alarm-message-format.htm)).
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// The notification title appears as the subject line in a formatted email message and as the title in a Slack message.
+	NotificationTitle string `json:"notificationTitle,omitempty"`
+	// Customizable slack period to wait for metric ingestion before evaluating the alarm.
+	// Specify a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+	// for one hour). Minimum: PT3M. Maximum: PT2H. Default: PT3M.
+	// For more information about the slack period, see
+	// About the Internal Reset Period (https://docs.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#reset).
+	EvaluationSlackDuration string `json:"evaluationSlackDuration,omitempty"`
+	// Customizable alarm summary (`alarmSummary` alarm message parameter (https://docs.oracle.com/iaas/Content/Monitoring/alarm-message-format.htm)).
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// The alarm summary appears within the body of the alarm message and in responses to
+	// ListAlarmsStatus
+	// GetAlarmHistory and
+	// RetrieveDimensionStates.
+	AlarmSummary string `json:"alarmSummary,omitempty"`
 }
 
 // +kubebuilder:object:root=true

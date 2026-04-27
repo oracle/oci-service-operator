@@ -79,6 +79,15 @@ spec:
                 description: The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
                   of the load balancer associated with the backend set and server.
                 type: string
+              maxConnections:
+                description: |-
+                  The maximum number of simultaneous connections the load balancer can make to the backend.
+                  If this is not set or set to 0 then the maximum number of simultaneous connections the
+                  load balancer can make to the backend is unlimited.
+                  If setting maxConnections to some value other than 0 then that value must be greater
+                  or equal to 256.
+                  Example: `300`
+                type: integer
               offline:
                 description: |-
                   Whether the load balancer should treat this server as offline. Offline servers receive no incoming
@@ -96,7 +105,7 @@ spec:
                   proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
                   as a server weighted '1'.
                   For more information on load balancing policies, see
-                  How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+                  How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
                   Example: `3`
                 type: integer
             required:
@@ -132,6 +141,13 @@ spec:
               loadBalancerId:
                 description: The bound load balancer OCID used to address this backend.
                 type: string
+              maxConnections:
+                description: |-
+                  The maximum number of simultaneous connections the load balancer can make to the backend.
+                  If this is not set or set to 0 then the maximum number of simultaneous connections the
+                  load balancer can make to the backend is unlimited.
+                  Example: `300`
+                type: integer
               name:
                 description: |-
                   A read-only field showing the IP address and port that uniquely identify this backend server in the backend set.
@@ -254,7 +270,7 @@ spec:
                   proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
                   as a server weighted '1'.
                   For more information on load balancing policies, see
-                  How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+                  How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
                   Example: `3`
                 type: integer
             required:

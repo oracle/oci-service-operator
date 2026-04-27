@@ -101,7 +101,7 @@ spec:
                 type: string
               reason:
                 description: The reason that the email address was suppressed. For
-                  more information on the types of bounces, see Suppression List (https://docs.cloud.oracle.com/Content/Email/Concepts/overview.htm#components).
+                  more information on the types of bounces, see Suppression List (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
                 type: string
               status:
                 properties:
@@ -206,13 +206,13 @@ spec:
               timeCreated:
                 description: |-
                   The date and time the suppression was added in "YYYY-MM-ddThh:mmZ"
-                  format with a Z offset, as defined by RFC 3339.
+                  format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
                 type: string
               timeLastSuppressed:
                 description: |-
                   The last date and time the suppression prevented submission
                   in "YYYY-MM-ddThh:mmZ"
-                  format with a Z offset, as defined by RFC 3339.
+                  format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
                 type: string
             required:
             - status

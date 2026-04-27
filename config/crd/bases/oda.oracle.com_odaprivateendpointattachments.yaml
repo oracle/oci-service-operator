@@ -55,11 +55,11 @@ spec:
               of OdaPrivateEndpointAttachment.
             properties:
               odaInstanceId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the attached ODA Instance.
                 type: string
               odaPrivateEndpointId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the ODA Private Endpoint.
                 type: string
             required:
@@ -71,23 +71,23 @@ spec:
               of OdaPrivateEndpointAttachment.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment that the ODA private endpoint attachment belongs
                   to.
                 type: string
               id:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the ODA Private Endpoint Attachment.
                 type: string
               lifecycleState:
                 description: The current state of the ODA Private Endpoint attachment.
                 type: string
               odaInstanceId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the attached ODA Instance.
                 type: string
               odaPrivateEndpointId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the ODA Private Endpoint.
                 type: string
               status:

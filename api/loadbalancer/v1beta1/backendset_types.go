@@ -29,6 +29,16 @@ type BackendSetSpec struct {
 	HealthChecker BackendSetHealthChecker `json:"healthChecker"`
 	// +kubebuilder:validation:Optional
 	Backends []BackendSetBackend `json:"backends,omitempty"`
+	// The maximum number of simultaneous connections the load balancer can make to any backend
+	// in the backend set unless the backend has its own maxConnections setting. If this is not
+	// set or set to 0 then the number of simultaneous connections the load balancer can make
+	// to any backend in the backend set unless the backend has its own maxConnections setting
+	// is unlimited.
+	// If setting backendMaxConnections to some value other than 0 then that value must be greater
+	// or equal to 256.
+	// Example: `300`
+	// +kubebuilder:validation:Optional
+	BackendMaxConnections int `json:"backendMaxConnections,omitempty"`
 	// +kubebuilder:validation:Optional
 	SslConfiguration BackendSetSslConfiguration `json:"sslConfiguration,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -102,10 +112,18 @@ type BackendSetBackend struct {
 	// proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
 	// as a server weighted '1'.
 	// For more information on load balancing policies, see
-	// How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
 	// Example: `3`
 	// +kubebuilder:validation:Optional
 	Weight int `json:"weight,omitempty"`
+	// The maximum number of simultaneous connections the load balancer can make to the backend.
+	// If this is not set or set to 0 then the maximum number of simultaneous connections the
+	// load balancer can make to the backend is unlimited.
+	// If setting maxConnections to some value other than 0 then that value must be greater
+	// or equal to 256.
+	// Example: `300`
+	// +kubebuilder:validation:Optional
+	MaxConnections int `json:"maxConnections,omitempty"`
 	// Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
 	// traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy.
 	// **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy.
@@ -134,6 +152,13 @@ type BackendSetSslConfiguration struct {
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	VerifyPeerCertificate bool `json:"verifyPeerCertificate,omitempty"`
+	// Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again.
+	// If "true", the service resumes the previous TLS encrypted session.
+	// If "false", the service starts a new TLS encrypted session.
+	// Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	HasSessionResumption bool `json:"hasSessionResumption,omitempty"`
 	// Ids for OCI certificates service CA or CA bundles for the load balancer to trust.
 	// Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]`
 	// +kubebuilder:validation:Optional
@@ -155,6 +180,7 @@ type BackendSetSslConfiguration struct {
 	// *  TLSv1
 	// *  TLSv1.1
 	// *  TLSv1.2
+	// *  TLSv1.3
 	// If this field is not specified, TLSv1.2 is the default.
 	// **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
 	// **Notes:**
@@ -296,9 +322,16 @@ type BackendSetStatus struct {
 	// The load balancer policy for the backend set. To get a list of available policies, use the
 	// ListPolicies operation.
 	// Example: `LEAST_CONNECTIONS`
-	Policy                                  string                                            `json:"policy,omitempty"`
-	Backends                                []BackendSetBackend                               `json:"backends,omitempty"`
-	HealthChecker                           BackendSetHealthChecker                           `json:"healthChecker,omitempty"`
+	Policy        string                  `json:"policy,omitempty"`
+	Backends      []BackendSetBackend     `json:"backends,omitempty"`
+	HealthChecker BackendSetHealthChecker `json:"healthChecker,omitempty"`
+	// The maximum number of simultaneous connections the load balancer can make to any backend
+	// in the backend set unless the backend has its own maxConnections setting. If this is not
+	// set or set to 0 then the number of simultaneous connections the load balancer can make
+	// to any backend in the backend set unless the backend has its own maxConnections setting
+	// is unlimited.
+	// Example: `300`
+	BackendMaxConnections                   int                                               `json:"backendMaxConnections,omitempty"`
 	SslConfiguration                        BackendSetSslConfiguration                        `json:"sslConfiguration,omitempty"`
 	SessionPersistenceConfiguration         BackendSetSessionPersistenceConfiguration         `json:"sessionPersistenceConfiguration,omitempty"`
 	LbCookieSessionPersistenceConfiguration BackendSetLbCookieSessionPersistenceConfiguration `json:"lbCookieSessionPersistenceConfiguration,omitempty"`

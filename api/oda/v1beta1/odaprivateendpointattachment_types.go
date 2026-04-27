@@ -14,10 +14,10 @@ import (
 
 // OdaPrivateEndpointAttachmentSpec defines the desired state of OdaPrivateEndpointAttachment.
 type OdaPrivateEndpointAttachmentSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance.
 	// +kubebuilder:validation:Required
 	OdaInstanceId string `json:"odaInstanceId"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint.
 	// +kubebuilder:validation:Required
 	OdaPrivateEndpointId string `json:"odaPrivateEndpointId"`
 }
@@ -25,13 +25,13 @@ type OdaPrivateEndpointAttachmentSpec struct {
 // OdaPrivateEndpointAttachmentStatus defines the observed state of OdaPrivateEndpointAttachment.
 type OdaPrivateEndpointAttachmentStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Attachment.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Attachment.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance.
 	OdaInstanceId string `json:"odaInstanceId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint.
 	OdaPrivateEndpointId string `json:"odaPrivateEndpointId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint attachment belongs to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint attachment belongs to.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The current state of the ODA Private Endpoint attachment.
 	LifecycleState string `json:"lifecycleState,omitempty"`

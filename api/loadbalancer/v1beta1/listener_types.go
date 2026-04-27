@@ -69,6 +69,13 @@ type ListenerSslConfiguration struct {
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	VerifyPeerCertificate bool `json:"verifyPeerCertificate,omitempty"`
+	// Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again.
+	// If "true", the service resumes the previous TLS encrypted session.
+	// If "false", the service starts a new TLS encrypted session.
+	// Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	HasSessionResumption bool `json:"hasSessionResumption,omitempty"`
 	// Ids for OCI certificates service CA or CA bundles for the load balancer to trust.
 	// Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]`
 	// +kubebuilder:validation:Optional
@@ -90,6 +97,7 @@ type ListenerSslConfiguration struct {
 	// *  TLSv1
 	// *  TLSv1.1
 	// *  TLSv1.2
+	// *  TLSv1.3
 	// If this field is not specified, TLSv1.2 is the default.
 	// **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
 	// **Notes:**
@@ -137,7 +145,7 @@ type ListenerConnectionConfiguration struct {
 	// The maximum idle time, in seconds, allowed between two successive receive or two successive send operations
 	// between the client and backend servers. A send operation does not reset the timer for receive operations. A
 	// receive operation does not reset the timer for send operations.
-	// For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration).
+	// For more information, see Connection Configuration (https://docs.oracle.com/iaas/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration).
 	// Example: `1200`
 	// +kubebuilder:validation:Required
 	IdleTimeout int64 `json:"idleTimeout"`
@@ -145,6 +153,10 @@ type ListenerConnectionConfiguration struct {
 	// Example: `1`
 	// +kubebuilder:validation:Optional
 	BackendTcpProxyProtocolVersion int `json:"backendTcpProxyProtocolVersion,omitempty"`
+	// An array that represents the PPV2 Options that can be enabled on TCP Listeners.
+	// Example: ["PP2_TYPE_AUTHORITY"]
+	// +kubebuilder:validation:Optional
+	BackendTcpProxyProtocolOptions []string `json:"backendTcpProxyProtocolOptions,omitempty"`
 }
 
 // ListenerStatus defines the observed state of Listener.

@@ -74,20 +74,47 @@ spec:
                     type: string
                   type: object
                 description: |-
-                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
+              detachedModeTimeoutInSeconds:
+                description: Timeout for detached function invocations. Value in seconds.
+                type: integer
               displayName:
                 description: The display name of the function. The display name must
                   be unique within the application containing the function. Avoid
                   entering confidential information.
                 type: string
+              failureDestination:
+                description: FunctionFailureDestination defines nested fields for
+                  Function.FailureDestination.
+                properties:
+                  channelId:
+                    description: The ID of the channel in the queue.
+                    type: string
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  queueId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the queue.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                  topicId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the topic.
+                    type: string
+                type: object
               freeformTags:
                 additionalProperties:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               image:
@@ -126,10 +153,34 @@ spec:
                     type: string
                   pbfListingId:
                     description: |-
-                      The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
                       function is sourced from.
                     type: string
                   sourceType:
+                    type: string
+                type: object
+              successDestination:
+                description: FunctionSuccessDestination defines nested fields for
+                  Function.SuccessDestination.
+                properties:
+                  channelId:
+                    description: The ID of the channel in the queue.
+                    type: string
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  queueId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the queue.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                  topicId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the topic.
                     type: string
                 type: object
               timeoutInSeconds:
@@ -171,23 +222,52 @@ spec:
                     type: string
                   type: object
                 description: |-
-                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
+              detachedModeTimeoutInSeconds:
+                description: |-
+                  Timeout for detached function invocations. Value in seconds.
+                  Example: `{"detachedModeTimeoutInSeconds": 900}`
+                type: integer
               displayName:
                 description: The display name of the function. The display name is
                   unique within the application containing the function.
                 type: string
+              failureDestination:
+                description: FunctionFailureDestination defines nested fields for
+                  Function.FailureDestination.
+                properties:
+                  channelId:
+                    description: The ID of the channel in the queue.
+                    type: string
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  queueId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the queue.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                  topicId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the topic.
+                    type: string
+                type: object
               freeformTags:
                 additionalProperties:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the function.
                 type: string
               image:
@@ -239,7 +319,7 @@ spec:
                     type: string
                   pbfListingId:
                     description: |-
-                      The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this
                       function is sourced from.
                     type: string
                   sourceType:
@@ -343,6 +423,30 @@ spec:
                     type: string
                   updatedAt:
                     format: date-time
+                    type: string
+                type: object
+              successDestination:
+                description: FunctionSuccessDestination defines nested fields for
+                  Function.SuccessDestination.
+                properties:
+                  channelId:
+                    description: The ID of the channel in the queue.
+                    type: string
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  queueId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the queue.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                  topicId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the topic.
                     type: string
                 type: object
               timeCreated:

@@ -63,7 +63,7 @@ spec:
                   type: string
                 type: array
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment where you want to create the job.
                 type: string
               definedTags:
@@ -161,6 +161,7 @@ spec:
                       - de-DE: German - Germany
                       - it-IT: Italian - Italy
                       Whisper supported language codes are (Whisper models are locale agnostic).
+                      - auto: Auto-detect language
                       - af: Afrikaans
                       - ar: Arabic
                       - az: Azerbaijani
@@ -230,6 +231,12 @@ spec:
                     description: TranscriptionJobModelDetailsTranscriptionSettings
                       defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.
                     properties:
+                      additionalSettings:
+                        additionalProperties:
+                          type: string
+                        description: Simple key-value pair for setting model specific
+                          properties. For more details, refer the documentation.
+                        type: object
                       diarization:
                         description: TranscriptionJobModelDetailsTranscriptionSettingsDiarization
                           defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.Diarization.
@@ -307,11 +314,11 @@ spec:
                   type: string
                 type: array
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment where you want to create the job.
                 type: string
               createdBy:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the user who created the job.
                 type: string
               definedTags:
@@ -337,7 +344,7 @@ spec:
                   Example: `{"bar-key": "value"}`.
                 type: object
               id:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the job.
                 type: string
               inputLocation:
@@ -421,6 +428,7 @@ spec:
                       - de-DE: German - Germany
                       - it-IT: Italian - Italy
                       Whisper supported language codes are (Whisper models are locale agnostic).
+                      - auto: Auto-detect language
                       - af: Afrikaans
                       - ar: Arabic
                       - az: Azerbaijani
@@ -490,6 +498,12 @@ spec:
                     description: TranscriptionJobModelDetailsTranscriptionSettings
                       defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.
                     properties:
+                      additionalSettings:
+                        additionalProperties:
+                          type: string
+                        description: Simple key-value pair for setting model specific
+                          properties. For more details, refer the documentation.
+                        type: object
                       diarization:
                         description: TranscriptionJobModelDetailsTranscriptionSettingsDiarization
                           defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.Diarization.

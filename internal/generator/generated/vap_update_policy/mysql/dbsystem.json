@@ -18,37 +18,58 @@
   },
   "update": {
     "allowInPlacePaths": [
+      "accessMode",
+      "backupPolicy.copyPolicies.backupCopyRetentionInDays",
+      "backupPolicy.copyPolicies.copyToRegion",
       "backupPolicy.definedTags",
       "backupPolicy.freeformTags",
       "backupPolicy.isEnabled",
       "backupPolicy.pitrPolicy.isEnabled",
       "backupPolicy.retentionInDays",
+      "backupPolicy.softDelete",
       "backupPolicy.windowStartTime",
       "configurationId",
       "crashRecovery",
+      "customerContacts.email",
+      "dataStorage.isAutoExpandStorageEnabled",
+      "dataStorage.maxStorageSizeInGbs",
+      "databaseConsole.port",
+      "databaseConsole.status",
       "databaseManagement",
+      "databaseMode",
       "definedTags",
       "deletionPolicy.automaticBackupRetention",
       "deletionPolicy.finalBackup",
       "deletionPolicy.isDeleteProtected",
       "description",
       "displayName",
+      "encryptData.keyGenerationType",
+      "encryptData.keyId",
       "freeformTags",
       "hostnameLabel",
       "isHighlyAvailable",
+      "maintenance.maintenanceDisabledWindows.timeEnd",
+      "maintenance.maintenanceDisabledWindows.timeStart",
+      "maintenance.maintenanceScheduleType",
+      "maintenance.versionPreference",
+      "maintenance.versionTrackPreference",
       "maintenance.windowStartTime",
+      "nsgIds",
+      "readEndpoint.excludeIps",
+      "readEndpoint.isEnabled",
+      "readEndpoint.readEndpointHostnameLabel",
+      "readEndpoint.readEndpointIpAddress",
+      "rest.configuration",
+      "rest.port",
       "secureConnections.certificateGenerationType",
       "secureConnections.certificateId",
-      "shapeName"
+      "securityAttributes",
+      "shapeName",
+      "telemetryConfiguration.logs.destination",
+      "telemetryConfiguration.logs.destinationConfigurations.value",
+      "telemetryConfiguration.logs.logTypes"
     ],
     "denyRules": [
-      {
-        "fieldPath": "accessMode",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
       {
         "fieldPath": "adminPassword",
         "decision": "replacementRequired",
@@ -71,27 +92,6 @@
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       {
-        "fieldPath": "backupPolicy.copyPolicies.backupCopyRetentionInDays",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "backupPolicy.copyPolicies.copyToRegion",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "backupPolicy.softDelete",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
         "fieldPath": "compartmentId",
         "decision": "replacementRequired",
         "mergeCase": "replacementRequired",
@@ -99,63 +99,7 @@
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       {
-        "fieldPath": "customerContacts.email",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "dataStorage.isAutoExpandStorageEnabled",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "dataStorage.maxStorageSizeInGbs",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
         "fieldPath": "dataStorageSizeInGb",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "databaseConsole.port",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "databaseConsole.status",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "databaseMode",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptData.keyGenerationType",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptData.keyId",
         "decision": "unknown",
         "mergeCase": "unresolvedJoin",
         "docsEvidenceState": "notDocumented",
@@ -176,53 +120,11 @@
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       {
-        "fieldPath": "maintenance.maintenanceDisabledWindows.timeEnd",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "maintenance.maintenanceDisabledWindows.timeStart",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "maintenance.maintenanceScheduleType",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "maintenance.versionPreference",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "maintenance.versionTrackPreference",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
         "fieldPath": "mysqlVersion",
         "decision": "replacementRequired",
         "mergeCase": "replacementRequired",
         "docsEvidenceState": "notDocumented",
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
-      },
-      {
-        "fieldPath": "nsgIds",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "port",
@@ -237,55 +139,6 @@
         "mergeCase": "replacementRequired",
         "docsEvidenceState": "notDocumented",
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
-      },
-      {
-        "fieldPath": "readEndpoint.excludeIps",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "readEndpoint.isEnabled",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "readEndpoint.readEndpointHostnameLabel",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "readEndpoint.readEndpointIpAddress",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "rest.configuration",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "rest.port",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "securityAttributes",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "shutdownType",
@@ -351,30 +204,9 @@
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       {
-        "fieldPath": "telemetryConfiguration.logs.destination",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
         "fieldPath": "telemetryConfiguration.logs.destinationConfigurations.key",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "telemetryConfiguration.logs.destinationConfigurations.value",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "telemetryConfiguration.logs.logTypes",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       }

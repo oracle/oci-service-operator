@@ -19,7 +19,7 @@ type SddcSpec struct {
 	// ListSupportedVmwareSoftwareVersions.
 	// +kubebuilder:validation:Required
 	VmwareSoftwareVersion string `json:"vmwareSoftwareVersion"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment to contain the SDDC.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the SDDC.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// HCX configuration of the SDDC.
@@ -46,13 +46,15 @@ type SddcSpec struct {
 	// Indicates whether this SDDC is designated for only single ESXi host.
 	// +kubebuilder:validation:Optional
 	IsSingleHostSddc bool `json:"isSingleHostSddc,omitempty"`
+	// +kubebuilder:validation:Optional
+	SddcByolAllocationDetails SddcByolAllocationDetails `json:"sddcByolAllocationDetails,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -60,11 +62,11 @@ type SddcSpec struct {
 
 // SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.NetworkConfiguration.
 type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration struct {
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used
 	// to provision the Cluster.
 	// +kubebuilder:validation:Required
 	ProvisioningSubnetId string `json:"provisioningSubnetId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the vMotion component of the VMware environment.
 	// This attribute is not guaranteed to reflect the vMotion VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -77,7 +79,7 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 	// `vmotionVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	VmotionVlanId string `json:"vmotionVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the vSAN component of the VMware environment.
 	// This attribute is not guaranteed to reflect the vSAN VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -90,7 +92,7 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 	// `vsanVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	VsanVlanId string `json:"vsanVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the NSX VTEP component of the VMware environment.
 	// This attribute is not guaranteed to reflect the NSX VTEP VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -103,7 +105,7 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 	// `nsxVTepVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	NsxVTepVlanId string `json:"nsxVTepVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the NSX Edge VTEP component of the VMware environment.
 	// This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -116,7 +118,7 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 	// `nsxEdgeVTepVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	NsxEdgeVTepVlanId string `json:"nsxEdgeVTepVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the vSphere component of the VMware environment. This VLAN is a mandatory attribute
 	// for Management Cluster.
 	// This attribute is not guaranteed to reflect the vSphere VLAN
@@ -130,7 +132,7 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 	// `vsphereVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Optional
 	VsphereVlanId string `json:"vsphereVlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory
 	// attribute for Management Cluster.
 	// This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN
@@ -144,7 +146,7 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 	// `nsxEdgeUplink1VlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Optional
 	NsxEdgeUplink1VlanId string `json:"nsxEdgeUplink1VlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory
 	// attribute for Management Cluster.
 	// This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN
@@ -158,15 +160,15 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 	// `nsxEdgeUplink2VlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Optional
 	NsxEdgeUplink2VlanId string `json:"nsxEdgeUplink2VlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the vSphere Replication component of the VMware environment.
 	// +kubebuilder:validation:Optional
 	ReplicationVlanId string `json:"replicationVlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the Provisioning component of the VMware environment.
 	// +kubebuilder:validation:Optional
 	ProvisioningVlanId string `json:"provisioningVlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the HCX component of the VMware environment. This VLAN is a mandatory attribute
 	// for Management Cluster when HCX is enabled.
 	// This attribute is not guaranteed to reflect the HCX VLAN
@@ -184,12 +186,22 @@ type SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration str
 
 // SddcInitialConfigurationInitialClusterConfigurationDatastore defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.Datastore.
 type SddcInitialConfigurationInitialClusterConfigurationDatastore struct {
-	// A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes.
+	// A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes.
 	// +kubebuilder:validation:Required
 	BlockVolumeIds []string `json:"blockVolumeIds"`
 	// Type of the datastore.
 	// +kubebuilder:validation:Required
 	DatastoreType string `json:"datastoreType"`
+}
+
+// SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.ClusterByolAllocationDetails.
+type SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails struct {
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vSAN.
+	// +kubebuilder:validation:Optional
+	VsanByolAllocationId string `json:"vsanByolAllocationId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vDefend Firewall.
+	// +kubebuilder:validation:Optional
+	FirewallByolAllocationId string `json:"firewallByolAllocationId,omitempty"`
 }
 
 // SddcInitialConfigurationInitialClusterConfiguration defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.
@@ -212,7 +224,7 @@ type SddcInitialConfigurationInitialClusterConfiguration struct {
 	// +kubebuilder:validation:Required
 	NetworkConfiguration SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration `json:"networkConfiguration"`
 	// A descriptive name for the Cluster.
-	// Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
+	// Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
@@ -240,13 +252,21 @@ type SddcInitialConfigurationInitialClusterConfiguration struct {
 	// Indicates whether shielded instance is enabled for this Cluster.
 	// +kubebuilder:validation:Optional
 	IsShieldedInstanceEnabled bool `json:"isShieldedInstanceEnabled,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
 	// +kubebuilder:validation:Optional
 	CapacityReservationId string `json:"capacityReservationId,omitempty"`
 	// A list of datastore info for the Cluster.
 	// This value is required only when `initialHostShapeName` is a standard shape.
 	// +kubebuilder:validation:Optional
 	Datastores []SddcInitialConfigurationInitialClusterConfigurationDatastore `json:"datastores,omitempty"`
+	// A list of datastore clusters.
+	// +kubebuilder:validation:Optional
+	DatastoreClusterIds []string `json:"datastoreClusterIds,omitempty"`
+	// +kubebuilder:validation:Optional
+	ClusterByolAllocationDetails SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails `json:"clusterByolAllocationDetails,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation.
+	// +kubebuilder:validation:Optional
+	InitialVcfByolAllocationId string `json:"initialVcfByolAllocationId,omitempty"`
 }
 
 // SddcInitialConfiguration defines nested fields for Sddc.InitialConfiguration.
@@ -254,6 +274,16 @@ type SddcInitialConfiguration struct {
 	// The configurations for Clusters initially created in the SDDC.
 	// +kubebuilder:validation:Required
 	InitialClusterConfigurations []SddcInitialConfigurationInitialClusterConfiguration `json:"initialClusterConfigurations"`
+}
+
+// SddcByolAllocationDetails defines nested fields for Sddc.SddcByolAllocationDetails.
+type SddcByolAllocationDetails struct {
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware Avi Load Balancer.
+	// +kubebuilder:validation:Optional
+	LoadBalancerByolAllocationId string `json:"loadBalancerByolAllocationId,omitempty"`
+	// The number of VMware Avi Load Balancer instances to be deployed on VMware SDDC.
+	// +kubebuilder:validation:Optional
+	LoadBalancerInstanceCount int `json:"loadBalancerInstanceCount,omitempty"`
 }
 
 // SddcHcxOnPremLicense defines nested fields for Sddc.HcxOnPremLicense.
@@ -269,7 +299,7 @@ type SddcHcxOnPremLicense struct {
 // SddcStatus defines the observed state of Sddc.
 type SddcStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC.
 	Id string `json:"id,omitempty"`
 	// A descriptive name for the SDDC. It must be unique, start with a letter, and contain only letters, digits,
 	// whitespaces, dashes and underscores.
@@ -288,7 +318,7 @@ type SddcStatus struct {
 	// should use UpdateSddc to update the SDDC's
 	// `vmwareSoftwareVersion` with that new version.
 	VmwareSoftwareVersion string `json:"vmwareSoftwareVersion,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
 	// contains the SDDC.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The number of Clusters in the SDDC.
@@ -299,11 +329,11 @@ type SddcStatus struct {
 	// The FQDN for NSX Manager.
 	// Example: `nsx-my-sddc.sddc.us-phoenix-1.oraclecloud.com`
 	NsxManagerFqdn string `json:"nsxManagerFqdn,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
 	// the virtual IP (VIP) for vCenter. For information about `PrivateIp` objects, see the
 	// Core Services API.
 	VcenterPrivateIpId string `json:"vcenterPrivateIpId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
 	// the virtual IP (VIP) for NSX Manager. For information about `PrivateIp` objects, see the
 	// Core Services API.
 	NsxManagerPrivateIpId string `json:"nsxManagerPrivateIpId,omitempty"`
@@ -327,11 +357,11 @@ type SddcStatus struct {
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// In general, this is a specific version of bundled ESXi software supported by
@@ -354,12 +384,12 @@ type SddcStatus struct {
 	// The SDDC includes an administrator username and initial password for NSX Manager. You
 	// can change this initial username to a different value in NSX Manager.
 	NsxManagerUsername string `json:"nsxManagerUsername,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
 	// the virtual IP (VIP) for the NSX Edge Uplink. Use this OCID as the route target for
 	// route table rules when setting up connectivity between the SDDC and other networks.
 	// For information about `PrivateIp` objects, see the Core Services API.
 	NsxEdgeUplinkIpId string `json:"nsxEdgeUplinkIpId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is
 	// the virtual IP (VIP) for HCX Manager. For information about `PrivateIp` objects, see the
 	// Core Services API.
 	HcxPrivateIpId string `json:"hcxPrivateIpId,omitempty"`
@@ -383,7 +413,11 @@ type SddcStatus struct {
 	// RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// The current state of the SDDC.
-	LifecycleState string `json:"lifecycleState,omitempty"`
+	LifecycleState            string                    `json:"lifecycleState,omitempty"`
+	SddcByolAllocationDetails SddcByolAllocationDetails `json:"sddcByolAllocationDetails,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{orcl-cloud: {free-tier-retain: true}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

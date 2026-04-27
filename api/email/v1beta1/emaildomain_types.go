@@ -18,64 +18,88 @@ type EmailDomainSpec struct {
 	// The email domain name must be unique in the region for this tenancy.
 	// Domain names limited to ASCII characters use alphanumeric, dash ("-"), and dot (".") characters.
 	// The dash and dot are only allowed between alphanumeric characters.
-	// For details, please see: https://tools.ietf.org/html/rfc5321#section-4.1.2
+	// For details, see RFC 5321, section 4.1.2 (https://tools.ietf.org/html/rfc5321#section-4.1.2)
 	// Non-ASCII domain names should adopt IDNA2008 normalization (RFC 5891-5892).
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for this email domain.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for this email domain.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
+	// Id for Domain in Domain Management (under governance) if DOMAINID verification method used.
+	// +kubebuilder:validation:Optional
+	DomainVerificationId string `json:"domainVerificationId,omitempty"`
 	// A string that describes the details about the domain. It does not have to be unique,
 	// and you can change it. Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// EmailDomainLock defines nested fields for EmailDomain.Lock.
+type EmailDomainLock struct {
+	// Lock type.
+	Type string `json:"type,omitempty"`
+	// The lock compartment ID.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
+	RelatedResourceId string `json:"relatedResourceId,omitempty"`
+	// A message added by the lock creator. The message typically gives an
+	// indication of why the resource is locked.
+	Message string `json:"message,omitempty"`
+	// Indicates when the lock was created, in the format defined by RFC 3339.
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // EmailDomainStatus defines the observed state of EmailDomain.
 type EmailDomainStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// The name of the email domain in the Internet Domain Name System (DNS).
-	// Example: `example.net`
+	// Example: `mydomain.example.com`
 	Name string `json:"name,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this email domain.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this email domain.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The current state of the email domain.
 	LifecycleState string `json:"lifecycleState,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key
 	// that will be used to sign mail sent from this email domain.
 	ActiveDkimId string `json:"activeDkimId,omitempty"`
 	// Value of the SPF field. For more information about SPF, please see
-	// SPF Authentication (https://docs.cloud.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
+	// SPF Authentication (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
 	IsSpf bool `json:"isSpf,omitempty"`
-	// The description of a email domain.
+	// The current domain verification status.
+	DomainVerificationStatus string `json:"domainVerificationStatus,omitempty"`
+	// Id for Domain in Domain Management (under governance) if DOMAINID verification method used.
+	DomainVerificationId string `json:"domainVerificationId,omitempty"`
+	// The description of an email domain.
 	Description string `json:"description,omitempty"`
 	// The time the email domain was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
 	// timestamp format, "YYYY-MM-ddThh:mmZ".
 	// Example: `2021-02-12T22:47:12.613Z`
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// Locks associated with this resource.
+	Locks []EmailDomainLock `json:"locks,omitempty"`
 }
 
 // +kubebuilder:object:root=true

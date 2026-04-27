@@ -119,7 +119,7 @@ func newClusterDefaultRuntimeHooks(sdkClient containerenginesdk.ContainerEngineC
 			},
 		},
 		Get: runtimeOperationHooks[containerenginesdk.GetClusterRequest, containerenginesdk.GetClusterResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true}, {FieldName: "ShouldIncludeOidcConfigFile", RequestName: "shouldIncludeOidcConfigFile", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request containerenginesdk.GetClusterRequest) (containerenginesdk.GetClusterResponse, error) {
 				return sdkClient.GetCluster(ctx, request)
 			},

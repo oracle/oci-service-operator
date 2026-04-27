@@ -122,17 +122,11 @@ spec:
                     healthChecks:
                       description: |-
                         list of container health checks to check container status and take appropriate action if container status is failed.
-                        There are three types of health checks that we currently support HTTP, TCP, and Command.
+                        There are two types of health checks that we currently support HTTP and TCP.
                       items:
                         description: ContainerInstanceContainerHealthCheck defines
                           nested fields for ContainerInstance.Container.HealthCheck.
                         properties:
-                          command:
-                            description: The list of strings that will be simplified
-                              to a single command for checking the status of the container.
-                            items:
-                              type: string
-                            type: array
                           failureAction:
                             description: |-
                               The action will be triggered when the container health check fails. There are two types of action: KILL or NONE. The default

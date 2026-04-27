@@ -17,21 +17,40 @@ type RedisClusterSpec struct {
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	// +kubebuilder:validation:Required
 	DisplayName string `json:"displayName"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the Redis cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the cluster.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
-	// The number of nodes in the Redis cluster.
+	// The number of nodes per shard in the cluster when clusterMode is SHARDED. This is the total number of nodes when clusterMode is NONSHARDED.
 	// +kubebuilder:validation:Required
 	NodeCount int `json:"nodeCount"`
-	// The Redis version that the cluster is running.
+	// The OCI Cache engine version that the cluster is running.
 	// +kubebuilder:validation:Required
 	SoftwareVersion string `json:"softwareVersion"`
-	// The amount of memory allocated to the Redis cluster's nodes, in gigabytes.
+	// The amount of memory allocated to the cluster's nodes, in gigabytes.
 	// +kubebuilder:validation:Required
 	NodeMemoryInGBs float32 `json:"nodeMemoryInGBs"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the Redis cluster's subnet.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster's subnet.
 	// +kubebuilder:validation:Required
 	SubnetId string `json:"subnetId"`
+	// The ID of the corresponding OCI Cache Config Set for the cluster.
+	// +kubebuilder:validation:Optional
+	OciCacheConfigSetId string `json:"ociCacheConfigSetId,omitempty"`
+	// Specifies whether the cluster is sharded or non-sharded.
+	// +kubebuilder:validation:Optional
+	ClusterMode string `json:"clusterMode,omitempty"`
+	// The number of shards in sharded cluster. Only applicable when clusterMode is SHARDED.
+	// +kubebuilder:validation:Optional
+	ShardCount int `json:"shardCount,omitempty"`
+	// A list of Network Security Group (NSG) OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	// associated with this cluster. For more information,
+	// see Using an NSG for Clusters (https://docs.oracle.com/iaas/Content/ocicache/connecttocluster.htm#connecttocluster__networksecuritygroup).
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// Security attributes for redis cluster resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -48,7 +67,7 @@ type RedisClusterNodeCollectionItem struct {
 	PrivateEndpointFqdn string `json:"privateEndpointFqdn,omitempty"`
 	// The private IP address of the API endpoint to access a specific node.
 	PrivateEndpointIpAddress string `json:"privateEndpointIpAddress,omitempty"`
-	// A user-friendly name of a Redis cluster node.
+	// A user-friendly name of a cluster node.
 	DisplayName string `json:"displayName,omitempty"`
 }
 
@@ -61,37 +80,55 @@ type RedisClusterNodeCollection struct {
 // RedisClusterStatus defines the observed state of RedisCluster.
 type RedisClusterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the Redis cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
 	Id string `json:"id,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the Redis cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the cluster.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The number of nodes in the Redis cluster.
+	// The number of nodes per shard in the cluster when clusterMode is SHARDED. This is the total number of nodes when clusterMode is NONSHARDED.
 	NodeCount int `json:"nodeCount,omitempty"`
-	// The amount of memory allocated to the Redis cluster's nodes, in gigabytes.
+	// The amount of memory allocated to the cluster's nodes, in gigabytes.
 	NodeMemoryInGBs float32 `json:"nodeMemoryInGBs,omitempty"`
-	// The fully qualified domain name (FQDN) of the API endpoint for the Redis cluster's primary node.
+	// The fully qualified domain name (FQDN) of the API endpoint for the cluster's primary node.
 	PrimaryFqdn string `json:"primaryFqdn,omitempty"`
-	// The private IP address of the API endpoint for the Redis cluster's primary node.
+	// The private IP address of the API endpoint for the cluster's primary node.
 	PrimaryEndpointIpAddress string `json:"primaryEndpointIpAddress,omitempty"`
-	// The fully qualified domain name (FQDN) of the API endpoint for the Redis cluster's replica nodes.
+	// The fully qualified domain name (FQDN) of the API endpoint for the cluster's replica nodes.
 	ReplicasFqdn string `json:"replicasFqdn,omitempty"`
-	// The private IP address of the API endpoint for the Redis cluster's replica nodes.
+	// The private IP address of the API endpoint for the cluster's replica nodes.
 	ReplicasEndpointIpAddress string `json:"replicasEndpointIpAddress,omitempty"`
-	// The Redis version that the cluster is running.
+	// The OCI Cache engine version that the cluster is running.
 	SoftwareVersion string `json:"softwareVersion,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the Redis cluster's subnet.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster's subnet.
 	SubnetId       string                     `json:"subnetId,omitempty"`
 	NodeCollection RedisClusterNodeCollection `json:"nodeCollection,omitempty"`
-	// The current state of the Redis cluster.
+	// The current state of the cluster.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// A message describing the current state in more detail. For example, the message might provide actionable information for a resource in `FAILED` state.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
-	// The date and time the Redis cluster was created. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string.
+	// The fully qualified domain name (FQDN) of the API endpoint for sharded cluster discovery.
+	DiscoveryFqdn string `json:"discoveryFqdn,omitempty"`
+	// The private IP address of the API endpoint for sharded cluster discovery.
+	DiscoveryEndpointIpAddress string `json:"discoveryEndpointIpAddress,omitempty"`
+	// The date and time the cluster was created. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string.
 	TimeCreated string `json:"timeCreated,omitempty"`
-	// The date and time the Redis cluster was updated. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string.
+	// The date and time the cluster was updated. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string.
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The ID of the corresponding OCI Cache Config Set for the cluster.
+	OciCacheConfigSetId string `json:"ociCacheConfigSetId,omitempty"`
+	// Specifies whether the cluster is sharded or non-sharded.
+	ClusterMode string `json:"clusterMode,omitempty"`
+	// The number of shards in a sharded cluster. Only applicable when clusterMode is SHARDED.
+	ShardCount int `json:"shardCount,omitempty"`
+	// A list of Network Security Group (NSG) OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	// associated with this cluster. For more information,
+	// see Using an NSG for Clusters (https://docs.oracle.com/iaas/Content/ocicache/connecttocluster.htm#connecttocluster__networksecuritygroup).
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// Security attributes for redis cluster resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`

@@ -20,8 +20,14 @@
     "allowInPlacePaths": [
       "adminPassword",
       "arePrimaryWhitelistedIpsUsed",
+      "autoRefreshFrequencyInSeconds",
+      "autoRefreshPointLagInSeconds",
+      "autonomousDatabaseMaintenanceWindow.dayOfWeek.name",
+      "autonomousDatabaseMaintenanceWindow.maintenanceEndTime",
+      "autonomousDatabaseMaintenanceWindow.maintenanceStartTime",
       "autonomousMaintenanceScheduleType",
       "backupRetentionPeriodInDays",
+      "byolComputeCountLimit",
       "compartmentId",
       "computeCount",
       "computeModel",
@@ -37,11 +43,29 @@
       "dbWorkload",
       "definedTags",
       "displayName",
+      "encryptionKey.arnRole",
+      "encryptionKey.certificateDirectoryName",
+      "encryptionKey.certificateId",
+      "encryptionKey.directoryName",
+      "encryptionKey.externalId",
+      "encryptionKey.keyArn",
+      "encryptionKey.keyName",
+      "encryptionKey.keyRing",
+      "encryptionKey.kmsKeyId",
+      "encryptionKey.kmsRestEndpoint",
+      "encryptionKey.location",
+      "encryptionKey.okvKmsKey",
+      "encryptionKey.okvUri",
+      "encryptionKey.project",
+      "encryptionKey.serviceEndpointUri",
+      "encryptionKey.vaultId",
+      "encryptionKey.vaultUri",
       "freeformTags",
       "inMemoryPercentage",
       "isAccessControlEnabled",
       "isAutoScalingEnabled",
       "isAutoScalingForStorageEnabled",
+      "isBackupRetentionLocked",
       "isDataGuardEnabled",
       "isDevTier",
       "isLocalDataGuardEnabled",
@@ -52,30 +76,20 @@
       "privateEndpointLabel",
       "refreshableMode",
       "resourcePoolLeaderId",
+      "resourcePoolSummary.availableStorageCapacityInTbs",
       "resourcePoolSummary.isDisabled",
       "resourcePoolSummary.poolSize",
+      "resourcePoolSummary.poolStorageSizeInTbs",
       "scheduledOperations.dayOfWeek.name",
       "scheduledOperations.scheduledStartTime",
       "scheduledOperations.scheduledStopTime",
       "secretId",
       "secretVersionNumber",
-      "subnetId"
+      "securityAttributes",
+      "subnetId",
+      "timeOfAutoRefreshStart"
     ],
     "denyRules": [
-      {
-        "fieldPath": "autoRefreshFrequencyInSeconds",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "autoRefreshPointLagInSeconds",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
       {
         "fieldPath": "autonomousContainerDatabaseId",
         "decision": "replacementRequired",
@@ -96,34 +110,6 @@
         "mergeCase": "replacementRequired",
         "docsEvidenceState": "notDocumented",
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
-      },
-      {
-        "fieldPath": "autonomousDatabaseMaintenanceWindow.dayOfWeek.name",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "autonomousDatabaseMaintenanceWindow.maintenanceEndTime",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "autonomousDatabaseMaintenanceWindow.maintenanceStartTime",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "byolComputeCountLimit",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "characterSet",
@@ -189,133 +175,7 @@
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
-        "fieldPath": "encryptionKey.arnRole",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
         "fieldPath": "encryptionKey.autonomousDatabaseProvider",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.certificateDirectoryName",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.certificateId",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.directoryName",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.externalId",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.keyArn",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.keyName",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.keyRing",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.kmsKeyId",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.kmsRestEndpoint",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.location",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.okvKmsKey",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.okvUri",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.project",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.serviceEndpointUri",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.vaultId",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "encryptionKey.vaultUri",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "isBackupRetentionLocked",
         "decision": "unknown",
         "mergeCase": "unresolvedJoin",
         "docsEvidenceState": "notDocumented",
@@ -331,14 +191,14 @@
       {
         "fieldPath": "isDisableDbVersionUpgradeSchedule",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "isDisconnectPeer",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
@@ -373,7 +233,7 @@
       {
         "fieldPath": "isScheduleDbVersionUpgradeToEarliest",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
@@ -415,7 +275,7 @@
       {
         "fieldPath": "localAdgResourcePoolLeaderId",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
@@ -497,28 +357,7 @@
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       {
-        "fieldPath": "resourcePoolSummary.availableStorageCapacityInTbs",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "resourcePoolSummary.poolStorageSizeInTbs",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
         "fieldPath": "rotateKeyTrigger",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "securityAttributes",
         "decision": "unknown",
         "mergeCase": "unresolvedJoin",
         "docsEvidenceState": "notDocumented",
@@ -562,9 +401,9 @@
       {
         "fieldPath": "subscriptionId",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
       },
       {
         "fieldPath": "switchoverTo",
@@ -583,21 +422,14 @@
       {
         "fieldPath": "timeMaintenancePauseUntil",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
-      },
-      {
-        "fieldPath": "timeOfAutoRefreshStart",
-        "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "timeScheduledDbVersionUpgrade",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
@@ -611,9 +443,9 @@
       {
         "fieldPath": "transportableTablespace.ttsBundleUrl",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
-        "docsEvidenceState": "notDocumented",
-        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+        "mergeCase": "unknown",
+        "docsEvidenceState": "unknown",
+        "detail": "Argument Reference documents the field but does not include an explicit update cue."
       },
       {
         "fieldPath": "useLatestAvailableBackupTimeStamp",
@@ -625,21 +457,21 @@
       {
         "fieldPath": "vanityUrlDetails.apiGatewayId",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "vanityUrlDetails.isDisabled",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },
       {
         "fieldPath": "vanityUrlDetails.vanityUrlHostName",
         "decision": "unknown",
-        "mergeCase": "unresolvedJoin",
+        "mergeCase": "astOnlyCandidate",
         "docsEvidenceState": "notDocumented",
         "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
       },

@@ -57,7 +57,7 @@ spec:
             description: EmailDomainSpec defines the desired state of EmailDomain.
             properties:
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment for this email domain.
                 type: string
               definedTags:
@@ -67,7 +67,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
@@ -75,12 +75,16 @@ spec:
                   A string that describes the details about the domain. It does not have to be unique,
                   and you can change it. Avoid entering confidential information.
                 type: string
+              domainVerificationId:
+                description: Id for Domain in Domain Management (under governance)
+                  if DOMAINID verification method used.
+                type: string
               freeformTags:
                 additionalProperties:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               name:
@@ -89,7 +93,7 @@ spec:
                   The email domain name must be unique in the region for this tenancy.
                   Domain names limited to ASCII characters use alphanumeric, dash ("-"), and dot (".") characters.
                   The dash and dot are only allowed between alphanumeric characters.
-                  For details, please see: https://tools.ietf.org/html/rfc5321#section-4.1.2
+                  For details, see RFC 5321, section 4.1.2 (https://tools.ietf.org/html/rfc5321#section-4.1.2)
                   Non-ASCII domain names should adopt IDNA2008 normalization (RFC 5891-5892).
                 type: string
             required:
@@ -101,11 +105,11 @@ spec:
             properties:
               activeDkimId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key
                   that will be used to sign mail sent from this email domain.
                 type: string
               compartmentId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the compartment that contains this email domain.
                 type: string
               definedTags:
@@ -115,36 +119,69 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
-                description: The description of a email domain.
+                description: The description of an email domain.
+                type: string
+              domainVerificationId:
+                description: Id for Domain in Domain Management (under governance)
+                  if DOMAINID verification method used.
+                type: string
+              domainVerificationStatus:
+                description: The current domain verification status.
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the email domain.
                 type: string
               isSpf:
                 description: |-
                   Value of the SPF field. For more information about SPF, please see
-                  SPF Authentication (https://docs.cloud.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
+                  SPF Authentication (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
                 type: boolean
               lifecycleState:
                 description: The current state of the email domain.
                 type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: EmailDomainLock defines nested fields for EmailDomain.Lock.
+                  properties:
+                    compartmentId:
+                      description: The lock compartment ID.
+                      type: string
+                    message:
+                      description: |-
+                        A message added by the lock creator. The message typically gives an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The resource ID that is locking this resource.
+                        Indicates that deleting this resource removes the lock.
+                      type: string
+                    timeCreated:
+                      description: Indicates when the lock was created, in the format
+                        defined by RFC 3339.
+                      type: string
+                    type:
+                      description: Lock type.
+                      type: string
+                  type: object
+                type: array
               name:
                 description: |-
                   The name of the email domain in the Internet Domain Name System (DNS).
-                  Example: `example.net`
+                  Example: `mydomain.example.com`
                 type: string
               status:
                 properties:

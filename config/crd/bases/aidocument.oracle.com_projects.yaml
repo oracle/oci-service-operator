@@ -122,6 +122,32 @@ spec:
               lifecycleState:
                 description: The current state of the project.
                 type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: ProjectLock defines nested fields for Project.Lock.
+                  properties:
+                    compartmentId:
+                      description: The lock compartment ID.
+                      type: string
+                    message:
+                      description: |-
+                        A message added by the lock creator. The message typically gives an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The resource ID that is locking this resource.
+                        Indicates that deleting this resource removes the lock.
+                      type: string
+                    timeCreated:
+                      description: Indicates when the lock was created, in the format
+                        defined by RFC 3339.
+                      type: string
+                    type:
+                      description: Lock type.
+                      type: string
+                  type: object
+                type: array
               status:
                 properties:
                   async:

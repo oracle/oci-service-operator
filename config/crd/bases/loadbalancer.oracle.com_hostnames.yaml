@@ -59,7 +59,7 @@ spec:
               hostname:
                 description: |-
                   A virtual hostname. For more information about virtual hostname string construction, see
-                  Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+                  Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing).
                   Example: `app.example.com`
                 type: string
               name:
@@ -78,7 +78,7 @@ spec:
               hostname:
                 description: |-
                   A virtual hostname. For more information about virtual hostname string construction, see
-                  Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+                  Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing).
                   Example: `app.example.com`
                 type: string
               name:

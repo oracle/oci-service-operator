@@ -20,16 +20,34 @@ type SenderSpec struct {
 	// The email address of the sender.
 	// +kubebuilder:validation:Required
 	EmailAddress string `json:"emailAddress"`
+	// An optional field. The IpPool OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender.
+	// +kubebuilder:validation:Optional
+	EmailIpPoolId string `json:"emailIpPoolId,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+}
+
+// SenderLock defines nested fields for Sender.Lock.
+type SenderLock struct {
+	// Lock type.
+	Type string `json:"type,omitempty"`
+	// The lock compartment ID.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
+	RelatedResourceId string `json:"relatedResourceId,omitempty"`
+	// A message added by the lock creator. The message typically gives an
+	// indication of why the resource is locked.
+	Message string `json:"message,omitempty"`
+	// Indicates when the lock was created, in the format defined by RFC 3339.
+	TimeCreated string `json:"timeCreated,omitempty"`
 }
 
 // SenderStatus defines the observed state of Sender.
@@ -42,23 +60,30 @@ type SenderStatus struct {
 	// The unique OCID of the sender.
 	Id string `json:"id,omitempty"`
 	// Value of the SPF field. For more information about SPF, please see
-	// SPF Authentication (https://docs.cloud.oracle.com/Content/Email/Concepts/overview.htm#components).
+	// SPF Authentication (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
 	IsSpf bool `json:"isSpf,omitempty"`
 	// The sender's current lifecycle state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The date and time the approved sender was added in "YYYY-MM-ddThh:mmZ"
-	// format with a Z offset, as defined by RFC 3339.
+	// format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The email domain used to assert responsibility for emails sent from this sender.
 	EmailDomainId string `json:"emailDomainId,omitempty"`
+	// The IpPool OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender.
+	EmailIpPoolId string `json:"emailIpPoolId,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// Locks associated with this resource.
+	Locks []SenderLock `json:"locks,omitempty"`
 }
 
 // +kubebuilder:object:root=true

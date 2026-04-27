@@ -63,7 +63,7 @@ spec:
                 type: boolean
               compartmentId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the
                   NAT gateway.
                 type: string
               definedTags:
@@ -73,7 +73,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a
-                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               displayName:
@@ -86,22 +86,22 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               publicIpId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the public IP address associated with the NAT gateway.
                 type: string
               routeTableId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway.
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway.
                   If you don't specify a route table here, the NAT gateway is created without an associated route
                   table. The Networking service does NOT automatically associate the attached VCN's default route table
                   with the NAT gateway.
                 type: string
               vcnId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the VCN the gateway belongs to.
                 type: string
             required:
@@ -118,7 +118,7 @@ spec:
                 type: boolean
               compartmentId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains
                   the NAT gateway.
                 type: string
               definedTags:
@@ -128,7 +128,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a
-                  namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               displayName:
@@ -141,12 +141,12 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no
-                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
                   NAT gateway.
                 type: string
               lifecycleState:
@@ -156,7 +156,7 @@ spec:
                 description: The IP address associated with the NAT gateway.
                 type: string
               publicIpId:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the public IP address associated with the NAT gateway.
                 type: string
               publicIpIdCreateIntent:
@@ -169,7 +169,7 @@ spec:
                 type: string
               routeTableId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway.
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway.
                   If you don't specify a route table here, the NAT gateway is created without an associated route
                   table. The Networking service does NOT automatically associate the attached VCN's default route table
                   with the NAT gateway.
@@ -281,7 +281,7 @@ spec:
                 type: string
               vcnId:
                 description: |-
-                  The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the NAT gateway
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the NAT gateway
                   belongs to.
                 type: string
             required:

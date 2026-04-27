@@ -163,9 +163,6 @@ type ContainerInstanceContainerHealthCheck struct {
 	// Container health check HTTP headers.
 	// +kubebuilder:validation:Optional
 	Headers []ContainerInstanceContainerHealthCheckHeader `json:"headers,omitempty"`
-	// The list of strings that will be simplified to a single command for checking the status of the container.
-	// +kubebuilder:validation:Optional
-	Command []string `json:"command,omitempty"`
 }
 
 // ContainerInstanceContainerSecurityContextCapabilities defines nested fields for ContainerInstance.Container.SecurityContext.Capabilities.
@@ -243,7 +240,7 @@ type ContainerInstanceContainer struct {
 	// +kubebuilder:validation:Optional
 	ResourceConfig ContainerInstanceContainerResourceConfig `json:"resourceConfig,omitempty"`
 	// list of container health checks to check container status and take appropriate action if container status is failed.
-	// There are three types of health checks that we currently support HTTP, TCP, and Command.
+	// There are two types of health checks that we currently support HTTP and TCP.
 	// +kubebuilder:validation:Optional
 	HealthChecks []ContainerInstanceContainerHealthCheck `json:"healthChecks,omitempty"`
 	// +kubebuilder:validation:Optional

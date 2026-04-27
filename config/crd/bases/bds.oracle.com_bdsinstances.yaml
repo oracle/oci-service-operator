@@ -56,13 +56,26 @@ spec:
           spec:
             description: BdsInstanceSpec defines the desired state of BdsInstance.
             properties:
+              bdsClusterVersionSummary:
+                description: BdsInstanceBdsClusterVersionSummary defines nested fields
+                  for BdsInstance.BdsClusterVersionSummary.
+                properties:
+                  bdsVersion:
+                    description: BDS version to be used for cluster creation
+                    type: string
+                  odhVersion:
+                    description: ODH version to be used for cluster creation
+                    type: string
+                required:
+                - bdsVersion
+                type: object
               bootstrapScriptUrl:
                 description: Pre-authenticated URL of the script in Object Store that
                   is downloaded and executed.
                 type: string
               clusterAdminPassword:
                 description: Base-64 encoded password for the cluster (and Cloudera
-                  Manager) admin user.
+                  Manager) admin user. Not required if the secretId is specified.
                 type: string
               clusterProfile:
                 description: Profile of the Big Data Service cluster.
@@ -98,6 +111,10 @@ spec:
               isHighAvailability:
                 description: Boolean flag specifying whether or not the cluster is
                   highly available (HA).
+                type: boolean
+              isSecretReused:
+                description: Boolean flag specifying whether or not to persist the
+                  provided secret OCID and reuse it for future operations.
                 type: boolean
               isSecure:
                 description: Boolean flag specifying whether or not the cluster should
@@ -164,8 +181,10 @@ spec:
                   - subnetId
                   type: object
                 type: array
+              secretId:
+                description: The secretId for the clusterAdminPassword.
+                type: string
             required:
-            - clusterAdminPassword
             - clusterPublicKey
             - clusterVersion
             - compartmentId
@@ -177,6 +196,19 @@ spec:
           status:
             description: BdsInstanceStatus defines the observed state of BdsInstance.
             properties:
+              bdsClusterVersionSummary:
+                description: BdsInstanceBdsClusterVersionSummary defines nested fields
+                  for BdsInstance.BdsClusterVersionSummary.
+                properties:
+                  bdsVersion:
+                    description: BDS version to be used for cluster creation
+                    type: string
+                  odhVersion:
+                    description: ODH version to be used for cluster creation
+                    type: string
+                required:
+                - bdsVersion
+                type: object
               bootstrapScriptUrl:
                 description: pre-authenticated URL of the bootstrap script in Object
                   Store that can be downloaded and executed.
@@ -315,6 +347,10 @@ spec:
                 description: Boolean flag specifying whether or not Kafka should be
                   configured.
                 type: boolean
+              isSecretReused:
+                description: Boolean flag specifying whether or not to persist the
+                  provided secret OCID and reuse it for future operations.
+                type: boolean
               isSecure:
                 description: Boolean flag specifying whether or not the cluster should
                   be set up as secure.
@@ -386,6 +422,9 @@ spec:
               numberOfNodesRequiringMaintenanceReboot:
                 description: Number of nodes that require a maintenance reboot
                 type: integer
+              secretId:
+                description: The secretId for the clusterAdminPassword.
+                type: string
               status:
                 properties:
                   async:
@@ -489,6 +528,10 @@ spec:
               timeCreated:
                 description: The time the cluster was created, shown as an RFC 3339
                   formatted datetime string.
+                type: string
+              timeEarliestCertificateExpiration:
+                description: The earliest time of certificate expiration date across
+                  the certificates of all current nodes under this cluster.
                 type: string
               timeUpdated:
                 description: The time the cluster was updated, shown as an RFC 3339

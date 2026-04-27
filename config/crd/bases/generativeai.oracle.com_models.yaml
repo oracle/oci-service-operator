@@ -70,7 +70,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
@@ -108,6 +108,18 @@ spec:
                         description: |-
                           Determines how frequently to log model metrics.
                           Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics.
+                        type: integer
+                      loraAlpha:
+                        description: This parameter represents the scaling factor
+                          for the weight matrices in LoRA.
+                        type: integer
+                      loraDropout:
+                        description: This parameter indicates the dropout probability
+                          for LoRA layers.
+                        type: number
+                      loraR:
+                        description: This parameter represents the LoRA rank of the
+                          update matrices.
                         type: integer
                       numOfLastLayers:
                         description: The number of last layers to be fine-tuned.
@@ -149,7 +161,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               vendor:
@@ -186,7 +198,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               description:
@@ -224,6 +236,18 @@ spec:
                         description: |-
                           Determines how frequently to log model metrics.
                           Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics.
+                        type: integer
+                      loraAlpha:
+                        description: This parameter represents the scaling factor
+                          for the weight matrices in LoRA.
+                        type: integer
+                      loraDropout:
+                        description: This parameter indicates the dropout probability
+                          for LoRA layers.
+                        type: number
+                      loraR:
+                        description: This parameter represents the LoRA rank of the
+                          update matrices.
                         type: integer
                       numOfLastLayers:
                         description: The number of last layers to be fine-tuned.
@@ -265,7 +289,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
@@ -410,9 +434,17 @@ spec:
                 description: The date and time that the model was created in the format
                   of an RFC3339 datetime string.
                 type: string
+              timeDedicatedRetired:
+                description: The timestamp indicating when the custom model and its
+                  associated foundation model will be fully retired.
+                type: string
               timeDeprecated:
                 description: Corresponds to the time when the custom model and its
                   associated foundation model will be deprecated.
+                type: string
+              timeOnDemandRetired:
+                description: The timestamp indicating when the base model will no
+                  longer be available for on-demand usage.
                 type: string
               timeUpdated:
                 description: The date and time that the model was updated in the format

@@ -131,13 +131,13 @@ func newProjectDefaultRuntimeHooks(sdkClient aidocumentsdk.AIServiceDocumentClie
 			},
 		},
 		Update: runtimeOperationHooks[aidocumentsdk.UpdateProjectRequest, aidocumentsdk.UpdateProjectResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateProjectDetails", RequestName: "UpdateProjectDetails", Contribution: "body", PreferResourceID: false}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}, {FieldName: "UpdateProjectDetails", RequestName: "UpdateProjectDetails", Contribution: "body", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aidocumentsdk.UpdateProjectRequest) (aidocumentsdk.UpdateProjectResponse, error) {
 				return sdkClient.UpdateProject(ctx, request)
 			},
 		},
 		Delete: runtimeOperationHooks[aidocumentsdk.DeleteProjectRequest, aidocumentsdk.DeleteProjectResponse]{
-			Fields: []generatedruntime.RequestField{{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true}},
+			Fields: []generatedruntime.RequestField{{FieldName: "ProjectId", RequestName: "projectId", Contribution: "path", PreferResourceID: true}, {FieldName: "IsLockOverride", RequestName: "isLockOverride", Contribution: "query", PreferResourceID: false}},
 			Call: func(ctx context.Context, request aidocumentsdk.DeleteProjectRequest) (aidocumentsdk.DeleteProjectResponse, error) {
 				return sdkClient.DeleteProject(ctx, request)
 			},
