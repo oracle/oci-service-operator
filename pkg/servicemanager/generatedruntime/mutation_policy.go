@@ -171,6 +171,19 @@ func pruneComparableValue(value any) (any, bool) {
 			return nil, false
 		}
 		return pruned, true
+	case []any:
+		pruned := make([]any, 0, len(concrete))
+		for _, child := range concrete {
+			prunedChild, ok := pruneComparableValue(child)
+			if !ok {
+				continue
+			}
+			pruned = append(pruned, prunedChild)
+		}
+		if len(pruned) == 0 {
+			return nil, false
+		}
+		return pruned, true
 	default:
 		if !meaningfulValue(concrete) {
 			return nil, false
@@ -214,7 +227,7 @@ func (c ServiceClient[T]) hasMutableDrift(resource T, currentResponse any) (bool
 			}
 			continue
 		}
-		if !valuesEqual(wantedValue, currentValue) {
+		if !forceNewValuesEqual(wantedValue, currentValue) {
 			return true, nil
 		}
 	}
@@ -263,11 +276,15 @@ func meaningfulSortedKeys(values map[string]any) []string {
 }
 
 func comparableDiffPathsForKey(specValues map[string]any, currentValues map[string]any, prefix string, key string) []string {
-	specValue := specValues[key]
+	specValue, specMeaningful := pruneComparableValue(specValues[key])
+	if !specMeaningful {
+		return nil
+	}
 	currentValue, ok := lookupMapKey(currentValues, key)
 	if !ok {
 		return nil
 	}
+	currentValue, _ = pruneComparableValue(currentValue)
 
 	path := key
 	if prefix != "" {
