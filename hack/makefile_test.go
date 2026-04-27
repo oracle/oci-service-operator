@@ -59,6 +59,42 @@ func TestMakeGeneratedCoverageUsesControllerGenCompatibilityRunner(t *testing.T)
 	}
 }
 
+func TestMakeSchemaValidatorSupportedSelectionUsesEffectiveGeneratorConfig(t *testing.T) {
+	output := runMakeDryRun(t, "schema-validator", []string{
+		"SCHEMA_VALIDATOR_SELECTION=supported",
+	})
+
+	if !strings.Contains(output, "go run ./cmd/osok-schema-validator --provider-path . --config internal/generator/config/services.yaml --all") {
+		t.Fatalf("make -n schema-validator output did not invoke cmd/osok-schema-validator with the effective generator config and default-active selection:\n%s", output)
+	}
+	if !strings.Contains(output, "--format json > \"$tmp_report\"") {
+		t.Fatalf("make -n schema-validator output did not keep the default coverage format at json:\n%s", output)
+	}
+}
+
+func TestMakeSchemaValidatorUpgradeUsesEffectiveGeneratorConfig(t *testing.T) {
+	tmpDir := filepath.Join(t.TempDir(), "validator-root")
+	output := runMakeDryRun(t, "schema-validator", []string{
+		"TMPDIR=" + tmpDir,
+		"SCHEMA_VALIDATOR_UPGRADE_FROM=v65.61.1",
+		"SCHEMA_VALIDATOR_UPGRADE_TO=v65.104.0",
+	})
+
+	expectedReport := filepath.Join(tmpDir, "validator-upgrade-report.md")
+	if !strings.Contains(output, "go run ./cmd/osok-schema-validator --provider-path . --config internal/generator/config/services.yaml --all") {
+		t.Fatalf("make -n schema-validator output did not scope the upgrade run to the effective generator config:\n%s", output)
+	}
+	if !strings.Contains(output, "--upgrade-from v65.61.1 --upgrade-to v65.104.0 --format markdown > \"$tmp_report\"") {
+		t.Fatalf("make -n schema-validator output did not invoke cmd/osok-schema-validator with the effective generator config and default-active selection:\n%s", output)
+	}
+	if !strings.Contains(output, "report=\""+expectedReport+"\"") {
+		t.Fatalf("make -n schema-validator output did not use the temp-based default report path %q:\n%s", expectedReport, output)
+	}
+	if strings.Contains(output, filepath.Join(findRepoRootForTest(t), "validator-upgrade-report.md")) {
+		t.Fatalf("make -n schema-validator output still points the default report into the repo root:\n%s", output)
+	}
+}
+
 func TestMakeFormalScaffoldUsesEffectiveGeneratorConfig(t *testing.T) {
 	output := runMakeDryRun(t, "formal-scaffold", nil)
 
@@ -202,10 +238,7 @@ func TestMakeEnvtestUsesTempBasedEnvtestRoot(t *testing.T) {
 func runMakeDryRun(t *testing.T, target string, extraEnv []string) string {
 	t.Helper()
 
-	root, err := findRepoRoot()
-	if err != nil {
-		t.Fatalf("findRepoRoot() error = %v", err)
-	}
+	root := findRepoRootForTest(t)
 
 	cmd := exec.Command("make", "-n", target)
 	cmd.Dir = root
@@ -216,4 +249,14 @@ func runMakeDryRun(t *testing.T, target string, extraEnv []string) string {
 	}
 
 	return string(output)
+}
+
+func findRepoRootForTest(t *testing.T) string {
+	t.Helper()
+
+	root, err := findRepoRoot()
+	if err != nil {
+		t.Fatalf("findRepoRoot() error = %v", err)
+	}
+	return root
 }

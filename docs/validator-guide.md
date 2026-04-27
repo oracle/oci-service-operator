@@ -45,6 +45,12 @@ go run ./cmd/osok-schema-validator --provider-path .
 # Run for a single service only (controller + API)
 go run ./cmd/osok-schema-validator --provider-path . --service core
 
+# Run only the enabled default-active services and explicit kind subsets from services.yaml
+go run ./cmd/osok-schema-validator \
+  --provider-path . \
+  --config internal/generator/config/services.yaml \
+  --all
+
 # Markdown / JSON output
 go run ./cmd/osok-schema-validator --provider-path . --format markdown
 go run ./cmd/osok-schema-validator --provider-path . --format json | jq .
@@ -64,6 +70,15 @@ go run ./cmd/osok-schema-validator \
   --upgrade-from v65.61.1 \
   --upgrade-to   v65.104.0 \
   --format markdown
+
+# SDK upgrade diff scoped to the enabled default-active generator surface
+go run ./cmd/osok-schema-validator \
+  --provider-path . \
+  --config internal/generator/config/services.yaml \
+  --all \
+  --upgrade-from v65.61.1 \
+  --upgrade-to   v65.104.0 \
+  --format markdown
 ```
 
 Common flags:
@@ -73,6 +88,7 @@ Common flags:
 | `--provider-path` | Path to the OSOK repo (defaults to `.`). |
 | `--allowlist` | Path to the allowlist file (defaults to `validator_allowlist.yaml`). |
 | `--service` | Optional service filter (for example `core`, `identity`, `psql`). |
+| `--config` / `--all` | Scope coverage or upgrade reports to the generator-selected default-active or explicit service surface, including explicit kind subsets. |
 | `--format` | `table` (default), `markdown`, or `json`. |
 | `--baseline` | Load a previous controller report when diffing. |
 | `--write-baseline` | Save the current controller report as JSON. |
@@ -108,11 +124,32 @@ make schema-validator
 # Service-specific report
 make schema-validator SCHEMA_VALIDATOR_SERVICE=core
 
+# Coverage report scoped to the supported default-active / explicit kind surface
+make schema-validator SCHEMA_VALIDATOR_SELECTION=supported
+
+# One supported service, still honoring selection.mode=explicit vs selection.mode=all
+make schema-validator \
+  SCHEMA_VALIDATOR_SELECTION=supported \
+  SCHEMA_VALIDATOR_SERVICE=core
+
 # Custom output file + format
 make schema-validator \
   SCHEMA_VALIDATOR_SERVICE=identity \
   SCHEMA_VALIDATOR_FORMAT=json \
   SCHEMA_VALIDATOR_REPORT=identity-validator-report.json
+ 
+# SDK upgrade diff; blank selection defaults to the supported surface
+make schema-validator \
+  SCHEMA_VALIDATOR_UPGRADE_FROM=v65.61.1 \
+  SCHEMA_VALIDATOR_UPGRADE_TO=v65.104.0
+
+# One service upgrade diff, with a custom report path
+make schema-validator \
+  SCHEMA_VALIDATOR_SELECTION=supported \
+  SCHEMA_VALIDATOR_SERVICE=core \
+  SCHEMA_VALIDATOR_UPGRADE_FROM=v65.61.1 \
+  SCHEMA_VALIDATOR_UPGRADE_TO=v65.104.0 \
+  SCHEMA_VALIDATOR_REPORT=/tmp/core-validator-upgrade.md
 ```
 
 `schema-validator` target variables:
@@ -120,9 +157,15 @@ make schema-validator \
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `SCHEMA_VALIDATOR_PROVIDER_PATH` | `.` | Provider path passed to the CLI. |
-| `SCHEMA_VALIDATOR_SERVICE` | empty | Optional service filter. |
-| `SCHEMA_VALIDATOR_FORMAT` | `json` | Output format passed to the CLI. |
-| `SCHEMA_VALIDATOR_REPORT` | `validator-report.json` | File path to write CLI output. |
+| `SCHEMA_VALIDATOR_SELECTION` | blank (`full` for coverage, `supported` when upgrade vars are set) | Set `supported` to scope reports to the enabled default-active or explicitly selected service surface from `services.yaml`. |
+| `SCHEMA_VALIDATOR_CONFIG` | `internal/generator/config/services.yaml` (via `$(EFFECTIVE_GENERATOR_CONFIG)`) | Generator config used when `SCHEMA_VALIDATOR_SELECTION=supported`. |
+| `SCHEMA_VALIDATOR_SERVICE` | empty | Optional service filter. With `SCHEMA_VALIDATOR_SELECTION=supported`, service selection still honors explicit kind subsets. |
+| `SCHEMA_VALIDATOR_UPGRADE_FROM` / `SCHEMA_VALIDATOR_UPGRADE_TO` | empty | When both are set, run the SDK upgrade diff instead of the coverage report. |
+| `SCHEMA_VALIDATOR_FORMAT` | `json` for coverage, `markdown` for upgrade | Output format passed to the CLI. |
+| `SCHEMA_VALIDATOR_REPORT` | `validator-report.json` for coverage, `$(TMPDIR or /tmp)/validator-upgrade-report.md` for upgrade | File path to write CLI output. The default upgrade path stays outside the repo so upgrade runs do not dirty `git status`. |
+
+`schema-validator-upgrade` remains as a backward-compatible alias for the old
+supported-surface upgrade invocation.
 
 ## Generated Snapshot Coverage Report
 
@@ -488,6 +531,9 @@ This report uses the SDK’s `mandatory` tags to default missing mandatory field
 - Added/removed/changed fields for each tracked struct (with controller usage if you provide `--provider-path`).
 - Draft allowlist suggestions for new fields (mandatory ones default to `potential_gap`, optional to `future_consideration`).
 - Optional service operation differences if you add operation targets in `internal/validator/sdk/registry.go`.
+- When you pass `--config`, blank runs default to the enabled default-active
+  services from `internal/generator/config/services.yaml`, and `--service`
+  still honors any configured explicit kind subset for that service.
 
 This mode ignores baseline/allowlist flags; it’s a standalone helper for SDK bumps.
 
