@@ -173,6 +173,14 @@ func (c *subnetRuntimeClient) CreateOrUpdate(ctx context.Context, resource *core
 			if current.LifecycleState == coresdk.SubnetLifecycleStateTerminated {
 				return c.fail(resource, fmt.Errorf("Subnet lifecycle state %q is not modeled for create or update", current.LifecycleState))
 			}
+			updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+			if err != nil {
+				return c.fail(resource, err)
+			}
+			if !updateNeeded {
+				return c.applyLifecycle(resource, current)
+			}
+			return c.update(ctx, resource, updateRequest)
 		}
 	}
 
@@ -205,13 +213,15 @@ func (c *subnetRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.
 	deleteRequest := coresdk.DeleteSubnetRequest{
 		SubnetId: common.String(trackedID),
 	}
-	if _, err := c.client.DeleteSubnet(ctx, deleteRequest); err != nil {
+	deleteResponse, err := c.client.DeleteSubnet(ctx, deleteRequest)
+	if err != nil {
 		if isSubnetDeleteNotFoundOCI(err) {
 			c.markDeleted(resource, "OCI resource no longer exists")
 			return true, nil
 		}
 		return false, normalizeSubnetOCIError(err)
 	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, deleteResponse)
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
@@ -236,6 +246,35 @@ func (c *subnetRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.
 		c.markTerminating(resource, current)
 		return false, nil
 	}
+}
+
+func (c *subnetRuntimeClient) update(
+	ctx context.Context,
+	resource *corev1beta1.Subnet,
+	request coresdk.UpdateSubnetRequest,
+) (servicemanager.OSOKResponse, error) {
+	response, err := c.client.UpdateSubnet(ctx, request)
+	if err != nil {
+		return c.fail(resource, normalizeSubnetOCIError(err))
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+
+	current := response.Subnet
+	if current.Id == nil || strings.TrimSpace(*current.Id) == "" {
+		currentID := strings.TrimSpace(stringValue(request.SubnetId))
+		if currentID == "" {
+			return c.fail(resource, fmt.Errorf("Subnet update response did not include an OCI identifier"))
+		}
+		current, err = c.get(ctx, currentID)
+		if err != nil {
+			return c.fail(resource, normalizeSubnetOCIError(err))
+		}
+	}
+
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
+	return c.applyLifecycle(resource, current)
 }
 
 func (c *subnetRuntimeClient) create(ctx context.Context, resource *corev1beta1.Subnet) (servicemanager.OSOKResponse, error) {
@@ -269,8 +308,12 @@ func (c *subnetRuntimeClient) normalizeMutableCollections(resource *corev1beta1.
 		return
 	}
 
-	resource.Spec.SecurityListIds = normalizeStringSlice(resource.Spec.SecurityListIds)
-	resource.Spec.Ipv6CidrBlocks = normalizeStringSlice(resource.Spec.Ipv6CidrBlocks)
+	if resource.Spec.SecurityListIds != nil {
+		resource.Spec.SecurityListIds = normalizeStringSlice(resource.Spec.SecurityListIds)
+	}
+	if resource.Spec.Ipv6CidrBlocks != nil {
+		resource.Spec.Ipv6CidrBlocks = normalizeStringSlice(resource.Spec.Ipv6CidrBlocks)
+	}
 
 	if current == nil {
 		return
@@ -469,6 +512,8 @@ func (c *subnetRuntimeClient) applyLifecycle(resource *corev1beta1.Subnet, curre
 
 	switch current.LifecycleState {
 	case coresdk.SubnetLifecycleStateAvailable:
+		status.Async.Current = nil
+		*status = dropSubnetStaleConditions(*status, shared.Active)
 		status.Reason = string(shared.Active)
 		resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Active, v1.ConditionTrue, "", message, c.manager.Log)
 		return servicemanager.OSOKResponse{IsSuccessful: true}, nil
@@ -497,6 +542,33 @@ func (c *subnetRuntimeClient) fail(resource *corev1beta1.Subnet, err error) (ser
 	status.UpdatedAt = &updatedAt
 	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
+}
+
+func dropSubnetStaleConditions(status shared.OSOKStatus, current shared.OSOKConditionType) shared.OSOKStatus {
+	if len(status.Conditions) == 0 {
+		return status
+	}
+	conditions := status.Conditions[:0]
+	for _, condition := range status.Conditions {
+		if condition.Type == shared.Failed {
+			continue
+		}
+		if current == shared.Active && isSubnetTransientCondition(condition.Type) {
+			continue
+		}
+		conditions = append(conditions, condition)
+	}
+	status.Conditions = conditions
+	return status
+}
+
+func isSubnetTransientCondition(condition shared.OSOKConditionType) bool {
+	switch condition {
+	case shared.Provisioning, shared.Updating, shared.Terminating:
+		return true
+	default:
+		return false
+	}
 }
 
 func (c *subnetRuntimeClient) markDeleted(resource *corev1beta1.Subnet, message string) {
