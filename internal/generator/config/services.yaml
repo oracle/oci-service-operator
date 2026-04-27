@@ -2325,6 +2325,14 @@ services:
             strategy: lifecycle
             runtime: generatedruntime
             formalClassification: lifecycle
+          specFields:
+            - name: OdaInstanceId
+              type: string
+              tag: 'json:"odaInstanceId"'
+              comments:
+                - Unique Digital Assistant instance identifier.
+              markers:
+                - +kubebuilder:validation:Required
         - kind: DigitalAssistant
           async:
             strategy: lifecycle

@@ -179,6 +179,9 @@ type ChannelSpec struct {
 	// The version for payloads.
 	// +kubebuilder:validation:Optional
 	PayloadVersion string `json:"payloadVersion,omitempty"`
+	// Unique Digital Assistant instance identifier.
+	// +kubebuilder:validation:Required
+	OdaInstanceId string `json:"odaInstanceId"`
 }
 
 // ChannelStatus defines the observed state of Channel.

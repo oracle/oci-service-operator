@@ -2953,3 +2953,36 @@ func TestCheckedInConfigExcludesMySQLDbSystemSourceURLFromObservedState(t *testi
 		t.Fatalf("mysql DbSystem excluded observed-state paths = %v, want %q", excluded, wantKey)
 	}
 }
+
+func TestCheckedInConfigAddsODAChannelOdaInstanceIDSpecField(t *testing.T) {
+	t.Parallel()
+
+	cfgPath := filepath.Join(repoRoot(t), "internal", "generator", "config", "services.yaml")
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
+	}
+
+	odaService := requireService(t, cfg, "oda")
+	override, ok := odaService.resourceGenerationOverride("Channel")
+	if !ok {
+		t.Fatal("oda Channel override was not found in services.yaml")
+	}
+
+	var odaInstanceID *FieldOverride
+	for i := range override.SpecFields {
+		if override.SpecFields[i].Name == "OdaInstanceId" {
+			odaInstanceID = &override.SpecFields[i]
+			break
+		}
+	}
+	if odaInstanceID == nil {
+		t.Fatalf("oda Channel specFields = %#v, want OdaInstanceId", override.SpecFields)
+	}
+	if odaInstanceID.Type != "string" || odaInstanceID.Tag != `json:"odaInstanceId"` {
+		t.Fatalf("oda Channel OdaInstanceId override = %#v, want required string json odaInstanceId", *odaInstanceID)
+	}
+	if !slices.Contains(odaInstanceID.Markers, "+kubebuilder:validation:Required") {
+		t.Fatalf("oda Channel OdaInstanceId markers = %v, want required marker", odaInstanceID.Markers)
+	}
+}

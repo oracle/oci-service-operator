@@ -200,6 +200,7 @@ ChannelSpec defines the desired state of Channel.
 | `msaAppId` | The Microsoft App ID that you obtained when you created your bot registration in Azure. | `string` | No | - | - |
 | `msaAppPassword` | The client secret that you obtained from your bot registration. | `string` | No | - | - |
 | `name` | The Channel's name. The name can contain only letters, numbers, periods, and underscores. The name must begin with a letter. | `string` | Yes | - | - |
+| `odaInstanceId` | Unique Digital Assistant instance identifier. | `string` | Yes | - | - |
 | `originalConnectorsUrl` | The original connectors URL (used for backward compatibility). | `string` | No | - | - |
 | `outboundMessageTopic` | The topic outbound messages are sent on. | `string` | No | - | - |
 | `outboundUrl` | The URL to send response and error messages to. | `string` | No | - | - |

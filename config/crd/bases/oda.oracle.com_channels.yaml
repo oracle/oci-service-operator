@@ -193,6 +193,9 @@ spec:
                 description: The Channel's name. The name can contain only letters,
                   numbers, periods, and underscores. The name must begin with a letter.
                 type: string
+              odaInstanceId:
+                description: Unique Digital Assistant instance identifier.
+                type: string
               originalConnectorsUrl:
                 description: The original connectors URL (used for backward compatibility).
                 type: string
@@ -255,6 +258,7 @@ spec:
                 type: string
             required:
             - name
+            - odaInstanceId
             type: object
           status:
             description: ChannelStatus defines the observed state of Channel.
