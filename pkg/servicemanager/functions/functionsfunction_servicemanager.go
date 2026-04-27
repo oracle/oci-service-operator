@@ -137,12 +137,19 @@ func (m *FunctionsFunctionServiceManager) resolveFunctionForReconcile(
 			}
 			clearTrackedFunctionsStatus(resource)
 		} else {
-			updatedCurrent, _, err := m.UpdateFunction(ctx, resource, current)
-			if err != nil {
-				m.Log.ErrorLog(err, "error while updating Function")
-				return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
+			switch normalizedFunctionsLifecycleState(current.LifecycleState) {
+			case "DELETED":
+				clearTrackedFunctionsStatus(resource)
+			case "CREATING", "UPDATING", "DELETING", "FAILED":
+				return current, servicemanager.OSOKResponse{}, false, nil
+			default:
+				updatedCurrent, _, err := m.UpdateFunction(ctx, resource, current)
+				if err != nil {
+					applyFunctionsFailure(&resource.Status.OsokStatus, err, m.Log, "Update Function failed")
+					return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
+				}
+				return updatedCurrent, servicemanager.OSOKResponse{}, false, nil
 			}
-			return updatedCurrent, servicemanager.OSOKResponse{}, false, nil
 		}
 	}
 
@@ -161,12 +168,29 @@ func (m *FunctionsFunctionServiceManager) resolveFunctionForReconcile(
 		return &createResponse.Function, servicemanager.OSOKResponse{}, false, nil
 	}
 
-	updatedCurrent, _, err := m.UpdateFunction(ctx, resource, current)
-	if err != nil {
-		m.Log.ErrorLog(err, "error while updating Function")
-		return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
+	switch normalizedFunctionsLifecycleState(current.LifecycleState) {
+	case "DELETED":
+		clearTrackedFunctionsStatus(resource)
+		createResponse, err := m.CreateFunction(ctx, resource)
+		if err != nil {
+			applyFunctionsCreateFailure(&resource.Status.OsokStatus, err, m.Log, "Function")
+			return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
+		}
+		return &createResponse.Function, servicemanager.OSOKResponse{}, false, nil
+	case "CREATING", "UPDATING", "DELETING", "FAILED":
+		return current, servicemanager.OSOKResponse{}, false, nil
+	default:
+		updatedCurrent, _, err := m.UpdateFunction(ctx, resource, current)
+		if err != nil {
+			applyFunctionsFailure(&resource.Status.OsokStatus, err, m.Log, "Update Function failed")
+			return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
+		}
+		return updatedCurrent, servicemanager.OSOKResponse{}, false, nil
 	}
-	return updatedCurrent, servicemanager.OSOKResponse{}, false, nil
+}
+
+func normalizedFunctionsLifecycleState(state ocifunctions.FunctionLifecycleStateEnum) string {
+	return strings.ToUpper(strings.TrimSpace(string(state)))
 }
 
 func (m *FunctionsFunctionServiceManager) Delete(ctx context.Context, obj runtime.Object) (bool, error) {
@@ -177,16 +201,29 @@ func (m *FunctionsFunctionServiceManager) Delete(ctx context.Context, obj runtim
 
 	targetID := functionStatusID(resource)
 	if strings.TrimSpace(string(targetID)) == "" {
-		if err := m.deleteFunctionSecret(ctx, resource); err != nil {
+		current, err := m.FindFunction(ctx, resource)
+		if err != nil {
+			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 			return false, err
 		}
-		return true, nil
+		if current == nil {
+			if err := m.deleteFunctionSecret(ctx, resource); err != nil {
+				return false, err
+			}
+			return true, nil
+		}
+		if err := projectFunctionsResponseIntoStatus(resource, current); err != nil {
+			return false, err
+		}
+		targetID = functionStatusID(resource)
+		if strings.TrimSpace(string(targetID)) == "" {
+			return false, fmt.Errorf("function delete could not resolve OCI resource ID")
+		}
 	}
 
 	if err := m.DeleteFunction(ctx, resource, targetID); err != nil {
 		if isFunctionsNotFound(err) {
-			clearTrackedFunctionsStatus(resource)
-			if err := m.deleteFunctionSecret(ctx, resource); err != nil {
+			if err := m.markFunctionDeleted(ctx, resource, "OCI Function is already deleted"); err != nil {
 				return false, err
 			}
 			return true, nil
@@ -199,8 +236,7 @@ func (m *FunctionsFunctionServiceManager) Delete(ctx context.Context, obj runtim
 	if err != nil {
 		if isFunctionsNotFound(err) {
 			servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
-			clearTrackedFunctionsStatus(resource)
-			if err := m.deleteFunctionSecret(ctx, resource); err != nil {
+			if err := m.markFunctionDeleted(ctx, resource, "OCI Function deleted"); err != nil {
 				return false, err
 			}
 			return true, nil
@@ -212,14 +248,35 @@ func (m *FunctionsFunctionServiceManager) Delete(ctx context.Context, obj runtim
 		return false, err
 	}
 	if strings.EqualFold(string(current.LifecycleState), "DELETED") {
-		clearTrackedFunctionsStatus(resource)
-		if err := m.deleteFunctionSecret(ctx, resource); err != nil {
+		if err := m.markFunctionDeleted(ctx, resource, "OCI Function deleted"); err != nil {
 			return false, err
 		}
 		return true, nil
 	}
 
+	markFunctionsDeletePending(
+		&resource.Status.OsokStatus,
+		shared.OCID(safeFunctionsString(current.Id)),
+		safeFunctionsString(current.DisplayName),
+		string(current.LifecycleState),
+		m.Log,
+		"Function",
+	)
 	return false, nil
+}
+
+func (m *FunctionsFunctionServiceManager) markFunctionDeleted(
+	ctx context.Context,
+	resource *functionsv1beta1.Function,
+	message string,
+) error {
+	markFunctionsDeleted(&resource.Status.OsokStatus, message, m.Log)
+	resource.Status.LifecycleState = string(ocifunctions.FunctionLifecycleStateDeleted)
+	clearTrackedFunctionsStatus(resource)
+	if err := m.deleteFunctionSecret(ctx, resource); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *FunctionsFunctionServiceManager) GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error) {

@@ -202,7 +202,7 @@ func (m *FunctionsApplicationServiceManager) Delete(ctx context.Context, obj run
 		return true, nil
 	}
 
-	markFunctionsDeletePending(&resource.Status.OsokStatus, current, m.Log, "Application")
+	markFunctionsApplicationDeletePending(&resource.Status.OsokStatus, current, m.Log, "Application")
 	return false, nil
 }
 

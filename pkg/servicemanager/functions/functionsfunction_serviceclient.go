@@ -34,7 +34,7 @@ func (m *FunctionsFunctionServiceManager) CreateFunction(
 		return ocifunctions.CreateFunctionResponse{}, err
 	}
 
-	details, err := buildFunctionsDetails[ocifunctions.CreateFunctionDetails](ctx, m.CredentialClient, resource)
+	details, err := buildFunctionDetails[ocifunctions.CreateFunctionDetails](ctx, m.CredentialClient, resource)
 	if err != nil {
 		return ocifunctions.CreateFunctionResponse{}, fmt.Errorf("build Functions Function create details: %w", err)
 	}
@@ -87,20 +87,29 @@ func (m *FunctionsFunctionServiceManager) FindFunction(
 		return nil, err
 	}
 
-	response, err := client.ListFunctions(ctx, ocifunctions.ListFunctionsRequest{
+	request := ocifunctions.ListFunctionsRequest{
 		ApplicationId: common.String(resource.Spec.ApplicationId),
 		DisplayName:   common.String(resource.Spec.DisplayName),
-		Limit:         common.Int(1),
-	})
-	if err != nil {
-		return nil, err
+		Limit:         common.Int(50),
 	}
 
-	for _, item := range response.Items {
-		if item.Id == nil || strings.EqualFold(string(item.LifecycleState), "DELETED") {
-			continue
+	for {
+		response, err := client.ListFunctions(ctx, request)
+		if err != nil {
+			return nil, err
 		}
-		return m.GetFunction(ctx, shared.OCID(*item.Id), nil)
+
+		for _, item := range response.Items {
+			if item.Id == nil || strings.EqualFold(string(item.LifecycleState), "DELETED") {
+				continue
+			}
+			return m.GetFunction(ctx, shared.OCID(*item.Id), nil)
+		}
+
+		if response.OpcNextPage == nil || strings.TrimSpace(*response.OpcNextPage) == "" {
+			break
+		}
+		request.Page = response.OpcNextPage
 	}
 
 	return nil, nil
@@ -112,13 +121,81 @@ func buildFunctionUpdateDetails(
 	resource *functionsv1beta1.Function,
 	existing *ocifunctions.Function,
 ) (ocifunctions.UpdateFunctionDetails, bool, error) {
-	details, err := buildFunctionsDetails[ocifunctions.UpdateFunctionDetails](ctx, credentialClient, resource)
+	if err := rejectFunctionCreateOnlyDrift(ctx, credentialClient, resource, existing); err != nil {
+		return ocifunctions.UpdateFunctionDetails{}, false, err
+	}
+
+	details, err := buildFunctionDetails[ocifunctions.UpdateFunctionDetails](ctx, credentialClient, resource)
 	if err != nil {
 		return ocifunctions.UpdateFunctionDetails{}, false, fmt.Errorf("build Functions Function update details: %w", err)
 	}
 
+	normalizeFunctionUpdateDetailsForExisting(&details, existing)
 	updateNeeded := trimUnchangedFunctionsDetails(&details, existing)
 	return details, updateNeeded, nil
+}
+
+func normalizeFunctionUpdateDetailsForExisting(
+	details *ocifunctions.UpdateFunctionDetails,
+	existing *ocifunctions.Function,
+) {
+	if details == nil || existing == nil || details.TraceConfig == nil {
+		return
+	}
+	if details.TraceConfig.IsEnabled == nil || *details.TraceConfig.IsEnabled {
+		return
+	}
+	if existing.TraceConfig != nil && existing.TraceConfig.IsEnabled != nil && *existing.TraceConfig.IsEnabled {
+		return
+	}
+	details.TraceConfig = nil
+}
+
+func rejectFunctionCreateOnlyDrift(
+	ctx context.Context,
+	credentialClient credhelper.CredentialClient,
+	resource *functionsv1beta1.Function,
+	existing *ocifunctions.Function,
+) error {
+	if resource == nil || existing == nil {
+		return nil
+	}
+
+	var drift []string
+	if resource.Spec.DisplayName != safeFunctionsString(existing.DisplayName) {
+		drift = append(drift, "displayName")
+	}
+	if resource.Spec.ApplicationId != safeFunctionsString(existing.ApplicationId) {
+		drift = append(drift, "applicationId")
+	}
+	desiredSourceDetailsConfigured := functionSourceDetailsConfigured(resource.Spec.SourceDetails)
+	existingSourceDetailsConfigured := functionOCISourceDetailsConfigured(existing.SourceDetails)
+	if desiredSourceDetailsConfigured {
+		details, err := buildFunctionDetails[ocifunctions.CreateFunctionDetails](ctx, credentialClient, resource)
+		if err != nil {
+			return fmt.Errorf("build Functions Function create-only details: %w", err)
+		}
+		if !jsonEquivalent(details.SourceDetails, existing.SourceDetails) {
+			drift = append(drift, "sourceDetails")
+		}
+	} else if existingSourceDetailsConfigured {
+		drift = append(drift, "sourceDetails")
+	}
+	if len(drift) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("Function create-only field drift is not supported: %s", strings.Join(drift, ", "))
+}
+
+func functionSourceDetailsConfigured(details functionsv1beta1.FunctionSourceDetails) bool {
+	return strings.TrimSpace(details.JsonData) != "" ||
+		strings.TrimSpace(details.SourceType) != "" ||
+		strings.TrimSpace(details.PbfListingId) != ""
+}
+
+func functionOCISourceDetailsConfigured(details ocifunctions.FunctionSourceDetails) bool {
+	return !jsonEquivalent(nil, details)
 }
 
 func (m *FunctionsFunctionServiceManager) UpdateFunction(

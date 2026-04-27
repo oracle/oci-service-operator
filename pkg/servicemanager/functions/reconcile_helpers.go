@@ -46,18 +46,21 @@ func safeFunctionsString(value *string) string {
 }
 
 func applyFunctionsCreateFailure(status *shared.OSOKStatus, err error, log loggerutil.OSOKLogger, kind string) {
+	applyFunctionsFailure(status, err, log, fmt.Sprintf("Create %s failed", kind))
+	if code, ok := functionsBadRequestCode(err); ok {
+		status.Message = code
+		log.ErrorLog(err, fmt.Sprintf("Create %s bad request", kind))
+	}
+}
+
+func applyFunctionsFailure(status *shared.OSOKStatus, err error, log loggerutil.OSOKLogger, message string) {
 	now := metav1.Now()
 	servicemanager.RecordErrorOpcRequestID(status, err)
 	status.UpdatedAt = &now
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), log)
-	if code, ok := functionsBadRequestCode(err); ok {
-		status.Message = code
-		log.ErrorLog(err, fmt.Sprintf("Create %s bad request", kind))
-		return
-	}
-	log.ErrorLog(err, fmt.Sprintf("Create %s failed", kind))
+	log.ErrorLog(err, message)
 }
 
 func reconcileFunctionsApplicationLifecycle(
@@ -146,11 +149,13 @@ func markFunctionsLifecycle(
 	shouldRequeue := true
 
 	switch strings.ToUpper(strings.TrimSpace(lifecycleState)) {
-	case "ACTIVE":
+	case "ACTIVE", "INACTIVE":
 		condition = shared.Active
 		shouldRequeue = false
 	case "UPDATING":
 		condition = shared.Updating
+	case "DELETING":
+		condition = shared.Terminating
 	case "FAILED", "DELETED":
 		condition = shared.Failed
 		conditionStatus = v1.ConditionFalse
@@ -278,7 +283,7 @@ func markFunctionsFailure(status *shared.OSOKStatus, err error, log loggerutil.O
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), log)
 }
 
-func markFunctionsDeletePending(
+func markFunctionsApplicationDeletePending(
 	status *shared.OSOKStatus,
 	instance *ocifunctions.Application,
 	log loggerutil.OSOKLogger,
@@ -308,6 +313,50 @@ func markFunctionsDeletePending(
 	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, log)
 }
 
+func markFunctionsDeletePending(
+	status *shared.OSOKStatus,
+	resourceID shared.OCID,
+	displayName string,
+	lifecycleState string,
+	log loggerutil.OSOKLogger,
+	kind string,
+) {
+	now := metav1.Now()
+	if resourceID != "" {
+		status.Ocid = resourceID
+	}
+
+	resourceName := strings.TrimSpace(displayName)
+	if resourceName == "" {
+		resourceName = strings.TrimSpace(string(resourceID))
+	}
+	if resourceName == "" {
+		resourceName = "resource"
+	}
+
+	state := strings.ToUpper(strings.TrimSpace(lifecycleState))
+	message := fmt.Sprintf("%s %s delete is in progress", kind, resourceName)
+	if state != "" {
+		message = fmt.Sprintf("%s (%s)", message, state)
+	}
+
+	status.UpdatedAt = &now
+	status.Message = message
+	status.Reason = string(shared.Terminating)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, log)
+}
+
+func markFunctionsDeleted(status *shared.OSOKStatus, message string, log loggerutil.OSOKLogger) {
+	now := metav1.Now()
+	status.DeletedAt = &now
+	status.UpdatedAt = &now
+	if strings.TrimSpace(message) != "" {
+		status.Message = message
+	}
+	status.Reason = string(shared.Terminating)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, log)
+}
+
 func buildFunctionsDetails[T any](
 	ctx context.Context,
 	credentialClient credhelper.CredentialClient,
@@ -328,6 +377,31 @@ func buildFunctionsDetails[T any](
 	}
 	if err := json.Unmarshal(payload, &details); err != nil {
 		return details, fmt.Errorf("decode functions request body: %w", err)
+	}
+	return details, nil
+}
+
+func buildFunctionDetails[T any](
+	ctx context.Context,
+	credentialClient credhelper.CredentialClient,
+	resource *functionsv1beta1.Function,
+) (T, error) {
+	var details T
+	if resource == nil {
+		return details, fmt.Errorf("functions Function resource is nil")
+	}
+
+	resolvedSpec, err := generatedruntime.ResolveSpecValueWithBoolFields(resource, ctx, credentialClient, resource.GetNamespace())
+	if err != nil {
+		return details, err
+	}
+
+	payload, err := json.Marshal(resolvedSpec)
+	if err != nil {
+		return details, fmt.Errorf("marshal resolved functions Function spec: %w", err)
+	}
+	if err := json.Unmarshal(payload, &details); err != nil {
+		return details, fmt.Errorf("decode functions Function request body: %w", err)
 	}
 	return details, nil
 }
