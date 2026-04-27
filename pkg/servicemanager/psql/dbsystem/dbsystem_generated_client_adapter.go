@@ -33,20 +33,45 @@ const (
 )
 
 func init() {
-	newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
-		sdkClient, err := psqlsdk.NewPostgresqlClientWithConfigurationProvider(manager.Provider)
-		if err != nil {
-			return manualDbSystemServiceClient{
-				initErr: fmt.Errorf("initialize DbSystem OCI client: %w", err),
-				log:     manager.Log,
-			}
-		}
-		return manualDbSystemServiceClient{
-			sdk:              sdkClient,
-			log:              manager.Log,
-			credentialClient: manager.CredentialClient,
-		}
+	registerDbSystemRuntimeHooksMutator(applyDbSystemRuntimeHooks)
+}
+
+func applyDbSystemRuntimeHooks(manager *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
+
+	alignDbSystemRuntimeSemantics(hooks)
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(DbSystemServiceClient) DbSystemServiceClient {
+		return newManualDbSystemServiceClient(manager)
+	})
+}
+
+func alignDbSystemRuntimeSemantics(hooks *DbSystemRuntimeHooks) {
+	if hooks == nil || hooks.Semantics == nil {
+		return
+	}
+
+	hooks.Semantics.Lifecycle.ProvisioningStates = []string{"CREATING"}
+	hooks.Semantics.Lifecycle.UpdatingStates = []string{"UPDATING"}
+	hooks.Semantics.Lifecycle.ActiveStates = []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"}
+}
+
+func newManualDbSystemServiceClient(manager *DbSystemServiceManager) DbSystemServiceClient {
+	client := manualDbSystemServiceClient{}
+	if manager == nil {
+		client.initErr = fmt.Errorf("initialize DbSystem OCI client: service manager is nil")
+		return client
+	}
+
+	sdkClient, err := psqlsdk.NewPostgresqlClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		client.initErr = fmt.Errorf("initialize DbSystem OCI client: %w", err)
+	}
+	client.sdk = sdkClient
+	client.log = manager.Log
+	client.credentialClient = manager.CredentialClient
+	return client
 }
 
 type dbSystemOCIClient interface {
@@ -95,7 +120,9 @@ func (c manualDbSystemServiceClient) CreateOrUpdate(
 			return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 		}
 
-		return c.projectDbSystem(resource, response.DbSystem, shared.Provisioning)
+		osokResponse, err := c.projectDbSystem(resource, response.DbSystem, shared.Provisioning)
+		recordDbSystemResponseRequestID(resource, response)
+		return osokResponse, err
 	}
 
 	switch strings.ToUpper(string(current.LifecycleState)) {
@@ -126,10 +153,11 @@ func (c manualDbSystemServiceClient) CreateOrUpdate(
 	if dbSystemID == "" {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, fmt.Errorf("DbSystem bind did not resolve an OCI identifier"))
 	}
-	if _, err := c.sdk.UpdateDbSystem(ctx, psqlsdk.UpdateDbSystemRequest{
+	updateResponse, err := c.sdk.UpdateDbSystem(ctx, psqlsdk.UpdateDbSystemRequest{
 		DbSystemId:            common.String(dbSystemID),
 		UpdateDbSystemDetails: updateDetails,
-	}); err != nil {
+	})
+	if err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, err)
 	}
 
@@ -141,7 +169,9 @@ func (c manualDbSystemServiceClient) CreateOrUpdate(
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.markFailure(resource, fmt.Errorf("DbSystem %q disappeared immediately after update", dbSystemID))
 	}
 
-	return c.projectDbSystem(resource, refreshed, shared.Updating)
+	osokResponse, err := c.projectDbSystem(resource, refreshed, shared.Updating)
+	recordDbSystemResponseRequestID(resource, updateResponse)
+	return osokResponse, err
 }
 
 func (c manualDbSystemServiceClient) Delete(
@@ -173,30 +203,37 @@ func (c manualDbSystemServiceClient) Delete(
 		c.markDeleted(resource, "DbSystem identity was never established; assuming no OCI DbSystem remains")
 		return true, nil
 	}
-	if _, err := c.sdk.DeleteDbSystem(ctx, psqlsdk.DeleteDbSystemRequest{
+	deleteResponse, err := c.sdk.DeleteDbSystem(ctx, psqlsdk.DeleteDbSystemRequest{
 		DbSystemId: common.String(dbSystemID),
-	}); err != nil {
+	})
+	if err != nil {
 		if isDbSystemNotFound(err) {
 			c.markDeleted(resource, "DbSystem no longer exists in OCI")
+			recordDbSystemErrorRequestID(resource, err)
 			return true, nil
 		}
 		return false, c.markFailure(resource, err)
 	}
+	recordDbSystemResponseRequestID(resource, deleteResponse)
 
 	refreshed, found, err := c.getDbSystem(ctx, dbSystemID)
 	if err != nil {
 		if isDbSystemNotFound(err) {
 			c.markDeleted(resource, "DbSystem deleted from OCI")
+			recordDbSystemErrorRequestID(resource, err)
 			return true, nil
 		}
 		return false, c.markFailure(resource, err)
 	}
 	if !found || strings.EqualFold(string(refreshed.LifecycleState), "DELETED") {
 		c.markDeleted(resource, "DbSystem deleted from OCI")
+		recordDbSystemResponseRequestID(resource, deleteResponse)
 		return true, nil
 	}
 
-	return c.markDeleteInProgress(resource, refreshed)
+	deleted, err := c.markDeleteInProgress(resource, refreshed)
+	recordDbSystemResponseRequestID(resource, deleteResponse)
+	return deleted, err
 }
 
 func (c manualDbSystemServiceClient) markDeleteInProgress(
@@ -636,6 +673,7 @@ func dbSystemLifecycleMessage(current psqlsdk.DbSystem, fallback shared.OSOKCond
 
 func (c manualDbSystemServiceClient) markFailure(resource *psqlv1beta1.DbSystem, err error) error {
 	status := resource.Status.OsokStatus
+	servicemanager.RecordErrorOpcRequestID(&status, err)
 	now := metav1.Now()
 	status.Message = err.Error()
 	status.Reason = string(shared.Failed)
@@ -643,6 +681,20 @@ func (c manualDbSystemServiceClient) markFailure(resource *psqlv1beta1.DbSystem,
 	status = util.UpdateOSOKStatusCondition(status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.log)
 	resource.Status.OsokStatus = status
 	return err
+}
+
+func recordDbSystemResponseRequestID(resource *psqlv1beta1.DbSystem, response any) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
+}
+
+func recordDbSystemErrorRequestID(resource *psqlv1beta1.DbSystem, err error) {
+	if resource == nil {
+		return
+	}
+	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
 }
 
 func (c manualDbSystemServiceClient) markDeleted(resource *psqlv1beta1.DbSystem, message string) {
