@@ -662,6 +662,14 @@ func sdkInitialClusterConfigurationFromSpec(spec ocvpv1beta1.SddcInitialConfigur
 			})
 		}
 	}
+	cluster.DatastoreClusterIds = append([]string(nil), spec.DatastoreClusterIds...)
+	cluster.ClusterByolAllocationDetails = &ocvpsdk.ClusterByolAllocationDetails{
+		VsanByolAllocationId:     stringPtrOrNil(spec.ClusterByolAllocationDetails.VsanByolAllocationId),
+		FirewallByolAllocationId: stringPtrOrNil(spec.ClusterByolAllocationDetails.FirewallByolAllocationId),
+	}
+	if spec.InitialVcfByolAllocationId != "" {
+		cluster.InitialVcfByolAllocationId = common.String(spec.InitialVcfByolAllocationId)
+	}
 	return cluster
 }
 
@@ -755,6 +763,13 @@ func requireSddcStringPointer(t *testing.T, label string, got *string, want stri
 	if got == nil || *got != want {
 		t.Fatalf("%s = %v, want %q", label, got, want)
 	}
+}
+
+func stringPtrOrNil(v string) *string {
+	if v == "" {
+		return nil
+	}
+	return common.String(v)
 }
 
 func float32Ptr(v float32) *float32 {

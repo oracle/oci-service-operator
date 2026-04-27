@@ -424,7 +424,7 @@ func makeSDKSuppressionSummary(id string, resource *emailv1beta1.Suppression) em
 		Id:            common.String(id),
 		CompartmentId: common.String(strings.TrimSpace(resource.Spec.CompartmentId)),
 		EmailAddress:  common.String(normalizeSuppressionEmail(resource.Spec.EmailAddress)),
-		Reason:        emailsdk.SuppressionSummaryReasonManual,
+		Reason:        emailsdk.SuppressionReasonManual,
 	}
 }
 

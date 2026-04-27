@@ -286,8 +286,8 @@ func TestCustomTableServiceClientBindsExistingCustomTableWithoutCreate(t *testin
 	if createCalled {
 		t.Fatal("CreateCustomTable() should not be called when ListCustomTables finds a matching custom table")
 	}
-	if getCalls != 2 {
-		t.Fatalf("GetCustomTable() calls = %d, want 2 reads of the bound custom table", getCalls)
+	if getCalls != 1 {
+		t.Fatalf("GetCustomTable() calls = %d, want 1 read of the bound custom table", getCalls)
 	}
 	if got := string(resource.Status.OsokStatus.Ocid); got != "ocid1.customtable.oc1..existing" {
 		t.Fatalf("status.ocid = %q, want existing custom table OCID", got)

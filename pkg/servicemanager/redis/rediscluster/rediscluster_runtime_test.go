@@ -396,7 +396,21 @@ func TestRedisWorkRequestOperationTypeCoverage(t *testing.T) {
 			redissdk.OperationTypeCreateRedisConfigSet,
 			redissdk.OperationTypeUpdateRedisConfigSet,
 			redissdk.OperationTypeDeleteRedisConfigSet,
-			redissdk.OperationTypeMoveRedisConfigSet:
+			redissdk.OperationTypeMoveRedisConfigSet,
+			redissdk.OperationTypeMigrateCluster,
+			redissdk.OperationTypeClusterRollback,
+			redissdk.OperationTypeAttachOciCacheUsers,
+			redissdk.OperationTypeDetachOciCacheUsers,
+			redissdk.OperationTypeCreateOciCacheUser,
+			redissdk.OperationTypeUpdateOciCacheUser,
+			redissdk.OperationTypeDeleteOciCacheUser,
+			redissdk.OperationTypeCreateOciCacheConfigSet,
+			redissdk.OperationTypeUpdateOciCacheConfigSet,
+			redissdk.OperationTypeDeleteOciCacheConfigSet,
+			redissdk.OperationTypeChangeOciCacheConfigSetCompartment,
+			redissdk.OperationTypeChangeOciCacheUserCompartment,
+			redissdk.OperationTypePatchOciCacheCluster,
+			redissdk.OperationTypeReplaceOciCacheNode:
 			phase, ok := redisWorkRequestPhaseFromOperationType(operation)
 			assert.False(t, ok)
 			assert.Equal(t, shared.OSOKAsyncPhase(""), phase)

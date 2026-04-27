@@ -3448,7 +3448,7 @@ func TestCheckedInAILanguageSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *test
 		gotKinds = append(gotKinds, candidate.rawName)
 	}
 
-	wantKinds := []string{"Endpoint", "EvaluationResult", "Model", "ModelType", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	wantKinds := []string{"Endpoint", "EvaluationResult", "Job", "Model", "ModelType", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
 	if !slices.Equal(gotKinds, wantKinds) {
 		t.Fatalf("ailanguage discovered kinds = %v, want %v", gotKinds, wantKinds)
 	}
@@ -3501,7 +3501,7 @@ func TestCheckedInAIVisionSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *testin
 		gotKinds = append(gotKinds, candidate.rawName)
 	}
 
-	wantKinds := []string{"DocumentJob", "ImageJob", "Model", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	wantKinds := []string{"DocumentJob", "ImageJob", "Model", "Project", "StreamGroup", "StreamJob", "StreamSource", "VideoJob", "VisionPrivateEndpoint", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
 	if !slices.Equal(gotKinds, wantKinds) {
 		t.Fatalf("aivision discovered kinds = %v, want %v", gotKinds, wantKinds)
 	}
@@ -3554,7 +3554,7 @@ func TestCheckedInAIDocumentSDKDiscoveryFindsProjectAndAuxiliaryFamilies(t *test
 		gotKinds = append(gotKinds, candidate.rawName)
 	}
 
-	wantKinds := []string{"Model", "ProcessorJob", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
+	wantKinds := []string{"Model", "ModelType", "ProcessorJob", "Project", "WorkRequest", "WorkRequestError", "WorkRequestLog"}
 	if !slices.Equal(gotKinds, wantKinds) {
 		t.Fatalf("aidocument discovered kinds = %v, want %v", gotKinds, wantKinds)
 	}
@@ -3700,12 +3700,21 @@ func TestCheckedInBDSSDKDiscoveryFindsBdsInstanceAndAuxiliaryFamilies(t *testing
 	wantKinds := []string{
 		"AutoScalingConfiguration",
 		"BdsApiKey",
+		"BdsCapacityReport",
+		"BdsCertificateConfiguration",
+		"BdsClusterVersion",
 		"BdsInstance",
 		"BdsMetastoreConfiguration",
+		"IdentityConfiguration",
+		"NodeBackup",
+		"NodeBackupConfiguration",
+		"NodeReplaceConfiguration",
 		"OsPatch",
 		"OsPatchDetail",
 		"Patch",
 		"PatchHistory",
+		"ResourcePrincipalConfiguration",
+		"SoftwareUpdate",
 		"WorkRequest",
 		"WorkRequestError",
 		"WorkRequestLog",

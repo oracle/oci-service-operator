@@ -427,6 +427,29 @@ func TestForceNewValuesEqualIgnoresMeaninglessNestedMaps(t *testing.T) {
 	}
 }
 
+func TestForceNewValuesEqualIgnoresMeaninglessNestedMapsInSlices(t *testing.T) {
+	t.Parallel()
+	spec := map[string]any{
+		"initialClusterConfigurations": []any{
+			map[string]any{
+				"displayName": "management-cluster",
+				"clusterByolAllocationDetails": map[string]any{
+					"vsanByolAllocationId":     "",
+					"firewallByolAllocationId": "",
+				},
+			},
+		},
+	}
+	current := map[string]any{
+		"initialClusterConfigurations": []any{
+			map[string]any{"displayName": "management-cluster"},
+		},
+	}
+	if !forceNewValuesEqual(spec, current) {
+		t.Fatalf("forceNewValuesEqual() = false, want true when only meaningless nested slice maps differ")
+	}
+}
+
 func TestUnsupportedUpdateDriftPathsIgnoresMeaninglessNestedMaps(t *testing.T) {
 	t.Parallel()
 	spec := map[string]any{"displayName": "example", "preemptibleInstanceConfig": map[string]any{"preemptionAction": map[string]any{"jsonData": "", "type": ""}}}

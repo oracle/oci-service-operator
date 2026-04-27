@@ -170,6 +170,18 @@ func makeSDKEndpoint(
 		LifecycleState:       state,
 		ContentModerationConfig: &generativeaisdk.ContentModerationConfig{
 			IsEnabled: boolPtr(spec.ContentModerationConfig.IsEnabled),
+			Mode:      generativeaisdk.ContentModerationConfigModeEnum(spec.ContentModerationConfig.Mode),
+			ModelId:   stringPtrOrNil(spec.ContentModerationConfig.ModelId),
+		},
+		PromptInjectionConfig: &generativeaisdk.PromptInjectionConfig{
+			IsEnabled: boolPtr(spec.PromptInjectionConfig.IsEnabled),
+			Mode:      generativeaisdk.ContentModerationConfigModeEnum(spec.PromptInjectionConfig.Mode),
+			ModelId:   stringPtrOrNil(spec.PromptInjectionConfig.ModelId),
+		},
+		PiiDetectionConfig: &generativeaisdk.PiiDetectionConfig{
+			IsEnabled: boolPtr(spec.PiiDetectionConfig.IsEnabled),
+			Mode:      generativeaisdk.ContentModerationConfigModeEnum(spec.PiiDetectionConfig.Mode),
+			ModelId:   stringPtrOrNil(spec.PiiDetectionConfig.ModelId),
 		},
 		FreeformTags: map[string]string{},
 		DefinedTags:  map[string]map[string]interface{}{},
@@ -200,6 +212,18 @@ func makeSDKEndpointSummary(
 		LifecycleState:       state,
 		ContentModerationConfig: &generativeaisdk.ContentModerationConfig{
 			IsEnabled: boolPtr(spec.ContentModerationConfig.IsEnabled),
+			Mode:      generativeaisdk.ContentModerationConfigModeEnum(spec.ContentModerationConfig.Mode),
+			ModelId:   stringPtrOrNil(spec.ContentModerationConfig.ModelId),
+		},
+		PromptInjectionConfig: &generativeaisdk.PromptInjectionConfig{
+			IsEnabled: boolPtr(spec.PromptInjectionConfig.IsEnabled),
+			Mode:      generativeaisdk.ContentModerationConfigModeEnum(spec.PromptInjectionConfig.Mode),
+			ModelId:   stringPtrOrNil(spec.PromptInjectionConfig.ModelId),
+		},
+		PiiDetectionConfig: &generativeaisdk.PiiDetectionConfig{
+			IsEnabled: boolPtr(spec.PiiDetectionConfig.IsEnabled),
+			Mode:      generativeaisdk.ContentModerationConfigModeEnum(spec.PiiDetectionConfig.Mode),
+			ModelId:   stringPtrOrNil(spec.PiiDetectionConfig.ModelId),
 		},
 	}
 	if spec.DisplayName != "" {
@@ -216,6 +240,13 @@ func makeSDKEndpointSummary(
 
 func boolPtr(value bool) *bool {
 	return &value
+}
+
+func stringPtrOrNil(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return common.String(value)
 }
 
 func TestEndpointServiceClientCreatesAndProjectsStatus(t *testing.T) {
