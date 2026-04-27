@@ -262,6 +262,8 @@ func (c *vaultRuntimeClient) Delete(ctx context.Context, resource *keymanagement
 		clearVaultDeletionScheduleStatus(resource)
 		return true, nil
 	case "PENDING_DELETION", "SCHEDULING_DELETION", "DELETING":
+		// Vault deletion is a scheduled control-plane state. Once OCI reports
+		// the schedule is accepted, Kubernetes finalizer retention is complete.
 		c.markVaultCondition(resource, shared.Terminating, vaultLifecycleMessage(lifecycleState))
 		return true, nil
 	case "CANCELLING_DELETION":
@@ -335,6 +337,13 @@ func desiredVaultDeletionAction(resource *keymanagementv1beta1.Vault) vaultDelet
 }
 
 func (c *vaultRuntimeClient) scheduleVaultDeletion(ctx context.Context, resource *keymanagementv1beta1.Vault) (servicemanager.OSOKResponse, error) {
+	if c.initErr != nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, c.initErr
+	}
+	if c.sdk == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Vault OCI client is not configured")
+	}
+
 	vaultID := currentVaultID(resource)
 	if vaultID == "" {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Vault identity is not recorded")
@@ -396,6 +405,8 @@ func (c *vaultRuntimeClient) confirmVaultDeleteAccepted(ctx context.Context, res
 		clearVaultDeletionScheduleStatus(resource)
 		return true, nil
 	case "PENDING_DELETION", "SCHEDULING_DELETION", "DELETING":
+		// Vault deletion is a scheduled control-plane state. Once OCI reports
+		// the schedule is accepted, Kubernetes finalizer retention is complete.
 		c.markVaultCondition(resource, shared.Terminating, vaultLifecycleMessage(lifecycleState))
 		return true, nil
 	case "CANCELLING_DELETION":

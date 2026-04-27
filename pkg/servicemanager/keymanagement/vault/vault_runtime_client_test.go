@@ -19,6 +19,7 @@ import (
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -125,6 +126,28 @@ func makeSDKVault(id string, lifecycleState keymanagementsdk.VaultLifecycleState
 	}
 }
 
+func makeSDKVaultSummary(id string, lifecycleState keymanagementsdk.VaultSummaryLifecycleStateEnum, displayName string) keymanagementsdk.VaultSummary {
+	created := common.SDKTime{Time: time.Date(2026, 4, 8, 12, 0, 0, 0, time.UTC)}
+	return keymanagementsdk.VaultSummary{
+		CompartmentId:      common.String("ocid1.compartment.oc1..example"),
+		CryptoEndpoint:     common.String("https://crypto.example"),
+		DisplayName:        common.String(displayName),
+		Id:                 common.String(id),
+		LifecycleState:     lifecycleState,
+		ManagementEndpoint: common.String("https://management.example"),
+		TimeCreated:        &created,
+		VaultType:          keymanagementsdk.VaultSummaryVaultTypeDefault,
+		FreeformTags: map[string]string{
+			"env": "dev",
+		},
+		DefinedTags: map[string]map[string]interface{}{
+			"Operations": {
+				"CostCenter": "42",
+			},
+		},
+	}
+}
+
 func TestVaultRuntimeCreateOrUpdate_CreatesVault(t *testing.T) {
 	vaultID := "ocid1.vault.oc1..created"
 	createCalls := 0
@@ -164,6 +187,50 @@ func TestVaultRuntimeCreateOrUpdate_CreatesVault(t *testing.T) {
 	assert.Equal(t, vaultID, string(resource.Status.OsokStatus.Ocid))
 	assert.Equal(t, "ACTIVE", resource.Status.LifecycleState)
 	assert.Zero(t, resource.Status.RequestedDeletionScheduleDays)
+}
+
+func TestVaultRuntimeCreateOrUpdate_BindsExistingVaultFromList(t *testing.T) {
+	vaultID := "ocid1.vault.oc1..existing"
+	listCalls := 0
+	getCalls := 0
+
+	manager := newVaultTestManager(&fakeVaultOCIClient{
+		createFn: func(_ context.Context, _ keymanagementsdk.CreateVaultRequest) (keymanagementsdk.CreateVaultResponse, error) {
+			t.Fatal("CreateVault() should not be called when list lookup finds a reusable Vault")
+			return keymanagementsdk.CreateVaultResponse{}, nil
+		},
+		listFn: func(_ context.Context, req keymanagementsdk.ListVaultsRequest) (keymanagementsdk.ListVaultsResponse, error) {
+			listCalls++
+			assert.Equal(t, "ocid1.compartment.oc1..example", *req.CompartmentId)
+			return keymanagementsdk.ListVaultsResponse{
+				Items: []keymanagementsdk.VaultSummary{
+					makeSDKVaultSummary(vaultID, keymanagementsdk.VaultSummaryLifecycleStateActive, "vault-sample"),
+				},
+			}, nil
+		},
+		getFn: func(_ context.Context, req keymanagementsdk.GetVaultRequest) (keymanagementsdk.GetVaultResponse, error) {
+			getCalls++
+			assert.Equal(t, vaultID, *req.VaultId)
+			return keymanagementsdk.GetVaultResponse{
+				Vault: makeSDKVault(vaultID, keymanagementsdk.VaultLifecycleStateActive, nil, "vault-sample", map[string]string{"env": "dev"}),
+			}, nil
+		},
+	})
+
+	resource := makeSpecVault()
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.True(t, response.IsSuccessful)
+	assert.False(t, response.ShouldRequeue)
+	assert.Equal(t, 1, listCalls)
+	assert.Equal(t, 1, getCalls)
+	assert.Equal(t, vaultID, resource.Status.Id)
+	assert.Equal(t, vaultID, string(resource.Status.OsokStatus.Ocid))
+	assert.Equal(t, "ACTIVE", resource.Status.LifecycleState)
 }
 
 func TestVaultRuntimeCreateOrUpdate_UpdatesMutableFieldsInPlace(t *testing.T) {
@@ -220,6 +287,122 @@ func TestVaultRuntimeCreateOrUpdate_UpdatesMutableFieldsInPlace(t *testing.T) {
 	assert.Equal(t, map[string]string{"env": "prod"}, captured.UpdateVaultDetails.FreeformTags)
 	assert.Equal(t, "vault-new", resource.Status.DisplayName)
 	assert.Equal(t, map[string]string{"env": "prod"}, resource.Status.FreeformTags)
+}
+
+func TestVaultRuntimeCreateOrUpdate_RejectsForceNewCompartmentDrift(t *testing.T) {
+	vaultID := "ocid1.vault.oc1..existing"
+	updateCalls := 0
+
+	manager := newVaultTestManager(&fakeVaultOCIClient{
+		getFn: func(_ context.Context, req keymanagementsdk.GetVaultRequest) (keymanagementsdk.GetVaultResponse, error) {
+			assert.Equal(t, vaultID, *req.VaultId)
+			return keymanagementsdk.GetVaultResponse{
+				Vault: makeSDKVault(vaultID, keymanagementsdk.VaultLifecycleStateActive, nil, "vault-sample", map[string]string{"env": "dev"}),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ keymanagementsdk.UpdateVaultRequest) (keymanagementsdk.UpdateVaultResponse, error) {
+			updateCalls++
+			t.Fatal("UpdateVault() should not be called when force-new compartment drift is detected")
+			return keymanagementsdk.UpdateVaultResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVault()
+	resource.Spec.CompartmentId = "ocid1.compartment.oc1..different"
+	resource.Status.Id = vaultID
+	resource.Status.CompartmentId = "ocid1.compartment.oc1..example"
+	resource.Status.LifecycleState = "ACTIVE"
+	resource.Status.OsokStatus.Ocid = shared.OCID(vaultID)
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "require replacement when compartmentId changes")
+	assert.False(t, response.IsSuccessful)
+	assert.Equal(t, 0, updateCalls)
+}
+
+func TestVaultRuntimeCreateOrUpdate_MapsLifecycleStates(t *testing.T) {
+	tests := []struct {
+		name          string
+		state         keymanagementsdk.VaultLifecycleStateEnum
+		wantReason    shared.OSOKConditionType
+		wantSuccess   bool
+		wantRequeue   bool
+		wantCondition v1.ConditionStatus
+	}{
+		{
+			name:          "creating",
+			state:         keymanagementsdk.VaultLifecycleStateCreating,
+			wantReason:    shared.Provisioning,
+			wantSuccess:   true,
+			wantRequeue:   true,
+			wantCondition: v1.ConditionTrue,
+		},
+		{
+			name:          "updating",
+			state:         keymanagementsdk.VaultLifecycleStateUpdating,
+			wantReason:    shared.Updating,
+			wantSuccess:   true,
+			wantRequeue:   true,
+			wantCondition: v1.ConditionTrue,
+		},
+		{
+			name:          "active",
+			state:         keymanagementsdk.VaultLifecycleStateActive,
+			wantReason:    shared.Active,
+			wantSuccess:   true,
+			wantRequeue:   false,
+			wantCondition: v1.ConditionTrue,
+		},
+		{
+			name:          "unmodeled",
+			state:         keymanagementsdk.VaultLifecycleStateEnum("FAILED"),
+			wantReason:    shared.Failed,
+			wantSuccess:   false,
+			wantRequeue:   false,
+			wantCondition: v1.ConditionFalse,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			vaultID := "ocid1.vault.oc1.." + tt.name
+			updateCalls := 0
+			manager := newVaultTestManager(&fakeVaultOCIClient{
+				getFn: func(_ context.Context, req keymanagementsdk.GetVaultRequest) (keymanagementsdk.GetVaultResponse, error) {
+					assert.Equal(t, vaultID, *req.VaultId)
+					return keymanagementsdk.GetVaultResponse{
+						Vault: makeSDKVault(vaultID, tt.state, nil, "vault-sample", map[string]string{"env": "dev"}),
+					}, nil
+				},
+				updateFn: func(_ context.Context, _ keymanagementsdk.UpdateVaultRequest) (keymanagementsdk.UpdateVaultResponse, error) {
+					updateCalls++
+					t.Fatal("UpdateVault() should not be called while lifecycle observation owns reconciliation")
+					return keymanagementsdk.UpdateVaultResponse{}, nil
+				},
+			})
+
+			resource := makeSpecVault()
+			resource.Status.Id = vaultID
+			resource.Status.OsokStatus.Ocid = shared.OCID(vaultID)
+
+			response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+			if !assert.NoError(t, err) {
+				return
+			}
+
+			assert.Equal(t, tt.wantSuccess, response.IsSuccessful)
+			assert.Equal(t, tt.wantRequeue, response.ShouldRequeue)
+			assert.Equal(t, 0, updateCalls)
+			assert.Equal(t, string(tt.state), resource.Status.LifecycleState)
+			assert.Equal(t, string(tt.wantReason), resource.Status.OsokStatus.Reason)
+			condition := findVaultCondition(resource, tt.wantReason)
+			if assert.NotNil(t, condition) {
+				assert.Equal(t, tt.wantCondition, condition.Status)
+			}
+		})
+	}
 }
 
 func TestVaultRuntimeCreateOrUpdate_SchedulesDeletion(t *testing.T) {
@@ -377,6 +560,69 @@ func TestVaultRuntimeDelete_PendingDeletionReturnsSuccess(t *testing.T) {
 	assert.Equal(t, int32(10), resource.Status.RequestedDeletionScheduleDays)
 }
 
+func TestVaultRuntimeDelete_CancellingDeletionKeepsFinalizer(t *testing.T) {
+	vaultID := "ocid1.vault.oc1..cancel-delete"
+
+	manager := newVaultTestManager(&fakeVaultOCIClient{
+		getFn: func(_ context.Context, req keymanagementsdk.GetVaultRequest) (keymanagementsdk.GetVaultResponse, error) {
+			assert.Equal(t, vaultID, *req.VaultId)
+			return keymanagementsdk.GetVaultResponse{
+				Vault: makeSDKVault(vaultID, keymanagementsdk.VaultLifecycleStateCancellingDeletion, nil, "vault-sample", map[string]string{"env": "dev"}),
+			}, nil
+		},
+		scheduleFn: func(_ context.Context, req keymanagementsdk.ScheduleVaultDeletionRequest) (keymanagementsdk.ScheduleVaultDeletionResponse, error) {
+			t.Fatalf("ScheduleVaultDeletion() should not be called while OCI is cancelling deletion for %s", *req.VaultId)
+			return keymanagementsdk.ScheduleVaultDeletionResponse{}, nil
+		},
+	})
+
+	resource := makeSpecVault()
+	resource.Status.Id = vaultID
+	resource.Status.LifecycleState = "CANCELLING_DELETION"
+	resource.Status.OsokStatus.Ocid = shared.OCID(vaultID)
+
+	deleted, err := manager.Delete(context.Background(), resource)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.False(t, deleted)
+	assert.Equal(t, "CANCELLING_DELETION", resource.Status.LifecycleState)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+}
+
+func TestVaultRuntimeDelete_DeletedLifecycleClearsScheduleAndReleasesFinalizer(t *testing.T) {
+	vaultID := "ocid1.vault.oc1..deleted"
+	deletionTime := time.Now().UTC().AddDate(0, 0, -1)
+
+	manager := newVaultTestManager(&fakeVaultOCIClient{
+		getFn: func(_ context.Context, req keymanagementsdk.GetVaultRequest) (keymanagementsdk.GetVaultResponse, error) {
+			assert.Equal(t, vaultID, *req.VaultId)
+			return keymanagementsdk.GetVaultResponse{
+				Vault: makeSDKVault(vaultID, keymanagementsdk.VaultLifecycleStateDeleted, &deletionTime, "vault-sample", map[string]string{"env": "dev"}),
+			}, nil
+		},
+	})
+
+	resource := makeSpecVault()
+	resource.Status.Id = vaultID
+	resource.Status.LifecycleState = "PENDING_DELETION"
+	resource.Status.TimeOfDeletion = time.Now().UTC().AddDate(0, 0, 14).Format(time.RFC3339)
+	resource.Status.RequestedDeletionScheduleDays = 14
+	resource.Status.OsokStatus.Ocid = shared.OCID(vaultID)
+
+	deleted, err := manager.Delete(context.Background(), resource)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.True(t, deleted)
+	assert.Equal(t, "DELETED", resource.Status.LifecycleState)
+	assert.Zero(t, resource.Status.RequestedDeletionScheduleDays)
+	assert.Empty(t, resource.Status.TimeOfDeletion)
+	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
 func TestVaultRuntimeDelete_TreatsAuthShaped404AsDeleted(t *testing.T) {
 	vaultID := "ocid1.vault.oc1..missing"
 	getCalls := 0
@@ -459,4 +705,13 @@ func TestVaultRuntimeDelete_ConflictWithPendingDeletionReturnsSuccess(t *testing
 	if assert.NoError(t, err) {
 		assert.WithinDuration(t, deletionTime.UTC(), recordedDeletion, time.Second)
 	}
+}
+
+func findVaultCondition(resource *keymanagementv1beta1.Vault, conditionType shared.OSOKConditionType) *shared.OSOKCondition {
+	for i := range resource.Status.OsokStatus.Conditions {
+		if resource.Status.OsokStatus.Conditions[i].Type == conditionType {
+			return &resource.Status.OsokStatus.Conditions[i]
+		}
+	}
+	return nil
 }
