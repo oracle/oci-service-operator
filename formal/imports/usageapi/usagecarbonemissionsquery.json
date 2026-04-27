@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "usageapi",
+  "slug": "usagecarbonemissionsquery",
+  "kind": "UsageCarbonEmissionsQuery",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_usageapi_usagecarbonemissionsquery",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateUsageCarbonEmissionsQuery",
+        "requestType": "usageapi.CreateUsageCarbonEmissionsQueryRequest",
+        "responseType": "usageapi.CreateUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetUsageCarbonEmissionsQuery",
+        "requestType": "usageapi.GetUsageCarbonEmissionsQueryRequest",
+        "responseType": "usageapi.GetUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListUsageCarbonEmissionsQuery",
+        "requestType": "usageapi.ListUsageCarbonEmissionsQueryRequest",
+        "responseType": "usageapi.ListUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateUsageCarbonEmissionsQuery",
+        "requestType": "usageapi.UpdateUsageCarbonEmissionsQueryRequest",
+        "responseType": "usageapi.UpdateUsageCarbonEmissionsQueryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteUsageCarbonEmissionsQuery",
+        "requestType": "usageapi.DeleteUsageCarbonEmissionsQueryRequest",
+        "responseType": "usageapi.DeleteUsageCarbonEmissionsQueryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_usageapi_usagecarbonemissionsquery",
+    "collectionField": "usagecarbonemissionsquery",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/usageapi/usagecarbonemissionsquery/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/usageapi/usagecarbonemissionsquery/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for usageapi/usagecarbonemissionsquery; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

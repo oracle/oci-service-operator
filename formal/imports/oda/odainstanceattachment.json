@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oda",
+  "slug": "odainstanceattachment",
+  "kind": "OdaInstanceAttachment",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_oda_odainstanceattachment",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOdaInstanceAttachment",
+        "requestType": "oda.CreateOdaInstanceAttachmentRequest",
+        "responseType": "oda.CreateOdaInstanceAttachmentResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOdaInstanceAttachment",
+        "requestType": "oda.GetOdaInstanceAttachmentRequest",
+        "responseType": "oda.GetOdaInstanceAttachmentResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOdaInstanceAttachment",
+        "requestType": "oda.ListOdaInstanceAttachmentRequest",
+        "responseType": "oda.ListOdaInstanceAttachmentResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOdaInstanceAttachment",
+        "requestType": "oda.UpdateOdaInstanceAttachmentRequest",
+        "responseType": "oda.UpdateOdaInstanceAttachmentResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOdaInstanceAttachment",
+        "requestType": "oda.DeleteOdaInstanceAttachmentRequest",
+        "responseType": "oda.DeleteOdaInstanceAttachmentResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_oda_odainstanceattachment",
+    "collectionField": "odainstanceattachment",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oda/odainstanceattachment/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oda/odainstanceattachment/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for oda/odainstanceattachment; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

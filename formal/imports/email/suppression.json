@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "email",
+  "slug": "suppression",
+  "kind": "Suppression",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_email_suppression",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSuppression",
+        "requestType": "email.CreateSuppressionRequest",
+        "responseType": "email.CreateSuppressionResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSuppression",
+        "requestType": "email.GetSuppressionRequest",
+        "responseType": "email.GetSuppressionResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSuppression",
+        "requestType": "email.ListSuppressionRequest",
+        "responseType": "email.ListSuppressionResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSuppression",
+        "requestType": "email.UpdateSuppressionRequest",
+        "responseType": "email.UpdateSuppressionResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSuppression",
+        "requestType": "email.DeleteSuppressionRequest",
+        "responseType": "email.DeleteSuppressionResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_email_suppression",
+    "collectionField": "suppression",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/email/suppression/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/email/suppression/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for email/suppression; replace imported facts before promoting this row beyond scaffold."
+  ]
+}
