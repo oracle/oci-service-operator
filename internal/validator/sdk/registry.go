@@ -41,7 +41,7 @@ import (
 
 const (
 	modulePath    = "github.com/oracle/oci-go-sdk/v65"
-	moduleVersion = "v65.61.1"
+	moduleVersion = "v65.110.0"
 )
 
 var seedTargets = []Target{
