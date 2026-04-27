@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -18,15 +18,25 @@ import (
 // AddBlockStorageDetails The information about added block volumes.
 type AddBlockStorageDetails struct {
 
-	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user.
-	ClusterAdminPassword *string `mandatory:"true" json:"clusterAdminPassword"`
-
-	// The size of block volume in GB to be added to each worker node. All the
-	// details needed for attaching the block volume are managed by service itself.
+	// The size of block volume in GB to be added. For WORKER, COMPUTE_ONLY_WORKER, and KAFKA_BROKER nodes,
+	// the same size will be added to all nodes of that type. For EDGE nodes, this size can be different
+	// per node when nodeId is specified. All the details needed for attaching the block volume are managed
+	// by service itself.
 	BlockVolumeSizeInGBs *int64 `mandatory:"true" json:"blockVolumeSizeInGBs"`
 
 	// Worker node types.
 	NodeType AddBlockStorageDetailsNodeTypeEnum `mandatory:"true" json:"nodeType"`
+
+	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user.
+	ClusterAdminPassword *string `mandatory:"false" json:"clusterAdminPassword"`
+
+	// The secretId for the clusterAdminPassword.
+	SecretId *string `mandatory:"false" json:"secretId"`
+
+	// Optional. List of OCIDs of specific nodes to add storage to.
+	// Only supported for EDGE nodes.
+	// When omitted, storage is added to all nodes of the specified type.
+	NodeIds []string `mandatory:"false" json:"nodeIds"`
 }
 
 func (m AddBlockStorageDetails) String() string {
@@ -43,7 +53,7 @@ func (m AddBlockStorageDetails) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -56,18 +66,21 @@ const (
 	AddBlockStorageDetailsNodeTypeWorker            AddBlockStorageDetailsNodeTypeEnum = "WORKER"
 	AddBlockStorageDetailsNodeTypeComputeOnlyWorker AddBlockStorageDetailsNodeTypeEnum = "COMPUTE_ONLY_WORKER"
 	AddBlockStorageDetailsNodeTypeKafkaBroker       AddBlockStorageDetailsNodeTypeEnum = "KAFKA_BROKER"
+	AddBlockStorageDetailsNodeTypeEdge              AddBlockStorageDetailsNodeTypeEnum = "EDGE"
 )
 
 var mappingAddBlockStorageDetailsNodeTypeEnum = map[string]AddBlockStorageDetailsNodeTypeEnum{
 	"WORKER":              AddBlockStorageDetailsNodeTypeWorker,
 	"COMPUTE_ONLY_WORKER": AddBlockStorageDetailsNodeTypeComputeOnlyWorker,
 	"KAFKA_BROKER":        AddBlockStorageDetailsNodeTypeKafkaBroker,
+	"EDGE":                AddBlockStorageDetailsNodeTypeEdge,
 }
 
 var mappingAddBlockStorageDetailsNodeTypeEnumLowerCase = map[string]AddBlockStorageDetailsNodeTypeEnum{
 	"worker":              AddBlockStorageDetailsNodeTypeWorker,
 	"compute_only_worker": AddBlockStorageDetailsNodeTypeComputeOnlyWorker,
 	"kafka_broker":        AddBlockStorageDetailsNodeTypeKafkaBroker,
+	"edge":                AddBlockStorageDetailsNodeTypeEdge,
 }
 
 // GetAddBlockStorageDetailsNodeTypeEnumValues Enumerates the set of values for AddBlockStorageDetailsNodeTypeEnum
@@ -85,6 +98,7 @@ func GetAddBlockStorageDetailsNodeTypeEnumStringValues() []string {
 		"WORKER",
 		"COMPUTE_ONLY_WORKER",
 		"KAFKA_BROKER",
+		"EDGE",
 	}
 }
 

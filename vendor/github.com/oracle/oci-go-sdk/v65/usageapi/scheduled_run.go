@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Usage API
 //
-// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the dimension of your choosing. The Usage API is used by the Cost Analysis tool in the Console. Also see Using the Usage API (https://docs.cloud.oracle.com/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
+// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the chosen dimension. The Usage API is used by Cost Analysis (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm), Scheduled Reports (https://docs.oracle.com/iaas/Content/Billing/Concepts/scheduledreportoverview.htm), and Carbon Emissions Analysis (https://docs.oracle.com/iaas/Content/General/Concepts/emissions-management.htm) in the Console. Also see Using the Usage API (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
 //
 
 package usageapi
@@ -18,22 +18,22 @@ import (
 // ScheduledRun The saved schedule run.
 type ScheduledRun struct {
 
-	// The ocid representing unique shedule run
+	// The OCID representing a unique shedule run.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The ocid representing unique shedule
+	// The OCID representing a unique shedule.
 	ScheduleId *string `mandatory:"true" json:"scheduleId"`
 
-	// The time when schedule started executing
+	// The time the schedule started executing.
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
-	// The time when schedule finished executing
+	// The time the schedule finished executing.
 	TimeFinished *common.SDKTime `mandatory:"true" json:"timeFinished"`
 
-	// Specifies if the schedule job was run successfully or not.
+	// Specifies whether or not the schedule job was successfully run.
 	LifecycleState ScheduledRunLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
-	// Additional details about scheduled run failure
+	// Additional details about the scheduled run.
 	LifecycleDetails *string `mandatory:"true" json:"lifecycleDetails"`
 }
 
@@ -51,7 +51,7 @@ func (m ScheduledRun) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

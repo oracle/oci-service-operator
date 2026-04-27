@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/psql/RestartDbInstanceInDbSystem.go.html to see an example of how to use RestartDbInstanceInDbSystemRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/psql/RestartDbInstanceInDbSystem.go.html to see an example of how to use RestartDbInstanceInDbSystemRequest.
 type RestartDbInstanceInDbSystemRequest struct {
 
 	// A unique identifier for the database system.
@@ -74,7 +74,7 @@ func (request RestartDbInstanceInDbSystemRequest) RetryPolicy() *common.RetryPol
 func (request RestartDbInstanceInDbSystemRequest) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

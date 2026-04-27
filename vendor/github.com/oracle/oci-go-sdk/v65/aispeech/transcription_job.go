@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -19,10 +19,10 @@ import (
 // TranscriptionJob Description of Transcription Job.
 type TranscriptionJob struct {
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	ModelDetails *TranscriptionModelDetails `mandatory:"true" json:"modelDetails"`
@@ -63,7 +63,7 @@ type TranscriptionJob struct {
 	// How much progress the operation has made, vs the total amount of work that must be performed.
 	PercentComplete *int `mandatory:"false" json:"percentComplete"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job.
 	CreatedBy *string `mandatory:"false" json:"createdBy"`
 
 	// Transcription format. JSON format will always be provided in addition to any formats in this list.
@@ -108,7 +108,7 @@ func (m TranscriptionJob) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetTranscriptionJobLifecycleStateEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

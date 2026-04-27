@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -27,6 +27,8 @@ type DefaultJobConfigurationDetails struct {
 
 	// A time bound for the execution of the job. Timer starts when the job becomes active.
 	MaximumRuntimeInMinutes *int64 `mandatory:"false" json:"maximumRuntimeInMinutes"`
+
+	StartupProbeDetails JobProbeDetails `mandatory:"false" json:"startupProbeDetails"`
 }
 
 func (m DefaultJobConfigurationDetails) String() string {
@@ -40,7 +42,7 @@ func (m DefaultJobConfigurationDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -57,4 +59,37 @@ func (m DefaultJobConfigurationDetails) MarshalJSON() (buff []byte, e error) {
 	}
 
 	return json.Marshal(&s)
+}
+
+// UnmarshalJSON unmarshals from json
+func (m *DefaultJobConfigurationDetails) UnmarshalJSON(data []byte) (e error) {
+	model := struct {
+		EnvironmentVariables    map[string]string `json:"environmentVariables"`
+		CommandLineArguments    *string           `json:"commandLineArguments"`
+		MaximumRuntimeInMinutes *int64            `json:"maximumRuntimeInMinutes"`
+		StartupProbeDetails     jobprobedetails   `json:"startupProbeDetails"`
+	}{}
+
+	e = json.Unmarshal(data, &model)
+	if e != nil {
+		return
+	}
+	var nn interface{}
+	m.EnvironmentVariables = model.EnvironmentVariables
+
+	m.CommandLineArguments = model.CommandLineArguments
+
+	m.MaximumRuntimeInMinutes = model.MaximumRuntimeInMinutes
+
+	nn, e = model.StartupProbeDetails.UnmarshalPolymorphicJSON(model.StartupProbeDetails.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.StartupProbeDetails = nn.(JobProbeDetails)
+	} else {
+		m.StartupProbeDetails = nil
+	}
+
+	return
 }

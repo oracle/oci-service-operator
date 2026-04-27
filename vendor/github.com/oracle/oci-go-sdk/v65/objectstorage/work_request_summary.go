@@ -1,12 +1,12 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Object Storage Service API
 //
 // Use Object Storage and Archive Storage APIs to manage buckets, objects, and related resources.
-// For more information, see Overview of Object Storage (https://docs.cloud.oracle.com/Content/Object/Concepts/objectstorageoverview.htm) and
-// Overview of Archive Storage (https://docs.cloud.oracle.com/Content/Archive/Concepts/archivestorageoverview.htm).
+// For more information, see Overview of Object Storage (https://docs.oracle.com/iaas/Content/Object/Concepts/objectstorageoverview.htm) and
+// Overview of Archive Storage (https://docs.oracle.com/iaas/Content/Archive/Concepts/archivestorageoverview.htm).
 //
 
 package objectstorage
@@ -29,7 +29,7 @@ type WorkRequestSummary struct {
 	// The id of the work request.
 	Id *string `mandatory:"false" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work
 	// requests are scoped to the same compartment as the resource the work request affects.
 	// If the work request affects multiple resources and those resources are not in the same compartment, the OCID of
 	// the primary resource is used. For example, you can copy an object in a bucket in one compartment to a bucket in
@@ -71,7 +71,7 @@ func (m WorkRequestSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for Status: %s. Supported values are: %s.", m.Status, strings.Join(GetWorkRequestSummaryStatusEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -81,18 +81,27 @@ type WorkRequestSummaryOperationTypeEnum string
 
 // Set of constants representing the allowable values for WorkRequestSummaryOperationTypeEnum
 const (
-	WorkRequestSummaryOperationTypeCopyObject WorkRequestSummaryOperationTypeEnum = "COPY_OBJECT"
-	WorkRequestSummaryOperationTypeReencrypt  WorkRequestSummaryOperationTypeEnum = "REENCRYPT"
+	WorkRequestSummaryOperationTypeCopyObject            WorkRequestSummaryOperationTypeEnum = "COPY_OBJECT"
+	WorkRequestSummaryOperationTypeReencrypt             WorkRequestSummaryOperationTypeEnum = "REENCRYPT"
+	WorkRequestSummaryOperationTypePrivateEndpointCreate WorkRequestSummaryOperationTypeEnum = "PRIVATE_ENDPOINT_CREATE"
+	WorkRequestSummaryOperationTypePrivateEndpointUpdate WorkRequestSummaryOperationTypeEnum = "PRIVATE_ENDPOINT_UPDATE"
+	WorkRequestSummaryOperationTypePrivateEndpointDelete WorkRequestSummaryOperationTypeEnum = "PRIVATE_ENDPOINT_DELETE"
 )
 
 var mappingWorkRequestSummaryOperationTypeEnum = map[string]WorkRequestSummaryOperationTypeEnum{
-	"COPY_OBJECT": WorkRequestSummaryOperationTypeCopyObject,
-	"REENCRYPT":   WorkRequestSummaryOperationTypeReencrypt,
+	"COPY_OBJECT":             WorkRequestSummaryOperationTypeCopyObject,
+	"REENCRYPT":               WorkRequestSummaryOperationTypeReencrypt,
+	"PRIVATE_ENDPOINT_CREATE": WorkRequestSummaryOperationTypePrivateEndpointCreate,
+	"PRIVATE_ENDPOINT_UPDATE": WorkRequestSummaryOperationTypePrivateEndpointUpdate,
+	"PRIVATE_ENDPOINT_DELETE": WorkRequestSummaryOperationTypePrivateEndpointDelete,
 }
 
 var mappingWorkRequestSummaryOperationTypeEnumLowerCase = map[string]WorkRequestSummaryOperationTypeEnum{
-	"copy_object": WorkRequestSummaryOperationTypeCopyObject,
-	"reencrypt":   WorkRequestSummaryOperationTypeReencrypt,
+	"copy_object":             WorkRequestSummaryOperationTypeCopyObject,
+	"reencrypt":               WorkRequestSummaryOperationTypeReencrypt,
+	"private_endpoint_create": WorkRequestSummaryOperationTypePrivateEndpointCreate,
+	"private_endpoint_update": WorkRequestSummaryOperationTypePrivateEndpointUpdate,
+	"private_endpoint_delete": WorkRequestSummaryOperationTypePrivateEndpointDelete,
 }
 
 // GetWorkRequestSummaryOperationTypeEnumValues Enumerates the set of values for WorkRequestSummaryOperationTypeEnum
@@ -109,6 +118,9 @@ func GetWorkRequestSummaryOperationTypeEnumStringValues() []string {
 	return []string{
 		"COPY_OBJECT",
 		"REENCRYPT",
+		"PRIVATE_ENDPOINT_CREATE",
+		"PRIVATE_ENDPOINT_UPDATE",
+		"PRIVATE_ENDPOINT_DELETE",
 	}
 }
 

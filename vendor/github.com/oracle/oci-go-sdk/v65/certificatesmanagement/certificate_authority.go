@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -43,6 +43,9 @@ type CertificateAuthority struct {
 
 	// A brief description of the CA.
 	Description *string `mandatory:"false" json:"description"`
+
+	// For externally managed CAs, a description of the externally managed key. Avoid entering confidential information.
+	ExternalKeyDescription *string `mandatory:"false" json:"externalKeyDescription"`
 
 	// An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
 	// Example: `2019-04-03T21:10:29.600Z`
@@ -95,7 +98,7 @@ func (m CertificateAuthority) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SigningAlgorithm: %s. Supported values are: %s.", m.SigningAlgorithm, strings.Join(GetSignatureAlgorithmEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -105,6 +108,7 @@ func (m *CertificateAuthority) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
 		IssuerCertificateAuthorityId     *string                                `json:"issuerCertificateAuthorityId"`
 		Description                      *string                                `json:"description"`
+		ExternalKeyDescription           *string                                `json:"externalKeyDescription"`
 		TimeOfDeletion                   *common.SDKTime                        `json:"timeOfDeletion"`
 		KmsKeyId                         *string                                `json:"kmsKeyId"`
 		LifecycleDetails                 *string                                `json:"lifecycleDetails"`
@@ -131,6 +135,8 @@ func (m *CertificateAuthority) UnmarshalJSON(data []byte) (e error) {
 	m.IssuerCertificateAuthorityId = model.IssuerCertificateAuthorityId
 
 	m.Description = model.Description
+
+	m.ExternalKeyDescription = model.ExternalKeyDescription
 
 	m.TimeOfDeletion = model.TimeOfDeletion
 

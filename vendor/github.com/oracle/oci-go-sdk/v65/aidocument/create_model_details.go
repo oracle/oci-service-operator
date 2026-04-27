@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -25,7 +25,7 @@ type CreateModelDetails struct {
 	// The compartment identifier.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project that contains the model.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project that contains the model.
 	ProjectId *string `mandatory:"true" json:"projectId"`
 
 	// A human-friendly name for the model, which can be changed.
@@ -37,11 +37,20 @@ type CreateModelDetails struct {
 	// The model version
 	ModelVersion *string `mandatory:"false" json:"modelVersion"`
 
+	// Applicable to only PRE_TRAINED_KEY_VALUE_EXTRACTION, PRE_TRAINED_DOCUMENT_ELEMENTS_EXTRACTION.
+	ModelSubType ModelSubType `mandatory:"false" json:"modelSubType"`
+
+	// Number of replicas required for this model.
+	InferenceUnits *int `mandatory:"false" json:"inferenceUnits"`
+
 	// Set to true when experimenting with a new model type or dataset, so the model training is quick, with a predefined low number of passes through the training data.
 	IsQuickMode *bool `mandatory:"false" json:"isQuickMode"`
 
 	// The maximum model training time in hours, expressed as a decimal fraction.
 	MaxTrainingTimeInHours *float64 `mandatory:"false" json:"maxTrainingTimeInHours"`
+
+	// The document language for model training, abbreviated according to the BCP 47 syntax.
+	Language *string `mandatory:"false" json:"language"`
 
 	TrainingDataset Dataset `mandatory:"false" json:"trainingDataset"`
 
@@ -49,7 +58,7 @@ type CreateModelDetails struct {
 
 	ValidationDataset Dataset `mandatory:"false" json:"validationDataset"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) list of active custom Key Value models that need to be composed.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) list of active custom Key Value models that need to be composed.
 	ComponentModels []ComponentModel `mandatory:"false" json:"componentModels"`
 
 	// the alias name of the model.
@@ -78,7 +87,7 @@ func (m CreateModelDetails) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -89,8 +98,11 @@ func (m *CreateModelDetails) UnmarshalJSON(data []byte) (e error) {
 		DisplayName            *string                           `json:"displayName"`
 		Description            *string                           `json:"description"`
 		ModelVersion           *string                           `json:"modelVersion"`
+		ModelSubType           modelsubtype                      `json:"modelSubType"`
+		InferenceUnits         *int                              `json:"inferenceUnits"`
 		IsQuickMode            *bool                             `json:"isQuickMode"`
 		MaxTrainingTimeInHours *float64                          `json:"maxTrainingTimeInHours"`
+		Language               *string                           `json:"language"`
 		TrainingDataset        dataset                           `json:"trainingDataset"`
 		TestingDataset         dataset                           `json:"testingDataset"`
 		ValidationDataset      dataset                           `json:"validationDataset"`
@@ -114,9 +126,23 @@ func (m *CreateModelDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.ModelVersion = model.ModelVersion
 
+	nn, e = model.ModelSubType.UnmarshalPolymorphicJSON(model.ModelSubType.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.ModelSubType = nn.(ModelSubType)
+	} else {
+		m.ModelSubType = nil
+	}
+
+	m.InferenceUnits = model.InferenceUnits
+
 	m.IsQuickMode = model.IsQuickMode
 
 	m.MaxTrainingTimeInHours = model.MaxTrainingTimeInHours
+
+	m.Language = model.Language
 
 	nn, e = model.TrainingDataset.UnmarshalPolymorphicJSON(model.TrainingDataset.JsonData)
 	if e != nil {

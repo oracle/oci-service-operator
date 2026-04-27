@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -25,11 +25,14 @@ type AddAutoScalingConfigurationDetails struct {
 	// Whether the autoscale configuration is enabled.
 	IsEnabled *bool `mandatory:"true" json:"isEnabled"`
 
-	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user.
-	ClusterAdminPassword *string `mandatory:"true" json:"clusterAdminPassword"`
-
 	// A user-friendly name. The name does not have to be unique, and it may be changed. Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
+
+	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user.
+	ClusterAdminPassword *string `mandatory:"false" json:"clusterAdminPassword"`
+
+	// The secretId for the clusterAdminPassword.
+	SecretId *string `mandatory:"false" json:"secretId"`
 
 	Policy *AutoScalePolicy `mandatory:"false" json:"policy"`
 
@@ -50,7 +53,7 @@ func (m AddAutoScalingConfigurationDetails) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -59,11 +62,12 @@ func (m AddAutoScalingConfigurationDetails) ValidateEnumValue() (bool, error) {
 func (m *AddAutoScalingConfigurationDetails) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
 		DisplayName          *string                   `json:"displayName"`
+		ClusterAdminPassword *string                   `json:"clusterAdminPassword"`
+		SecretId             *string                   `json:"secretId"`
 		Policy               *AutoScalePolicy          `json:"policy"`
 		PolicyDetails        addautoscalepolicydetails `json:"policyDetails"`
 		NodeType             NodeNodeTypeEnum          `json:"nodeType"`
 		IsEnabled            *bool                     `json:"isEnabled"`
-		ClusterAdminPassword *string                   `json:"clusterAdminPassword"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -72,6 +76,10 @@ func (m *AddAutoScalingConfigurationDetails) UnmarshalJSON(data []byte) (e error
 	}
 	var nn interface{}
 	m.DisplayName = model.DisplayName
+
+	m.ClusterAdminPassword = model.ClusterAdminPassword
+
+	m.SecretId = model.SecretId
 
 	m.Policy = model.Policy
 
@@ -88,8 +96,6 @@ func (m *AddAutoScalingConfigurationDetails) UnmarshalJSON(data []byte) (e error
 	m.NodeType = model.NodeType
 
 	m.IsEnabled = model.IsEnabled
-
-	m.ClusterAdminPassword = model.ClusterAdminPassword
 
 	return
 }

@@ -1,11 +1,11 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Oracle Cloud VMware Solution API
 //
 // Use the Oracle Cloud VMware API to create SDDCs and manage ESXi hosts and software.
-// For more information, see Oracle Cloud VMware Solution (https://docs.cloud.oracle.com/iaas/Content/VMware/Concepts/ocvsoverview.htm).
+// For more information, see Oracle Cloud VMware Solution (https://docs.oracle.com/iaas/Content/VMware/Concepts/ocvsoverview.htm).
 //
 
 package ocvp
@@ -24,8 +24,8 @@ import (
 // Cluster in the future with CreateEsxiHost.
 type UpdateClusterDetails struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster.
-	// Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cluster.
+	// Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
 	NetworkConfiguration *NetworkConfiguration `mandatory:"false" json:"networkConfiguration"`
@@ -41,13 +41,15 @@ type UpdateClusterDetails struct {
 	// ListSupportedVmwareSoftwareVersions.
 	EsxiSoftwareVersion *string `mandatory:"false" json:"esxiSoftwareVersion"`
 
+	ClusterByolAllocationDetails *ClusterByolAllocationDetails `mandatory:"false" json:"clusterByolAllocationDetails"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 }
@@ -63,7 +65,7 @@ func (m UpdateClusterDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

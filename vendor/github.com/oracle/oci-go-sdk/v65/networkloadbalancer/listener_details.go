@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -16,8 +16,8 @@ import (
 )
 
 // ListenerDetails The listener's configuration.
-// For more information about backend set configuration, see
-// Managing Load Balancer Listeners (https://docs.cloud.oracle.com/Content/Balance/Tasks/managinglisteners.htm).
+// For more information about listener configuration, see
+// Listeners for Network Load Balancers (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/Listeners/listener-management.htm).
 type ListenerDetails struct {
 
 	// A friendly name for the listener. It must be unique and it cannot be changed.
@@ -33,15 +33,29 @@ type ListenerDetails struct {
 	Port *int `mandatory:"true" json:"port"`
 
 	// The protocol on which the listener accepts connection requests.
-	// For public network load balancers, ANY protocol refers to TCP/UDP.
+	// For public network load balancers, ANY protocol refers to TCP/UDP with the wildcard port.
 	// For private network load balancers, ANY protocol refers to TCP/UDP/ICMP (note that ICMP requires isPreserveSourceDestination to be set to true).
-	// To get a list of valid protocols, use the ListNetworkLoadBalancersProtocols
-	// operation.
+	// "ListNetworkLoadBalancersProtocols" API is deprecated and it will not return the updated values. Use the allowed values for the protocol instead.
 	// Example: `TCP`
 	Protocol ListenerProtocolsEnum `mandatory:"true" json:"protocol"`
 
 	// IP version associated with the listener.
 	IpVersion IpVersionEnum `mandatory:"false" json:"ipVersion,omitempty"`
+
+	// Property to enable/disable PPv2 feature for this listener.
+	IsPpv2Enabled *bool `mandatory:"false" json:"isPpv2Enabled"`
+
+	// The duration for TCP idle timeout in seconds.
+	// Example: `300`
+	TcpIdleTimeout *int `mandatory:"false" json:"tcpIdleTimeout"`
+
+	// The duration for UDP idle timeout in seconds.
+	// Example: `120`
+	UdpIdleTimeout *int `mandatory:"false" json:"udpIdleTimeout"`
+
+	// The duration for L3IP idle timeout in seconds.
+	// Example: `200`
+	L3IpIdleTimeout *int `mandatory:"false" json:"l3IpIdleTimeout"`
 }
 
 func (m ListenerDetails) String() string {
@@ -61,7 +75,7 @@ func (m ListenerDetails) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for IpVersion: %s. Supported values are: %s.", m.IpVersion, strings.Join(GetIpVersionEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

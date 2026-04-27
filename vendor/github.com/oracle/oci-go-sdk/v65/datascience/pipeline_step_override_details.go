@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -10,6 +10,7 @@
 package datascience
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"strings"
@@ -22,6 +23,15 @@ type PipelineStepOverrideDetails struct {
 	StepName *string `mandatory:"true" json:"stepName"`
 
 	StepConfigurationDetails *PipelineStepConfigurationDetails `mandatory:"true" json:"stepConfigurationDetails"`
+
+	StepContainerConfigurationDetails PipelineContainerConfigurationDetails `mandatory:"false" json:"stepContainerConfigurationDetails"`
+
+	StepDataflowConfigurationDetails *PipelineDataflowConfigurationDetails `mandatory:"false" json:"stepDataflowConfigurationDetails"`
+
+	StepInfrastructureConfigurationDetails *PipelineInfrastructureConfigurationDetails `mandatory:"false" json:"stepInfrastructureConfigurationDetails"`
+
+	// The storage mount details to mount to the instance running the pipeline step.
+	StepStorageMountConfigurationDetailsList []StorageMountConfigurationDetails `mandatory:"false" json:"stepStorageMountConfigurationDetailsList"`
 }
 
 func (m PipelineStepOverrideDetails) String() string {
@@ -35,7 +45,56 @@ func (m PipelineStepOverrideDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
+}
+
+// UnmarshalJSON unmarshals from json
+func (m *PipelineStepOverrideDetails) UnmarshalJSON(data []byte) (e error) {
+	model := struct {
+		StepContainerConfigurationDetails        pipelinecontainerconfigurationdetails       `json:"stepContainerConfigurationDetails"`
+		StepDataflowConfigurationDetails         *PipelineDataflowConfigurationDetails       `json:"stepDataflowConfigurationDetails"`
+		StepInfrastructureConfigurationDetails   *PipelineInfrastructureConfigurationDetails `json:"stepInfrastructureConfigurationDetails"`
+		StepStorageMountConfigurationDetailsList []storagemountconfigurationdetails          `json:"stepStorageMountConfigurationDetailsList"`
+		StepName                                 *string                                     `json:"stepName"`
+		StepConfigurationDetails                 *PipelineStepConfigurationDetails           `json:"stepConfigurationDetails"`
+	}{}
+
+	e = json.Unmarshal(data, &model)
+	if e != nil {
+		return
+	}
+	var nn interface{}
+	nn, e = model.StepContainerConfigurationDetails.UnmarshalPolymorphicJSON(model.StepContainerConfigurationDetails.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.StepContainerConfigurationDetails = nn.(PipelineContainerConfigurationDetails)
+	} else {
+		m.StepContainerConfigurationDetails = nil
+	}
+
+	m.StepDataflowConfigurationDetails = model.StepDataflowConfigurationDetails
+
+	m.StepInfrastructureConfigurationDetails = model.StepInfrastructureConfigurationDetails
+
+	m.StepStorageMountConfigurationDetailsList = make([]StorageMountConfigurationDetails, len(model.StepStorageMountConfigurationDetailsList))
+	for i, n := range model.StepStorageMountConfigurationDetailsList {
+		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
+		if e != nil {
+			return e
+		}
+		if nn != nil {
+			m.StepStorageMountConfigurationDetailsList[i] = nn.(StorageMountConfigurationDetails)
+		} else {
+			m.StepStorageMountConfigurationDetailsList[i] = nil
+		}
+	}
+	m.StepName = model.StepName
+
+	m.StepConfigurationDetails = model.StepConfigurationDetails
+
+	return
 }

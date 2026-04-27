@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -15,33 +15,33 @@ import (
 	"strings"
 )
 
-// AutonomousDatabaseDataguardAssociation The properties that define dataguard association between two different Autonomous Databases.
-// Note that Autonomous Databases inherit DataGuard association from parent Autonomous Container Database.
+// AutonomousDatabaseDataguardAssociation The properties that define dataguard association between two different Autonomous AI Databases.
+// Note that Autonomous AI Databases inherit DataGuard association from parent Autonomous Container Database.
 // No actions can be taken on AutonomousDatabaseDataguardAssociation, usage is strictly informational.
 type AutonomousDatabaseDataguardAssociation struct {
 
-	// The OCID of the Autonomous Dataguard created for Autonomous Container Database where given Autonomous Database resides in.
+	// The OCID of the Autonomous Dataguard created for Autonomous Container Database where given Autonomous AI Database resides in.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Autonomous Database that has a relationship with the peer Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Autonomous AI Database that has a relationship with the peer Autonomous AI Database.
 	AutonomousDatabaseId *string `mandatory:"true" json:"autonomousDatabaseId"`
 
-	// The Data Guard role of the Autonomous Container Database or Autonomous Database, if Autonomous Data Guard is enabled.
+	// The Data Guard role of the Autonomous Container Database or Autonomous AI Database, if Autonomous Data Guard is enabled.
 	Role AutonomousDatabaseDataguardAssociationRoleEnum `mandatory:"true" json:"role"`
 
 	// The current state of Autonomous Data Guard.
 	LifecycleState AutonomousDatabaseDataguardAssociationLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
-	// The Data Guard role of the Autonomous Container Database or Autonomous Database, if Autonomous Data Guard is enabled.
+	// The Data Guard role of the Autonomous Container Database or Autonomous AI Database, if Autonomous Data Guard is enabled.
 	PeerRole AutonomousDatabaseDataguardAssociationPeerRoleEnum `mandatory:"true" json:"peerRole"`
 
 	// Additional information about the current lifecycleState, if available.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the peer Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the peer Autonomous AI Database.
 	PeerAutonomousDatabaseId *string `mandatory:"false" json:"peerAutonomousDatabaseId"`
 
-	// The current state of the Autonomous Database.
+	// The current state of the Autonomous AI Database.
 	PeerAutonomousDatabaseLifeCycleState AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum `mandatory:"false" json:"peerAutonomousDatabaseLifeCycleState,omitempty"`
 
 	// The protection mode of this Autonomous Data Guard association. For more information, see
@@ -102,7 +102,7 @@ func (m AutonomousDatabaseDataguardAssociation) ValidateEnumValue() (bool, error
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ProtectionMode: %s. Supported values are: %s.", m.ProtectionMode, strings.Join(GetAutonomousDatabaseDataguardAssociationProtectionModeEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -307,6 +307,7 @@ const (
 	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpgrading               AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "UPGRADING"
 	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateInaccessible            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "INACCESSIBLE"
 	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStandby                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "STANDBY"
+	AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTransporting            AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = "TRANSPORTING"
 )
 
 var mappingAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum = map[string]AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum{
@@ -331,6 +332,7 @@ var mappingAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycle
 	"UPGRADING":                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpgrading,
 	"INACCESSIBLE":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateInaccessible,
 	"STANDBY":                   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStandby,
+	"TRANSPORTING":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTransporting,
 }
 
 var mappingAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnumLowerCase = map[string]AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum{
@@ -355,6 +357,7 @@ var mappingAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycle
 	"upgrading":                 AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateUpgrading,
 	"inaccessible":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateInaccessible,
 	"standby":                   AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateStandby,
+	"transporting":              AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateTransporting,
 }
 
 // GetAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnumValues Enumerates the set of values for AutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleStateEnum
@@ -390,6 +393,7 @@ func GetAutonomousDatabaseDataguardAssociationPeerAutonomousDatabaseLifeCycleSta
 		"UPGRADING",
 		"INACCESSIBLE",
 		"STANDBY",
+		"TRANSPORTING",
 	}
 }
 

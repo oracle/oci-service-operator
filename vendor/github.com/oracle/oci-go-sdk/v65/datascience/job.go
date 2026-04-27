@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -19,20 +19,20 @@ import (
 // Job A job for training models.
 type Job struct {
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job.
 	Id *string `mandatory:"true" json:"id"`
 
 	// The date and time the resource was created in the timestamp format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: 2020-08-06T21:10:29.41Z
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job.
 	CreatedBy *string `mandatory:"true" json:"createdBy"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project to associate the job with.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project to associate the job with.
 	ProjectId *string `mandatory:"true" json:"projectId"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	JobConfigurationDetails JobConfigurationDetails `mandatory:"true" json:"jobConfigurationDetails"`
@@ -55,14 +55,16 @@ type Job struct {
 	// Collection of JobStorageMountConfigurationDetails.
 	JobStorageMountConfigurationDetailsList []StorageMountConfigurationDetails `mandatory:"false" json:"jobStorageMountConfigurationDetailsList"`
 
+	JobNodeConfigurationDetails JobNodeConfigurationDetails `mandatory:"false" json:"jobNodeConfigurationDetails"`
+
 	// The state of the job.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
 
-	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
-	// Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 }
@@ -81,7 +83,7 @@ func (m Job) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -94,6 +96,7 @@ func (m *Job) UnmarshalJSON(data []byte) (e error) {
 		JobEnvironmentConfigurationDetails      jobenvironmentconfigurationdetails    `json:"jobEnvironmentConfigurationDetails"`
 		JobLogConfigurationDetails              *JobLogConfigurationDetails           `json:"jobLogConfigurationDetails"`
 		JobStorageMountConfigurationDetailsList []storagemountconfigurationdetails    `json:"jobStorageMountConfigurationDetailsList"`
+		JobNodeConfigurationDetails             jobnodeconfigurationdetails           `json:"jobNodeConfigurationDetails"`
 		LifecycleDetails                        *string                               `json:"lifecycleDetails"`
 		FreeformTags                            map[string]string                     `json:"freeformTags"`
 		DefinedTags                             map[string]map[string]interface{}     `json:"definedTags"`
@@ -140,6 +143,16 @@ func (m *Job) UnmarshalJSON(data []byte) (e error) {
 			m.JobStorageMountConfigurationDetailsList[i] = nil
 		}
 	}
+	nn, e = model.JobNodeConfigurationDetails.UnmarshalPolymorphicJSON(model.JobNodeConfigurationDetails.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.JobNodeConfigurationDetails = nn.(JobNodeConfigurationDetails)
+	} else {
+		m.JobNodeConfigurationDetails = nil
+	}
+
 	m.LifecycleDetails = model.LifecycleDetails
 
 	m.FreeformTags = model.FreeformTags

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,10 +15,10 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListBackups.go.html to see an example of how to use ListBackupsRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListBackups.go.html to see an example of how to use ListBackupsRequest.
 type ListBackupsRequest struct {
 
-	// The compartment OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The compartment OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	CompartmentId *string `mandatory:"true" contributesTo:"query" name:"compartmentId"`
 
 	// Customer-defined unique identifier for the request. If you need to
@@ -32,11 +32,20 @@ type ListBackupsRequest struct {
 	// Backup Lifecycle State
 	LifecycleState BackupLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleState" omitEmpty:"true"`
 
-	// The DB System OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The DB System OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	DbSystemId *string `mandatory:"false" contributesTo:"query" name:"dbSystemId"`
 
 	// A filter to return only the resource matching the given display name exactly.
 	DisplayName *string `mandatory:"false" contributesTo:"query" name:"displayName"`
+
+	// Backup Soft Delete
+	SoftDelete ListBackupsSoftDeleteEnum `mandatory:"false" contributesTo:"query" name:"softDelete" omitEmpty:"true"`
+
+	// Indicates whether the backup has been prepared successfully.
+	BackupPreparationStatus BackupValidationDetailsBackupPreparationStatusEnum `mandatory:"false" contributesTo:"query" name:"backupPreparationStatus" omitEmpty:"true"`
+
+	// Backup validation status
+	ValidationStatus BackupValidationDetailsValidationStatusEnum `mandatory:"false" contributesTo:"query" name:"validationStatus" omitEmpty:"true"`
 
 	// Backup creationType
 	CreationType BackupCreationTypeEnum `mandatory:"false" contributesTo:"query" name:"creationType" omitEmpty:"true"`
@@ -48,12 +57,12 @@ type ListBackupsRequest struct {
 	SortOrder ListBackupsSortOrderEnum `mandatory:"false" contributesTo:"query" name:"sortOrder" omitEmpty:"true"`
 
 	// The maximum number of items to return in a paginated list call. For information about pagination, see
-	// List Pagination (https://docs.cloud.oracle.comAPI/Concepts/usingapi.htm#List_Pagination).
+	// List Pagination (https://docs.oracle.com/iaasAPI/Concepts/usingapi.htm#List_Pagination).
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
 
 	// The value of the `opc-next-page` or `opc-prev-page` response header from
 	// the previous list call. For information about pagination, see List
-	// Pagination (https://docs.cloud.oracle.comAPI/Concepts/usingapi.htm#List_Pagination).
+	// Pagination (https://docs.oracle.com/iaasAPI/Concepts/usingapi.htm#List_Pagination).
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
 
 	// Metadata about the request. This information will not be transmitted to the service, but
@@ -95,6 +104,15 @@ func (request ListBackupsRequest) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingBackupLifecycleStateEnum(string(request.LifecycleState)); !ok && request.LifecycleState != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", request.LifecycleState, strings.Join(GetBackupLifecycleStateEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingListBackupsSoftDeleteEnum(string(request.SoftDelete)); !ok && request.SoftDelete != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SoftDelete: %s. Supported values are: %s.", request.SoftDelete, strings.Join(GetListBackupsSoftDeleteEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingBackupValidationDetailsBackupPreparationStatusEnum(string(request.BackupPreparationStatus)); !ok && request.BackupPreparationStatus != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for BackupPreparationStatus: %s. Supported values are: %s.", request.BackupPreparationStatus, strings.Join(GetBackupValidationDetailsBackupPreparationStatusEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingBackupValidationDetailsValidationStatusEnum(string(request.ValidationStatus)); !ok && request.ValidationStatus != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ValidationStatus: %s. Supported values are: %s.", request.ValidationStatus, strings.Join(GetBackupValidationDetailsValidationStatusEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingBackupCreationTypeEnum(string(request.CreationType)); !ok && request.CreationType != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for CreationType: %s. Supported values are: %s.", request.CreationType, strings.Join(GetBackupCreationTypeEnumStringValues(), ",")))
 	}
@@ -105,7 +123,7 @@ func (request ListBackupsRequest) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortOrder: %s. Supported values are: %s.", request.SortOrder, strings.Join(GetListBackupsSortOrderEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -136,6 +154,48 @@ func (response ListBackupsResponse) String() string {
 // HTTPResponse implements the OCIResponse interface
 func (response ListBackupsResponse) HTTPResponse() *http.Response {
 	return response.RawResponse
+}
+
+// ListBackupsSoftDeleteEnum Enum with underlying type: string
+type ListBackupsSoftDeleteEnum string
+
+// Set of constants representing the allowable values for ListBackupsSoftDeleteEnum
+const (
+	ListBackupsSoftDeleteEnabled  ListBackupsSoftDeleteEnum = "ENABLED"
+	ListBackupsSoftDeleteDisabled ListBackupsSoftDeleteEnum = "DISABLED"
+)
+
+var mappingListBackupsSoftDeleteEnum = map[string]ListBackupsSoftDeleteEnum{
+	"ENABLED":  ListBackupsSoftDeleteEnabled,
+	"DISABLED": ListBackupsSoftDeleteDisabled,
+}
+
+var mappingListBackupsSoftDeleteEnumLowerCase = map[string]ListBackupsSoftDeleteEnum{
+	"enabled":  ListBackupsSoftDeleteEnabled,
+	"disabled": ListBackupsSoftDeleteDisabled,
+}
+
+// GetListBackupsSoftDeleteEnumValues Enumerates the set of values for ListBackupsSoftDeleteEnum
+func GetListBackupsSoftDeleteEnumValues() []ListBackupsSoftDeleteEnum {
+	values := make([]ListBackupsSoftDeleteEnum, 0)
+	for _, v := range mappingListBackupsSoftDeleteEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetListBackupsSoftDeleteEnumStringValues Enumerates the set of values in String for ListBackupsSoftDeleteEnum
+func GetListBackupsSoftDeleteEnumStringValues() []string {
+	return []string{
+		"ENABLED",
+		"DISABLED",
+	}
+}
+
+// GetMappingListBackupsSoftDeleteEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingListBackupsSoftDeleteEnum(val string) (ListBackupsSoftDeleteEnum, bool) {
+	enum, ok := mappingListBackupsSoftDeleteEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
 }
 
 // ListBackupsSortByEnum Enum with underlying type: string

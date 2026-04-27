@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -18,18 +18,24 @@ type CertificateAuthorityConfigTypeEnum string
 
 // Set of constants representing the allowable values for CertificateAuthorityConfigTypeEnum
 const (
-	CertificateAuthorityConfigTypeRootCaGeneratedInternally       CertificateAuthorityConfigTypeEnum = "ROOT_CA_GENERATED_INTERNALLY"
-	CertificateAuthorityConfigTypeSubordinateCaIssuedByInternalCa CertificateAuthorityConfigTypeEnum = "SUBORDINATE_CA_ISSUED_BY_INTERNAL_CA"
+	CertificateAuthorityConfigTypeRootCaGeneratedInternally                        CertificateAuthorityConfigTypeEnum = "ROOT_CA_GENERATED_INTERNALLY"
+	CertificateAuthorityConfigTypeSubordinateCaIssuedByInternalCa                  CertificateAuthorityConfigTypeEnum = "SUBORDINATE_CA_ISSUED_BY_INTERNAL_CA"
+	CertificateAuthorityConfigTypeRootCaManagedExternally                          CertificateAuthorityConfigTypeEnum = "ROOT_CA_MANAGED_EXTERNALLY"
+	CertificateAuthorityConfigTypeSubordinateCaManagedInternallyIssuedByExternalCa CertificateAuthorityConfigTypeEnum = "SUBORDINATE_CA_MANAGED_INTERNALLY_ISSUED_BY_EXTERNAL_CA"
 )
 
 var mappingCertificateAuthorityConfigTypeEnum = map[string]CertificateAuthorityConfigTypeEnum{
-	"ROOT_CA_GENERATED_INTERNALLY":         CertificateAuthorityConfigTypeRootCaGeneratedInternally,
-	"SUBORDINATE_CA_ISSUED_BY_INTERNAL_CA": CertificateAuthorityConfigTypeSubordinateCaIssuedByInternalCa,
+	"ROOT_CA_GENERATED_INTERNALLY":                            CertificateAuthorityConfigTypeRootCaGeneratedInternally,
+	"SUBORDINATE_CA_ISSUED_BY_INTERNAL_CA":                    CertificateAuthorityConfigTypeSubordinateCaIssuedByInternalCa,
+	"ROOT_CA_MANAGED_EXTERNALLY":                              CertificateAuthorityConfigTypeRootCaManagedExternally,
+	"SUBORDINATE_CA_MANAGED_INTERNALLY_ISSUED_BY_EXTERNAL_CA": CertificateAuthorityConfigTypeSubordinateCaManagedInternallyIssuedByExternalCa,
 }
 
 var mappingCertificateAuthorityConfigTypeEnumLowerCase = map[string]CertificateAuthorityConfigTypeEnum{
-	"root_ca_generated_internally":         CertificateAuthorityConfigTypeRootCaGeneratedInternally,
-	"subordinate_ca_issued_by_internal_ca": CertificateAuthorityConfigTypeSubordinateCaIssuedByInternalCa,
+	"root_ca_generated_internally":                            CertificateAuthorityConfigTypeRootCaGeneratedInternally,
+	"subordinate_ca_issued_by_internal_ca":                    CertificateAuthorityConfigTypeSubordinateCaIssuedByInternalCa,
+	"root_ca_managed_externally":                              CertificateAuthorityConfigTypeRootCaManagedExternally,
+	"subordinate_ca_managed_internally_issued_by_external_ca": CertificateAuthorityConfigTypeSubordinateCaManagedInternallyIssuedByExternalCa,
 }
 
 // GetCertificateAuthorityConfigTypeEnumValues Enumerates the set of values for CertificateAuthorityConfigTypeEnum
@@ -46,6 +52,8 @@ func GetCertificateAuthorityConfigTypeEnumStringValues() []string {
 	return []string{
 		"ROOT_CA_GENERATED_INTERNALLY",
 		"SUBORDINATE_CA_ISSUED_BY_INTERNAL_CA",
+		"ROOT_CA_MANAGED_EXTERNALLY",
+		"SUBORDINATE_CA_MANAGED_INTERNALLY_ISSUED_BY_EXTERNAL_CA",
 	}
 }
 

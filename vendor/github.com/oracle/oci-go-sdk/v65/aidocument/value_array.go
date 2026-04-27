@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -32,6 +32,12 @@ type ValueArray struct {
 
 	// The detected text of a field.
 	Text *string `mandatory:"false" json:"text"`
+
+	// The normalized value.
+	NormalizedValue *string `mandatory:"false" json:"normalizedValue"`
+
+	// The normalized value confidence score between 0 and 1.
+	NormalizedConfidence *float32 `mandatory:"false" json:"normalizedConfidence"`
 }
 
 // GetText returns Text
@@ -54,6 +60,16 @@ func (m ValueArray) GetWordIndexes() []int {
 	return m.WordIndexes
 }
 
+// GetNormalizedValue returns NormalizedValue
+func (m ValueArray) GetNormalizedValue() *string {
+	return m.NormalizedValue
+}
+
+// GetNormalizedConfidence returns NormalizedConfidence
+func (m ValueArray) GetNormalizedConfidence() *float32 {
+	return m.NormalizedConfidence
+}
+
 func (m ValueArray) String() string {
 	return common.PointerString(m)
 }
@@ -65,7 +81,7 @@ func (m ValueArray) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

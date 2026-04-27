@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -18,10 +18,10 @@ import (
 // DataGuardAssociation The representation of DataGuardAssociation
 type DataGuardAssociation struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Data Guard association.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Data Guard association.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the reporting database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the reporting database.
 	DatabaseId *string `mandatory:"true" json:"databaseId"`
 
 	// The role of the reporting database in this Data Guard association.
@@ -30,7 +30,7 @@ type DataGuardAssociation struct {
 	// The current state of the Data Guard association.
 	LifecycleState DataGuardAssociationLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the DB system containing the associated
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DB system containing the associated
 	// peer database.
 	PeerDbSystemId *string `mandatory:"true" json:"peerDbSystemId"`
 
@@ -45,13 +45,13 @@ type DataGuardAssociation struct {
 	// Additional information about the current lifecycleState, if available.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Home containing the associated peer database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Home containing the associated peer database.
 	PeerDbHomeId *string `mandatory:"false" json:"peerDbHomeId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the associated peer database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the associated peer database.
 	PeerDatabaseId *string `mandatory:"false" json:"peerDatabaseId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the peer database's Data Guard association.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the peer database's Data Guard association.
 	PeerDataGuardAssociationId *string `mandatory:"false" json:"peerDataGuardAssociationId"`
 
 	// The lag time between updates to the primary database and application of the redo data on the standby database,
@@ -101,7 +101,7 @@ func (m DataGuardAssociation) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for TransportType: %s. Supported values are: %s.", m.TransportType, strings.Join(GetDataGuardAssociationTransportTypeEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -114,18 +114,21 @@ const (
 	DataGuardAssociationRolePrimary         DataGuardAssociationRoleEnum = "PRIMARY"
 	DataGuardAssociationRoleStandby         DataGuardAssociationRoleEnum = "STANDBY"
 	DataGuardAssociationRoleDisabledStandby DataGuardAssociationRoleEnum = "DISABLED_STANDBY"
+	DataGuardAssociationRoleSnapshotStandby DataGuardAssociationRoleEnum = "SNAPSHOT_STANDBY"
 )
 
 var mappingDataGuardAssociationRoleEnum = map[string]DataGuardAssociationRoleEnum{
 	"PRIMARY":          DataGuardAssociationRolePrimary,
 	"STANDBY":          DataGuardAssociationRoleStandby,
 	"DISABLED_STANDBY": DataGuardAssociationRoleDisabledStandby,
+	"SNAPSHOT_STANDBY": DataGuardAssociationRoleSnapshotStandby,
 }
 
 var mappingDataGuardAssociationRoleEnumLowerCase = map[string]DataGuardAssociationRoleEnum{
 	"primary":          DataGuardAssociationRolePrimary,
 	"standby":          DataGuardAssociationRoleStandby,
 	"disabled_standby": DataGuardAssociationRoleDisabledStandby,
+	"snapshot_standby": DataGuardAssociationRoleSnapshotStandby,
 }
 
 // GetDataGuardAssociationRoleEnumValues Enumerates the set of values for DataGuardAssociationRoleEnum
@@ -143,6 +146,7 @@ func GetDataGuardAssociationRoleEnumStringValues() []string {
 		"PRIMARY",
 		"STANDBY",
 		"DISABLED_STANDBY",
+		"SNAPSHOT_STANDBY",
 	}
 }
 
@@ -222,18 +226,21 @@ const (
 	DataGuardAssociationPeerRolePrimary         DataGuardAssociationPeerRoleEnum = "PRIMARY"
 	DataGuardAssociationPeerRoleStandby         DataGuardAssociationPeerRoleEnum = "STANDBY"
 	DataGuardAssociationPeerRoleDisabledStandby DataGuardAssociationPeerRoleEnum = "DISABLED_STANDBY"
+	DataGuardAssociationPeerRoleSnapshotStandby DataGuardAssociationPeerRoleEnum = "SNAPSHOT_STANDBY"
 )
 
 var mappingDataGuardAssociationPeerRoleEnum = map[string]DataGuardAssociationPeerRoleEnum{
 	"PRIMARY":          DataGuardAssociationPeerRolePrimary,
 	"STANDBY":          DataGuardAssociationPeerRoleStandby,
 	"DISABLED_STANDBY": DataGuardAssociationPeerRoleDisabledStandby,
+	"SNAPSHOT_STANDBY": DataGuardAssociationPeerRoleSnapshotStandby,
 }
 
 var mappingDataGuardAssociationPeerRoleEnumLowerCase = map[string]DataGuardAssociationPeerRoleEnum{
 	"primary":          DataGuardAssociationPeerRolePrimary,
 	"standby":          DataGuardAssociationPeerRoleStandby,
 	"disabled_standby": DataGuardAssociationPeerRoleDisabledStandby,
+	"snapshot_standby": DataGuardAssociationPeerRoleSnapshotStandby,
 }
 
 // GetDataGuardAssociationPeerRoleEnumValues Enumerates the set of values for DataGuardAssociationPeerRoleEnum
@@ -251,6 +258,7 @@ func GetDataGuardAssociationPeerRoleEnumStringValues() []string {
 		"PRIMARY",
 		"STANDBY",
 		"DISABLED_STANDBY",
+		"SNAPSHOT_STANDBY",
 	}
 }
 

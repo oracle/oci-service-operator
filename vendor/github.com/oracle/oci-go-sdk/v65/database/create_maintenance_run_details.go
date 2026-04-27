@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -24,18 +24,21 @@ type CreateMaintenanceRunDetails struct {
 	// The date and time that update should be scheduled.
 	TimeScheduled *common.SDKTime `mandatory:"true" json:"timeScheduled"`
 
-	// Patch type, either "QUARTERLY" or "TIMEZONE".
+	// Patch type, either "QUARTERLY", "TIMEZONE" or "CUSTOM_DATABASE_SOFTWARE_IMAGE".
 	PatchType CreateMaintenanceRunDetailsPatchTypeEnum `mandatory:"true" json:"patchType"`
 
 	// Indicates if an automatic DST Time Zone file update is enabled for the Autonomous Container Database. If enabled along with Release Update, patching will be done in a Non-Rolling manner.
 	IsDstFileUpdateEnabled *bool `mandatory:"false" json:"isDstFileUpdateEnabled"`
 
 	// Cloud Exadata infrastructure node patching method, either "ROLLING" or "NONROLLING". Default value is ROLLING.
-	// *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
+	// *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
 	PatchingMode CreateMaintenanceRunDetailsPatchingModeEnum `mandatory:"false" json:"patchingMode,omitempty"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Maintenance Run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Maintenance Run.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
+
+	// The Autonomous AI Database Software Image OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	DatabaseSoftwareImageId *string `mandatory:"false" json:"databaseSoftwareImageId"`
 }
 
 func (m CreateMaintenanceRunDetails) String() string {
@@ -55,7 +58,7 @@ func (m CreateMaintenanceRunDetails) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for PatchingMode: %s. Supported values are: %s.", m.PatchingMode, strings.Join(GetCreateMaintenanceRunDetailsPatchingModeEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -107,18 +110,21 @@ type CreateMaintenanceRunDetailsPatchTypeEnum string
 
 // Set of constants representing the allowable values for CreateMaintenanceRunDetailsPatchTypeEnum
 const (
-	CreateMaintenanceRunDetailsPatchTypeQuarterly CreateMaintenanceRunDetailsPatchTypeEnum = "QUARTERLY"
-	CreateMaintenanceRunDetailsPatchTypeTimezone  CreateMaintenanceRunDetailsPatchTypeEnum = "TIMEZONE"
+	CreateMaintenanceRunDetailsPatchTypeQuarterly                   CreateMaintenanceRunDetailsPatchTypeEnum = "QUARTERLY"
+	CreateMaintenanceRunDetailsPatchTypeTimezone                    CreateMaintenanceRunDetailsPatchTypeEnum = "TIMEZONE"
+	CreateMaintenanceRunDetailsPatchTypeCustomDatabaseSoftwareImage CreateMaintenanceRunDetailsPatchTypeEnum = "CUSTOM_DATABASE_SOFTWARE_IMAGE"
 )
 
 var mappingCreateMaintenanceRunDetailsPatchTypeEnum = map[string]CreateMaintenanceRunDetailsPatchTypeEnum{
-	"QUARTERLY": CreateMaintenanceRunDetailsPatchTypeQuarterly,
-	"TIMEZONE":  CreateMaintenanceRunDetailsPatchTypeTimezone,
+	"QUARTERLY":                      CreateMaintenanceRunDetailsPatchTypeQuarterly,
+	"TIMEZONE":                       CreateMaintenanceRunDetailsPatchTypeTimezone,
+	"CUSTOM_DATABASE_SOFTWARE_IMAGE": CreateMaintenanceRunDetailsPatchTypeCustomDatabaseSoftwareImage,
 }
 
 var mappingCreateMaintenanceRunDetailsPatchTypeEnumLowerCase = map[string]CreateMaintenanceRunDetailsPatchTypeEnum{
-	"quarterly": CreateMaintenanceRunDetailsPatchTypeQuarterly,
-	"timezone":  CreateMaintenanceRunDetailsPatchTypeTimezone,
+	"quarterly":                      CreateMaintenanceRunDetailsPatchTypeQuarterly,
+	"timezone":                       CreateMaintenanceRunDetailsPatchTypeTimezone,
+	"custom_database_software_image": CreateMaintenanceRunDetailsPatchTypeCustomDatabaseSoftwareImage,
 }
 
 // GetCreateMaintenanceRunDetailsPatchTypeEnumValues Enumerates the set of values for CreateMaintenanceRunDetailsPatchTypeEnum
@@ -135,6 +141,7 @@ func GetCreateMaintenanceRunDetailsPatchTypeEnumStringValues() []string {
 	return []string{
 		"QUARTERLY",
 		"TIMEZONE",
+		"CUSTOM_DATABASE_SOFTWARE_IMAGE",
 	}
 }
 

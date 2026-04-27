@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/queue/DeleteMessages.go.html to see an example of how to use DeleteMessagesRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/queue/DeleteMessages.go.html to see an example of how to use DeleteMessagesRequest.
 type DeleteMessagesRequest struct {
 
 	// The unique queue identifier.
@@ -23,6 +23,9 @@ type DeleteMessagesRequest struct {
 
 	// Details for the messages to delete.
 	DeleteMessagesDetails `contributesTo:"body"`
+
+	// Optional parameter to specify a consumer group.
+	ConsumerGroupId *string `mandatory:"false" contributesTo:"query" name:"consumerGroupId"`
 
 	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
 	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
@@ -64,7 +67,7 @@ func (request DeleteMessagesRequest) RetryPolicy() *common.RetryPolicy {
 func (request DeleteMessagesRequest) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

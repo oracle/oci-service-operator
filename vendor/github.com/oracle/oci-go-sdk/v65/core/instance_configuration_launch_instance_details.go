@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,11 +6,11 @@
 //
 // Use the Core Services API to manage resources such as virtual cloud networks (VCNs),
 // compute instances, and block storage volumes. For more information, see the console
-// documentation for the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
-// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
-// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services.
+// documentation for the Networking (https://docs.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.oracle.com/iaas/Content/Block/Concepts/overview.htm) services.
 // The required permissions are documented in the
-// Details for the Core Services (https://docs.cloud.oracle.com/iaas/Content/Identity/Reference/corepolicyreference.htm) article.
+// Details for the Core Services (https://docs.oracle.com/iaas/Content/Identity/Reference/corepolicyreference.htm) article.
 //
 
 package core
@@ -34,17 +34,35 @@ type InstanceConfigurationLaunchInstanceDetails struct {
 	// The OCID of the compute capacity reservation this instance is launched under.
 	CapacityReservationId *string `mandatory:"false" json:"capacityReservationId"`
 
+	// Whether to enable AI enterprise on the instance.
+	IsAIEnterpriseEnabled *bool `mandatory:"false" json:"isAIEnterpriseEnabled"`
+
+	PlacementConstraintDetails InstanceConfigurationPlacementConstraintDetails `mandatory:"false" json:"placementConstraintDetails"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
+	// compute cluster (https://docs.oracle.com/iaas/Content/Compute/Tasks/compute-clusters.htm) that the instance will be created in.
+	ComputeClusterId *string `mandatory:"false" json:"computeClusterId"`
+
 	// The OCID of the compartment containing the instance.
 	// Instances created from instance configurations are placed in the same compartment
 	// as the instance that was used to create the instance configuration.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
+	// The OCID of the cluster placement group of the instance.
+	ClusterPlacementGroupId *string `mandatory:"false" json:"clusterPlacementGroupId"`
+
 	CreateVnicDetails *InstanceConfigurationCreateVnicDetails `mandatory:"false" json:"createVnicDetails"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// Security attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm#security-attributes) are labels
+	// for a resource that can be referenced in a Zero Trust Packet Routing (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/overview.htm)
+	// (ZPR) policy to control access to ZPR-supported resources.
+	// Example: `{"Oracle-DataSecurity-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
 
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
@@ -59,7 +77,7 @@ type InstanceConfigurationLaunchInstanceDetails struct {
 	ExtendedMetadata map[string]interface{} `mandatory:"false" json:"extendedMetadata"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
@@ -80,7 +98,7 @@ type InstanceConfigurationLaunchInstanceDetails struct {
 	// iqn.2015-02.oracle.boot.
 	// For more information about the Bring Your Own Image feature of
 	// Oracle Cloud Infrastructure, see
-	// Bring Your Own Image (https://docs.cloud.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
+	// Bring Your Own Image (https://docs.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
 	// For more information about iPXE, see http://ipxe.org.
 	IpxeScript *string `mandatory:"false" json:"ipxeScript"`
 
@@ -174,6 +192,9 @@ type InstanceConfigurationLaunchInstanceDetails struct {
 	AvailabilityConfig *InstanceConfigurationAvailabilityConfig `mandatory:"false" json:"availabilityConfig"`
 
 	PreemptibleInstanceConfig *PreemptibleInstanceConfigDetails `mandatory:"false" json:"preemptibleInstanceConfig"`
+
+	// List of licensing configurations associated with target launch values.
+	LicensingConfigs []LaunchInstanceLicensingConfig `mandatory:"false" json:"licensingConfigs"`
 }
 
 func (m InstanceConfigurationLaunchInstanceDetails) String() string {
@@ -193,7 +214,7 @@ func (m InstanceConfigurationLaunchInstanceDetails) ValidateEnumValue() (bool, e
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for PreferredMaintenanceAction: %s. Supported values are: %s.", m.PreferredMaintenanceAction, strings.Join(GetInstanceConfigurationLaunchInstanceDetailsPreferredMaintenanceActionEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -203,9 +224,14 @@ func (m *InstanceConfigurationLaunchInstanceDetails) UnmarshalJSON(data []byte) 
 	model := struct {
 		AvailabilityDomain             *string                                                                  `json:"availabilityDomain"`
 		CapacityReservationId          *string                                                                  `json:"capacityReservationId"`
+		IsAIEnterpriseEnabled          *bool                                                                    `json:"isAIEnterpriseEnabled"`
+		PlacementConstraintDetails     instanceconfigurationplacementconstraintdetails                          `json:"placementConstraintDetails"`
+		ComputeClusterId               *string                                                                  `json:"computeClusterId"`
 		CompartmentId                  *string                                                                  `json:"compartmentId"`
+		ClusterPlacementGroupId        *string                                                                  `json:"clusterPlacementGroupId"`
 		CreateVnicDetails              *InstanceConfigurationCreateVnicDetails                                  `json:"createVnicDetails"`
 		DefinedTags                    map[string]map[string]interface{}                                        `json:"definedTags"`
+		SecurityAttributes             map[string]map[string]interface{}                                        `json:"securityAttributes"`
 		DisplayName                    *string                                                                  `json:"displayName"`
 		ExtendedMetadata               map[string]interface{}                                                   `json:"extendedMetadata"`
 		FreeformTags                   map[string]string                                                        `json:"freeformTags"`
@@ -225,6 +251,7 @@ func (m *InstanceConfigurationLaunchInstanceDetails) UnmarshalJSON(data []byte) 
 		InstanceOptions                *InstanceConfigurationInstanceOptions                                    `json:"instanceOptions"`
 		AvailabilityConfig             *InstanceConfigurationAvailabilityConfig                                 `json:"availabilityConfig"`
 		PreemptibleInstanceConfig      *PreemptibleInstanceConfigDetails                                        `json:"preemptibleInstanceConfig"`
+		LicensingConfigs               []launchinstancelicensingconfig                                          `json:"licensingConfigs"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -236,11 +263,29 @@ func (m *InstanceConfigurationLaunchInstanceDetails) UnmarshalJSON(data []byte) 
 
 	m.CapacityReservationId = model.CapacityReservationId
 
+	m.IsAIEnterpriseEnabled = model.IsAIEnterpriseEnabled
+
+	nn, e = model.PlacementConstraintDetails.UnmarshalPolymorphicJSON(model.PlacementConstraintDetails.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.PlacementConstraintDetails = nn.(InstanceConfigurationPlacementConstraintDetails)
+	} else {
+		m.PlacementConstraintDetails = nil
+	}
+
+	m.ComputeClusterId = model.ComputeClusterId
+
 	m.CompartmentId = model.CompartmentId
+
+	m.ClusterPlacementGroupId = model.ClusterPlacementGroupId
 
 	m.CreateVnicDetails = model.CreateVnicDetails
 
 	m.DefinedTags = model.DefinedTags
+
+	m.SecurityAttributes = model.SecurityAttributes
 
 	m.DisplayName = model.DisplayName
 
@@ -296,6 +341,18 @@ func (m *InstanceConfigurationLaunchInstanceDetails) UnmarshalJSON(data []byte) 
 
 	m.PreemptibleInstanceConfig = model.PreemptibleInstanceConfig
 
+	m.LicensingConfigs = make([]LaunchInstanceLicensingConfig, len(model.LicensingConfigs))
+	for i, n := range model.LicensingConfigs {
+		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
+		if e != nil {
+			return e
+		}
+		if nn != nil {
+			m.LicensingConfigs[i] = nn.(LaunchInstanceLicensingConfig)
+		} else {
+			m.LicensingConfigs[i] = nil
+		}
+	}
 	return
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,10 +15,10 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/databasetools/ListDatabaseToolsConnections.go.html to see an example of how to use ListDatabaseToolsConnectionsRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/databasetools/ListDatabaseToolsConnections.go.html to see an example of how to use ListDatabaseToolsConnectionsRequest.
 type ListDatabaseToolsConnectionsRequest struct {
 
-	// The ID of the compartment in which to list resources.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
 	CompartmentId *string `mandatory:"true" contributesTo:"query" name:"compartmentId"`
 
 	// A filter to return only resources their `lifecycleState` matches the specified `lifecycleState`.
@@ -30,10 +30,13 @@ type ListDatabaseToolsConnectionsRequest struct {
 	// A filter to return only resources their type matches the specified type.
 	Type []ConnectionTypeEnum `contributesTo:"query" name:"type" omitEmpty:"true" collectionFormat:"multi"`
 
-	// A filter to return only resources with one of the specified runtimeSupport values.
+	// A filter to return only resources with one of the specified type values.
 	RuntimeSupport []RuntimeSupportEnum `contributesTo:"query" name:"runtimeSupport" omitEmpty:"true" collectionFormat:"multi"`
 
-	// A filter to return only resources associated to the related resource identifier OCID passed in the query string.
+	// A filter to return only resources with one of the specified runtimeIdentity values.
+	RuntimeIdentity []RuntimeIdentityEnum `contributesTo:"query" name:"runtimeIdentity" omitEmpty:"true" collectionFormat:"multi"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the related resource.
 	RelatedResourceIdentifier *string `mandatory:"false" contributesTo:"query" name:"relatedResourceIdentifier"`
 
 	// The maximum number of items to return.
@@ -102,6 +105,12 @@ func (request ListDatabaseToolsConnectionsRequest) ValidateEnumValue() (bool, er
 		}
 	}
 
+	for _, val := range request.RuntimeIdentity {
+		if _, ok := GetMappingRuntimeIdentityEnum(string(val)); !ok && val != "" {
+			errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeIdentity: %s. Supported values are: %s.", val, strings.Join(GetRuntimeIdentityEnumStringValues(), ",")))
+		}
+	}
+
 	if _, ok := GetMappingListDatabaseToolsConnectionsSortOrderEnum(string(request.SortOrder)); !ok && request.SortOrder != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortOrder: %s. Supported values are: %s.", request.SortOrder, strings.Join(GetListDatabaseToolsConnectionsSortOrderEnumStringValues(), ",")))
 	}
@@ -109,7 +118,7 @@ func (request ListDatabaseToolsConnectionsRequest) ValidateEnumValue() (bool, er
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortBy: %s. Supported values are: %s.", request.SortBy, strings.Join(GetListDatabaseToolsConnectionsSortByEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -22,13 +22,13 @@ type CreateDatabaseToolsConnectionGenericJdbcDetails struct {
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The JDBC URL used to connect to the Generic JDBC database system.
 	Url *string `mandatory:"true" json:"url"`
 
-	// The user name.
+	// The database user name.
 	UserName *string `mandatory:"true" json:"userName"`
 
 	UserPassword DatabaseToolsUserPasswordDetails `mandatory:"true" json:"userPassword"`
@@ -53,6 +53,9 @@ type CreateDatabaseToolsConnectionGenericJdbcDetails struct {
 
 	// Specifies whether this connection is supported by the Database Tools Runtime.
 	RuntimeSupport RuntimeSupportEnum `mandatory:"false" json:"runtimeSupport,omitempty"`
+
+	// Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault).
+	RuntimeIdentity RuntimeIdentityEnum `mandatory:"false" json:"runtimeIdentity,omitempty"`
 }
 
 // GetDisplayName returns DisplayName
@@ -85,6 +88,11 @@ func (m CreateDatabaseToolsConnectionGenericJdbcDetails) GetRuntimeSupport() Run
 	return m.RuntimeSupport
 }
 
+// GetRuntimeIdentity returns RuntimeIdentity
+func (m CreateDatabaseToolsConnectionGenericJdbcDetails) GetRuntimeIdentity() RuntimeIdentityEnum {
+	return m.RuntimeIdentity
+}
+
 func (m CreateDatabaseToolsConnectionGenericJdbcDetails) String() string {
 	return common.PointerString(m)
 }
@@ -98,8 +106,11 @@ func (m CreateDatabaseToolsConnectionGenericJdbcDetails) ValidateEnumValue() (bo
 	if _, ok := GetMappingRuntimeSupportEnum(string(m.RuntimeSupport)); !ok && m.RuntimeSupport != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeSupport: %s. Supported values are: %s.", m.RuntimeSupport, strings.Join(GetRuntimeSupportEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingRuntimeIdentityEnum(string(m.RuntimeIdentity)); !ok && m.RuntimeIdentity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeIdentity: %s. Supported values are: %s.", m.RuntimeIdentity, strings.Join(GetRuntimeIdentityEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -125,6 +136,7 @@ func (m *CreateDatabaseToolsConnectionGenericJdbcDetails) UnmarshalJSON(data []b
 		FreeformTags       map[string]string                         `json:"freeformTags"`
 		Locks              []ResourceLock                            `json:"locks"`
 		RuntimeSupport     RuntimeSupportEnum                        `json:"runtimeSupport"`
+		RuntimeIdentity    RuntimeIdentityEnum                       `json:"runtimeIdentity"`
 		AdvancedProperties map[string]string                         `json:"advancedProperties"`
 		KeyStores          []DatabaseToolsKeyStoreGenericJdbcDetails `json:"keyStores"`
 		DisplayName        *string                                   `json:"displayName"`
@@ -146,6 +158,8 @@ func (m *CreateDatabaseToolsConnectionGenericJdbcDetails) UnmarshalJSON(data []b
 	m.Locks = make([]ResourceLock, len(model.Locks))
 	copy(m.Locks, model.Locks)
 	m.RuntimeSupport = model.RuntimeSupport
+
+	m.RuntimeIdentity = model.RuntimeIdentity
 
 	m.AdvancedProperties = model.AdvancedProperties
 

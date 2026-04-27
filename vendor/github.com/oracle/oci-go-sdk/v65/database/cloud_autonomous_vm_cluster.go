@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -18,16 +18,16 @@ import (
 // CloudAutonomousVmCluster Details of the cloud Autonomous VM cluster.
 type CloudAutonomousVmCluster struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cloud Autonomous VM cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cloud Autonomous VM cluster.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The name of the availability domain that the cloud Autonomous VM cluster is located in.
 	AvailabilityDomain *string `mandatory:"true" json:"availabilityDomain"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet the cloud Autonomous VM Cluster is associated with.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the cloud Autonomous VM Cluster is associated with.
 	// **Subnet Restrictions:**
 	// - For Exadata and virtual machine 2-node RAC DB systems, do not use a subnet that overlaps with 192.168.128.0/20.
 	// These subnets are used by the Oracle Clusterware private interconnect on the database instance.
@@ -41,18 +41,18 @@ type CloudAutonomousVmCluster struct {
 	// The user-friendly name for the cloud Autonomous VM cluster. The name does not need to be unique.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the cloud Exadata infrastructure.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cloud Exadata infrastructure.
 	CloudExadataInfrastructureId *string `mandatory:"true" json:"cloudExadataInfrastructureId"`
 
 	// User defined description of the cloud Autonomous VM cluster.
 	Description *string `mandatory:"false" json:"description"`
 
-	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
 	// **NsgIds restrictions:**
-	// - A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty.
+	// - A network security group (NSG) is optional for Autonomous AI Databases with private access. The nsgIds list can be empty.
 	NsgIds []string `mandatory:"false" json:"nsgIds"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last maintenance update history. This value is updated when a maintenance update starts.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the last maintenance update history. This value is updated when a maintenance update starts.
 	LastUpdateHistoryEntryId *string `mandatory:"false" json:"lastUpdateHistoryEntryId"`
 
 	// The date and time that the cloud Autonomous VM cluster was created.
@@ -91,7 +91,7 @@ type CloudAutonomousVmCluster struct {
 	// The number of CPU cores on the cloud Autonomous VM cluster. Only 1 decimal place is allowed for the fractional part.
 	OcpuCount *float32 `mandatory:"false" json:"ocpuCount"`
 
-	// The compute model of the Cloud Autonomous VM Cluster. ECPU compute model is the recommended model and OCPU compute model is legacy. See Compute Models in Autonomous Database on Dedicated Exadata #Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak) for more details.
+	// The compute model of the Cloud Autonomous VM Cluster. ECPU compute model is the recommended model and OCPU compute model is legacy. See Compute Models in Autonomous AI Database on Dedicated Exadata #Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak) for more details.
 	ComputeModel CloudAutonomousVmClusterComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
 
 	// Enable mutual TLS(mTLS) authentication for database at time of provisioning a VMCluster. This is applicable to database TLS Certificates only. Default is TLS
@@ -103,17 +103,17 @@ type CloudAutonomousVmCluster struct {
 	// The memory allocated in GBs.
 	MemorySizeInGBs *int `mandatory:"false" json:"memorySizeInGBs"`
 
-	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
-	// License Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.
-	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
-	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
+	// The Oracle license model that applies to the Oracle Autonomous AI Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
+	// License Included allows you to subscribe to new Oracle AI Database software licenses and the Oracle AI Database service.
+	// Note that when provisioning an Autonomous AI Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
+	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	LicenseModel CloudAutonomousVmClusterLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last maintenance run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the last maintenance run.
 	LastMaintenanceRunId *string `mandatory:"false" json:"lastMaintenanceRunId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the next maintenance run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the next maintenance run.
 	NextMaintenanceRunId *string `mandatory:"false" json:"nextMaintenanceRunId"`
 
 	MaintenanceWindow *MaintenanceWindow `mandatory:"false" json:"maintenanceWindow"`
@@ -125,13 +125,18 @@ type CloudAutonomousVmCluster struct {
 	ScanListenerPortNonTls *int `mandatory:"false" json:"scanListenerPortNonTls"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
 
 	// The date and time of Database SSL certificate expiration.
 	TimeDatabaseSslCertificateExpires *common.SDKTime `mandatory:"false" json:"timeDatabaseSslCertificateExpires"`
@@ -139,10 +144,10 @@ type CloudAutonomousVmCluster struct {
 	// The date and time of ORDS certificate expiration.
 	TimeOrdsCertificateExpires *common.SDKTime `mandatory:"false" json:"timeOrdsCertificateExpires"`
 
-	// CPU cores available for allocation to Autonomous Databases.
+	// CPU cores available for allocation to Autonomous AI Databases.
 	AvailableCpus *float32 `mandatory:"false" json:"availableCpus"`
 
-	// CPUs that continue to be included in the count of CPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available CPUs at its parent Autonomous VM Cluster level by restarting the Autonomous Container Database.
+	// CPUs that continue to be included in the count of CPUs available to the Autonomous Container Database even after one of its Autonomous AI Database is terminated or scaled down. You can release them to the available CPUs at its parent Autonomous VM Cluster level by restarting the Autonomous Container Database.
 	ReclaimableCpus *float32 `mandatory:"false" json:"reclaimableCpus"`
 
 	// The number of Autonomous Container Databases that can be created with the currently available local storage.
@@ -151,25 +156,28 @@ type CloudAutonomousVmCluster struct {
 	// The total number of Autonomous Container Databases that can be created with the allocated local storage.
 	TotalContainerDatabases *int `mandatory:"false" json:"totalContainerDatabases"`
 
-	// The data disk group size available for Autonomous Databases, in TBs.
+	// The data disk group size available for Autonomous AI Databases, in TBs.
 	AvailableAutonomousDataStorageSizeInTBs *float64 `mandatory:"false" json:"availableAutonomousDataStorageSizeInTBs"`
 
-	// The data disk group size allocated for Autonomous Databases, in TBs.
+	// The data disk group size allocated for Autonomous AI Databases, in TBs.
 	AutonomousDataStorageSizeInTBs *float64 `mandatory:"false" json:"autonomousDataStorageSizeInTBs"`
 
 	// The local node storage allocated in GBs.
 	DbNodeStorageSizeInGBs *int `mandatory:"false" json:"dbNodeStorageSizeInGBs"`
 
-	// The amount of memory (in GBs) enabled per OCPU or ECPU.
+	// The amount of memory (in GBs rounded off to nearest integer value) enabled per ECPU or OCPU. This is deprecated. Please refer to memoryPerComputeUnitInGBs for accurate value.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
 
-	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Db servers.
+	// The amount of memory (in GBs) to be enabled per OCPU or ECPU.
+	MemoryPerComputeUnitInGBs *float32 `mandatory:"false" json:"memoryPerComputeUnitInGBs"`
+
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Db servers.
 	DbServers []string `mandatory:"false" json:"dbServers"`
 
 	// The percentage of total number of CPUs used in an Autonomous VM Cluster.
 	CpuPercentage *float32 `mandatory:"false" json:"cpuPercentage"`
 
-	// The percentage of the data storage used for the Autonomous Databases in an Autonomous VM Cluster.
+	// The percentage of the data storage used for the Autonomous AI Databases in an Autonomous VM Cluster.
 	AutonomousDataStoragePercentage *float32 `mandatory:"false" json:"autonomousDataStoragePercentage"`
 
 	// The number of CPUs provisioned in an Autonomous VM Cluster.
@@ -178,7 +186,7 @@ type CloudAutonomousVmCluster struct {
 	// The total number of CPUs in an Autonomous VM Cluster.
 	TotalCpus *float32 `mandatory:"false" json:"totalCpus"`
 
-	// The total data disk group size for Autonomous Databases, in TBs.
+	// The total data disk group size for Autonomous AI Databases, in TBs.
 	TotalAutonomousDataStorageInTBs *float32 `mandatory:"false" json:"totalAutonomousDataStorageInTBs"`
 
 	// The number of CPUs reserved in an Autonomous VM Cluster.
@@ -201,6 +209,19 @@ type CloudAutonomousVmCluster struct {
 
 	// The lowest value to which maximum number of ACDs can be scaled down.
 	MaxAcdsLowestScaledValue *int `mandatory:"false" json:"maxAcdsLowestScaledValue"`
+
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription with which resource needs to be associated with.
+	SubscriptionId *string `mandatory:"false" json:"subscriptionId"`
+
+	// Details of the multi cloud identity connectors of the VM cluster.
+	MultiCloudIdentityConnectorConfigs []IdentityConnectorDetails `mandatory:"false" json:"multiCloudIdentityConnectorConfigs"`
+
+	// TDE keystore type
+	TdeKeyStoreType CloudAutonomousVmClusterTdeKeyStoreTypeEnum `mandatory:"false" json:"tdeKeyStoreType,omitempty"`
 }
 
 func (m CloudAutonomousVmCluster) String() string {
@@ -222,8 +243,11 @@ func (m CloudAutonomousVmCluster) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingCloudAutonomousVmClusterLicenseModelEnum(string(m.LicenseModel)); !ok && m.LicenseModel != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseModel: %s. Supported values are: %s.", m.LicenseModel, strings.Join(GetCloudAutonomousVmClusterLicenseModelEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingCloudAutonomousVmClusterTdeKeyStoreTypeEnum(string(m.TdeKeyStoreType)); !ok && m.TdeKeyStoreType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for TdeKeyStoreType: %s. Supported values are: %s.", m.TdeKeyStoreType, strings.Join(GetCloudAutonomousVmClusterTdeKeyStoreTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -371,5 +395,55 @@ func GetCloudAutonomousVmClusterLicenseModelEnumStringValues() []string {
 // GetMappingCloudAutonomousVmClusterLicenseModelEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingCloudAutonomousVmClusterLicenseModelEnum(val string) (CloudAutonomousVmClusterLicenseModelEnum, bool) {
 	enum, ok := mappingCloudAutonomousVmClusterLicenseModelEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudAutonomousVmClusterTdeKeyStoreTypeEnum Enum with underlying type: string
+type CloudAutonomousVmClusterTdeKeyStoreTypeEnum string
+
+// Set of constants representing the allowable values for CloudAutonomousVmClusterTdeKeyStoreTypeEnum
+const (
+	CloudAutonomousVmClusterTdeKeyStoreTypeAzure CloudAutonomousVmClusterTdeKeyStoreTypeEnum = "AZURE"
+	CloudAutonomousVmClusterTdeKeyStoreTypeOci   CloudAutonomousVmClusterTdeKeyStoreTypeEnum = "OCI"
+	CloudAutonomousVmClusterTdeKeyStoreTypeGcp   CloudAutonomousVmClusterTdeKeyStoreTypeEnum = "GCP"
+	CloudAutonomousVmClusterTdeKeyStoreTypeAws   CloudAutonomousVmClusterTdeKeyStoreTypeEnum = "AWS"
+)
+
+var mappingCloudAutonomousVmClusterTdeKeyStoreTypeEnum = map[string]CloudAutonomousVmClusterTdeKeyStoreTypeEnum{
+	"AZURE": CloudAutonomousVmClusterTdeKeyStoreTypeAzure,
+	"OCI":   CloudAutonomousVmClusterTdeKeyStoreTypeOci,
+	"GCP":   CloudAutonomousVmClusterTdeKeyStoreTypeGcp,
+	"AWS":   CloudAutonomousVmClusterTdeKeyStoreTypeAws,
+}
+
+var mappingCloudAutonomousVmClusterTdeKeyStoreTypeEnumLowerCase = map[string]CloudAutonomousVmClusterTdeKeyStoreTypeEnum{
+	"azure": CloudAutonomousVmClusterTdeKeyStoreTypeAzure,
+	"oci":   CloudAutonomousVmClusterTdeKeyStoreTypeOci,
+	"gcp":   CloudAutonomousVmClusterTdeKeyStoreTypeGcp,
+	"aws":   CloudAutonomousVmClusterTdeKeyStoreTypeAws,
+}
+
+// GetCloudAutonomousVmClusterTdeKeyStoreTypeEnumValues Enumerates the set of values for CloudAutonomousVmClusterTdeKeyStoreTypeEnum
+func GetCloudAutonomousVmClusterTdeKeyStoreTypeEnumValues() []CloudAutonomousVmClusterTdeKeyStoreTypeEnum {
+	values := make([]CloudAutonomousVmClusterTdeKeyStoreTypeEnum, 0)
+	for _, v := range mappingCloudAutonomousVmClusterTdeKeyStoreTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudAutonomousVmClusterTdeKeyStoreTypeEnumStringValues Enumerates the set of values in String for CloudAutonomousVmClusterTdeKeyStoreTypeEnum
+func GetCloudAutonomousVmClusterTdeKeyStoreTypeEnumStringValues() []string {
+	return []string{
+		"AZURE",
+		"OCI",
+		"GCP",
+		"AWS",
+	}
+}
+
+// GetMappingCloudAutonomousVmClusterTdeKeyStoreTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudAutonomousVmClusterTdeKeyStoreTypeEnum(val string) (CloudAutonomousVmClusterTdeKeyStoreTypeEnum, bool) {
+	enum, ok := mappingCloudAutonomousVmClusterTdeKeyStoreTypeEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

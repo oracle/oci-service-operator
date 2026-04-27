@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -21,6 +21,7 @@ const (
 	ModelDeploymentShapeSeriesAmdRome      ModelDeploymentShapeSeriesEnum = "AMD_ROME"
 	ModelDeploymentShapeSeriesIntelSkylake ModelDeploymentShapeSeriesEnum = "INTEL_SKYLAKE"
 	ModelDeploymentShapeSeriesNvidiaGpu    ModelDeploymentShapeSeriesEnum = "NVIDIA_GPU"
+	ModelDeploymentShapeSeriesGeneric      ModelDeploymentShapeSeriesEnum = "GENERIC"
 	ModelDeploymentShapeSeriesLegacy       ModelDeploymentShapeSeriesEnum = "LEGACY"
 	ModelDeploymentShapeSeriesArm          ModelDeploymentShapeSeriesEnum = "ARM"
 )
@@ -29,6 +30,7 @@ var mappingModelDeploymentShapeSeriesEnum = map[string]ModelDeploymentShapeSerie
 	"AMD_ROME":      ModelDeploymentShapeSeriesAmdRome,
 	"INTEL_SKYLAKE": ModelDeploymentShapeSeriesIntelSkylake,
 	"NVIDIA_GPU":    ModelDeploymentShapeSeriesNvidiaGpu,
+	"GENERIC":       ModelDeploymentShapeSeriesGeneric,
 	"LEGACY":        ModelDeploymentShapeSeriesLegacy,
 	"ARM":           ModelDeploymentShapeSeriesArm,
 }
@@ -37,6 +39,7 @@ var mappingModelDeploymentShapeSeriesEnumLowerCase = map[string]ModelDeploymentS
 	"amd_rome":      ModelDeploymentShapeSeriesAmdRome,
 	"intel_skylake": ModelDeploymentShapeSeriesIntelSkylake,
 	"nvidia_gpu":    ModelDeploymentShapeSeriesNvidiaGpu,
+	"generic":       ModelDeploymentShapeSeriesGeneric,
 	"legacy":        ModelDeploymentShapeSeriesLegacy,
 	"arm":           ModelDeploymentShapeSeriesArm,
 }
@@ -56,6 +59,7 @@ func GetModelDeploymentShapeSeriesEnumStringValues() []string {
 		"AMD_ROME",
 		"INTEL_SKYLAKE",
 		"NVIDIA_GPU",
+		"GENERIC",
 		"LEGACY",
 		"ARM",
 	}

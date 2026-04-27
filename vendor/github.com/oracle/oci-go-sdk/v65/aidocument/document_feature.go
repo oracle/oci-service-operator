@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -50,6 +50,10 @@ func (m *documentfeature) UnmarshalPolymorphicJSON(data []byte) (interface{}, er
 
 	var err error
 	switch m.FeatureType {
+	case "DOCUMENT_ELEMENTS_EXTRACTION":
+		mm := DocumentElementsExtractionFeature{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "DOCUMENT_CLASSIFICATION":
 		mm := DocumentClassificationFeature{}
 		err = json.Unmarshal(data, &mm)
@@ -71,7 +75,7 @@ func (m *documentfeature) UnmarshalPolymorphicJSON(data []byte) (interface{}, er
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for DocumentFeature: %s.", m.FeatureType)
+		common.Logf("Received unsupported enum value for DocumentFeature: %s.", m.FeatureType)
 		return *m, nil
 	}
 }
@@ -87,7 +91,7 @@ func (m documentfeature) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -97,27 +101,30 @@ type DocumentFeatureFeatureTypeEnum string
 
 // Set of constants representing the allowable values for DocumentFeatureFeatureTypeEnum
 const (
-	DocumentFeatureFeatureTypeLanguageClassification DocumentFeatureFeatureTypeEnum = "LANGUAGE_CLASSIFICATION"
-	DocumentFeatureFeatureTypeTextExtraction         DocumentFeatureFeatureTypeEnum = "TEXT_EXTRACTION"
-	DocumentFeatureFeatureTypeTableExtraction        DocumentFeatureFeatureTypeEnum = "TABLE_EXTRACTION"
-	DocumentFeatureFeatureTypeKeyValueExtraction     DocumentFeatureFeatureTypeEnum = "KEY_VALUE_EXTRACTION"
-	DocumentFeatureFeatureTypeDocumentClassification DocumentFeatureFeatureTypeEnum = "DOCUMENT_CLASSIFICATION"
+	DocumentFeatureFeatureTypeLanguageClassification     DocumentFeatureFeatureTypeEnum = "LANGUAGE_CLASSIFICATION"
+	DocumentFeatureFeatureTypeTextExtraction             DocumentFeatureFeatureTypeEnum = "TEXT_EXTRACTION"
+	DocumentFeatureFeatureTypeTableExtraction            DocumentFeatureFeatureTypeEnum = "TABLE_EXTRACTION"
+	DocumentFeatureFeatureTypeKeyValueExtraction         DocumentFeatureFeatureTypeEnum = "KEY_VALUE_EXTRACTION"
+	DocumentFeatureFeatureTypeDocumentClassification     DocumentFeatureFeatureTypeEnum = "DOCUMENT_CLASSIFICATION"
+	DocumentFeatureFeatureTypeDocumentElementsExtraction DocumentFeatureFeatureTypeEnum = "DOCUMENT_ELEMENTS_EXTRACTION"
 )
 
 var mappingDocumentFeatureFeatureTypeEnum = map[string]DocumentFeatureFeatureTypeEnum{
-	"LANGUAGE_CLASSIFICATION": DocumentFeatureFeatureTypeLanguageClassification,
-	"TEXT_EXTRACTION":         DocumentFeatureFeatureTypeTextExtraction,
-	"TABLE_EXTRACTION":        DocumentFeatureFeatureTypeTableExtraction,
-	"KEY_VALUE_EXTRACTION":    DocumentFeatureFeatureTypeKeyValueExtraction,
-	"DOCUMENT_CLASSIFICATION": DocumentFeatureFeatureTypeDocumentClassification,
+	"LANGUAGE_CLASSIFICATION":      DocumentFeatureFeatureTypeLanguageClassification,
+	"TEXT_EXTRACTION":              DocumentFeatureFeatureTypeTextExtraction,
+	"TABLE_EXTRACTION":             DocumentFeatureFeatureTypeTableExtraction,
+	"KEY_VALUE_EXTRACTION":         DocumentFeatureFeatureTypeKeyValueExtraction,
+	"DOCUMENT_CLASSIFICATION":      DocumentFeatureFeatureTypeDocumentClassification,
+	"DOCUMENT_ELEMENTS_EXTRACTION": DocumentFeatureFeatureTypeDocumentElementsExtraction,
 }
 
 var mappingDocumentFeatureFeatureTypeEnumLowerCase = map[string]DocumentFeatureFeatureTypeEnum{
-	"language_classification": DocumentFeatureFeatureTypeLanguageClassification,
-	"text_extraction":         DocumentFeatureFeatureTypeTextExtraction,
-	"table_extraction":        DocumentFeatureFeatureTypeTableExtraction,
-	"key_value_extraction":    DocumentFeatureFeatureTypeKeyValueExtraction,
-	"document_classification": DocumentFeatureFeatureTypeDocumentClassification,
+	"language_classification":      DocumentFeatureFeatureTypeLanguageClassification,
+	"text_extraction":              DocumentFeatureFeatureTypeTextExtraction,
+	"table_extraction":             DocumentFeatureFeatureTypeTableExtraction,
+	"key_value_extraction":         DocumentFeatureFeatureTypeKeyValueExtraction,
+	"document_classification":      DocumentFeatureFeatureTypeDocumentClassification,
+	"document_elements_extraction": DocumentFeatureFeatureTypeDocumentElementsExtraction,
 }
 
 // GetDocumentFeatureFeatureTypeEnumValues Enumerates the set of values for DocumentFeatureFeatureTypeEnum
@@ -137,6 +144,7 @@ func GetDocumentFeatureFeatureTypeEnumStringValues() []string {
 		"TABLE_EXTRACTION",
 		"KEY_VALUE_EXTRACTION",
 		"DOCUMENT_CLASSIFICATION",
+		"DOCUMENT_ELEMENTS_EXTRACTION",
 	}
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -19,7 +19,7 @@ import (
 // To use any of the API operations, you must be authorized in an IAM
 // policy. If you're not authorized, talk to an administrator. If you're an
 // administrator who needs to write policies to give users access, see
-// Getting Started with Policies (https://docs.cloud.oracle.com/Content/Identity/Concepts/policygetstarted.htm).
+// Getting Started with Policies (https://docs.oracle.com/iaas/Content/Identity/Concepts/policygetstarted.htm).
 type BackupSummary struct {
 
 	// OCID of the backup.
@@ -49,6 +49,19 @@ type BackupSummary struct {
 	// A user-supplied description of the backup.
 	Description *string `mandatory:"false" json:"description"`
 
+	// Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED
+	// state for 7 days before permanently deleting it.
+	SoftDelete SoftDeleteEnum `mandatory:"false" json:"softDelete,omitempty"`
+
+	// Indicates whether the backup has been prepared successfully.
+	BackupPreparationStatus BackupValidationDetailsBackupPreparationStatusEnum `mandatory:"false" json:"backupPreparationStatus,omitempty"`
+
+	// Status of the backup validation.
+	ValidationStatus BackupValidationDetailsValidationStatusEnum `mandatory:"false" json:"validationStatus,omitempty"`
+
+	// Additional information about the current lifecycleState.
+	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
+
 	// Size of the data volume in GiBs.
 	DataStorageSizeInGBs *int `mandatory:"false" json:"dataStorageSizeInGBs"`
 
@@ -71,6 +84,23 @@ type BackupSummary struct {
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// The OCID of the immediate source DB system backup from which this DB system backup was copied.
+	ImmediateSourceBackupId *string `mandatory:"false" json:"immediateSourceBackupId"`
+
+	// The OCID of the original source DB system backup from which this DB system backup was copied.
+	OriginalSourceBackupId *string `mandatory:"false" json:"originalSourceBackupId"`
+
+	// The date and time the DB system backup copy was created, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+	TimeCopyCreated *common.SDKTime `mandatory:"false" json:"timeCopyCreated"`
+
+	DbSystemSnapshotSummary *DbSystemSnapshotSummary `mandatory:"false" json:"dbSystemSnapshotSummary"`
+
+	EncryptData *EncryptDataDetails `mandatory:"false" json:"encryptData"`
 }
 
 func (m BackupSummary) String() string {
@@ -92,8 +122,17 @@ func (m BackupSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for CreationType: %s. Supported values are: %s.", m.CreationType, strings.Join(GetBackupCreationTypeEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingSoftDeleteEnum(string(m.SoftDelete)); !ok && m.SoftDelete != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SoftDelete: %s. Supported values are: %s.", m.SoftDelete, strings.Join(GetSoftDeleteEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingBackupValidationDetailsBackupPreparationStatusEnum(string(m.BackupPreparationStatus)); !ok && m.BackupPreparationStatus != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for BackupPreparationStatus: %s. Supported values are: %s.", m.BackupPreparationStatus, strings.Join(GetBackupValidationDetailsBackupPreparationStatusEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingBackupValidationDetailsValidationStatusEnum(string(m.ValidationStatus)); !ok && m.ValidationStatus != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ValidationStatus: %s. Supported values are: %s.", m.ValidationStatus, strings.Join(GetBackupValidationDetailsValidationStatusEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

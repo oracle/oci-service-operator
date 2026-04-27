@@ -1,14 +1,13 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Email Delivery API
 //
-// API for the Email Delivery service. Use this API to send high-volume, application-generated
-// emails. For more information, see Overview of the Email Delivery Service (https://docs.cloud.oracle.com/iaas/Content/Email/Concepts/overview.htm).
-//
-// **Note:** Write actions (POST, UPDATE, DELETE) may take several minutes to propagate and be reflected by the API.
-// If a subsequent read request fails to reflect your changes, wait a few minutes and try again.
+// Use the Email Delivery API to do the necessary set up to send high-volume and application-generated emails through the OCI Email Delivery service.
+// For more information, see Overview of the Email Delivery Service (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm).
+//  **Note:** Write actions (POST, UPDATE, DELETE) may take several minutes to propagate and be reflected by the API.
+//  If a subsequent read request fails to reflect your changes, wait a few minutes and try again.
 //
 
 package email
@@ -26,14 +25,14 @@ type Dkim struct {
 	// If the same domain is managed in more than one region, each region must use different selectors.
 	Name *string `mandatory:"true" json:"name"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain
 	// that this DKIM belongs to.
 	EmailDomainId *string `mandatory:"true" json:"emailDomainId"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
 	// The current state of the DKIM.
@@ -59,25 +58,31 @@ type Dkim struct {
 	TimeUpdated *common.SDKTime `mandatory:"false" json:"timeUpdated"`
 
 	// The name of the DNS subdomain that must be provisioned to enable email recipients to verify DKIM signatures.
-	// It is usually created with a CNAME record set to the cnameRecordValue
+	// It is usually created with a CNAME record set to the cnameRecordValue.
 	DnsSubdomainName *string `mandatory:"false" json:"dnsSubdomainName"`
 
 	// The DNS CNAME record value to provision to the DKIM DNS subdomain, when using the CNAME method for DKIM setup (preferred).
 	CnameRecordValue *string `mandatory:"false" json:"cnameRecordValue"`
 
 	// The DNS TXT record value to provision to the DKIM DNS subdomain in place of using a CNAME record.
-	// This is used in cases where a CNAME can not be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry.
-	// This can also be used by customers who have an existing procedure to directly provision TXT records for DKIM.
-	// Be aware that many DNS APIs will require you to break this string into segments of less than 255 characters.
+	// This is used in cases where a CNAME cannot be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry.
+	// You can also use this if you have an existing procedure to directly provision TXT records for DKIM.
+	// Many DNS APIs require you to break this string into segments of fewer than 255 characters.
 	TxtRecordValue *string `mandatory:"false" json:"txtRecordValue"`
 
+	// Indicates whether the DKIM was imported.
+	IsImported *bool `mandatory:"false" json:"isImported"`
+
+	// Length of the RSA key used in the DKIM.
+	KeyLength *int `mandatory:"false" json:"keyLength"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -100,7 +105,7 @@ func (m Dkim) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetDkimLifecycleStateEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

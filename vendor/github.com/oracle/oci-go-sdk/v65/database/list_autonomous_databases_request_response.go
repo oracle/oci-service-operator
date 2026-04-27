@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,13 +15,13 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabases.go.html to see an example of how to use ListAutonomousDatabasesRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabases.go.html to see an example of how to use ListAutonomousDatabasesRequest.
 type ListAutonomousDatabasesRequest struct {
 
-	// The compartment OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The compartment OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	CompartmentId *string `mandatory:"true" contributesTo:"query" name:"compartmentId"`
 
-	// The Autonomous Container Database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The Autonomous Container Database OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	AutonomousContainerDatabaseId *string `mandatory:"false" contributesTo:"query" name:"autonomousContainerDatabaseId"`
 
 	// The maximum number of items to return per page.
@@ -43,10 +43,13 @@ type ListAutonomousDatabasesRequest struct {
 	// A filter to return only resources that match the given lifecycle state exactly.
 	LifecycleState AutonomousDatabaseSummaryLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleState" omitEmpty:"true"`
 
-	// A filter to return only autonomous database resources that match the specified workload type.
+	// A filter to return only resources that not match the given lifecycle state.
+	LifecycleStateNotEqualTo AutonomousDatabaseSummaryLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleStateNotEqualTo" omitEmpty:"true"`
+
+	// A filter to return only Autonomous AI Database resources that match the specified workload type.
 	DbWorkload AutonomousDatabaseSummaryDbWorkloadEnum `mandatory:"false" contributesTo:"query" name:"dbWorkload" omitEmpty:"true"`
 
-	// A filter to return only autonomous database resources that match the specified dbVersion.
+	// A filter to return only Autonomous AI Database resources that match the specified dbVersion.
 	DbVersion *string `mandatory:"false" contributesTo:"query" name:"dbVersion"`
 
 	// Filter on the value of the resource's 'isFreeTier' property. A value of `true` returns only Always Free resources.
@@ -69,7 +72,7 @@ type ListAutonomousDatabasesRequest struct {
 	// Filter if the resource is the resource pool leader. A value of `true` returns only resource pool leader.
 	IsResourcePoolLeader *bool `mandatory:"false" contributesTo:"query" name:"isResourcePoolLeader"`
 
-	// The database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resourcepool Leader Autonomous Database.
+	// The database OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resourcepool Leader Autonomous AI Database.
 	ResourcePoolLeaderId *string `mandatory:"false" contributesTo:"query" name:"resourcePoolLeaderId"`
 
 	// Metadata about the request. This information will not be transmitted to the service, but
@@ -120,11 +123,14 @@ func (request ListAutonomousDatabasesRequest) ValidateEnumValue() (bool, error) 
 	if _, ok := GetMappingAutonomousDatabaseSummaryLifecycleStateEnum(string(request.LifecycleState)); !ok && request.LifecycleState != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", request.LifecycleState, strings.Join(GetAutonomousDatabaseSummaryLifecycleStateEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingAutonomousDatabaseSummaryLifecycleStateEnum(string(request.LifecycleStateNotEqualTo)); !ok && request.LifecycleStateNotEqualTo != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleStateNotEqualTo: %s. Supported values are: %s.", request.LifecycleStateNotEqualTo, strings.Join(GetAutonomousDatabaseSummaryLifecycleStateEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingAutonomousDatabaseSummaryDbWorkloadEnum(string(request.DbWorkload)); !ok && request.DbWorkload != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DbWorkload: %s. Supported values are: %s.", request.DbWorkload, strings.Join(GetAutonomousDatabaseSummaryDbWorkloadEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -145,7 +151,7 @@ type ListAutonomousDatabasesResponse struct {
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
 	// then there are additional items still to get. Include this value as the `page` parameter for the
 	// subsequent GET request. For information about pagination, see
-	// List Pagination (https://docs.cloud.oracle.com/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 }
 

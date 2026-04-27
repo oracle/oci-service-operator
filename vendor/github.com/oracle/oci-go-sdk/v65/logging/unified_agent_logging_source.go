@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,7 +6,7 @@
 //
 // Use the Logging Management API to create, read, list, update, move and delete
 // log groups, log objects, log saved searches, and agent configurations.
-// For more information, see Logging Overview (https://docs.cloud.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
+// For more information, see Logging Overview (https://docs.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
 //
 
 package logging
@@ -57,6 +57,10 @@ func (m *unifiedagentloggingsource) UnmarshalPolymorphicJSON(data []byte) (inter
 
 	var err error
 	switch m.SourceType {
+	case "CUSTOM_PLUGIN":
+		mm := UnifiedAgentCustomPluginLogSource{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "WINDOWS_EVENT_LOG":
 		mm := UnifiedAgentWindowsEventSource{}
 		err = json.Unmarshal(data, &mm)
@@ -66,7 +70,7 @@ func (m *unifiedagentloggingsource) UnmarshalPolymorphicJSON(data []byte) (inter
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for UnifiedAgentLoggingSource: %s.", m.SourceType)
+		common.Logf("Received unsupported enum value for UnifiedAgentLoggingSource: %s.", m.SourceType)
 		return *m, nil
 	}
 }
@@ -87,7 +91,7 @@ func (m unifiedagentloggingsource) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -99,16 +103,19 @@ type UnifiedAgentLoggingSourceSourceTypeEnum string
 const (
 	UnifiedAgentLoggingSourceSourceTypeLogTail         UnifiedAgentLoggingSourceSourceTypeEnum = "LOG_TAIL"
 	UnifiedAgentLoggingSourceSourceTypeWindowsEventLog UnifiedAgentLoggingSourceSourceTypeEnum = "WINDOWS_EVENT_LOG"
+	UnifiedAgentLoggingSourceSourceTypeCustomPlugin    UnifiedAgentLoggingSourceSourceTypeEnum = "CUSTOM_PLUGIN"
 )
 
 var mappingUnifiedAgentLoggingSourceSourceTypeEnum = map[string]UnifiedAgentLoggingSourceSourceTypeEnum{
 	"LOG_TAIL":          UnifiedAgentLoggingSourceSourceTypeLogTail,
 	"WINDOWS_EVENT_LOG": UnifiedAgentLoggingSourceSourceTypeWindowsEventLog,
+	"CUSTOM_PLUGIN":     UnifiedAgentLoggingSourceSourceTypeCustomPlugin,
 }
 
 var mappingUnifiedAgentLoggingSourceSourceTypeEnumLowerCase = map[string]UnifiedAgentLoggingSourceSourceTypeEnum{
 	"log_tail":          UnifiedAgentLoggingSourceSourceTypeLogTail,
 	"windows_event_log": UnifiedAgentLoggingSourceSourceTypeWindowsEventLog,
+	"custom_plugin":     UnifiedAgentLoggingSourceSourceTypeCustomPlugin,
 }
 
 // GetUnifiedAgentLoggingSourceSourceTypeEnumValues Enumerates the set of values for UnifiedAgentLoggingSourceSourceTypeEnum
@@ -125,6 +132,7 @@ func GetUnifiedAgentLoggingSourceSourceTypeEnumStringValues() []string {
 	return []string{
 		"LOG_TAIL",
 		"WINDOWS_EVENT_LOG",
+		"CUSTOM_PLUGIN",
 	}
 }
 

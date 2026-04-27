@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -94,11 +94,13 @@ func (client *LimitsClient) ConfigurationProvider() *common.ConfigurationProvide
 // GetResourceAvailability For a given compartmentId, resource limit name, and scope, returns the following:
 //   - The number of available resources associated with the given limit.
 //   - The usage in the selected compartment for the given limit.
-//     Note that not all resource limits support this API. If the value is not available, the API returns a 404 response.
+//
+// If the subscription ID is provided, then usage for resource created in that subscription will be returned.
+// Note that not all resource limits support this API. If the value is not available, the API returns a 404 response.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/GetResourceAvailability.go.html to see an example of how to use GetResourceAvailability API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/GetResourceAvailability.go.html to see an example of how to use GetResourceAvailability API.
 // A default retry strategy applies to this operation GetResourceAvailability()
 func (client LimitsClient) GetResourceAvailability(ctx context.Context, request GetResourceAvailabilityRequest) (response GetResourceAvailabilityResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -153,12 +155,12 @@ func (client LimitsClient) getResourceAvailability(ctx context.Context, request 
 }
 
 // ListLimitDefinitions Includes a list of resource limits that are currently supported.
-// If the 'areQuotasSupported' property is true, you can create quota policies on top of this limit at the
-// compartment level.
+// If the subscription ID is provided, then only resource limits supported by the subscription will be returned.
+// If the `areQuotasSupported` property is true, you can create quota policies on top of this limit at the compartment level.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/ListLimitDefinitions.go.html to see an example of how to use ListLimitDefinitions API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/ListLimitDefinitions.go.html to see an example of how to use ListLimitDefinitions API.
 // A default retry strategy applies to this operation ListLimitDefinitions()
 func (client LimitsClient) ListLimitDefinitions(ctx context.Context, request ListLimitDefinitionsRequest) (response ListLimitDefinitionsResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -213,10 +215,11 @@ func (client LimitsClient) listLimitDefinitions(ctx context.Context, request com
 }
 
 // ListLimitValues Includes a full list of resource limits belonging to a given service.
+// If the subscription ID is provided, the limit value for the subscription will be returned.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/ListLimitValues.go.html to see an example of how to use ListLimitValues API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/ListLimitValues.go.html to see an example of how to use ListLimitValues API.
 // A default retry strategy applies to this operation ListLimitValues()
 func (client LimitsClient) ListLimitValues(ctx context.Context, request ListLimitValuesRequest) (response ListLimitValuesResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -270,12 +273,12 @@ func (client LimitsClient) listLimitValues(ctx context.Context, request common.O
 	return response, err
 }
 
-// ListServices Returns the list of supported services.
+// ListServices Returns the list of supported services. If subscription ID is provided then only services supported by subscription will be returned.
 // This includes the programmatic service name, along with the friendly service name.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/ListServices.go.html to see an example of how to use ListServices API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/limits/ListServices.go.html to see an example of how to use ListServices API.
 // A default retry strategy applies to this operation ListServices()
 func (client LimitsClient) ListServices(ctx context.Context, request ListServicesRequest) (response ListServicesResponse, err error) {
 	var ociResponse common.OCIResponse

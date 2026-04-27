@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -20,11 +20,19 @@ import (
 
 // PiiEntityMasking Mask recognized PII entities with different modes.
 type PiiEntityMasking interface {
+
+	// List of offsets/entities to be removed from anonymization.
+	GetExclude() []string
+
+	// To include excluded entities from masking in detected entities or not.
+	GetShouldDetect() *bool
 }
 
 type piientitymasking struct {
-	JsonData []byte
-	Mode     string `json:"mode"`
+	JsonData     []byte
+	Exclude      []string `mandatory:"false" json:"exclude"`
+	ShouldDetect *bool    `mandatory:"false" json:"shouldDetect"`
+	Mode         string   `json:"mode"`
 }
 
 // UnmarshalJSON unmarshals json
@@ -38,6 +46,8 @@ func (m *piientitymasking) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+	m.Exclude = s.Model.Exclude
+	m.ShouldDetect = s.Model.ShouldDetect
 	m.Mode = s.Model.Mode
 
 	return err
@@ -52,6 +62,10 @@ func (m *piientitymasking) UnmarshalPolymorphicJSON(data []byte) (interface{}, e
 
 	var err error
 	switch m.Mode {
+	case "RELEXIFY":
+		mm := PiiEntityRelexify{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "REPLACE":
 		mm := PiiEntityReplace{}
 		err = json.Unmarshal(data, &mm)
@@ -65,9 +79,19 @@ func (m *piientitymasking) UnmarshalPolymorphicJSON(data []byte) (interface{}, e
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for PiiEntityMasking: %s.", m.Mode)
+		common.Logf("Received unsupported enum value for PiiEntityMasking: %s.", m.Mode)
 		return *m, nil
 	}
+}
+
+// GetExclude returns Exclude
+func (m piientitymasking) GetExclude() []string {
+	return m.Exclude
+}
+
+// GetShouldDetect returns ShouldDetect
+func (m piientitymasking) GetShouldDetect() *bool {
+	return m.ShouldDetect
 }
 
 func (m piientitymasking) String() string {
@@ -81,7 +105,7 @@ func (m piientitymasking) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -91,21 +115,24 @@ type PiiEntityMaskingModeEnum string
 
 // Set of constants representing the allowable values for PiiEntityMaskingModeEnum
 const (
-	PiiEntityMaskingModeReplace PiiEntityMaskingModeEnum = "REPLACE"
-	PiiEntityMaskingModeMask    PiiEntityMaskingModeEnum = "MASK"
-	PiiEntityMaskingModeRemove  PiiEntityMaskingModeEnum = "REMOVE"
+	PiiEntityMaskingModeReplace  PiiEntityMaskingModeEnum = "REPLACE"
+	PiiEntityMaskingModeMask     PiiEntityMaskingModeEnum = "MASK"
+	PiiEntityMaskingModeRemove   PiiEntityMaskingModeEnum = "REMOVE"
+	PiiEntityMaskingModeRelexify PiiEntityMaskingModeEnum = "RELEXIFY"
 )
 
 var mappingPiiEntityMaskingModeEnum = map[string]PiiEntityMaskingModeEnum{
-	"REPLACE": PiiEntityMaskingModeReplace,
-	"MASK":    PiiEntityMaskingModeMask,
-	"REMOVE":  PiiEntityMaskingModeRemove,
+	"REPLACE":  PiiEntityMaskingModeReplace,
+	"MASK":     PiiEntityMaskingModeMask,
+	"REMOVE":   PiiEntityMaskingModeRemove,
+	"RELEXIFY": PiiEntityMaskingModeRelexify,
 }
 
 var mappingPiiEntityMaskingModeEnumLowerCase = map[string]PiiEntityMaskingModeEnum{
-	"replace": PiiEntityMaskingModeReplace,
-	"mask":    PiiEntityMaskingModeMask,
-	"remove":  PiiEntityMaskingModeRemove,
+	"replace":  PiiEntityMaskingModeReplace,
+	"mask":     PiiEntityMaskingModeMask,
+	"remove":   PiiEntityMaskingModeRemove,
+	"relexify": PiiEntityMaskingModeRelexify,
 }
 
 // GetPiiEntityMaskingModeEnumValues Enumerates the set of values for PiiEntityMaskingModeEnum
@@ -123,6 +150,7 @@ func GetPiiEntityMaskingModeEnumStringValues() []string {
 		"REPLACE",
 		"MASK",
 		"REMOVE",
+		"RELEXIFY",
 	}
 }
 

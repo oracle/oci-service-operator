@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,13 +15,13 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseBackups.go.html to see an example of how to use ListAutonomousDatabaseBackupsRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListAutonomousDatabaseBackups.go.html to see an example of how to use ListAutonomousDatabaseBackupsRequest.
 type ListAutonomousDatabaseBackupsRequest struct {
 
-	// The database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The database OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	AutonomousDatabaseId *string `mandatory:"false" contributesTo:"query" name:"autonomousDatabaseId"`
 
-	// The compartment OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The compartment OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	CompartmentId *string `mandatory:"false" contributesTo:"query" name:"compartmentId"`
 
 	// The maximum number of items to return per page.
@@ -45,6 +45,15 @@ type ListAutonomousDatabaseBackupsRequest struct {
 
 	// A filter to return only backups that matches with the given type of Backup.
 	Type *string `mandatory:"false" contributesTo:"query" name:"type"`
+
+	// A filter to return only resources that have the given backup destination id.
+	BackupDestinationId *string `mandatory:"false" contributesTo:"query" name:"backupDestinationId"`
+
+	// A filter to return only resources that have the given key store id.
+	KeyStoreId *string `mandatory:"false" contributesTo:"query" name:"keyStoreId"`
+
+	// A filter to return only resources that match the given Infrastructure Type.
+	InfrastructureType AutonomousDatabaseBackupSummaryInfrastructureTypeEnum `mandatory:"false" contributesTo:"query" name:"infrastructureType" omitEmpty:"true"`
 
 	// Unique identifier for the request.
 	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
@@ -94,8 +103,11 @@ func (request ListAutonomousDatabaseBackupsRequest) ValidateEnumValue() (bool, e
 	if _, ok := GetMappingAutonomousDatabaseBackupSummaryLifecycleStateEnum(string(request.LifecycleState)); !ok && request.LifecycleState != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", request.LifecycleState, strings.Join(GetAutonomousDatabaseBackupSummaryLifecycleStateEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnum(string(request.InfrastructureType)); !ok && request.InfrastructureType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for InfrastructureType: %s. Supported values are: %s.", request.InfrastructureType, strings.Join(GetAutonomousDatabaseBackupSummaryInfrastructureTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -116,7 +128,7 @@ type ListAutonomousDatabaseBackupsResponse struct {
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
 	// then there are additional items still to get. Include this value as the `page` parameter for the
 	// subsequent GET request. For information about pagination, see
-	// List Pagination (https://docs.cloud.oracle.com/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 }
 

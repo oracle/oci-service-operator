@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Queue API
 //
-// Use the Queue API to produce and consume messages, create queues, and manage related items. For more information, see Queue (https://docs.cloud.oracle.com/iaas/Content/queue/overview.htm).
+// Use the Queue API to produce and consume messages, create queues, and manage related items. For more information, see Queue (https://docs.oracle.com/iaas/Content/queue/overview.htm).
 //
 
 package queue
@@ -21,7 +21,7 @@ type QueueSummary struct {
 	// A unique identifier for the queue that is immutable on creation.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The time that the queue was created, expressed in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
@@ -55,6 +55,9 @@ type QueueSummary struct {
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// The list of capabilities enabled on the queue
+	Capabilities []QueueCapabilityEnum `mandatory:"false" json:"capabilities,omitempty"`
 }
 
 func (m QueueSummary) String() string {
@@ -70,8 +73,14 @@ func (m QueueSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetQueueLifecycleStateEnumStringValues(), ",")))
 	}
 
+	for _, val := range m.Capabilities {
+		if _, ok := GetMappingQueueCapabilityEnum(string(val)); !ok && val != "" {
+			errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for Capabilities: %s. Supported values are: %s.", val, strings.Join(GetQueueCapabilityEnumStringValues(), ",")))
+		}
+	}
+
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

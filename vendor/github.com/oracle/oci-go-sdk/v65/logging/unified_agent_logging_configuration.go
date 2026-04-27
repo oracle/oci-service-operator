@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,7 +6,7 @@
 //
 // Use the Logging Management API to create, read, list, update, move and delete
 // log groups, log objects, log saved searches, and agent configurations.
-// For more information, see Logging Overview (https://docs.cloud.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
+// For more information, see Logging Overview (https://docs.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
 //
 
 package logging
@@ -25,6 +25,9 @@ type UnifiedAgentLoggingConfiguration struct {
 	Sources []UnifiedAgentLoggingSource `mandatory:"true" json:"sources"`
 
 	Destination *UnifiedAgentLoggingDestination `mandatory:"true" json:"destination"`
+
+	// Logging filter object.
+	Filter []UnifiedAgentLoggingFilter `mandatory:"false" json:"filter"`
 }
 
 func (m UnifiedAgentLoggingConfiguration) String() string {
@@ -38,7 +41,7 @@ func (m UnifiedAgentLoggingConfiguration) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -60,6 +63,7 @@ func (m UnifiedAgentLoggingConfiguration) MarshalJSON() (buff []byte, e error) {
 // UnmarshalJSON unmarshals from json
 func (m *UnifiedAgentLoggingConfiguration) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
+		Filter      []unifiedagentloggingfilter     `json:"filter"`
 		Sources     []unifiedagentloggingsource     `json:"sources"`
 		Destination *UnifiedAgentLoggingDestination `json:"destination"`
 	}{}
@@ -69,6 +73,18 @@ func (m *UnifiedAgentLoggingConfiguration) UnmarshalJSON(data []byte) (e error) 
 		return
 	}
 	var nn interface{}
+	m.Filter = make([]UnifiedAgentLoggingFilter, len(model.Filter))
+	for i, n := range model.Filter {
+		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
+		if e != nil {
+			return e
+		}
+		if nn != nil {
+			m.Filter[i] = nn.(UnifiedAgentLoggingFilter)
+		} else {
+			m.Filter[i] = nil
+		}
+	}
 	m.Sources = make([]UnifiedAgentLoggingSource, len(model.Sources))
 	for i, n := range model.Sources {
 		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)

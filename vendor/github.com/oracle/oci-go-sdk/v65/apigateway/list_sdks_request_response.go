@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,10 +15,10 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ListSdks.go.html to see an example of how to use ListSdksRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ListSdks.go.html to see an example of how to use ListSdksRequest.
 type ListSdksRequest struct {
 
-	// The ocid of the SDK.
+	// The ocid of the SDK. This value must be present unless apiId is present.
 	SdkId *string `mandatory:"false" contributesTo:"query" name:"sdkId"`
 
 	// A user-friendly name. Does not have to be unique, and it's changeable.
@@ -44,7 +44,7 @@ type ListSdksRequest struct {
 	// sensitive.
 	SortBy ListSdksSortByEnum `mandatory:"false" contributesTo:"query" name:"sortBy" omitEmpty:"true"`
 
-	// The ocid of the API.
+	// The ocid of the API. This value must be present unless sdkId is present.
 	ApiId *string `mandatory:"false" contributesTo:"query" name:"apiId"`
 
 	// The client request id for tracing.
@@ -96,7 +96,7 @@ func (request ListSdksRequest) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortBy: %s. Supported values are: %s.", request.SortBy, strings.Join(GetListSdksSortByEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -118,13 +118,13 @@ type ListSdksResponse struct {
 	// For list pagination. When this header appears in the response,
 	// additional pages of results remain. For important details about how
 	// pagination works, see
-	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 
 	// For list pagination. When this header appears in the response,
 	// additional pages of results were seen previously. For important details
 	// about how pagination works, see
-	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcPrevPage *string `presentIn:"header" name:"opc-prev-page"`
 }
 

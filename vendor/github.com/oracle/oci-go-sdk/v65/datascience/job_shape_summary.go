@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -45,7 +45,7 @@ func (m JobShapeSummary) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -58,6 +58,7 @@ const (
 	JobShapeSummaryShapeSeriesAmdRome      JobShapeSummaryShapeSeriesEnum = "AMD_ROME"
 	JobShapeSummaryShapeSeriesIntelSkylake JobShapeSummaryShapeSeriesEnum = "INTEL_SKYLAKE"
 	JobShapeSummaryShapeSeriesNvidiaGpu    JobShapeSummaryShapeSeriesEnum = "NVIDIA_GPU"
+	JobShapeSummaryShapeSeriesGeneric      JobShapeSummaryShapeSeriesEnum = "GENERIC"
 	JobShapeSummaryShapeSeriesLegacy       JobShapeSummaryShapeSeriesEnum = "LEGACY"
 	JobShapeSummaryShapeSeriesArm          JobShapeSummaryShapeSeriesEnum = "ARM"
 )
@@ -66,6 +67,7 @@ var mappingJobShapeSummaryShapeSeriesEnum = map[string]JobShapeSummaryShapeSerie
 	"AMD_ROME":      JobShapeSummaryShapeSeriesAmdRome,
 	"INTEL_SKYLAKE": JobShapeSummaryShapeSeriesIntelSkylake,
 	"NVIDIA_GPU":    JobShapeSummaryShapeSeriesNvidiaGpu,
+	"GENERIC":       JobShapeSummaryShapeSeriesGeneric,
 	"LEGACY":        JobShapeSummaryShapeSeriesLegacy,
 	"ARM":           JobShapeSummaryShapeSeriesArm,
 }
@@ -74,6 +76,7 @@ var mappingJobShapeSummaryShapeSeriesEnumLowerCase = map[string]JobShapeSummaryS
 	"amd_rome":      JobShapeSummaryShapeSeriesAmdRome,
 	"intel_skylake": JobShapeSummaryShapeSeriesIntelSkylake,
 	"nvidia_gpu":    JobShapeSummaryShapeSeriesNvidiaGpu,
+	"generic":       JobShapeSummaryShapeSeriesGeneric,
 	"legacy":        JobShapeSummaryShapeSeriesLegacy,
 	"arm":           JobShapeSummaryShapeSeriesArm,
 }
@@ -93,6 +96,7 @@ func GetJobShapeSummaryShapeSeriesEnumStringValues() []string {
 		"AMD_ROME",
 		"INTEL_SKYLAKE",
 		"NVIDIA_GPU",
+		"GENERIC",
 		"LEGACY",
 		"ARM",
 	}

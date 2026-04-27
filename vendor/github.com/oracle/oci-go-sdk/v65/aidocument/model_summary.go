@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -31,7 +31,7 @@ type ModelSummary struct {
 	// The version of the model.
 	ModelVersion *string `mandatory:"true" json:"modelVersion"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project that contains the model.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project that contains the model.
 	ProjectId *string `mandatory:"true" json:"projectId"`
 
 	// When the model was created, as an RFC3339 datetime string.
@@ -45,6 +45,9 @@ type ModelSummary struct {
 
 	// An optional description of the model.
 	Description *string `mandatory:"false" json:"description"`
+
+	// Number of replicas required for this model.
+	InferenceUnits *int `mandatory:"false" json:"inferenceUnits"`
 
 	// When the model was modified, as an RFC3339 datetime string.
 	TimeUpdated *common.SDKTime `mandatory:"false" json:"timeUpdated"`
@@ -67,7 +70,7 @@ type ModelSummary struct {
 
 	ValidationDataset Dataset `mandatory:"false" json:"validationDataset"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) list of active custom Key Value models that need to be composed.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) list of active custom Key Value models that need to be composed.
 	ComponentModels []ComponentModel `mandatory:"false" json:"componentModels"`
 
 	// Set to true when the model is created by using multiple key value extraction models.
@@ -84,6 +87,9 @@ type ModelSummary struct {
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// For example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// Locks associated with this resource.
+	Locks []ResourceLock `mandatory:"false" json:"locks"`
 }
 
 func (m ModelSummary) String() string {
@@ -103,7 +109,7 @@ func (m ModelSummary) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -113,6 +119,7 @@ func (m *ModelSummary) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
 		DisplayName       *string                           `json:"displayName"`
 		Description       *string                           `json:"description"`
+		InferenceUnits    *int                              `json:"inferenceUnits"`
 		TimeUpdated       *common.SDKTime                   `json:"timeUpdated"`
 		LifecycleDetails  *string                           `json:"lifecycleDetails"`
 		Precision         *float32                          `json:"precision"`
@@ -126,6 +133,7 @@ func (m *ModelSummary) UnmarshalJSON(data []byte) (e error) {
 		FreeformTags      map[string]string                 `json:"freeformTags"`
 		DefinedTags       map[string]map[string]interface{} `json:"definedTags"`
 		SystemTags        map[string]map[string]interface{} `json:"systemTags"`
+		Locks             []ResourceLock                    `json:"locks"`
 		Id                *string                           `json:"id"`
 		CompartmentId     *string                           `json:"compartmentId"`
 		ModelType         ModelModelTypeEnum                `json:"modelType"`
@@ -143,6 +151,8 @@ func (m *ModelSummary) UnmarshalJSON(data []byte) (e error) {
 	m.DisplayName = model.DisplayName
 
 	m.Description = model.Description
+
+	m.InferenceUnits = model.InferenceUnits
 
 	m.TimeUpdated = model.TimeUpdated
 
@@ -194,6 +204,8 @@ func (m *ModelSummary) UnmarshalJSON(data []byte) (e error) {
 
 	m.SystemTags = model.SystemTags
 
+	m.Locks = make([]ResourceLock, len(model.Locks))
+	copy(m.Locks, model.Locks)
 	m.Id = model.Id
 
 	m.CompartmentId = model.CompartmentId

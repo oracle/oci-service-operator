@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,7 +6,7 @@
 //
 // API for the API Gateway service. Use this API to manage gateways, deployments, and related items.
 // For more information, see
-// Overview of API Gateway (https://docs.cloud.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm).
+// Overview of API Gateway (https://docs.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm).
 //
 
 package apigateway
@@ -19,13 +19,13 @@ import (
 )
 
 // Gateway A gateway is a virtual network appliance in a regional subnet. A gateway routes inbound traffic to back-end services including public, private, and partner HTTP APIs, as well as Oracle Functions. Avoid entering confidential information. For more information, see
-// API Gateway Concepts (https://docs.cloud.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayconcepts.htm).
+// API Gateway Concepts (https://docs.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayconcepts.htm).
 type Gateway struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment in which the
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the
 	// resource is created.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
@@ -39,7 +39,7 @@ type Gateway struct {
 	// Example: `My new resource`
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet in which
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in which
 	// related resources are created.
 	SubnetId *string `mandatory:"false" json:"subnetId"`
 
@@ -60,10 +60,13 @@ type Gateway struct {
 	// resource in a Failed state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
 
+	// Locks associated with this resource.
+	Locks []ResourceLock `mandatory:"false" json:"locks"`
+
 	// The hostname for APIs deployed on the gateway.
 	Hostname *string `mandatory:"false" json:"hostname"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the resource.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource.
 	CertificateId *string `mandatory:"false" json:"certificateId"`
 
 	// An array of IP addresses associated with the gateway.
@@ -73,18 +76,33 @@ type Gateway struct {
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair
 	// with no predefined name, type, or namespace. For more information, see
-	// Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
 	// namespace. For more information, see
-	// Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
 	// An array of CA bundles that should be used on the Gateway for TLS validation.
 	CaBundles []CaBundle `mandatory:"false" json:"caBundles"`
+
+	// Determines whether the gateway has an IPv4 or IPv6 address assigned to it, or both.
+	// `IPV4` means the gateway will only have an IPv4 address assigned to it, and `IPV6` means the gateway will
+	// only have an `IPv6` address assigned to it. `DUAL_STACK` means the gateway will have both an IPv4 and IPv6
+	// address assigned to it.
+	// Example: `IPV4` or `IPV6` or `DUAL_STACK`
+	IpMode GatewayIpModeEnum `mandatory:"false" json:"ipMode,omitempty"`
+
+	Ipv6AddressConfiguration *Ipv6AddressConfiguration `mandatory:"false" json:"ipv6AddressConfiguration"`
+
+	Ipv4AddressConfiguration *Ipv4AddressConfiguration `mandatory:"false" json:"ipv4AddressConfiguration"`
 }
 
 func (m Gateway) String() string {
@@ -103,8 +121,11 @@ func (m Gateway) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingGatewayLifecycleStateEnum(string(m.LifecycleState)); !ok && m.LifecycleState != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetGatewayLifecycleStateEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingGatewayIpModeEnum(string(m.IpMode)); !ok && m.IpMode != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for IpMode: %s. Supported values are: %s.", m.IpMode, strings.Join(GetGatewayIpModeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -112,23 +133,28 @@ func (m Gateway) ValidateEnumValue() (bool, error) {
 // UnmarshalJSON unmarshals from json
 func (m *Gateway) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		DisplayName             *string                           `json:"displayName"`
-		SubnetId                *string                           `json:"subnetId"`
-		NetworkSecurityGroupIds []string                          `json:"networkSecurityGroupIds"`
-		TimeCreated             *common.SDKTime                   `json:"timeCreated"`
-		TimeUpdated             *common.SDKTime                   `json:"timeUpdated"`
-		LifecycleState          GatewayLifecycleStateEnum         `json:"lifecycleState"`
-		LifecycleDetails        *string                           `json:"lifecycleDetails"`
-		Hostname                *string                           `json:"hostname"`
-		CertificateId           *string                           `json:"certificateId"`
-		IpAddresses             []IpAddress                       `json:"ipAddresses"`
-		ResponseCacheDetails    responsecachedetails              `json:"responseCacheDetails"`
-		FreeformTags            map[string]string                 `json:"freeformTags"`
-		DefinedTags             map[string]map[string]interface{} `json:"definedTags"`
-		CaBundles               []cabundle                        `json:"caBundles"`
-		Id                      *string                           `json:"id"`
-		CompartmentId           *string                           `json:"compartmentId"`
-		EndpointType            GatewayEndpointTypeEnum           `json:"endpointType"`
+		DisplayName              *string                           `json:"displayName"`
+		SubnetId                 *string                           `json:"subnetId"`
+		NetworkSecurityGroupIds  []string                          `json:"networkSecurityGroupIds"`
+		TimeCreated              *common.SDKTime                   `json:"timeCreated"`
+		TimeUpdated              *common.SDKTime                   `json:"timeUpdated"`
+		LifecycleState           GatewayLifecycleStateEnum         `json:"lifecycleState"`
+		LifecycleDetails         *string                           `json:"lifecycleDetails"`
+		Locks                    []ResourceLock                    `json:"locks"`
+		Hostname                 *string                           `json:"hostname"`
+		CertificateId            *string                           `json:"certificateId"`
+		IpAddresses              []IpAddress                       `json:"ipAddresses"`
+		ResponseCacheDetails     responsecachedetails              `json:"responseCacheDetails"`
+		FreeformTags             map[string]string                 `json:"freeformTags"`
+		DefinedTags              map[string]map[string]interface{} `json:"definedTags"`
+		SystemTags               map[string]map[string]interface{} `json:"systemTags"`
+		CaBundles                []cabundle                        `json:"caBundles"`
+		IpMode                   GatewayIpModeEnum                 `json:"ipMode"`
+		Ipv6AddressConfiguration *Ipv6AddressConfiguration         `json:"ipv6AddressConfiguration"`
+		Ipv4AddressConfiguration *Ipv4AddressConfiguration         `json:"ipv4AddressConfiguration"`
+		Id                       *string                           `json:"id"`
+		CompartmentId            *string                           `json:"compartmentId"`
+		EndpointType             GatewayEndpointTypeEnum           `json:"endpointType"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -150,6 +176,8 @@ func (m *Gateway) UnmarshalJSON(data []byte) (e error) {
 
 	m.LifecycleDetails = model.LifecycleDetails
 
+	m.Locks = make([]ResourceLock, len(model.Locks))
+	copy(m.Locks, model.Locks)
 	m.Hostname = model.Hostname
 
 	m.CertificateId = model.CertificateId
@@ -170,6 +198,8 @@ func (m *Gateway) UnmarshalJSON(data []byte) (e error) {
 
 	m.DefinedTags = model.DefinedTags
 
+	m.SystemTags = model.SystemTags
+
 	m.CaBundles = make([]CaBundle, len(model.CaBundles))
 	for i, n := range model.CaBundles {
 		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
@@ -182,6 +212,12 @@ func (m *Gateway) UnmarshalJSON(data []byte) (e error) {
 			m.CaBundles[i] = nil
 		}
 	}
+	m.IpMode = model.IpMode
+
+	m.Ipv6AddressConfiguration = model.Ipv6AddressConfiguration
+
+	m.Ipv4AddressConfiguration = model.Ipv4AddressConfiguration
+
 	m.Id = model.Id
 
 	m.CompartmentId = model.CompartmentId
@@ -288,5 +324,51 @@ func GetGatewayLifecycleStateEnumStringValues() []string {
 // GetMappingGatewayLifecycleStateEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingGatewayLifecycleStateEnum(val string) (GatewayLifecycleStateEnum, bool) {
 	enum, ok := mappingGatewayLifecycleStateEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// GatewayIpModeEnum Enum with underlying type: string
+type GatewayIpModeEnum string
+
+// Set of constants representing the allowable values for GatewayIpModeEnum
+const (
+	GatewayIpModeIpv4      GatewayIpModeEnum = "IPV4"
+	GatewayIpModeIpv6      GatewayIpModeEnum = "IPV6"
+	GatewayIpModeDualStack GatewayIpModeEnum = "DUAL_STACK"
+)
+
+var mappingGatewayIpModeEnum = map[string]GatewayIpModeEnum{
+	"IPV4":       GatewayIpModeIpv4,
+	"IPV6":       GatewayIpModeIpv6,
+	"DUAL_STACK": GatewayIpModeDualStack,
+}
+
+var mappingGatewayIpModeEnumLowerCase = map[string]GatewayIpModeEnum{
+	"ipv4":       GatewayIpModeIpv4,
+	"ipv6":       GatewayIpModeIpv6,
+	"dual_stack": GatewayIpModeDualStack,
+}
+
+// GetGatewayIpModeEnumValues Enumerates the set of values for GatewayIpModeEnum
+func GetGatewayIpModeEnumValues() []GatewayIpModeEnum {
+	values := make([]GatewayIpModeEnum, 0)
+	for _, v := range mappingGatewayIpModeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetGatewayIpModeEnumStringValues Enumerates the set of values in String for GatewayIpModeEnum
+func GetGatewayIpModeEnumStringValues() []string {
+	return []string{
+		"IPV4",
+		"IPV6",
+		"DUAL_STACK",
+	}
+}
+
+// GetMappingGatewayIpModeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingGatewayIpModeEnum(val string) (GatewayIpModeEnum, bool) {
+	enum, ok := mappingGatewayIpModeEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

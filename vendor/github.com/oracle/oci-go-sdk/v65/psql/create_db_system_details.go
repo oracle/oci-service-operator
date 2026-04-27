@@ -1,11 +1,11 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // PGSQL Control Plane API
 //
 // Use the OCI Database with PostgreSQL API to manage resources such as database systems, database nodes, backups, and configurations.
-// For information, see the user guide documentation for the service (https://docs.cloud.oracle.com/iaas/Content/postgresql/home.htm).
+// For information, see the user guide documentation for the service (https://docs.oracle.com/iaas/Content/postgresql/home.htm).
 //
 
 package psql
@@ -23,7 +23,7 @@ type CreateDbSystemDetails struct {
 	// A user-friendly display name for the database system. Avoid entering confidential information.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// Version of database system software.
@@ -35,6 +35,8 @@ type CreateDbSystemDetails struct {
 	// Example: `VM.Standard.E4.Flex`
 	Shape *string `mandatory:"true" json:"shape"`
 
+	Credentials *Credentials `mandatory:"true" json:"credentials"`
+
 	NetworkDetails *NetworkDetails `mandatory:"true" json:"networkDetails"`
 
 	// A user-provided description of a database system.
@@ -43,7 +45,7 @@ type CreateDbSystemDetails struct {
 	// Type of the database system.
 	SystemType DbSystemSystemTypeEnum `mandatory:"false" json:"systemType,omitempty"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system.
 	ConfigId *string `mandatory:"false" json:"configId"`
 
 	// The total number of OCPUs available to each database instance node.
@@ -58,8 +60,6 @@ type CreateDbSystemDetails struct {
 	// Details of database instances nodes to be created. This parameter is optional.
 	// If specified, its size must match `instanceCount`.
 	InstancesDetails []CreateDbInstanceDetails `mandatory:"false" json:"instancesDetails"`
-
-	Credentials *Credentials `mandatory:"false" json:"credentials"`
 
 	ManagementPolicy *ManagementPolicyDetails `mandatory:"false" json:"managementPolicy"`
 
@@ -88,7 +88,7 @@ func (m CreateDbSystemDetails) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SystemType: %s. Supported values are: %s.", m.SystemType, strings.Join(GetDbSystemSystemTypeEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -103,7 +103,6 @@ func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 		InstanceMemorySizeInGBs *int                              `json:"instanceMemorySizeInGBs"`
 		InstanceCount           *int                              `json:"instanceCount"`
 		InstancesDetails        []CreateDbInstanceDetails         `json:"instancesDetails"`
-		Credentials             *Credentials                      `json:"credentials"`
 		ManagementPolicy        *ManagementPolicyDetails          `json:"managementPolicy"`
 		Source                  sourcedetails                     `json:"source"`
 		FreeformTags            map[string]string                 `json:"freeformTags"`
@@ -113,6 +112,7 @@ func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 		DbVersion               *string                           `json:"dbVersion"`
 		StorageDetails          storagedetails                    `json:"storageDetails"`
 		Shape                   *string                           `json:"shape"`
+		Credentials             *Credentials                      `json:"credentials"`
 		NetworkDetails          *NetworkDetails                   `json:"networkDetails"`
 	}{}
 
@@ -135,8 +135,6 @@ func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.InstancesDetails = make([]CreateDbInstanceDetails, len(model.InstancesDetails))
 	copy(m.InstancesDetails, model.InstancesDetails)
-	m.Credentials = model.Credentials
-
 	m.ManagementPolicy = model.ManagementPolicy
 
 	nn, e = model.Source.UnmarshalPolymorphicJSON(model.Source.JsonData)
@@ -170,6 +168,8 @@ func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 	}
 
 	m.Shape = model.Shape
+
+	m.Credentials = model.Credentials
 
 	m.NetworkDetails = model.NetworkDetails
 

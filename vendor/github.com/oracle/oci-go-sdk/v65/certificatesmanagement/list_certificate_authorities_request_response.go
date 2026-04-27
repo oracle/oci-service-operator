@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificatesmanagement/ListCertificateAuthorities.go.html to see an example of how to use ListCertificateAuthoritiesRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificatesmanagement/ListCertificateAuthorities.go.html to see an example of how to use ListCertificateAuthoritiesRequest.
 type ListCertificateAuthoritiesRequest struct {
 
 	// Unique Oracle-assigned identifier for the request. If provided, the returned request ID
@@ -99,7 +99,7 @@ func (request ListCertificateAuthoritiesRequest) ValidateEnumValue() (bool, erro
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortOrder: %s. Supported values are: %s.", request.SortOrder, strings.Join(GetListCertificateAuthoritiesSortOrderEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -120,7 +120,7 @@ type ListCertificateAuthoritiesResponse struct {
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
 	// then there are additional items still to get. Include this value as the `page` parameter for the
 	// subsequent GET request. For information about pagination, see
-	// List Pagination (https://docs.cloud.oracle.com/Content/API/Concepts/usingapi.htm#List_Pagination).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#List_Pagination).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 }
 
@@ -147,6 +147,7 @@ const (
 	ListCertificateAuthoritiesLifecycleStatePendingDeletion    ListCertificateAuthoritiesLifecycleStateEnum = "PENDING_DELETION"
 	ListCertificateAuthoritiesLifecycleStateCancellingDeletion ListCertificateAuthoritiesLifecycleStateEnum = "CANCELLING_DELETION"
 	ListCertificateAuthoritiesLifecycleStateFailed             ListCertificateAuthoritiesLifecycleStateEnum = "FAILED"
+	ListCertificateAuthoritiesLifecycleStatePendingActivation  ListCertificateAuthoritiesLifecycleStateEnum = "PENDING_ACTIVATION"
 )
 
 var mappingListCertificateAuthoritiesLifecycleStateEnum = map[string]ListCertificateAuthoritiesLifecycleStateEnum{
@@ -159,6 +160,7 @@ var mappingListCertificateAuthoritiesLifecycleStateEnum = map[string]ListCertifi
 	"PENDING_DELETION":    ListCertificateAuthoritiesLifecycleStatePendingDeletion,
 	"CANCELLING_DELETION": ListCertificateAuthoritiesLifecycleStateCancellingDeletion,
 	"FAILED":              ListCertificateAuthoritiesLifecycleStateFailed,
+	"PENDING_ACTIVATION":  ListCertificateAuthoritiesLifecycleStatePendingActivation,
 }
 
 var mappingListCertificateAuthoritiesLifecycleStateEnumLowerCase = map[string]ListCertificateAuthoritiesLifecycleStateEnum{
@@ -171,6 +173,7 @@ var mappingListCertificateAuthoritiesLifecycleStateEnumLowerCase = map[string]Li
 	"pending_deletion":    ListCertificateAuthoritiesLifecycleStatePendingDeletion,
 	"cancelling_deletion": ListCertificateAuthoritiesLifecycleStateCancellingDeletion,
 	"failed":              ListCertificateAuthoritiesLifecycleStateFailed,
+	"pending_activation":  ListCertificateAuthoritiesLifecycleStatePendingActivation,
 }
 
 // GetListCertificateAuthoritiesLifecycleStateEnumValues Enumerates the set of values for ListCertificateAuthoritiesLifecycleStateEnum
@@ -194,6 +197,7 @@ func GetListCertificateAuthoritiesLifecycleStateEnumStringValues() []string {
 		"PENDING_DELETION",
 		"CANCELLING_DELETION",
 		"FAILED",
+		"PENDING_ACTIVATION",
 	}
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -91,12 +91,75 @@ func (client *DbBackupsClient) ConfigurationProvider() *common.ConfigurationProv
 	return client.config
 }
 
+// CancelBackupDeletion Cancels the scheduled deletion of a backup and moves it to ACTIVE state.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CancelBackupDeletion.go.html to see an example of how to use CancelBackupDeletion API.
+// A default retry strategy applies to this operation CancelBackupDeletion()
+func (client DbBackupsClient) CancelBackupDeletion(ctx context.Context, request CancelBackupDeletionRequest) (response CancelBackupDeletionResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.DefaultRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.cancelBackupDeletion, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CancelBackupDeletionResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CancelBackupDeletionResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CancelBackupDeletionResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CancelBackupDeletionResponse")
+	}
+	return
+}
+
+// cancelBackupDeletion implements the OCIOperation interface (enables retrying operations)
+func (client DbBackupsClient) cancelBackupDeletion(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/backups/{backupId}/actions/cancelDeletion", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CancelBackupDeletionResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/Backup/CancelBackupDeletion"
+		err = common.PostProcessServiceError(err, "DbBackups", "CancelBackupDeletion", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeBackupCompartment Moves a DB System Backup into a different compartment.
 // When provided, If-Match is checked against ETag values of the Backup.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ChangeBackupCompartment.go.html to see an example of how to use ChangeBackupCompartment API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ChangeBackupCompartment.go.html to see an example of how to use ChangeBackupCompartment API.
 func (client DbBackupsClient) ChangeBackupCompartment(ctx context.Context, request ChangeBackupCompartmentRequest) (response ChangeBackupCompartmentResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -154,11 +217,74 @@ func (client DbBackupsClient) changeBackupCompartment(ctx context.Context, reque
 	return response, err
 }
 
+// CopyBackup Creates a copy of a DB system backup available in the specified source region.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CopyBackup.go.html to see an example of how to use CopyBackup API.
+// A default retry strategy applies to this operation CopyBackup()
+func (client DbBackupsClient) CopyBackup(ctx context.Context, request CopyBackupRequest) (response CopyBackupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.DefaultRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.copyBackup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CopyBackupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CopyBackupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CopyBackupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CopyBackupResponse")
+	}
+	return
+}
+
+// copyBackup implements the OCIOperation interface (enables retrying operations)
+func (client DbBackupsClient) copyBackup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/backups/actions/copy", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CopyBackupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/Backup/CopyBackup"
+		err = common.PostProcessServiceError(err, "DbBackups", "CopyBackup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CreateBackup Create a backup of a DB System.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CreateBackup.go.html to see an example of how to use CreateBackup API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/CreateBackup.go.html to see an example of how to use CreateBackup API.
 // A default retry strategy applies to this operation CreateBackup()
 func (client DbBackupsClient) CreateBackup(ctx context.Context, request CreateBackupRequest) (response CreateBackupResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -221,7 +347,7 @@ func (client DbBackupsClient) createBackup(ctx context.Context, request common.O
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteBackup.go.html to see an example of how to use DeleteBackup API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/DeleteBackup.go.html to see an example of how to use DeleteBackup API.
 // A default retry strategy applies to this operation DeleteBackup()
 func (client DbBackupsClient) DeleteBackup(ctx context.Context, request DeleteBackupRequest) (response DeleteBackupResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -275,11 +401,74 @@ func (client DbBackupsClient) deleteBackup(ctx context.Context, request common.O
 	return response, err
 }
 
+// ExportBackup Export logical data from a DB system backup to an Object Storage bucket.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ExportBackup.go.html to see an example of how to use ExportBackup API.
+// A default retry strategy applies to this operation ExportBackup()
+func (client DbBackupsClient) ExportBackup(ctx context.Context, request ExportBackupRequest) (response ExportBackupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.DefaultRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.exportBackup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ExportBackupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ExportBackupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ExportBackupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ExportBackupResponse")
+	}
+	return
+}
+
+// exportBackup implements the OCIOperation interface (enables retrying operations)
+func (client DbBackupsClient) exportBackup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/backups/{backupId}/actions/export", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ExportBackupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/Backup/ExportBackup"
+		err = common.PostProcessServiceError(err, "DbBackups", "ExportBackup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetBackup Get information about the specified Backup
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetBackup.go.html to see an example of how to use GetBackup API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/GetBackup.go.html to see an example of how to use GetBackup API.
 // A default retry strategy applies to this operation GetBackup()
 func (client DbBackupsClient) GetBackup(ctx context.Context, request GetBackupRequest) (response GetBackupResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -337,7 +526,7 @@ func (client DbBackupsClient) getBackup(ctx context.Context, request common.OCIR
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListBackups.go.html to see an example of how to use ListBackups API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ListBackups.go.html to see an example of how to use ListBackups API.
 // A default retry strategy applies to this operation ListBackups()
 func (client DbBackupsClient) ListBackups(ctx context.Context, request ListBackupsRequest) (response ListBackupsResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -395,7 +584,7 @@ func (client DbBackupsClient) listBackups(ctx context.Context, request common.OC
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateBackup.go.html to see an example of how to use UpdateBackup API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/UpdateBackup.go.html to see an example of how to use UpdateBackup API.
 // A default retry strategy applies to this operation UpdateBackup()
 func (client DbBackupsClient) UpdateBackup(ctx context.Context, request UpdateBackupRequest) (response UpdateBackupResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -442,6 +631,69 @@ func (client DbBackupsClient) updateBackup(ctx context.Context, request common.O
 	if err != nil {
 		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/Backup/UpdateBackup"
 		err = common.PostProcessServiceError(err, "DbBackups", "UpdateBackup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ValidateBackup Request to validate the backup by checking the data consistency.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/mysql/ValidateBackup.go.html to see an example of how to use ValidateBackup API.
+// A default retry strategy applies to this operation ValidateBackup()
+func (client DbBackupsClient) ValidateBackup(ctx context.Context, request ValidateBackupRequest) (response ValidateBackupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.DefaultRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.validateBackup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ValidateBackupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ValidateBackupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ValidateBackupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ValidateBackupResponse")
+	}
+	return
+}
+
+// validateBackup implements the OCIOperation interface (enables retrying operations)
+func (client DbBackupsClient) validateBackup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/backups/{backupId}/actions/validate", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ValidateBackupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/mysql/20190415/Backup/ValidateBackup"
+		err = common.PostProcessServiceError(err, "DbBackups", "ValidateBackup", apiReferenceLink)
 		return response, err
 	}
 

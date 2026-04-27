@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -39,6 +39,9 @@ type AutoScalingConfiguration struct {
 
 	Policy *AutoScalePolicy `mandatory:"true" json:"policy"`
 
+	// The secretId for the clusterAdminPassword.
+	SecretId *string `mandatory:"false" json:"secretId"`
+
 	PolicyDetails AutoScalePolicyDetails `mandatory:"false" json:"policyDetails"`
 }
 
@@ -59,7 +62,7 @@ func (m AutoScalingConfiguration) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -67,6 +70,7 @@ func (m AutoScalingConfiguration) ValidateEnumValue() (bool, error) {
 // UnmarshalJSON unmarshals from json
 func (m *AutoScalingConfiguration) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
+		SecretId       *string                                    `json:"secretId"`
 		PolicyDetails  autoscalepolicydetails                     `json:"policyDetails"`
 		Id             *string                                    `json:"id"`
 		DisplayName    *string                                    `json:"displayName"`
@@ -82,6 +86,8 @@ func (m *AutoScalingConfiguration) UnmarshalJSON(data []byte) (e error) {
 		return
 	}
 	var nn interface{}
+	m.SecretId = model.SecretId
+
 	nn, e = model.PolicyDetails.UnmarshalPolymorphicJSON(model.PolicyDetails.JsonData)
 	if e != nil {
 		return

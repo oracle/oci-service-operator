@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,7 +6,7 @@
 //
 // API for the API Gateway service. Use this API to manage gateways, deployments, and related items.
 // For more information, see
-// Overview of API Gateway (https://docs.cloud.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm).
+// Overview of API Gateway (https://docs.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm).
 //
 
 package apigateway
@@ -93,11 +93,68 @@ func (client *UsagePlansClient) ConfigurationProvider() *common.ConfigurationPro
 	return client.config
 }
 
+// AddUsagePlanLock Adds a lock to a UsagePlan resource.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/AddUsagePlanLock.go.html to see an example of how to use AddUsagePlanLock API.
+func (client UsagePlansClient) AddUsagePlanLock(ctx context.Context, request AddUsagePlanLockRequest) (response AddUsagePlanLockResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.addUsagePlanLock, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = AddUsagePlanLockResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = AddUsagePlanLockResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(AddUsagePlanLockResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into AddUsagePlanLockResponse")
+	}
+	return
+}
+
+// addUsagePlanLock implements the OCIOperation interface (enables retrying operations)
+func (client UsagePlansClient) addUsagePlanLock(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/usagePlans/{usagePlanId}/actions/addLock", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response AddUsagePlanLockResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/api-gateway/20190501/UsagePlan/AddUsagePlanLock"
+		err = common.PostProcessServiceError(err, "UsagePlans", "AddUsagePlanLock", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeUsagePlanCompartment Changes the usage plan compartment.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ChangeUsagePlanCompartment.go.html to see an example of how to use ChangeUsagePlanCompartment API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ChangeUsagePlanCompartment.go.html to see an example of how to use ChangeUsagePlanCompartment API.
 func (client UsagePlansClient) ChangeUsagePlanCompartment(ctx context.Context, request ChangeUsagePlanCompartmentRequest) (response ChangeUsagePlanCompartmentResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -159,7 +216,7 @@ func (client UsagePlansClient) changeUsagePlanCompartment(ctx context.Context, r
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/CreateUsagePlan.go.html to see an example of how to use CreateUsagePlan API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/CreateUsagePlan.go.html to see an example of how to use CreateUsagePlan API.
 // A default retry strategy applies to this operation CreateUsagePlan()
 func (client UsagePlansClient) CreateUsagePlan(ctx context.Context, request CreateUsagePlanRequest) (response CreateUsagePlanResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -222,7 +279,7 @@ func (client UsagePlansClient) createUsagePlan(ctx context.Context, request comm
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/DeleteUsagePlan.go.html to see an example of how to use DeleteUsagePlan API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/DeleteUsagePlan.go.html to see an example of how to use DeleteUsagePlan API.
 func (client UsagePlansClient) DeleteUsagePlan(ctx context.Context, request DeleteUsagePlanRequest) (response DeleteUsagePlanResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -279,7 +336,7 @@ func (client UsagePlansClient) deleteUsagePlan(ctx context.Context, request comm
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/GetUsagePlan.go.html to see an example of how to use GetUsagePlan API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/GetUsagePlan.go.html to see an example of how to use GetUsagePlan API.
 // A default retry strategy applies to this operation GetUsagePlan()
 func (client UsagePlansClient) GetUsagePlan(ctx context.Context, request GetUsagePlanRequest) (response GetUsagePlanResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -337,7 +394,7 @@ func (client UsagePlansClient) getUsagePlan(ctx context.Context, request common.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ListUsagePlans.go.html to see an example of how to use ListUsagePlans API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ListUsagePlans.go.html to see an example of how to use ListUsagePlans API.
 // A default retry strategy applies to this operation ListUsagePlans()
 func (client UsagePlansClient) ListUsagePlans(ctx context.Context, request ListUsagePlansRequest) (response ListUsagePlansResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -391,11 +448,68 @@ func (client UsagePlansClient) listUsagePlans(ctx context.Context, request commo
 	return response, err
 }
 
+// RemoveUsagePlanLock Removes a lock from a UsagePlan resource.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/RemoveUsagePlanLock.go.html to see an example of how to use RemoveUsagePlanLock API.
+func (client UsagePlansClient) RemoveUsagePlanLock(ctx context.Context, request RemoveUsagePlanLockRequest) (response RemoveUsagePlanLockResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.removeUsagePlanLock, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = RemoveUsagePlanLockResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = RemoveUsagePlanLockResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(RemoveUsagePlanLockResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RemoveUsagePlanLockResponse")
+	}
+	return
+}
+
+// removeUsagePlanLock implements the OCIOperation interface (enables retrying operations)
+func (client UsagePlansClient) removeUsagePlanLock(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/usagePlans/{usagePlanId}/actions/removeLock", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RemoveUsagePlanLockResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/api-gateway/20190501/UsagePlan/RemoveUsagePlanLock"
+		err = common.PostProcessServiceError(err, "UsagePlans", "RemoveUsagePlanLock", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateUsagePlan Updates the usage plan with the given identifier.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/UpdateUsagePlan.go.html to see an example of how to use UpdateUsagePlan API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/UpdateUsagePlan.go.html to see an example of how to use UpdateUsagePlan API.
 func (client UsagePlansClient) UpdateUsagePlan(ctx context.Context, request UpdateUsagePlanRequest) (response UpdateUsagePlanResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()

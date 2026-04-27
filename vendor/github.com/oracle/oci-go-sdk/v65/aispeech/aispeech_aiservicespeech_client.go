@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -95,7 +95,7 @@ func (client *AIServiceSpeechClient) ConfigurationProvider() *common.Configurati
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CancelTranscriptionJob.go.html to see an example of how to use CancelTranscriptionJob API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CancelTranscriptionJob.go.html to see an example of how to use CancelTranscriptionJob API.
 func (client AIServiceSpeechClient) CancelTranscriptionJob(ctx context.Context, request CancelTranscriptionJobRequest) (response CancelTranscriptionJobResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -157,7 +157,7 @@ func (client AIServiceSpeechClient) cancelTranscriptionJob(ctx context.Context, 
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CancelTranscriptionTask.go.html to see an example of how to use CancelTranscriptionTask API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CancelTranscriptionTask.go.html to see an example of how to use CancelTranscriptionTask API.
 func (client AIServiceSpeechClient) CancelTranscriptionTask(ctx context.Context, request CancelTranscriptionTaskRequest) (response CancelTranscriptionTaskResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -215,11 +215,73 @@ func (client AIServiceSpeechClient) cancelTranscriptionTask(ctx context.Context,
 	return response, err
 }
 
+// ChangeCustomizationCompartment Moves a Customization resource into a different compartment.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ChangeCustomizationCompartment.go.html to see an example of how to use ChangeCustomizationCompartment API.
+func (client AIServiceSpeechClient) ChangeCustomizationCompartment(ctx context.Context, request ChangeCustomizationCompartmentRequest) (response ChangeCustomizationCompartmentResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.changeCustomizationCompartment, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ChangeCustomizationCompartmentResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ChangeCustomizationCompartmentResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ChangeCustomizationCompartmentResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ChangeCustomizationCompartmentResponse")
+	}
+	return
+}
+
+// changeCustomizationCompartment implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) changeCustomizationCompartment(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/customizations/{customizationId}/actions/changeCompartment", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ChangeCustomizationCompartmentResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/Customization/ChangeCustomizationCompartment"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "ChangeCustomizationCompartment", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeTranscriptionJobCompartment Moves a transcription Job resource into a different compartment.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ChangeTranscriptionJobCompartment.go.html to see an example of how to use ChangeTranscriptionJobCompartment API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ChangeTranscriptionJobCompartment.go.html to see an example of how to use ChangeTranscriptionJobCompartment API.
 func (client AIServiceSpeechClient) ChangeTranscriptionJobCompartment(ctx context.Context, request ChangeTranscriptionJobCompartmentRequest) (response ChangeTranscriptionJobCompartmentResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -277,11 +339,135 @@ func (client AIServiceSpeechClient) changeTranscriptionJobCompartment(ctx contex
 	return response, err
 }
 
+// CreateCustomization Creates a new Customization.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CreateCustomization.go.html to see an example of how to use CreateCustomization API.
+func (client AIServiceSpeechClient) CreateCustomization(ctx context.Context, request CreateCustomizationRequest) (response CreateCustomizationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createCustomization, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateCustomizationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateCustomizationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateCustomizationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateCustomizationResponse")
+	}
+	return
+}
+
+// createCustomization implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) createCustomization(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/customizations", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateCustomizationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/Customization/CreateCustomization"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "CreateCustomization", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateRealtimeSessionToken Returns an authentication token to the user.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CreateRealtimeSessionToken.go.html to see an example of how to use CreateRealtimeSessionToken API.
+func (client AIServiceSpeechClient) CreateRealtimeSessionToken(ctx context.Context, request CreateRealtimeSessionTokenRequest) (response CreateRealtimeSessionTokenResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createRealtimeSessionToken, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateRealtimeSessionTokenResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateRealtimeSessionTokenResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateRealtimeSessionTokenResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateRealtimeSessionTokenResponse")
+	}
+	return
+}
+
+// createRealtimeSessionToken implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) createRealtimeSessionToken(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/actions/realtimeSessionToken", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateRealtimeSessionTokenResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/RealtimeSessionToken/CreateRealtimeSessionToken"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "CreateRealtimeSessionToken", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CreateTranscriptionJob Creates a new Transcription Job.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CreateTranscriptionJob.go.html to see an example of how to use CreateTranscriptionJob API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/CreateTranscriptionJob.go.html to see an example of how to use CreateTranscriptionJob API.
 func (client AIServiceSpeechClient) CreateTranscriptionJob(ctx context.Context, request CreateTranscriptionJobRequest) (response CreateTranscriptionJobResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -339,11 +525,73 @@ func (client AIServiceSpeechClient) createTranscriptionJob(ctx context.Context, 
 	return response, err
 }
 
+// DeleteCustomization Delete Customization and its metadata from tenancy.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/DeleteCustomization.go.html to see an example of how to use DeleteCustomization API.
+func (client AIServiceSpeechClient) DeleteCustomization(ctx context.Context, request DeleteCustomizationRequest) (response DeleteCustomizationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.deleteCustomization, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = DeleteCustomizationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = DeleteCustomizationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteCustomizationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteCustomizationResponse")
+	}
+	return
+}
+
+// deleteCustomization implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) deleteCustomization(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/customizations/{customizationId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteCustomizationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/Customization/DeleteCustomization"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "DeleteCustomization", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // DeleteTranscriptionJob Delete API cleans job, tasks and the related metadata. However the generated transcriptions in customer tenancy will not be deleted.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/DeleteTranscriptionJob.go.html to see an example of how to use DeleteTranscriptionJob API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/DeleteTranscriptionJob.go.html to see an example of how to use DeleteTranscriptionJob API.
 func (client AIServiceSpeechClient) DeleteTranscriptionJob(ctx context.Context, request DeleteTranscriptionJobRequest) (response DeleteTranscriptionJobResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -401,11 +649,68 @@ func (client AIServiceSpeechClient) deleteTranscriptionJob(ctx context.Context, 
 	return response, err
 }
 
+// GetCustomization Gets a Customization by identifier
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/GetCustomization.go.html to see an example of how to use GetCustomization API.
+func (client AIServiceSpeechClient) GetCustomization(ctx context.Context, request GetCustomizationRequest) (response GetCustomizationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getCustomization, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetCustomizationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetCustomizationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetCustomizationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetCustomizationResponse")
+	}
+	return
+}
+
+// getCustomization implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) getCustomization(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/customizations/{customizationId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetCustomizationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/Customization/GetCustomization"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "GetCustomization", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetTranscriptionJob Gets a Transcription Job by identifier
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/GetTranscriptionJob.go.html to see an example of how to use GetTranscriptionJob API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/GetTranscriptionJob.go.html to see an example of how to use GetTranscriptionJob API.
 func (client AIServiceSpeechClient) GetTranscriptionJob(ctx context.Context, request GetTranscriptionJobRequest) (response GetTranscriptionJobResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -462,7 +767,7 @@ func (client AIServiceSpeechClient) getTranscriptionJob(ctx context.Context, req
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/GetTranscriptionTask.go.html to see an example of how to use GetTranscriptionTask API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/GetTranscriptionTask.go.html to see an example of how to use GetTranscriptionTask API.
 func (client AIServiceSpeechClient) GetTranscriptionTask(ctx context.Context, request GetTranscriptionTaskRequest) (response GetTranscriptionTaskResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -515,11 +820,68 @@ func (client AIServiceSpeechClient) getTranscriptionTask(ctx context.Context, re
 	return response, err
 }
 
+// ListCustomizations Returns a list of Customizations.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ListCustomizations.go.html to see an example of how to use ListCustomizations API.
+func (client AIServiceSpeechClient) ListCustomizations(ctx context.Context, request ListCustomizationsRequest) (response ListCustomizationsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listCustomizations, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListCustomizationsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListCustomizationsResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListCustomizationsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListCustomizationsResponse")
+	}
+	return
+}
+
+// listCustomizations implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) listCustomizations(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/customizations", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListCustomizationsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/Customization/ListCustomizations"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "ListCustomizations", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListTranscriptionJobs Returns a list of Transcription Jobs.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ListTranscriptionJobs.go.html to see an example of how to use ListTranscriptionJobs API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ListTranscriptionJobs.go.html to see an example of how to use ListTranscriptionJobs API.
 func (client AIServiceSpeechClient) ListTranscriptionJobs(ctx context.Context, request ListTranscriptionJobsRequest) (response ListTranscriptionJobsResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -576,7 +938,7 @@ func (client AIServiceSpeechClient) listTranscriptionJobs(ctx context.Context, r
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ListTranscriptionTasks.go.html to see an example of how to use ListTranscriptionTasks API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ListTranscriptionTasks.go.html to see an example of how to use ListTranscriptionTasks API.
 func (client AIServiceSpeechClient) ListTranscriptionTasks(ctx context.Context, request ListTranscriptionTasksRequest) (response ListTranscriptionTasksResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -629,11 +991,181 @@ func (client AIServiceSpeechClient) listTranscriptionTasks(ctx context.Context, 
 	return response, err
 }
 
+// ListVoices Returns a list of speakers available to the user to choose from based on language code and voice type provided.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/ListVoices.go.html to see an example of how to use ListVoices API.
+func (client AIServiceSpeechClient) ListVoices(ctx context.Context, request ListVoicesRequest) (response ListVoicesResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listVoices, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListVoicesResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListVoicesResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListVoicesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListVoicesResponse")
+	}
+	return
+}
+
+// listVoices implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) listVoices(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/voices", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListVoicesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/Voice/ListVoices"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "ListVoices", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// SynthesizeSpeech Creates an audio for the given input text based on other input parameters like language, voice type, etc.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/SynthesizeSpeech.go.html to see an example of how to use SynthesizeSpeech API.
+func (client AIServiceSpeechClient) SynthesizeSpeech(ctx context.Context, request SynthesizeSpeechRequest) (response SynthesizeSpeechResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.synthesizeSpeech, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = SynthesizeSpeechResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = SynthesizeSpeechResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(SynthesizeSpeechResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into SynthesizeSpeechResponse")
+	}
+	return
+}
+
+// synthesizeSpeech implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) synthesizeSpeech(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/actions/synthesizeSpeech", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response SynthesizeSpeechResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/SynthesizeSpeech/SynthesizeSpeech"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "SynthesizeSpeech", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateCustomization Updates a Customization by identifier
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/UpdateCustomization.go.html to see an example of how to use UpdateCustomization API.
+func (client AIServiceSpeechClient) UpdateCustomization(ctx context.Context, request UpdateCustomizationRequest) (response UpdateCustomizationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateCustomization, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateCustomizationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateCustomizationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateCustomizationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateCustomizationResponse")
+	}
+	return
+}
+
+// updateCustomization implements the OCIOperation interface (enables retrying operations)
+func (client AIServiceSpeechClient) updateCustomization(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/customizations/{customizationId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateCustomizationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/speech/20220101/Customization/UpdateCustomization"
+		err = common.PostProcessServiceError(err, "AIServiceSpeech", "UpdateCustomization", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateTranscriptionJob Updates the Transcription Job
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/UpdateTranscriptionJob.go.html to see an example of how to use UpdateTranscriptionJob API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/aispeech/UpdateTranscriptionJob.go.html to see an example of how to use UpdateTranscriptionJob API.
 func (client AIServiceSpeechClient) UpdateTranscriptionJob(ctx context.Context, request UpdateTranscriptionJobRequest) (response UpdateTranscriptionJobResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()

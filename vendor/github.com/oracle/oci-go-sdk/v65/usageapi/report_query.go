@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Usage API
 //
-// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the dimension of your choosing. The Usage API is used by the Cost Analysis tool in the Console. Also see Using the Usage API (https://docs.cloud.oracle.com/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
+// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the chosen dimension. The Usage API is used by Cost Analysis (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm), Scheduled Reports (https://docs.oracle.com/iaas/Content/Billing/Concepts/scheduledreportoverview.htm), and Carbon Emissions Analysis (https://docs.oracle.com/iaas/Content/General/Concepts/emissions-management.htm) in the Console. Also see Using the Usage API (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
 //
 
 package usageapi
@@ -34,21 +34,21 @@ type ReportQuery struct {
 	// The usage end time.
 	TimeUsageEnded *common.SDKTime `mandatory:"false" json:"timeUsageEnded"`
 
-	// Whether aggregated by time. If isAggregateByTime is true, all usage/cost over the query time period will be added up.
+	// Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up.
 	IsAggregateByTime *bool `mandatory:"false" json:"isAggregateByTime"`
 
 	Forecast *Forecast `mandatory:"false" json:"forecast"`
 
 	// The query usage type. COST by default if it is missing.
-	// Usage - Query the usage data.
-	// Cost - Query the cost/billing data.
-	// Credit - Query the credit adjustments data.
-	// ExpiredCredit - Query the expired credits data
-	// AllCredit - Query the credit adjustments and expired credit
+	// * Usage: Query the usage data.
+	// * Cost: Query the cost/billing data.
+	// * Credit: Query the credit adjustments data.
+	// * ExpiredCredit: Query the expired credits data.
+	// * AllCredit: Query the credit adjustments and expired credit.
 	QueryType ReportQueryQueryTypeEnum `mandatory:"false" json:"queryType,omitempty"`
 
-	// Aggregate the result by.
-	// example:
+	// Specifies what to aggregate the result by.
+	// For example:
 	//   `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
 	//     "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
 	//     "resourceId", "tenantId", "tenantName"]`
@@ -88,7 +88,7 @@ func (m ReportQuery) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DateRangeName: %s. Supported values are: %s.", m.DateRangeName, strings.Join(GetReportQueryDateRangeNameEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

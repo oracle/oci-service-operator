@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -32,8 +32,13 @@ type PipelineCustomScriptStepDetails struct {
 
 	StepInfrastructureConfigurationDetails *PipelineInfrastructureConfigurationDetails `mandatory:"false" json:"stepInfrastructureConfigurationDetails"`
 
+	// The storage mount details to mount to the instance running the pipeline step.
+	StepStorageMountConfigurationDetailsList []StorageMountConfigurationDetails `mandatory:"false" json:"stepStorageMountConfigurationDetailsList"`
+
 	// A flag to indicate whether the artifact has been uploaded for this step or not.
 	IsArtifactUploaded *bool `mandatory:"false" json:"isArtifactUploaded"`
+
+	StepParameters PipelineStepParameterDetails `mandatory:"false" json:"stepParameters"`
 }
 
 // GetStepName returns StepName
@@ -67,7 +72,7 @@ func (m PipelineCustomScriptStepDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -84,4 +89,59 @@ func (m PipelineCustomScriptStepDetails) MarshalJSON() (buff []byte, e error) {
 	}
 
 	return json.Marshal(&s)
+}
+
+// UnmarshalJSON unmarshals from json
+func (m *PipelineCustomScriptStepDetails) UnmarshalJSON(data []byte) (e error) {
+	model := struct {
+		Description                              *string                                     `json:"description"`
+		DependsOn                                []string                                    `json:"dependsOn"`
+		StepConfigurationDetails                 *PipelineStepConfigurationDetails           `json:"stepConfigurationDetails"`
+		StepInfrastructureConfigurationDetails   *PipelineInfrastructureConfigurationDetails `json:"stepInfrastructureConfigurationDetails"`
+		StepStorageMountConfigurationDetailsList []storagemountconfigurationdetails          `json:"stepStorageMountConfigurationDetailsList"`
+		IsArtifactUploaded                       *bool                                       `json:"isArtifactUploaded"`
+		StepParameters                           pipelinestepparameterdetails                `json:"stepParameters"`
+		StepName                                 *string                                     `json:"stepName"`
+	}{}
+
+	e = json.Unmarshal(data, &model)
+	if e != nil {
+		return
+	}
+	var nn interface{}
+	m.Description = model.Description
+
+	m.DependsOn = make([]string, len(model.DependsOn))
+	copy(m.DependsOn, model.DependsOn)
+	m.StepConfigurationDetails = model.StepConfigurationDetails
+
+	m.StepInfrastructureConfigurationDetails = model.StepInfrastructureConfigurationDetails
+
+	m.StepStorageMountConfigurationDetailsList = make([]StorageMountConfigurationDetails, len(model.StepStorageMountConfigurationDetailsList))
+	for i, n := range model.StepStorageMountConfigurationDetailsList {
+		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
+		if e != nil {
+			return e
+		}
+		if nn != nil {
+			m.StepStorageMountConfigurationDetailsList[i] = nn.(StorageMountConfigurationDetails)
+		} else {
+			m.StepStorageMountConfigurationDetailsList[i] = nil
+		}
+	}
+	m.IsArtifactUploaded = model.IsArtifactUploaded
+
+	nn, e = model.StepParameters.UnmarshalPolymorphicJSON(model.StepParameters.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.StepParameters = nn.(PipelineStepParameterDetails)
+	} else {
+		m.StepParameters = nil
+	}
+
+	m.StepName = model.StepName
+
+	return
 }

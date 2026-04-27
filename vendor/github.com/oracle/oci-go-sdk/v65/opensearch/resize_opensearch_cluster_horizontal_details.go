@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-// ResizeOpensearchClusterHorizontalDetails The node count configuration to update on an existing OpenSearch cluster for horizontal resizing (https://docs.cloud.oracle.com/iaas/Content/search-opensearch/Tasks/resizingacluster.htm#horizontalresize).
+// ResizeOpensearchClusterHorizontalDetails The node count configuration to update on an existing OpenSearch cluster for horizontal resizing (https://docs.oracle.com/iaas/Content/search-opensearch/Tasks/resizingacluster.htm#horizontalresize).
 type ResizeOpensearchClusterHorizontalDetails struct {
 
 	// The number of master nodes to configure for the cluster.
@@ -26,6 +26,12 @@ type ResizeOpensearchClusterHorizontalDetails struct {
 
 	// The number of OpenSearch Dashboard nodes to configure for the cluster.
 	OpendashboardNodeCount *int `mandatory:"false" json:"opendashboardNodeCount"`
+
+	// The number of search nodes configured for the cluster.
+	SearchNodeCount *int `mandatory:"false" json:"searchNodeCount"`
+
+	// The number of ML nodes configured for the cluster.
+	MlNodeCount *int `mandatory:"false" json:"mlNodeCount"`
 
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
@@ -47,7 +53,7 @@ func (m ResizeOpensearchClusterHorizontalDetails) ValidateEnumValue() (bool, err
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

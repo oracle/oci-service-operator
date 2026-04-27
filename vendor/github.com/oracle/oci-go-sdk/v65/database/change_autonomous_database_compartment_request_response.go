@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,13 +15,13 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeAutonomousDatabaseCompartment.go.html to see an example of how to use ChangeAutonomousDatabaseCompartmentRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ChangeAutonomousDatabaseCompartment.go.html to see an example of how to use ChangeAutonomousDatabaseCompartmentRequest.
 type ChangeAutonomousDatabaseCompartmentRequest struct {
 
-	// Request to move Autonomous Database to a different compartment
+	// Request to move Autonomous AI Database to a different compartment
 	ChangeCompartmentDetails `contributesTo:"body"`
 
-	// The database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The database OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	AutonomousDatabaseId *string `mandatory:"true" contributesTo:"path" name:"autonomousDatabaseId"`
 
 	// A token that uniquely identifies a request so it can be retried in case of a timeout or
@@ -38,6 +38,10 @@ type ChangeAutonomousDatabaseCompartmentRequest struct {
 	// parameter to the value of the etag from a previous GET or POST response for that resource.  The resource
 	// will be updated or deleted only if the etag you provide matches the resource's current etag value.
 	IfMatch *string `mandatory:"false" contributesTo:"header" name:"if-match"`
+
+	// Indicates that the request is a dry run, if set to "true". A dry run request does not actually
+	// creating or updating a resource and is used only to perform validation on the submitted data.
+	OpcDryRun *bool `mandatory:"false" contributesTo:"header" name:"opc-dry-run"`
 
 	// Metadata about the request. This information will not be transmitted to the service, but
 	// represents information that the SDK will consume to drive retry behavior.
@@ -76,7 +80,7 @@ func (request ChangeAutonomousDatabaseCompartmentRequest) RetryPolicy() *common.
 func (request ChangeAutonomousDatabaseCompartmentRequest) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

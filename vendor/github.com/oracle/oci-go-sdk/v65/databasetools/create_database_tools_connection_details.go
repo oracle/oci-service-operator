@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -22,7 +22,7 @@ type CreateDatabaseToolsConnectionDetails interface {
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	GetDisplayName() *string
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
 	GetCompartmentId() *string
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
@@ -38,17 +38,21 @@ type CreateDatabaseToolsConnectionDetails interface {
 
 	// Specifies whether this connection is supported by the Database Tools Runtime.
 	GetRuntimeSupport() RuntimeSupportEnum
+
+	// Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault).
+	GetRuntimeIdentity() RuntimeIdentityEnum
 }
 
 type createdatabasetoolsconnectiondetails struct {
-	JsonData       []byte
-	DefinedTags    map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
-	FreeformTags   map[string]string                 `mandatory:"false" json:"freeformTags"`
-	Locks          []ResourceLock                    `mandatory:"false" json:"locks"`
-	RuntimeSupport RuntimeSupportEnum                `mandatory:"false" json:"runtimeSupport,omitempty"`
-	DisplayName    *string                           `mandatory:"true" json:"displayName"`
-	CompartmentId  *string                           `mandatory:"true" json:"compartmentId"`
-	Type           string                            `json:"type"`
+	JsonData        []byte
+	DefinedTags     map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+	FreeformTags    map[string]string                 `mandatory:"false" json:"freeformTags"`
+	Locks           []ResourceLock                    `mandatory:"false" json:"locks"`
+	RuntimeSupport  RuntimeSupportEnum                `mandatory:"false" json:"runtimeSupport,omitempty"`
+	RuntimeIdentity RuntimeIdentityEnum               `mandatory:"false" json:"runtimeIdentity,omitempty"`
+	DisplayName     *string                           `mandatory:"true" json:"displayName"`
+	CompartmentId   *string                           `mandatory:"true" json:"compartmentId"`
+	Type            string                            `json:"type"`
 }
 
 // UnmarshalJSON unmarshals json
@@ -68,6 +72,7 @@ func (m *createdatabasetoolsconnectiondetails) UnmarshalJSON(data []byte) error 
 	m.FreeformTags = s.Model.FreeformTags
 	m.Locks = s.Model.Locks
 	m.RuntimeSupport = s.Model.RuntimeSupport
+	m.RuntimeIdentity = s.Model.RuntimeIdentity
 	m.Type = s.Model.Type
 
 	return err
@@ -99,7 +104,7 @@ func (m *createdatabasetoolsconnectiondetails) UnmarshalPolymorphicJSON(data []b
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for CreateDatabaseToolsConnectionDetails: %s.", m.Type)
+		common.Logf("Received unsupported enum value for CreateDatabaseToolsConnectionDetails: %s.", m.Type)
 		return *m, nil
 	}
 }
@@ -122,6 +127,11 @@ func (m createdatabasetoolsconnectiondetails) GetLocks() []ResourceLock {
 // GetRuntimeSupport returns RuntimeSupport
 func (m createdatabasetoolsconnectiondetails) GetRuntimeSupport() RuntimeSupportEnum {
 	return m.RuntimeSupport
+}
+
+// GetRuntimeIdentity returns RuntimeIdentity
+func (m createdatabasetoolsconnectiondetails) GetRuntimeIdentity() RuntimeIdentityEnum {
+	return m.RuntimeIdentity
 }
 
 // GetDisplayName returns DisplayName
@@ -147,8 +157,11 @@ func (m createdatabasetoolsconnectiondetails) ValidateEnumValue() (bool, error) 
 	if _, ok := GetMappingRuntimeSupportEnum(string(m.RuntimeSupport)); !ok && m.RuntimeSupport != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeSupport: %s. Supported values are: %s.", m.RuntimeSupport, strings.Join(GetRuntimeSupportEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingRuntimeIdentityEnum(string(m.RuntimeIdentity)); !ok && m.RuntimeIdentity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeIdentity: %s. Supported values are: %s.", m.RuntimeIdentity, strings.Join(GetRuntimeIdentityEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

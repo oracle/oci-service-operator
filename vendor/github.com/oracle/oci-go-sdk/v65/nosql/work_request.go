@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -70,7 +70,7 @@ func (m WorkRequest) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -80,21 +80,24 @@ type WorkRequestOperationTypeEnum string
 
 // Set of constants representing the allowable values for WorkRequestOperationTypeEnum
 const (
-	WorkRequestOperationTypeCreateTable WorkRequestOperationTypeEnum = "CREATE_TABLE"
-	WorkRequestOperationTypeUpdateTable WorkRequestOperationTypeEnum = "UPDATE_TABLE"
-	WorkRequestOperationTypeDeleteTable WorkRequestOperationTypeEnum = "DELETE_TABLE"
+	WorkRequestOperationTypeCreateTable         WorkRequestOperationTypeEnum = "CREATE_TABLE"
+	WorkRequestOperationTypeUpdateTable         WorkRequestOperationTypeEnum = "UPDATE_TABLE"
+	WorkRequestOperationTypeDeleteTable         WorkRequestOperationTypeEnum = "DELETE_TABLE"
+	WorkRequestOperationTypeUpdateConfiguration WorkRequestOperationTypeEnum = "UPDATE_CONFIGURATION"
 )
 
 var mappingWorkRequestOperationTypeEnum = map[string]WorkRequestOperationTypeEnum{
-	"CREATE_TABLE": WorkRequestOperationTypeCreateTable,
-	"UPDATE_TABLE": WorkRequestOperationTypeUpdateTable,
-	"DELETE_TABLE": WorkRequestOperationTypeDeleteTable,
+	"CREATE_TABLE":         WorkRequestOperationTypeCreateTable,
+	"UPDATE_TABLE":         WorkRequestOperationTypeUpdateTable,
+	"DELETE_TABLE":         WorkRequestOperationTypeDeleteTable,
+	"UPDATE_CONFIGURATION": WorkRequestOperationTypeUpdateConfiguration,
 }
 
 var mappingWorkRequestOperationTypeEnumLowerCase = map[string]WorkRequestOperationTypeEnum{
-	"create_table": WorkRequestOperationTypeCreateTable,
-	"update_table": WorkRequestOperationTypeUpdateTable,
-	"delete_table": WorkRequestOperationTypeDeleteTable,
+	"create_table":         WorkRequestOperationTypeCreateTable,
+	"update_table":         WorkRequestOperationTypeUpdateTable,
+	"delete_table":         WorkRequestOperationTypeDeleteTable,
+	"update_configuration": WorkRequestOperationTypeUpdateConfiguration,
 }
 
 // GetWorkRequestOperationTypeEnumValues Enumerates the set of values for WorkRequestOperationTypeEnum
@@ -112,6 +115,7 @@ func GetWorkRequestOperationTypeEnumStringValues() []string {
 		"CREATE_TABLE",
 		"UPDATE_TABLE",
 		"DELETE_TABLE",
+		"UPDATE_CONFIGURATION",
 	}
 }
 

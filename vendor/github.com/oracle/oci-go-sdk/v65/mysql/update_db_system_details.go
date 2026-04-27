@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -26,6 +26,32 @@ type UpdateDbSystemDetails struct {
 
 	// The OCID of the subnet the DB System is associated with.
 	SubnetId *string `mandatory:"false" json:"subnetId"`
+
+	// Network Security Group OCIDs used for the VNIC attachment.
+	NsgIds []string `mandatory:"false" json:"nsgIds"`
+
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
+
+	// The database mode indicating the types of statements that will be allowed to run in the DB system.
+	// This mode will apply only to statements run by user connections. Replicated write statements will continue
+	// to be allowed regardless of the DatabaseMode.
+	//   - READ_WRITE: allow running read and write statements on the DB system;
+	//   - READ_ONLY: only allow running read statements on the DB system.
+	DatabaseMode DbSystemDatabaseModeEnum `mandatory:"false" json:"databaseMode,omitempty"`
+
+	// The access mode indicating if the database access will be restricted only to administrators or not:
+	//  - UNRESTRICTED: the access to the database is not restricted;
+	//  - RESTRICTED: the access will be allowed only to users with specific privileges;
+	//    RESTRICTED will correspond to setting the MySQL system variable
+	//    offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON.
+	AccessMode DbSystemAccessModeEnum `mandatory:"false" json:"accessMode,omitempty"`
+
+	Rest *UpdateRestDetails `mandatory:"false" json:"rest"`
+
+	DatabaseConsole *UpdateDatabaseConsoleDetails `mandatory:"false" json:"databaseConsole"`
 
 	// Specifies if the DB System is highly available.
 	// Set to true to enable high availability. Two secondary MySQL instances are created and placed in the unused
@@ -82,6 +108,8 @@ type UpdateDbSystemDetails struct {
 	// It is not possible to decrease data storage size.
 	DataStorageSizeInGBs *int `mandatory:"false" json:"dataStorageSizeInGBs"`
 
+	DataStorage *DataStorageDetails `mandatory:"false" json:"dataStorage"`
+
 	// The hostname for the primary endpoint of the DB System. Used for DNS.
 	// The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN)
 	// (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com").
@@ -122,6 +150,17 @@ type UpdateDbSystemDetails struct {
 	DatabaseManagement DatabaseManagementStatusEnum `mandatory:"false" json:"databaseManagement,omitempty"`
 
 	SecureConnections *SecureConnectionDetails `mandatory:"false" json:"secureConnections"`
+
+	EncryptData *EncryptDataDetails `mandatory:"false" json:"encryptData"`
+
+	// The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource.
+	// Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators.
+	// Up to 10 email addresses can be added to the customer contacts for a DB System.
+	CustomerContacts []CustomerContact `mandatory:"false" json:"customerContacts"`
+
+	ReadEndpoint *UpdateReadEndpointDetails `mandatory:"false" json:"readEndpoint"`
+
+	TelemetryConfiguration *UpdateTelemetryConfigurationDetails `mandatory:"false" json:"telemetryConfiguration"`
 }
 
 func (m UpdateDbSystemDetails) String() string {
@@ -134,6 +173,12 @@ func (m UpdateDbSystemDetails) String() string {
 func (m UpdateDbSystemDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
+	if _, ok := GetMappingDbSystemDatabaseModeEnum(string(m.DatabaseMode)); !ok && m.DatabaseMode != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DatabaseMode: %s. Supported values are: %s.", m.DatabaseMode, strings.Join(GetDbSystemDatabaseModeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingDbSystemAccessModeEnum(string(m.AccessMode)); !ok && m.AccessMode != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for AccessMode: %s. Supported values are: %s.", m.AccessMode, strings.Join(GetDbSystemAccessModeEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingCrashRecoveryStatusEnum(string(m.CrashRecovery)); !ok && m.CrashRecovery != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for CrashRecovery: %s. Supported values are: %s.", m.CrashRecovery, strings.Join(GetCrashRecoveryStatusEnumStringValues(), ",")))
 	}
@@ -141,7 +186,7 @@ func (m UpdateDbSystemDetails) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DatabaseManagement: %s. Supported values are: %s.", m.DatabaseManagement, strings.Join(GetDatabaseManagementStatusEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

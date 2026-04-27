@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/redis/ListRedisClusters.go.html to see an example of how to use ListRedisClustersRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/redis/ListRedisClusters.go.html to see an example of how to use ListRedisClustersRequest.
 type ListRedisClustersRequest struct {
 
 	// The ID of the compartment in which to list resources.
@@ -27,7 +27,7 @@ type ListRedisClustersRequest struct {
 	// A filter to return only resources that match the entire display name given.
 	DisplayName *string `mandatory:"false" contributesTo:"query" name:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the Redis cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
 	Id *string `mandatory:"false" contributesTo:"query" name:"id"`
 
 	// The maximum number of items to return.
@@ -91,7 +91,7 @@ func (request ListRedisClustersRequest) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortBy: %s. Supported values are: %s.", request.SortBy, strings.Join(GetListRedisClustersSortByEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

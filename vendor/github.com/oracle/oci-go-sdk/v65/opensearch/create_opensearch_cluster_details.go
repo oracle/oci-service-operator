@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -78,8 +78,53 @@ type CreateOpensearchClusterDetails struct {
 	// The bare metal shape for the cluster's master nodes.
 	MasterNodeHostBareMetalShape *string `mandatory:"false" json:"masterNodeHostBareMetalShape"`
 
+	// The node shape for the cluster's master nodes.
+	MasterNodeHostShape *string `mandatory:"false" json:"masterNodeHostShape"`
+
 	// The bare metal shape for the cluster's data nodes.
 	DataNodeHostBareMetalShape *string `mandatory:"false" json:"dataNodeHostBareMetalShape"`
+
+	// The node shape for the cluster's data nodes.
+	DataNodeHostShape *string `mandatory:"false" json:"dataNodeHostShape"`
+
+	// The node shape for the cluster's OpenSearch Dashboard nodes.
+	OpendashboardNodeHostShape *string `mandatory:"false" json:"opendashboardNodeHostShape"`
+
+	// The number of search nodes configured for the cluster.
+	SearchNodeCount *int `mandatory:"false" json:"searchNodeCount"`
+
+	// The instance type for the cluster's search nodes.
+	SearchNodeHostType SearchNodeHostTypeEnum `mandatory:"false" json:"searchNodeHostType,omitempty"`
+
+	// The node shape for the cluster's search nodes.
+	SearchNodeHostShape *string `mandatory:"false" json:"searchNodeHostShape"`
+
+	// The number of OCPUs configured for the cluster's search nodes.
+	SearchNodeHostOcpuCount *int `mandatory:"false" json:"searchNodeHostOcpuCount"`
+
+	// The amount of memory in GB, for the cluster's search nodes.
+	SearchNodeHostMemoryGB *int `mandatory:"false" json:"searchNodeHostMemoryGB"`
+
+	// The amount of storage in GB, to configure per node for the cluster's search nodes.
+	SearchNodeStorageGB *int `mandatory:"false" json:"searchNodeStorageGB"`
+
+	// The number of ML nodes configured for the cluster.
+	MlNodeCount *int `mandatory:"false" json:"mlNodeCount"`
+
+	// The instance type for the cluster's ML nodes.
+	MlNodeHostType MlNodeHostTypeEnum `mandatory:"false" json:"mlNodeHostType,omitempty"`
+
+	// The node shape for the cluster's ML nodes.
+	MlNodeHostShape *string `mandatory:"false" json:"mlNodeHostShape"`
+
+	// The number of OCPUs configured for the cluster's ML nodes.
+	MlNodeHostOcpuCount *int `mandatory:"false" json:"mlNodeHostOcpuCount"`
+
+	// The amount of memory in GB, for the cluster's ML nodes.
+	MlNodeHostMemoryGB *int `mandatory:"false" json:"mlNodeHostMemoryGB"`
+
+	// The amount of storage in GB, to configure per node for the cluster's ML nodes.
+	MlNodeStorageGB *int `mandatory:"false" json:"mlNodeStorageGB"`
 
 	// The security mode of the cluster.
 	SecurityMode SecurityModeEnum `mandatory:"false" json:"securityMode,omitempty"`
@@ -89,6 +134,27 @@ type CreateOpensearchClusterDetails struct {
 
 	// The password hash of the master user that are used to manage security config
 	SecurityMasterUserPasswordHash *string `mandatory:"false" json:"securityMasterUserPasswordHash"`
+
+	SecuritySamlConfig *SecuritySamlConfig `mandatory:"false" json:"securitySamlConfig"`
+
+	BackupPolicy *BackupPolicy `mandatory:"false" json:"backupPolicy"`
+
+	// The OCID of the NSG where the private endpoint vnic will be attached.
+	NsgId *string `mandatory:"false" json:"nsgId"`
+
+	// The customer IP addresses of the endpoint in customer VCN
+	ReverseConnectionEndpointCustomerIps []string `mandatory:"false" json:"reverseConnectionEndpointCustomerIps"`
+
+	// List of inbound clusters that will be queried using cross cluster search
+	InboundClusterIds []string `mandatory:"false" json:"inboundClusterIds"`
+
+	OutboundClusterConfig *OutboundClusterConfig `mandatory:"false" json:"outboundClusterConfig"`
+
+	MaintenanceDetails *CreateMaintenanceDetails `mandatory:"false" json:"maintenanceDetails"`
+
+	LoadBalancerConfig *LoadBalancerConfig `mandatory:"false" json:"loadBalancerConfig"`
+
+	CertificateConfig *CertificateConfig `mandatory:"false" json:"certificateConfig"`
 
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
@@ -101,6 +167,11 @@ type CreateOpensearchClusterDetails struct {
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// Security attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
 }
 
 func (m CreateOpensearchClusterDetails) String() string {
@@ -119,11 +190,17 @@ func (m CreateOpensearchClusterDetails) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DataNodeHostType: %s. Supported values are: %s.", m.DataNodeHostType, strings.Join(GetDataNodeHostTypeEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingSearchNodeHostTypeEnum(string(m.SearchNodeHostType)); !ok && m.SearchNodeHostType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SearchNodeHostType: %s. Supported values are: %s.", m.SearchNodeHostType, strings.Join(GetSearchNodeHostTypeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingMlNodeHostTypeEnum(string(m.MlNodeHostType)); !ok && m.MlNodeHostType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for MlNodeHostType: %s. Supported values are: %s.", m.MlNodeHostType, strings.Join(GetMlNodeHostTypeEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingSecurityModeEnum(string(m.SecurityMode)); !ok && m.SecurityMode != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SecurityMode: %s. Supported values are: %s.", m.SecurityMode, strings.Join(GetSecurityModeEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

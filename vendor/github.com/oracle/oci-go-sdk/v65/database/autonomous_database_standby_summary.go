@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -21,17 +21,29 @@ type AutonomousDatabaseStandbySummary struct {
 	// The amount of time, in seconds, that the data of the standby database lags the data of the primary database. Can be used to determine the potential data loss in the event of a failover.
 	LagTimeInSeconds *int `mandatory:"false" json:"lagTimeInSeconds"`
 
-	// The current state of the Autonomous Database.
+	// The current state of the Autonomous AI Database.
 	LifecycleState AutonomousDatabaseStandbySummaryLifecycleStateEnum `mandatory:"false" json:"lifecycleState,omitempty"`
 
 	// Additional information about the current lifecycle state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
 
-	// The date and time the Autonomous Data Guard role was switched for the standby Autonomous Database.
+	// The date and time the Autonomous Data Guard role was switched for the standby Autonomous AI Database.
 	TimeDataGuardRoleChanged *common.SDKTime `mandatory:"false" json:"timeDataGuardRoleChanged"`
 
-	// The date and time the Disaster Recovery role was switched for the standby Autonomous Database.
+	// The date and time the Disaster Recovery role was switched for the standby Autonomous AI Database.
 	TimeDisasterRecoveryRoleChanged *common.SDKTime `mandatory:"false" json:"timeDisasterRecoveryRoleChanged"`
+
+	// The date and time when maintenance will begin.
+	TimeMaintenanceBegin *common.SDKTime `mandatory:"false" json:"timeMaintenanceBegin"`
+
+	// The date and time when maintenance will end.
+	TimeMaintenanceEnd *common.SDKTime `mandatory:"false" json:"timeMaintenanceEnd"`
+
+	// The component chosen for maintenance.
+	MaintenanceTargetComponent *string `mandatory:"false" json:"maintenanceTargetComponent"`
+
+	// The availability domain of a local Autonomous Data Guard standby database of an Autonomous AI Database Serverless instance.
+	AvailabilityDomain *string `mandatory:"false" json:"availabilityDomain"`
 }
 
 func (m AutonomousDatabaseStandbySummary) String() string {
@@ -48,7 +60,7 @@ func (m AutonomousDatabaseStandbySummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetAutonomousDatabaseStandbySummaryLifecycleStateEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -79,6 +91,7 @@ const (
 	AutonomousDatabaseStandbySummaryLifecycleStateUpgrading               AutonomousDatabaseStandbySummaryLifecycleStateEnum = "UPGRADING"
 	AutonomousDatabaseStandbySummaryLifecycleStateInaccessible            AutonomousDatabaseStandbySummaryLifecycleStateEnum = "INACCESSIBLE"
 	AutonomousDatabaseStandbySummaryLifecycleStateStandby                 AutonomousDatabaseStandbySummaryLifecycleStateEnum = "STANDBY"
+	AutonomousDatabaseStandbySummaryLifecycleStateTransporting            AutonomousDatabaseStandbySummaryLifecycleStateEnum = "TRANSPORTING"
 )
 
 var mappingAutonomousDatabaseStandbySummaryLifecycleStateEnum = map[string]AutonomousDatabaseStandbySummaryLifecycleStateEnum{
@@ -103,6 +116,7 @@ var mappingAutonomousDatabaseStandbySummaryLifecycleStateEnum = map[string]Auton
 	"UPGRADING":                 AutonomousDatabaseStandbySummaryLifecycleStateUpgrading,
 	"INACCESSIBLE":              AutonomousDatabaseStandbySummaryLifecycleStateInaccessible,
 	"STANDBY":                   AutonomousDatabaseStandbySummaryLifecycleStateStandby,
+	"TRANSPORTING":              AutonomousDatabaseStandbySummaryLifecycleStateTransporting,
 }
 
 var mappingAutonomousDatabaseStandbySummaryLifecycleStateEnumLowerCase = map[string]AutonomousDatabaseStandbySummaryLifecycleStateEnum{
@@ -127,6 +141,7 @@ var mappingAutonomousDatabaseStandbySummaryLifecycleStateEnumLowerCase = map[str
 	"upgrading":                 AutonomousDatabaseStandbySummaryLifecycleStateUpgrading,
 	"inaccessible":              AutonomousDatabaseStandbySummaryLifecycleStateInaccessible,
 	"standby":                   AutonomousDatabaseStandbySummaryLifecycleStateStandby,
+	"transporting":              AutonomousDatabaseStandbySummaryLifecycleStateTransporting,
 }
 
 // GetAutonomousDatabaseStandbySummaryLifecycleStateEnumValues Enumerates the set of values for AutonomousDatabaseStandbySummaryLifecycleStateEnum
@@ -162,6 +177,7 @@ func GetAutonomousDatabaseStandbySummaryLifecycleStateEnumStringValues() []strin
 		"UPGRADING",
 		"INACCESSIBLE",
 		"STANDBY",
+		"TRANSPORTING",
 	}
 }
 

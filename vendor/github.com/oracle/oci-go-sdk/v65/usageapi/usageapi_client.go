@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Usage API
 //
-// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the dimension of your choosing. The Usage API is used by the Cost Analysis tool in the Console. Also see Using the Usage API (https://docs.cloud.oracle.com/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
+// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the chosen dimension. The Usage API is used by Cost Analysis (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm), Scheduled Reports (https://docs.oracle.com/iaas/Content/Billing/Concepts/scheduledreportoverview.htm), and Carbon Emissions Analysis (https://docs.oracle.com/iaas/Content/General/Concepts/emissions-management.htm) in the Console. Also see Using the Usage API (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
 //
 
 package usageapi
@@ -95,7 +95,7 @@ func (client *UsageapiClient) ConfigurationProvider() *common.ConfigurationProvi
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateCustomTable.go.html to see an example of how to use CreateCustomTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateCustomTable.go.html to see an example of how to use CreateCustomTable API.
 func (client UsageapiClient) CreateCustomTable(ctx context.Context, request CreateCustomTableRequest) (response CreateCustomTableResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -153,11 +153,73 @@ func (client UsageapiClient) createCustomTable(ctx context.Context, request comm
 	return response, err
 }
 
+// CreateEmailRecipientsGroup Creates a list of email recipients that can receive usage statements for the subscription.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateEmailRecipientsGroup.go.html to see an example of how to use CreateEmailRecipientsGroup API.
+func (client UsageapiClient) CreateEmailRecipientsGroup(ctx context.Context, request CreateEmailRecipientsGroupRequest) (response CreateEmailRecipientsGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.createEmailRecipientsGroup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = CreateEmailRecipientsGroupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = CreateEmailRecipientsGroupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateEmailRecipientsGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateEmailRecipientsGroupResponse")
+	}
+	return
+}
+
+// createEmailRecipientsGroup implements the OCIOperation interface (enables retrying operations)
+func (client UsageapiClient) createEmailRecipientsGroup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/usageStatements/{subscriptionId}/emailRecipientsGroups", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateEmailRecipientsGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/usage/20200107/EmailRecipientsGroup/CreateEmailRecipientsGroup"
+		err = common.PostProcessServiceError(err, "Usageapi", "CreateEmailRecipientsGroup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // CreateQuery Returns the created query.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateQuery.go.html to see an example of how to use CreateQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateQuery.go.html to see an example of how to use CreateQuery API.
 func (client UsageapiClient) CreateQuery(ctx context.Context, request CreateQueryRequest) (response CreateQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -219,7 +281,7 @@ func (client UsageapiClient) createQuery(ctx context.Context, request common.OCI
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateSchedule.go.html to see an example of how to use CreateSchedule API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateSchedule.go.html to see an example of how to use CreateSchedule API.
 func (client UsageapiClient) CreateSchedule(ctx context.Context, request CreateScheduleRequest) (response CreateScheduleResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -277,11 +339,11 @@ func (client UsageapiClient) createSchedule(ctx context.Context, request common.
 	return response, err
 }
 
-// CreateUsageCarbonEmissionsQuery Returns the created usage carbon emissions query.
+// CreateUsageCarbonEmissionsQuery Returns the created carbon emissions usage query.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateUsageCarbonEmissionsQuery.go.html to see an example of how to use CreateUsageCarbonEmissionsQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/CreateUsageCarbonEmissionsQuery.go.html to see an example of how to use CreateUsageCarbonEmissionsQuery API.
 func (client UsageapiClient) CreateUsageCarbonEmissionsQuery(ctx context.Context, request CreateUsageCarbonEmissionsQueryRequest) (response CreateUsageCarbonEmissionsQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -343,7 +405,7 @@ func (client UsageapiClient) createUsageCarbonEmissionsQuery(ctx context.Context
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteCustomTable.go.html to see an example of how to use DeleteCustomTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteCustomTable.go.html to see an example of how to use DeleteCustomTable API.
 func (client UsageapiClient) DeleteCustomTable(ctx context.Context, request DeleteCustomTableRequest) (response DeleteCustomTableResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -396,11 +458,68 @@ func (client UsageapiClient) deleteCustomTable(ctx context.Context, request comm
 	return response, err
 }
 
+// DeleteEmailRecipientsGroup Deletes the email recipients group for the usage statement subscription.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteEmailRecipientsGroup.go.html to see an example of how to use DeleteEmailRecipientsGroup API.
+func (client UsageapiClient) DeleteEmailRecipientsGroup(ctx context.Context, request DeleteEmailRecipientsGroupRequest) (response DeleteEmailRecipientsGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteEmailRecipientsGroup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = DeleteEmailRecipientsGroupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = DeleteEmailRecipientsGroupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteEmailRecipientsGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteEmailRecipientsGroupResponse")
+	}
+	return
+}
+
+// deleteEmailRecipientsGroup implements the OCIOperation interface (enables retrying operations)
+func (client UsageapiClient) deleteEmailRecipientsGroup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/usageStatements/{subscriptionId}/emailRecipientsGroups/{emailRecipientsGroupId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteEmailRecipientsGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/usage/20200107/EmailRecipientsGroup/DeleteEmailRecipientsGroup"
+		err = common.PostProcessServiceError(err, "Usageapi", "DeleteEmailRecipientsGroup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // DeleteQuery Delete a saved query by the OCID.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteQuery.go.html to see an example of how to use DeleteQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteQuery.go.html to see an example of how to use DeleteQuery API.
 func (client UsageapiClient) DeleteQuery(ctx context.Context, request DeleteQueryRequest) (response DeleteQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -457,7 +576,7 @@ func (client UsageapiClient) deleteQuery(ctx context.Context, request common.OCI
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteSchedule.go.html to see an example of how to use DeleteSchedule API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteSchedule.go.html to see an example of how to use DeleteSchedule API.
 func (client UsageapiClient) DeleteSchedule(ctx context.Context, request DeleteScheduleRequest) (response DeleteScheduleResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -510,11 +629,11 @@ func (client UsageapiClient) deleteSchedule(ctx context.Context, request common.
 	return response, err
 }
 
-// DeleteUsageCarbonEmissionsQuery Delete a usage carbon emissions saved query by the OCID.
+// DeleteUsageCarbonEmissionsQuery Delete a carbon emissions usage saved query by the OCID.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteUsageCarbonEmissionsQuery.go.html to see an example of how to use DeleteUsageCarbonEmissionsQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/DeleteUsageCarbonEmissionsQuery.go.html to see an example of how to use DeleteUsageCarbonEmissionsQuery API.
 func (client UsageapiClient) DeleteUsageCarbonEmissionsQuery(ctx context.Context, request DeleteUsageCarbonEmissionsQueryRequest) (response DeleteUsageCarbonEmissionsQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -571,7 +690,7 @@ func (client UsageapiClient) deleteUsageCarbonEmissionsQuery(ctx context.Context
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetCustomTable.go.html to see an example of how to use GetCustomTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetCustomTable.go.html to see an example of how to use GetCustomTable API.
 func (client UsageapiClient) GetCustomTable(ctx context.Context, request GetCustomTableRequest) (response GetCustomTableResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -624,11 +743,68 @@ func (client UsageapiClient) getCustomTable(ctx context.Context, request common.
 	return response, err
 }
 
+// GetEmailRecipientsGroup Returns the saved usage statement email recipients group.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetEmailRecipientsGroup.go.html to see an example of how to use GetEmailRecipientsGroup API.
+func (client UsageapiClient) GetEmailRecipientsGroup(ctx context.Context, request GetEmailRecipientsGroupRequest) (response GetEmailRecipientsGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getEmailRecipientsGroup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetEmailRecipientsGroupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetEmailRecipientsGroupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetEmailRecipientsGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetEmailRecipientsGroupResponse")
+	}
+	return
+}
+
+// getEmailRecipientsGroup implements the OCIOperation interface (enables retrying operations)
+func (client UsageapiClient) getEmailRecipientsGroup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/usageStatements/{subscriptionId}/emailRecipientsGroups/{emailRecipientsGroupId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetEmailRecipientsGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/usage/20200107/EmailRecipientsGroup/GetEmailRecipientsGroup"
+		err = common.PostProcessServiceError(err, "Usageapi", "GetEmailRecipientsGroup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // GetQuery Returns the saved query.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetQuery.go.html to see an example of how to use GetQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetQuery.go.html to see an example of how to use GetQuery API.
 func (client UsageapiClient) GetQuery(ctx context.Context, request GetQueryRequest) (response GetQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -685,7 +861,7 @@ func (client UsageapiClient) getQuery(ctx context.Context, request common.OCIReq
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetSchedule.go.html to see an example of how to use GetSchedule API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetSchedule.go.html to see an example of how to use GetSchedule API.
 func (client UsageapiClient) GetSchedule(ctx context.Context, request GetScheduleRequest) (response GetScheduleResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -742,7 +918,7 @@ func (client UsageapiClient) getSchedule(ctx context.Context, request common.OCI
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetScheduledRun.go.html to see an example of how to use GetScheduledRun API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetScheduledRun.go.html to see an example of how to use GetScheduledRun API.
 func (client UsageapiClient) GetScheduledRun(ctx context.Context, request GetScheduledRunRequest) (response GetScheduledRunResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -795,11 +971,11 @@ func (client UsageapiClient) getScheduledRun(ctx context.Context, request common
 	return response, err
 }
 
-// GetUsageCarbonEmissionsQuery Returns the usage carbon emissions saved query.
+// GetUsageCarbonEmissionsQuery Returns the carbon emissions usage saved query.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetUsageCarbonEmissionsQuery.go.html to see an example of how to use GetUsageCarbonEmissionsQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/GetUsageCarbonEmissionsQuery.go.html to see an example of how to use GetUsageCarbonEmissionsQuery API.
 func (client UsageapiClient) GetUsageCarbonEmissionsQuery(ctx context.Context, request GetUsageCarbonEmissionsQueryRequest) (response GetUsageCarbonEmissionsQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -856,7 +1032,7 @@ func (client UsageapiClient) getUsageCarbonEmissionsQuery(ctx context.Context, r
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListCustomTables.go.html to see an example of how to use ListCustomTables API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListCustomTables.go.html to see an example of how to use ListCustomTables API.
 func (client UsageapiClient) ListCustomTables(ctx context.Context, request ListCustomTablesRequest) (response ListCustomTablesResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -909,11 +1085,73 @@ func (client UsageapiClient) listCustomTables(ctx context.Context, request commo
 	return response, err
 }
 
+// ListEmailRecipientsGroups Returns the saved usage statement email recipients group.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListEmailRecipientsGroups.go.html to see an example of how to use ListEmailRecipientsGroups API.
+func (client UsageapiClient) ListEmailRecipientsGroups(ctx context.Context, request ListEmailRecipientsGroupsRequest) (response ListEmailRecipientsGroupsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+
+	if !(request.OpcRetryToken != nil && *request.OpcRetryToken != "") {
+		request.OpcRetryToken = common.String(common.RetryToken())
+	}
+
+	ociResponse, err = common.Retry(ctx, request, client.listEmailRecipientsGroups, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = ListEmailRecipientsGroupsResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = ListEmailRecipientsGroupsResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListEmailRecipientsGroupsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListEmailRecipientsGroupsResponse")
+	}
+	return
+}
+
+// listEmailRecipientsGroups implements the OCIOperation interface (enables retrying operations)
+func (client UsageapiClient) listEmailRecipientsGroups(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/usageStatements/{subscriptionId}/emailRecipientsGroups", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListEmailRecipientsGroupsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/usage/20200107/EmailRecipientsGroup/ListEmailRecipientsGroups"
+		err = common.PostProcessServiceError(err, "Usageapi", "ListEmailRecipientsGroups", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ListQueries Returns the saved query list.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListQueries.go.html to see an example of how to use ListQueries API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListQueries.go.html to see an example of how to use ListQueries API.
 func (client UsageapiClient) ListQueries(ctx context.Context, request ListQueriesRequest) (response ListQueriesResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -966,11 +1204,11 @@ func (client UsageapiClient) listQueries(ctx context.Context, request common.OCI
 	return response, err
 }
 
-// ListScheduledRuns Returns schedule history list.
+// ListScheduledRuns Returns the schedule history list.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListScheduledRuns.go.html to see an example of how to use ListScheduledRuns API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListScheduledRuns.go.html to see an example of how to use ListScheduledRuns API.
 func (client UsageapiClient) ListScheduledRuns(ctx context.Context, request ListScheduledRunsRequest) (response ListScheduledRunsResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1027,7 +1265,7 @@ func (client UsageapiClient) listScheduledRuns(ctx context.Context, request comm
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListSchedules.go.html to see an example of how to use ListSchedules API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListSchedules.go.html to see an example of how to use ListSchedules API.
 func (client UsageapiClient) ListSchedules(ctx context.Context, request ListSchedulesRequest) (response ListSchedulesResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1080,11 +1318,11 @@ func (client UsageapiClient) listSchedules(ctx context.Context, request common.O
 	return response, err
 }
 
-// ListUsageCarbonEmissionsQueries Returns the usage carbon emissions saved query list.
+// ListUsageCarbonEmissionsQueries Returns the carbon emissions usage saved query list.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListUsageCarbonEmissionsQueries.go.html to see an example of how to use ListUsageCarbonEmissionsQueries API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/ListUsageCarbonEmissionsQueries.go.html to see an example of how to use ListUsageCarbonEmissionsQueries API.
 func (client UsageapiClient) ListUsageCarbonEmissionsQueries(ctx context.Context, request ListUsageCarbonEmissionsQueriesRequest) (response ListUsageCarbonEmissionsQueriesResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1141,7 +1379,7 @@ func (client UsageapiClient) listUsageCarbonEmissionsQueries(ctx context.Context
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestAverageCarbonEmission.go.html to see an example of how to use RequestAverageCarbonEmission API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestAverageCarbonEmission.go.html to see an example of how to use RequestAverageCarbonEmission API.
 func (client UsageapiClient) RequestAverageCarbonEmission(ctx context.Context, request RequestAverageCarbonEmissionRequest) (response RequestAverageCarbonEmissionResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1198,7 +1436,7 @@ func (client UsageapiClient) requestAverageCarbonEmission(ctx context.Context, r
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestCleanEnergyUsage.go.html to see an example of how to use RequestCleanEnergyUsage API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestCleanEnergyUsage.go.html to see an example of how to use RequestCleanEnergyUsage API.
 func (client UsageapiClient) RequestCleanEnergyUsage(ctx context.Context, request RequestCleanEnergyUsageRequest) (response RequestCleanEnergyUsageResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1255,7 +1493,7 @@ func (client UsageapiClient) requestCleanEnergyUsage(ctx context.Context, reques
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestSummarizedConfigurations.go.html to see an example of how to use RequestSummarizedConfigurations API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestSummarizedConfigurations.go.html to see an example of how to use RequestSummarizedConfigurations API.
 func (client UsageapiClient) RequestSummarizedConfigurations(ctx context.Context, request RequestSummarizedConfigurationsRequest) (response RequestSummarizedConfigurationsResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1312,7 +1550,7 @@ func (client UsageapiClient) requestSummarizedConfigurations(ctx context.Context
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestSummarizedUsages.go.html to see an example of how to use RequestSummarizedUsages API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestSummarizedUsages.go.html to see an example of how to use RequestSummarizedUsages API.
 func (client UsageapiClient) RequestSummarizedUsages(ctx context.Context, request RequestSummarizedUsagesRequest) (response RequestSummarizedUsagesResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1365,11 +1603,11 @@ func (client UsageapiClient) requestSummarizedUsages(ctx context.Context, reques
 	return response, err
 }
 
-// RequestUsageCarbonEmissionConfig Returns the configuration list for the UI drop-down list of carbon emission console.
+// RequestUsageCarbonEmissionConfig Returns the configuration list for the Console's carbon emission user interface drop-down list.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestUsageCarbonEmissionConfig.go.html to see an example of how to use RequestUsageCarbonEmissionConfig API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestUsageCarbonEmissionConfig.go.html to see an example of how to use RequestUsageCarbonEmissionConfig API.
 func (client UsageapiClient) RequestUsageCarbonEmissionConfig(ctx context.Context, request RequestUsageCarbonEmissionConfigRequest) (response RequestUsageCarbonEmissionConfigResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1422,11 +1660,11 @@ func (client UsageapiClient) requestUsageCarbonEmissionConfig(ctx context.Contex
 	return response, err
 }
 
-// RequestUsageCarbonEmissions Returns usage carbon emission for the given account.
+// RequestUsageCarbonEmissions Returns carbon emission usage for the given account.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestUsageCarbonEmissions.go.html to see an example of how to use RequestUsageCarbonEmissions API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/RequestUsageCarbonEmissions.go.html to see an example of how to use RequestUsageCarbonEmissions API.
 func (client UsageapiClient) RequestUsageCarbonEmissions(ctx context.Context, request RequestUsageCarbonEmissionsRequest) (response RequestUsageCarbonEmissionsResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1479,11 +1717,11 @@ func (client UsageapiClient) requestUsageCarbonEmissions(ctx context.Context, re
 	return response, err
 }
 
-// UpdateCustomTable Update a saved custom table by table id.
+// UpdateCustomTable Update a saved custom table by table ID.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateCustomTable.go.html to see an example of how to use UpdateCustomTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateCustomTable.go.html to see an example of how to use UpdateCustomTable API.
 func (client UsageapiClient) UpdateCustomTable(ctx context.Context, request UpdateCustomTableRequest) (response UpdateCustomTableResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1536,11 +1774,68 @@ func (client UsageapiClient) updateCustomTable(ctx context.Context, request comm
 	return response, err
 }
 
+// UpdateEmailRecipientsGroup Updates a saved email recipients group.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateEmailRecipientsGroup.go.html to see an example of how to use UpdateEmailRecipientsGroup API.
+func (client UsageapiClient) UpdateEmailRecipientsGroup(ctx context.Context, request UpdateEmailRecipientsGroupRequest) (response UpdateEmailRecipientsGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateEmailRecipientsGroup, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateEmailRecipientsGroupResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateEmailRecipientsGroupResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateEmailRecipientsGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateEmailRecipientsGroupResponse")
+	}
+	return
+}
+
+// updateEmailRecipientsGroup implements the OCIOperation interface (enables retrying operations)
+func (client UsageapiClient) updateEmailRecipientsGroup(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/usageStatements/{subscriptionId}/emailRecipientsGroups/{emailRecipientsGroupId}", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateEmailRecipientsGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/usage/20200107/EmailRecipientsGroup/UpdateEmailRecipientsGroup"
+		err = common.PostProcessServiceError(err, "Usageapi", "UpdateEmailRecipientsGroup", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateQuery Update a saved query by the OCID.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateQuery.go.html to see an example of how to use UpdateQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateQuery.go.html to see an example of how to use UpdateQuery API.
 func (client UsageapiClient) UpdateQuery(ctx context.Context, request UpdateQueryRequest) (response UpdateQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1593,11 +1888,11 @@ func (client UsageapiClient) updateQuery(ctx context.Context, request common.OCI
 	return response, err
 }
 
-// UpdateSchedule Update a saved schedule
+// UpdateSchedule Update a saved schedule.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateSchedule.go.html to see an example of how to use UpdateSchedule API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateSchedule.go.html to see an example of how to use UpdateSchedule API.
 func (client UsageapiClient) UpdateSchedule(ctx context.Context, request UpdateScheduleRequest) (response UpdateScheduleResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1650,11 +1945,11 @@ func (client UsageapiClient) updateSchedule(ctx context.Context, request common.
 	return response, err
 }
 
-// UpdateUsageCarbonEmissionsQuery Update a usage carbon emissions saved query by the OCID.
+// UpdateUsageCarbonEmissionsQuery Update a carbon emissions usage saved query by the OCID.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateUsageCarbonEmissionsQuery.go.html to see an example of how to use UpdateUsageCarbonEmissionsQuery API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/usageapi/UpdateUsageCarbonEmissionsQuery.go.html to see an example of how to use UpdateUsageCarbonEmissionsQuery API.
 func (client UsageapiClient) UpdateUsageCarbonEmissionsQuery(ctx context.Context, request UpdateUsageCarbonEmissionsQueryRequest) (response UpdateUsageCarbonEmissionsQueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()

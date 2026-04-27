@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -19,15 +19,18 @@ import (
 // UpdateCertificateAuthorityDetails The details for updating a certificate authority (CA).
 type UpdateCertificateAuthorityDetails struct {
 
-	// A brief description of the CA.
+	// A brief description of the CA. Avoid entering confidential information.
 	Description *string `mandatory:"false" json:"description"`
 
-	// Makes this version the current version. This property cannot be updated in combination with any other properties.
+	// Makes this version the current version. This property can't be updated in combination with any other properties.
 	CurrentVersionNumber *int64 `mandatory:"false" json:"currentVersionNumber"`
 
 	CertificateAuthorityConfig UpdateCertificateAuthorityConfigDetails `mandatory:"false" json:"certificateAuthorityConfig"`
 
 	CertificateRevocationListDetails *CertificateRevocationListDetails `mandatory:"false" json:"certificateRevocationListDetails"`
+
+	// For externally managed CAs, a description of the externally managed key. Avoid entering confidential information.
+	ExternalKeyDescription *string `mandatory:"false" json:"externalKeyDescription"`
 
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
@@ -52,7 +55,7 @@ func (m UpdateCertificateAuthorityDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -64,6 +67,7 @@ func (m *UpdateCertificateAuthorityDetails) UnmarshalJSON(data []byte) (e error)
 		CurrentVersionNumber             *int64                                  `json:"currentVersionNumber"`
 		CertificateAuthorityConfig       updatecertificateauthorityconfigdetails `json:"certificateAuthorityConfig"`
 		CertificateRevocationListDetails *CertificateRevocationListDetails       `json:"certificateRevocationListDetails"`
+		ExternalKeyDescription           *string                                 `json:"externalKeyDescription"`
 		FreeformTags                     map[string]string                       `json:"freeformTags"`
 		DefinedTags                      map[string]map[string]interface{}       `json:"definedTags"`
 		CertificateAuthorityRules        []certificateauthorityrule              `json:"certificateAuthorityRules"`
@@ -89,6 +93,8 @@ func (m *UpdateCertificateAuthorityDetails) UnmarshalJSON(data []byte) (e error)
 	}
 
 	m.CertificateRevocationListDetails = model.CertificateRevocationListDetails
+
+	m.ExternalKeyDescription = model.ExternalKeyDescription
 
 	m.FreeformTags = model.FreeformTags
 

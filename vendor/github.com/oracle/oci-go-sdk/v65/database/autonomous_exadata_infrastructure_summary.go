@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -15,15 +15,15 @@ import (
 	"strings"
 )
 
-// AutonomousExadataInfrastructureSummary **Deprecated** These APIs are deprecated with the introduction of the Autonomous Exadata VM Cluster resource and a shift to a common Exadata Infrastructure resource for all Exadata Cloud-based services, including Autonomous Database on dedicated Exadata infrastructure. For more details, see Latest Resource Model (https://docs.oracle.com/en/cloud/paas/autonomous-database/flddd/#articletitle).
-// Infrastructure that enables the running of multiple Autonomous Databases within a dedicated DB system.
+// AutonomousExadataInfrastructureSummary **Deprecated** These APIs are deprecated with the introduction of the Autonomous Exadata VM Cluster resource and a shift to a common Exadata Infrastructure resource for all Exadata Cloud-based services, including Autonomous AI Database on dedicated Exadata infrastructure. For more details, see Latest Resource Model (https://docs.oracle.com/en/cloud/paas/autonomous-database/flddd/#articletitle).
+// Infrastructure that enables the running of multiple Autonomous AI Databases within a dedicated DB system.
 // For more information about Autonomous Exadata Infrastructure, see
-// Oracle Autonomous Database (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
-// To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized, talk to an administrator. If you're an administrator who needs to write policies to give users access, see Getting Started with Policies (https://docs.cloud.oracle.com/Content/Identity/Concepts/policygetstarted.htm).
+// Oracle Autonomous AI Database (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
+// To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized, talk to an administrator. If you're an administrator who needs to write policies to give users access, see Getting Started with Policies (https://docs.oracle.com/iaas/Content/Identity/Concepts/policygetstarted.htm).
 // For information about access control and compartments, see
-// Overview of the Identity Service (https://docs.cloud.oracle.com/Content/Identity/Concepts/overview.htm).
+// Overview of the Identity Service (https://docs.oracle.com/iaas/Content/Identity/Concepts/overview.htm).
 // For information about availability domains, see
-// Regions and Availability Domains (https://docs.cloud.oracle.com/Content/General/Concepts/regions.htm).
+// Regions and Availability Domains (https://docs.oracle.com/iaas/Content/General/Concepts/regions.htm).
 // To get a list of availability domains, use the ListAvailabilityDomains operation
 // in the Identity service API.
 type AutonomousExadataInfrastructureSummary struct {
@@ -42,7 +42,7 @@ type AutonomousExadataInfrastructureSummary struct {
 
 	// The OCID of the subnet the Autonomous Exadata Infrastructure is associated with.
 	// **Subnet Restrictions:**
-	// - For Autonomous Databases with Autonomous Exadata Infrastructure, do not use a subnet that overlaps with 192.168.128.0/20
+	// - For Autonomous AI Databases with Autonomous Exadata Infrastructure, do not use a subnet that overlaps with 192.168.128.0/20
 	// These subnets are used by the Oracle Clusterware private interconnect on the database instance.
 	// Specifying an overlapping subnet will cause the private interconnect to malfunction.
 	// This restriction applies to both the client subnet and backup subnet.
@@ -62,9 +62,9 @@ type AutonomousExadataInfrastructureSummary struct {
 
 	MaintenanceWindow *MaintenanceWindow `mandatory:"true" json:"maintenanceWindow"`
 
-	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
 	// **NsgIds restrictions:**
-	// - A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty.
+	// - A network security group (NSG) is optional for Autonomous AI Databases with private access. The nsgIds list can be empty.
 	NsgIds []string `mandatory:"false" json:"nsgIds"`
 
 	// Additional information about the current lifecycle state of the Autonomous Exadata Infrastructure.
@@ -76,19 +76,19 @@ type AutonomousExadataInfrastructureSummary struct {
 	// The date and time the Autonomous Exadata Infrastructure was created.
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last maintenance run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the last maintenance run.
 	LastMaintenanceRunId *string `mandatory:"false" json:"lastMaintenanceRunId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the next maintenance run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the next maintenance run.
 	NextMaintenanceRunId *string `mandatory:"false" json:"nextMaintenanceRunId"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	// The FQDN of the DNS record for the SCAN IP addresses that are associated with the Autonomous Exadata Infrastructure.
@@ -115,7 +115,7 @@ func (m AutonomousExadataInfrastructureSummary) ValidateEnumValue() (bool, error
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseModel: %s. Supported values are: %s.", m.LicenseModel, strings.Join(GetAutonomousExadataInfrastructureSummaryLicenseModelEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -15,36 +15,46 @@ import (
 	"strings"
 )
 
-// AutonomousDbVersionSummary The supported Autonomous Database version.
+// AutonomousDbVersionSummary The supported Autonomous AI Database version.
 type AutonomousDbVersionSummary struct {
 
-	// A valid Oracle Database version for Autonomous Database.
+	// A valid Oracle AI Database version for Autonomous AI Database.
+	// When you specify 23ai for dbversion, the system will provision a 23ai database, but the UI will display it as 26ai.
+	// When you specify 26ai for dbversion, the system will provision and display a 26ai database as expected.
+	// For new databases, it is recommended to use either 19c or 26ai.
+	// **Note** Starting December 2026, 23ai will not be supported as a valid value for this parameter.
 	Version *string `mandatory:"true" json:"version"`
 
-	// The Autonomous Database workload type. The following values are valid:
-	// - OLTP - indicates an Autonomous Transaction Processing database
-	// - DW - indicates an Autonomous Data Warehouse database
-	// - AJD - indicates an Autonomous JSON Database
-	// - APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.
+	// The Autonomous AI Database workload type. The following values are valid:
+	// - OLTP - indicates an Autonomous AI Transaction Processing database
+	// - DW - indicates an Autonomous AI Lakehouse database
+	// - AJD - indicates an Autonomous AI JSON Database
+	// - APEX - indicates an Autonomous AI Database with the Oracle APEX AI Application Development workload type.
+	// - LH - indicates an Oracle Autonomous AI Lakehouse database
+	// **Note** Starting December 2026, DW will not be supported as a valid value for this parameter.
+	//
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	DbWorkload AutonomousDbVersionSummaryDbWorkloadEnum `mandatory:"false" json:"dbWorkload,omitempty"`
 
 	// True if the database uses dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
 	IsDedicated *bool `mandatory:"false" json:"isDedicated"`
 
-	// A URL that points to a detailed description of the Autonomous Database version.
+	// A URL that points to a detailed description of the Autonomous AI Database version.
 	Details *string `mandatory:"false" json:"details"`
 
-	// True if this version of the Oracle Database software can be used for Always-Free Autonomous Databases.
+	// True if this version of the Oracle AI Database software can be used for Always-Free Autonomous AI Databases.
 	IsFreeTierEnabled *bool `mandatory:"false" json:"isFreeTierEnabled"`
 
-	// True if this version of the Oracle Database software has payments enabled.
+	// True if this Oracle AI Database software version can be used for Autonomous AI Databases for Developers.
+	IsDevTierEnabled *bool `mandatory:"false" json:"isDevTierEnabled"`
+
+	// True if this version of the Oracle AI Database software has payments enabled.
 	IsPaidEnabled *bool `mandatory:"false" json:"isPaidEnabled"`
 
-	// True if this version of the Oracle Database software's default is free.
+	// True if this version of the Oracle AI Database software's default is free.
 	IsDefaultForFree *bool `mandatory:"false" json:"isDefaultForFree"`
 
-	// True if this version of the Oracle Database software's default is paid.
+	// True if this version of the Oracle AI Database software's default is paid.
 	IsDefaultForPaid *bool `mandatory:"false" json:"isDefaultForPaid"`
 }
 
@@ -62,7 +72,7 @@ func (m AutonomousDbVersionSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DbWorkload: %s. Supported values are: %s.", m.DbWorkload, strings.Join(GetAutonomousDbVersionSummaryDbWorkloadEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -76,6 +86,7 @@ const (
 	AutonomousDbVersionSummaryDbWorkloadDw   AutonomousDbVersionSummaryDbWorkloadEnum = "DW"
 	AutonomousDbVersionSummaryDbWorkloadAjd  AutonomousDbVersionSummaryDbWorkloadEnum = "AJD"
 	AutonomousDbVersionSummaryDbWorkloadApex AutonomousDbVersionSummaryDbWorkloadEnum = "APEX"
+	AutonomousDbVersionSummaryDbWorkloadLh   AutonomousDbVersionSummaryDbWorkloadEnum = "LH"
 )
 
 var mappingAutonomousDbVersionSummaryDbWorkloadEnum = map[string]AutonomousDbVersionSummaryDbWorkloadEnum{
@@ -83,6 +94,7 @@ var mappingAutonomousDbVersionSummaryDbWorkloadEnum = map[string]AutonomousDbVer
 	"DW":   AutonomousDbVersionSummaryDbWorkloadDw,
 	"AJD":  AutonomousDbVersionSummaryDbWorkloadAjd,
 	"APEX": AutonomousDbVersionSummaryDbWorkloadApex,
+	"LH":   AutonomousDbVersionSummaryDbWorkloadLh,
 }
 
 var mappingAutonomousDbVersionSummaryDbWorkloadEnumLowerCase = map[string]AutonomousDbVersionSummaryDbWorkloadEnum{
@@ -90,6 +102,7 @@ var mappingAutonomousDbVersionSummaryDbWorkloadEnumLowerCase = map[string]Autono
 	"dw":   AutonomousDbVersionSummaryDbWorkloadDw,
 	"ajd":  AutonomousDbVersionSummaryDbWorkloadAjd,
 	"apex": AutonomousDbVersionSummaryDbWorkloadApex,
+	"lh":   AutonomousDbVersionSummaryDbWorkloadLh,
 }
 
 // GetAutonomousDbVersionSummaryDbWorkloadEnumValues Enumerates the set of values for AutonomousDbVersionSummaryDbWorkloadEnum
@@ -108,6 +121,7 @@ func GetAutonomousDbVersionSummaryDbWorkloadEnumStringValues() []string {
 		"DW",
 		"AJD",
 		"APEX",
+		"LH",
 	}
 }
 

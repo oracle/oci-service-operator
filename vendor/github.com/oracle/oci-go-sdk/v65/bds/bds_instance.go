@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -51,6 +51,12 @@ type BdsInstance struct {
 	// Version of the Hadoop distribution.
 	ClusterVersion BdsInstanceClusterVersionEnum `mandatory:"false" json:"clusterVersion,omitempty"`
 
+	// The secretId for the clusterAdminPassword.
+	SecretId *string `mandatory:"false" json:"secretId"`
+
+	// Boolean flag specifying whether or not to persist the provided secret OCID and reuse it for future operations.
+	IsSecretReused *bool `mandatory:"false" json:"isSecretReused"`
+
 	NetworkConfig *NetworkConfig `mandatory:"false" json:"networkConfig"`
 
 	ClusterDetails *ClusterDetails `mandatory:"false" json:"clusterDetails"`
@@ -85,6 +91,11 @@ type BdsInstance struct {
 
 	// Profile of the Big Data Service cluster.
 	ClusterProfile BdsInstanceClusterProfileEnum `mandatory:"false" json:"clusterProfile,omitempty"`
+
+	BdsClusterVersionSummary *BdsClusterVersionSummary `mandatory:"false" json:"bdsClusterVersionSummary"`
+
+	// The earliest time of certificate expiration date across the certificates of all current nodes under this cluster.
+	TimeEarliestCertificateExpiration *common.SDKTime `mandatory:"false" json:"timeEarliestCertificateExpiration"`
 }
 
 func (m BdsInstance) String() string {
@@ -107,7 +118,7 @@ func (m BdsInstance) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ClusterProfile: %s. Supported values are: %s.", m.ClusterProfile, strings.Join(GetBdsInstanceClusterProfileEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

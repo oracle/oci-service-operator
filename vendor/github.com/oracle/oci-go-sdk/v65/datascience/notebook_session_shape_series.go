@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -21,6 +21,7 @@ const (
 	NotebookSessionShapeSeriesAmdRome      NotebookSessionShapeSeriesEnum = "AMD_ROME"
 	NotebookSessionShapeSeriesIntelSkylake NotebookSessionShapeSeriesEnum = "INTEL_SKYLAKE"
 	NotebookSessionShapeSeriesNvidiaGpu    NotebookSessionShapeSeriesEnum = "NVIDIA_GPU"
+	NotebookSessionShapeSeriesGeneric      NotebookSessionShapeSeriesEnum = "GENERIC"
 	NotebookSessionShapeSeriesLegacy       NotebookSessionShapeSeriesEnum = "LEGACY"
 	NotebookSessionShapeSeriesArm          NotebookSessionShapeSeriesEnum = "ARM"
 )
@@ -29,6 +30,7 @@ var mappingNotebookSessionShapeSeriesEnum = map[string]NotebookSessionShapeSerie
 	"AMD_ROME":      NotebookSessionShapeSeriesAmdRome,
 	"INTEL_SKYLAKE": NotebookSessionShapeSeriesIntelSkylake,
 	"NVIDIA_GPU":    NotebookSessionShapeSeriesNvidiaGpu,
+	"GENERIC":       NotebookSessionShapeSeriesGeneric,
 	"LEGACY":        NotebookSessionShapeSeriesLegacy,
 	"ARM":           NotebookSessionShapeSeriesArm,
 }
@@ -37,6 +39,7 @@ var mappingNotebookSessionShapeSeriesEnumLowerCase = map[string]NotebookSessionS
 	"amd_rome":      NotebookSessionShapeSeriesAmdRome,
 	"intel_skylake": NotebookSessionShapeSeriesIntelSkylake,
 	"nvidia_gpu":    NotebookSessionShapeSeriesNvidiaGpu,
+	"generic":       NotebookSessionShapeSeriesGeneric,
 	"legacy":        NotebookSessionShapeSeriesLegacy,
 	"arm":           NotebookSessionShapeSeriesArm,
 }
@@ -56,6 +59,7 @@ func GetNotebookSessionShapeSeriesEnumStringValues() []string {
 		"AMD_ROME",
 		"INTEL_SKYLAKE",
 		"NVIDIA_GPU",
+		"GENERIC",
 		"LEGACY",
 		"ARM",
 	}

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -35,7 +35,7 @@ type UpdateDatabaseToolsConnectionPostgresqlDetails struct {
 	// The connection string used to connect to the PostgreSQL Server.
 	ConnectionString *string `mandatory:"false" json:"connectionString"`
 
-	// The user name.
+	// The database user name.
 	UserName *string `mandatory:"false" json:"userName"`
 
 	UserPassword DatabaseToolsUserPasswordDetails `mandatory:"false" json:"userPassword"`
@@ -47,7 +47,7 @@ type UpdateDatabaseToolsConnectionPostgresqlDetails struct {
 	// the client private key and associated certificate required for client authentication.
 	KeyStores []DatabaseToolsKeyStorePostgresqlDetails `mandatory:"false" json:"keyStores"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the DatabaseToolsPrivateEndpoint used to access the database in the Customer VCN.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the Customer VCN.
 	PrivateEndpointId *string `mandatory:"false" json:"privateEndpointId"`
 }
 
@@ -77,7 +77,7 @@ func (m UpdateDatabaseToolsConnectionPostgresqlDetails) ValidateEnumValue() (boo
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

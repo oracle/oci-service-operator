@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -36,6 +36,15 @@ type ValidateDatabaseToolsConnectionOracleDatabaseResult struct {
 
 	// The database name.
 	DatabaseName *string `mandatory:"false" json:"databaseName"`
+
+	// Displays the CLOUD_SERVICE value within the USERENV context
+	CloudService *string `mandatory:"false" json:"cloudService"`
+
+	// Status on whether a Database Tools identity type can be used with this connection or not.
+	DatabaseToolsIdentityStatuses []ValidationIdentityStatus `mandatory:"false" json:"databaseToolsIdentityStatuses"`
+
+	// The DBMS_CLOUD package installation status.
+	DbmsCloudStatus DbmsCloudStatusEnum `mandatory:"true" json:"dbmsCloudStatus"`
 }
 
 // GetCode returns Code
@@ -68,8 +77,11 @@ func (m ValidateDatabaseToolsConnectionOracleDatabaseResult) String() string {
 func (m ValidateDatabaseToolsConnectionOracleDatabaseResult) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
+	if _, ok := GetMappingDbmsCloudStatusEnum(string(m.DbmsCloudStatus)); !ok && m.DbmsCloudStatus != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DbmsCloudStatus: %s. Supported values are: %s.", m.DbmsCloudStatus, strings.Join(GetDbmsCloudStatusEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

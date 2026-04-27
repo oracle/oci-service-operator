@@ -1,11 +1,11 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // PGSQL Control Plane API
 //
 // Use the OCI Database with PostgreSQL API to manage resources such as database systems, database nodes, backups, and configurations.
-// For information, see the user guide documentation for the service (https://docs.cloud.oracle.com/iaas/Content/postgresql/home.htm).
+// For information, see the user guide documentation for the service (https://docs.oracle.com/iaas/Content/postgresql/home.htm).
 //
 
 package psql
@@ -33,18 +33,23 @@ type DefaultConfiguration struct {
 	// The current state of the configuration.
 	LifecycleState DefaultConfigurationLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
+	// Version of the PostgreSQL database.
+	DbVersion *string `mandatory:"true" json:"dbVersion"`
+
 	// The name of the shape for the configuration.
-	// Example: `VM.Standard.E4.Flex`
+	// For multi-shape enabled configurations, it is set to PostgreSQL. Please use compatibleShapes property to get list of supported shapes for such configurations.
 	Shape *string `mandatory:"true" json:"shape"`
 
-	// CPU core count. Minimum value is 1.
+	// CPU core count.
+	// Its value is set to 0 if configuration is for a flexible shape.
 	InstanceOcpuCount *int `mandatory:"true" json:"instanceOcpuCount"`
 
 	// Memory size in gigabytes with 1GB increment.
+	// Its value is set to 0 if configuration is for a flexible shape.
 	InstanceMemorySizeInGBs *int `mandatory:"true" json:"instanceMemorySizeInGBs"`
 
-	// Version of the PostgreSQL database.
-	DbVersion *string `mandatory:"true" json:"dbVersion"`
+	// Indicates the collection of compatible shapes for this configuration.
+	CompatibleShapes []string `mandatory:"true" json:"compatibleShapes"`
 
 	ConfigurationDetails *DefaultConfigurationDetails `mandatory:"true" json:"configurationDetails"`
 
@@ -53,6 +58,9 @@ type DefaultConfiguration struct {
 
 	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
+
+	// True if the configuration supports flexible shapes, false otherwise.
+	IsFlexible *bool `mandatory:"false" json:"isFlexible"`
 }
 
 func (m DefaultConfiguration) String() string {
@@ -69,7 +77,7 @@ func (m DefaultConfiguration) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,10 +15,10 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDatabaseSoftwareImages.go.html to see an example of how to use ListDatabaseSoftwareImagesRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/database/ListDatabaseSoftwareImages.go.html to see an example of how to use ListDatabaseSoftwareImagesRequest.
 type ListDatabaseSoftwareImagesRequest struct {
 
-	// The compartment OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The compartment OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	CompartmentId *string `mandatory:"true" contributesTo:"query" name:"compartmentId"`
 
 	// The maximum number of items to return per page.
@@ -28,6 +28,7 @@ type ListDatabaseSoftwareImagesRequest struct {
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
 
 	// The field to sort by.  You can provide one sort order (`sortOrder`).  Default order for TIMECREATED is descending.  Default order for DISPLAYNAME is ascending. The DISPLAYNAME sort order is case sensitive.
+	// Default order for PATCHSET is descending.
 	SortBy ListDatabaseSoftwareImagesSortByEnum `mandatory:"false" contributesTo:"query" name:"sortBy" omitEmpty:"true"`
 
 	// The sort order to use, either ascending (`ASC`) or descending (`DESC`).
@@ -44,6 +45,12 @@ type ListDatabaseSoftwareImagesRequest struct {
 
 	// A filter to return only resources that match the given image shape family exactly.
 	ImageShapeFamily DatabaseSoftwareImageSummaryImageShapeFamilyEnum `mandatory:"false" contributesTo:"query" name:"imageShapeFamily" omitEmpty:"true"`
+
+	// A filter to return only resources with `patchSet` greater than or equal to given value.
+	PatchSetGreaterThanOrEqualTo *string `mandatory:"false" contributesTo:"query" name:"patchSetGreaterThanOrEqualTo"`
+
+	// The DB system OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). If provided, filters the results to the set of database versions which are supported for the DB system.
+	DbSystemId *string `mandatory:"false" contributesTo:"query" name:"dbSystemId"`
 
 	// If provided, filters the results to the set of database versions which are supported for Upgrade.
 	IsUpgradeSupported *bool `mandatory:"false" contributesTo:"query" name:"isUpgradeSupported"`
@@ -104,7 +111,7 @@ func (request ListDatabaseSoftwareImagesRequest) ValidateEnumValue() (bool, erro
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ImageShapeFamily: %s. Supported values are: %s.", request.ImageShapeFamily, strings.Join(GetDatabaseSoftwareImageSummaryImageShapeFamilyEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -125,7 +132,7 @@ type ListDatabaseSoftwareImagesResponse struct {
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
 	// then there are additional items still to get. Include this value as the `page` parameter for the
 	// subsequent GET request. For information about pagination, see
-	// List Pagination (https://docs.cloud.oracle.com/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 }
 
@@ -145,16 +152,19 @@ type ListDatabaseSoftwareImagesSortByEnum string
 const (
 	ListDatabaseSoftwareImagesSortByTimecreated ListDatabaseSoftwareImagesSortByEnum = "TIMECREATED"
 	ListDatabaseSoftwareImagesSortByDisplayname ListDatabaseSoftwareImagesSortByEnum = "DISPLAYNAME"
+	ListDatabaseSoftwareImagesSortByPatchset    ListDatabaseSoftwareImagesSortByEnum = "PATCHSET"
 )
 
 var mappingListDatabaseSoftwareImagesSortByEnum = map[string]ListDatabaseSoftwareImagesSortByEnum{
 	"TIMECREATED": ListDatabaseSoftwareImagesSortByTimecreated,
 	"DISPLAYNAME": ListDatabaseSoftwareImagesSortByDisplayname,
+	"PATCHSET":    ListDatabaseSoftwareImagesSortByPatchset,
 }
 
 var mappingListDatabaseSoftwareImagesSortByEnumLowerCase = map[string]ListDatabaseSoftwareImagesSortByEnum{
 	"timecreated": ListDatabaseSoftwareImagesSortByTimecreated,
 	"displayname": ListDatabaseSoftwareImagesSortByDisplayname,
+	"patchset":    ListDatabaseSoftwareImagesSortByPatchset,
 }
 
 // GetListDatabaseSoftwareImagesSortByEnumValues Enumerates the set of values for ListDatabaseSoftwareImagesSortByEnum
@@ -171,6 +181,7 @@ func GetListDatabaseSoftwareImagesSortByEnumStringValues() []string {
 	return []string{
 		"TIMECREATED",
 		"DISPLAYNAME",
+		"PATCHSET",
 	}
 }
 

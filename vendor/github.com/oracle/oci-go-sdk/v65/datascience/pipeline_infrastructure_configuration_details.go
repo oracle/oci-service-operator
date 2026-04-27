@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -24,7 +24,14 @@ type PipelineInfrastructureConfigurationDetails struct {
 	// The size of the block storage volume to attach to the instance.
 	BlockStorageSizeInGBs *int `mandatory:"true" json:"blockStorageSizeInGBs"`
 
+	// The subnet to create a secondary vnic in to attach to the instance running the pipeline step.
+	SubnetId *string `mandatory:"false" json:"subnetId"`
+
 	ShapeConfigDetails *PipelineShapeConfigDetails `mandatory:"false" json:"shapeConfigDetails"`
+
+	// The size of the block storage volume to attach to the pipeline step run instance specified as a parameter. This overrides the blockStorageSizeInGBs value.
+	// The request will fail if the parameters used are null or invalid.
+	BlockStorageSizeInGBsParameterized *string `mandatory:"false" json:"blockStorageSizeInGBsParameterized"`
 }
 
 func (m PipelineInfrastructureConfigurationDetails) String() string {
@@ -38,7 +45,7 @@ func (m PipelineInfrastructureConfigurationDetails) ValidateEnumValue() (bool, e
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

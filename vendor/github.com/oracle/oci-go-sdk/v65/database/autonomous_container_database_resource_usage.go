@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -21,13 +21,13 @@ type AutonomousContainerDatabaseResourceUsage struct {
 	// The user-friendly name for the Autonomous Container Database. The name does not need to be unique.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Autonomous Container Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Autonomous Container Database.
 	Id *string `mandatory:"false" json:"id"`
 
 	// Number of CPUs that are reclaimable or released to the AVMC on Autonomous Container Database restart.
 	ReclaimableCpus *float32 `mandatory:"false" json:"reclaimableCpus"`
 
-	// CPUs available for provisioning or scaling an Autonomous Database in the Autonomous Container Database.
+	// CPUs available for provisioning or scaling an Autonomous AI Database in the Autonomous Container Database.
 	AvailableCpus *float32 `mandatory:"false" json:"availableCpus"`
 
 	// Largest provisionable ADB in the Autonomous Container Database.
@@ -44,19 +44,19 @@ type AutonomousContainerDatabaseResourceUsage struct {
 	// reserved and reclaimable CPUs/ cores.
 	UsedCpus *float32 `mandatory:"false" json:"usedCpus"`
 
-	// Valid list of provisionable CPUs for Autonomous Database.
+	// Valid list of provisionable CPUs for Autonomous AI Database.
 	ProvisionableCpus []float32 `mandatory:"false" json:"provisionableCpus"`
 
 	// List of autonomous container database resource usage per autonomous virtual machine.
 	AutonomousContainerDatabaseVmUsage []AcdAvmResourceStats `mandatory:"false" json:"autonomousContainerDatabaseVmUsage"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 }
 
@@ -71,7 +71,7 @@ func (m AutonomousContainerDatabaseResourceUsage) ValidateEnumValue() (bool, err
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
