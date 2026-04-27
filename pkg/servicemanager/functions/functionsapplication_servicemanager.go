@@ -125,6 +125,9 @@ func (m *FunctionsApplicationServiceManager) resolveApplicationForReconcile(
 			}
 			clearTrackedFunctionsStatus(resource)
 		} else {
+			if !functionsApplicationAllowsMutation(current) {
+				return current, servicemanager.OSOKResponse{}, false, nil
+			}
 			updatedCurrent, _, err := m.UpdateApplication(ctx, resource, current)
 			if err != nil {
 				m.Log.ErrorLog(err, "error while updating Application")
@@ -147,6 +150,10 @@ func (m *FunctionsApplicationServiceManager) resolveApplicationForReconcile(
 			return nil, servicemanager.OSOKResponse{IsSuccessful: false}, true, err
 		}
 		return &createResponse.Application, servicemanager.OSOKResponse{}, false, nil
+	}
+
+	if !functionsApplicationAllowsMutation(current) {
+		return current, servicemanager.OSOKResponse{}, false, nil
 	}
 
 	updatedCurrent, _, err := m.UpdateApplication(ctx, resource, current)
@@ -195,6 +202,7 @@ func (m *FunctionsApplicationServiceManager) Delete(ctx context.Context, obj run
 		return true, nil
 	}
 
+	markFunctionsDeletePending(&resource.Status.OsokStatus, current, m.Log, "Application")
 	return false, nil
 }
 

@@ -2,6 +2,7 @@ package functions
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -229,6 +230,233 @@ func TestFunctionsApplicationCreateOrUpdateTracked404FallsBackToCreate(t *testin
 	}
 }
 
+func TestFunctionsApplicationCreateOrUpdateUpdatesMutableConfig(t *testing.T) {
+	t.Parallel()
+
+	updateCalls := 0
+	client := &fakeFunctionsManagementClient{
+		getApplicationFn: func(_ context.Context, req ocifunctions.GetApplicationRequest) (ocifunctions.GetApplicationResponse, error) {
+			if got := safeFunctionsString(req.ApplicationId); got != "ocid1.application.oc1..tracked" {
+				t.Fatalf("GetApplicationRequest.ApplicationId = %q, want tracked id", got)
+			}
+			return ocifunctions.GetApplicationResponse{
+				Application: ocifunctions.Application{
+					Id:             common.String("ocid1.application.oc1..tracked"),
+					CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+					DisplayName:    common.String("sample-app"),
+					SubnetIds:      []string{"ocid1.subnet.oc1..example"},
+					Config:         map[string]string{"mode": "old"},
+					Shape:          ocifunctions.ApplicationShapeX86,
+					LifecycleState: ocifunctions.ApplicationLifecycleStateActive,
+				},
+			}, nil
+		},
+		updateApplicationFn: func(_ context.Context, req ocifunctions.UpdateApplicationRequest) (ocifunctions.UpdateApplicationResponse, error) {
+			updateCalls++
+			if got := safeFunctionsString(req.ApplicationId); got != "ocid1.application.oc1..tracked" {
+				t.Fatalf("UpdateApplicationRequest.ApplicationId = %q, want tracked id", got)
+			}
+			if got := req.UpdateApplicationDetails.Config["mode"]; got != "new" {
+				t.Fatalf("UpdateApplicationDetails.Config[mode] = %q, want new", got)
+			}
+			if req.UpdateApplicationDetails.NetworkSecurityGroupIds != nil {
+				t.Fatalf("UpdateApplicationDetails.NetworkSecurityGroupIds = %#v, want nil when unchanged", req.UpdateApplicationDetails.NetworkSecurityGroupIds)
+			}
+			return ocifunctions.UpdateApplicationResponse{
+				OpcRequestId: common.String("opc-update-app-1"),
+				Application: ocifunctions.Application{
+					Id:             common.String("ocid1.application.oc1..tracked"),
+					CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+					DisplayName:    common.String("sample-app"),
+					SubnetIds:      []string{"ocid1.subnet.oc1..example"},
+					Config:         map[string]string{"mode": "new"},
+					Shape:          ocifunctions.ApplicationShapeX86,
+					LifecycleState: ocifunctions.ApplicationLifecycleStateActive,
+				},
+			}, nil
+		},
+	}
+
+	manager := &FunctionsApplicationServiceManager{
+		Log:       testFunctionsLogger(),
+		ociClient: client,
+	}
+
+	resource := testApplicationResource()
+	resource.Spec.Config = map[string]string{"mode": "new"}
+	resource.Status.Id = "ocid1.application.oc1..tracked"
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful non-requeueing update", response)
+	}
+	if updateCalls != 1 {
+		t.Fatalf("UpdateApplication() calls = %d, want 1", updateCalls)
+	}
+	if got := resource.Status.Config["mode"]; got != "new" {
+		t.Fatalf("status.config[mode] = %q, want new", got)
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-update-app-1" {
+		t.Fatalf("status.opcRequestId = %q, want %q", got, "opc-update-app-1")
+	}
+	requireTrailingFunctionsCondition(t, resource.Status.OsokStatus, shared.Active)
+}
+
+func TestFunctionsApplicationCreateOrUpdateRejectsCreateOnlyDrift(t *testing.T) {
+	t.Parallel()
+
+	updateCalls := 0
+	client := &fakeFunctionsManagementClient{
+		getApplicationFn: func(_ context.Context, _ ocifunctions.GetApplicationRequest) (ocifunctions.GetApplicationResponse, error) {
+			return ocifunctions.GetApplicationResponse{
+				Application: ocifunctions.Application{
+					Id:             common.String("ocid1.application.oc1..tracked"),
+					CompartmentId:  common.String("ocid1.compartment.oc1..existing"),
+					DisplayName:    common.String("existing-app"),
+					SubnetIds:      []string{"ocid1.subnet.oc1..existing"},
+					Shape:          ocifunctions.ApplicationShapeX86,
+					LifecycleState: ocifunctions.ApplicationLifecycleStateActive,
+				},
+			}, nil
+		},
+		updateApplicationFn: func(context.Context, ocifunctions.UpdateApplicationRequest) (ocifunctions.UpdateApplicationResponse, error) {
+			updateCalls++
+			return ocifunctions.UpdateApplicationResponse{}, nil
+		},
+	}
+
+	manager := &FunctionsApplicationServiceManager{
+		Log:       testFunctionsLogger(),
+		ociClient: client,
+	}
+
+	resource := testApplicationResource()
+	resource.Spec.CompartmentId = "ocid1.compartment.oc1..desired"
+	resource.Spec.DisplayName = "desired-app"
+	resource.Spec.SubnetIds = []string{"ocid1.subnet.oc1..desired"}
+	resource.Spec.Shape = string(ocifunctions.ApplicationShapeArm)
+	resource.Status.Id = "ocid1.application.oc1..tracked"
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want create-only drift rejection")
+	}
+	if response.IsSuccessful {
+		t.Fatalf("CreateOrUpdate() response = %#v, want unsuccessful drift rejection", response)
+	}
+	for _, want := range []string{"create-only field drift", "compartmentId", "displayName", "subnetIds", "shape"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("CreateOrUpdate() error = %q, want substring %q", err.Error(), want)
+		}
+	}
+	if updateCalls != 0 {
+		t.Fatalf("UpdateApplication() calls = %d, want 0 after create-only drift rejection", updateCalls)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Failed) {
+		t.Fatalf("status.reason = %q, want Failed", got)
+	}
+	requireTrailingFunctionsCondition(t, resource.Status.OsokStatus, shared.Failed)
+}
+
+func TestFunctionsApplicationCreateOrUpdateSkipsUpdateWhileCreating(t *testing.T) {
+	t.Parallel()
+
+	updateCalls := 0
+	client := &fakeFunctionsManagementClient{
+		getApplicationFn: func(_ context.Context, _ ocifunctions.GetApplicationRequest) (ocifunctions.GetApplicationResponse, error) {
+			return ocifunctions.GetApplicationResponse{
+				Application: ocifunctions.Application{
+					Id:             common.String("ocid1.application.oc1..tracked"),
+					CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+					DisplayName:    common.String("sample-app"),
+					SubnetIds:      []string{"ocid1.subnet.oc1..example"},
+					Config:         map[string]string{"mode": "old"},
+					LifecycleState: ocifunctions.ApplicationLifecycleStateCreating,
+				},
+			}, nil
+		},
+		updateApplicationFn: func(context.Context, ocifunctions.UpdateApplicationRequest) (ocifunctions.UpdateApplicationResponse, error) {
+			updateCalls++
+			return ocifunctions.UpdateApplicationResponse{}, nil
+		},
+	}
+
+	manager := &FunctionsApplicationServiceManager{
+		Log:       testFunctionsLogger(),
+		ociClient: client,
+	}
+
+	resource := testApplicationResource()
+	resource.Spec.Config = map[string]string{"mode": "new"}
+	resource.Status.Id = "ocid1.application.oc1..tracked"
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful requeue while creating", response)
+	}
+	if updateCalls != 0 {
+		t.Fatalf("UpdateApplication() calls = %d, want 0 while lifecycle is CREATING", updateCalls)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Provisioning) {
+		t.Fatalf("status.reason = %q, want Provisioning", got)
+	}
+	requireTrailingFunctionsCondition(t, resource.Status.OsokStatus, shared.Provisioning)
+}
+
+func TestFunctionsApplicationLifecycleClassification(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name        string
+		state       ocifunctions.ApplicationLifecycleStateEnum
+		wantReason  shared.OSOKConditionType
+		wantSuccess bool
+		wantRequeue bool
+	}{
+		{name: "active", state: ocifunctions.ApplicationLifecycleStateActive, wantReason: shared.Active, wantSuccess: true},
+		{name: "inactive", state: ocifunctions.ApplicationLifecycleStateInactive, wantReason: shared.Active, wantSuccess: true},
+		{name: "creating", state: ocifunctions.ApplicationLifecycleStateCreating, wantReason: shared.Provisioning, wantSuccess: true, wantRequeue: true},
+		{name: "updating", state: ocifunctions.ApplicationLifecycleStateUpdating, wantReason: shared.Updating, wantSuccess: true, wantRequeue: true},
+		{name: "deleting", state: ocifunctions.ApplicationLifecycleStateDeleting, wantReason: shared.Terminating, wantSuccess: true, wantRequeue: true},
+		{name: "failed", state: ocifunctions.ApplicationLifecycleStateFailed, wantReason: shared.Failed},
+		{name: "deleted", state: ocifunctions.ApplicationLifecycleStateDeleted, wantReason: shared.Failed},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			status := shared.OSOKStatus{}
+			response := reconcileFunctionsApplicationLifecycle(&status, &ocifunctions.Application{
+				Id:             common.String("ocid1.application.oc1..tracked"),
+				DisplayName:    common.String("sample-app"),
+				LifecycleState: tc.state,
+			}, testFunctionsLogger())
+
+			if response.IsSuccessful != tc.wantSuccess {
+				t.Fatalf("IsSuccessful = %t, want %t", response.IsSuccessful, tc.wantSuccess)
+			}
+			if response.ShouldRequeue != tc.wantRequeue {
+				t.Fatalf("ShouldRequeue = %t, want %t", response.ShouldRequeue, tc.wantRequeue)
+			}
+			if got := status.Reason; got != string(tc.wantReason) {
+				t.Fatalf("status.reason = %q, want %q", got, tc.wantReason)
+			}
+			requireTrailingFunctionsCondition(t, status, tc.wantReason)
+		})
+	}
+}
+
 func TestFunctionsApplicationDeleteTreatsRead404AsDeleted(t *testing.T) {
 	t.Parallel()
 
@@ -282,6 +510,71 @@ func TestFunctionsApplicationDeleteTreatsRead404AsDeleted(t *testing.T) {
 	if resource.Status.OsokStatus.OpcRequestID != "opc-request-id" {
 		t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-request-id")
 	}
+}
+
+func TestFunctionsApplicationDeleteMarksTerminatingUntilReadbackConfirmsGone(t *testing.T) {
+	t.Parallel()
+
+	deleteCalls := 0
+	getCalls := 0
+	client := &fakeFunctionsManagementClient{
+		deleteApplicationFn: func(_ context.Context, req ocifunctions.DeleteApplicationRequest) (ocifunctions.DeleteApplicationResponse, error) {
+			deleteCalls++
+			if got := safeFunctionsString(req.ApplicationId); got != "ocid1.application.oc1..tracked" {
+				t.Fatalf("DeleteApplicationRequest.ApplicationId = %q, want tracked id", got)
+			}
+			return ocifunctions.DeleteApplicationResponse{}, nil
+		},
+		getApplicationFn: func(_ context.Context, req ocifunctions.GetApplicationRequest) (ocifunctions.GetApplicationResponse, error) {
+			getCalls++
+			if got := safeFunctionsString(req.ApplicationId); got != "ocid1.application.oc1..tracked" {
+				t.Fatalf("GetApplicationRequest.ApplicationId = %q, want tracked id", got)
+			}
+			return ocifunctions.GetApplicationResponse{
+				Application: ocifunctions.Application{
+					Id:             common.String("ocid1.application.oc1..tracked"),
+					DisplayName:    common.String("sample-app"),
+					LifecycleState: ocifunctions.ApplicationLifecycleStateDeleting,
+				},
+			}, nil
+		},
+	}
+
+	manager := &FunctionsApplicationServiceManager{
+		Log:       testFunctionsLogger(),
+		ociClient: client,
+	}
+
+	resource := testApplicationResource()
+	resource.Status.Id = "ocid1.application.oc1..tracked"
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+
+	deleted, err := manager.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() should keep the finalizer while OCI still returns the application")
+	}
+	if deleteCalls != 1 {
+		t.Fatalf("DeleteApplication() calls = %d, want 1", deleteCalls)
+	}
+	if getCalls != 1 {
+		t.Fatalf("GetApplication() calls = %d, want 1", getCalls)
+	}
+	if resource.Status.Id != "ocid1.application.oc1..tracked" {
+		t.Fatalf("status.id = %q, want retained tracked id", resource.Status.Id)
+	}
+	if resource.Status.OsokStatus.Ocid != shared.OCID("ocid1.application.oc1..tracked") {
+		t.Fatalf("status.ocid = %q, want retained tracked ocid", resource.Status.OsokStatus.Ocid)
+	}
+	if got := resource.Status.OsokStatus.Reason; got != string(shared.Terminating) {
+		t.Fatalf("status.reason = %q, want Terminating", got)
+	}
+	if resource.Status.OsokStatus.DeletedAt == nil {
+		t.Fatal("status.deletedAt = nil, want delete progress timestamp")
+	}
+	requireTrailingFunctionsCondition(t, resource.Status.OsokStatus, shared.Terminating)
 }
 
 func TestFunctionsFunctionDeleteTreatsDelete404AsDeletedAndIgnoresMissingSecret(t *testing.T) {
@@ -394,6 +687,17 @@ func TestFunctionsFunctionCreateOrUpdateBadRequestCapturesOCIErrorCode(t *testin
 
 func testFunctionsLogger() loggerutil.OSOKLogger {
 	return loggerutil.OSOKLogger{Logger: logr.Discard()}
+}
+
+func requireTrailingFunctionsCondition(t *testing.T, status shared.OSOKStatus, want shared.OSOKConditionType) {
+	t.Helper()
+
+	if len(status.Conditions) == 0 {
+		t.Fatalf("status.conditions = nil, want trailing %s condition", want)
+	}
+	if got := status.Conditions[len(status.Conditions)-1].Type; got != want {
+		t.Fatalf("trailing status condition = %s, want %s", got, want)
+	}
 }
 
 func testApplicationResource() *functionsv1beta1.Application {

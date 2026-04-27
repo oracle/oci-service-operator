@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -68,7 +69,7 @@ func reconcileFunctionsApplicationLifecycle(
 		return servicemanager.OSOKResponse{IsSuccessful: false}
 	}
 
-	return markFunctionsLifecycle(
+	return markFunctionsApplicationLifecycle(
 		status,
 		shared.OCID(safeFunctionsString(instance.Id)),
 		safeFunctionsString(instance.DisplayName),
@@ -97,6 +98,41 @@ func reconcileFunctionsFunctionLifecycle(
 	)
 }
 
+func markFunctionsApplicationLifecycle(
+	status *shared.OSOKStatus,
+	resourceID shared.OCID,
+	displayName string,
+	lifecycleState string,
+	log loggerutil.OSOKLogger,
+	kind string,
+) servicemanager.OSOKResponse {
+	condition := shared.Provisioning
+	conditionStatus := v1.ConditionTrue
+	shouldRequeue := true
+
+	switch strings.ToUpper(strings.TrimSpace(lifecycleState)) {
+	case "ACTIVE", "INACTIVE":
+		condition = shared.Active
+		shouldRequeue = false
+	case "CREATING":
+		condition = shared.Provisioning
+	case "UPDATING":
+		condition = shared.Updating
+	case "DELETING":
+		condition = shared.Terminating
+	case "FAILED", "DELETED":
+		condition = shared.Failed
+		conditionStatus = v1.ConditionFalse
+		shouldRequeue = false
+	default:
+		condition = shared.Failed
+		conditionStatus = v1.ConditionFalse
+		shouldRequeue = false
+	}
+
+	return applyFunctionsLifecycleStatus(status, resourceID, displayName, lifecycleState, log, kind, condition, conditionStatus, shouldRequeue)
+}
+
 func markFunctionsLifecycle(
 	status *shared.OSOKStatus,
 	resourceID shared.OCID,
@@ -121,6 +157,20 @@ func markFunctionsLifecycle(
 		shouldRequeue = false
 	}
 
+	return applyFunctionsLifecycleStatus(status, resourceID, displayName, lifecycleState, log, kind, condition, conditionStatus, shouldRequeue)
+}
+
+func applyFunctionsLifecycleStatus(
+	status *shared.OSOKStatus,
+	resourceID shared.OCID,
+	displayName string,
+	lifecycleState string,
+	log loggerutil.OSOKLogger,
+	kind string,
+	condition shared.OSOKConditionType,
+	conditionStatus v1.ConditionStatus,
+	shouldRequeue bool,
+) servicemanager.OSOKResponse {
 	now := metav1.Now()
 	if resourceID != "" {
 		status.Ocid = resourceID
@@ -138,6 +188,124 @@ func markFunctionsLifecycle(
 		ShouldRequeue:   shouldRequeue,
 		RequeueDuration: functionsRequeueDuration,
 	}
+}
+
+func functionsApplicationAllowsMutation(instance *ocifunctions.Application) bool {
+	if instance == nil {
+		return false
+	}
+
+	switch instance.LifecycleState {
+	case ocifunctions.ApplicationLifecycleStateActive,
+		ocifunctions.ApplicationLifecycleStateInactive:
+		return true
+	default:
+		return false
+	}
+}
+
+func validateFunctionsApplicationCreateOnlyDrift(spec functionsv1beta1.ApplicationSpec, current *ocifunctions.Application) error {
+	if current == nil {
+		return nil
+	}
+
+	var unsupported []string
+	if !functionsStringPtrMatches(current.CompartmentId, spec.CompartmentId) {
+		unsupported = append(unsupported, "compartmentId")
+	}
+	if !functionsStringPtrMatches(current.DisplayName, spec.DisplayName) {
+		unsupported = append(unsupported, "displayName")
+	}
+	if !functionsStringSlicesMatch(current.SubnetIds, spec.SubnetIds) {
+		unsupported = append(unsupported, "subnetIds")
+	}
+	if !functionsApplicationShapeMatches(current.Shape, spec.Shape) {
+		unsupported = append(unsupported, "shape")
+	}
+
+	if len(unsupported) == 0 {
+		return nil
+	}
+	return fmt.Errorf("Application create-only field drift is not supported: %s", strings.Join(unsupported, ", "))
+}
+
+func functionsStringPtrMatches(current *string, desired string) bool {
+	desired = strings.TrimSpace(desired)
+	if desired == "" {
+		return true
+	}
+	return strings.TrimSpace(safeFunctionsString(current)) == desired
+}
+
+func functionsStringSlicesMatch(current []string, desired []string) bool {
+	normalizedDesired := normalizedFunctionsStrings(desired)
+	if len(normalizedDesired) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(normalizedFunctionsStrings(current), normalizedDesired)
+}
+
+func functionsApplicationShapeMatches(current ocifunctions.ApplicationShapeEnum, desired string) bool {
+	desired = strings.TrimSpace(desired)
+	if desired == "" {
+		return true
+	}
+	return strings.EqualFold(string(current), desired)
+}
+
+func normalizedFunctionsStrings(values []string) []string {
+	normalized := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		normalized = append(normalized, trimmed)
+	}
+	sort.Strings(normalized)
+	return normalized
+}
+
+func markFunctionsFailure(status *shared.OSOKStatus, err error, log loggerutil.OSOKLogger) {
+	if status == nil || err == nil {
+		return
+	}
+
+	now := metav1.Now()
+	status.UpdatedAt = &now
+	status.Message = err.Error()
+	status.Reason = string(shared.Failed)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), log)
+}
+
+func markFunctionsDeletePending(
+	status *shared.OSOKStatus,
+	instance *ocifunctions.Application,
+	log loggerutil.OSOKLogger,
+	kind string,
+) {
+	if status == nil {
+		return
+	}
+
+	displayName := ""
+	lifecycleState := ""
+	if instance != nil {
+		displayName = safeFunctionsString(instance.DisplayName)
+		lifecycleState = string(instance.LifecycleState)
+	}
+
+	now := metav1.Now()
+	status.UpdatedAt = &now
+	if status.DeletedAt == nil {
+		status.DeletedAt = &now
+	}
+	status.Message = fmt.Sprintf("%s %s delete is waiting for confirmation", kind, displayName)
+	if lifecycleState != "" {
+		status.Message = fmt.Sprintf("%s; OCI lifecycle state is %s", status.Message, lifecycleState)
+	}
+	status.Reason = string(shared.Terminating)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", status.Message, log)
 }
 
 func buildFunctionsDetails[T any](
