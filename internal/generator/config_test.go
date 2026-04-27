@@ -1135,7 +1135,10 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"aispeech",
 		"aivision",
 		"analytics",
+		"artifacts",
+		"bastion",
 		"bds",
+		"certificatesmanagement",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1143,24 +1146,35 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"database",
 		"databasetools",
 		"datascience",
+		"devops",
+		"dns",
 		"email",
+		"events",
 		"functions",
 		"generativeai",
+		"healthchecks",
 		"identity",
+		"integration",
 		"keymanagement",
+		"limits",
 		"loadbalancer",
 		"logging",
+		"managedkafka",
 		"monitoring",
 		"marketplace",
 		"mysql",
+		"networkloadbalancer",
 		"nosql",
 		"objectstorage",
 		"ocvp",
 		"oda",
 		"opensearch",
+		"ons",
 		"psql",
 		"queue",
 		"redis",
+		"sch",
+		"servicecatalog",
 		"streaming",
 		"usageapi",
 	}
@@ -1176,7 +1190,10 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"aispeech",
 		"aivision",
 		"analytics",
+		"artifacts",
+		"bastion",
 		"bds",
+		"certificatesmanagement",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1184,24 +1201,35 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"database",
 		"databasetools",
 		"datascience",
+		"devops",
+		"dns",
 		"email",
+		"events",
 		"functions",
 		"generativeai",
+		"healthchecks",
 		"identity",
+		"integration",
 		"keymanagement",
+		"limits",
 		"loadbalancer",
 		"logging",
+		"managedkafka",
 		"monitoring",
 		"marketplace",
 		"mysql",
+		"networkloadbalancer",
 		"nosql",
 		"objectstorage",
 		"ocvp",
 		"oda",
 		"opensearch",
+		"ons",
 		"psql",
 		"queue",
 		"redis",
+		"sch",
+		"servicecatalog",
 		"streaming",
 		"usageapi",
 		"vault",
@@ -1211,7 +1239,10 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["aispeech"], true, SelectionModeExplicit, []string{"TranscriptionJob"})
 	assertServiceSelection(t, services["aivision"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
+	assertServiceSelection(t, services["artifacts"], true, SelectionModeExplicit, []string{"ContainerImageSignature", "ContainerRepository", "Repository"})
+	assertServiceSelection(t, services["bastion"], true, SelectionModeExplicit, []string{"Bastion", "Session"})
 	assertServiceSelection(t, services["bds"], true, SelectionModeExplicit, []string{"BdsInstance"})
+	assertServiceSelection(t, services["certificatesmanagement"], true, SelectionModeExplicit, []string{"CaBundle"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
@@ -1219,24 +1250,35 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
 	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
 	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
+	assertServiceSelection(t, services["devops"], true, SelectionModeExplicit, []string{"Project", "Repository", "BuildPipeline", "DeployPipeline", "DeployArtifact", "Trigger"})
+	assertServiceSelection(t, services["dns"], true, SelectionModeExplicit, []string{"Zone", "View", "TsigKey", "SteeringPolicy", "SteeringPolicyAttachment"})
 	assertServiceSelection(t, services["email"], true, SelectionModeExplicit, []string{"Dkim", "EmailDomain", "Sender", "Suppression"})
+	assertServiceSelection(t, services["events"], true, SelectionModeExplicit, []string{"Rule"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
 	assertServiceSelection(t, services["generativeai"], true, SelectionModeExplicit, []string{"DedicatedAiCluster", "Endpoint", "Model"})
+	assertServiceSelection(t, services["healthchecks"], true, SelectionModeExplicit, []string{"HttpMonitor", "PingMonitor"})
 	assertServiceSelection(t, services["identity"], true, SelectionModeExplicit, []string{"Compartment"})
-	assertServiceSelection(t, services["keymanagement"], true, SelectionModeExplicit, []string{"Vault"})
+	assertServiceSelection(t, services["integration"], true, SelectionModeExplicit, []string{"IntegrationInstance"})
+	assertServiceSelection(t, services["keymanagement"], true, SelectionModeExplicit, []string{"EkmsPrivateEndpoint", "Vault"})
+	assertServiceSelection(t, services["limits"], true, SelectionModeExplicit, []string{"Quota"})
 	assertServiceSelection(t, services["loadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Certificate", "Hostname", "Listener", "LoadBalancer", "PathRouteSet", "RoutingPolicy", "RuleSet", "SSLCipherSuite"})
 	assertServiceSelection(t, services["logging"], true, SelectionModeExplicit, []string{"Log", "LogGroup", "LogSavedSearch", "UnifiedAgentConfiguration"})
+	assertServiceSelection(t, services["managedkafka"], true, SelectionModeExplicit, []string{"KafkaCluster", "KafkaClusterConfig"})
 	assertServiceSelection(t, services["monitoring"], true, SelectionModeExplicit, []string{"Alarm", "AlarmSuppression"})
 	assertServiceSelection(t, services["marketplace"], true, SelectionModeExplicit, []string{"AcceptedAgreement", "Publication"})
 	assertServiceSelection(t, services["mysql"], true, SelectionModeExplicit, []string{"DbSystem"})
+	assertServiceSelection(t, services["networkloadbalancer"], true, SelectionModeExplicit, []string{"Backend", "BackendSet", "Listener", "NetworkLoadBalancer"})
 	assertServiceSelection(t, services["nosql"], true, SelectionModeExplicit, []string{"Table"})
 	assertServiceSelection(t, services["objectstorage"], true, SelectionModeExplicit, []string{"Bucket"})
 	assertServiceSelection(t, services["ocvp"], true, SelectionModeExplicit, []string{"Cluster", "EsxiHost", "Sddc"})
 	assertServiceSelection(t, services["oda"], true, SelectionModeExplicit, []string{"AuthenticationProvider", "Channel", "DigitalAssistant", "ImportedPackage", "OdaInstance", "OdaInstanceAttachment", "OdaPrivateEndpoint", "OdaPrivateEndpointAttachment", "OdaPrivateEndpointScanProxy", "Skill", "SkillParameter", "Translator"})
 	assertServiceSelection(t, services["opensearch"], true, SelectionModeExplicit, []string{"OpensearchCluster"})
+	assertServiceSelection(t, services["ons"], true, SelectionModeExplicit, []string{"Subscription", "Topic"})
 	assertServiceSelection(t, services["psql"], true, SelectionModeExplicit, []string{"DbSystem"})
 	assertServiceSelection(t, services["queue"], true, SelectionModeExplicit, []string{"Queue"})
 	assertServiceSelection(t, services["redis"], true, SelectionModeExplicit, []string{"RedisCluster"})
+	assertServiceSelection(t, services["sch"], true, SelectionModeExplicit, []string{"ServiceConnector"})
+	assertServiceSelection(t, services["servicecatalog"], true, SelectionModeExplicit, []string{"PrivateApplication", "ServiceCatalog"})
 	assertServiceSelection(t, services["streaming"], true, SelectionModeExplicit, []string{"Stream"})
 	assertServiceSelection(t, services["usageapi"], true, SelectionModeExplicit, []string{"CustomTable", "Query", "Schedule", "UsageCarbonEmissionsQuery"})
 	assertServiceSelection(t, services["vault"], false, SelectionModeAll, nil)
@@ -1901,39 +1943,53 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		strategy string
 		runtime  string
 	}{
-		"aidocument":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ailanguage":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"aispeech":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"aivision":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"analytics":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"bds":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"databasetools":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"datascience":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"email":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"functions":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"generativeai":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"identity":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"keymanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"loadbalancer":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"logging":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"marketplace":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"monitoring":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"mysql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ocvp":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"objectstorage":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"oda":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"opensearch":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"psql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"queue":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"streaming":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"usageapi":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"aidocument":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ailanguage":             {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"aispeech":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"aivision":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"analytics":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"artifacts":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"bastion":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"bds":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"certificatesmanagement": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerengine":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerinstances":     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"core":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataflow":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"database":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"databasetools":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datascience":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"devops":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dns":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"email":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"events":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"functions":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"generativeai":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"healthchecks":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"identity":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"integration":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"keymanagement":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"limits":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"loadbalancer":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"logging":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"managedkafka":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"marketplace":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"monitoring":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mysql":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"networkloadbalancer":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"nosql":                  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ocvp":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"objectstorage":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"oda":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"opensearch":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ons":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"psql":                   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"queue":                  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"redis":                  {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"sch":                    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"servicecatalog":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"streaming":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"usageapi":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)

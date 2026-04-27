@@ -475,4 +475,3 @@ DbSystemStorageDetails defines nested fields for DbSystem.StorageDetails.
 | `isRegionallyDurable` | Specifies if the block volume used for the database system is regional or AD-local. If not specified, it will be set to false. If `isRegionallyDurable` is set to true, `availabilityDomain` should not be specified. If `isRegionallyDurable` is set to false, `availabilityDomain` must be specified. | `boolean` | Yes | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `systemType` | - | `string` | No | - | - |
-

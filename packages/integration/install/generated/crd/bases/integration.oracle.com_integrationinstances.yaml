@@ -1,0 +1,754 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: integrationinstances.integration.oracle.com
+spec:
+  group: integration.oracle.com
+  names:
+    kind: IntegrationInstance
+    listKind: IntegrationInstanceList
+    plural: integrationinstances
+    singular: integrationinstance
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the IntegrationInstance
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the IntegrationInstance
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: IntegrationInstance is the Schema for the integrationinstances
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: IntegrationInstanceSpec defines the desired state of IntegrationInstance.
+            properties:
+              alternateCustomEndpoints:
+                description: |-
+                  A list of alternate custom endpoints to be used for the integration instance URL
+                  (contact Oracle for alternateCustomEndpoints availability for a specific instance).
+                items:
+                  description: IntegrationInstanceAlternateCustomEndpoint defines
+                    nested fields for IntegrationInstance.AlternateCustomEndpoint.
+                  properties:
+                    certificateSecretId:
+                      description: |-
+                        Optional OCID of a vault/secret containing a private SSL certificate bundle to be used for the custom hostname.
+                        All certificates should be stored in a single base64 encoded secret
+                        Note the update will fail if this is not a valid certificate.
+                      type: string
+                    hostname:
+                      description: A custom hostname to be used for the integration
+                        instance URL, in FQDN format.
+                      type: string
+                  required:
+                  - hostname
+                  type: object
+                type: array
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              consumptionModel:
+                description: Optional parameter specifying which entitlement to use
+                  for billing purposes. Only required if the account possesses more
+                  than one entitlement.
+                type: string
+              customEndpoint:
+                description: IntegrationInstanceCustomEndpoint defines nested fields
+                  for IntegrationInstance.CustomEndpoint.
+                properties:
+                  certificateSecretId:
+                    description: |-
+                      Optional OCID of a vault/secret containing a private SSL certificate bundle to be used for the custom hostname.
+                      All certificates should be stored in a single base64 encoded secret
+                      Note the update will fail if this is not a valid certificate.
+                    type: string
+                  hostname:
+                    description: A custom hostname to be used for the integration
+                      instance URL, in FQDN format.
+                    type: string
+                required:
+                - hostname
+                type: object
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to
+                  namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Integration Instance Identifier.
+                type: string
+              domainId:
+                description: |-
+                  The OCID of the identity domain, that will be used to determine the
+                  corresponding Idcs Stripe and create an Idcs application within the stripe.
+                  This parameter is mutually exclusive with parameter: idcsAt, i.e only one of
+                  two parameters should be specified.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name,
+                  type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              idcsAt:
+                description: IDCS Authentication token. This is required for all realms
+                  with IDCS. Its optional as its not required for non IDCS realms.
+                type: string
+              integrationInstanceType:
+                description: |-
+                  Standard or Enterprise type,
+                  Oracle Integration Generation 2 uses ENTERPRISE and STANDARD,
+                  Oracle Integration 3 uses ENTERPRISEX and STANDARDX
+                type: string
+              isByol:
+                description: Bring your own license.
+                type: boolean
+              isDisasterRecoveryEnabled:
+                description: Is Disaster Recovery enabled or not.
+                type: boolean
+              isFileServerEnabled:
+                description: The file server is enabled or not.
+                type: boolean
+              isVisualBuilderEnabled:
+                description: Visual Builder is enabled or not.
+                type: boolean
+              messagePacks:
+                description: The number of configured message packs
+                type: integer
+              networkEndpointDetails:
+                description: IntegrationInstanceNetworkEndpointDetails defines nested
+                  fields for IntegrationInstance.NetworkEndpointDetails.
+                properties:
+                  allowlistedHttpIps:
+                    description: |-
+                      Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                      An invalid IP or CIDR block will result in a 400 response.
+                    items:
+                      type: string
+                    type: array
+                  allowlistedHttpVcns:
+                    description: Virtual Cloud Networks allowed to access this network
+                      endpoint.
+                    items:
+                      description: IntegrationInstanceNetworkEndpointDetailsAllowlistedHttpVcn
+                        defines nested fields for IntegrationInstance.NetworkEndpointDetails.AllowlistedHttpVcn.
+                      properties:
+                        allowlistedIps:
+                          description: |-
+                            Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                            An invalid IP or CIDR block will result in a 400 response.
+                          items:
+                            type: string
+                          type: array
+                        id:
+                          description: The Virtual Cloud Network OCID.
+                          type: string
+                      required:
+                      - id
+                      type: object
+                    type: array
+                  designTime:
+                    description: IntegrationInstanceNetworkEndpointDetailsDesignTime
+                      defines nested fields for IntegrationInstance.NetworkEndpointDetails.DesignTime.
+                    properties:
+                      allowlistedHttpIps:
+                        description: |-
+                          Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                          An invalid IP or CIDR block will result in a 400 response.
+                        items:
+                          type: string
+                        type: array
+                      allowlistedHttpVcns:
+                        description: Virtual Cloud Networks allowed to access this
+                          network endpoint.
+                        items:
+                          description: IntegrationInstanceNetworkEndpointDetailsDesignTimeAllowlistedHttpVcn
+                            defines nested fields for IntegrationInstance.NetworkEndpointDetails.DesignTime.AllowlistedHttpVcn.
+                          properties:
+                            allowlistedIps:
+                              description: |-
+                                Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                                An invalid IP or CIDR block will result in a 400 response.
+                              items:
+                                type: string
+                              type: array
+                            id:
+                              description: The Virtual Cloud Network OCID.
+                              type: string
+                          required:
+                          - id
+                          type: object
+                        type: array
+                    type: object
+                  isIntegrationVcnAllowlisted:
+                    description: The Integration service's VCN is allow-listed to
+                      allow integrations to call back into other integrations
+                    type: boolean
+                  jsonData:
+                    type: string
+                  networkEndpointType:
+                    type: string
+                  runtime:
+                    description: IntegrationInstanceNetworkEndpointDetailsRuntime
+                      defines nested fields for IntegrationInstance.NetworkEndpointDetails.Runtime.
+                    properties:
+                      allowlistedHttpIps:
+                        description: |-
+                          Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                          An invalid IP or CIDR block will result in a 400 response.
+                        items:
+                          type: string
+                        type: array
+                      allowlistedHttpVcns:
+                        description: Virtual Cloud Networks allowed to access this
+                          network endpoint.
+                        items:
+                          description: IntegrationInstanceNetworkEndpointDetailsRuntimeAllowlistedHttpVcn
+                            defines nested fields for IntegrationInstance.NetworkEndpointDetails.Runtime.AllowlistedHttpVcn.
+                          properties:
+                            allowlistedIps:
+                              description: |-
+                                Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                                An invalid IP or CIDR block will result in a 400 response.
+                              items:
+                                type: string
+                              type: array
+                            id:
+                              description: The Virtual Cloud Network OCID.
+                              type: string
+                          required:
+                          - id
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
+              shape:
+                description: Shape
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - integrationInstanceType
+            - isByol
+            - messagePacks
+            type: object
+          status:
+            description: IntegrationInstanceStatus defines the observed state of IntegrationInstance.
+            properties:
+              alternateCustomEndpoints:
+                description: A list of alternate custom endpoints used for the integration
+                  instance URL.
+                items:
+                  description: IntegrationInstanceAlternateCustomEndpoint defines
+                    nested fields for IntegrationInstance.AlternateCustomEndpoint.
+                  properties:
+                    certificateSecretId:
+                      description: |-
+                        Optional OCID of a vault/secret containing a private SSL certificate bundle to be used for the custom hostname.
+                        All certificates should be stored in a single base64 encoded secret
+                        Note the update will fail if this is not a valid certificate.
+                      type: string
+                    hostname:
+                      description: A custom hostname to be used for the integration
+                        instance URL, in FQDN format.
+                      type: string
+                  required:
+                  - hostname
+                  type: object
+                type: array
+              attachments:
+                description: A list of associated attachments to other services
+                items:
+                  description: IntegrationInstanceAttachment defines nested fields
+                    for IntegrationInstance.Attachment.
+                  properties:
+                    isImplicit:
+                      description: |-
+                        * If role == `PARENT`, the attached instance was created by this service instance
+                        * If role == `CHILD`, this instance was created from attached instance on behalf of a user
+                      type: boolean
+                    targetId:
+                      description: The OCID of the target instance (which could be
+                        any other OCI PaaS/SaaS resource), to which this instance
+                        is attached.
+                      type: string
+                    targetInstanceUrl:
+                      description: The dataplane instance URL of the attached instance
+                      type: string
+                    targetRole:
+                      description: |-
+                        The role of the target attachment.
+                           * `PARENT` - The target instance is the parent of this attachment.
+                           * `CHILD` - The target instance is the child of this attachment.
+                      type: string
+                    targetServiceType:
+                      description: The type of the target instance, such as "FUSION".
+                      type: string
+                  type: object
+                type: array
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              consumptionModel:
+                description: The entitlement used for billing purposes.
+                type: string
+              customEndpoint:
+                description: IntegrationInstanceCustomEndpoint defines nested fields
+                  for IntegrationInstance.CustomEndpoint.
+                properties:
+                  certificateSecretId:
+                    description: |-
+                      Optional OCID of a vault/secret containing a private SSL certificate bundle to be used for the custom hostname.
+                      All certificates should be stored in a single base64 encoded secret
+                      Note the update will fail if this is not a valid certificate.
+                    type: string
+                  hostname:
+                    description: A custom hostname to be used for the integration
+                      instance URL, in FQDN format.
+                    type: string
+                required:
+                - hostname
+                type: object
+              dataRetentionPeriod:
+                description: Data retention period set for given integration instance
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of predefined tag keys. These predefined keys are scoped to
+                  namespaces.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              disasterRecoveryDetails:
+                description: IntegrationInstanceDisasterRecoveryDetails defines nested
+                  fields for IntegrationInstance.DisasterRecoveryDetails.
+                properties:
+                  crossRegionIntegrationInstanceDetails:
+                    description: IntegrationInstanceDisasterRecoveryDetailsCrossRegionIntegrationInstanceDetails
+                      defines nested fields for IntegrationInstance.DisasterRecoveryDetails.CrossRegionIntegrationInstanceDetails.
+                    properties:
+                      id:
+                        description: Cross region integration instance identifier
+                        type: string
+                      region:
+                        description: Cross region where integration instance is created
+                        type: string
+                      role:
+                        description: Role of the integration instance in the region
+                        type: string
+                      timeRoleChanged:
+                        description: Time when cross region integration instance role
+                          was changed
+                        type: string
+                    type: object
+                  regionalInstanceUrl:
+                    description: Region specific instance url for the integration
+                      instance in the region
+                    type: string
+                  role:
+                    description: Role of the integration instance in the region
+                    type: string
+                type: object
+              displayName:
+                description: Integration Instance Identifier, can be renamed.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name,
+                  type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Unique identifier that is immutable on creation.
+                type: string
+              idcsInfo:
+                description: IntegrationInstanceIdcsInfo defines nested fields for
+                  IntegrationInstance.IdcsInfo.
+                properties:
+                  idcsAppDisplayName:
+                    description: The IDCS application display name associated with
+                      the instance
+                    type: string
+                  idcsAppId:
+                    description: The IDCS application ID associated with the instance
+                    type: string
+                  idcsAppLocationUrl:
+                    description: URL for the location of the IDCS Application (used
+                      by IDCS APIs)
+                    type: string
+                  idcsAppName:
+                    description: The IDCS application name associated with the instance
+                    type: string
+                  instancePrimaryAudienceUrl:
+                    description: |-
+                      The URL used as the primary audience for integration flows in this instance
+                      type: string
+                    type: string
+                type: object
+              instanceDesignTimeUrl:
+                description: The Integration Instance Design Time URL
+                type: string
+              instanceUrl:
+                description: The Integration Instance URL.
+                type: string
+              integrationInstanceType:
+                description: |-
+                  Standard or Enterprise type,
+                  Oracle Integration Generation 2 uses ENTERPRISE and STANDARD,
+                  Oracle Integration 3 uses ENTERPRISEX, STANDARDX and HEALTHCARE
+                type: string
+              isByol:
+                description: Bring your own license.
+                type: boolean
+              isDisasterRecoveryEnabled:
+                description: Is Disaster Recovery enabled for the integrationInstance
+                type: boolean
+              isFileServerEnabled:
+                description: The file server is enabled or not.
+                type: boolean
+              isVisualBuilderEnabled:
+                description: VisualBuilder is enabled or not.
+                type: boolean
+              lifecycleDetails:
+                description: Additional details of lifecycleState or substates
+                type: string
+              lifecycleState:
+                description: The current state of the integration instance.
+                type: string
+              logGroupId:
+                description: OCID of LogAnalytics LogGroup, enabled for given integration
+                  instance
+                type: string
+              messagePacks:
+                description: The number of configured message packs (if any)
+                type: integer
+              networkEndpointDetails:
+                description: IntegrationInstanceNetworkEndpointDetails defines nested
+                  fields for IntegrationInstance.NetworkEndpointDetails.
+                properties:
+                  allowlistedHttpIps:
+                    description: |-
+                      Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                      An invalid IP or CIDR block will result in a 400 response.
+                    items:
+                      type: string
+                    type: array
+                  allowlistedHttpVcns:
+                    description: Virtual Cloud Networks allowed to access this network
+                      endpoint.
+                    items:
+                      description: IntegrationInstanceNetworkEndpointDetailsAllowlistedHttpVcn
+                        defines nested fields for IntegrationInstance.NetworkEndpointDetails.AllowlistedHttpVcn.
+                      properties:
+                        allowlistedIps:
+                          description: |-
+                            Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                            An invalid IP or CIDR block will result in a 400 response.
+                          items:
+                            type: string
+                          type: array
+                        id:
+                          description: The Virtual Cloud Network OCID.
+                          type: string
+                      required:
+                      - id
+                      type: object
+                    type: array
+                  designTime:
+                    description: IntegrationInstanceNetworkEndpointDetailsDesignTime
+                      defines nested fields for IntegrationInstance.NetworkEndpointDetails.DesignTime.
+                    properties:
+                      allowlistedHttpIps:
+                        description: |-
+                          Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                          An invalid IP or CIDR block will result in a 400 response.
+                        items:
+                          type: string
+                        type: array
+                      allowlistedHttpVcns:
+                        description: Virtual Cloud Networks allowed to access this
+                          network endpoint.
+                        items:
+                          description: IntegrationInstanceNetworkEndpointDetailsDesignTimeAllowlistedHttpVcn
+                            defines nested fields for IntegrationInstance.NetworkEndpointDetails.DesignTime.AllowlistedHttpVcn.
+                          properties:
+                            allowlistedIps:
+                              description: |-
+                                Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                                An invalid IP or CIDR block will result in a 400 response.
+                              items:
+                                type: string
+                              type: array
+                            id:
+                              description: The Virtual Cloud Network OCID.
+                              type: string
+                          required:
+                          - id
+                          type: object
+                        type: array
+                    type: object
+                  isIntegrationVcnAllowlisted:
+                    description: The Integration service's VCN is allow-listed to
+                      allow integrations to call back into other integrations
+                    type: boolean
+                  jsonData:
+                    type: string
+                  networkEndpointType:
+                    type: string
+                  runtime:
+                    description: IntegrationInstanceNetworkEndpointDetailsRuntime
+                      defines nested fields for IntegrationInstance.NetworkEndpointDetails.Runtime.
+                    properties:
+                      allowlistedHttpIps:
+                        description: |-
+                          Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                          An invalid IP or CIDR block will result in a 400 response.
+                        items:
+                          type: string
+                        type: array
+                      allowlistedHttpVcns:
+                        description: Virtual Cloud Networks allowed to access this
+                          network endpoint.
+                        items:
+                          description: IntegrationInstanceNetworkEndpointDetailsRuntimeAllowlistedHttpVcn
+                            defines nested fields for IntegrationInstance.NetworkEndpointDetails.Runtime.AllowlistedHttpVcn.
+                          properties:
+                            allowlistedIps:
+                              description: |-
+                                Source IP addresses or IP address ranges ingress rules. (ex: "168.122.59.5", "10.20.30.0/26")
+                                An invalid IP or CIDR block will result in a 400 response.
+                              items:
+                                type: string
+                              type: array
+                            id:
+                              description: The Virtual Cloud Network OCID.
+                              type: string
+                          required:
+                          - id
+                          type: object
+                        type: array
+                    type: object
+                type: object
+              privateEndpointOutboundConnection:
+                description: IntegrationInstancePrivateEndpointOutboundConnection
+                  defines nested fields for IntegrationInstance.PrivateEndpointOutboundConnection.
+                properties:
+                  isAllOutboundTrafficPrivate:
+                    description: Indicates if all traffic should go through configured
+                      outbound connection
+                    type: boolean
+                  jsonData:
+                    type: string
+                  nsgIds:
+                    description: One or more Network security group Ids. This is an
+                      optional argument.
+                    items:
+                      type: string
+                    type: array
+                  outboundConnectionType:
+                    type: string
+                  subnetId:
+                    description: Customer Private Network VCN Subnet OCID. This is
+                      a required argument.
+                    type: string
+                type: object
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
+              shape:
+                description: Shape
+                type: string
+              stateMessage:
+                description: An message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the the IntegrationInstance was created. An
+                  RFC3339 formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time the IntegrationInstance was updated. An RFC3339
+                  formatted datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

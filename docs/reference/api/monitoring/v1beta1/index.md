@@ -387,4 +387,3 @@ AlarmSuppressionSuppressionCondition defines nested fields for AlarmSuppression.
 | `jsonData` | - | `string` | No | - | - |
 | `suppressionDuration` | Duration of the recurring suppression. Specified as a string in ISO 8601 format. Minimum: `PT1M` (1 minute). Maximum: `PT24H` (24 hours). | `string` | No | - | - |
 | `suppressionRecurrence` | Frequency and start time of the recurring suppression. The format follows the iCalendar specification (RFC 5545, section 3.3.10) (https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10). Supported rule parts: * `FREQ`: Frequency of the recurring suppression: `WEEKLY` or `DAILY` only. * `BYDAY`: Comma separated days. Use with weekly suppressions only. Supported values: `MO`, `TU`, `WE`, `TH`, `FR`, `SA` ,`SU`. * `BYHOUR`, `BYMINUTE`, `BYSECOND`: Start time in UTC, after `timeSuppressFrom` value. Default is 00:00:00 UTC after `timeSuppressFrom`. | `string` | No | - | - |
-

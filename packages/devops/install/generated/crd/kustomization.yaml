@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/devops.oracle.com_buildpipelines.yaml
+- bases/devops.oracle.com_deployartifacts.yaml
+- bases/devops.oracle.com_deploypipelines.yaml
+- bases/devops.oracle.com_projects.yaml
+- bases/devops.oracle.com_repositories.yaml
+- bases/devops.oracle.com_triggers.yaml

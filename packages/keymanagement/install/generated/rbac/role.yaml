@@ -14,6 +14,7 @@ rules:
 - apiGroups:
   - keymanagement.oracle.com
   resources:
+  - ekmsprivateendpoints
   - vaults
   verbs:
   - create
@@ -26,12 +27,14 @@ rules:
 - apiGroups:
   - keymanagement.oracle.com
   resources:
+  - ekmsprivateendpoints/finalizers
   - vaults/finalizers
   verbs:
   - update
 - apiGroups:
   - keymanagement.oracle.com
   resources:
+  - ekmsprivateendpoints/status
   - vaults/status
   verbs:
   - get

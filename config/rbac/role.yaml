@@ -140,6 +140,67 @@ rules:
   - patch
   - update
 - apiGroups:
+  - artifacts.oracle.com
+  resources:
+  - containerimagesignatures
+  - containerrepositories
+  - repositories
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - artifacts.oracle.com
+  resources:
+  - containerimagesignatures/finalizers
+  - containerrepositories/finalizers
+  - repositories/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - artifacts.oracle.com
+  resources:
+  - containerimagesignatures/status
+  - containerrepositories/status
+  - repositories/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - bastion.oracle.com
+  resources:
+  - bastions
+  - sessions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bastion.oracle.com
+  resources:
+  - bastions/finalizers
+  - sessions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - bastion.oracle.com
+  resources:
+  - bastions/status
+  - sessions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - bds.oracle.com
   resources:
   - bdsinstances
@@ -161,6 +222,32 @@ rules:
   - bds.oracle.com
   resources:
   - bdsinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - certificatesmanagement.oracle.com
+  resources:
+  - cabundles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - certificatesmanagement.oracle.com
+  resources:
+  - cabundles/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - certificatesmanagement.oracle.com
+  resources:
+  - cabundles/status
   verbs:
   - get
   - patch
@@ -352,6 +439,85 @@ rules:
   - patch
   - update
 - apiGroups:
+  - devops.oracle.com
+  resources:
+  - buildpipelines
+  - deployartifacts
+  - deploypipelines
+  - projects
+  - repositories
+  - triggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - devops.oracle.com
+  resources:
+  - buildpipelines/finalizers
+  - deployartifacts/finalizers
+  - deploypipelines/finalizers
+  - projects/finalizers
+  - repositories/finalizers
+  - triggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - devops.oracle.com
+  resources:
+  - buildpipelines/status
+  - deployartifacts/status
+  - deploypipelines/status
+  - projects/status
+  - repositories/status
+  - triggers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - steeringpolicies
+  - steeringpolicyattachments
+  - tsigkeys
+  - views
+  - zones
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - steeringpolicies/finalizers
+  - steeringpolicyattachments/finalizers
+  - tsigkeys/finalizers
+  - views/finalizers
+  - zones/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dns.oracle.com
+  resources:
+  - steeringpolicies/status
+  - steeringpolicyattachments/status
+  - tsigkeys/status
+  - views/status
+  - zones/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - email.oracle.com
   resources:
   - dkims
@@ -382,6 +548,32 @@ rules:
   - emaildomains/status
   - senders/status
   - suppressions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - events.oracle.com
+  resources:
+  - rules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - events.oracle.com
+  resources:
+  - rules/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - events.oracle.com
+  resources:
+  - rules/status
   verbs:
   - get
   - patch
@@ -448,6 +640,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - healthchecks.oracle.com
+  resources:
+  - httpmonitors
+  - pingmonitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - healthchecks.oracle.com
+  resources:
+  - httpmonitors/finalizers
+  - pingmonitors/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - healthchecks.oracle.com
+  resources:
+  - httpmonitors/status
+  - pingmonitors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - identity.oracle.com
   resources:
   - compartments
@@ -474,8 +695,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - integration.oracle.com
+  resources:
+  - integrationinstances
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - integration.oracle.com
+  resources:
+  - integrationinstances/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - integration.oracle.com
+  resources:
+  - integrationinstances/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - keymanagement.oracle.com
   resources:
+  - ekmsprivateendpoints
   - vaults
   verbs:
   - create
@@ -488,13 +736,41 @@ rules:
 - apiGroups:
   - keymanagement.oracle.com
   resources:
+  - ekmsprivateendpoints/finalizers
   - vaults/finalizers
   verbs:
   - update
 - apiGroups:
   - keymanagement.oracle.com
   resources:
+  - ekmsprivateendpoints/status
   - vaults/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - limits.oracle.com
+  resources:
+  - quotas
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - limits.oracle.com
+  resources:
+  - quotas/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - limits.oracle.com
+  resources:
+  - quotas/status
   verbs:
   - get
   - patch
@@ -588,6 +864,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - managedkafka.oracle.com
+  resources:
+  - kafkaclusterconfigs
+  - kafkaclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - managedkafka.oracle.com
+  resources:
+  - kafkaclusterconfigs/finalizers
+  - kafkaclusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - managedkafka.oracle.com
+  resources:
+  - kafkaclusterconfigs/status
+  - kafkaclusters/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - marketplace.oracle.com
   resources:
   - acceptedagreements
@@ -670,6 +975,41 @@ rules:
   - psql.oracle.com
   resources:
   - dbsystems/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - networkloadbalancer.oracle.com
+  resources:
+  - backends
+  - backendsets
+  - listeners
+  - networkloadbalancers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - networkloadbalancer.oracle.com
+  resources:
+  - backends/finalizers
+  - backendsets/finalizers
+  - listeners/finalizers
+  - networkloadbalancers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - networkloadbalancer.oracle.com
+  resources:
+  - backends/status
+  - backendsets/status
+  - listeners/status
+  - networkloadbalancers/status
   verbs:
   - get
   - patch
@@ -818,6 +1158,35 @@ rules:
   - patch
   - update
 - apiGroups:
+  - ons.oracle.com
+  resources:
+  - subscriptions
+  - topics
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ons.oracle.com
+  resources:
+  - subscriptions/finalizers
+  - topics/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ons.oracle.com
+  resources:
+  - subscriptions/status
+  - topics/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - opensearch.oracle.com
   resources:
   - opensearchclusters
@@ -891,6 +1260,61 @@ rules:
   - redis.oracle.com
   resources:
   - redisclusters/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - sch.oracle.com
+  resources:
+  - serviceconnectors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - sch.oracle.com
+  resources:
+  - serviceconnectors/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - sch.oracle.com
+  resources:
+  - serviceconnectors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - servicecatalog.oracle.com
+  resources:
+  - privateapplications
+  - servicecatalogs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - servicecatalog.oracle.com
+  resources:
+  - privateapplications/finalizers
+  - servicecatalogs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - servicecatalog.oracle.com
+  resources:
+  - privateapplications/status
+  - servicecatalogs/status
   verbs:
   - get
   - patch

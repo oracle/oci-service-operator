@@ -1,0 +1,330 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: httpmonitors.healthchecks.oracle.com
+spec:
+  group: healthchecks.oracle.com
+  names:
+    kind: HttpMonitor
+    listKind: HttpMonitorList
+    plural: httpmonitors
+    singular: httpmonitor
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the HttpMonitor
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the HttpMonitor
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: HttpMonitor is the Schema for the httpmonitors API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HttpMonitorSpec defines the desired state of HttpMonitor.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A user-friendly and mutable name suitable for display
+                  in a user interface.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace.  For more information,
+                  see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              headers:
+                additionalProperties:
+                  type: string
+                description: |-
+                  A dictionary of HTTP request headers.
+                  *Note:* Monitors and probes do not support the use of the `Authorization` HTTP header.
+                type: object
+              intervalInSeconds:
+                description: 'The monitor interval in seconds. Valid values: 10, 30,
+                  and 60.'
+                type: integer
+              isEnabled:
+                description: Enables or disables the monitor. Set to 'true' to launch
+                  monitoring.
+                type: boolean
+              method:
+                type: string
+              path:
+                description: The optional URL path to probe, including query parameters.
+                type: string
+              port:
+                description: |-
+                  The port on which to probe endpoints. If unspecified, probes will use the
+                  default port of their protocol.
+                type: integer
+              protocol:
+                type: string
+              targets:
+                description: A list of targets (hostnames or IP addresses) of the
+                  probe.
+                items:
+                  type: string
+                type: array
+              timeoutInSeconds:
+                description: |-
+                  The probe timeout in seconds. Valid values: 10, 20, 30, and 60.
+                  The probe timeout must be less than or equal to `intervalInSeconds` for monitors.
+                type: integer
+              vantagePointNames:
+                description: A list of names of vantage points from which to execute
+                  the probe.
+                items:
+                  type: string
+                type: array
+            required:
+            - compartmentId
+            - displayName
+            - intervalInSeconds
+            - protocol
+            - targets
+            type: object
+          status:
+            description: HttpMonitorStatus defines the observed state of HttpMonitor.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              displayName:
+                description: A user-friendly and mutable name suitable for display
+                  in a user interface.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace.  For more information,
+                  see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              headers:
+                additionalProperties:
+                  type: string
+                description: |-
+                  A dictionary of HTTP request headers.
+                  *Note:* Monitors and probes do not support the use of the `Authorization` HTTP header.
+                type: object
+              homeRegion:
+                description: The region where updates must be made and where results
+                  must be fetched from.
+                type: string
+              id:
+                description: The OCID of the resource.
+                type: string
+              intervalInSeconds:
+                description: 'The monitor interval in seconds. Valid values: 10, 30,
+                  and 60.'
+                type: integer
+              isEnabled:
+                description: Enables or disables the monitor. Set to 'true' to launch
+                  monitoring.
+                type: boolean
+              method:
+                type: string
+              path:
+                description: The optional URL path to probe, including query parameters.
+                type: string
+              port:
+                description: |-
+                  The port on which to probe endpoints. If unspecified, probes will use the
+                  default port of their protocol.
+                type: integer
+              protocol:
+                type: string
+              resultsUrl:
+                description: A URL for fetching the probe results.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              targets:
+                description: A list of targets (hostnames or IP addresses) of the
+                  probe.
+                items:
+                  type: string
+                type: array
+              timeCreated:
+                description: The RFC 3339-formatted creation date and time of the
+                  probe.
+                type: string
+              timeoutInSeconds:
+                description: |-
+                  The probe timeout in seconds. Valid values: 10, 20, 30, and 60.
+                  The probe timeout must be less than or equal to `intervalInSeconds` for monitors.
+                type: integer
+              vantagePointNames:
+                description: A list of names of vantage points from which to execute
+                  the probe.
+                items:
+                  type: string
+                type: array
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

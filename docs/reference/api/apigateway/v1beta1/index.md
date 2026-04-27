@@ -241,4 +241,3 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `reason` | - | `string` | No | - | - |
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
-

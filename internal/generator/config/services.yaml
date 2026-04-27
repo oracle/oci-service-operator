@@ -292,8 +292,42 @@ services:
     phase: data-and-storage
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ContainerImageSignature
+        - ContainerRepository
+        - Repository
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: bastion
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/bastion
+    group: bastion
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Bastion
+        - Session
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -413,8 +447,14 @@ services:
     phase: security-and-identity
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - CaBundle
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1182,6 +1222,36 @@ services:
           serviceManager:
             strategy: none
 
+  - service: devops
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/devops
+    group: devops
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Project
+        - Repository
+        - BuildPipeline
+        - DeployPipeline
+        - DeployArtifact
+        - Trigger
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: dns
     sdkPackage: github.com/oracle/oci-go-sdk/v65/dns
     group: dns
@@ -1189,8 +1259,18 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Zone
+        - View
+        - TsigKey
+        - SteeringPolicy
+        - SteeringPolicyAttachment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1293,8 +1373,14 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Rule
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1449,6 +1535,32 @@ services:
                 freeformTags:
                   managed-by: oci-service-operator
 
+  - service: healthchecks
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/healthchecks
+    group: healthchecks
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - HttpMonitor
+        - PingMonitor
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: identity
     sdkPackage: github.com/oracle/oci-go-sdk/v65/identity
     group: identity
@@ -1513,6 +1625,31 @@ services:
         UserUIPasswordInformation:
           - UiPasswordInformation
 
+  - service: integration
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/integration
+    group: integration
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - IntegrationInstance
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: keymanagement
     sdkPackage: github.com/oracle/oci-go-sdk/v65/keymanagement
     group: keymanagement
@@ -1523,7 +1660,12 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
+        - EkmsPrivateEndpoint
         - Vault
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     observedState:
       excludedFieldPaths:
         PreCoUserCredential:
@@ -1604,8 +1746,14 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Quota
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -1876,6 +2024,32 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: managedkafka
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/managedkafka
+    group: managedkafka
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - KafkaCluster
+        - KafkaClusterConfig
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: monitoring
     sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
     group: monitoring
@@ -2097,8 +2271,17 @@ services:
     phase: networking-and-infrastructure
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Backend
+        - BackendSet
+        - Listener
+        - NetworkLoadBalancer
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -2451,8 +2634,15 @@ services:
     phase: eventing-messaging-and-observability
     packageProfile: controller-backed
     selection:
-      enabled: false
-      mode: all
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Subscription
+        - Topic
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
     generation:
       controller:
         strategy: generated
@@ -2675,6 +2865,31 @@ services:
           serviceManager:
             packagePath: redis/rediscluster
 
+  - service: sch
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/sch
+    group: sch
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ServiceConnector
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: secrets
     sdkPackage: github.com/oracle/oci-go-sdk/v65/secrets
     group: secrets
@@ -2702,6 +2917,32 @@ services:
       sdkAliases:
         SecretBundleByName:
           - SecretBundle
+
+  - service: servicecatalog
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/servicecatalog
+    group: servicecatalog
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - PrivateApplication
+        - ServiceCatalog
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
 
   - service: streaming
     sdkPackage: github.com/oracle/oci-go-sdk/v65/streaming

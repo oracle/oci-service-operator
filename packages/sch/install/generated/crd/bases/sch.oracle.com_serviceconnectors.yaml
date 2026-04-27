@@ -1,0 +1,792 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: serviceconnectors.sch.oracle.com
+spec:
+  group: sch.oracle.com
+  names:
+    kind: ServiceConnector
+    listKind: ServiceConnectorList
+    plural: serviceconnectors
+    singular: serviceconnector
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ServiceConnector
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ServiceConnector
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ServiceConnector is the Schema for the serviceconnectors API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceConnectorSpec defines the desired state of ServiceConnector.
+            properties:
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
+                  comparment to create the connector in.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: The description of the resource. Avoid entering confidential
+                  information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. It does not have to be unique, and it is changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              source:
+                description: ServiceConnectorSource defines nested fields for ServiceConnector.Source.
+                properties:
+                  configMap:
+                    description: |-
+                      The configuration map for the connector plugin. This map includes parameters specific to the connector plugin type.
+                      For example, for `QueueSource`, the map lists the OCID of the selected queue.
+                      To find the parameters for a connector plugin, get the plugin using GetConnectorPlugin and review its schema value.
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  cursor:
+                    description: ServiceConnectorSourceCursor defines nested fields
+                      for ServiceConnector.Source.Cursor.
+                    properties:
+                      jsonData:
+                        type: string
+                      kind:
+                        type: string
+                    type: object
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  logSources:
+                    description: The logs for this Logging source.
+                    items:
+                      description: ServiceConnectorSourceLogSource defines nested
+                        fields for ServiceConnector.Source.LogSource.
+                      properties:
+                        compartmentId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the compartment containing the log source.
+                          type: string
+                        logGroupId:
+                          description: |-
+                            Identifier of the log group. Either `_Audit` or the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the log group.
+                            Note: For the Notifications target, only `_Audit` is allowed.
+                          type: string
+                        logId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the log.
+                          type: string
+                      required:
+                      - compartmentId
+                      type: object
+                    type: array
+                  monitoringSources:
+                    description: One or more compartment-specific lists of metric
+                      namespaces to retrieve data from.
+                    items:
+                      description: ServiceConnectorSourceMonitoringSource defines
+                        nested fields for ServiceConnector.Source.MonitoringSource.
+                      properties:
+                        compartmentId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of a compartment containing metric namespaces you want
+                            to use for the Monitoring source.
+                          type: string
+                        namespaceDetails:
+                          description: ServiceConnectorSourceMonitoringSourceNamespaceDetails
+                            defines nested fields for ServiceConnector.Source.MonitoringSource.NamespaceDetails.
+                          properties:
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            namespaces:
+                              description: The namespaces for the compartment-specific
+                                list.
+                              items:
+                                description: ServiceConnectorSourceMonitoringSourceNamespaceDetailsNamespace
+                                  defines nested fields for ServiceConnector.Source.MonitoringSource.NamespaceDetails.Namespace.
+                                properties:
+                                  metrics:
+                                    description: ServiceConnectorSourceMonitoringSourceNamespaceDetailsNamespaceMetrics
+                                      defines nested fields for ServiceConnector.Source.MonitoringSource.NamespaceDetails.Namespace.Metrics.
+                                    properties:
+                                      jsonData:
+                                        type: string
+                                      kind:
+                                        type: string
+                                    type: object
+                                  namespace:
+                                    description: |-
+                                      The source service or application to use when querying for metric data points. Must begin with `oci_`.
+                                      Example: `oci_computeagent`
+                                    type: string
+                                required:
+                                - metrics
+                                - namespace
+                                type: object
+                              type: array
+                          type: object
+                      required:
+                      - compartmentId
+                      - namespaceDetails
+                      type: object
+                    type: array
+                  pluginName:
+                    description: |-
+                      The name of the connector plugin. This name indicates the service to be called by the connector plugin. For example, `QueueSource` indicates the Queue service.
+                      To find names of connector plugins, list the plugin using ListConnectorPlugins.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                type: object
+              target:
+                description: ServiceConnectorTarget defines nested fields for ServiceConnector.Target.
+                properties:
+                  batchRolloverSizeInMBs:
+                    description: The batch rollover size in megabytes.
+                    type: integer
+                  batchRolloverTimeInMs:
+                    description: The batch rollover time in milliseconds.
+                    type: integer
+                  batchSizeInKbs:
+                    description: |-
+                      The batch rollover size in kilobytes.
+                      Only one size option can be specified: `batchSizeInKbs` or `batchSizeInNum`.
+                    type: integer
+                  batchSizeInNum:
+                    description: |-
+                      The batch rollover size in number of messages.
+                      Only one size option can be specified: `batchSizeInKbs` or `batchSizeInNum`.
+                    type: integer
+                  batchTimeInSec:
+                    description: The batch rollover time in seconds.
+                    type: integer
+                  bucketName:
+                    description: |-
+                      The name of the bucket. Valid characters are letters (upper or lower case), numbers, hyphens (-),
+                      underscores(_), and periods (.). Bucket names must be unique within an Object Storage namespace.
+                      Avoid entering confidential information. Example: my-new-bucket1
+                    type: string
+                  compartmentId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the compartment containing the metric.
+                    type: string
+                  dimensions:
+                    description: List of dimension names and values.
+                    items:
+                      description: ServiceConnectorTargetDimension defines nested
+                        fields for ServiceConnector.Target.Dimension.
+                      properties:
+                        dimensionValue:
+                          description: ServiceConnectorTargetDimensionDimensionValue
+                            defines nested fields for ServiceConnector.Target.Dimension.DimensionValue.
+                          properties:
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            path:
+                              description: |-
+                                The location to use for deriving the dimension value (evaluated).
+                                The path must start with `logContent` in an acceptable notation style with supported JMESPath selectors (https://jmespath.org/specification.html): expression with dot and index operator (`.` and `MetricDataDetails.
+                                The returned value depends on the results of evaluation.
+                                If the evaluated value is valid, then the evaluated value is returned without double quotes. (Any front or trailing double quotes are trimmed before returning the value. For example, the evaluated value `"compartmentId"` is returned as `compartmentId`.)
+                                If the evaluated value is invalid, then the returned value is `SCH_EVAL_INVALID_VALUE`.
+                                If the evaluated value is empty, then the returned value is `SCH_EVAL_VALUE_EMPTY`.
+                              type: string
+                            value:
+                              description: |-
+                                The data extracted from the specified dimension value (passed as-is). Unicode characters only.
+                                For information on valid dimension keys and values, see MetricDataDetails.
+                              type: string
+                          type: object
+                        name:
+                          description: |-
+                            Dimension key. A valid dimension key includes only printable ASCII, excluding periods (.) and spaces.
+                            Custom dimension keys are acceptable. Avoid entering confidential information.
+                            Due to use by Connector Hub, the following dimension names are reserved: `connectorId`, `connectorName`, `connectorSourceType`.
+                            For information on valid dimension keys and values, see MetricDataDetails.
+                            Example: `type`
+                          type: string
+                      required:
+                      - dimensionValue
+                      - name
+                      type: object
+                    type: array
+                  enableFormattedMessaging:
+                    description: |-
+                      Whether to apply a simplified, user-friendly format to the message. Applies only when friendly formatting is supported by the connector source and the subscription protocol.
+                      Example: `true`
+                    type: boolean
+                  functionId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the function.
+                    type: string
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  logGroupId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Logging Analytics log group.
+                    type: string
+                  logSourceIdentifier:
+                    description: |-
+                      Identifier of the log source that you want to use for processing data received from the connector source.
+                      Applies to `StreamingSource` only.
+                      Equivalent to `name` at LogAnalyticsSource.
+                    type: string
+                  metric:
+                    description: |-
+                      The name of the metric.
+                      Example: `CpuUtilization`
+                    type: string
+                  metricNamespace:
+                    description: |-
+                      The namespace of the metric.
+                      Example: `oci_computeagent`
+                    type: string
+                  namespace:
+                    description: The namespace.
+                    type: string
+                  objectNamePrefix:
+                    description: The prefix of the objects. Avoid entering confidential
+                      information.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                  topicId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the topic.
+                    type: string
+                type: object
+              tasks:
+                description: The list of tasks.
+                items:
+                  description: ServiceConnectorTask defines nested fields for ServiceConnector.Task.
+                  properties:
+                    batchSizeInKbs:
+                      description: Size limit (kilobytes) for batch sent to invoke
+                        the function.
+                      type: integer
+                    batchTimeInSec:
+                      description: Time limit (seconds) for batch sent to invoke the
+                        function.
+                      type: integer
+                    condition:
+                      description: A filter or mask to limit the source used in the
+                        flow defined by the connector.
+                      type: string
+                    functionId:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the function to be used as a task.
+                      type: string
+                    jsonData:
+                      type: string
+                    kind:
+                      type: string
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - displayName
+            - source
+            - target
+            type: object
+          status:
+            description: ServiceConnectorStatus defines the observed state of ServiceConnector.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment containing the connector.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: The description of the resource. Avoid entering confidential
+                  information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. It does not have to be unique, and it is changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the connector.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  A message describing the current state in more detail.
+                  For example, the message might provide actionable
+                  information for a resource in a `FAILED` state.
+                type: string
+              lifecycleState:
+                description: The current state of the connector.
+                type: string
+              lifecyleDetails:
+                description: |-
+                  *Please note this property is deprecated and will be removed on January 27, 2026. Use `lifecycleDetails` instead.*
+                  A message describing the current state in more detail.
+                  For example, the message might provide actionable
+                  information for a resource in a `FAILED` state.
+                type: string
+              source:
+                description: ServiceConnectorSource defines nested fields for ServiceConnector.Source.
+                properties:
+                  configMap:
+                    description: |-
+                      The configuration map for the connector plugin. This map includes parameters specific to the connector plugin type.
+                      For example, for `QueueSource`, the map lists the OCID of the selected queue.
+                      To find the parameters for a connector plugin, get the plugin using GetConnectorPlugin and review its schema value.
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  cursor:
+                    description: ServiceConnectorSourceCursor defines nested fields
+                      for ServiceConnector.Source.Cursor.
+                    properties:
+                      jsonData:
+                        type: string
+                      kind:
+                        type: string
+                    type: object
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  logSources:
+                    description: The logs for this Logging source.
+                    items:
+                      description: ServiceConnectorSourceLogSource defines nested
+                        fields for ServiceConnector.Source.LogSource.
+                      properties:
+                        compartmentId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the compartment containing the log source.
+                          type: string
+                        logGroupId:
+                          description: |-
+                            Identifier of the log group. Either `_Audit` or the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the log group.
+                            Note: For the Notifications target, only `_Audit` is allowed.
+                          type: string
+                        logId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the log.
+                          type: string
+                      required:
+                      - compartmentId
+                      type: object
+                    type: array
+                  monitoringSources:
+                    description: One or more compartment-specific lists of metric
+                      namespaces to retrieve data from.
+                    items:
+                      description: ServiceConnectorSourceMonitoringSource defines
+                        nested fields for ServiceConnector.Source.MonitoringSource.
+                      properties:
+                        compartmentId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of a compartment containing metric namespaces you want
+                            to use for the Monitoring source.
+                          type: string
+                        namespaceDetails:
+                          description: ServiceConnectorSourceMonitoringSourceNamespaceDetails
+                            defines nested fields for ServiceConnector.Source.MonitoringSource.NamespaceDetails.
+                          properties:
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            namespaces:
+                              description: The namespaces for the compartment-specific
+                                list.
+                              items:
+                                description: ServiceConnectorSourceMonitoringSourceNamespaceDetailsNamespace
+                                  defines nested fields for ServiceConnector.Source.MonitoringSource.NamespaceDetails.Namespace.
+                                properties:
+                                  metrics:
+                                    description: ServiceConnectorSourceMonitoringSourceNamespaceDetailsNamespaceMetrics
+                                      defines nested fields for ServiceConnector.Source.MonitoringSource.NamespaceDetails.Namespace.Metrics.
+                                    properties:
+                                      jsonData:
+                                        type: string
+                                      kind:
+                                        type: string
+                                    type: object
+                                  namespace:
+                                    description: |-
+                                      The source service or application to use when querying for metric data points. Must begin with `oci_`.
+                                      Example: `oci_computeagent`
+                                    type: string
+                                required:
+                                - metrics
+                                - namespace
+                                type: object
+                              type: array
+                          type: object
+                      required:
+                      - compartmentId
+                      - namespaceDetails
+                      type: object
+                    type: array
+                  pluginName:
+                    description: |-
+                      The name of the connector plugin. This name indicates the service to be called by the connector plugin. For example, `QueueSource` indicates the Queue service.
+                      To find names of connector plugins, list the plugin using ListConnectorPlugins.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The system tags associated with this resource, if any. The system tags are set by Oracle Cloud Infrastructure services. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
+              target:
+                description: ServiceConnectorTarget defines nested fields for ServiceConnector.Target.
+                properties:
+                  batchRolloverSizeInMBs:
+                    description: The batch rollover size in megabytes.
+                    type: integer
+                  batchRolloverTimeInMs:
+                    description: The batch rollover time in milliseconds.
+                    type: integer
+                  batchSizeInKbs:
+                    description: |-
+                      The batch rollover size in kilobytes.
+                      Only one size option can be specified: `batchSizeInKbs` or `batchSizeInNum`.
+                    type: integer
+                  batchSizeInNum:
+                    description: |-
+                      The batch rollover size in number of messages.
+                      Only one size option can be specified: `batchSizeInKbs` or `batchSizeInNum`.
+                    type: integer
+                  batchTimeInSec:
+                    description: The batch rollover time in seconds.
+                    type: integer
+                  bucketName:
+                    description: |-
+                      The name of the bucket. Valid characters are letters (upper or lower case), numbers, hyphens (-),
+                      underscores(_), and periods (.). Bucket names must be unique within an Object Storage namespace.
+                      Avoid entering confidential information. Example: my-new-bucket1
+                    type: string
+                  compartmentId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the compartment containing the metric.
+                    type: string
+                  dimensions:
+                    description: List of dimension names and values.
+                    items:
+                      description: ServiceConnectorTargetDimension defines nested
+                        fields for ServiceConnector.Target.Dimension.
+                      properties:
+                        dimensionValue:
+                          description: ServiceConnectorTargetDimensionDimensionValue
+                            defines nested fields for ServiceConnector.Target.Dimension.DimensionValue.
+                          properties:
+                            jsonData:
+                              type: string
+                            kind:
+                              type: string
+                            path:
+                              description: |-
+                                The location to use for deriving the dimension value (evaluated).
+                                The path must start with `logContent` in an acceptable notation style with supported JMESPath selectors (https://jmespath.org/specification.html): expression with dot and index operator (`.` and `MetricDataDetails.
+                                The returned value depends on the results of evaluation.
+                                If the evaluated value is valid, then the evaluated value is returned without double quotes. (Any front or trailing double quotes are trimmed before returning the value. For example, the evaluated value `"compartmentId"` is returned as `compartmentId`.)
+                                If the evaluated value is invalid, then the returned value is `SCH_EVAL_INVALID_VALUE`.
+                                If the evaluated value is empty, then the returned value is `SCH_EVAL_VALUE_EMPTY`.
+                              type: string
+                            value:
+                              description: |-
+                                The data extracted from the specified dimension value (passed as-is). Unicode characters only.
+                                For information on valid dimension keys and values, see MetricDataDetails.
+                              type: string
+                          type: object
+                        name:
+                          description: |-
+                            Dimension key. A valid dimension key includes only printable ASCII, excluding periods (.) and spaces.
+                            Custom dimension keys are acceptable. Avoid entering confidential information.
+                            Due to use by Connector Hub, the following dimension names are reserved: `connectorId`, `connectorName`, `connectorSourceType`.
+                            For information on valid dimension keys and values, see MetricDataDetails.
+                            Example: `type`
+                          type: string
+                      required:
+                      - dimensionValue
+                      - name
+                      type: object
+                    type: array
+                  enableFormattedMessaging:
+                    description: |-
+                      Whether to apply a simplified, user-friendly format to the message. Applies only when friendly formatting is supported by the connector source and the subscription protocol.
+                      Example: `true`
+                    type: boolean
+                  functionId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the function.
+                    type: string
+                  jsonData:
+                    type: string
+                  kind:
+                    type: string
+                  logGroupId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the Logging Analytics log group.
+                    type: string
+                  logSourceIdentifier:
+                    description: |-
+                      Identifier of the log source that you want to use for processing data received from the connector source.
+                      Applies to `StreamingSource` only.
+                      Equivalent to `name` at LogAnalyticsSource.
+                    type: string
+                  metric:
+                    description: |-
+                      The name of the metric.
+                      Example: `CpuUtilization`
+                    type: string
+                  metricNamespace:
+                    description: |-
+                      The namespace of the metric.
+                      Example: `oci_computeagent`
+                    type: string
+                  namespace:
+                    description: The namespace.
+                    type: string
+                  objectNamePrefix:
+                    description: The prefix of the objects. Avoid entering confidential
+                      information.
+                    type: string
+                  streamId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the stream.
+                    type: string
+                  topicId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the topic.
+                    type: string
+                type: object
+              tasks:
+                description: The list of tasks.
+                items:
+                  description: ServiceConnectorTask defines nested fields for ServiceConnector.Task.
+                  properties:
+                    batchSizeInKbs:
+                      description: Size limit (kilobytes) for batch sent to invoke
+                        the function.
+                      type: integer
+                    batchTimeInSec:
+                      description: Time limit (seconds) for batch sent to invoke the
+                        function.
+                      type: integer
+                    condition:
+                      description: A filter or mask to limit the source used in the
+                        flow defined by the connector.
+                      type: string
+                    functionId:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the function to be used as a task.
+                      type: string
+                    jsonData:
+                      type: string
+                    kind:
+                      type: string
+                  type: object
+                type: array
+              timeCreated:
+                description: |-
+                  The date and time when the connector was created.
+                  Format is defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2020-01-25T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time when the connector was updated.
+                  Format is defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2020-01-25T21:10:29.600Z`
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

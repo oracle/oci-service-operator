@@ -887,4 +887,3 @@ AutonomousDatabaseVanityUrlDetails defines nested fields for AutonomousDatabase.
 | `apiGatewayId` | API Gateway ID. | `string` | No | - | - |
 | `isDisabled` | Indicates if the vanity url details should be deleted for the Autonomous AI Database. | `boolean` | No | - | - |
 | `vanityUrlHostName` | Custom URL prefix provided by the customer to access dbTools. | `string` | No | - | - |
-

@@ -287,4 +287,3 @@ AnalyticsInstanceVanityUrlDetails defines nested fields for AnalyticsInstance.Va
 | `key` | The vanity url unique identifier key. | `string` | No | - | - |
 | `publicCertificate` | PEM certificate for HTTPS connections. | `string` | No | - | - |
 | `urls` | List of urls supported by this vanity URL definition (max of 3). | `list[string]` | No | - | - |
-

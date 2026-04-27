@@ -18,7 +18,117 @@ No customer-visible package currently exposes `keymanagement.oracle.com/v1beta1`
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [EkmsPrivateEndpoint](#kind-ekmsprivateendpoint) | Namespaced | [Sample](../../../samples/keymanagement/v1beta1/ekmsprivateendpoint.md) | - |
 | [Vault](#kind-vault) | Namespaced | [Sample](../../../samples/keymanagement/v1beta1/vault.md) | - |
+
+<a id="kind-ekmsprivateendpoint"></a>
+## EkmsPrivateEndpoint
+
+Manage OCI EKMS private endpoints.
+
+- `Plural`: `ekmsprivateendpoints`
+- `Scope`: `Namespaced`
+- `APIVersion`: `keymanagement.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/keymanagement/v1beta1/ekmsprivateendpoint.md) (`config/samples/keymanagement_v1beta1_ekmsprivateendpoint.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-ekmsprivateendpoint-spec"></a>
+### Spec
+
+EkmsPrivateEndpointSpec defines the desired state of EkmsPrivateEndpoint.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `caBundle` | CABundle to validate TLS certificate of the external key manager system in PEM format | `string` | Yes | - | - |
+| `compartmentId` | Compartment identifier. | `string` | Yes | - | - |
+| `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | Display name of the EKMS private endpoint resource being created. | `string` | Yes | - | - |
+| `externalKeyManagerIp` | External private IP to connect to from this EKMS private endpoint | `string` | Yes | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `port` | The port of the external key manager system | `integer` | No | - | - |
+| `subnetId` | The OCID of subnet in which the EKMS private endpoint is to be created | `string` | Yes | - | - |
+
+<a id="kind-ekmsprivateendpoint-status"></a>
+### Status
+
+EkmsPrivateEndpointStatus defines the observed state of EkmsPrivateEndpoint.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `caBundle` | CABundle to validate TLS certificate of the external key manager system in PEM format | `string` | No | - | - |
+| `compartmentId` | Compartment Identifier. | `string` | No | - | - |
+| `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | EKMS Private Endpoint display name | `string` | No | - | - |
+| `externalKeyManagerIp` | Private IP of the external key manager system to connect to from the EKMS private endpoint | `string` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `id` | Unique identifier that is immutable | `string` | No | - | - |
+| `lifecycleDetails` | A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in 'Failed' state. | `string` | No | - | - |
+| `lifecycleState` | The current state of the EKMS private endpoint resource. | `string` | No | - | - |
+| `port` | The port of the external key manager system | `integer` | No | - | - |
+| `privateEndpointIp` | The IP address in the customer's VCN for the EKMS private endpoint. This is taken from subnet | `string` | No | - | - |
+| [`status`](#kind-ekmsprivateendpoint-status-status) | - | `object` | Yes | - | - |
+| `subnetId` | Subnet Identifier | `string` | No | - | - |
+| `timeCreated` | The time the EKMS private endpoint was created. An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime string. | `string` | No | - | - |
+| `timeUpdated` | The time the EKMS private endpoint was updated. An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime string. | `string` | No | - | - |
+
+<a id="kind-ekmsprivateendpoint-status-status"></a>
+#### Status.status
+
+[Back to EkmsPrivateEndpoint status](#kind-ekmsprivateendpoint-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-ekmsprivateendpoint-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-ekmsprivateendpoint-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-ekmsprivateendpoint-status-status-async"></a>
+##### Status.status.async
+
+[Back to EkmsPrivateEndpoint status](#kind-ekmsprivateendpoint-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-ekmsprivateendpoint-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-ekmsprivateendpoint-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to EkmsPrivateEndpoint status](#kind-ekmsprivateendpoint-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-ekmsprivateendpoint-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to EkmsPrivateEndpoint status](#kind-ekmsprivateendpoint-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-vault"></a>
 ## Vault
@@ -194,4 +304,3 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `reason` | - | `string` | No | - | - |
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
-

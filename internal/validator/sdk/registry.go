@@ -9,7 +9,10 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/aispeech"
 	"github.com/oracle/oci-go-sdk/v65/aivision"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
+	"github.com/oracle/oci-go-sdk/v65/artifacts"
+	"github.com/oracle/oci-go-sdk/v65/bastion"
 	"github.com/oracle/oci-go-sdk/v65/bds"
+	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
@@ -17,24 +20,35 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/databasetools"
 	"github.com/oracle/oci-go-sdk/v65/dataflow"
 	"github.com/oracle/oci-go-sdk/v65/datascience"
+	"github.com/oracle/oci-go-sdk/v65/devops"
+	"github.com/oracle/oci-go-sdk/v65/dns"
 	"github.com/oracle/oci-go-sdk/v65/email"
+	"github.com/oracle/oci-go-sdk/v65/events"
 	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
+	"github.com/oracle/oci-go-sdk/v65/healthchecks"
 	"github.com/oracle/oci-go-sdk/v65/identity"
+	"github.com/oracle/oci-go-sdk/v65/integration"
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
+	"github.com/oracle/oci-go-sdk/v65/limits"
 	"github.com/oracle/oci-go-sdk/v65/loadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/logging"
+	"github.com/oracle/oci-go-sdk/v65/managedkafka"
 	"github.com/oracle/oci-go-sdk/v65/marketplace"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
+	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
 	"github.com/oracle/oci-go-sdk/v65/ocvp"
 	"github.com/oracle/oci-go-sdk/v65/oda"
+	"github.com/oracle/oci-go-sdk/v65/ons"
 	"github.com/oracle/oci-go-sdk/v65/opensearch"
 	"github.com/oracle/oci-go-sdk/v65/psql"
 	"github.com/oracle/oci-go-sdk/v65/queue"
 	"github.com/oracle/oci-go-sdk/v65/redis"
+	"github.com/oracle/oci-go-sdk/v65/sch"
+	"github.com/oracle/oci-go-sdk/v65/servicecatalog"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
 	"github.com/oracle/oci-go-sdk/v65/usageapi"
 )
@@ -209,6 +223,15 @@ var seedTargets = []Target{
 	newTarget("oda", "SkillSummary", reflect.TypeOf(oda.SkillSummary{})),
 	newTarget("oda", "TranslatorSummary", reflect.TypeOf(oda.TranslatorSummary{})),
 
+	// Notifications (ONS) CRD support
+	newTarget("ons", "CreateSubscriptionDetails", reflect.TypeOf(ons.CreateSubscriptionDetails{})),
+	newTarget("ons", "CreateTopicDetails", reflect.TypeOf(ons.CreateTopicDetails{})),
+	newTarget("ons", "UpdateSubscriptionDetails", reflect.TypeOf(ons.UpdateSubscriptionDetails{})),
+	newTarget("ons", "NotificationTopic", reflect.TypeOf(ons.NotificationTopic{})),
+	newTarget("ons", "Subscription", reflect.TypeOf(ons.Subscription{})),
+	newTarget("ons", "NotificationTopicSummary", reflect.TypeOf(ons.NotificationTopicSummary{})),
+	newTarget("ons", "SubscriptionSummary", reflect.TypeOf(ons.SubscriptionSummary{})),
+
 	// Logging CRD support
 	newTarget("logging", "CreateLogDetails", reflect.TypeOf(logging.CreateLogDetails{})),
 	newTarget("logging", "CreateLogGroupDetails", reflect.TypeOf(logging.CreateLogGroupDetails{})),
@@ -258,6 +281,12 @@ var seedTargets = []Target{
 	newTarget("usageapi", "ScheduleSummary", reflect.TypeOf(usageapi.ScheduleSummary{})),
 	newTarget("usageapi", "UsageCarbonEmissionsQuerySummary", reflect.TypeOf(usageapi.UsageCarbonEmissionsQuerySummary{})),
 
+	// Events CRD support
+	newTarget("events", "CreateRuleDetails", reflect.TypeOf(events.CreateRuleDetails{})),
+	newTarget("events", "UpdateRuleDetails", reflect.TypeOf(events.UpdateRuleDetails{})),
+	newTarget("events", "Rule", reflect.TypeOf(events.Rule{})),
+	newTarget("events", "RuleSummary", reflect.TypeOf(events.RuleSummary{})),
+
 	// Monitoring CRD support
 	newTarget("monitoring", "CreateAlarmDetails", reflect.TypeOf(monitoring.CreateAlarmDetails{})),
 	newTarget("monitoring", "CreateAlarmSuppressionDetails", reflect.TypeOf(monitoring.CreateAlarmSuppressionDetails{})),
@@ -267,6 +296,28 @@ var seedTargets = []Target{
 	newTarget("monitoring", "AlarmSuppressionCollection", reflect.TypeOf(monitoring.AlarmSuppressionCollection{})),
 	newTarget("monitoring", "AlarmSummary", reflect.TypeOf(monitoring.AlarmSummary{})),
 	newTarget("monitoring", "AlarmSuppressionSummary", reflect.TypeOf(monitoring.AlarmSuppressionSummary{})),
+
+	// DNS CRD support
+	newTarget("dns", "CreateSteeringPolicyAttachmentDetails", reflect.TypeOf(dns.CreateSteeringPolicyAttachmentDetails{})),
+	newTarget("dns", "CreateSteeringPolicyDetails", reflect.TypeOf(dns.CreateSteeringPolicyDetails{})),
+	newTarget("dns", "CreateTsigKeyDetails", reflect.TypeOf(dns.CreateTsigKeyDetails{})),
+	newTarget("dns", "CreateViewDetails", reflect.TypeOf(dns.CreateViewDetails{})),
+	newTarget("dns", "CreateZoneDetails", reflect.TypeOf(dns.CreateZoneDetails{})),
+	newTarget("dns", "UpdateSteeringPolicyAttachmentDetails", reflect.TypeOf(dns.UpdateSteeringPolicyAttachmentDetails{})),
+	newTarget("dns", "UpdateSteeringPolicyDetails", reflect.TypeOf(dns.UpdateSteeringPolicyDetails{})),
+	newTarget("dns", "UpdateTsigKeyDetails", reflect.TypeOf(dns.UpdateTsigKeyDetails{})),
+	newTarget("dns", "UpdateViewDetails", reflect.TypeOf(dns.UpdateViewDetails{})),
+	newTarget("dns", "UpdateZoneDetails", reflect.TypeOf(dns.UpdateZoneDetails{})),
+	newTarget("dns", "SteeringPolicy", reflect.TypeOf(dns.SteeringPolicy{})),
+	newTarget("dns", "SteeringPolicyAttachment", reflect.TypeOf(dns.SteeringPolicyAttachment{})),
+	newTarget("dns", "TsigKey", reflect.TypeOf(dns.TsigKey{})),
+	newTarget("dns", "View", reflect.TypeOf(dns.View{})),
+	newTarget("dns", "Zone", reflect.TypeOf(dns.Zone{})),
+	newTarget("dns", "SteeringPolicyAttachmentSummary", reflect.TypeOf(dns.SteeringPolicyAttachmentSummary{})),
+	newTarget("dns", "SteeringPolicySummary", reflect.TypeOf(dns.SteeringPolicySummary{})),
+	newTarget("dns", "TsigKeySummary", reflect.TypeOf(dns.TsigKeySummary{})),
+	newTarget("dns", "ViewSummary", reflect.TypeOf(dns.ViewSummary{})),
+	newTarget("dns", "ZoneSummary", reflect.TypeOf(dns.ZoneSummary{})),
 
 	// Load Balancer CRD support
 	newTarget("loadbalancer", "CreateBackendDetails", reflect.TypeOf(loadbalancer.CreateBackendDetails{})),
@@ -308,6 +359,52 @@ var seedTargets = []Target{
 	newTarget("loadbalancer", "RuleSet", reflect.TypeOf(loadbalancer.RuleSet{})),
 	newTarget("loadbalancer", "SslCipherSuite", reflect.TypeOf(loadbalancer.SslCipherSuite{})),
 
+	// Network Load Balancer CRD support
+	newTarget("networkloadbalancer", "CreateBackendDetails", reflect.TypeOf(networkloadbalancer.CreateBackendDetails{})),
+	newTarget("networkloadbalancer", "CreateBackendSetDetails", reflect.TypeOf(networkloadbalancer.CreateBackendSetDetails{})),
+	newTarget("networkloadbalancer", "CreateListenerDetails", reflect.TypeOf(networkloadbalancer.CreateListenerDetails{})),
+	newTarget("networkloadbalancer", "CreateNetworkLoadBalancerDetails", reflect.TypeOf(networkloadbalancer.CreateNetworkLoadBalancerDetails{})),
+	newTarget("networkloadbalancer", "UpdateBackendDetails", reflect.TypeOf(networkloadbalancer.UpdateBackendDetails{})),
+	newTarget("networkloadbalancer", "UpdateBackendSetDetails", reflect.TypeOf(networkloadbalancer.UpdateBackendSetDetails{})),
+	newTarget("networkloadbalancer", "UpdateListenerDetails", reflect.TypeOf(networkloadbalancer.UpdateListenerDetails{})),
+	newTarget("networkloadbalancer", "UpdateNetworkLoadBalancerDetails", reflect.TypeOf(networkloadbalancer.UpdateNetworkLoadBalancerDetails{})),
+	newTarget("networkloadbalancer", "BackendDetails", reflect.TypeOf(networkloadbalancer.BackendDetails{})),
+	newTarget("networkloadbalancer", "BackendSetDetails", reflect.TypeOf(networkloadbalancer.BackendSetDetails{})),
+	newTarget("networkloadbalancer", "ListenerDetails", reflect.TypeOf(networkloadbalancer.ListenerDetails{})),
+	newTarget("networkloadbalancer", "Backend", reflect.TypeOf(networkloadbalancer.Backend{})),
+	newTarget("networkloadbalancer", "BackendCollection", reflect.TypeOf(networkloadbalancer.BackendCollection{})),
+	newTarget("networkloadbalancer", "BackendSet", reflect.TypeOf(networkloadbalancer.BackendSet{})),
+	newTarget("networkloadbalancer", "BackendSetCollection", reflect.TypeOf(networkloadbalancer.BackendSetCollection{})),
+	newTarget("networkloadbalancer", "Listener", reflect.TypeOf(networkloadbalancer.Listener{})),
+	newTarget("networkloadbalancer", "ListenerCollection", reflect.TypeOf(networkloadbalancer.ListenerCollection{})),
+	newTarget("networkloadbalancer", "NetworkLoadBalancer", reflect.TypeOf(networkloadbalancer.NetworkLoadBalancer{})),
+	newTarget("networkloadbalancer", "NetworkLoadBalancerCollection", reflect.TypeOf(networkloadbalancer.NetworkLoadBalancerCollection{})),
+	newTarget("networkloadbalancer", "BackendSetSummary", reflect.TypeOf(networkloadbalancer.BackendSetSummary{})),
+	newTarget("networkloadbalancer", "BackendSummary", reflect.TypeOf(networkloadbalancer.BackendSummary{})),
+	newTarget("networkloadbalancer", "ListenerSummary", reflect.TypeOf(networkloadbalancer.ListenerSummary{})),
+	newTarget("networkloadbalancer", "NetworkLoadBalancerSummary", reflect.TypeOf(networkloadbalancer.NetworkLoadBalancerSummary{})),
+
+	// Artifacts CRD support
+	newTarget("artifacts", "CreateContainerImageSignatureDetails", reflect.TypeOf(artifacts.CreateContainerImageSignatureDetails{})),
+	newTarget("artifacts", "CreateContainerRepositoryDetails", reflect.TypeOf(artifacts.CreateContainerRepositoryDetails{})),
+	newTarget("artifacts", "UpdateContainerImageSignatureDetails", reflect.TypeOf(artifacts.UpdateContainerImageSignatureDetails{})),
+	newTarget("artifacts", "UpdateContainerRepositoryDetails", reflect.TypeOf(artifacts.UpdateContainerRepositoryDetails{})),
+	newTarget("artifacts", "ContainerImageSignature", reflect.TypeOf(artifacts.ContainerImageSignature{})),
+	newTarget("artifacts", "ContainerImageSignatureCollection", reflect.TypeOf(artifacts.ContainerImageSignatureCollection{})),
+	newTarget("artifacts", "ContainerRepository", reflect.TypeOf(artifacts.ContainerRepository{})),
+	newTarget("artifacts", "ContainerRepositoryCollection", reflect.TypeOf(artifacts.ContainerRepositoryCollection{})),
+	newTarget("artifacts", "GenericRepository", reflect.TypeOf(artifacts.GenericRepository{})),
+	newTarget("artifacts", "RepositoryCollection", reflect.TypeOf(artifacts.RepositoryCollection{})),
+	newTarget("artifacts", "ContainerImageSignatureSummary", reflect.TypeOf(artifacts.ContainerImageSignatureSummary{})),
+	newTarget("artifacts", "ContainerRepositorySummary", reflect.TypeOf(artifacts.ContainerRepositorySummary{})),
+
+	// Certificates Management CRD support
+	newTarget("certificatesmanagement", "CreateCaBundleDetails", reflect.TypeOf(certificatesmanagement.CreateCaBundleDetails{})),
+	newTarget("certificatesmanagement", "UpdateCaBundleDetails", reflect.TypeOf(certificatesmanagement.UpdateCaBundleDetails{})),
+	newTarget("certificatesmanagement", "CaBundle", reflect.TypeOf(certificatesmanagement.CaBundle{})),
+	newTarget("certificatesmanagement", "CaBundleCollection", reflect.TypeOf(certificatesmanagement.CaBundleCollection{})),
+	newTarget("certificatesmanagement", "CaBundleSummary", reflect.TypeOf(certificatesmanagement.CaBundleSummary{})),
+
 	// Container Engine CRD support
 	newTarget("containerengine", "CreateClusterDetails", reflect.TypeOf(containerengine.CreateClusterDetails{})),
 	newTarget("containerengine", "CreateNodePoolDetails", reflect.TypeOf(containerengine.CreateNodePoolDetails{})),
@@ -324,10 +421,20 @@ var seedTargets = []Target{
 	newTarget("identity", "Compartment", reflect.TypeOf(identity.Compartment{})),
 
 	// Key Management CRD support
+	newTarget("keymanagement", "CreateEkmsPrivateEndpointDetails", reflect.TypeOf(keymanagement.CreateEkmsPrivateEndpointDetails{})),
 	newTarget("keymanagement", "CreateVaultDetails", reflect.TypeOf(keymanagement.CreateVaultDetails{})),
+	newTarget("keymanagement", "UpdateEkmsPrivateEndpointDetails", reflect.TypeOf(keymanagement.UpdateEkmsPrivateEndpointDetails{})),
 	newTarget("keymanagement", "UpdateVaultDetails", reflect.TypeOf(keymanagement.UpdateVaultDetails{})),
+	newTarget("keymanagement", "EkmsPrivateEndpoint", reflect.TypeOf(keymanagement.EkmsPrivateEndpoint{})),
 	newTarget("keymanagement", "Vault", reflect.TypeOf(keymanagement.Vault{})),
+	newTarget("keymanagement", "EkmsPrivateEndpointSummary", reflect.TypeOf(keymanagement.EkmsPrivateEndpointSummary{})),
 	newTarget("keymanagement", "VaultSummary", reflect.TypeOf(keymanagement.VaultSummary{})),
+
+	// Limits CRD support
+	newTarget("limits", "CreateQuotaDetails", reflect.TypeOf(limits.CreateQuotaDetails{})),
+	newTarget("limits", "UpdateQuotaDetails", reflect.TypeOf(limits.UpdateQuotaDetails{})),
+	newTarget("limits", "Quota", reflect.TypeOf(limits.Quota{})),
+	newTarget("limits", "QuotaSummary", reflect.TypeOf(limits.QuotaSummary{})),
 
 	// Core VCN CRD support
 	newTarget("core", "CreateDrgDetails", reflect.TypeOf(core.CreateDrgDetails{})),
@@ -395,6 +502,16 @@ var seedTargets = []Target{
 	newTarget("analytics", "AnalyticsInstance", reflect.TypeOf(analytics.AnalyticsInstance{})),
 	newTarget("analytics", "AnalyticsInstanceSummary", reflect.TypeOf(analytics.AnalyticsInstanceSummary{})),
 
+	// Bastion CRD support
+	newTarget("bastion", "CreateBastionDetails", reflect.TypeOf(bastion.CreateBastionDetails{})),
+	newTarget("bastion", "CreateSessionDetails", reflect.TypeOf(bastion.CreateSessionDetails{})),
+	newTarget("bastion", "UpdateBastionDetails", reflect.TypeOf(bastion.UpdateBastionDetails{})),
+	newTarget("bastion", "UpdateSessionDetails", reflect.TypeOf(bastion.UpdateSessionDetails{})),
+	newTarget("bastion", "Bastion", reflect.TypeOf(bastion.Bastion{})),
+	newTarget("bastion", "Session", reflect.TypeOf(bastion.Session{})),
+	newTarget("bastion", "BastionSummary", reflect.TypeOf(bastion.BastionSummary{})),
+	newTarget("bastion", "SessionSummary", reflect.TypeOf(bastion.SessionSummary{})),
+
 	// Bds CRD support
 	newTarget("bds", "CreateBdsInstanceDetails", reflect.TypeOf(bds.CreateBdsInstanceDetails{})),
 	newTarget("bds", "UpdateBdsInstanceDetails", reflect.TypeOf(bds.UpdateBdsInstanceDetails{})),
@@ -439,6 +556,63 @@ var seedTargets = []Target{
 	newTarget("datascience", "Project", reflect.TypeOf(datascience.Project{})),
 	newTarget("datascience", "ProjectSummary", reflect.TypeOf(datascience.ProjectSummary{})),
 
+	// Devops CRD support
+	newTarget("devops", "CreateBuildPipelineDetails", reflect.TypeOf(devops.CreateBuildPipelineDetails{})),
+	newTarget("devops", "CreateDeployArtifactDetails", reflect.TypeOf(devops.CreateDeployArtifactDetails{})),
+	newTarget("devops", "CreateDeployPipelineDetails", reflect.TypeOf(devops.CreateDeployPipelineDetails{})),
+	newTarget("devops", "CreateProjectDetails", reflect.TypeOf(devops.CreateProjectDetails{})),
+	newTarget("devops", "CreateRepositoryDetails", reflect.TypeOf(devops.CreateRepositoryDetails{})),
+	newTarget("devops", "UpdateBuildPipelineDetails", reflect.TypeOf(devops.UpdateBuildPipelineDetails{})),
+	newTarget("devops", "UpdateDeployArtifactDetails", reflect.TypeOf(devops.UpdateDeployArtifactDetails{})),
+	newTarget("devops", "UpdateDeployPipelineDetails", reflect.TypeOf(devops.UpdateDeployPipelineDetails{})),
+	newTarget("devops", "UpdateProjectDetails", reflect.TypeOf(devops.UpdateProjectDetails{})),
+	newTarget("devops", "UpdateRepositoryDetails", reflect.TypeOf(devops.UpdateRepositoryDetails{})),
+	newTarget("devops", "BuildPipeline", reflect.TypeOf(devops.BuildPipeline{})),
+	newTarget("devops", "BuildPipelineCollection", reflect.TypeOf(devops.BuildPipelineCollection{})),
+	newTarget("devops", "DeployArtifact", reflect.TypeOf(devops.DeployArtifact{})),
+	newTarget("devops", "DeployArtifactCollection", reflect.TypeOf(devops.DeployArtifactCollection{})),
+	newTarget("devops", "DeployPipeline", reflect.TypeOf(devops.DeployPipeline{})),
+	newTarget("devops", "DeployPipelineCollection", reflect.TypeOf(devops.DeployPipelineCollection{})),
+	newTarget("devops", "Project", reflect.TypeOf(devops.Project{})),
+	newTarget("devops", "ProjectCollection", reflect.TypeOf(devops.ProjectCollection{})),
+	newTarget("devops", "Repository", reflect.TypeOf(devops.Repository{})),
+	newTarget("devops", "RepositoryCollection", reflect.TypeOf(devops.RepositoryCollection{})),
+	newTarget("devops", "TriggerCollection", reflect.TypeOf(devops.TriggerCollection{})),
+	newTarget("devops", "BuildPipelineSummary", reflect.TypeOf(devops.BuildPipelineSummary{})),
+	newTarget("devops", "DeployArtifactSummary", reflect.TypeOf(devops.DeployArtifactSummary{})),
+	newTarget("devops", "DeployPipelineSummary", reflect.TypeOf(devops.DeployPipelineSummary{})),
+	newTarget("devops", "ProjectSummary", reflect.TypeOf(devops.ProjectSummary{})),
+	newTarget("devops", "RepositorySummary", reflect.TypeOf(devops.RepositorySummary{})),
+
+	// Healthchecks CRD support
+	newTarget("healthchecks", "CreateHttpMonitorDetails", reflect.TypeOf(healthchecks.CreateHttpMonitorDetails{})),
+	newTarget("healthchecks", "CreatePingMonitorDetails", reflect.TypeOf(healthchecks.CreatePingMonitorDetails{})),
+	newTarget("healthchecks", "UpdateHttpMonitorDetails", reflect.TypeOf(healthchecks.UpdateHttpMonitorDetails{})),
+	newTarget("healthchecks", "UpdatePingMonitorDetails", reflect.TypeOf(healthchecks.UpdatePingMonitorDetails{})),
+	newTarget("healthchecks", "HttpMonitor", reflect.TypeOf(healthchecks.HttpMonitor{})),
+	newTarget("healthchecks", "PingMonitor", reflect.TypeOf(healthchecks.PingMonitor{})),
+	newTarget("healthchecks", "HttpMonitorSummary", reflect.TypeOf(healthchecks.HttpMonitorSummary{})),
+	newTarget("healthchecks", "PingMonitorSummary", reflect.TypeOf(healthchecks.PingMonitorSummary{})),
+
+	// Integration CRD support
+	newTarget("integration", "CreateIntegrationInstanceDetails", reflect.TypeOf(integration.CreateIntegrationInstanceDetails{})),
+	newTarget("integration", "UpdateIntegrationInstanceDetails", reflect.TypeOf(integration.UpdateIntegrationInstanceDetails{})),
+	newTarget("integration", "IntegrationInstance", reflect.TypeOf(integration.IntegrationInstance{})),
+	newTarget("integration", "IntegrationInstanceSummary", reflect.TypeOf(integration.IntegrationInstanceSummary{})),
+
+	// Managedkafka CRD support
+	newTarget("managedkafka", "CreateKafkaClusterConfigDetails", reflect.TypeOf(managedkafka.CreateKafkaClusterConfigDetails{})),
+	newTarget("managedkafka", "CreateKafkaClusterDetails", reflect.TypeOf(managedkafka.CreateKafkaClusterDetails{})),
+	newTarget("managedkafka", "UpdateKafkaClusterConfigDetails", reflect.TypeOf(managedkafka.UpdateKafkaClusterConfigDetails{})),
+	newTarget("managedkafka", "UpdateKafkaClusterDetails", reflect.TypeOf(managedkafka.UpdateKafkaClusterDetails{})),
+	newTarget("managedkafka", "KafkaCluster", reflect.TypeOf(managedkafka.KafkaCluster{})),
+	newTarget("managedkafka", "KafkaClusterCollection", reflect.TypeOf(managedkafka.KafkaClusterCollection{})),
+	newTarget("managedkafka", "KafkaClusterConfig", reflect.TypeOf(managedkafka.KafkaClusterConfig{})),
+	newTarget("managedkafka", "KafkaClusterConfigCollection", reflect.TypeOf(managedkafka.KafkaClusterConfigCollection{})),
+	newTarget("managedkafka", "KafkaClusterConfigVersionSummary", reflect.TypeOf(managedkafka.KafkaClusterConfigVersionSummary{})),
+	newTarget("managedkafka", "KafkaClusterConfigSummary", reflect.TypeOf(managedkafka.KafkaClusterConfigSummary{})),
+	newTarget("managedkafka", "KafkaClusterSummary", reflect.TypeOf(managedkafka.KafkaClusterSummary{})),
+
 	// Opensearch CRD support
 	newTarget("opensearch", "CreateOpensearchClusterDetails", reflect.TypeOf(opensearch.CreateOpensearchClusterDetails{})),
 	newTarget("opensearch", "UpdateOpensearchClusterDetails", reflect.TypeOf(opensearch.UpdateOpensearchClusterDetails{})),
@@ -452,6 +626,25 @@ var seedTargets = []Target{
 	newTarget("redis", "RedisCluster", reflect.TypeOf(redis.RedisCluster{})),
 	newTarget("redis", "RedisClusterCollection", reflect.TypeOf(redis.RedisClusterCollection{})),
 	newTarget("redis", "RedisClusterSummary", reflect.TypeOf(redis.RedisClusterSummary{})),
+
+	// Sch CRD support
+	newTarget("sch", "CreateServiceConnectorDetails", reflect.TypeOf(sch.CreateServiceConnectorDetails{})),
+	newTarget("sch", "UpdateServiceConnectorDetails", reflect.TypeOf(sch.UpdateServiceConnectorDetails{})),
+	newTarget("sch", "ServiceConnector", reflect.TypeOf(sch.ServiceConnector{})),
+	newTarget("sch", "ServiceConnectorCollection", reflect.TypeOf(sch.ServiceConnectorCollection{})),
+	newTarget("sch", "ServiceConnectorSummary", reflect.TypeOf(sch.ServiceConnectorSummary{})),
+
+	// Servicecatalog CRD support
+	newTarget("servicecatalog", "CreatePrivateApplicationDetails", reflect.TypeOf(servicecatalog.CreatePrivateApplicationDetails{})),
+	newTarget("servicecatalog", "CreateServiceCatalogDetails", reflect.TypeOf(servicecatalog.CreateServiceCatalogDetails{})),
+	newTarget("servicecatalog", "UpdatePrivateApplicationDetails", reflect.TypeOf(servicecatalog.UpdatePrivateApplicationDetails{})),
+	newTarget("servicecatalog", "UpdateServiceCatalogDetails", reflect.TypeOf(servicecatalog.UpdateServiceCatalogDetails{})),
+	newTarget("servicecatalog", "PrivateApplication", reflect.TypeOf(servicecatalog.PrivateApplication{})),
+	newTarget("servicecatalog", "PrivateApplicationCollection", reflect.TypeOf(servicecatalog.PrivateApplicationCollection{})),
+	newTarget("servicecatalog", "ServiceCatalog", reflect.TypeOf(servicecatalog.ServiceCatalog{})),
+	newTarget("servicecatalog", "ServiceCatalogCollection", reflect.TypeOf(servicecatalog.ServiceCatalogCollection{})),
+	newTarget("servicecatalog", "PrivateApplicationSummary", reflect.TypeOf(servicecatalog.PrivateApplicationSummary{})),
+	newTarget("servicecatalog", "ServiceCatalogSummary", reflect.TypeOf(servicecatalog.ServiceCatalogSummary{})),
 }
 
 var interfaceImplementations = map[string][]reflect.Type{

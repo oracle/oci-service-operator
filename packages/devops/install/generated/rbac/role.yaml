@@ -1,0 +1,54 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - devops.oracle.com
+  resources:
+  - buildpipelines
+  - deployartifacts
+  - deploypipelines
+  - projects
+  - repositories
+  - triggers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - devops.oracle.com
+  resources:
+  - buildpipelines/finalizers
+  - deployartifacts/finalizers
+  - deploypipelines/finalizers
+  - projects/finalizers
+  - repositories/finalizers
+  - triggers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - devops.oracle.com
+  resources:
+  - buildpipelines/status
+  - deployartifacts/status
+  - deploypipelines/status
+  - projects/status
+  - repositories/status
+  - triggers/status
+  verbs:
+  - get
+  - patch
+  - update
