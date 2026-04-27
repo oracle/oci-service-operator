@@ -2653,9 +2653,10 @@ func assertOCVPRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
 		registration:   GenerationStrategyGenerated,
 		webhook:        GenerationStrategyNone,
 	})
-	assertResourceOverrideCount(t, service, 2)
+	assertResourceOverrideCount(t, service, 3)
 	assertPrimaryPortOverride(t, service, "Cluster", "cluster", "ocvp/cluster")
 	assertSampleOverrideContains(t, service, "Cluster", "displayName:", "sddcId:", "networkConfiguration:")
+	assertFormalSpecFor(t, service, "EsxiHost", "")
 	assertPrimaryPortOverride(t, service, "Sddc", "sddc", "ocvp/sddc")
 	assertSampleOverrideContains(t, service, "Sddc", "displayName:", "compartmentId:", "initialConfiguration:")
 }

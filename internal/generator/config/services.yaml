@@ -1240,6 +1240,11 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Dkim
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
         - kind: EmailDomain
           formalSpec: emaildomain
           sample:
@@ -1275,6 +1280,11 @@ services:
                 emailAddress: sender@example.com
                 freeformTags:
                   managed-by: oci-service-operator
+        - kind: Suppression
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: events
     sdkPackage: github.com/oracle/oci-go-sdk/v65/events
@@ -1715,6 +1725,16 @@ services:
                   urlPath: /healthz
                   port: 8080
                   returnCode: 200
+        - kind: Certificate
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Hostname
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
         - kind: Listener
           formalSpec: listener
           specFields:
@@ -1760,6 +1780,26 @@ services:
                 shapeDetails:
                   minimumBandwidthInMbps: 10
                   maximumBandwidthInMbps: 10
+        - kind: PathRouteSet
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: RoutingPolicy
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: RuleSet
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: SSLCipherSuite
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
@@ -1820,6 +1860,21 @@ services:
                     service: service_name
                     resource: ocid1.resource.oc1..exampleuniqueID
                     category: category_name
+        - kind: LogGroup
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: LogSavedSearch
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: UnifiedAgentConfiguration
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: monitoring
     sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
@@ -1870,6 +1925,11 @@ services:
                 destinations:
                   - ocid1.onstopic.oc1..exampleuniqueID
                 isEnabled: true
+        - kind: AlarmSuppression
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
     observedState:
       sdkAliases:
         AlarmHistory:
@@ -1936,6 +1996,11 @@ services:
                 agreementId: ocid1.agreement.oc1..exampleuniqueID
                 signature: "<listing-package-agreement-signature>"
                 displayName: "acceptedagreement-sample"
+        - kind: Publication
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -2169,6 +2234,11 @@ services:
                   nsxEdgeVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
           serviceManager:
             packagePath: ocvp/cluster
+        - kind: EsxiHost
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
         - kind: Sddc
           formalSpec: sddc
           sample:
@@ -2244,6 +2314,67 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: AuthenticationProvider
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Channel
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: DigitalAssistant
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: ImportedPackage
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaInstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaInstanceAttachment
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaPrivateEndpoint
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaPrivateEndpointAttachment
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaPrivateEndpointScanProxy
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Skill
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: SkillParameter
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Translator
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: opensearch
     sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
@@ -2714,6 +2845,11 @@ services:
                 savedReportId: ocid1.savedreport.oc1..exampleuniqueID
                 freeformTags:
                   workload: finops
+        - kind: UsageCarbonEmissionsQuery
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
