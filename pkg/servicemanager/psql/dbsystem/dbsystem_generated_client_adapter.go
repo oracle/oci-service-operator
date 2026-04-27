@@ -539,14 +539,14 @@ func validateImmutableDrift(
 		equal bool
 	}{
 		{field: "compartmentId", equal: spec.CompartmentId == observed.CompartmentId},
-		{field: "dbVersion", equal: spec.DbVersion == observed.DbVersion},
-		{field: "shape", equal: spec.Shape == observed.Shape},
+		{field: "dbVersion", equal: dbSystemDbVersionEqual(spec.DbVersion, observed.DbVersion)},
+		{field: "shape", equal: dbSystemShapeEqual(spec.Shape, observed.Shape)},
 		{field: "systemType", equal: spec.SystemType == "" || spec.SystemType == observed.SystemType},
 		{field: "configId", equal: spec.ConfigId == "" || spec.ConfigId == observed.ConfigId},
 		{field: "instanceOcpuCount", equal: spec.InstanceOcpuCount == 0 || spec.InstanceOcpuCount == observed.InstanceOcpuCount},
 		{field: "instanceMemorySizeInGBs", equal: spec.InstanceMemorySizeInGBs == 0 || spec.InstanceMemorySizeInGBs == observed.InstanceMemorySizeInGBs},
 		{field: "instanceCount", equal: spec.InstanceCount == 0 || spec.InstanceCount == observed.InstanceCount},
-		{field: "networkDetails", equal: reflect.DeepEqual(spec.NetworkDetails, observed.NetworkDetails)},
+		{field: "networkDetails", equal: dbSystemNetworkDetailsEqual(spec.NetworkDetails, observed.NetworkDetails)},
 		{field: "storageDetails.availabilityDomain", equal: spec.StorageDetails.AvailabilityDomain == observed.StorageDetails.AvailabilityDomain},
 		{field: "storageDetails.isRegionallyDurable", equal: spec.StorageDetails.IsRegionallyDurable == observed.StorageDetails.IsRegionallyDurable},
 		{field: "storageDetails.systemType", equal: spec.StorageDetails.SystemType == observed.StorageDetails.SystemType},
@@ -565,6 +565,43 @@ func validateImmutableDrift(
 	}
 
 	return nil
+}
+
+func dbSystemDbVersionEqual(specVersion string, observedVersion string) bool {
+	specVersion = strings.TrimSpace(specVersion)
+	observedVersion = strings.TrimSpace(observedVersion)
+	if specVersion == observedVersion {
+		return true
+	}
+	if specVersion == "" || observedVersion == "" || strings.Contains(specVersion, ".") {
+		return false
+	}
+	return specVersion == strings.SplitN(observedVersion, ".", 2)[0]
+}
+
+func dbSystemShapeEqual(specShape string, observedShape string) bool {
+	specShape = strings.TrimSpace(specShape)
+	observedShape = strings.TrimSpace(observedShape)
+	if specShape == observedShape {
+		return true
+	}
+	return strings.TrimPrefix(specShape, "PostgreSQL.") == strings.TrimPrefix(observedShape, "PostgreSQL.")
+}
+
+func dbSystemNetworkDetailsEqual(
+	spec psqlv1beta1.DbSystemNetworkDetails,
+	observed psqlv1beta1.DbSystemNetworkDetails,
+) bool {
+	if spec.SubnetId != observed.SubnetId {
+		return false
+	}
+	if spec.PrimaryDbEndpointPrivateIp != "" && spec.PrimaryDbEndpointPrivateIp != observed.PrimaryDbEndpointPrivateIp {
+		return false
+	}
+	if spec.IsReaderEndpointEnabled != observed.IsReaderEndpointEnabled {
+		return false
+	}
+	return reflect.DeepEqual(spec.NsgIds, observed.NsgIds) || len(spec.NsgIds) == 0 && len(observed.NsgIds) == 0
 }
 
 func validateAdminSecretDrift(
@@ -612,6 +649,9 @@ func (c manualDbSystemServiceClient) projectDbSystem(
 	}
 	status.UpdatedAt = &now
 	status = util.UpdateOSOKStatusCondition(status, condition, v1.ConditionTrue, "", message, c.log)
+	if condition != shared.Failed {
+		status = dropDbSystemStaleConditions(status, condition)
+	}
 	resource.Status.OsokStatus = status
 
 	return servicemanager.OSOKResponse{
@@ -619,6 +659,33 @@ func (c manualDbSystemServiceClient) projectDbSystem(
 		ShouldRequeue:   shouldRequeue,
 		RequeueDuration: dbSystemDefaultRequeueDuration,
 	}, nil
+}
+
+func dropDbSystemStaleConditions(status shared.OSOKStatus, current shared.OSOKConditionType) shared.OSOKStatus {
+	if len(status.Conditions) == 0 {
+		return status
+	}
+	conditions := status.Conditions[:0]
+	for _, condition := range status.Conditions {
+		if condition.Type == shared.Failed {
+			continue
+		}
+		if current == shared.Active && isDbSystemTransientCondition(condition.Type) {
+			continue
+		}
+		conditions = append(conditions, condition)
+	}
+	status.Conditions = conditions
+	return status
+}
+
+func isDbSystemTransientCondition(condition shared.OSOKConditionType) bool {
+	switch condition {
+	case shared.Provisioning, shared.Updating, shared.Terminating:
+		return true
+	default:
+		return false
+	}
 }
 
 func classifyDbSystemLifecycle(

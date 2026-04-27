@@ -232,6 +232,57 @@ func TestManualDbSystemServiceClientRejectsImmutableShapeDrift(t *testing.T) {
 	}
 }
 
+func TestValidateImmutableDriftAcceptsPostCreateReadbackNormalization(t *testing.T) {
+	t.Parallel()
+
+	resource := testDbSystemResource()
+	resource.Spec.Shape = "PostgreSQL.VM.Standard.E5.Flex"
+	observed := psqlv1beta1.DbSystemStatus{
+		CompartmentId:           resource.Spec.CompartmentId,
+		DbVersion:               "14.17",
+		Shape:                   "VM.Standard.E5.Flex",
+		InstanceOcpuCount:       2,
+		InstanceMemorySizeInGBs: 16,
+		InstanceCount:           1,
+		StorageDetails: psqlv1beta1.DbSystemStorageDetails{
+			SystemType:          resource.Spec.StorageDetails.SystemType,
+			IsRegionallyDurable: resource.Spec.StorageDetails.IsRegionallyDurable,
+			Iops:                resource.Spec.StorageDetails.Iops,
+		},
+		NetworkDetails: psqlv1beta1.DbSystemNetworkDetails{
+			SubnetId:                   resource.Spec.NetworkDetails.SubnetId,
+			PrimaryDbEndpointPrivateIp: "10.0.10.110",
+		},
+		AdminUsername: resource.Spec.Credentials.Username,
+	}
+
+	if err := validateImmutableDrift(resource.Spec, observed); err != nil {
+		t.Fatalf("validateImmutableDrift() error = %v, want nil", err)
+	}
+}
+
+func TestValidateImmutableDriftRejectsDbVersionMajorChange(t *testing.T) {
+	t.Parallel()
+
+	resource := testDbSystemResource()
+	observed := psqlv1beta1.DbSystemStatus{
+		CompartmentId: resource.Spec.CompartmentId,
+		DbVersion:     "15.1",
+		Shape:         resource.Spec.Shape,
+		StorageDetails: psqlv1beta1.DbSystemStorageDetails{
+			SystemType:          resource.Spec.StorageDetails.SystemType,
+			IsRegionallyDurable: resource.Spec.StorageDetails.IsRegionallyDurable,
+		},
+		NetworkDetails: resource.Spec.NetworkDetails,
+		AdminUsername:  resource.Spec.Credentials.Username,
+	}
+
+	err := validateImmutableDrift(resource.Spec, observed)
+	if err == nil || !strings.Contains(err.Error(), "dbVersion") {
+		t.Fatalf("validateImmutableDrift() error = %v, want dbVersion drift", err)
+	}
+}
+
 func TestManualDbSystemServiceClientUpdatesMutableDescriptionAndRequeues(t *testing.T) {
 	t.Parallel()
 
@@ -523,6 +574,49 @@ func TestClassifyDbSystemLifecycleMapsFormalStates(t *testing.T) {
 				t.Fatalf("successful = %t, want %t", successful, test.wantSuccessful)
 			}
 		})
+	}
+}
+
+func TestDropDbSystemStaleConditionsOnSuccessfulProjection(t *testing.T) {
+	t.Parallel()
+
+	status := shared.OSOKStatus{
+		Conditions: []shared.OSOKCondition{
+			{Type: shared.Provisioning},
+			{Type: shared.Active},
+			{Type: shared.Failed},
+			{Type: shared.Updating},
+			{Type: shared.Terminating},
+			{Type: shared.Failed},
+		},
+	}
+
+	got := dropDbSystemStaleConditions(status, shared.Active)
+	if len(got.Conditions) != 1 {
+		t.Fatalf("conditions = %#v, want only active condition", got.Conditions)
+	}
+	if got.Conditions[0].Type != shared.Active {
+		t.Fatalf("conditions = %#v, want Active", got.Conditions)
+	}
+}
+
+func TestDropDbSystemStaleConditionsPreservesCurrentTransientCondition(t *testing.T) {
+	t.Parallel()
+
+	status := shared.OSOKStatus{
+		Conditions: []shared.OSOKCondition{
+			{Type: shared.Active},
+			{Type: shared.Failed},
+			{Type: shared.Updating},
+		},
+	}
+
+	got := dropDbSystemStaleConditions(status, shared.Updating)
+	if len(got.Conditions) != 2 {
+		t.Fatalf("conditions = %#v, want active and updating conditions", got.Conditions)
+	}
+	if got.Conditions[0].Type != shared.Active || got.Conditions[1].Type != shared.Updating {
+		t.Fatalf("conditions = %#v, want Active then Updating", got.Conditions)
 	}
 }
 
