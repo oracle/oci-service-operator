@@ -21,6 +21,7 @@ import (
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/oracle/oci-service-operator/pkg/util"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -38,6 +39,7 @@ type ContainerInstanceServiceManager struct {
 	Log              loggerutil.OSOKLogger
 	Metrics          *metrics.Metrics
 	ociClient        ContainerInstanceClientInterface
+	vnicClient       ContainerInstanceVnicClientInterface
 }
 
 func NewContainerInstanceServiceManagerWithDeps(deps servicemanager.RuntimeDeps) *ContainerInstanceServiceManager {
@@ -102,6 +104,7 @@ func (c *ContainerInstanceServiceManager) Delete(ctx context.Context, obj runtim
 	if err != nil {
 		if servicemanager.IsNotFoundServiceError(err) {
 			servicemanager.RecordErrorOpcRequestID(&ci.Status.OsokStatus, err)
+			c.markContainerInstanceDeleted(ci, string(targetID))
 			return true, nil
 		}
 		servicemanager.RecordErrorOpcRequestID(&ci.Status.OsokStatus, err)
@@ -109,22 +112,27 @@ func (c *ContainerInstanceServiceManager) Delete(ctx context.Context, obj runtim
 		return false, err
 	}
 
+	c.syncObservedStatus(ci, current)
 	switch current.LifecycleState {
 	case containerinstancessdk.ContainerInstanceLifecycleStateDeleted:
+		c.markContainerInstanceDeleted(ci, string(targetID))
 		return true, nil
 	case containerinstancessdk.ContainerInstanceLifecycleStateDeleting:
+		c.applyContainerInstanceLifecycle(&ci.Status.OsokStatus, current, shared.OSOKAsyncPhaseDelete)
 		return false, nil
 	}
 
 	c.Log.InfoLog(fmt.Sprintf("Deleting ContainerInstance %s", targetID))
 	if err := c.DeleteContainerInstance(ctx, ci, targetID); err != nil {
 		if servicemanager.IsNotFoundServiceError(err) {
+			c.markContainerInstanceDeleted(ci, string(targetID))
 			return true, nil
 		}
 		c.Log.ErrorLog(err, "Error while deleting ContainerInstance")
 		return false, err
 	}
 
+	c.markContainerInstanceDeleteRequested(ci, targetID)
 	return false, nil
 }
 
@@ -150,6 +158,10 @@ func (c *ContainerInstanceServiceManager) resolveContainerInstance(ctx context.C
 	if trackedID, ok := trackedContainerInstanceID(ci); ok {
 		instance, err := c.GetContainerInstance(ctx, trackedID, nil)
 		if err == nil {
+			if instance.LifecycleState == containerinstancessdk.ContainerInstanceLifecycleStateDeleted {
+				clearTrackedContainerInstanceID(ci)
+				return c.lookupOrCreateContainerInstance(ctx, ci)
+			}
 			return c.refreshOrUpdateTrackedInstance(ctx, ci, trackedID, instance)
 		}
 		if !servicemanager.IsNotFoundServiceError(err) {
@@ -157,8 +169,7 @@ func (c *ContainerInstanceServiceManager) resolveContainerInstance(ctx context.C
 			return nil, err
 		}
 
-		ci.Status.Id = ""
-		ci.Status.OsokStatus.Ocid = ""
+		clearTrackedContainerInstanceID(ci)
 	}
 
 	return c.lookupOrCreateContainerInstance(ctx, ci)
@@ -211,35 +222,39 @@ func (c *ContainerInstanceServiceManager) refreshOrUpdateTrackedInstance(ctx con
 
 func (c *ContainerInstanceServiceManager) reconcileLifecycle(status *shared.OSOKStatus,
 	instance *containerinstancessdk.ContainerInstance) servicemanager.OSOKResponse {
+	return c.applyContainerInstanceLifecycle(status, instance, shared.OSOKAsyncPhaseCreate)
+}
+
+func (c *ContainerInstanceServiceManager) applyContainerInstanceLifecycle(status *shared.OSOKStatus,
+	instance *containerinstancessdk.ContainerInstance, fallbackPhase shared.OSOKAsyncPhase) servicemanager.OSOKResponse {
 	displayName := safeString(instance.DisplayName)
 	message := fmt.Sprintf("ContainerInstance %s is %s", displayName, instance.LifecycleState)
 
 	switch instance.LifecycleState {
 	case containerinstancessdk.ContainerInstanceLifecycleStateActive,
 		containerinstancessdk.ContainerInstanceLifecycleStateInactive:
+		servicemanager.ClearAsyncOperation(status)
 		*status = util.UpdateOSOKStatusCondition(*status, shared.Active, v1.ConditionTrue, "", message, c.Log)
 		status.Message = message
 		status.Reason = string(shared.Active)
 		c.Log.InfoLog(message)
 		return servicemanager.OSOKResponse{IsSuccessful: true}
 	case containerinstancessdk.ContainerInstanceLifecycleStateCreating:
-		*status = util.UpdateOSOKStatusCondition(*status, shared.Provisioning, v1.ConditionTrue, "", message, c.Log)
-		status.Message = message
-		status.Reason = string(shared.Provisioning)
+		projection := c.applyContainerInstanceAsync(status, instance.LifecycleState, message, shared.OSOKAsyncPhaseCreate)
 		c.Log.InfoLog(message)
-		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: containerInstanceRequeue}
+		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: projection.ShouldRequeue, RequeueDuration: containerInstanceRequeue}
 	case containerinstancessdk.ContainerInstanceLifecycleStateUpdating:
-		*status = util.UpdateOSOKStatusCondition(*status, shared.Updating, v1.ConditionTrue, "", message, c.Log)
-		status.Message = message
-		status.Reason = string(shared.Updating)
+		projection := c.applyContainerInstanceAsync(status, instance.LifecycleState, message, shared.OSOKAsyncPhaseUpdate)
 		c.Log.InfoLog(message)
-		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: containerInstanceRequeue}
+		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: projection.ShouldRequeue, RequeueDuration: containerInstanceRequeue}
 	case containerinstancessdk.ContainerInstanceLifecycleStateDeleting:
-		*status = util.UpdateOSOKStatusCondition(*status, shared.Terminating, v1.ConditionTrue, "", message, c.Log)
-		status.Message = message
-		status.Reason = string(shared.Terminating)
+		projection := c.applyContainerInstanceAsync(status, instance.LifecycleState, message, shared.OSOKAsyncPhaseDelete)
 		c.Log.InfoLog(message)
-		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: true, RequeueDuration: containerInstanceRequeue}
+		return servicemanager.OSOKResponse{IsSuccessful: true, ShouldRequeue: projection.ShouldRequeue, RequeueDuration: containerInstanceRequeue}
+	case containerinstancessdk.ContainerInstanceLifecycleStateFailed:
+		projection := c.applyContainerInstanceAsync(status, instance.LifecycleState, message, fallbackPhase)
+		c.Log.InfoLog(message)
+		return servicemanager.OSOKResponse{IsSuccessful: false, ShouldRequeue: projection.ShouldRequeue, RequeueDuration: containerInstanceRequeue}
 	default:
 		*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", message, c.Log)
 		status.Message = message
@@ -247,6 +262,41 @@ func (c *ContainerInstanceServiceManager) reconcileLifecycle(status *shared.OSOK
 		c.Log.InfoLog(message)
 		return servicemanager.OSOKResponse{IsSuccessful: false}
 	}
+}
+
+func (c *ContainerInstanceServiceManager) applyContainerInstanceAsync(status *shared.OSOKStatus,
+	state containerinstancessdk.ContainerInstanceLifecycleStateEnum, message string, fallbackPhase shared.OSOKAsyncPhase) servicemanager.AsyncProjection {
+	current := servicemanager.NewLifecycleAsyncOperation(status, string(state), message, fallbackPhase)
+	if current == nil {
+		return servicemanager.AsyncProjection{}
+	}
+	return servicemanager.ApplyAsyncOperation(status, current, c.Log)
+}
+
+func (c *ContainerInstanceServiceManager) markContainerInstanceDeleteRequested(
+	ci *containerinstancesv1beta1.ContainerInstance,
+	targetID shared.OCID,
+) {
+	ci.Status.Id = string(targetID)
+	ci.Status.OsokStatus.Ocid = targetID
+	ci.Status.LifecycleState = string(containerinstancessdk.ContainerInstanceLifecycleStateDeleting)
+	message := fmt.Sprintf("ContainerInstance %s delete is in progress", targetID)
+	c.applyContainerInstanceAsync(&ci.Status.OsokStatus, containerinstancessdk.ContainerInstanceLifecycleStateDeleting, message, shared.OSOKAsyncPhaseDelete)
+}
+
+func (c *ContainerInstanceServiceManager) markContainerInstanceDeleted(
+	ci *containerinstancesv1beta1.ContainerInstance,
+	targetID string,
+) {
+	if targetID != "" {
+		ci.Status.Id = targetID
+		ci.Status.OsokStatus.Ocid = shared.OCID(targetID)
+	}
+	ci.Status.LifecycleState = string(containerinstancessdk.ContainerInstanceLifecycleStateDeleted)
+	now := metav1.Now()
+	ci.Status.OsokStatus.DeletedAt = &now
+	message := fmt.Sprintf("ContainerInstance %s delete is confirmed", targetID)
+	c.applyContainerInstanceAsync(&ci.Status.OsokStatus, containerinstancessdk.ContainerInstanceLifecycleStateDeleted, message, shared.OSOKAsyncPhaseDelete)
 }
 
 func (c *ContainerInstanceServiceManager) recordCreateOrUpdateError(status *shared.OSOKStatus, err error) error {
@@ -318,6 +368,11 @@ func trackedContainerInstanceID(ci *containerinstancesv1beta1.ContainerInstance)
 		return shared.OCID(ci.Status.Id), true
 	}
 	return "", false
+}
+
+func clearTrackedContainerInstanceID(ci *containerinstancesv1beta1.ContainerInstance) {
+	ci.Status.Id = ""
+	ci.Status.OsokStatus.Ocid = ""
 }
 
 func supportsContainerInstanceUpdate(state containerinstancessdk.ContainerInstanceLifecycleStateEnum) bool {
