@@ -386,8 +386,6 @@ func buildHealthChecks(specChecks []containerinstancesv1beta1.ContainerInstanceC
 		checkType := strings.ToUpper(strings.TrimSpace(check.HealthCheckType))
 		if checkType == "" {
 			switch {
-			case len(check.Command) > 0:
-				checkType = "COMMAND"
 			case check.Path != "" || len(check.Headers) > 0:
 				checkType = "HTTP"
 			case check.Port != 0:
@@ -399,17 +397,6 @@ func buildHealthChecks(specChecks []containerinstancesv1beta1.ContainerInstanceC
 
 		base := healthCheckBase(check)
 		switch checkType {
-		case "COMMAND":
-			healthChecks = append(healthChecks, containerinstancessdk.CreateContainerCommandHealthCheckDetails{
-				Command:               append([]string(nil), check.Command...),
-				Name:                  base.Name,
-				InitialDelayInSeconds: base.InitialDelayInSeconds,
-				IntervalInSeconds:     base.IntervalInSeconds,
-				FailureThreshold:      base.FailureThreshold,
-				SuccessThreshold:      base.SuccessThreshold,
-				TimeoutInSeconds:      base.TimeoutInSeconds,
-				FailureAction:         base.FailureAction,
-			})
 		case "HTTP":
 			headers := make([]containerinstancessdk.HealthCheckHttpHeader, 0, len(check.Headers))
 			for _, header := range check.Headers {
@@ -904,7 +891,6 @@ type comparableHealthCheck struct {
 	Path                  string
 	Port                  int
 	Headers               []comparableHealthCheckHeader
-	Command               []string
 }
 
 type comparableHealthCheckHeader struct {
@@ -918,8 +904,6 @@ func desiredHealthChecks(in []containerinstancesv1beta1.ContainerInstanceContain
 		checkType := strings.ToUpper(strings.TrimSpace(check.HealthCheckType))
 		if checkType == "" {
 			switch {
-			case len(check.Command) > 0:
-				checkType = "COMMAND"
 			case check.Path != "" || len(check.Headers) > 0:
 				checkType = "HTTP"
 			case check.Port != 0:
@@ -939,7 +923,6 @@ func desiredHealthChecks(in []containerinstancesv1beta1.ContainerInstanceContain
 			FailureAction:         check.FailureAction,
 			Path:                  check.Path,
 			Port:                  check.Port,
-			Command:               append([]string(nil), check.Command...),
 		}
 		for _, header := range check.Headers {
 			next.Headers = append(next.Headers, comparableHealthCheckHeader{Name: header.Name, Value: header.Value})
@@ -962,9 +945,6 @@ func observedHealthChecks(in []containerinstancessdk.ContainerHealthCheck) []com
 			FailureAction:         string(check.GetFailureAction()),
 		}
 		switch typed := check.(type) {
-		case containerinstancessdk.ContainerCommandHealthCheck:
-			next.HealthCheckType = "COMMAND"
-			next.Command = append([]string(nil), typed.Command...)
 		case containerinstancessdk.ContainerHttpHealthCheck:
 			next.HealthCheckType = "HTTP"
 			next.Path = safeString(typed.Path)
