@@ -41,12 +41,12 @@ AcceptedAgreementSpec defines the desired state of AcceptedAgreement.
 | --- | --- | --- | --- | --- | --- |
 | `agreementId` | The agreement to accept. | `string` | Yes | - | - |
 | `compartmentId` | The unique identifier for the compartment where the agreement will be accepted. | `string` | Yes | - | - |
-| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A display name for the accepted agreement. | `string` | No | - | - |
-| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `listingId` | The unique identifier for the listing associated with the agreement. | `string` | Yes | - | - |
 | `packageVersion` | The package version associated with the agreement. | `string` | Yes | - | - |
-| `signature` | A signature generated for the listing package agreements that you can retrieve with GetAgreement (https://docs.cloud.oracle.com/api/#/en/marketplace/20181001/Agreement/GetAgreement). | `string` | Yes | - | - |
+| `signature` | A signature generated for the listing package agreements that you can retrieve with GetAgreement (https://docs.oracle.com/iaas/api/#/en/marketplace/20181001/Agreement/GetAgreement). | `string` | Yes | - | - |
 
 <a id="kind-acceptedagreement-status"></a>
 ### Status
@@ -58,9 +58,9 @@ AcceptedAgreementStatus defines the observed state of AcceptedAgreement.
 | `agreementId` | The unique identifier for the terms of use agreement itself. | `string` | No | - | - |
 | `appliedSignature` | The last applied agreement signature used when the accepted agreement was created or rebound. | `string` | No | - | - |
 | `compartmentId` | The unique identifier for the compartment where the agreement was accepted. | `string` | No | - | - |
-| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A display name for the accepted agreement. | `string` | No | - | - |
-| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The unique identifier for the acceptance of the agreement within a specific compartment. | `string` | No | - | - |
 | `listingId` | The unique identifier for the listing associated with the agreement. | `string` | No | - | - |
 | `packageVersion` | The package version associated with the agreement. | `string` | No | - | - |
@@ -144,9 +144,9 @@ PublicationSpec defines the desired state of Publication.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the publication. | `string` | Yes | - | - |
-| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the publication. | `string` | Yes | - | - |
+| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `isAgreementAcknowledged` | Whether the publisher acknowledged that they have the right and authority to share the contents of the publication and that they accepted the Oracle terms of use agreements required to create a publication. | `boolean` | Yes | - | - |
 | `listingType` | The publisher category to which the publication belongs. The publisher category informs where the listing appears for use. | `string` | Yes | - | - |
 | `longDescription` | A long description of the publication to use in the listing. | `string` | No | - | - |
@@ -202,9 +202,9 @@ PublicationStatus defines the observed state of Publication.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment where the publication exists. | `string` | No | - | - |
-| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where the publication exists. | `string` | No | - | - |
+| `definedTags` | The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`icon`](#kind-publication-status-icon) | PublicationIcon defines nested fields for Publication.Icon. | `object` | No | - | - |
 | `id` | The unique identifier for the publication in Marketplace. | `string` | No | - | - |
 | `lifecycleState` | The lifecycle state of the publication. | `string` | No | - | - |
@@ -216,7 +216,7 @@ PublicationStatus defines the observed state of Publication.
 | [`status`](#kind-publication-status-status) | - | `object` | Yes | - | - |
 | [`supportContacts`](#kind-publication-status-supportcontacts) | Contact information for getting support from the publisher for the listing. | `list[object]` | No | - | - |
 | [`supportedOperatingSystems`](#kind-publication-status-supportedoperatingsystems) | The list of operating systems supprted by the listing. | `list[object]` | No | - | - |
-| `systemTags` | The system tags associated with this resource, if any. The system tags are set by Oracle Cloud Infrastructure services. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{orcl-cloud: {free-tier-retain: true}}` | `map[string, map[string, string]]` | No | - | - |
+| `systemTags` | The system tags associated with this resource, if any. The system tags are set by Oracle Cloud Infrastructure services. Each key is predefined and scoped to namespaces. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{orcl-cloud: {free-tier-retain: true}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time the publication was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 
 <a id="kind-publication-status-icon"></a>

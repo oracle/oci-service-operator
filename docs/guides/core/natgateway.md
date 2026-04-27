@@ -33,13 +33,13 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | `blockTraffic` | Whether the NAT gateway blocks traffic through it. The default is `false`. Example: `true` | `boolean` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the NAT gateway. | `string` | Yes |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the NAT gateway. | `string` | Yes |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
-| `publicIpId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the public IP address associated with the NAT gateway. | `string` | No |
-| `routeTableId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway. If you don't specify a route table here, the NAT gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the NAT gateway. | `string` | No |
-| `vcnId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the gateway belongs to. | `string` | Yes |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `publicIpId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the public IP address associated with the NAT gateway. | `string` | No |
+| `routeTableId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway. If you don't specify a route table here, the NAT gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the NAT gateway. | `string` | No |
+| `vcnId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the gateway belongs to. | `string` | Yes |
 
 
 ## Status Fields
@@ -49,19 +49,19 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | `blockTraffic` | Whether the NAT gateway blocks traffic through it. The default is `false`. Example: `true` | `boolean` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the NAT gateway. | `string` | No |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the NAT gateway. | `string` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the NAT gateway. | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the NAT gateway. | `string` | No |
 | `lifecycleState` | The NAT gateway's current state. | `string` | No |
 | `natIp` | The IP address associated with the NAT gateway. | `string` | No |
-| `publicIpId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the public IP address associated with the NAT gateway. | `string` | No |
+| `publicIpId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the public IP address associated with the NAT gateway. | `string` | No |
 | `publicIpIdCreateIntent` | Tracks whether `spec.publicIpId` was explicitly set or omitted when the current tracked NAT gateway first became managed by this controller. | `string` | No |
-| `routeTableId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway. If you don't specify a route table here, the NAT gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the NAT gateway. | `string` | No |
+| `routeTableId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table used by the NAT gateway. If you don't specify a route table here, the NAT gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the NAT gateway. | `string` | No |
 | [`status`](../../reference/api/core/v1beta1/index.md#kind-natgateway-status-status) | - | `object` | Yes |
 | `timeCreated` | The date and time the NAT gateway was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No |
-| `vcnId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the NAT gateway belongs to. | `string` | No |
+| `vcnId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the NAT gateway belongs to. | `string` | No |
 
 
 ## Sample Manifest

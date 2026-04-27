@@ -32,14 +32,19 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the Redis cluster. | `string` | Yes |
+| `clusterMode` | Specifies whether the cluster is sharded or non-sharded. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the cluster. | `string` | Yes |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | Yes |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No |
-| `nodeCount` | The number of nodes in the Redis cluster. | `integer` | Yes |
-| `nodeMemoryInGBs` | The amount of memory allocated to the Redis cluster's nodes, in gigabytes. | `number` | Yes |
-| `softwareVersion` | The Redis version that the cluster is running. | `string` | Yes |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the Redis cluster's subnet. | `string` | Yes |
+| `nodeCount` | The number of nodes per shard in the cluster when clusterMode is SHARDED. This is the total number of nodes when clusterMode is NONSHARDED. | `integer` | Yes |
+| `nodeMemoryInGBs` | The amount of memory allocated to the cluster's nodes, in gigabytes. | `number` | Yes |
+| `nsgIds` | A list of Network Security Group (NSG) OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with this cluster. For more information, see Using an NSG for Clusters (https://docs.oracle.com/iaas/Content/ocicache/connecttocluster.htm#connecttocluster__networksecuritygroup). | `list[string]` | No |
+| `ociCacheConfigSetId` | The ID of the corresponding OCI Cache Config Set for the cluster. | `string` | No |
+| `securityAttributes` | Security attributes for redis cluster resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No |
+| `shardCount` | The number of shards in sharded cluster. Only applicable when clusterMode is SHARDED. | `integer` | No |
+| `softwareVersion` | The OCI Cache engine version that the cluster is running. | `string` | Yes |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster's subnet. | `string` | Yes |
 
 
 ## Status Fields
@@ -48,26 +53,33 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the Redis cluster. | `string` | No |
+| `clusterMode` | Specifies whether the cluster is sharded or non-sharded. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the cluster. | `string` | No |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
+| `discoveryEndpointIpAddress` | The private IP address of the API endpoint for sharded cluster discovery. | `string` | No |
+| `discoveryFqdn` | The fully qualified domain name (FQDN) of the API endpoint for sharded cluster discovery. | `string` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the Redis cluster. | `string` | No |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster. | `string` | No |
 | `lifecycleDetails` | A message describing the current state in more detail. For example, the message might provide actionable information for a resource in `FAILED` state. | `string` | No |
-| `lifecycleState` | The current state of the Redis cluster. | `string` | No |
+| `lifecycleState` | The current state of the cluster. | `string` | No |
 | [`nodeCollection`](../../reference/api/redis/v1beta1/index.md#kind-rediscluster-status-nodecollection) | RedisClusterNodeCollection defines nested fields for RedisCluster.NodeCollection. | `object` | No |
-| `nodeCount` | The number of nodes in the Redis cluster. | `integer` | No |
-| `nodeMemoryInGBs` | The amount of memory allocated to the Redis cluster's nodes, in gigabytes. | `number` | No |
-| `primaryEndpointIpAddress` | The private IP address of the API endpoint for the Redis cluster's primary node. | `string` | No |
-| `primaryFqdn` | The fully qualified domain name (FQDN) of the API endpoint for the Redis cluster's primary node. | `string` | No |
-| `replicasEndpointIpAddress` | The private IP address of the API endpoint for the Redis cluster's replica nodes. | `string` | No |
-| `replicasFqdn` | The fully qualified domain name (FQDN) of the API endpoint for the Redis cluster's replica nodes. | `string` | No |
-| `softwareVersion` | The Redis version that the cluster is running. | `string` | No |
+| `nodeCount` | The number of nodes per shard in the cluster when clusterMode is SHARDED. This is the total number of nodes when clusterMode is NONSHARDED. | `integer` | No |
+| `nodeMemoryInGBs` | The amount of memory allocated to the cluster's nodes, in gigabytes. | `number` | No |
+| `nsgIds` | A list of Network Security Group (NSG) OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with this cluster. For more information, see Using an NSG for Clusters (https://docs.oracle.com/iaas/Content/ocicache/connecttocluster.htm#connecttocluster__networksecuritygroup). | `list[string]` | No |
+| `ociCacheConfigSetId` | The ID of the corresponding OCI Cache Config Set for the cluster. | `string` | No |
+| `primaryEndpointIpAddress` | The private IP address of the API endpoint for the cluster's primary node. | `string` | No |
+| `primaryFqdn` | The fully qualified domain name (FQDN) of the API endpoint for the cluster's primary node. | `string` | No |
+| `replicasEndpointIpAddress` | The private IP address of the API endpoint for the cluster's replica nodes. | `string` | No |
+| `replicasFqdn` | The fully qualified domain name (FQDN) of the API endpoint for the cluster's replica nodes. | `string` | No |
+| `securityAttributes` | Security attributes for redis cluster resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No |
+| `shardCount` | The number of shards in a sharded cluster. Only applicable when clusterMode is SHARDED. | `integer` | No |
+| `softwareVersion` | The OCI Cache engine version that the cluster is running. | `string` | No |
 | [`status`](../../reference/api/redis/v1beta1/index.md#kind-rediscluster-status-status) | - | `object` | Yes |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the Redis cluster's subnet. | `string` | No |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster's subnet. | `string` | No |
 | `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No |
-| `timeCreated` | The date and time the Redis cluster was created. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string. | `string` | No |
-| `timeUpdated` | The date and time the Redis cluster was updated. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string. | `string` | No |
+| `timeCreated` | The date and time the cluster was created. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string. | `string` | No |
+| `timeUpdated` | The date and time the cluster was updated. An RFC3339 (https://datatracker.ietf.org/doc/html/rfc3339) formatted datetime string. | `string` | No |
 
 
 ## Sample Manifest

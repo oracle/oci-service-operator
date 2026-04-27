@@ -40,33 +40,153 @@ OpensearchClusterSpec defines the desired state of OpensearchCluster.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`backupPolicy`](#kind-opensearchcluster-spec-backuppolicy) | OpensearchClusterBackupPolicy defines nested fields for OpensearchCluster.BackupPolicy. | `object` | No | - | - |
+| [`certificateConfig`](#kind-opensearchcluster-spec-certificateconfig) | OpensearchClusterCertificateConfig defines nested fields for OpensearchCluster.CertificateConfig. | `object` | No | - | - |
 | `compartmentId` | The OCID of the compartment to create the cluster in. | `string` | Yes | - | - |
 | `dataNodeCount` | The number of data nodes to configure for the cluster. | `integer` | Yes | - | - |
 | `dataNodeHostBareMetalShape` | The bare metal shape for the cluster's data nodes. | `string` | No | - | - |
 | `dataNodeHostMemoryGB` | The amount of memory in GB, to configure per node for the cluster's data nodes. | `integer` | Yes | - | - |
 | `dataNodeHostOcpuCount` | The number of OCPUs to configure for the cluster's data nodes. | `integer` | Yes | - | - |
+| `dataNodeHostShape` | The node shape for the cluster's data nodes. | `string` | No | - | - |
 | `dataNodeHostType` | TThe instance type for the cluster's data nodes. | `string` | Yes | - | - |
 | `dataNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's data nodes. | `integer` | Yes | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | The name of the cluster. Avoid entering confidential information. | `string` | Yes | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `inboundClusterIds` | List of inbound clusters that will be queried using cross cluster search | `list[string]` | No | - | - |
+| [`loadBalancerConfig`](#kind-opensearchcluster-spec-loadbalancerconfig) | OpensearchClusterLoadBalancerConfig defines nested fields for OpensearchCluster.LoadBalancerConfig. | `object` | No | - | - |
+| [`maintenanceDetails`](#kind-opensearchcluster-spec-maintenancedetails) | OpensearchClusterMaintenanceDetails defines nested fields for OpensearchCluster.MaintenanceDetails. | `object` | No | - | - |
 | `masterNodeCount` | The number of master nodes to configure for the cluster. | `integer` | Yes | - | - |
 | `masterNodeHostBareMetalShape` | The bare metal shape for the cluster's master nodes. | `string` | No | - | - |
 | `masterNodeHostMemoryGB` | The amount of memory in GB, to configure per node for the cluster's master nodes. | `integer` | Yes | - | - |
 | `masterNodeHostOcpuCount` | The number of OCPUs to configure for the cluser's master nodes. | `integer` | Yes | - | - |
+| `masterNodeHostShape` | The node shape for the cluster's master nodes. | `string` | No | - | - |
 | `masterNodeHostType` | The instance type for the cluster's master nodes. | `string` | Yes | - | - |
+| `mlNodeCount` | The number of ML nodes configured for the cluster. | `integer` | No | - | - |
+| `mlNodeHostMemoryGB` | The amount of memory in GB, for the cluster's ML nodes. | `integer` | No | - | - |
+| `mlNodeHostOcpuCount` | The number of OCPUs configured for the cluster's ML nodes. | `integer` | No | - | - |
+| `mlNodeHostShape` | The node shape for the cluster's ML nodes. | `string` | No | - | - |
+| `mlNodeHostType` | The instance type for the cluster's ML nodes. | `string` | No | - | - |
+| `mlNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's ML nodes. | `integer` | No | - | - |
+| `nsgId` | The OCID of the NSG where the private endpoint vnic will be attached. | `string` | No | - | - |
 | `opendashboardNodeCount` | The number of OpenSearch Dashboard nodes to configure for the cluster. | `integer` | Yes | - | - |
 | `opendashboardNodeHostMemoryGB` | The amount of memory in GB, to configure for the cluster's OpenSearch Dashboard nodes. | `integer` | Yes | - | - |
 | `opendashboardNodeHostOcpuCount` | The number of OCPUs to configure for the cluster's OpenSearch Dashboard nodes. | `integer` | Yes | - | - |
+| `opendashboardNodeHostShape` | The node shape for the cluster's OpenSearch Dashboard nodes. | `string` | No | - | - |
+| [`outboundClusterConfig`](#kind-opensearchcluster-spec-outboundclusterconfig) | OpensearchClusterOutboundClusterConfig defines nested fields for OpensearchCluster.OutboundClusterConfig. | `object` | No | - | - |
+| `reverseConnectionEndpointCustomerIps` | The customer IP addresses of the endpoint in customer VCN | `list[string]` | No | - | - |
+| `searchNodeCount` | The number of search nodes configured for the cluster. | `integer` | No | - | - |
+| `searchNodeHostMemoryGB` | The amount of memory in GB, for the cluster's search nodes. | `integer` | No | - | - |
+| `searchNodeHostOcpuCount` | The number of OCPUs configured for the cluster's search nodes. | `integer` | No | - | - |
+| `searchNodeHostShape` | The node shape for the cluster's search nodes. | `string` | No | - | - |
+| `searchNodeHostType` | The instance type for the cluster's search nodes. | `string` | No | - | - |
+| `searchNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's search nodes. | `integer` | No | - | - |
+| `securityAttributes` | Security attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No | - | - |
 | `securityMasterUserName` | The name of the master user that are used to manage security config | `string` | No | - | - |
 | `securityMasterUserPasswordHash` | The password hash of the master user that are used to manage security config | `string` | No | - | - |
 | `securityMode` | The security mode of the cluster. | `string` | No | - | - |
+| [`securitySamlConfig`](#kind-opensearchcluster-spec-securitysamlconfig) | OpensearchClusterSecuritySamlConfig defines nested fields for OpensearchCluster.SecuritySamlConfig. | `object` | No | - | - |
 | `softwareVersion` | The version of the software the cluster is running. | `string` | Yes | - | - |
 | `subnetCompartmentId` | The OCID for the compartment where the cluster's subnet is located. | `string` | Yes | - | - |
 | `subnetId` | The OCID of the cluster's subnet. | `string` | Yes | - | - |
 | `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `vcnCompartmentId` | The OCID for the compartment where the cluster's VCN is located. | `string` | Yes | - | - |
 | `vcnId` | The OCID of the cluster's VCN. | `string` | Yes | - | - |
+
+<a id="kind-opensearchcluster-spec-backuppolicy"></a>
+#### Spec.backupPolicy
+
+[Back to OpensearchCluster spec](#kind-opensearchcluster-spec)
+
+OpensearchClusterBackupPolicy defines nested fields for OpensearchCluster.BackupPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `frequencyInHours` | Specifies how often backup should be performed | `integer` | No | - | - |
+| `isEnabled` | Specifies if automatic backups are enabled. | `boolean` | No | - | - |
+| `retentionInDays` | Specifies how long backup copy should remain on Storage in days | `integer` | No | - | - |
+
+<a id="kind-opensearchcluster-spec-certificateconfig"></a>
+#### Spec.certificateConfig
+
+[Back to OpensearchCluster spec](#kind-opensearchcluster-spec)
+
+OpensearchClusterCertificateConfig defines nested fields for OpensearchCluster.CertificateConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clusterCertificateMode` | Specifies whether the certificate to be used in cluster is managed by OpenSearch or OCI Certificates service. | `string` | No | - | - |
+| `dashboardCertificateMode` | Specifies whether the certificate to be used in dashboard is managed by OpenSearch or OCI Certificates service. | `string` | No | - | - |
+| `openSearchApiCertificateId` | certificate to be used for OpenSearch cluster api communication | `string` | No | - | - |
+| `openSearchDashboardCertificateId` | certificate to be used for OpenSearch dashboard api communication | `string` | No | - | - |
+
+<a id="kind-opensearchcluster-spec-loadbalancerconfig"></a>
+#### Spec.loadBalancerConfig
+
+[Back to OpensearchCluster spec](#kind-opensearchcluster-spec)
+
+OpensearchClusterLoadBalancerConfig defines nested fields for OpensearchCluster.LoadBalancerConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `loadBalancerMaxBandwidthInMbps` | Maximum bandwidth (Mbps) of OpenSearch load balancer. Not applicable for network load balancer service. | `integer` | No | - | - |
+| `loadBalancerMinBandwidthInMbps` | Minimum bandwidth (Mbps) of OpenSearch load balancer. Not applicable for network load balancer service. | `integer` | No | - | - |
+| `loadBalancerServiceType` | Load balancer service for OpenSearch and OpenDashboard load balancer. Default value is LOAD_BALANCER. | `string` | Yes | - | - |
+
+<a id="kind-opensearchcluster-spec-maintenancedetails"></a>
+#### Spec.maintenanceDetails
+
+[Back to OpensearchCluster spec](#kind-opensearchcluster-spec)
+
+OpensearchClusterMaintenanceDetails defines nested fields for OpensearchCluster.MaintenanceDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `notificationEmailIds` | The Email IDs given by the customer to get notified about maintenance activities | `list[string]` | No | - | - |
+
+<a id="kind-opensearchcluster-spec-outboundclusterconfig"></a>
+#### Spec.outboundClusterConfig
+
+[Back to OpensearchCluster spec](#kind-opensearchcluster-spec)
+
+OpensearchClusterOutboundClusterConfig defines nested fields for OpensearchCluster.OutboundClusterConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Flag to indicate whether outbound cluster configuration is enabled | `boolean` | Yes | - | - |
+| [`outboundClusters`](#kind-opensearchcluster-spec-outboundclusterconfig-outboundclusters) | List of outbound clusters to be connected to the inbound cluster | `list[object]` | Yes | - | - |
+
+<a id="kind-opensearchcluster-spec-outboundclusterconfig-outboundclusters"></a>
+##### Spec.outboundClusterConfig.outboundClusters[]
+
+[Back to OpensearchCluster spec](#kind-opensearchcluster-spec)
+
+OpensearchClusterOutboundClusterConfigOutboundCluster defines nested fields for OpensearchCluster.OutboundClusterConfig.OutboundCluster.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `displayName` | Name of the Outbound cluster. Avoid entering confidential information. | `string` | Yes | - | - |
+| `isSkipUnavailable` | Flag to indicate whether to skip the Outbound cluster during cross cluster search, if it is unavailable | `boolean` | No | - | - |
+| `mode` | Mode for the cross cluster connection | `string` | No | - | - |
+| `pingSchedule` | Sets the time interval between regular application-level ping messages that are sent to try and keep outbound cluster connections alive. If set to -1, application-level ping messages to this outbound cluster are not sent. If unset, application-level ping messages are sent according to the global transport.ping_schedule setting, which defaults to -1 meaning that pings are not sent. | `string` | No | - | - |
+| `seedClusterId` | OCID of the Outbound cluster | `string` | Yes | - | - |
+
+<a id="kind-opensearchcluster-spec-securitysamlconfig"></a>
+#### Spec.securitySamlConfig
+
+[Back to OpensearchCluster spec](#kind-opensearchcluster-spec)
+
+OpensearchClusterSecuritySamlConfig defines nested fields for OpensearchCluster.SecuritySamlConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `adminBackendRole` | The backend role of admins who have all permissions like local master user | `string` | No | - | - |
+| `idpEntityId` | The unique name for a identity provider entity | `string` | Yes | - | - |
+| `idpMetadataContent` | The content of identity provider metadata | `string` | Yes | - | - |
+| `isEnabled` | A flag determine whether SAML is enabled | `boolean` | Yes | - | - |
+| `opendashboardUrl` | The endpoint of opendashboard | `string` | No | - | - |
+| `rolesKey` | The roles key is sued to get backend roles from SAML assertion | `string` | No | - | - |
+| `subjectKey` | The subject key is used to get username from SAML assertion. By default, it is NameID | `string` | No | - | - |
 
 <a id="kind-opensearchcluster-status"></a>
 ### Status
@@ -76,11 +196,14 @@ OpensearchClusterStatus defines the observed state of OpensearchCluster.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `availabilityDomains` | The availability domains to distribute the cluser nodes across. | `list[string]` | No | - | - |
+| [`backupPolicy`](#kind-opensearchcluster-status-backuppolicy) | OpensearchClusterBackupPolicy defines nested fields for OpensearchCluster.BackupPolicy. | `object` | No | - | - |
+| [`certificateConfig`](#kind-opensearchcluster-status-certificateconfig) | OpensearchClusterCertificateConfig defines nested fields for OpensearchCluster.CertificateConfig. | `object` | No | - | - |
 | `compartmentId` | The OCID of the compartment where the cluster is located. | `string` | No | - | - |
 | `dataNodeCount` | The number of data nodes configured for the cluster. | `integer` | No | - | - |
 | `dataNodeHostBareMetalShape` | The bare metal shape for the cluster's data nodes. | `string` | No | - | - |
 | `dataNodeHostMemoryGB` | The amount of memory in GB, for the cluster's data nodes. | `integer` | No | - | - |
 | `dataNodeHostOcpuCount` | The number of OCPUs configured for the cluster's data nodes. | `integer` | No | - | - |
+| `dataNodeHostShape` | The node shape for the cluster's data nodes. | `string` | No | - | - |
 | `dataNodeHostType` | The instance type for the cluster's data nodes. | `string` | No | - | - |
 | `dataNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's data nodes. | `integer` | No | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
@@ -88,23 +211,46 @@ OpensearchClusterStatus defines the observed state of OpensearchCluster.
 | `fqdn` | The fully qualified domain name (FQDN) for the cluster's API endpoint. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the cluster. | `string` | No | - | - |
+| `inboundClusterIds` | List of inbound clusters for which this cluster is an outbound cluster | `list[string]` | No | - | - |
 | `lifecycleDetails` | Additional information about the current lifecycle state of the cluster. | `string` | No | - | - |
 | `lifecycleState` | The current state of the cluster. | `string` | No | - | - |
+| [`loadBalancerConfig`](#kind-opensearchcluster-status-loadbalancerconfig) | OpensearchClusterLoadBalancerConfig defines nested fields for OpensearchCluster.LoadBalancerConfig. | `object` | No | - | - |
+| [`maintenanceDetails`](#kind-opensearchcluster-status-maintenancedetails) | OpensearchClusterMaintenanceDetails defines nested fields for OpensearchCluster.MaintenanceDetails. | `object` | No | - | - |
 | `masterNodeCount` | The number of master nodes configured for the cluster. | `integer` | No | - | - |
 | `masterNodeHostBareMetalShape` | The bare metal shape for the cluster's master nodes. | `string` | No | - | - |
 | `masterNodeHostMemoryGB` | The amount of memory in GB, for the cluster's master nodes. | `integer` | No | - | - |
 | `masterNodeHostOcpuCount` | The number of OCPUs configured for cluster's master nodes. | `integer` | No | - | - |
+| `masterNodeHostShape` | The node shape for the cluster's master nodes. | `string` | No | - | - |
 | `masterNodeHostType` | The instance type for the cluster's master nodes. | `string` | No | - | - |
+| `mlNodeCount` | The number of ML nodes configured for the cluster. | `integer` | No | - | - |
+| `mlNodeHostMemoryGB` | The amount of memory in GB, for the cluster's ML nodes. | `integer` | No | - | - |
+| `mlNodeHostOcpuCount` | The number of OCPUs configured for the cluster's ML nodes. | `integer` | No | - | - |
+| `mlNodeHostShape` | The node shape for the cluster's ML nodes. | `string` | No | - | - |
+| `mlNodeHostType` | The instance type for the cluster's ML nodes. | `string` | No | - | - |
+| `mlNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's ML nodes. | `integer` | No | - | - |
+| `nsgId` | The OCID of the NSG where the private endpoint vnic will be attached. | `string` | No | - | - |
 | `opendashboardFqdn` | The fully qualified domain name (FQDN) for the cluster's OpenSearch Dashboard API endpoint. | `string` | No | - | - |
 | `opendashboardNodeCount` | The number of OpenSearch Dashboard nodes configured for the cluster. | `integer` | No | - | - |
 | `opendashboardNodeHostMemoryGB` | The amount of memory in GB, for the cluster's OpenSearch Dashboard nodes. | `integer` | No | - | - |
 | `opendashboardNodeHostOcpuCount` | The amount of memory in GB, for the cluster's OpenSearch Dashboard nodes. | `integer` | No | - | - |
+| `opendashboardNodeHostShape` | The node shape for the cluster's OpenSearch Dashboard nodes. | `string` | No | - | - |
 | `opendashboardPrivateIp` | The private IP address for the cluster's OpenSearch Dashboard. | `string` | No | - | - |
 | `opensearchFqdn` | The fully qualified domain name (FQDN) for the cluster's API endpoint. | `string` | No | - | - |
 | `opensearchPrivateIp` | The cluster's private IP address. | `string` | No | - | - |
+| [`outboundClusterConfig`](#kind-opensearchcluster-status-outboundclusterconfig) | OpensearchClusterOutboundClusterConfig defines nested fields for OpensearchCluster.OutboundClusterConfig. | `object` | No | - | - |
+| `reverseConnectionEndpointCustomerIps` | The customer IP addresses of the endpoint in customer VCN | `list[string]` | No | - | - |
+| [`reverseConnectionEndpoints`](#kind-opensearchcluster-status-reverseconnectionendpoints) | The list of reverse connection endpoints. | `list[object]` | No | - | - |
+| `searchNodeCount` | The number of search nodes configured for the cluster. | `integer` | No | - | - |
+| `searchNodeHostMemoryGB` | The amount of memory in GB, for the cluster's search nodes. | `integer` | No | - | - |
+| `searchNodeHostOcpuCount` | The number of OCPUs configured for the cluster's search nodes. | `integer` | No | - | - |
+| `searchNodeHostShape` | The node shape for the cluster's search nodes. | `string` | No | - | - |
+| `searchNodeHostType` | The instance type for the cluster's search nodes. | `string` | No | - | - |
+| `searchNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's search nodes. | `integer` | No | - | - |
+| `securityAttributes` | Security attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No | - | - |
 | `securityMasterUserName` | The name of the master user that are used to manage security config | `string` | No | - | - |
 | `securityMasterUserPasswordHash` | The password hash of the master user that are used to manage security config | `string` | No | - | - |
 | `securityMode` | The security mode of the cluster. | `string` | No | - | - |
+| [`securitySamlConfig`](#kind-opensearchcluster-status-securitysamlconfig) | OpensearchClusterSecuritySamlConfig defines nested fields for OpensearchCluster.SecuritySamlConfig. | `object` | No | - | - |
 | `softwareVersion` | The software version the cluster is running. | `string` | No | - | - |
 | [`status`](#kind-opensearchcluster-status-status) | - | `object` | Yes | - | - |
 | `subnetCompartmentId` | The OCID for the compartment where the cluster's subnet is located. | `string` | No | - | - |
@@ -116,6 +262,113 @@ OpensearchClusterStatus defines the observed state of OpensearchCluster.
 | `totalStorageGB` | The size in GB of the cluster's total storage. | `integer` | No | - | - |
 | `vcnCompartmentId` | The OCID for the compartment where the cluster's VCN is located. | `string` | No | - | - |
 | `vcnId` | The OCID of the cluster's VCN. | `string` | No | - | - |
+
+<a id="kind-opensearchcluster-status-backuppolicy"></a>
+#### Status.backupPolicy
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterBackupPolicy defines nested fields for OpensearchCluster.BackupPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `frequencyInHours` | Specifies how often backup should be performed | `integer` | No | - | - |
+| `isEnabled` | Specifies if automatic backups are enabled. | `boolean` | No | - | - |
+| `retentionInDays` | Specifies how long backup copy should remain on Storage in days | `integer` | No | - | - |
+
+<a id="kind-opensearchcluster-status-certificateconfig"></a>
+#### Status.certificateConfig
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterCertificateConfig defines nested fields for OpensearchCluster.CertificateConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `clusterCertificateMode` | Specifies whether the certificate to be used in cluster is managed by OpenSearch or OCI Certificates service. | `string` | No | - | - |
+| `dashboardCertificateMode` | Specifies whether the certificate to be used in dashboard is managed by OpenSearch or OCI Certificates service. | `string` | No | - | - |
+| `openSearchApiCertificateId` | certificate to be used for OpenSearch cluster api communication | `string` | No | - | - |
+| `openSearchDashboardCertificateId` | certificate to be used for OpenSearch dashboard api communication | `string` | No | - | - |
+
+<a id="kind-opensearchcluster-status-loadbalancerconfig"></a>
+#### Status.loadBalancerConfig
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterLoadBalancerConfig defines nested fields for OpensearchCluster.LoadBalancerConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `loadBalancerMaxBandwidthInMbps` | Maximum bandwidth (Mbps) of OpenSearch load balancer. Not applicable for network load balancer service. | `integer` | No | - | - |
+| `loadBalancerMinBandwidthInMbps` | Minimum bandwidth (Mbps) of OpenSearch load balancer. Not applicable for network load balancer service. | `integer` | No | - | - |
+| `loadBalancerServiceType` | Load balancer service for OpenSearch and OpenDashboard load balancer. Default value is LOAD_BALANCER. | `string` | Yes | - | - |
+
+<a id="kind-opensearchcluster-status-maintenancedetails"></a>
+#### Status.maintenanceDetails
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterMaintenanceDetails defines nested fields for OpensearchCluster.MaintenanceDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `notificationEmailIds` | The Email IDs given by the customer to get notified about maintenance activities | `list[string]` | No | - | - |
+
+<a id="kind-opensearchcluster-status-outboundclusterconfig"></a>
+#### Status.outboundClusterConfig
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterOutboundClusterConfig defines nested fields for OpensearchCluster.OutboundClusterConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Flag to indicate whether outbound cluster configuration is enabled | `boolean` | Yes | - | - |
+| [`outboundClusters`](#kind-opensearchcluster-status-outboundclusterconfig-outboundclusters) | List of outbound clusters to be connected to the inbound cluster | `list[object]` | Yes | - | - |
+
+<a id="kind-opensearchcluster-status-outboundclusterconfig-outboundclusters"></a>
+##### Status.outboundClusterConfig.outboundClusters[]
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterOutboundClusterConfigOutboundCluster defines nested fields for OpensearchCluster.OutboundClusterConfig.OutboundCluster.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `displayName` | Name of the Outbound cluster. Avoid entering confidential information. | `string` | Yes | - | - |
+| `isSkipUnavailable` | Flag to indicate whether to skip the Outbound cluster during cross cluster search, if it is unavailable | `boolean` | No | - | - |
+| `mode` | Mode for the cross cluster connection | `string` | No | - | - |
+| `pingSchedule` | Sets the time interval between regular application-level ping messages that are sent to try and keep outbound cluster connections alive. If set to -1, application-level ping messages to this outbound cluster are not sent. If unset, application-level ping messages are sent according to the global transport.ping_schedule setting, which defaults to -1 meaning that pings are not sent. | `string` | No | - | - |
+| `seedClusterId` | OCID of the Outbound cluster | `string` | Yes | - | - |
+
+<a id="kind-opensearchcluster-status-reverseconnectionendpoints"></a>
+#### Status.reverseConnectionEndpoints[]
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterReverseConnectionEndpoint defines nested fields for OpensearchCluster.ReverseConnectionEndpoint.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `customerIp` | The IP addresses of the endpoint in customer VCN | `string` | No | - | - |
+| `natIp` | The NAT IP addresses of the endpoint in service VCN | `string` | No | - | - |
+
+<a id="kind-opensearchcluster-status-securitysamlconfig"></a>
+#### Status.securitySamlConfig
+
+[Back to OpensearchCluster status](#kind-opensearchcluster-status)
+
+OpensearchClusterSecuritySamlConfig defines nested fields for OpensearchCluster.SecuritySamlConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `adminBackendRole` | The backend role of admins who have all permissions like local master user | `string` | No | - | - |
+| `idpEntityId` | The unique name for a identity provider entity | `string` | Yes | - | - |
+| `idpMetadataContent` | The content of identity provider metadata | `string` | Yes | - | - |
+| `isEnabled` | A flag determine whether SAML is enabled | `boolean` | Yes | - | - |
+| `opendashboardUrl` | The endpoint of opendashboard | `string` | No | - | - |
+| `rolesKey` | The roles key is sued to get backend roles from SAML assertion | `string` | No | - | - |
+| `subjectKey` | The subject key is used to get username from SAML assertion. By default, it is NameID | `string` | No | - | - |
 
 <a id="kind-opensearchcluster-status-status"></a>
 #### Status.status

@@ -41,11 +41,12 @@ DkimSpec defines the desired state of Dkim.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | A string that describes the details about the DKIM. It does not have to be unique, and you can change it. Avoid entering confidential information. | `string` | No | - | - |
-| `emailDomainId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain for this DKIM. | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `name` | The DKIM selector. This selector is required to be globally unique for this email domain. If you do not provide the selector, we will generate one for you. If you do provide the selector, we suggest adding a short region indicator to differentiate from your signing of emails in other regions you may be subscribed to. Selectors limited to ASCII characters may use alphanumeric, dash ("-"), and dot (".") characters. Non-ASCII selector names should adopt IDNA2008 normalization (RFC 5891-5892). Avoid entering confidential information. Example: `mydomain-phx-20210228` | `string` | No | - | - |
+| `emailDomainId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain for this DKIM. | `string` | Yes | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `name` | The DKIM selector. This selector is required to be globally unique for this email domain. If you do not provide the selector, we will generate one for you. If you do provide the selector, we suggest adding a short region indicator to differentiate from your signing of emails in other regions you might be subscribed to. Selectors limited to ASCII characters can use alphanumeric, dash ("-"), and dot (".") characters. Non-ASCII selector names should adopt IDNA2008 normalization (RFC 5891-5892). Avoid entering confidential information. Example: `mydomain-phx-20210228` | `string` | No | - | - |
+| `privateKey` | The DKIM RSA Private Key in Privacy-Enhanced Mail (PEM) format. It is a text-based representation of the private key used for signing email messages. | `string` | No | - | - |
 
 <a id="kind-dkim-status"></a>
 ### Status
@@ -55,13 +56,15 @@ DkimStatus defines the observed state of Dkim.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `cnameRecordValue` | The DNS CNAME record value to provision to the DKIM DNS subdomain, when using the CNAME method for DKIM setup (preferred). | `string` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | The description of the DKIM. Avoid entering confidential information. | `string` | No | - | - |
-| `dnsSubdomainName` | The name of the DNS subdomain that must be provisioned to enable email recipients to verify DKIM signatures. It is usually created with a CNAME record set to the cnameRecordValue | `string` | No | - | - |
-| `emailDomainId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain that this DKIM belongs to. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM. | `string` | No | - | - |
+| `dnsSubdomainName` | The name of the DNS subdomain that must be provisioned to enable email recipients to verify DKIM signatures. It is usually created with a CNAME record set to the cnameRecordValue. | `string` | No | - | - |
+| `emailDomainId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain that this DKIM belongs to. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM. | `string` | No | - | - |
+| `isImported` | Indicates whether the DKIM was imported. | `boolean` | No | - | - |
+| `keyLength` | Length of the RSA key used in the DKIM. | `integer` | No | - | - |
 | `lifecycleDetails` | A message describing the current state in more detail. For example, can be used to provide actionable information for a resource. | `string` | No | - | - |
 | `lifecycleState` | The current state of the DKIM. | `string` | No | - | - |
 | `name` | The DKIM selector. If the same domain is managed in more than one region, each region must use different selectors. | `string` | No | - | - |
@@ -69,7 +72,7 @@ DkimStatus defines the observed state of Dkim.
 | `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The time the DKIM was created. Times are expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format, "YYYY-MM-ddThh:mmZ". Example: `2021-02-12T22:47:12.613Z` | `string` | No | - | - |
 | `timeUpdated` | The time of the last change to the DKIM configuration, due to a state change or an update operation. Times are expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format, "YYYY-MM-ddThh:mmZ". | `string` | No | - | - |
-| `txtRecordValue` | The DNS TXT record value to provision to the DKIM DNS subdomain in place of using a CNAME record. This is used in cases where a CNAME can not be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry. This can also be used by customers who have an existing procedure to directly provision TXT records for DKIM. Be aware that many DNS APIs will require you to break this string into segments of less than 255 characters. | `string` | No | - | - |
+| `txtRecordValue` | The DNS TXT record value to provision to the DKIM DNS subdomain in place of using a CNAME record. This is used in cases where a CNAME cannot be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry. You can also use this if you have an existing procedure to directly provision TXT records for DKIM. Many DNS APIs require you to break this string into segments of fewer than 255 characters. | `string` | No | - | - |
 
 <a id="kind-dkim-status-status"></a>
 #### Status.status
@@ -148,11 +151,12 @@ EmailDomainSpec defines the desired state of EmailDomain.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for this email domain. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for this email domain. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | A string that describes the details about the domain. It does not have to be unique, and you can change it. Avoid entering confidential information. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `name` | The name of the email domain in the Internet Domain Name System (DNS). The email domain name must be unique in the region for this tenancy. Domain names limited to ASCII characters use alphanumeric, dash ("-"), and dot (".") characters. The dash and dot are only allowed between alphanumeric characters. For details, please see: https://tools.ietf.org/html/rfc5321#section-4.1.2 Non-ASCII domain names should adopt IDNA2008 normalization (RFC 5891-5892). | `string` | Yes | - | - |
+| `domainVerificationId` | Id for Domain in Domain Management (under governance) if DOMAINID verification method used. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `name` | The name of the email domain in the Internet Domain Name System (DNS). The email domain name must be unique in the region for this tenancy. Domain names limited to ASCII characters use alphanumeric, dash ("-"), and dot (".") characters. The dash and dot are only allowed between alphanumeric characters. For details, see RFC 5321, section 4.1.2 (https://tools.ietf.org/html/rfc5321#section-4.1.2) Non-ASCII domain names should adopt IDNA2008 normalization (RFC 5891-5892). | `string` | Yes | - | - |
 
 <a id="kind-emaildomain-status"></a>
 ### Status
@@ -161,18 +165,36 @@ EmailDomainStatus defines the observed state of EmailDomain.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `activeDkimId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key that will be used to sign mail sent from this email domain. | `string` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this email domain. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `description` | The description of a email domain. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain. | `string` | No | - | - |
-| `isSpf` | Value of the SPF field. For more information about SPF, please see SPF Authentication (https://docs.cloud.oracle.com/iaas/Content/Email/Concepts/overview.htm#components). | `boolean` | No | - | - |
+| `activeDkimId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key that will be used to sign mail sent from this email domain. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this email domain. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | The description of an email domain. | `string` | No | - | - |
+| `domainVerificationId` | Id for Domain in Domain Management (under governance) if DOMAINID verification method used. | `string` | No | - | - |
+| `domainVerificationStatus` | The current domain verification status. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain. | `string` | No | - | - |
+| `isSpf` | Value of the SPF field. For more information about SPF, please see SPF Authentication (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components). | `boolean` | No | - | - |
 | `lifecycleState` | The current state of the email domain. | `string` | No | - | - |
-| `name` | The name of the email domain in the Internet Domain Name System (DNS). Example: `example.net` | `string` | No | - | - |
+| [`locks`](#kind-emaildomain-status-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
+| `name` | The name of the email domain in the Internet Domain Name System (DNS). Example: `mydomain.example.com` | `string` | No | - | - |
 | [`status`](#kind-emaildomain-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The time the email domain was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format, "YYYY-MM-ddThh:mmZ". Example: `2021-02-12T22:47:12.613Z` | `string` | No | - | - |
+
+<a id="kind-emaildomain-status-locks"></a>
+#### Status.locks[]
+
+[Back to EmailDomain status](#kind-emaildomain-status)
+
+EmailDomainLock defines nested fields for EmailDomain.Lock.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The lock compartment ID. | `string` | No | - | - |
+| `message` | A message added by the lock creator. The message typically gives an indication of why the resource is locked. | `string` | No | - | - |
+| `relatedResourceId` | The resource ID that is locking this resource. Indicates that deleting this resource removes the lock. | `string` | No | - | - |
+| `timeCreated` | Indicates when the lock was created, in the format defined by RFC 3339. | `string` | No | - | - |
+| `type` | Lock type. | `string` | No | - | - |
 
 <a id="kind-emaildomain-status-status"></a>
 #### Status.status
@@ -252,9 +274,10 @@ SenderSpec defines the desired state of Sender.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that contains the sender. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `emailAddress` | The email address of the sender. | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `emailIpPoolId` | An optional field. The IpPool OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 
 <a id="kind-sender-status"></a>
 ### Status
@@ -264,15 +287,33 @@ SenderStatus defines the observed state of Sender.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID for the compartment. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `emailAddress` | Email address of the sender. | `string` | No | - | - |
 | `emailDomainId` | The email domain used to assert responsibility for emails sent from this sender. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `emailIpPoolId` | The IpPool OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The unique OCID of the sender. | `string` | No | - | - |
-| `isSpf` | Value of the SPF field. For more information about SPF, please see SPF Authentication (https://docs.cloud.oracle.com/Content/Email/Concepts/overview.htm#components). | `boolean` | No | - | - |
+| `isSpf` | Value of the SPF field. For more information about SPF, please see SPF Authentication (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components). | `boolean` | No | - | - |
 | `lifecycleState` | The sender's current lifecycle state. | `string` | No | - | - |
+| [`locks`](#kind-sender-status-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
 | [`status`](#kind-sender-status-status) | - | `object` | Yes | - | - |
-| `timeCreated` | The date and time the approved sender was added in "YYYY-MM-ddThh:mmZ" format with a Z offset, as defined by RFC 3339. | `string` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `timeCreated` | The date and time the approved sender was added in "YYYY-MM-ddThh:mmZ" format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
+
+<a id="kind-sender-status-locks"></a>
+#### Status.locks[]
+
+[Back to Sender status](#kind-sender-status)
+
+SenderLock defines nested fields for Sender.Lock.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The lock compartment ID. | `string` | No | - | - |
+| `message` | A message added by the lock creator. The message typically gives an indication of why the resource is locked. | `string` | No | - | - |
+| `relatedResourceId` | The resource ID that is locking this resource. Indicates that deleting this resource removes the lock. | `string` | No | - | - |
+| `timeCreated` | Indicates when the lock was created, in the format defined by RFC 3339. | `string` | No | - | - |
+| `type` | Lock type. | `string` | No | - | - |
 
 <a id="kind-sender-status-status"></a>
 #### Status.status
@@ -367,10 +408,10 @@ SuppressionStatus defines the observed state of Suppression.
 | `errorSource` | DNS name of the source of the error that caused the suppression. Will be set to either the remote-mta or reporting-mta field from a delivery status notification (RFC 3464) when available. Not provided for all types of suppressions, and not always known. Note: Most SMTP errors that cause suppressions come from software run by email receiving systems rather than from OCI email delivery itself. | `string` | No | - | - |
 | `id` | The unique ID of the suppression. | `string` | No | - | - |
 | `messageId` | The value of the Message-ID header from the email that triggered a suppression. This value is as defined in RFC 5322 section 3.6.4, excluding angle-brackets. Not provided for all types of suppressions. | `string` | No | - | - |
-| `reason` | The reason that the email address was suppressed. For more information on the types of bounces, see Suppression List (https://docs.cloud.oracle.com/Content/Email/Concepts/overview.htm#components). | `string` | No | - | - |
+| `reason` | The reason that the email address was suppressed. For more information on the types of bounces, see Suppression List (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components). | `string` | No | - | - |
 | [`status`](#kind-suppression-status-status) | - | `object` | Yes | - | - |
-| `timeCreated` | The date and time the suppression was added in "YYYY-MM-ddThh:mmZ" format with a Z offset, as defined by RFC 3339. | `string` | No | - | - |
-| `timeLastSuppressed` | The last date and time the suppression prevented submission in "YYYY-MM-ddThh:mmZ" format with a Z offset, as defined by RFC 3339. | `string` | No | - | - |
+| `timeCreated` | The date and time the suppression was added in "YYYY-MM-ddThh:mmZ" format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
+| `timeLastSuppressed` | The last date and time the suppression prevented submission in "YYYY-MM-ddThh:mmZ" format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
 
 <a id="kind-suppression-status-status"></a>
 #### Status.status

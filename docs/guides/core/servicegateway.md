@@ -33,13 +33,13 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | `blockTraffic` | Whether the service gateway blocks all traffic through it. The default is `false`. When this is `true`, traffic is not routed to any services, regardless of route rules. Example: `true` | `boolean` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment to contain the service gateway. | `string` | Yes |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the service gateway. | `string` | Yes |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
-| `routeTableId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the service gateway will use. If you don't specify a route table here, the service gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the service gateway. For information about why you would associate a route table with a service gateway, see Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm). | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `routeTableId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the service gateway will use. If you don't specify a route table here, the service gateway is created without an associated route table. The Networking service does NOT automatically associate the attached VCN's default route table with the service gateway. For information about why you would associate a route table with a service gateway, see Transit Routing: Private Access to Oracle Services (https://docs.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm). | `string` | No |
 | [`services`](../../reference/api/core/v1beta1/index.md#kind-servicegateway-spec-services) | List of the OCIDs of the Service objects to enable for the service gateway. This list can be empty if you don't want to enable any `Service` objects when you create the gateway. You can enable a `Service` object later by using either AttachServiceId or UpdateServiceGateway. For each enabled `Service`, make sure there's a route rule with the `Service` object's `cidrBlock` as the rule's destination and the service gateway as the rule's target. See RouteTable. | `list[object]` | Yes |
-| `vcnId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN. | `string` | Yes |
+| `vcnId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN. | `string` | Yes |
 
 
 ## Status Fields
@@ -49,17 +49,17 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | `blockTraffic` | Whether the service gateway blocks all traffic through it. The default is `false`. When this is `true`, traffic is not routed to any services, regardless of route rules. Example: `true` | `boolean` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the service gateway. | `string` | No |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the service gateway. | `string` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the service gateway. | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the service gateway. | `string` | No |
 | `lifecycleState` | The service gateway's current state. | `string` | No |
-| `routeTableId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the service gateway is using. For information about why you would associate a route table with a service gateway, see Transit Routing: Private Access to Oracle Services (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm). | `string` | No |
+| `routeTableId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the service gateway is using. For information about why you would associate a route table with a service gateway, see Transit Routing: Private Access to Oracle Services (https://docs.oracle.com/iaas/Content/Network/Tasks/transitroutingoracleservices.htm). | `string` | No |
 | [`services`](../../reference/api/core/v1beta1/index.md#kind-servicegateway-status-services) | List of the Service objects enabled for this service gateway. The list can be empty. You can enable a particular `Service` by using AttachServiceId or UpdateServiceGateway. | `list[object]` | No |
 | [`status`](../../reference/api/core/v1beta1/index.md#kind-servicegateway-status-status) | - | `object` | Yes |
 | `timeCreated` | The date and time the service gateway was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No |
-| `vcnId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the service gateway belongs to. | `string` | No |
+| `vcnId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the service gateway belongs to. | `string` | No |
 
 
 ## Sample Manifest

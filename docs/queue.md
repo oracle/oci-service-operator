@@ -33,9 +33,10 @@ This summary shows the top-level `spec` fields. Use [the full API reference](ref
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| [`capabilities`](reference/api/queue/v1beta1/index.md#kind-queue-spec-capabilities) | The capability to add on the queue | `list[object]` | No |
 | `channelConsumptionLimit` | The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources. | `integer` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue. | `string` | Yes |
-| `customEncryptionKeyId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue. | `string` | Yes |
+| `customEncryptionKeyId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content. | `string` | No |
 | `deadLetterQueueDeliveryCount` | The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used. | `integer` | No |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | The user-friendly name of the queue. | `string` | Yes |
@@ -51,10 +52,11 @@ This summary shows the top-level `status` fields. Use [the full API reference](r
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| [`capabilities`](reference/api/queue/v1beta1/index.md#kind-queue-status-capabilities) | The list of capabilities enabled on the queue | `list[object]` | No |
 | `channelConsumptionLimit` | The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources. | `integer` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue. | `string` | No |
 | `createWorkRequestId` | The work request OCID tracking the in-flight create operation. | `string` | No |
-| `customEncryptionKeyId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content. | `string` | No |
+| `customEncryptionKeyId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content. | `string` | No |
 | `deadLetterQueueDeliveryCount` | The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used. | `integer` | No |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
 | `deleteWorkRequestId` | The work request OCID tracking the in-flight delete operation. | `string` | No |

@@ -32,27 +32,52 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| [`backupPolicy`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-spec-backuppolicy) | OpensearchClusterBackupPolicy defines nested fields for OpensearchCluster.BackupPolicy. | `object` | No |
+| [`certificateConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-spec-certificateconfig) | OpensearchClusterCertificateConfig defines nested fields for OpensearchCluster.CertificateConfig. | `object` | No |
 | `compartmentId` | The OCID of the compartment to create the cluster in. | `string` | Yes |
 | `dataNodeCount` | The number of data nodes to configure for the cluster. | `integer` | Yes |
 | `dataNodeHostBareMetalShape` | The bare metal shape for the cluster's data nodes. | `string` | No |
 | `dataNodeHostMemoryGB` | The amount of memory in GB, to configure per node for the cluster's data nodes. | `integer` | Yes |
 | `dataNodeHostOcpuCount` | The number of OCPUs to configure for the cluster's data nodes. | `integer` | Yes |
+| `dataNodeHostShape` | The node shape for the cluster's data nodes. | `string` | No |
 | `dataNodeHostType` | TThe instance type for the cluster's data nodes. | `string` | Yes |
 | `dataNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's data nodes. | `integer` | Yes |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | The name of the cluster. Avoid entering confidential information. | `string` | Yes |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No |
+| `inboundClusterIds` | List of inbound clusters that will be queried using cross cluster search | `list[string]` | No |
+| [`loadBalancerConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-spec-loadbalancerconfig) | OpensearchClusterLoadBalancerConfig defines nested fields for OpensearchCluster.LoadBalancerConfig. | `object` | No |
+| [`maintenanceDetails`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-spec-maintenancedetails) | OpensearchClusterMaintenanceDetails defines nested fields for OpensearchCluster.MaintenanceDetails. | `object` | No |
 | `masterNodeCount` | The number of master nodes to configure for the cluster. | `integer` | Yes |
 | `masterNodeHostBareMetalShape` | The bare metal shape for the cluster's master nodes. | `string` | No |
 | `masterNodeHostMemoryGB` | The amount of memory in GB, to configure per node for the cluster's master nodes. | `integer` | Yes |
 | `masterNodeHostOcpuCount` | The number of OCPUs to configure for the cluser's master nodes. | `integer` | Yes |
+| `masterNodeHostShape` | The node shape for the cluster's master nodes. | `string` | No |
 | `masterNodeHostType` | The instance type for the cluster's master nodes. | `string` | Yes |
+| `mlNodeCount` | The number of ML nodes configured for the cluster. | `integer` | No |
+| `mlNodeHostMemoryGB` | The amount of memory in GB, for the cluster's ML nodes. | `integer` | No |
+| `mlNodeHostOcpuCount` | The number of OCPUs configured for the cluster's ML nodes. | `integer` | No |
+| `mlNodeHostShape` | The node shape for the cluster's ML nodes. | `string` | No |
+| `mlNodeHostType` | The instance type for the cluster's ML nodes. | `string` | No |
+| `mlNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's ML nodes. | `integer` | No |
+| `nsgId` | The OCID of the NSG where the private endpoint vnic will be attached. | `string` | No |
 | `opendashboardNodeCount` | The number of OpenSearch Dashboard nodes to configure for the cluster. | `integer` | Yes |
 | `opendashboardNodeHostMemoryGB` | The amount of memory in GB, to configure for the cluster's OpenSearch Dashboard nodes. | `integer` | Yes |
 | `opendashboardNodeHostOcpuCount` | The number of OCPUs to configure for the cluster's OpenSearch Dashboard nodes. | `integer` | Yes |
+| `opendashboardNodeHostShape` | The node shape for the cluster's OpenSearch Dashboard nodes. | `string` | No |
+| [`outboundClusterConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-spec-outboundclusterconfig) | OpensearchClusterOutboundClusterConfig defines nested fields for OpensearchCluster.OutboundClusterConfig. | `object` | No |
+| `reverseConnectionEndpointCustomerIps` | The customer IP addresses of the endpoint in customer VCN | `list[string]` | No |
+| `searchNodeCount` | The number of search nodes configured for the cluster. | `integer` | No |
+| `searchNodeHostMemoryGB` | The amount of memory in GB, for the cluster's search nodes. | `integer` | No |
+| `searchNodeHostOcpuCount` | The number of OCPUs configured for the cluster's search nodes. | `integer` | No |
+| `searchNodeHostShape` | The node shape for the cluster's search nodes. | `string` | No |
+| `searchNodeHostType` | The instance type for the cluster's search nodes. | `string` | No |
+| `searchNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's search nodes. | `integer` | No |
+| `securityAttributes` | Security attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No |
 | `securityMasterUserName` | The name of the master user that are used to manage security config | `string` | No |
 | `securityMasterUserPasswordHash` | The password hash of the master user that are used to manage security config | `string` | No |
 | `securityMode` | The security mode of the cluster. | `string` | No |
+| [`securitySamlConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-spec-securitysamlconfig) | OpensearchClusterSecuritySamlConfig defines nested fields for OpensearchCluster.SecuritySamlConfig. | `object` | No |
 | `softwareVersion` | The version of the software the cluster is running. | `string` | Yes |
 | `subnetCompartmentId` | The OCID for the compartment where the cluster's subnet is located. | `string` | Yes |
 | `subnetId` | The OCID of the cluster's subnet. | `string` | Yes |
@@ -68,11 +93,14 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | `availabilityDomains` | The availability domains to distribute the cluser nodes across. | `list[string]` | No |
+| [`backupPolicy`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-backuppolicy) | OpensearchClusterBackupPolicy defines nested fields for OpensearchCluster.BackupPolicy. | `object` | No |
+| [`certificateConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-certificateconfig) | OpensearchClusterCertificateConfig defines nested fields for OpensearchCluster.CertificateConfig. | `object` | No |
 | `compartmentId` | The OCID of the compartment where the cluster is located. | `string` | No |
 | `dataNodeCount` | The number of data nodes configured for the cluster. | `integer` | No |
 | `dataNodeHostBareMetalShape` | The bare metal shape for the cluster's data nodes. | `string` | No |
 | `dataNodeHostMemoryGB` | The amount of memory in GB, for the cluster's data nodes. | `integer` | No |
 | `dataNodeHostOcpuCount` | The number of OCPUs configured for the cluster's data nodes. | `integer` | No |
+| `dataNodeHostShape` | The node shape for the cluster's data nodes. | `string` | No |
 | `dataNodeHostType` | The instance type for the cluster's data nodes. | `string` | No |
 | `dataNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's data nodes. | `integer` | No |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
@@ -80,23 +108,46 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | `fqdn` | The fully qualified domain name (FQDN) for the cluster's API endpoint. | `string` | No |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No |
 | `id` | The OCID of the cluster. | `string` | No |
+| `inboundClusterIds` | List of inbound clusters for which this cluster is an outbound cluster | `list[string]` | No |
 | `lifecycleDetails` | Additional information about the current lifecycle state of the cluster. | `string` | No |
 | `lifecycleState` | The current state of the cluster. | `string` | No |
+| [`loadBalancerConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-loadbalancerconfig) | OpensearchClusterLoadBalancerConfig defines nested fields for OpensearchCluster.LoadBalancerConfig. | `object` | No |
+| [`maintenanceDetails`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-maintenancedetails) | OpensearchClusterMaintenanceDetails defines nested fields for OpensearchCluster.MaintenanceDetails. | `object` | No |
 | `masterNodeCount` | The number of master nodes configured for the cluster. | `integer` | No |
 | `masterNodeHostBareMetalShape` | The bare metal shape for the cluster's master nodes. | `string` | No |
 | `masterNodeHostMemoryGB` | The amount of memory in GB, for the cluster's master nodes. | `integer` | No |
 | `masterNodeHostOcpuCount` | The number of OCPUs configured for cluster's master nodes. | `integer` | No |
+| `masterNodeHostShape` | The node shape for the cluster's master nodes. | `string` | No |
 | `masterNodeHostType` | The instance type for the cluster's master nodes. | `string` | No |
+| `mlNodeCount` | The number of ML nodes configured for the cluster. | `integer` | No |
+| `mlNodeHostMemoryGB` | The amount of memory in GB, for the cluster's ML nodes. | `integer` | No |
+| `mlNodeHostOcpuCount` | The number of OCPUs configured for the cluster's ML nodes. | `integer` | No |
+| `mlNodeHostShape` | The node shape for the cluster's ML nodes. | `string` | No |
+| `mlNodeHostType` | The instance type for the cluster's ML nodes. | `string` | No |
+| `mlNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's ML nodes. | `integer` | No |
+| `nsgId` | The OCID of the NSG where the private endpoint vnic will be attached. | `string` | No |
 | `opendashboardFqdn` | The fully qualified domain name (FQDN) for the cluster's OpenSearch Dashboard API endpoint. | `string` | No |
 | `opendashboardNodeCount` | The number of OpenSearch Dashboard nodes configured for the cluster. | `integer` | No |
 | `opendashboardNodeHostMemoryGB` | The amount of memory in GB, for the cluster's OpenSearch Dashboard nodes. | `integer` | No |
 | `opendashboardNodeHostOcpuCount` | The amount of memory in GB, for the cluster's OpenSearch Dashboard nodes. | `integer` | No |
+| `opendashboardNodeHostShape` | The node shape for the cluster's OpenSearch Dashboard nodes. | `string` | No |
 | `opendashboardPrivateIp` | The private IP address for the cluster's OpenSearch Dashboard. | `string` | No |
 | `opensearchFqdn` | The fully qualified domain name (FQDN) for the cluster's API endpoint. | `string` | No |
 | `opensearchPrivateIp` | The cluster's private IP address. | `string` | No |
+| [`outboundClusterConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-outboundclusterconfig) | OpensearchClusterOutboundClusterConfig defines nested fields for OpensearchCluster.OutboundClusterConfig. | `object` | No |
+| `reverseConnectionEndpointCustomerIps` | The customer IP addresses of the endpoint in customer VCN | `list[string]` | No |
+| [`reverseConnectionEndpoints`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-reverseconnectionendpoints) | The list of reverse connection endpoints. | `list[object]` | No |
+| `searchNodeCount` | The number of search nodes configured for the cluster. | `integer` | No |
+| `searchNodeHostMemoryGB` | The amount of memory in GB, for the cluster's search nodes. | `integer` | No |
+| `searchNodeHostOcpuCount` | The number of OCPUs configured for the cluster's search nodes. | `integer` | No |
+| `searchNodeHostShape` | The node shape for the cluster's search nodes. | `string` | No |
+| `searchNodeHostType` | The instance type for the cluster's search nodes. | `string` | No |
+| `searchNodeStorageGB` | The amount of storage in GB, to configure per node for the cluster's search nodes. | `integer` | No |
+| `securityAttributes` | Security attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No |
 | `securityMasterUserName` | The name of the master user that are used to manage security config | `string` | No |
 | `securityMasterUserPasswordHash` | The password hash of the master user that are used to manage security config | `string` | No |
 | `securityMode` | The security mode of the cluster. | `string` | No |
+| [`securitySamlConfig`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-securitysamlconfig) | OpensearchClusterSecuritySamlConfig defines nested fields for OpensearchCluster.SecuritySamlConfig. | `object` | No |
 | `softwareVersion` | The software version the cluster is running. | `string` | No |
 | [`status`](../../reference/api/opensearch/v1beta1/index.md#kind-opensearchcluster-status-status) | - | `object` | Yes |
 | `subnetCompartmentId` | The OCID for the compartment where the cluster's subnet is located. | `string` | No |

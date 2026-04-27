@@ -38,7 +38,7 @@ ProjectSpec defines the desired state of Project.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the project's compartment. | `string` | Yes | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the project's compartment. | `string` | Yes | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | A short description of the project. | `string` | No | - | - |
 | `displayName` | A user-friendly display name for the resource. It does not have to be unique and can be modified. Avoid entering confidential information. | `string` | No | - | - |
@@ -51,7 +51,7 @@ ProjectStatus defines the observed state of Project.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the project's compartment. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the project's compartment. | `string` | No | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | A short description of a project. | `string` | No | - | - |
 | `displayName` | A user-friendly display name for the resource. It does not have to be unique and can be modified. Avoid entering confidential information. | `string` | No | - | - |

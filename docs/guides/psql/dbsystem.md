@@ -34,9 +34,9 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | --- | --- | --- | --- |
 | [`adminPassword`](../../reference/api/psql/v1beta1/index.md#kind-dbsystem-spec-adminpassword) | The administrative password sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `password` key. If omitted, `spec.credentials.passwordDetails` remains available for plaintext or OCI Vault secret input. | `object` | No |
 | [`adminUsername`](../../reference/api/psql/v1beta1/index.md#kind-dbsystem-spec-adminusername) | The administrative username sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input. | `object` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | Yes |
-| `configId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No |
-| [`credentials`](../../reference/api/psql/v1beta1/index.md#kind-dbsystem-spec-credentials) | DbSystemCredentials defines nested fields for DbSystem.Credentials. | `object` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | Yes |
+| `configId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No |
+| [`credentials`](../../reference/api/psql/v1beta1/index.md#kind-dbsystem-spec-credentials) | DbSystemCredentials defines nested fields for DbSystem.Credentials. | `object` | Yes |
 | [`dbConfigurationParams`](../../reference/api/psql/v1beta1/index.md#kind-dbsystem-spec-dbconfigurationparams) | DbSystemDbConfigurationParams defines nested fields for DbSystem.DbConfigurationParams. | `object` | No |
 | `dbVersion` | Version of database system software. | `string` | Yes |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
@@ -64,8 +64,8 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | [`adminPasswordSource`](../../reference/api/psql/v1beta1/index.md#kind-dbsystem-status-adminpasswordsource) | The last applied secret reference for the administrative password. | `object` | No |
 | `adminUsername` | The database system administrator username. | `string` | No |
 | [`adminUsernameSource`](../../reference/api/psql/v1beta1/index.md#kind-dbsystem-status-adminusernamesource) | The last applied secret reference for the administrative username. | `object` | No |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | No |
-| `configId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | No |
+| `configId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No |
 | `dbVersion` | The major and minor versions of the database system software. | `string` | No |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
 | `description` | A description of the database system. | `string` | No |

@@ -39,11 +39,11 @@ VaultSpec defines the desired state of Vault.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment where you want to create this vault. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `deletionScheduleDays` | The number of days to retain the Vault after OCI deletion has been scheduled. Set a value from 7 to 30 to control the retention window used when Vault deletion is scheduled. | `integer (int32)` | No | - | - |
 | `displayName` | A user-friendly name for the vault. It does not have to be unique, and it is changeable. Avoid entering confidential information. | `string` | Yes | - | - |
 | [`externalKeyManagerMetadata`](#kind-vault-spec-externalkeymanagermetadata) | VaultExternalKeyManagerMetadata defines nested fields for Vault.ExternalKeyManagerMetadata. | `object` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `vaultType` | The type of vault to create. Each type of vault stores the key with different degrees of isolation and has different options and pricing. | `string` | Yes | - | - |
 
 <a id="kind-vault-spec-externalkeymanagermetadata"></a>
@@ -80,13 +80,14 @@ VaultStatus defines the observed state of Vault.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that contains this vault. | `string` | No | - | - |
-| `cryptoEndpoint` | The service endpoint to perform cryptographic operations against. Cryptographic operations include Encrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/EncryptedData/Encrypt), Decrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/DecryptedData/Decrypt), and GenerateDataEncryptionKey (https://docs.cloud.oracle.com/api/#/en/key/latest/GeneratedKey/GenerateDataEncryptionKey) operations. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `cryptoEndpoint` | The service endpoint to perform cryptographic operations against. Cryptographic operations include Encrypt (https://docs.oracle.com/iaas/api/#/en/key/latest/EncryptedData/Encrypt), Decrypt (https://docs.oracle.com/iaas/api/#/en/key/latest/DecryptedData/Decrypt), and GenerateDataEncryptionKey (https://docs.oracle.com/iaas/api/#/en/key/latest/GeneratedKey/GenerateDataEncryptionKey) operations. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A user-friendly name for the vault. It does not have to be unique, and it is changeable. Avoid entering confidential information. | `string` | No | - | - |
 | [`externalKeyManagerMetadataSummary`](#kind-vault-status-externalkeymanagermetadatasummary) | VaultExternalKeyManagerMetadataSummary defines nested fields for Vault.ExternalKeyManagerMetadataSummary. | `object` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the vault. | `string` | No | - | - |
 | `isPrimary` | A Boolean value that indicates whether the Vault is primary Vault or replica Vault. | `boolean` | No | - | - |
+| `isVaultReplicable` | A Boolean value that indicates whether the Vault has cross region replication capability. Always true for Virtual Private Vaults. | `boolean` | No | - | - |
 | `lifecycleState` | The vault's current lifecycle state. Example: `DELETED` | `string` | No | - | - |
 | `managementEndpoint` | The service endpoint to perform management operations against. Management operations include "Create," "Update," "List," "Get," and "Delete" operations. | `string` | No | - | - |
 | [`replicaDetails`](#kind-vault-status-replicadetails) | VaultReplicaDetails defines nested fields for Vault.ReplicaDetails. | `object` | No | - | - |

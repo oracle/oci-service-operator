@@ -32,11 +32,11 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the DRG. | `string` | Yes |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the DRG. | `string` | Yes |
 | [`defaultDrgRouteTables`](../../reference/api/core/v1beta1/index.md#kind-drg-spec-defaultdrgroutetables) | DrgDefaultDrgRouteTables defines nested fields for Drg.DefaultDrgRouteTables. | `object` | No |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
 
 
 ## Status Fields
@@ -45,13 +45,13 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the DRG. | `string` | No |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the DRG. | `string` | No |
 | [`defaultDrgRouteTables`](../../reference/api/core/v1beta1/index.md#kind-drg-status-defaultdrgroutetables) | DrgDefaultDrgRouteTables defines nested fields for Drg.DefaultDrgRouteTables. | `object` | No |
-| `defaultExportDrgRouteDistributionId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of this DRG's default export route distribution for the DRG attachments. | `string` | No |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `defaultExportDrgRouteDistributionId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of this DRG's default export route distribution for the DRG attachments. | `string` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
-| `id` | The DRG's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)). | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `id` | The DRG's Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)). | `string` | No |
 | `lifecycleState` | The DRG's current state. | `string` | No |
 | [`status`](../../reference/api/core/v1beta1/index.md#kind-drg-status-status) | - | `object` | Yes |
 | `timeCreated` | The date and time the DRG was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No |

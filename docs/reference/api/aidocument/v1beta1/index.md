@@ -59,10 +59,26 @@ ProjectStatus defines the observed state of Project.
 | `id` | A unique identifier that is immutable after creation. | `string` | No | - | - |
 | `lifecycleDetails` | A message describing the current state in more detail, that can provide actionable information if creation failed. | `string` | No | - | - |
 | `lifecycleState` | The current state of the project. | `string` | No | - | - |
+| [`locks`](#kind-project-status-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
 | [`status`](#kind-project-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. For example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | When the project was created, as an RFC3339 datetime string. | `string` | No | - | - |
 | `timeUpdated` | When the project was updated, as an RFC3339 datetime string. | `string` | No | - | - |
+
+<a id="kind-project-status-locks"></a>
+#### Status.locks[]
+
+[Back to Project status](#kind-project-status)
+
+ProjectLock defines nested fields for Project.Lock.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The lock compartment ID. | `string` | No | - | - |
+| `message` | A message added by the lock creator. The message typically gives an indication of why the resource is locked. | `string` | No | - | - |
+| `relatedResourceId` | The resource ID that is locking this resource. Indicates that deleting this resource removes the lock. | `string` | No | - | - |
+| `timeCreated` | Indicates when the lock was created, in the format defined by RFC 3339. | `string` | No | - | - |
+| `type` | Lock type. | `string` | No | - | - |
 
 <a id="kind-project-status-status"></a>
 #### Status.status

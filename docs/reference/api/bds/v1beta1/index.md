@@ -38,8 +38,9 @@ BdsInstanceSpec defines the desired state of BdsInstance.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`bdsClusterVersionSummary`](#kind-bdsinstance-spec-bdsclusterversionsummary) | BdsInstanceBdsClusterVersionSummary defines nested fields for BdsInstance.BdsClusterVersionSummary. | `object` | No | - | - |
 | `bootstrapScriptUrl` | Pre-authenticated URL of the script in Object Store that is downloaded and executed. | `string` | No | - | - |
-| `clusterAdminPassword` | Base-64 encoded password for the cluster (and Cloudera Manager) admin user. | `string` | Yes | - | - |
+| `clusterAdminPassword` | Base-64 encoded password for the cluster (and Cloudera Manager) admin user. Not required if the secretId is specified. | `string` | No | - | - |
 | `clusterProfile` | Profile of the Big Data Service cluster. | `string` | No | - | - |
 | `clusterPublicKey` | The SSH public key used to authenticate the cluster connection. | `string` | Yes | - | - |
 | `clusterVersion` | Version of the Hadoop distribution. | `string` | Yes | - | - |
@@ -48,11 +49,25 @@ BdsInstanceSpec defines the desired state of BdsInstance.
 | `displayName` | Name of the Big Data Service cluster. | `string` | Yes | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only. For example, `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
 | `isHighAvailability` | Boolean flag specifying whether or not the cluster is highly available (HA). | `boolean` | Yes | - | - |
+| `isSecretReused` | Boolean flag specifying whether or not to persist the provided secret OCID and reuse it for future operations. | `boolean` | No | - | - |
 | `isSecure` | Boolean flag specifying whether or not the cluster should be set up as secure. | `boolean` | Yes | - | - |
 | `kerberosRealmName` | The user-defined kerberos realm name. | `string` | No | - | - |
 | `kmsKeyId` | The OCID of the Key Management master encryption key. | `string` | No | - | - |
 | [`networkConfig`](#kind-bdsinstance-spec-networkconfig) | BdsInstanceNetworkConfig defines nested fields for BdsInstance.NetworkConfig. | `object` | No | - | - |
 | [`nodes`](#kind-bdsinstance-spec-nodes) | The list of nodes in the Big Data Service cluster. | `list[object]` | Yes | - | - |
+| `secretId` | The secretId for the clusterAdminPassword. | `string` | No | - | - |
+
+<a id="kind-bdsinstance-spec-bdsclusterversionsummary"></a>
+#### Spec.bdsClusterVersionSummary
+
+[Back to BdsInstance spec](#kind-bdsinstance-spec)
+
+BdsInstanceBdsClusterVersionSummary defines nested fields for BdsInstance.BdsClusterVersionSummary.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `bdsVersion` | BDS version to be used for cluster creation | `string` | Yes | - | - |
+| `odhVersion` | ODH version to be used for cluster creation | `string` | No | - | - |
 
 <a id="kind-bdsinstance-spec-networkconfig"></a>
 #### Spec.networkConfig
@@ -101,6 +116,7 @@ BdsInstanceStatus defines the observed state of BdsInstance.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`bdsClusterVersionSummary`](#kind-bdsinstance-status-bdsclusterversionsummary) | BdsInstanceBdsClusterVersionSummary defines nested fields for BdsInstance.BdsClusterVersionSummary. | `object` | No | - | - |
 | `bootstrapScriptUrl` | pre-authenticated URL of the bootstrap script in Object Store that can be downloaded and executed. | `string` | No | - | - |
 | [`cloudSqlDetails`](#kind-bdsinstance-status-cloudsqldetails) | BdsInstanceCloudSqlDetails defines nested fields for BdsInstance.CloudSqlDetails. | `object` | No | - | - |
 | [`clusterDetails`](#kind-bdsinstance-status-clusterdetails) | BdsInstanceClusterDetails defines nested fields for BdsInstance.ClusterDetails. | `object` | No | - | - |
@@ -115,6 +131,7 @@ BdsInstanceStatus defines the observed state of BdsInstance.
 | `isCloudSqlConfigured` | Boolean flag specifying whether or not Cloud SQL should be configured. | `boolean` | No | - | - |
 | `isHighAvailability` | Boolean flag specifying whether or not the cluster is highly available (HA) | `boolean` | No | - | - |
 | `isKafkaConfigured` | Boolean flag specifying whether or not Kafka should be configured. | `boolean` | No | - | - |
+| `isSecretReused` | Boolean flag specifying whether or not to persist the provided secret OCID and reuse it for future operations. | `boolean` | No | - | - |
 | `isSecure` | Boolean flag specifying whether or not the cluster should be set up as secure. | `boolean` | No | - | - |
 | `kmsKeyId` | The OCID of the Key Management master encryption key. | `string` | No | - | - |
 | `lifecycleState` | The state of the cluster. | `string` | No | - | - |
@@ -122,9 +139,23 @@ BdsInstanceStatus defines the observed state of BdsInstance.
 | [`nodes`](#kind-bdsinstance-status-nodes) | The list of nodes in the cluster. | `list[object]` | No | - | - |
 | `numberOfNodes` | Number of nodes that forming the cluster | `integer` | No | - | - |
 | `numberOfNodesRequiringMaintenanceReboot` | Number of nodes that require a maintenance reboot | `integer` | No | - | - |
+| `secretId` | The secretId for the clusterAdminPassword. | `string` | No | - | - |
 | [`status`](#kind-bdsinstance-status-status) | - | `object` | Yes | - | - |
 | `timeCreated` | The time the cluster was created, shown as an RFC 3339 formatted datetime string. | `string` | No | - | - |
+| `timeEarliestCertificateExpiration` | The earliest time of certificate expiration date across the certificates of all current nodes under this cluster. | `string` | No | - | - |
 | `timeUpdated` | The time the cluster was updated, shown as an RFC 3339 formatted datetime string. | `string` | No | - | - |
+
+<a id="kind-bdsinstance-status-bdsclusterversionsummary"></a>
+#### Status.bdsClusterVersionSummary
+
+[Back to BdsInstance status](#kind-bdsinstance-status)
+
+BdsInstanceBdsClusterVersionSummary defines nested fields for BdsInstance.BdsClusterVersionSummary.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `bdsVersion` | BDS version to be used for cluster creation | `string` | Yes | - | - |
+| `odhVersion` | ODH version to be used for cluster creation | `string` | No | - | - |
 
 <a id="kind-bdsinstance-status-cloudsqldetails"></a>
 #### Status.cloudSqlDetails

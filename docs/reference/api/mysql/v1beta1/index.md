@@ -40,6 +40,7 @@ DbSystemSpec defines the desired state of DbSystem.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `accessMode` | The access mode indicating if the database access will be restricted only to administrators or not: - UNRESTRICTED (default): the access to the database is not restricted; - RESTRICTED: the access will be allowed only to users with specific privileges; RESTRICTED will correspond to setting the MySQL system variable offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON. | `string` | No | - | - |
 | [`adminPassword`](#kind-dbsystem-spec-adminpassword) | The password for the administrative user sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `password` key. | `object` | No | - | - |
 | [`adminUsername`](#kind-dbsystem-spec-adminusername) | The username for the administrative user sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `username` key. | `object` | No | - | - |
 | `availabilityDomain` | The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other availability domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the availability domain in which the DB System is placed. | `string` | No | - | - |
@@ -47,12 +48,17 @@ DbSystemSpec defines the desired state of DbSystem.
 | `compartmentId` | The OCID of the compartment. | `string` | Yes | - | - |
 | `configurationId` | The OCID of the Configuration to be used for this DB System. | `string` | No | - | - |
 | `crashRecovery` | Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled, and whether to enable or disable syncing of the Binary Logs. | `string` | No | - | - |
+| [`customerContacts`](#kind-dbsystem-spec-customercontacts) | The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource. Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators. Up to 10 email addresses can be added to the customer contacts for a DB System. | `list[object]` | No | - | - |
+| [`dataStorage`](#kind-dbsystem-spec-datastorage) | DbSystemDataStorage defines nested fields for DbSystem.DataStorage. | `object` | No | - | - |
 | `dataStorageSizeInGBs` | Initial size of the data volume in GBs that will be created and attached. Keep in mind that this only specifies the size of the database data volume, the log volume for the database will be scaled appropriately with its shape. | `integer` | No | - | - |
+| [`databaseConsole`](#kind-dbsystem-spec-databaseconsole) | DbSystemDatabaseConsole defines nested fields for DbSystem.DatabaseConsole. | `object` | No | - | - |
 | `databaseManagement` | Whether to enable monitoring via the Database Management service. | `string` | No | - | - |
+| `databaseMode` | The database mode indicating the types of statements that will be allowed to run in the DB system. This mode will apply only to statements run by user connections. Replicated write statements will continue to be allowed regardless of the DatabaseMode. - READ_WRITE (default): allow running read and write statements on the DB system; - READ_ONLY: only allow running read statements on the DB system. | `string` | No | - | - |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | [`deletionPolicy`](#kind-dbsystem-spec-deletionpolicy) | DbSystemDeletionPolicy defines nested fields for DbSystem.DeletionPolicy. | `object` | No | - | - |
 | `description` | User-provided data about the DB System. | `string` | No | - | - |
 | `displayName` | The user-friendly name for the DB System. It does not have to be unique. | `string` | No | - | - |
+| [`encryptData`](#kind-dbsystem-spec-encryptdata) | DbSystemEncryptData defines nested fields for DbSystem.EncryptData. | `object` | No | - | - |
 | `faultDomain` | The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other fault domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the fault domain in which the DB System is placed. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
 | `hostnameLabel` | The hostname for the primary endpoint of the DB System. Used for DNS. The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN) (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com"). Must be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123. | `string` | No | - | - |
@@ -60,12 +66,17 @@ DbSystemSpec defines the desired state of DbSystem.
 | `isHighlyAvailable` | Specifies if the DB System is highly available. When creating a DB System with High Availability, three instances are created and placed according to your region- and subnet-type. The secondaries are placed automatically in the other two availability or fault domains. You can choose the preferred location of your primary instance, only. | `boolean` | No | - | - |
 | [`maintenance`](#kind-dbsystem-spec-maintenance) | DbSystemMaintenance defines nested fields for DbSystem.Maintenance. | `object` | No | - | - |
 | `mysqlVersion` | The specific MySQL version identifier. | `string` | No | - | - |
+| `nsgIds` | Network Security Group OCIDs used for the VNIC attachment. | `list[string]` | No | - | - |
 | `port` | The port for primary endpoint of the DB System to listen on. | `integer` | No | - | - |
 | `portX` | The TCP network port on which X Plugin listens for connections. This is the X Plugin equivalent of port. | `integer` | No | - | - |
+| [`readEndpoint`](#kind-dbsystem-spec-readendpoint) | DbSystemReadEndpoint defines nested fields for DbSystem.ReadEndpoint. | `object` | No | - | - |
+| [`rest`](#kind-dbsystem-spec-rest) | DbSystemRest defines nested fields for DbSystem.Rest. | `object` | No | - | - |
 | [`secureConnections`](#kind-dbsystem-spec-secureconnections) | DbSystemSecureConnections defines nested fields for DbSystem.SecureConnections. | `object` | No | - | - |
+| `securityAttributes` | Security Attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}` | `map[string, map[string, string]]` | No | - | - |
 | `shapeName` | The name of the shape. The shape determines the resources allocated - CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes. To get a list of shapes, use the ListShapes operation. | `string` | Yes | - | - |
 | [`source`](#kind-dbsystem-spec-source) | DbSystemSource defines nested fields for DbSystem.Source. | `object` | No | - | - |
 | `subnetId` | The OCID of the subnet the DB System is associated with. | `string` | Yes | - | - |
+| [`telemetryConfiguration`](#kind-dbsystem-spec-telemetryconfiguration) | DbSystemTelemetryConfiguration defines nested fields for DbSystem.TelemetryConfiguration. | `object` | No | - | - |
 
 <a id="kind-dbsystem-spec-adminpassword"></a>
 #### Spec.adminPassword
@@ -116,12 +127,26 @@ DbSystemBackupPolicy defines nested fields for DbSystem.BackupPolicy.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`copyPolicies`](#kind-dbsystem-spec-backuppolicy-copypolicies) | List of policies of a DB system to schedule cross-region DB system backup copy. The policy includes the name of the destination region to which the DB system backup will be copied, and an optional parameter which specifies the retention period of the copied DB system backup in days. **Note:** Currently, only one policy can be specified in the list. | `list[object]` | No | - | - |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `freeformTags` | Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only. Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
 | `isEnabled` | Specifies if automatic backups are enabled. | `boolean` | No | - | - |
 | [`pitrPolicy`](#kind-dbsystem-spec-backuppolicy-pitrpolicy) | DbSystemBackupPolicyPitrPolicy defines nested fields for DbSystem.BackupPolicy.PitrPolicy. | `object` | No | - | - |
 | `retentionInDays` | Number of days to retain an automatic backup. | `integer` | No | - | - |
+| `softDelete` | Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED state for 7 days before permanently deleting it. | `string` | No | - | - |
 | `windowStartTime` | The start of a 30-minute window of time in which daily, automated backups occur. This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. At some point in the window, the system may incur a brief service disruption as the backup is performed. | `string` | No | - | - |
+
+<a id="kind-dbsystem-spec-backuppolicy-copypolicies"></a>
+##### Spec.backupPolicy.copyPolicies[]
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemBackupPolicyCopyPolicy defines nested fields for DbSystem.BackupPolicy.CopyPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `backupCopyRetentionInDays` | Number of days to retain the copied DB system backup. | `integer` | No | - | - |
+| `copyToRegion` | The destination region name to which the DB system backup will be copied. | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-spec-backuppolicy-pitrpolicy"></a>
 ##### Spec.backupPolicy.pitrPolicy
@@ -133,6 +158,41 @@ DbSystemBackupPolicyPitrPolicy defines nested fields for DbSystem.BackupPolicy.P
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `isEnabled` | Specifies if PITR is enabled or disabled. | `boolean` | Yes | - | - |
+
+<a id="kind-dbsystem-spec-customercontacts"></a>
+#### Spec.customerContacts[]
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemCustomerContact defines nested fields for DbSystem.CustomerContact.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `email` | The email address used by Oracle to send notifications regarding the DB System. | `string` | Yes | - | - |
+
+<a id="kind-dbsystem-spec-datastorage"></a>
+#### Spec.dataStorage
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemDataStorage defines nested fields for DbSystem.DataStorage.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isAutoExpandStorageEnabled` | Enable/disable automatic storage expansion. When set to true, the DB System will automatically add storage incrementally up to the value specified in maxStorageSizeInGBs. | `boolean` | No | - | - |
+| `maxStorageSizeInGBs` | Maximum storage size this DB System can expand to. When isAutoExpandStorageEnabled is set to true, the DB System will add storage incrementally up to this value. DB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB. DB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB. DB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB. DB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB. It is not possible to decrease data storage size. You cannot set the maximum data storage size to less than either current DB System dataStorageSizeInGBs or allocatedStorageSizeInGBs. | `integer` | No | - | - |
+
+<a id="kind-dbsystem-spec-databaseconsole"></a>
+#### Spec.databaseConsole
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemDatabaseConsole defines nested fields for DbSystem.DatabaseConsole.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `port` | The port on which the database console can be accessed. Supported port numbers are 443 and from 1024 to 65535. | `integer` | No | - | - |
+| `status` | Enable/disable the database console on the DB System. | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-spec-deletionpolicy"></a>
 #### Spec.deletionPolicy
@@ -147,6 +207,18 @@ DbSystemDeletionPolicy defines nested fields for DbSystem.DeletionPolicy.
 | `finalBackup` | Specifies whether or not a backup is taken when the DB System is deleted. REQUIRE_FINAL_BACKUP: a backup is taken if the DB System is deleted. SKIP_FINAL_BACKUP: a backup is not taken if the DB System is deleted. | `string` | No | - | - |
 | `isDeleteProtected` | Specifies whether the DB System can be deleted. Set to true to prevent deletion, false (default) to allow. | `boolean` | No | - | - |
 
+<a id="kind-dbsystem-spec-encryptdata"></a>
+#### Spec.encryptData
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemEncryptData defines nested fields for DbSystem.EncryptData.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `keyGenerationType` | Select whether to use Oracle-managed key (SYSTEM) or your own key (BYOK). | `string` | Yes | - | - |
+| `keyId` | The OCID of the key to use. | `string` | No | - | - |
+
 <a id="kind-dbsystem-spec-maintenance"></a>
 #### Spec.maintenance
 
@@ -156,7 +228,49 @@ DbSystemMaintenance defines nested fields for DbSystem.Maintenance.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`maintenanceDisabledWindows`](#kind-dbsystem-spec-maintenance-maintenancedisabledwindows) | Time window during which downtime-inducing maintenance shall not be performed. Downtime-free maintenance may be performed to apply required security patches. At most one configured window is supported. | `list[object]` | No | - | - |
+| `maintenanceScheduleType` | The maintenance schedule type of the DB system. Defaults to REGULAR. EARLY: Maintenance schedule follows a cycle where upgrades are performed when versions become deprecated. REGULAR: Maintenance schedule follows the normal cycle where upgrades are performed when versions become unavailable. | `string` | No | - | - |
+| `versionPreference` | The preferred version to target when performing an automatic MySQL upgrade. Defaults to OLDEST. OLDEST: Choose the oldest available MySQL version based on the current version of the DB System. SECOND_NEWEST: Choose the MySQL version before the newest for auto-upgrade. NEWEST: Choose the latest and greatest MySQL version available for auto-upgrade. | `string` | No | - | - |
+| `versionTrackPreference` | The preferred version track to target when performing an automatic MySQL upgrade. Defaults to FOLLOW. LONG_TERM_SUPPORT: No MySQL database behavior changes. INNOVATION: Provides access to the latest features and all bug fixes. FOLLOW: Follows the track of the current MySQL version. | `string` | No | - | - |
 | `windowStartTime` | The start of the 2 hour maintenance window. This string is of the format: "{day-of-week} {time-of-day}". "{day-of-week}" is a case-insensitive string like "mon", "tue", &c. "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. If you set the read replica maintenance window to "" or if not specified, the read replica is set same as the DB system maintenance window. | `string` | Yes | - | - |
+
+<a id="kind-dbsystem-spec-maintenance-maintenancedisabledwindows"></a>
+##### Spec.maintenance.maintenanceDisabledWindows[]
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemMaintenanceMaintenanceDisabledWindow defines nested fields for DbSystem.Maintenance.MaintenanceDisabledWindow.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `timeEnd` | The time until when maintenance is disabled. Must be set together with timeStart and must be after timeStart. as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | Yes | - | - |
+| `timeStart` | The time from when maintenance is disabled. Must be set together with timeEnd and must be before timeEnd. as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | Yes | - | - |
+
+<a id="kind-dbsystem-spec-readendpoint"></a>
+#### Spec.readEndpoint
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemReadEndpoint defines nested fields for DbSystem.ReadEndpoint.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `excludeIps` | A list of IP addresses of read replicas that are excluded from serving read requests. | `list[string]` | No | - | - |
+| `isEnabled` | Specifies if the DB System read endpoint is enabled or not. | `boolean` | No | - | - |
+| `readEndpointHostnameLabel` | The hostname for the read endpoint of the DB System. Used for DNS. The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN) (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com"). Must be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123. | `string` | No | - | - |
+| `readEndpointIpAddress` | The IP address the DB System read endpoint is configured to listen on. A private IP address of your choice to assign to the read endpoint of the DB System. Must be an available IP address within the subnet's CIDR. If you don't specify a value, Oracle automatically assigns a private IP address from the subnet. This should be a "dotted-quad" style IPv4 address. | `string` | No | - | - |
+
+<a id="kind-dbsystem-spec-rest"></a>
+#### Spec.rest
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemRest defines nested fields for DbSystem.Rest.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `configuration` | Select how REST is configured across the DB System instances. | `string` | Yes | - | - |
+| `port` | The port for REST to listen on. Supported port numbers are 443 and from 1024 to 65535. | `integer` | No | - | - |
 
 <a id="kind-dbsystem-spec-secureconnections"></a>
 #### Spec.secureConnections
@@ -186,6 +300,42 @@ DbSystemSource defines nested fields for DbSystem.Source.
 | `sourceType` | - | `string` | No | - | - |
 | `sourceUrl` | The Pre-Authenticated Request (PAR) of a bucket/prefix or PAR of a @.manifest.json object from the Object Storage. Check Using Pre-Authenticated Requests (https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usingpreauthenticatedrequests.htm) for information related to PAR creation. Please create PAR with "Permit object reads" access type and "Enable Object Listing" permission when using a bucket/prefix PAR. Please create PAR with "Permit object reads" access type when using a @.manifest.json object PAR. | `string` | No | - | - |
 
+<a id="kind-dbsystem-spec-telemetryconfiguration"></a>
+#### Spec.telemetryConfiguration
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemTelemetryConfiguration defines nested fields for DbSystem.TelemetryConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`logs`](#kind-dbsystem-spec-telemetryconfiguration-logs) | Telemetry configuration details for logging. | `list[object]` | No | - | - |
+
+<a id="kind-dbsystem-spec-telemetryconfiguration-logs"></a>
+##### Spec.telemetryConfiguration.logs[]
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemTelemetryConfigurationLog defines nested fields for DbSystem.TelemetryConfiguration.Log.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `destination` | Type of destination where MySQL telemetry is exposed to. | `string` | Yes | - | - |
+| [`destinationConfigurations`](#kind-dbsystem-spec-telemetryconfiguration-logs-destinationconfigurations) | List of configuration variables for a given destination type. | `list[object]` | Yes | - | - |
+| `logTypes` | List of MySQL telemetry types that can be exposed on a telemetry destination | `list[string]` | Yes | - | - |
+
+<a id="kind-dbsystem-spec-telemetryconfiguration-logs-destinationconfigurations"></a>
+###### Spec.telemetryConfiguration.logs[].destinationConfigurations[]
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemTelemetryConfigurationLogDestinationConfiguration defines nested fields for DbSystem.TelemetryConfiguration.Log.DestinationConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | Name of the destination configuration variable. | `string` | Yes | - | - |
+| `value` | Value of the destination configuration variable. | `string` | Yes | - | - |
+
 <a id="kind-dbsystem-status"></a>
 ### Status
 
@@ -193,21 +343,28 @@ DbSystemStatus defines the observed state of DbSystem.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `accessMode` | The access mode indicating if the database access is unrestricted (to all MySQL user accounts), or restricted (to only certain users with specific privileges): - UNRESTRICTED: the access to the database is not restricted; - RESTRICTED: access allowed only to users with specific privileges; RESTRICTED will correspond to setting the MySQL system variable offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON. | `string` | No | - | - |
 | [`adminPassword`](#kind-dbsystem-status-adminpassword) | The last applied secret reference for the administrative password. | `object` | No | - | - |
 | [`adminUsername`](#kind-dbsystem-status-adminusername) | The last applied secret reference for the administrative username. | `object` | No | - | - |
 | `availabilityDomain` | The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other availability domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the availability domain in which the DB System is placed. | `string` | No | - | - |
-| [`backupPolicy`](#kind-dbsystem-status-backuppolicy) | DbSystemBackupPolicy defines nested fields for DbSystem.BackupPolicy. | `object` | No | - | - |
+| [`backupPolicy`](#kind-dbsystem-status-backuppolicy) | DbSystemBackupPolicyObservedState defines nested fields for DbSystem.BackupPolicy. | `object` | No | - | - |
 | [`channels`](#kind-dbsystem-status-channels) | A list with a summary of all the Channels attached to the DB System. | `list[object]` | No | - | - |
 | `compartmentId` | The OCID of the compartment the DB System belongs in. | `string` | No | - | - |
 | `configurationId` | The OCID of the Configuration to be used for Instances in this DB System. | `string` | No | - | - |
+| [`controlledUpdate`](#kind-dbsystem-status-controlledupdate) | DbSystemControlledUpdate defines nested fields for DbSystem.ControlledUpdate. | `object` | No | - | - |
 | `crashRecovery` | Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled, and whether to enable or disable syncing of the Binary Logs. | `string` | No | - | - |
 | [`currentPlacement`](#kind-dbsystem-status-currentplacement) | DbSystemCurrentPlacement defines nested fields for DbSystem.CurrentPlacement. | `object` | No | - | - |
-| `dataStorageSizeInGBs` | Initial size of the data volume in GiBs that will be created and attached. | `integer` | No | - | - |
+| [`customerContacts`](#kind-dbsystem-status-customercontacts) | The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource. Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators. Up to 10 email addresses can be added to the customer contacts for a DB System. | `list[object]` | No | - | - |
+| [`dataStorage`](#kind-dbsystem-status-datastorage) | DbSystemDataStorageObservedState defines nested fields for DbSystem.DataStorage. | `object` | No | - | - |
+| `dataStorageSizeInGBs` | DEPRECATED: User specified size of the data volume. May be less than current allocatedStorageSizeInGBs. Replaced by dataStorage.dataStorageSizeInGBs. | `integer` | No | - | - |
+| [`databaseConsole`](#kind-dbsystem-status-databaseconsole) | DbSystemDatabaseConsole defines nested fields for DbSystem.DatabaseConsole. | `object` | No | - | - |
 | `databaseManagement` | Whether to enable monitoring via the Database Management service. | `string` | No | - | - |
+| `databaseMode` | The database mode indicating the types of statements that are allowed to run in the the DB system. This mode applies only to statements run by user connections. Replicated write statements continue to be allowed regardless of the DatabaseMode. - READ_WRITE: allow running read and write statements on the DB system; - READ_ONLY: only allow running read statements on the DB system. | `string` | No | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | [`deletionPolicy`](#kind-dbsystem-status-deletionpolicy) | DbSystemDeletionPolicy defines nested fields for DbSystem.DeletionPolicy. | `object` | No | - | - |
 | `description` | User-provided data about the DB System. | `string` | No | - | - |
 | `displayName` | The user-friendly name for the DB System. It does not have to be unique. | `string` | No | - | - |
+| [`encryptData`](#kind-dbsystem-status-encryptdata) | DbSystemEncryptData defines nested fields for DbSystem.EncryptData. | `object` | No | - | - |
 | [`endpoints`](#kind-dbsystem-status-endpoints) | The network endpoints available for this DB System. | `list[object]` | No | - | - |
 | `faultDomain` | The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other fault domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the fault domain in which the DB System is placed. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
@@ -219,16 +376,22 @@ DbSystemStatus defines the observed state of DbSystem.
 | `isHighlyAvailable` | Specifies if the DB System is highly available. | `boolean` | No | - | - |
 | `lifecycleDetails` | Additional information about the current lifecycleState. | `string` | No | - | - |
 | `lifecycleState` | The current state of the DB System. | `string` | No | - | - |
-| [`maintenance`](#kind-dbsystem-status-maintenance) | DbSystemMaintenance defines nested fields for DbSystem.Maintenance. | `object` | No | - | - |
+| [`maintenance`](#kind-dbsystem-status-maintenance) | DbSystemMaintenanceObservedState defines nested fields for DbSystem.Maintenance. | `object` | No | - | - |
 | `mysqlVersion` | Name of the MySQL Version in use for the DB System. | `string` | No | - | - |
+| `nsgIds` | Network Security Group OCIDs used for the VNIC attachment. | `list[string]` | No | - | - |
 | [`pointInTimeRecoveryDetails`](#kind-dbsystem-status-pointintimerecoverydetails) | DbSystemPointInTimeRecoveryDetails defines nested fields for DbSystem.PointInTimeRecoveryDetails. | `object` | No | - | - |
 | `port` | The port for primary endpoint of the DB System to listen on. | `integer` | No | - | - |
 | `portX` | The network port on which X Plugin listens for TCP/IP connections. This is the X Plugin equivalent of port. | `integer` | No | - | - |
+| [`readEndpoint`](#kind-dbsystem-status-readendpoint) | DbSystemReadEndpoint defines nested fields for DbSystem.ReadEndpoint. | `object` | No | - | - |
+| [`rest`](#kind-dbsystem-status-rest) | DbSystemRest defines nested fields for DbSystem.Rest. | `object` | No | - | - |
 | [`secureConnections`](#kind-dbsystem-status-secureconnections) | DbSystemSecureConnections defines nested fields for DbSystem.SecureConnections. | `object` | No | - | - |
+| `securityAttributes` | Security Attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}` | `map[string, map[string, string]]` | No | - | - |
 | `shapeName` | The shape of the primary instances of the DB System. The shape determines resources allocated to a DB System - CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes. To get a list of shapes, use (the ListShapes operation. | `string` | No | - | - |
 | [`source`](#kind-dbsystem-status-source) | DbSystemSourceObservedState defines nested fields for DbSystem.Source. | `object` | No | - | - |
 | [`status`](#kind-dbsystem-status-status) | - | `object` | Yes | - | - |
 | `subnetId` | The OCID of the subnet the DB System is associated with. | `string` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| [`telemetryConfiguration`](#kind-dbsystem-status-telemetryconfiguration) | DbSystemTelemetryConfiguration defines nested fields for DbSystem.TelemetryConfiguration. | `object` | No | - | - |
 | `timeCreated` | The date and time the DB System was created. | `string` | No | - | - |
 | `timeUpdated` | The time the DB System was last updated. | `string` | No | - | - |
 
@@ -277,16 +440,30 @@ The last applied secret reference for the administrative username.
 
 [Back to DbSystem status](#kind-dbsystem-status)
 
-DbSystemBackupPolicy defines nested fields for DbSystem.BackupPolicy.
+DbSystemBackupPolicyObservedState defines nested fields for DbSystem.BackupPolicy.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`copyPolicies`](#kind-dbsystem-status-backuppolicy-copypolicies) | List of policies of a DB system to schedule cross-region DB system backup copy. The policy includes the name of the destination region to which the DB system backup will be copied, and an optional parameter which specifies the retention period of the copied DB system backup in days. **Note:** Currently, only one policy can be specified in the list. | `list[object]` | No | - | - |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `freeformTags` | Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only. Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `isEnabled` | Specifies if automatic backups are enabled. | `boolean` | No | - | - |
+| `isEnabled` | If automated backups are enabled or disabled. | `boolean` | No | - | - |
 | [`pitrPolicy`](#kind-dbsystem-status-backuppolicy-pitrpolicy) | DbSystemBackupPolicyPitrPolicy defines nested fields for DbSystem.BackupPolicy.PitrPolicy. | `object` | No | - | - |
-| `retentionInDays` | Number of days to retain an automatic backup. | `integer` | No | - | - |
-| `windowStartTime` | The start of a 30-minute window of time in which daily, automated backups occur. This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. At some point in the window, the system may incur a brief service disruption as the backup is performed. | `string` | No | - | - |
+| `retentionInDays` | The number of days automated backups are retained. | `integer` | No | - | - |
+| `softDelete` | Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED state for 7 days before permanently deleting it. | `string` | No | - | - |
+| `windowStartTime` | The start of a 30-minute window of time in which daily, automated backups occur. This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. At some point in the window, the system may incur a brief service disruption as the backup is performed. If not defined, a window is selected from the following Region-based time-spans: - eu-frankfurt-1: 20:00 - 04:00 UTC - us-ashburn-1: 03:00 - 11:00 UTC - uk-london-1: 06:00 - 14:00 UTC - ap-tokyo-1: 13:00 - 21:00 - us-phoenix-1: 06:00 - 14:00 | `string` | No | - | - |
+
+<a id="kind-dbsystem-status-backuppolicy-copypolicies"></a>
+##### Status.backupPolicy.copyPolicies[]
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemBackupPolicyCopyPolicy defines nested fields for DbSystem.BackupPolicy.CopyPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `backupCopyRetentionInDays` | Number of days to retain the copied DB system backup. | `integer` | No | - | - |
+| `copyToRegion` | The destination region name to which the DB system backup will be copied. | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-status-backuppolicy-pitrpolicy"></a>
 ##### Status.backupPolicy.pitrPolicy
@@ -317,6 +494,7 @@ DbSystemChannel defines nested fields for DbSystem.Channel.
 | `lifecycleDetails` | A message describing the state of the Channel. | `string` | No | - | - |
 | `lifecycleState` | The state of the Channel. | `string` | No | - | - |
 | [`source`](#kind-dbsystem-status-channels-source) | DbSystemChannelSource defines nested fields for DbSystem.Channel.Source. | `object` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | [`target`](#kind-dbsystem-status-channels-target) | DbSystemChannelTarget defines nested fields for DbSystem.Channel.Target. | `object` | No | - | - |
 | `timeCreated` | The date and time the Channel was created, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | No | - | - |
 | `timeUpdated` | The time the Channel was last updated, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | No | - | - |
@@ -397,6 +575,18 @@ DbSystemChannelTargetFilter defines nested fields for DbSystem.Channel.Target.Fi
 | `type` | The type of the filter rule. For details on each type, see Replication Filtering Rules (https://dev.mysql.com/doc/refman/8.0/en/replication-rules.html) | `string` | No | - | - |
 | `value` | The body of the filter rule. This can represent a database, a table, or a database pair (represented as "db1->db2"). For more information, see Replication Filtering Rules (https://dev.mysql.com/doc/refman/8.0/en/replication-rules.html). | `string` | No | - | - |
 
+<a id="kind-dbsystem-status-controlledupdate"></a>
+#### Status.controlledUpdate
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemControlledUpdate defines nested fields for DbSystem.ControlledUpdate.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `targetDbInstances` | Defines the MySQL instances to be operated during a controlled update. - ALL_BUT_PRIMARY: Update all MySQL instances in a highly available DB System except the primary group member, without triggering a controlled failover. - PRIMARY_ONLY: Update the primary group member in a highly available DB System after a controlled failover (downtime is expected). This operation requires that the other MySQL instances have been previously updated using the ALL_BUT_PRIMARY option. | `string` | No | - | - |
+| `targetMysqlVersion` | The MySQL version to be applied to the selected instances. | `string` | No | - | - |
+
 <a id="kind-dbsystem-status-currentplacement"></a>
 #### Status.currentPlacement
 
@@ -408,6 +598,44 @@ DbSystemCurrentPlacement defines nested fields for DbSystem.CurrentPlacement.
 | --- | --- | --- | --- | --- | --- |
 | `availabilityDomain` | The availability domain in which the DB System is placed. | `string` | No | - | - |
 | `faultDomain` | The fault domain in which the DB System is placed. | `string` | No | - | - |
+
+<a id="kind-dbsystem-status-customercontacts"></a>
+#### Status.customerContacts[]
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemCustomerContact defines nested fields for DbSystem.CustomerContact.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `email` | The email address used by Oracle to send notifications regarding the DB System. | `string` | Yes | - | - |
+
+<a id="kind-dbsystem-status-datastorage"></a>
+#### Status.dataStorage
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemDataStorageObservedState defines nested fields for DbSystem.DataStorage.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allocatedStorageSizeInGBs` | The actual allocated storage size for the DB System. This may be higher than dataStorageSizeInGBs if an automatic storage expansion has occurred. | `integer` | No | - | - |
+| `dataStorageSizeInGBs` | User specified size of the data volume. May be less than current allocatedStorageSizeInGBs. | `integer` | No | - | - |
+| `dataStorageSizeLimitInGBs` | The absolute limit the DB System's storage size may ever expand to, either manually or automatically. This limit is based based on the initial dataStorageSizeInGBs when the DB System was first created. Both dataStorageSizeInGBs and maxDataStorageSizeInGBs can not exceed this value. DB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB. DB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB. DB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB. DB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB. | `integer` | No | - | - |
+| `isAutoExpandStorageEnabled` | Enable/disable automatic storage expansion. When set to true, the DB System will automatically add storage incrementally up to the value specified in maxStorageSizeInGBs. | `boolean` | No | - | - |
+| `maxStorageSizeInGBs` | Maximum storage size this DB System can expand to. When isAutoExpandStorageEnabled is set to true, the DB System will add storage incrementally up to this value. DB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB. DB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB. DB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB. DB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB. It is not possible to decrease data storage size. You cannot set the maximum data storage size to less than either current DB System dataStorageSizeInGBs or allocatedStorageSizeInGBs. | `integer` | No | - | - |
+
+<a id="kind-dbsystem-status-databaseconsole"></a>
+#### Status.databaseConsole
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemDatabaseConsole defines nested fields for DbSystem.DatabaseConsole.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `port` | The port on which the database console can be accessed. Supported port numbers are 443 and from 1024 to 65535. | `integer` | No | - | - |
+| `status` | Enable/disable the database console on the DB System. | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-status-deletionpolicy"></a>
 #### Status.deletionPolicy
@@ -421,6 +649,18 @@ DbSystemDeletionPolicy defines nested fields for DbSystem.DeletionPolicy.
 | `automaticBackupRetention` | Specifies if any automatic backups created for a DB System should be retained or deleted when the DB System is deleted. | `string` | No | - | - |
 | `finalBackup` | Specifies whether or not a backup is taken when the DB System is deleted. REQUIRE_FINAL_BACKUP: a backup is taken if the DB System is deleted. SKIP_FINAL_BACKUP: a backup is not taken if the DB System is deleted. | `string` | No | - | - |
 | `isDeleteProtected` | Specifies whether the DB System can be deleted. Set to true to prevent deletion, false (default) to allow. | `boolean` | No | - | - |
+
+<a id="kind-dbsystem-status-encryptdata"></a>
+#### Status.encryptData
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemEncryptData defines nested fields for DbSystem.EncryptData.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `keyGenerationType` | Select whether to use Oracle-managed key (SYSTEM) or your own key (BYOK). | `string` | Yes | - | - |
+| `keyId` | The OCID of the key to use. | `string` | No | - | - |
 
 <a id="kind-dbsystem-status-endpoints"></a>
 #### Status.endpoints[]
@@ -462,11 +702,29 @@ DbSystemHeatWaveCluster defines nested fields for DbSystem.HeatWaveCluster.
 
 [Back to DbSystem status](#kind-dbsystem-status)
 
-DbSystemMaintenance defines nested fields for DbSystem.Maintenance.
+DbSystemMaintenanceObservedState defines nested fields for DbSystem.Maintenance.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `windowStartTime` | The start of the 2 hour maintenance window. This string is of the format: "{day-of-week} {time-of-day}". "{day-of-week}" is a case-insensitive string like "mon", "tue", &c. "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. If you set the read replica maintenance window to "" or if not specified, the read replica is set same as the DB system maintenance window. | `string` | Yes | - | - |
+| [`maintenanceDisabledWindows`](#kind-dbsystem-status-maintenance-maintenancedisabledwindows) | Time window during which downtime-inducing maintenance shall not be performed. Downtime-free maintenance may be performed to apply required security patches. At most one configured window is supported. | `list[object]` | No | - | - |
+| `maintenanceScheduleType` | The maintenance schedule type of the DB system. EARLY: Maintenance schedule follows a cycle where upgrades are performed when versions become deprecated. REGULAR: Maintenance schedule follows the normal cycle where upgrades are performed when versions become unavailable. | `string` | No | - | - |
+| `targetVersion` | The version that is expected to be targeted during the next scheduled maintenance run. | `string` | No | - | - |
+| `timeScheduled` | The time the scheduled maintenance is expected to start, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | No | - | - |
+| `versionPreference` | The preferred version to target when performing an automatic MySQL upgrade. OLDEST: Choose the oldest available MySQL version based on the current version of the DB System. SECOND_NEWEST: Choose the MySQL version before the newest for auto-upgrade. NEWEST: Choose the latest and greatest MySQL version available for auto-upgrade. | `string` | No | - | - |
+| `versionTrackPreference` | The preferred version track to target when performing an automatic MySQL upgrade. LONG_TERM_SUPPORT: No MySQL database behavior changes. INNOVATION: Provides access to the latest features and all bug fixes. FOLLOW: Follows the track of the current MySQL version. | `string` | No | - | - |
+| `windowStartTime` | The start time of the maintenance window. This string is of the format: "{day-of-week} {time-of-day}". "{day-of-week}" is a case-insensitive string like "mon", "tue", &c. "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. If you set the read replica maintenance window to "" or if not specified, the read replica is set same as the DB system maintenance window. | `string` | No | - | - |
+
+<a id="kind-dbsystem-status-maintenance-maintenancedisabledwindows"></a>
+##### Status.maintenance.maintenanceDisabledWindows[]
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemMaintenanceMaintenanceDisabledWindow defines nested fields for DbSystem.Maintenance.MaintenanceDisabledWindow.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `timeEnd` | The time until when maintenance is disabled. Must be set together with timeStart and must be after timeStart. as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | Yes | - | - |
+| `timeStart` | The time from when maintenance is disabled. Must be set together with timeEnd and must be before timeEnd. as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-status-pointintimerecoverydetails"></a>
 #### Status.pointInTimeRecoveryDetails
@@ -479,6 +737,32 @@ DbSystemPointInTimeRecoveryDetails defines nested fields for DbSystem.PointInTim
 | --- | --- | --- | --- | --- | --- |
 | `timeEarliestRecoveryPoint` | Earliest recovery time point for the DB System, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | No | - | - |
 | `timeLatestRecoveryPoint` | Latest recovery time point for the DB System, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | No | - | - |
+
+<a id="kind-dbsystem-status-readendpoint"></a>
+#### Status.readEndpoint
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemReadEndpoint defines nested fields for DbSystem.ReadEndpoint.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `excludeIps` | A list of IP addresses of read replicas that are excluded from serving read requests. | `list[string]` | No | - | - |
+| `isEnabled` | Specifies if the DB System read endpoint is enabled or not. | `boolean` | No | - | - |
+| `readEndpointHostnameLabel` | The hostname for the read endpoint of the DB System. Used for DNS. The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN) (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com"). Must be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123. | `string` | No | - | - |
+| `readEndpointIpAddress` | The IP address the DB System read endpoint is configured to listen on. A private IP address of your choice to assign to the read endpoint of the DB System. Must be an available IP address within the subnet's CIDR. If you don't specify a value, Oracle automatically assigns a private IP address from the subnet. This should be a "dotted-quad" style IPv4 address. | `string` | No | - | - |
+
+<a id="kind-dbsystem-status-rest"></a>
+#### Status.rest
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemRest defines nested fields for DbSystem.Rest.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `configuration` | Select how REST is configured across the DB System instances. | `string` | Yes | - | - |
+| `port` | The port for REST to listen on. Supported port numbers are 443 and from 1024 to 65535. | `integer` | No | - | - |
 
 <a id="kind-dbsystem-status-secureconnections"></a>
 #### Status.secureConnections
@@ -565,4 +849,40 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `reason` | - | `string` | No | - | - |
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
+
+<a id="kind-dbsystem-status-telemetryconfiguration"></a>
+#### Status.telemetryConfiguration
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemTelemetryConfiguration defines nested fields for DbSystem.TelemetryConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`logs`](#kind-dbsystem-status-telemetryconfiguration-logs) | Telemetry configuration details for logging. | `list[object]` | No | - | - |
+
+<a id="kind-dbsystem-status-telemetryconfiguration-logs"></a>
+##### Status.telemetryConfiguration.logs[]
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemTelemetryConfigurationLog defines nested fields for DbSystem.TelemetryConfiguration.Log.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `destination` | Type of destination where MySQL telemetry is exposed to. | `string` | Yes | - | - |
+| [`destinationConfigurations`](#kind-dbsystem-status-telemetryconfiguration-logs-destinationconfigurations) | List of configuration variables for a given destination type. | `list[object]` | Yes | - | - |
+| `logTypes` | List of MySQL telemetry types that can be exposed on a telemetry destination | `list[string]` | Yes | - | - |
+
+<a id="kind-dbsystem-status-telemetryconfiguration-logs-destinationconfigurations"></a>
+###### Status.telemetryConfiguration.logs[].destinationConfigurations[]
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemTelemetryConfigurationLogDestinationConfiguration defines nested fields for DbSystem.TelemetryConfiguration.Log.DestinationConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | Name of the destination configuration variable. | `string` | Yes | - | - |
+| `value` | Value of the destination configuration variable. | `string` | Yes | - | - |
 

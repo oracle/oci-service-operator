@@ -833,13 +833,13 @@ OdaPrivateEndpointSpec defines the desired state of OdaPrivateEndpoint.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | Yes | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | Yes | - | - |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description of the ODA private endpoint. | `string` | No | - | - |
 | `displayName` | User-defined name for the ODA private endpoint. Avoid entering confidential information. You can change this value. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `nsgIds` | List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | Yes | - | - |
+| `nsgIds` | List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | Yes | - | - |
 
 <a id="kind-odaprivateendpoint-status"></a>
 ### Status
@@ -848,16 +848,16 @@ OdaPrivateEndpointStatus defines the observed state of OdaPrivateEndpoint.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | No | - | - |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description of the ODA private endpoint. | `string` | No | - | - |
 | `displayName` | User-defined name for the ODA private endpoint. Avoid entering confidential information. You can change this value. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that was assigned when the ODA private endpoint was created. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that was assigned when the ODA private endpoint was created. | `string` | No | - | - |
 | `lifecycleState` | The current state of the ODA private endpoint. | `string` | No | - | - |
-| `nsgIds` | List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
+| `nsgIds` | List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
 | [`status`](#kind-odaprivateendpoint-status-status) | - | `object` | Yes | - | - |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | No | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | No | - | - |
 | `timeCreated` | When the resource was created. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
 | `timeUpdated` | When the resource was last updated. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
 
@@ -938,8 +938,8 @@ OdaPrivateEndpointAttachmentSpec defines the desired state of OdaPrivateEndpoint
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `odaInstanceId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | Yes | - | - |
-| `odaPrivateEndpointId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | Yes | - | - |
+| `odaInstanceId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | Yes | - | - |
+| `odaPrivateEndpointId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | Yes | - | - |
 
 <a id="kind-odaprivateendpointattachment-status"></a>
 ### Status
@@ -948,11 +948,11 @@ OdaPrivateEndpointAttachmentStatus defines the observed state of OdaPrivateEndpo
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint attachment belongs to. | `string` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Attachment. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint attachment belongs to. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Attachment. | `string` | No | - | - |
 | `lifecycleState` | The current state of the ODA Private Endpoint attachment. | `string` | No | - | - |
-| `odaInstanceId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | No | - | - |
-| `odaPrivateEndpointId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | No | - | - |
+| `odaInstanceId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | No | - | - |
+| `odaPrivateEndpointId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | No | - | - |
 | [`status`](#kind-odaprivateendpointattachment-status-status) | - | `object` | Yes | - | - |
 | `timeCreated` | When the resource was created. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
 | `timeUpdated` | When the resource was last updated. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
@@ -1058,7 +1058,7 @@ OdaPrivateEndpointScanProxyStatus defines the observed state of OdaPrivateEndpoi
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Scan Proxy. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Scan Proxy. | `string` | No | - | - |
 | `lifecycleState` | The current state of the ODA Private Endpoint Scan Proxy. | `string` | No | - | - |
 | `protocol` | The protocol used for communication between client, scanProxy and RAC's scan listeners | `string` | No | - | - |
 | [`scanListenerInfos`](#kind-odaprivateendpointscanproxy-status-scanlistenerinfos) | The FQDN/IPs and port information of customer's Real Application Cluster (RAC)'s SCAN listeners. | `list[object]` | No | - | - |

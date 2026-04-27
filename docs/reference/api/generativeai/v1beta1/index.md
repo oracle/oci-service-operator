@@ -41,13 +41,13 @@ DedicatedAiClusterSpec defines the desired state of DedicatedAiCluster.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The compartment OCID to create the dedicated AI cluster in. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the dedicated AI cluster. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `type` | The dedicated AI cluster type indicating whether this is a fine-tuning/training processor or hosting/inference processor. Allowed values are: - HOSTING - FINE_TUNING | `string` | Yes | - | - |
 | `unitCount` | The number of dedicated units in this AI cluster. | `integer` | Yes | - | - |
-| `unitShape` | The shape of dedicated unit in this AI cluster. The underlying hardware configuration is hidden from customers. Allowed values are: - LARGE_COHERE - SMALL_COHERE - EMBED_COHERE - LLAMA2_70 | `string` | Yes | - | - |
+| `unitShape` | The shape of dedicated unit in this AI cluster. The underlying hardware configuration is hidden from customers. Allowed values are: - LARGE_COHERE - LARGE_COHERE_V2 - SMALL_COHERE - SMALL_COHERE_V2 - SMALL_COHERE_4 - EMBED_COHERE - LLAMA2_70 - LARGE_GENERIC - LARGE_COHERE_V2_2 - LARGE_GENERIC_4 - SMALL_GENERIC_V2 - LARGE_GENERIC_2 - LARGE_GENERIC_V3 - LARGE_COHERE_V3 - RERANK_COHERE - SMALL_GENERIC_V1 - MEDIUM_GENERIC_V1 - LARGE_GENERIC_V1 - A10_X1 - A10_X2 - A10_X4 - A100_40G_X1 - A100_40G_X2 - A100_40G_X4 - A100_40G_X8 - A100_80G_X1 - A100_80G_X2 - A100_80G_X4 - A100_80G_X8 - H100_X1 - H100_X2 - H100_X4 - H100_X8 - H200_X1 - H200_X2 - H200_X4 - H200_X8 The following shapes can only be used to deploy imported models: - A10_X1, A10_X2, A10_X4 - A100_40G_X1, A100_40G_X2, A100_40G_X4, A100_40G_X8 - A100_80G_X1, A100_80G_X2, A100_80G_X4, A100_80G_X8 - H100_X1, H100_X2, H100_X4, H100_X8 - H200_X1, H200_X2, H200_X4, H200_X8 - OAI_A10_X2 - OAI_H100_X1 - OAI_H100_X2 - OAI_H200_X1 - OAI_A100_80G_X1 - OAI_A100_80G_X2 - OAI_A100_40G_X1 - OAI_A100_40G_X4 | `string` | Yes | - | - |
 
 <a id="kind-dedicatedaicluster-status"></a>
 ### Status
@@ -58,11 +58,11 @@ DedicatedAiClusterStatus defines the observed state of DedicatedAiCluster.
 | --- | --- | --- | --- | --- | --- |
 | [`capacity`](#kind-dedicatedaicluster-status-capacity) | DedicatedAiClusterCapacity defines nested fields for DedicatedAiCluster.Capacity. | `object` | No | - | - |
 | `compartmentId` | The compartment OCID to create the dedicated AI cluster in. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the dedicated AI cluster. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster. | `string` | No | - | - |
 | `lifecycleDetails` | A message describing the current state with detail that can provide actionable information. | `string` | No | - | - |
 | `lifecycleState` | The current state of the dedicated AI cluster. | `string` | No | - | - |
 | [`status`](#kind-dedicatedaicluster-status-status) | - | `object` | Yes | - | - |
@@ -167,11 +167,14 @@ EndpointSpec defines the desired state of Endpoint.
 | `compartmentId` | The compartment OCID to create the endpoint in. | `string` | Yes | - | - |
 | [`contentModerationConfig`](#kind-endpoint-spec-contentmoderationconfig) | EndpointContentModerationConfig defines nested fields for Endpoint.ContentModerationConfig. | `object` | No | - | - |
 | `dedicatedAiClusterId` | The OCID of the dedicated AI cluster on which a model will be deployed to. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the endpoint. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `modelId` | The ID of the model that's used to create this endpoint. | `string` | Yes | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `generativeAiPrivateEndpointId` | The OCID of the Generative AI private endpoint to which this endpoint is attached to. | `string` | No | - | - |
+| `modelId` | The OCID of the model that's used to create this endpoint. | `string` | Yes | - | - |
+| [`piiDetectionConfig`](#kind-endpoint-spec-piidetectionconfig) | EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig. | `object` | No | - | - |
+| [`promptInjectionConfig`](#kind-endpoint-spec-promptinjectionconfig) | EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig. | `object` | No | - | - |
 
 <a id="kind-endpoint-spec-contentmoderationconfig"></a>
 #### Spec.contentModerationConfig
@@ -183,6 +186,34 @@ EndpointContentModerationConfig defines nested fields for Endpoint.ContentModera
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `isEnabled` | Whether to enable the content moderation feature. | `boolean` | Yes | - | - |
+| `mode` | Enum for the modes of operation for inference protection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-spec-piidetectionconfig"></a>
+#### Spec.piiDetectionConfig
+
+[Back to Endpoint spec](#kind-endpoint-spec)
+
+EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the PII detection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for PII detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-spec-promptinjectionconfig"></a>
+#### Spec.promptInjectionConfig
+
+[Back to Endpoint spec](#kind-endpoint-spec)
+
+EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the prompt injection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for prompt injection detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
 
 <a id="kind-endpoint-status"></a>
 ### Status
@@ -194,14 +225,17 @@ EndpointStatus defines the observed state of Endpoint.
 | `compartmentId` | The compartment OCID to create the endpoint in. | `string` | No | - | - |
 | [`contentModerationConfig`](#kind-endpoint-status-contentmoderationconfig) | EndpointContentModerationConfig defines nested fields for Endpoint.ContentModerationConfig. | `object` | No | - | - |
 | `dedicatedAiClusterId` | The OCID of the dedicated AI cluster on which the model will be deployed to. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the endpoint. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `generativeAiPrivateEndpointId` | The OCID of the Generative AI private endpoint to which this endpoint is attached to. | `string` | No | - | - |
 | `id` | An OCID that uniquely identifies this endpoint resource. | `string` | No | - | - |
 | `lifecycleDetails` | A message describing the current state of the endpoint in more detail that can provide actionable information. | `string` | No | - | - |
 | `lifecycleState` | The current state of the endpoint. | `string` | No | - | - |
 | `modelId` | The OCID of the model that's used to create this endpoint. | `string` | No | - | - |
+| [`piiDetectionConfig`](#kind-endpoint-status-piidetectionconfig) | EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig. | `object` | No | - | - |
+| [`promptInjectionConfig`](#kind-endpoint-status-promptinjectionconfig) | EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig. | `object` | No | - | - |
 | [`status`](#kind-endpoint-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time that the endpoint was created in the format of an RFC3339 datetime string. | `string` | No | - | - |
@@ -217,6 +251,34 @@ EndpointContentModerationConfig defines nested fields for Endpoint.ContentModera
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `isEnabled` | Whether to enable the content moderation feature. | `boolean` | Yes | - | - |
+| `mode` | Enum for the modes of operation for inference protection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-status-piidetectionconfig"></a>
+#### Status.piiDetectionConfig
+
+[Back to Endpoint status](#kind-endpoint-status)
+
+EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the PII detection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for PII detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-status-promptinjectionconfig"></a>
+#### Status.promptInjectionConfig
+
+[Back to Endpoint status](#kind-endpoint-status)
+
+EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the prompt injection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for prompt injection detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
 
 <a id="kind-endpoint-status-status"></a>
 #### Status.status
@@ -297,11 +359,11 @@ ModelSpec defines the desired state of Model.
 | --- | --- | --- | --- | --- | --- |
 | `baseModelId` | The OCID of the base model that's used for fine-tuning. | `string` | Yes | - | - |
 | `compartmentId` | The compartment OCID for fine-tuned models. For pretrained models, this value is null. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the model. | `string` | No | - | - |
 | `displayName` | A user-friendly name. | `string` | No | - | - |
 | [`fineTuneDetails`](#kind-model-spec-finetunedetails) | ModelFineTuneDetails defines nested fields for Model.FineTuneDetails. | `object` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `vendor` | The provider of the model. | `string` | No | - | - |
 | `version` | The version of the model. | `string` | No | - | - |
 
@@ -332,6 +394,9 @@ ModelFineTuneDetailsTrainingConfig defines nested fields for Model.FineTuneDetai
 | `jsonData` | - | `string` | No | - | - |
 | `learningRate` | The initial learning rate to be used during training | `number` | No | - | - |
 | `logModelMetricsIntervalInSteps` | Determines how frequently to log model metrics. Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics. | `integer` | No | - | - |
+| `loraAlpha` | This parameter represents the scaling factor for the weight matrices in LoRA. | `integer` | No | - | - |
+| `loraDropout` | This parameter indicates the dropout probability for LoRA layers. | `number` | No | - | - |
+| `loraR` | This parameter represents the LoRA rank of the update matrices. | `integer` | No | - | - |
 | `numOfLastLayers` | The number of last layers to be fine-tuned. | `integer` | No | - | - |
 | `totalTrainingEpochs` | The maximum number of training epochs to run for. | `integer` | No | - | - |
 | `trainingBatchSize` | The batch size used during training. | `integer` | No | - | - |
@@ -362,11 +427,11 @@ ModelStatus defines the observed state of Model.
 | `baseModelId` | The OCID of the base model that's used for fine-tuning. For pretrained models, the value is null. | `string` | No | - | - |
 | `capabilities` | Describes what this model can be used for. | `list[string]` | No | - | - |
 | `compartmentId` | The compartment OCID for fine-tuned models. For pretrained models, this value is null. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the model. | `string` | No | - | - |
 | `displayName` | A user-friendly name. | `string` | No | - | - |
 | [`fineTuneDetails`](#kind-model-status-finetunedetails) | ModelFineTuneDetails defines nested fields for Model.FineTuneDetails. | `object` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | An ID that uniquely identifies a pretrained or fine-tuned model. | `string` | No | - | - |
 | `isLongTermSupported` | Whether a model is supported long-term. Only applicable to base models. | `boolean` | No | - | - |
 | `lifecycleDetails` | A message describing the current state of the model in more detail that can provide actionable information. | `string` | No | - | - |
@@ -375,7 +440,9 @@ ModelStatus defines the observed state of Model.
 | [`status`](#kind-model-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time that the model was created in the format of an RFC3339 datetime string. | `string` | No | - | - |
+| `timeDedicatedRetired` | The timestamp indicating when the custom model and its associated foundation model will be fully retired. | `string` | No | - | - |
 | `timeDeprecated` | Corresponds to the time when the custom model and its associated foundation model will be deprecated. | `string` | No | - | - |
+| `timeOnDemandRetired` | The timestamp indicating when the base model will no longer be available for on-demand usage. | `string` | No | - | - |
 | `timeUpdated` | The date and time that the model was updated in the format of an RFC3339 datetime string. | `string` | No | - | - |
 | `type` | The model type indicating whether this is a pretrained/base model or a custom/fine-tuned model. | `string` | No | - | - |
 | `vendor` | The provider of the base model. | `string` | No | - | - |
@@ -408,6 +475,9 @@ ModelFineTuneDetailsTrainingConfig defines nested fields for Model.FineTuneDetai
 | `jsonData` | - | `string` | No | - | - |
 | `learningRate` | The initial learning rate to be used during training | `number` | No | - | - |
 | `logModelMetricsIntervalInSteps` | Determines how frequently to log model metrics. Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics. | `integer` | No | - | - |
+| `loraAlpha` | This parameter represents the scaling factor for the weight matrices in LoRA. | `integer` | No | - | - |
+| `loraDropout` | This parameter indicates the dropout probability for LoRA layers. | `number` | No | - | - |
+| `loraR` | This parameter represents the LoRA rank of the update matrices. | `integer` | No | - | - |
 | `numOfLastLayers` | The number of last layers to be fine-tuned. | `integer` | No | - | - |
 | `totalTrainingEpochs` | The maximum number of training epochs to run for. | `integer` | No | - | - |
 | `trainingBatchSize` | The batch size used during training. | `integer` | No | - | - |

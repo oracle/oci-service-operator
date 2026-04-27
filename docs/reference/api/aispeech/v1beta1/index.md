@@ -39,7 +39,7 @@ TranscriptionJobSpec defines the desired state of TranscriptionJob.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `additionalTranscriptionFormats` | Transcription Format. By default, the JSON format is used. | `list[string]` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job. | `string` | Yes | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job. | `string` | Yes | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace-1": {"bar-key-1": "value-1", "bar-key-2": "value-2"}, "foo-namespace-2": {"bar-key-1": "value-1", "bar-key-2": "value-2"}}`. | `map[string, map[string, string]]` | No | - | - |
 | `description` | A short description of the job. | `string` | No | - | - |
 | `displayName` | A user-friendly display name for the job. | `string` | No | - | - |
@@ -99,7 +99,7 @@ TranscriptionJobModelDetails defines nested fields for TranscriptionJob.ModelDet
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `domain` | Domain for input files. | `string` | No | - | - |
-| `languageCode` | Oracle supported language codes are (Oracle models are locale specific). - en-US: English - United States (default) - es-ES: Spanish - Spain - pt-BR: Portuguese - Brazil - en-GB: English - Great Britain - en-AU: English - Australia - en-IN: English - India - hi-IN: Hindi - India - fr-FR: French - France - de-DE: German - Germany - it-IT: Italian - Italy Whisper supported language codes are (Whisper models are locale agnostic). - af: Afrikaans - ar: Arabic - az: Azerbaijani - be: Belarusian - bg: Bulgarian - bs: Bosnian - ca: Catalan - cs: Czech - cy: Welsh - da: Danish - de: German - el: Greek - en: English (default) - es: Spanish - et: Estonian - fa: Persian - fi: Finnish - fr: French - gl: Galician - he: Hebrew - hi: Hindi - hr: Croatian - hu: Hungarian - hy: Armenian - id: Indonesian - is: Icelandic - it: Italian - ja: Japanese - kk: Kazakh - kn: Kannada - ko: Korean - lt: Lithuanian - lv: Latvian - mi: Maori - mk: Macedonian - mr: Marathi - ms: Malay - ne: Nepali - nl: Dutch - no: Norwegian - pl: Polish - pt: Portuguese - ro: Romanian - ru: Russian - sk: Slovak - sl: Slovenian - sr: Serbian - sv: Swedish - sw: Swahili - ta: Tamil - th: Thai - tl: Tagalog - tr: Turkish - uk: Ukrainian - ur: Urdu - vi: Vietnamese - zh: Chinese | `string` | No | - | - |
+| `languageCode` | Oracle supported language codes are (Oracle models are locale specific). - en-US: English - United States (default) - es-ES: Spanish - Spain - pt-BR: Portuguese - Brazil - en-GB: English - Great Britain - en-AU: English - Australia - en-IN: English - India - hi-IN: Hindi - India - fr-FR: French - France - de-DE: German - Germany - it-IT: Italian - Italy Whisper supported language codes are (Whisper models are locale agnostic). - auto: Auto-detect language - af: Afrikaans - ar: Arabic - az: Azerbaijani - be: Belarusian - bg: Bulgarian - bs: Bosnian - ca: Catalan - cs: Czech - cy: Welsh - da: Danish - de: German - el: Greek - en: English (default) - es: Spanish - et: Estonian - fa: Persian - fi: Finnish - fr: French - gl: Galician - he: Hebrew - hi: Hindi - hr: Croatian - hu: Hungarian - hy: Armenian - id: Indonesian - is: Icelandic - it: Italian - ja: Japanese - kk: Kazakh - kn: Kannada - ko: Korean - lt: Lithuanian - lv: Latvian - mi: Maori - mk: Macedonian - mr: Marathi - ms: Malay - ne: Nepali - nl: Dutch - no: Norwegian - pl: Polish - pt: Portuguese - ro: Romanian - ru: Russian - sk: Slovak - sl: Slovenian - sr: Serbian - sv: Swedish - sw: Swahili - ta: Tamil - th: Thai - tl: Tagalog - tr: Turkish - uk: Ukrainian - ur: Urdu - vi: Vietnamese - zh: Chinese | `string` | No | - | - |
 | `modelType` | Select a model to use for generating transcriptions. Currently supported models are: - ORACLE - WHISPER_MEDIUM - WHISPER_LARGE_V2 (upon service request) | `string` | No | - | - |
 | [`transcriptionSettings`](#kind-transcriptionjob-spec-modeldetails-transcriptionsettings) | TranscriptionJobModelDetailsTranscriptionSettings defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings. | `object` | No | - | - |
 
@@ -112,6 +112,7 @@ TranscriptionJobModelDetailsTranscriptionSettings defines nested fields for Tran
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `additionalSettings` | Simple key-value pair for setting model specific properties. For more details, refer the documentation. | `map[string, string]` | No | - | - |
 | [`diarization`](#kind-transcriptionjob-spec-modeldetails-transcriptionsettings-diarization) | TranscriptionJobModelDetailsTranscriptionSettingsDiarization defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.Diarization. | `object` | No | - | - |
 
 <a id="kind-transcriptionjob-spec-modeldetails-transcriptionsettings-diarization"></a>
@@ -172,13 +173,13 @@ TranscriptionJobStatus defines the observed state of TranscriptionJob.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `additionalTranscriptionFormats` | Transcription format. JSON format will always be provided in addition to any formats in this list. | `list[string]` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job. | `string` | No | - | - |
-| `createdBy` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the job. | `string` | No | - | - |
+| `createdBy` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the user who created the job. | `string` | No | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace-1": {"bar-key-1": "value-1", "bar-key-2": "value-2"}, "foo-namespace-2": {"bar-key-1": "value-1", "bar-key-2": "value-2"}}`. | `map[string, map[string, string]]` | No | - | - |
 | `description` | A short description of the job. | `string` | No | - | - |
 | `displayName` | A user-friendly display name for the job. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}`. | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the job. | `string` | No | - | - |
 | [`inputLocation`](#kind-transcriptionjob-status-inputlocation) | TranscriptionJobInputLocation defines nested fields for TranscriptionJob.InputLocation. | `object` | No | - | - |
 | `lifecycleDetails` | A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state. | `string` | No | - | - |
 | `lifecycleState` | The current state of the Job. | `string` | No | - | - |
@@ -246,7 +247,7 @@ TranscriptionJobModelDetails defines nested fields for TranscriptionJob.ModelDet
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `domain` | Domain for input files. | `string` | No | - | - |
-| `languageCode` | Oracle supported language codes are (Oracle models are locale specific). - en-US: English - United States (default) - es-ES: Spanish - Spain - pt-BR: Portuguese - Brazil - en-GB: English - Great Britain - en-AU: English - Australia - en-IN: English - India - hi-IN: Hindi - India - fr-FR: French - France - de-DE: German - Germany - it-IT: Italian - Italy Whisper supported language codes are (Whisper models are locale agnostic). - af: Afrikaans - ar: Arabic - az: Azerbaijani - be: Belarusian - bg: Bulgarian - bs: Bosnian - ca: Catalan - cs: Czech - cy: Welsh - da: Danish - de: German - el: Greek - en: English (default) - es: Spanish - et: Estonian - fa: Persian - fi: Finnish - fr: French - gl: Galician - he: Hebrew - hi: Hindi - hr: Croatian - hu: Hungarian - hy: Armenian - id: Indonesian - is: Icelandic - it: Italian - ja: Japanese - kk: Kazakh - kn: Kannada - ko: Korean - lt: Lithuanian - lv: Latvian - mi: Maori - mk: Macedonian - mr: Marathi - ms: Malay - ne: Nepali - nl: Dutch - no: Norwegian - pl: Polish - pt: Portuguese - ro: Romanian - ru: Russian - sk: Slovak - sl: Slovenian - sr: Serbian - sv: Swedish - sw: Swahili - ta: Tamil - th: Thai - tl: Tagalog - tr: Turkish - uk: Ukrainian - ur: Urdu - vi: Vietnamese - zh: Chinese | `string` | No | - | - |
+| `languageCode` | Oracle supported language codes are (Oracle models are locale specific). - en-US: English - United States (default) - es-ES: Spanish - Spain - pt-BR: Portuguese - Brazil - en-GB: English - Great Britain - en-AU: English - Australia - en-IN: English - India - hi-IN: Hindi - India - fr-FR: French - France - de-DE: German - Germany - it-IT: Italian - Italy Whisper supported language codes are (Whisper models are locale agnostic). - auto: Auto-detect language - af: Afrikaans - ar: Arabic - az: Azerbaijani - be: Belarusian - bg: Bulgarian - bs: Bosnian - ca: Catalan - cs: Czech - cy: Welsh - da: Danish - de: German - el: Greek - en: English (default) - es: Spanish - et: Estonian - fa: Persian - fi: Finnish - fr: French - gl: Galician - he: Hebrew - hi: Hindi - hr: Croatian - hu: Hungarian - hy: Armenian - id: Indonesian - is: Icelandic - it: Italian - ja: Japanese - kk: Kazakh - kn: Kannada - ko: Korean - lt: Lithuanian - lv: Latvian - mi: Maori - mk: Macedonian - mr: Marathi - ms: Malay - ne: Nepali - nl: Dutch - no: Norwegian - pl: Polish - pt: Portuguese - ro: Romanian - ru: Russian - sk: Slovak - sl: Slovenian - sr: Serbian - sv: Swedish - sw: Swahili - ta: Tamil - th: Thai - tl: Tagalog - tr: Turkish - uk: Ukrainian - ur: Urdu - vi: Vietnamese - zh: Chinese | `string` | No | - | - |
 | `modelType` | Select a model to use for generating transcriptions. Currently supported models are: - ORACLE - WHISPER_MEDIUM - WHISPER_LARGE_V2 (upon service request) | `string` | No | - | - |
 | [`transcriptionSettings`](#kind-transcriptionjob-status-modeldetails-transcriptionsettings) | TranscriptionJobModelDetailsTranscriptionSettings defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings. | `object` | No | - | - |
 
@@ -259,6 +260,7 @@ TranscriptionJobModelDetailsTranscriptionSettings defines nested fields for Tran
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `additionalSettings` | Simple key-value pair for setting model specific properties. For more details, refer the documentation. | `map[string, string]` | No | - | - |
 | [`diarization`](#kind-transcriptionjob-status-modeldetails-transcriptionsettings-diarization) | TranscriptionJobModelDetailsTranscriptionSettingsDiarization defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.Diarization. | `object` | No | - | - |
 
 <a id="kind-transcriptionjob-status-modeldetails-transcriptionsettings-diarization"></a>

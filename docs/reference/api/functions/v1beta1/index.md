@@ -43,13 +43,14 @@ ApplicationSpec defines the desired state of Application.
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment to create the application within. | `string` | Yes | - | - |
 | `config` | Application configuration. These values are passed on to the function as environment variables, functions may override application configuration. Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters. Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}` The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8. | `map[string, string]` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | The display name of the application. The display name must be unique within the compartment containing the application. Avoid entering confidential information. | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`imagePolicyConfig`](#kind-application-spec-imagepolicyconfig) | ApplicationImagePolicyConfig defines nested fields for Application.ImagePolicyConfig. | `object` | No | - | - |
-| `networkSecurityGroupIds` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the Network Security Groups to add the application to. | `list[string]` | No | - | - |
+| `networkSecurityGroupIds` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the Network Security Groups to add the application to. | `list[string]` | No | - | - |
+| `securityAttributes` | Security attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No | - | - |
 | `shape` | Valid values are `GENERIC_X86`, `GENERIC_ARM` and `GENERIC_X86_ARM`. Default is `GENERIC_X86`. Setting this to `GENERIC_X86`, will run the functions in the application on X86 processor architecture. Setting this to `GENERIC_ARM`, will run the functions in the application on ARM processor architecture. When set to `GENERIC_X86_ARM`, functions in the application are run on either X86 or ARM processor architecture. Accepted values are: `GENERIC_X86`, `GENERIC_ARM`, `GENERIC_X86_ARM` | `string` | No | - | - |
-| `subnetIds` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the subnets in which to run functions in the application. | `list[string]` | Yes | - | - |
+| `subnetIds` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the subnets in which to run functions in the application. | `list[string]` | Yes | - | - |
 | `syslogUrl` | A syslog URL to which to send all function logs. Supports tcp, udp, and tcp+tls. The syslog URL must be reachable from all of the subnets configured for the application. Note: If you enable the OCI Logging service for this application, the syslogUrl value is ignored. Function logs are sent to the OCI Logging service, and not to the syslog URL. Example: `tcp://logserver.myserver:1234` | `string` | No | - | - |
 | [`traceConfig`](#kind-application-spec-traceconfig) | ApplicationTraceConfig defines nested fields for Application.TraceConfig. | `object` | No | - | - |
 
@@ -74,7 +75,7 @@ ApplicationImagePolicyConfigKeyDetail defines nested fields for Application.Imag
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `kmsKeyId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the KMS key that will be used to verify the image signature. | `string` | Yes | - | - |
+| `kmsKeyId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the KMS key that will be used to verify the image signature. | `string` | Yes | - | - |
 
 <a id="kind-application-spec-traceconfig"></a>
 #### Spec.traceConfig
@@ -97,16 +98,17 @@ ApplicationStatus defines the observed state of Application.
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that contains the application. | `string` | No | - | - |
 | `config` | Application configuration for functions in this application (passed as environment variables). Can be overridden by function configuration. Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters. Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}` The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8. | `map[string, string]` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | The display name of the application. The display name is unique within the compartment containing the application. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the application. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the application. | `string` | No | - | - |
 | [`imagePolicyConfig`](#kind-application-status-imagepolicyconfig) | ApplicationImagePolicyConfig defines nested fields for Application.ImagePolicyConfig. | `object` | No | - | - |
 | `lifecycleState` | The current state of the application. | `string` | No | - | - |
-| `networkSecurityGroupIds` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the Network Security Groups to add the application to. | `list[string]` | No | - | - |
+| `networkSecurityGroupIds` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the Network Security Groups to add the application to. | `list[string]` | No | - | - |
+| `securityAttributes` | Security attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}` | `map[string, map[string, string]]` | No | - | - |
 | `shape` | Valid values are `GENERIC_X86`, `GENERIC_ARM` and `GENERIC_X86_ARM`. Default is `GENERIC_X86`. Setting this to `GENERIC_X86`, will run the functions in the application on X86 processor architecture. Setting this to `GENERIC_ARM`, will run the functions in the application on ARM processor architecture. When set to `GENERIC_X86_ARM`, functions in the application are run on either X86 or ARM processor architecture. Accepted values are: `GENERIC_X86`, `GENERIC_ARM`, `GENERIC_X86_ARM` | `string` | No | - | - |
 | [`status`](#kind-application-status-status) | - | `object` | Yes | - | - |
-| `subnetIds` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the subnets in which to run functions in the application. | `list[string]` | No | - | - |
+| `subnetIds` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the subnets in which to run functions in the application. | `list[string]` | No | - | - |
 | `syslogUrl` | A syslog URL to which to send all function logs. Supports tcp, udp, and tcp+tls. The syslog URL must be reachable from all of the subnets configured for the application. Note: If you enable the OCI Logging service for this application, the syslogUrl value is ignored. Function logs are sent to the OCI Logging service, and not to the syslog URL. Example: `tcp://logserver.myserver:1234` | `string` | No | - | - |
 | `timeCreated` | The time the application was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format. Example: `2018-09-12T22:47:12.613Z` | `string` | No | - | - |
 | `timeUpdated` | The time the application was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format. Example: `2018-09-12T22:47:12.613Z` | `string` | No | - | - |
@@ -133,7 +135,7 @@ ApplicationImagePolicyConfigKeyDetail defines nested fields for Application.Imag
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `kmsKeyId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the KMS key that will be used to verify the image signature. | `string` | Yes | - | - |
+| `kmsKeyId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of the KMS key that will be used to verify the image signature. | `string` | Yes | - | - |
 
 <a id="kind-application-status-status"></a>
 #### Status.status
@@ -226,16 +228,35 @@ FunctionSpec defines the desired state of Function.
 | --- | --- | --- | --- | --- | --- |
 | `applicationId` | The OCID of the application this function belongs to. | `string` | Yes | - | - |
 | `config` | Function configuration. These values are passed on to the function as environment variables, this overrides application configuration values. Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters. Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}` The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8. | `map[string, string]` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `detachedModeTimeoutInSeconds` | Timeout for detached function invocations. Value in seconds. | `integer` | No | - | - |
 | `displayName` | The display name of the function. The display name must be unique within the application containing the function. Avoid entering confidential information. | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| [`failureDestination`](#kind-function-spec-failuredestination) | FunctionFailureDestination defines nested fields for Function.FailureDestination. | `object` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `image` | The qualified name of the Docker image to use in the function, including the image tag. The image should be in the OCI Registry that is in the same region as the function itself. Example: `phx.ocir.io/ten/functions/function:0.0.1` | `string` | No | - | - |
 | `imageDigest` | The image digest for the version of the image that will be pulled when invoking this function. If no value is specified, the digest currently associated with the image in the OCI Registry will be used. Example: `sha256:ca0eeb6fb05351dfc8759c20733c91def84cb8007aa89a5bf606bc8b315b9fc7` | `string` | No | - | - |
 | `memoryInMBs` | Maximum usable memory for the function (MiB). | `integer (int64)` | Yes | - | - |
 | [`provisionedConcurrencyConfig`](#kind-function-spec-provisionedconcurrencyconfig) | FunctionProvisionedConcurrencyConfig defines nested fields for Function.ProvisionedConcurrencyConfig. | `object` | No | - | - |
 | [`sourceDetails`](#kind-function-spec-sourcedetails) | FunctionSourceDetails defines nested fields for Function.SourceDetails. | `object` | No | - | - |
+| [`successDestination`](#kind-function-spec-successdestination) | FunctionSuccessDestination defines nested fields for Function.SuccessDestination. | `object` | No | - | - |
 | `timeoutInSeconds` | Timeout for executions of the function. Value in seconds. | `integer` | No | - | - |
 | [`traceConfig`](#kind-function-spec-traceconfig) | FunctionTraceConfig defines nested fields for Function.TraceConfig. | `object` | No | - | - |
+
+<a id="kind-function-spec-failuredestination"></a>
+#### Spec.failureDestination
+
+[Back to Function spec](#kind-function-spec)
+
+FunctionFailureDestination defines nested fields for Function.FailureDestination.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `channelId` | The ID of the channel in the queue. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `kind` | - | `string` | No | - | - |
+| `queueId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the queue. | `string` | No | - | - |
+| `streamId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream. | `string` | No | - | - |
+| `topicId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic. | `string` | No | - | - |
 
 <a id="kind-function-spec-provisionedconcurrencyconfig"></a>
 #### Spec.provisionedConcurrencyConfig
@@ -260,8 +281,24 @@ FunctionSourceDetails defines nested fields for Function.SourceDetails.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `pbfListingId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this function is sourced from. | `string` | No | - | - |
+| `pbfListingId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this function is sourced from. | `string` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |
+
+<a id="kind-function-spec-successdestination"></a>
+#### Spec.successDestination
+
+[Back to Function spec](#kind-function-spec)
+
+FunctionSuccessDestination defines nested fields for Function.SuccessDestination.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `channelId` | The ID of the channel in the queue. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `kind` | - | `string` | No | - | - |
+| `queueId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the queue. | `string` | No | - | - |
+| `streamId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream. | `string` | No | - | - |
+| `topicId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic. | `string` | No | - | - |
 
 <a id="kind-function-spec-traceconfig"></a>
 #### Spec.traceConfig
@@ -284,10 +321,12 @@ FunctionStatus defines the observed state of Function.
 | `applicationId` | The OCID of the application the function belongs to. | `string` | No | - | - |
 | `compartmentId` | The OCID of the compartment that contains the function. | `string` | No | - | - |
 | `config` | Function configuration. Overrides application configuration. Keys must be ASCII strings consisting solely of letters, digits, and the '_' (underscore) character, and must not begin with a digit. Values should be limited to printable unicode characters. Example: `{"MY_FUNCTION_CONFIG": "ConfVal"}` The maximum size for all configuration keys and values is limited to 4KB. This is measured as the sum of octets necessary to represent each key and value in UTF-8. | `map[string, string]` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `detachedModeTimeoutInSeconds` | Timeout for detached function invocations. Value in seconds. Example: `{"detachedModeTimeoutInSeconds": 900}` | `integer` | No | - | - |
 | `displayName` | The display name of the function. The display name is unique within the application containing the function. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the function. | `string` | No | - | - |
+| [`failureDestination`](#kind-function-status-failuredestination) | FunctionFailureDestination defines nested fields for Function.FailureDestination. | `object` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the function. | `string` | No | - | - |
 | `image` | The qualified name of the Docker image to use in the function, including the image tag. The image should be in the OCI Registry that is in the same region as the function itself. Example: `phx.ocir.io/ten/functions/function:0.0.1` | `string` | No | - | - |
 | `imageDigest` | The image digest for the version of the image that will be pulled when invoking this function. If no value is specified, the digest currently associated with the image in the OCI Registry will be used. Example: `sha256:ca0eeb6fb05351dfc8759c20733c91def84cb8007aa89a5bf606bc8b315b9fc7` | `string` | No | - | - |
 | `invokeEndpoint` | The base https invoke URL to set on a client in order to invoke a function. This URL will never change over the lifetime of the function and can be cached. | `string` | No | - | - |
@@ -297,10 +336,27 @@ FunctionStatus defines the observed state of Function.
 | `shape` | The processor shape (`GENERIC_X86`/`GENERIC_ARM`) on which to run functions in the application, extracted from the image manifest. | `string` | No | - | - |
 | [`sourceDetails`](#kind-function-status-sourcedetails) | FunctionSourceDetails defines nested fields for Function.SourceDetails. | `object` | No | - | - |
 | [`status`](#kind-function-status-status) | - | `object` | Yes | - | - |
+| [`successDestination`](#kind-function-status-successdestination) | FunctionSuccessDestination defines nested fields for Function.SuccessDestination. | `object` | No | - | - |
 | `timeCreated` | The time the function was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format. Example: `2018-09-12T22:47:12.613Z` | `string` | No | - | - |
 | `timeUpdated` | The time the function was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format. Example: `2018-09-12T22:47:12.613Z` | `string` | No | - | - |
 | `timeoutInSeconds` | Timeout for executions of the function. Value in seconds. | `integer` | No | - | - |
 | [`traceConfig`](#kind-function-status-traceconfig) | FunctionTraceConfig defines nested fields for Function.TraceConfig. | `object` | No | - | - |
+
+<a id="kind-function-status-failuredestination"></a>
+#### Status.failureDestination
+
+[Back to Function status](#kind-function-status)
+
+FunctionFailureDestination defines nested fields for Function.FailureDestination.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `channelId` | The ID of the channel in the queue. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `kind` | - | `string` | No | - | - |
+| `queueId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the queue. | `string` | No | - | - |
+| `streamId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream. | `string` | No | - | - |
+| `topicId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic. | `string` | No | - | - |
 
 <a id="kind-function-status-provisionedconcurrencyconfig"></a>
 #### Status.provisionedConcurrencyConfig
@@ -325,7 +381,7 @@ FunctionSourceDetails defines nested fields for Function.SourceDetails.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `pbfListingId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this function is sourced from. | `string` | No | - | - |
+| `pbfListingId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the PbfListing this function is sourced from. | `string` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |
 
 <a id="kind-function-status-status"></a>
@@ -386,6 +442,22 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `reason` | - | `string` | No | - | - |
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
+
+<a id="kind-function-status-successdestination"></a>
+#### Status.successDestination
+
+[Back to Function status](#kind-function-status)
+
+FunctionSuccessDestination defines nested fields for Function.SuccessDestination.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `channelId` | The ID of the channel in the queue. | `string` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `kind` | - | `string` | No | - | - |
+| `queueId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the queue. | `string` | No | - | - |
+| `streamId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the stream. | `string` | No | - | - |
+| `topicId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the topic. | `string` | No | - | - |
 
 <a id="kind-function-status-traceconfig"></a>
 #### Status.traceConfig

@@ -33,12 +33,12 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | [`applicationLogConfig`](../../reference/api/dataflow/v1beta1/index.md#kind-application-spec-applicationlogconfig) | ApplicationLogConfig defines nested fields for Application.ApplicationLogConfig. | `object` | No |
-| `archiveUri` | A comma separated list of one or more archive files as Oracle Cloud Infrastructure URIs. For example, ``oci://path/to/a.zip,oci://path/to/b.zip``. An Oracle Cloud Infrastructure URI of an archive.zip file containing custom dependencies that may be used to support the execution of a Python, Java, or Scala application. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `archiveUri` | A comma separated list of one or more archive files as Oracle Cloud Infrastructure URIs. For example, ``oci://path/to/a.zip,oci://path/to/b.zip``. An Oracle Cloud Infrastructure URI of an archive.zip file containing custom dependencies that may be used to support the execution of a Python, Java, or Scala application. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
 | `arguments` | The arguments passed to the running application as command line arguments. An argument is either a plain text or a placeholder. Placeholders are replaced using values from the parameters map. Each placeholder specified must be represented in the parameters map else the request (POST or PUT) will fail with a HTTP 400 status code. Placeholders are specified as `Service Api Spec`, where `name` is the name of the parameter. Example: `[ "--input", "${input_file}", "--name", "John Doe" ]` If "input_file" has a value of "mydata.xml", then the value above will be translated to `--input mydata.xml --name "John Doe"` | `list[string]` | No |
 | `className` | The class for the application. | `string` | No |
 | `compartmentId` | The OCID of a compartment. | `string` | Yes |
 | `configuration` | The Spark configuration passed to the running process. See https://spark.apache.org/docs/latest/configuration.html#available-properties. Example: { "spark.app.name" : "My App Name", "spark.shuffle.io.maxRetries" : "4" } Note: Not all Spark properties are permitted to be set. Attempting to set a property that is not allowed to be overwritten will cause a 400 status to be returned. | `map[string, string]` | No |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `description` | A user-friendly description. Avoid entering confidential information. | `string` | No |
 | `displayName` | A user-friendly name. It does not have to be unique. Avoid entering confidential information. | `string` | Yes |
 | `driverShape` | The VM shape for the driver. Sets the driver cores and memory. | `string` | Yes |
@@ -46,11 +46,11 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | `execute` | The input used for spark-submit command. For more details see https://spark.apache.org/docs/latest/submitting-applications.html#launching-applications-with-spark-submit. Supported options include ``--class``, ``--file``, ``--jars``, ``--conf``, ``--py-files``, and main application file with arguments. Example: ``--jars oci://path/to/a.jar,oci://path/to/b.jar --files oci://path/to/a.json,oci://path/to/b.csv --py-files oci://path/to/a.py,oci://path/to/b.py --conf spark.sql.crossJoin.enabled=true --class org.apache.spark.examples.SparkPi oci://path/to/main.jar 10`` Note: If execute is specified together with applicationId, className, configuration, fileUri, language, arguments, parameters during application create/update, or run create/submit, Data Flow service will use derived information from execute input only. | `string` | No |
 | `executorShape` | The VM shape for the executors. Sets the executor cores and memory. | `string` | Yes |
 | [`executorShapeConfig`](../../reference/api/dataflow/v1beta1/index.md#kind-application-spec-executorshapeconfig) | ApplicationExecutorShapeConfig defines nested fields for Application.ExecutorShapeConfig. | `object` | No |
-| `fileUri` | An Oracle Cloud Infrastructure URI of the file containing the application to execute. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `fileUri` | An Oracle Cloud Infrastructure URI of the file containing the application to execute. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
 | `idleTimeoutInMinutes` | The timeout value in minutes used to manage Runs. A Run would be stopped after inactivity for this amount of time period. Note: This parameter is currently only applicable for Runs of type `SESSION`. Default value is 2880 minutes (2 days) | `integer (int64)` | No |
 | `language` | The Spark language. | `string` | Yes |
-| `logsBucketUri` | An Oracle Cloud Infrastructure URI of the bucket where the Spark job logs are to be uploaded. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `logsBucketUri` | An Oracle Cloud Infrastructure URI of the bucket where the Spark job logs are to be uploaded. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
 | `maxDurationInMinutes` | The maximum duration in minutes for which an Application should run. Data Flow Run would be terminated once it reaches this duration from the time it transitions to `IN_PROGRESS` state. | `integer (int64)` | No |
 | `metastoreId` | The OCID of OCI Hive Metastore. | `string` | No |
 | `numExecutors` | The number of executor VMs requested. | `integer` | Yes |
@@ -59,7 +59,7 @@ This summary shows the top-level `spec` fields. Use [the full API reference](../
 | `privateEndpointId` | The OCID of a private endpoint. | `string` | No |
 | `sparkVersion` | The Spark version utilized to run the application. | `string` | Yes |
 | `type` | The Spark application processing type. | `string` | No |
-| `warehouseBucketUri` | An Oracle Cloud Infrastructure URI of the bucket to be used as default warehouse directory for BATCH SQL runs. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `warehouseBucketUri` | An Oracle Cloud Infrastructure URI of the bucket to be used as default warehouse directory for BATCH SQL runs. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
 
 
 ## Status Fields
@@ -69,12 +69,12 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
 | [`applicationLogConfig`](../../reference/api/dataflow/v1beta1/index.md#kind-application-status-applicationlogconfig) | ApplicationLogConfig defines nested fields for Application.ApplicationLogConfig. | `object` | No |
-| `archiveUri` | A comma separated list of one or more archive files as Oracle Cloud Infrastructure URIs. For example, ``oci://path/to/a.zip,oci://path/to/b.zip``. An Oracle Cloud Infrastructure URI of an archive.zip file containing custom dependencies that may be used to support the execution of a Python, Java, or Scala application. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `archiveUri` | A comma separated list of one or more archive files as Oracle Cloud Infrastructure URIs. For example, ``oci://path/to/a.zip,oci://path/to/b.zip``. An Oracle Cloud Infrastructure URI of an archive.zip file containing custom dependencies that may be used to support the execution of a Python, Java, or Scala application. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
 | `arguments` | The arguments passed to the running application as command line arguments. An argument is either a plain text or a placeholder. Placeholders are replaced using values from the parameters map. Each placeholder specified must be represented in the parameters map else the request (POST or PUT) will fail with a HTTP 400 status code. Placeholders are specified as `Service Api Spec`, where `name` is the name of the parameter. Example: `[ "--input", "${input_file}", "--name", "John Doe" ]` If "input_file" has a value of "mydata.xml", then the value above will be translated to `--input mydata.xml --name "John Doe"` | `list[string]` | No |
 | `className` | The class for the application. | `string` | No |
 | `compartmentId` | The OCID of a compartment. | `string` | No |
 | `configuration` | The Spark configuration passed to the running process. See https://spark.apache.org/docs/latest/configuration.html#available-properties. Example: { "spark.app.name" : "My App Name", "spark.shuffle.io.maxRetries" : "4" } Note: Not all Spark properties are permitted to be set. Attempting to set a property that is not allowed to be overwritten will cause a 400 status to be returned. | `map[string, string]` | No |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No |
 | `description` | A user-friendly description. | `string` | No |
 | `displayName` | A user-friendly name. This name is not necessarily unique. | `string` | No |
 | `driverShape` | The VM shape for the driver. Sets the driver cores and memory. | `string` | No |
@@ -82,13 +82,13 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | `execute` | The input used for spark-submit command. For more details see https://spark.apache.org/docs/latest/submitting-applications.html#launching-applications-with-spark-submit. Supported options include ``--class``, ``--file``, ``--jars``, ``--conf``, ``--py-files``, and main application file with arguments. Example: ``--jars oci://path/to/a.jar,oci://path/to/b.jar --files oci://path/to/a.json,oci://path/to/b.csv --py-files oci://path/to/a.py,oci://path/to/b.py --conf spark.sql.crossJoin.enabled=true --class org.apache.spark.examples.SparkPi oci://path/to/main.jar 10`` Note: If execute is specified together with applicationId, className, configuration, fileUri, language, arguments, parameters during application create/update, or run create/submit, Data Flow service will use derived information from execute input only. | `string` | No |
 | `executorShape` | The VM shape for the executors. Sets the executor cores and memory. | `string` | No |
 | [`executorShapeConfig`](../../reference/api/dataflow/v1beta1/index.md#kind-application-status-executorshapeconfig) | ApplicationExecutorShapeConfig defines nested fields for Application.ExecutorShapeConfig. | `object` | No |
-| `fileUri` | An Oracle Cloud Infrastructure URI of the file containing the application to execute. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
+| `fileUri` | An Oracle Cloud Infrastructure URI of the file containing the application to execute. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No |
 | `id` | The application ID. | `string` | No |
 | `idleTimeoutInMinutes` | The timeout value in minutes used to manage Runs. A Run would be stopped after inactivity for this amount of time period. Note: This parameter is currently only applicable for Runs of type `SESSION`. Default value is 2880 minutes (2 days) | `integer (int64)` | No |
 | `language` | The Spark language. | `string` | No |
 | `lifecycleState` | The current state of this application. | `string` | No |
-| `logsBucketUri` | An Oracle Cloud Infrastructure URI of the bucket where the Spark job logs are to be uploaded. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `logsBucketUri` | An Oracle Cloud Infrastructure URI of the bucket where the Spark job logs are to be uploaded. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
 | `maxDurationInMinutes` | The maximum duration in minutes for which an Application should run. Data Flow Run would be terminated once it reaches this duration from the time it transitions to `IN_PROGRESS` state. | `integer (int64)` | No |
 | `metastoreId` | The OCID of OCI Hive Metastore. | `string` | No |
 | `numExecutors` | The number of executor VMs requested. | `integer` | No |
@@ -102,7 +102,7 @@ This summary shows the top-level `status` fields. Use [the full API reference](.
 | `timeCreated` | The date and time the resource was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format. Example: `2018-04-03T21:10:29.600Z` | `string` | No |
 | `timeUpdated` | The date and time the resource was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format. Example: `2018-04-03T21:10:29.600Z` | `string` | No |
 | `type` | The Spark application processing type. | `string` | No |
-| `warehouseBucketUri` | An Oracle Cloud Infrastructure URI of the bucket to be used as default warehouse directory for BATCH SQL runs. See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
+| `warehouseBucketUri` | An Oracle Cloud Infrastructure URI of the bucket to be used as default warehouse directory for BATCH SQL runs. See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat. | `string` | No |
 
 
 ## Sample Manifest
