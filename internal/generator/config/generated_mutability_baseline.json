@@ -5,10 +5,10 @@
     "overlayArtifacts": 6,
     "vapArtifacts": 6,
     "fields": 94,
-    "allowInPlaceCount": 62,
+    "allowInPlaceCount": 64,
     "denyInPlaceCount": 0,
     "replacementRequiredCount": 18,
-    "unknownPolicyCount": 14,
+    "unknownPolicyCount": 12,
     "docsDeniedCount": 0,
     "unresolvedJoinCount": 0,
     "ambiguousJoinCount": 0,
@@ -45,10 +45,10 @@
       "service": "core",
       "resources": 1,
       "fields": 9,
-      "allowInPlaceCount": 1,
+      "allowInPlaceCount": 3,
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 6,
-      "unknownPolicyCount": 2,
+      "unknownPolicyCount": 0,
       "docsDeniedCount": 0,
       "unresolvedJoinCount": 0,
       "ambiguousJoinCount": 0,
@@ -547,12 +547,14 @@
       "overlayPath": "internal/generator/generated/mutability_overlay/core/instance.json",
       "vapPath": "internal/generator/generated/vap_update_policy/core/instance.json",
       "fields": 9,
-      "allowInPlaceCount": 1,
+      "allowInPlaceCount": 3,
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 6,
-      "unknownPolicyCount": 2,
+      "unknownPolicyCount": 0,
       "allowInPlacePaths": [
-        "displayName"
+        "definedTags",
+        "displayName",
+        "freeformTags"
       ],
       "decisions": [
         {
@@ -571,10 +573,10 @@
         },
         {
           "fieldPath": "definedTags",
-          "finalPolicy": "unknown",
+          "finalPolicy": "allowInPlaceUpdate",
           "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
         },
         {
           "fieldPath": "displayName",
@@ -585,10 +587,10 @@
         },
         {
           "fieldPath": "freeformTags",
-          "finalPolicy": "unknown",
+          "finalPolicy": "allowInPlaceUpdate",
           "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
         },
         {
           "fieldPath": "shape",
@@ -619,10 +621,6 @@
           "docsEvidenceState": "notDocumented"
         }
       ],
-      "unknownFields": [
-        "definedTags",
-        "freeformTags"
-      ],
       "denyRules": [
         {
           "fieldPath": "availabilityDomain",
@@ -635,18 +633,6 @@
           "decision": "replacementRequired",
           "mergeCase": "replacementRequired",
           "docsEvidenceState": "notDocumented"
-        },
-        {
-          "fieldPath": "definedTags",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "freeformTags",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
         },
         {
           "fieldPath": "shape",
