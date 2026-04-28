@@ -19,6 +19,8 @@ gaps: []
 - Supported in-place updates are limited to `displayName`, `definedTags`,
   `freeformTags`, `egressSecurityRules`, and `ingressSecurityRules`, matching
   the pinned `UpdateSecurityListDetails` SDK surface and the handwritten runtime.
+- Ingress and egress rule comparison is order-insensitive, so semantically
+  equivalent OCI rule reordering does not trigger updates.
 - Create-only drift is rejected for `compartmentId` and `vcnId`.
 - The runtime observes by tracked `status.osokStatus.ocid` and only recreates
   after confirmed OCI not-found clears the tracked identity.
@@ -29,6 +31,9 @@ gaps: []
 - Empty nested optional ICMP, TCP, UDP, and port-range objects are omitted from
   OCI request payloads and projected back as zero-value-cleared status fields
   when OCI no longer returns them.
+- The runtime fails fast if the vendored `CreateSecurityListDetails`,
+  `UpdateSecurityListDetails`, security-rule option structs, or rule-type enums
+  drift away from the assumptions captured in this row.
 
 ## Authority and scoped cleanup
 

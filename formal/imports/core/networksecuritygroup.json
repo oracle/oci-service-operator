@@ -128,6 +128,7 @@
     "Vendored SDK lifecycle success is AVAILABLE; the handwritten runtime treats PROVISIONING, defensive literal UPDATING, TERMINATING, and TERMINATED as requeue states.",
     "The handwritten runtime observes by tracked OCID and only recreates after confirmed OCI not-found clears status identity.",
     "Delete confirmation is absence-based rather than a terminal SDK DELETED state.",
-    "Supported in-place updates are limited to displayName, definedTags, and freeformTags; create-only drift is rejected for compartmentId and vcnId."
+    "Supported in-place updates are limited to displayName, definedTags, and freeformTags; create-only drift is rejected for compartmentId and vcnId.",
+    "The handwritten runtime hard-fails if CreateNetworkSecurityGroupDetails, UpdateNetworkSecurityGroupDetails, or the vendored lifecycle enum surface drifts from these formal assumptions."
   ]
 }

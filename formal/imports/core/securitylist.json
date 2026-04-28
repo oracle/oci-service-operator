@@ -131,6 +131,7 @@
     "Pinned OCI SDK contract: UpdateSecurityListDetails exposes defined_tags, display_name, egress_security_rules, freeform_tags, and ingress_security_rules as in-place updates; the handwritten runtime rejects create-only drift for compartment_id and vcn_id.",
     "Vendored SDK lifecycle success is AVAILABLE; the handwritten runtime requeues PROVISIONING, defensive literal UPDATING, TERMINATING, and TERMINATED states.",
     "The handwritten runtime observes by tracked status.osokStatus.ocid and only recreates after confirmed OCI not-found clears the tracked identity.",
-    "Delete confirmation is absence-based rather than a terminal SDK DELETED state, so observed TERMINATING and TERMINATED keep the finalizer in place until GetSecurityList returns not found."
+    "Delete confirmation is absence-based rather than a terminal SDK DELETED state, so observed TERMINATING and TERMINATED keep the finalizer in place until GetSecurityList returns not found.",
+    "Ingress and egress rule comparison is order-insensitive, and the handwritten runtime hard-fails if CreateSecurityListDetails, UpdateSecurityListDetails, nested rule-option structs, or rule-type enums drift from these formal assumptions."
   ]
 }

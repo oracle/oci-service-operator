@@ -21,6 +21,9 @@ gaps: []
 - Route-rule drift is normalized before update decisions: ordering differences
   and OCI-managed `LOCAL` rules that are not part of the desired spec do not
   trigger updates.
+- The runtime fails fast if the vendored `CreateRouteTableDetails`,
+  `UpdateRouteTableDetails`, `RouteRule`, or route-rule enum surface drifts
+  away from the assumptions captured in this row.
 - Create-only drift is rejected for `compartmentId` and `vcnId`.
 
 ## Authority and scoped cleanup
