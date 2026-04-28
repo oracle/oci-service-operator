@@ -220,7 +220,7 @@ func buildVcnUpdateBody(
 
 	if resource.Spec.FreeformTags != nil {
 		desiredFreeformTags := copyStringMap(resource.Spec.FreeformTags)
-		if !reflect.DeepEqual(current.FreeformTags, desiredFreeformTags) {
+		if !stringMapEqual(current.FreeformTags, desiredFreeformTags) {
 			details.FreeformTags = desiredFreeformTags
 			updateNeeded = true
 		}
@@ -463,6 +463,13 @@ func copyStringMap(values map[string]string) map[string]string {
 		copied[key] = value
 	}
 	return copied
+}
+
+func stringMapEqual(left map[string]string, right map[string]string) bool {
+	if len(left) == 0 && len(right) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(left, right)
 }
 
 func nestedMapEqual(left map[string]map[string]interface{}, right map[string]map[string]interface{}) bool {

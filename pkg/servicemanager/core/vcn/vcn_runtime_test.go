@@ -513,6 +513,7 @@ func TestCreateOrUpdate_ClearsSecurityAttributesWithExplicitEmptySpec(t *testing
 func TestCreateOrUpdate_ClearsTagMapsWithExplicitEmptySpec(t *testing.T) {
 	var captured coresdk.UpdateVcnRequest
 	getCalls := 0
+	updateCalls := 0
 	manager := newTestManager(&fakeVcnOCIClient{
 		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
 			getCalls++
@@ -525,6 +526,7 @@ func TestCreateOrUpdate_ClearsTagMapsWithExplicitEmptySpec(t *testing.T) {
 			return coresdk.GetVcnResponse{Vcn: current}, nil
 		},
 		updateFn: func(_ context.Context, req coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			updateCalls++
 			captured = req
 			updated := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
 			updated.DefinedTags = nil
@@ -543,7 +545,9 @@ func TestCreateOrUpdate_ClearsTagMapsWithExplicitEmptySpec(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, "ocid1.vcn.oc1..existing", *captured.VcnId)
+	if assert.Equal(t, 1, updateCalls) && assert.NotNil(t, captured.VcnId) {
+		assert.Equal(t, "ocid1.vcn.oc1..existing", *captured.VcnId)
+	}
 	if assert.NotNil(t, captured.DefinedTags) {
 		assert.Empty(t, captured.DefinedTags)
 	}
@@ -551,6 +555,12 @@ func TestCreateOrUpdate_ClearsTagMapsWithExplicitEmptySpec(t *testing.T) {
 		assert.Empty(t, captured.FreeformTags)
 	}
 	assert.Nil(t, captured.DisplayName)
+
+	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, updateCalls)
 }
 
 func TestCreateOrUpdate_DoesNotUpdateDuringRetryableLiveStates(t *testing.T) {
