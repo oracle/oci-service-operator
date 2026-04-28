@@ -178,6 +178,7 @@ func reviewedApplicationRuntimeSemantics() *generatedruntime.Semantics {
 	semantics.CreateFollowUp = generatedruntime.FollowUpSemantics{}
 	semantics.UpdateFollowUp = generatedruntime.FollowUpSemantics{}
 	semantics.List = nil
+	semantics.Delete.PendingStates = []string{"DELETING"}
 
 	return semantics
 }
@@ -374,11 +375,19 @@ func (c *applicationRuntimeClient) applyDeleteOutcome(
 	}
 
 	if stage == generatedruntime.DeleteConfirmStageAlreadyPending {
-		return generatedruntime.DeleteOutcome{}, nil
+		switch current.LifecycleState {
+		case dataflowsdk.ApplicationLifecycleStateDeleting:
+			c.markDeleteProgress(resource, current)
+			return generatedruntime.DeleteOutcome{Handled: true, Deleted: false}, nil
+		default:
+			return generatedruntime.DeleteOutcome{}, nil
+		}
 	}
 
 	switch current.LifecycleState {
-	case dataflowsdk.ApplicationLifecycleStateActive, dataflowsdk.ApplicationLifecycleStateInactive:
+	case dataflowsdk.ApplicationLifecycleStateActive,
+		dataflowsdk.ApplicationLifecycleStateInactive,
+		dataflowsdk.ApplicationLifecycleStateDeleting:
 		c.markDeleteProgress(resource, current)
 		return generatedruntime.DeleteOutcome{Handled: true, Deleted: false}, nil
 	default:

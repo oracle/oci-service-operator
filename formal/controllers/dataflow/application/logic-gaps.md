@@ -24,8 +24,9 @@ gaps: []
   than requeue.
 - Delete confirmation is absence-based: `DeleteApplication` is followed by
   `GetApplication` until OCI no longer finds the resource. Observed `ACTIVE`,
-  `INACTIVE`, and `DELETED` after the delete request remain terminating
-  intermediate states that keep the finalizer in place.
+  `INACTIVE`, and `DELETING` after the delete request remain terminating
+  intermediate states that keep the finalizer in place, while `DELETED` or
+  NotFound confirms removal.
 
 ## Repo-authored semantics
 
@@ -46,7 +47,8 @@ gaps: []
   previous handwritten runtime and tests.
 - Status projection remains required. Create and update project directly from
   the immediate OCI response body, while delete-phase status updates still use
-  the package-local explicit status projector.
+  the package-local explicit status projector so `ACTIVE`, `INACTIVE`, and
+  `DELETING` delete-confirmation reads stay visible in the CR status.
 
 ## Why this row is seeded
 

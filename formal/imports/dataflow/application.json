@@ -117,7 +117,9 @@
     ]
   },
   "deleteConfirmation": {
-    "pending": [],
+    "pending": [
+      "DELETING"
+    ],
     "target": [
       "DELETED"
     ]
@@ -150,9 +152,9 @@
   },
   "notes": [
     "Pinned OCI SDK contract: CreateApplication, GetApplication, ListApplications, UpdateApplication, and DeleteApplication are the available CRUD and lookup operations for dataflow/Application.",
-    "Pinned OCI SDK lifecycle contract: Application responses expose ACTIVE, INACTIVE, and DELETED; there is no separate PROVISIONING or UPDATING lifecycle enum in the vendored SDK surface.",
+    "Pinned OCI SDK lifecycle contract: Application responses expose ACTIVE, INACTIVE, DELETING, and DELETED; there is no separate PROVISIONING or UPDATING lifecycle enum in the vendored SDK surface.",
     "Pinned SDK request surface: UpdateApplicationDetails exposes archive_uri, application_log_config, arguments, class_name, configuration, defined_tags, description, display_name, driver/executor shape fields, execute, file_uri, language, logs_bucket_uri, metastore_id, num_executors, parameters, pool/private endpoint IDs, spark_version, warehouse_bucket_uri, and timeout fields as update payload inputs.",
     "The package-local runtime intentionally does not use list-based bind-or-reuse semantics for create. Tracked status.osokStatus.ocid is preflighted with GetApplication, and only confirmed NotFound or DELETED clears the tracked identity before a fresh CreateApplication call.",
-    "Delete confirmation is repo-authored and absence-based rather than DELETED-target based: DeleteApplication is followed by GetApplication until OCI stops finding the resource, while observed ACTIVE, INACTIVE, and DELETED remain finalizer-holding intermediate states."
+    "Delete confirmation is repo-authored and absence-based: DeleteApplication is followed by GetApplication until OCI stops finding the resource; observed ACTIVE, INACTIVE, and DELETING remain finalizer-holding intermediate states, while DELETED or NotFound confirm removal."
   ]
 }

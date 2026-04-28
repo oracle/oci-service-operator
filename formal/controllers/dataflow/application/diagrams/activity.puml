@@ -45,6 +45,10 @@ endif
 stop
 else (no)
 partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in DELETING;
+stop
+endif
 if ("OCI state is outside success targets?") then (yes)
 :Return an unsuccessful reconcile result until\nOCI reaches ACTIVE, INACTIVE;
 stop
@@ -88,7 +92,7 @@ status/finalizer: required /
 retain-until-confirmed-delete
 requeue: terminating
 provider states: create none; update none;
-delete none
+delete DELETING
 supported drift: application_log_config,
 archive_uri, arguments, class_name (+22 more)
 reject before mutate: force-new fields
