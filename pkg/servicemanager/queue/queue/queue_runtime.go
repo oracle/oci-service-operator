@@ -156,7 +156,11 @@ func buildQueueUpdateBody(
 		updateDetails.CustomEncryptionKeyId = common.String(resource.Spec.CustomEncryptionKeyId)
 		updateNeeded = true
 	}
-	desiredCapabilities, capabilitiesChanged, err := desiredQueueCapabilitiesForUpdate(resource.Spec.Capabilities, current.Capabilities)
+	desiredCapabilities, capabilitiesChanged, err := desiredQueueCapabilitiesForUpdate(
+		resource.Spec.Capabilities,
+		current.Capabilities,
+		resource.Status.Capabilities,
+	)
 	if err != nil {
 		return queuesdk.UpdateQueueDetails{}, false, err
 	}
@@ -694,6 +698,7 @@ func queueCapabilityFromJSON(rawJSON string, fallbackType string) (queuesdk.Capa
 func desiredQueueCapabilitiesForUpdate(
 	specs []queuev1beta1.QueueCapability,
 	current []queuesdk.CapabilityDetails,
+	currentStatus []queuev1beta1.QueueCapability,
 ) ([]queuesdk.CapabilityDetails, bool, error) {
 	desiredTypes, err := queueCapabilityTypeSetFromSpec(specs)
 	if err != nil {
@@ -704,7 +709,17 @@ func desiredQueueCapabilitiesForUpdate(
 		return nil, false, err
 	}
 	if reflect.DeepEqual(currentTypes, desiredTypes) {
-		return nil, false, nil
+		desiredParity, err := queueControllerOwnedCapabilityParityFromSpec(specs)
+		if err != nil {
+			return nil, false, err
+		}
+		statusParity, err := queueControllerOwnedCapabilityParityFromStatus(currentStatus, queueCapabilityTypeMembership(desiredTypes))
+		if err != nil {
+			return nil, false, err
+		}
+		if reflect.DeepEqual(statusParity, desiredParity) {
+			return nil, false, nil
+		}
 	}
 	if len(specs) == 0 {
 		return []queuesdk.CapabilityDetails{}, true, nil
@@ -714,6 +729,175 @@ func desiredQueueCapabilitiesForUpdate(
 		return nil, false, err
 	}
 	return desiredCapabilities, true, nil
+}
+
+func queueControllerOwnedCapabilityParityFromSpec(specs []queuev1beta1.QueueCapability) (map[string]string, error) {
+	if len(specs) == 0 {
+		return nil, nil
+	}
+
+	snapshots := make(map[string]string)
+	for index, spec := range specs {
+		payloadJSON, capabilityType, err := queueCapabilityCanonicalPayloadJSON(spec)
+		if err != nil {
+			return nil, fmt.Errorf("build desired capabilities[%d] controller-owned parity: %w", index, err)
+		}
+		if !queueCapabilityRequiresControllerOwnedParity(capabilityType) {
+			continue
+		}
+		if _, exists := snapshots[capabilityType]; exists {
+			return nil, fmt.Errorf("build desired capabilities[%d] controller-owned parity: duplicate capability type %q", index, capabilityType)
+		}
+		snapshots[capabilityType] = payloadJSON
+	}
+	if len(snapshots) == 0 {
+		return nil, nil
+	}
+	return snapshots, nil
+}
+
+func queueControllerOwnedCapabilityParityFromStatus(
+	capabilities []queuev1beta1.QueueCapability,
+	allowedTypes map[string]struct{},
+) (map[string]string, error) {
+	if len(capabilities) == 0 || len(allowedTypes) == 0 {
+		return nil, nil
+	}
+
+	snapshots := make(map[string]string)
+	for index, capability := range capabilities {
+		payloadJSON, capabilityType, err := queueCapabilityCanonicalPayloadJSON(capability)
+		if err != nil {
+			return nil, fmt.Errorf("build status capabilities[%d] controller-owned parity: %w", index, err)
+		}
+		if !queueCapabilityRequiresControllerOwnedParity(capabilityType) {
+			continue
+		}
+		if _, allowed := allowedTypes[capabilityType]; !allowed {
+			continue
+		}
+		if _, exists := snapshots[capabilityType]; exists {
+			return nil, fmt.Errorf("build status capabilities[%d] controller-owned parity: duplicate capability type %q", index, capabilityType)
+		}
+		snapshots[capabilityType] = payloadJSON
+	}
+	if len(snapshots) == 0 {
+		return nil, nil
+	}
+	return snapshots, nil
+}
+
+func queueCapabilityCanonicalPayloadJSON(spec queuev1beta1.QueueCapability) (string, string, error) {
+	capability, capabilityType, err := buildQueueCapability(spec)
+	if err != nil {
+		return "", "", err
+	}
+
+	rawJSON, err := json.Marshal(capability)
+	if err != nil {
+		return "", "", fmt.Errorf("marshal capability: %w", err)
+	}
+	return string(rawJSON), capabilityType, nil
+}
+
+func queueCapabilityTypeMembership(capabilityTypes []string) map[string]struct{} {
+	if len(capabilityTypes) == 0 {
+		return nil
+	}
+
+	membership := make(map[string]struct{}, len(capabilityTypes))
+	for _, capabilityType := range capabilityTypes {
+		membership[capabilityType] = struct{}{}
+	}
+	return membership
+}
+
+func rememberQueueControllerOwnedCapabilityParityStatus(resource *queuev1beta1.Queue) error {
+	if !shouldRememberQueueControllerOwnedCapabilityParity(resource) {
+		return nil
+	}
+
+	remembered, err := queueStatusCapabilitiesWithControllerOwnedParity(
+		resource.Spec.Capabilities,
+		resource.Status.Capabilities,
+	)
+	if err != nil {
+		return err
+	}
+	resource.Status.Capabilities = remembered
+	return nil
+}
+
+func shouldRememberQueueControllerOwnedCapabilityParity(resource *queuev1beta1.Queue) bool {
+	if resource == nil {
+		return false
+	}
+	if currentQueueAsyncPhase(resource, "") != "" {
+		return false
+	}
+	return strings.EqualFold(
+		strings.TrimSpace(resource.Status.LifecycleState),
+		string(queuesdk.QueueLifecycleStateActive),
+	)
+}
+
+func queueStatusCapabilitiesWithControllerOwnedParity(
+	specs []queuev1beta1.QueueCapability,
+	projected []queuev1beta1.QueueCapability,
+) ([]queuev1beta1.QueueCapability, error) {
+	if len(projected) == 0 {
+		return nil, nil
+	}
+
+	controllerOwned := make(map[string]queuev1beta1.QueueCapability)
+	for index, spec := range specs {
+		statusCapability, capabilityType, err := queueControllerOwnedStatusCapability(spec)
+		if err != nil {
+			return nil, fmt.Errorf("build controller-owned status capabilities[%d]: %w", index, err)
+		}
+		if !queueCapabilityRequiresControllerOwnedParity(capabilityType) {
+			continue
+		}
+		if _, exists := controllerOwned[capabilityType]; exists {
+			return nil, fmt.Errorf("build controller-owned status capabilities[%d]: duplicate capability type %q", index, capabilityType)
+		}
+		controllerOwned[capabilityType] = statusCapability
+	}
+	if len(controllerOwned) == 0 {
+		return projected, nil
+	}
+
+	remembered := append([]queuev1beta1.QueueCapability(nil), projected...)
+	for index, capability := range remembered {
+		capabilityType, err := queueCapabilityTypeFromSpec(capability)
+		if err != nil {
+			return nil, fmt.Errorf("read projected capabilities[%d] type: %w", index, err)
+		}
+		if snapshot, ok := controllerOwned[capabilityType]; ok {
+			remembered[index] = snapshot
+		}
+	}
+	return remembered, nil
+}
+
+func queueControllerOwnedStatusCapability(
+	spec queuev1beta1.QueueCapability,
+) (queuev1beta1.QueueCapability, string, error) {
+	payloadJSON, capabilityType, err := queueCapabilityCanonicalPayloadJSON(spec)
+	if err != nil {
+		return queuev1beta1.QueueCapability{}, "", err
+	}
+
+	statusCapability := queuev1beta1.QueueCapability{
+		Type:     capabilityType,
+		JsonData: payloadJSON,
+	}
+	if err := json.Unmarshal([]byte(payloadJSON), &statusCapability); err != nil {
+		return queuev1beta1.QueueCapability{}, "", fmt.Errorf("decode capability parity payload: %w", err)
+	}
+	statusCapability.Type = capabilityType
+	statusCapability.JsonData = payloadJSON
+	return statusCapability, capabilityType, nil
 }
 
 func queueCapabilityTypeSetFromSpec(specs []queuev1beta1.QueueCapability) ([]string, error) {
@@ -874,6 +1058,10 @@ func queueCapabilityUsesTypedProjection(capabilityType string) bool {
 	default:
 		return false
 	}
+}
+
+func queueCapabilityRequiresControllerOwnedParity(capabilityType string) bool {
+	return capabilityType == string(queuesdk.QueueCapabilityConsumerGroups)
 }
 
 func queueCapabilitySummariesToDetails(capabilities []queuesdk.QueueCapabilityEnum) []queuesdk.CapabilityDetails {

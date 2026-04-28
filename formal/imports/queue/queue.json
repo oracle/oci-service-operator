@@ -149,6 +149,6 @@
     "Queue create, update, and delete are work-request-backed operations in the handwritten runtime.",
     "The repo-authored Queue runtime recovers the created Queue OCID from work-request resources instead of binding by display-name-only list lookup.",
     "Status projection, create-only drift rejection, required delete confirmation, and ready-only endpoint Secret side effects are explicit repo-authored semantics layered on top of these provider facts.",
-    "Queue capability payloads are forwarded on create and update, but steady-state parity is intentionally based on the observable enabled capability type set because GetQueue does not echo consumer-group add-on fields back after enablement."
+    "Queue capability payloads are forwarded on create and update, and steady-state parity for the non-observable consumer-group add-on fields is controller-owned because GetQueue still does not echo those fields back after enablement."
   ]
 }
