@@ -131,3 +131,35 @@ func TestDrgCreateFallbackClient_PreservesErrorWithoutCreatedResource(t *testing
 	assert.ErrorIs(t, err, delegateErr)
 	assert.False(t, response.IsSuccessful)
 }
+
+func TestDrgCreateFallbackClient_PreservesErrorWhenTrackedIDAlreadyExists(t *testing.T) {
+	resource := &corev1beta1.Drg{
+		Spec: corev1beta1.DrgSpec{DisplayName: "test-drg"},
+		Status: corev1beta1.DrgStatus{
+			Id:             "ocid1.drg.oc1..existing",
+			DisplayName:    "test-drg",
+			LifecycleState: "AVAILABLE",
+		},
+	}
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+
+	delegateErr := errors.New("update read failed")
+	client := drgCreateFallbackClient{
+		delegate: stubDrgServiceClient{
+			createOrUpdate: func(_ context.Context, resource *corev1beta1.Drg, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
+				resource.Status.LifecycleState = "PROVISIONING"
+				resource.Status.OsokStatus.Message = delegateErr.Error()
+				resource.Status.OsokStatus.Reason = string(shared.Failed)
+				return servicemanager.OSOKResponse{IsSuccessful: false}, delegateErr
+			},
+		},
+		log: loggerutil.OSOKLogger{Logger: logr.Discard()},
+	}
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.ErrorIs(t, err, delegateErr)
+	assert.False(t, response.IsSuccessful)
+	assert.Equal(t, "ocid1.drg.oc1..existing", string(resource.Status.OsokStatus.Ocid))
+	assert.Equal(t, "PROVISIONING", resource.Status.LifecycleState)
+}
