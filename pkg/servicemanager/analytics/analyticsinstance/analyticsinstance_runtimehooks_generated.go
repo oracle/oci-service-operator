@@ -64,8 +64,8 @@ func newAnalyticsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 		FinalizerPolicy:   "retain-until-confirmed-delete",
 		Lifecycle: generatedruntime.LifecycleSemantics{
 			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
 		},
 		Delete: generatedruntime.DeleteSemantics{
 			Policy:         "required",
@@ -77,7 +77,7 @@ func newAnalyticsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 			MatchFields:        []string{"capacityType", "compartmentId", "featureSet", "name", "state"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"capacity.capacityValue", "compartmentId", "definedTags", "description", "emailNotification", "freeformTags", "idcsAccessToken", "kmsKeyId", "licenseType", "networkEndpointDetails.networkSecurityGroupIds", "networkEndpointDetails.subnetId", "networkEndpointDetails.vcnId", "networkEndpointDetails.whitelistedIps", "networkEndpointDetails.whitelistedServices", "networkEndpointDetails.whitelistedVcns.id", "networkEndpointDetails.whitelistedVcns.whitelistedIps"},
+			Mutable:       []string{"definedTags", "description", "emailNotification", "freeformTags", "licenseType", "updateChannel"},
 			ForceNew:      []string{"capacity.capacityType", "featureSet", "name", "networkEndpointDetails.networkEndpointType"},
 			ConflictsWith: map[string][]string{},
 		},
@@ -98,7 +98,7 @@ func newAnalyticsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 			Strategy: "confirm-delete",
 			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeAnalyticsInstanceCompartment", RequestTypeName: "analytics.ChangeAnalyticsInstanceCompartmentRequest", ResponseTypeName: "analytics.ChangeAnalyticsInstanceCompartmentResponse"}, {Phase: "update", MethodName: "ChangeAnalyticsInstanceNetworkEndpoint", RequestTypeName: "analytics.ChangeAnalyticsInstanceNetworkEndpointRequest", ResponseTypeName: "analytics.ChangeAnalyticsInstanceNetworkEndpointResponse"}, {Phase: "update", MethodName: "ScaleAnalyticsInstance", RequestTypeName: "analytics.ScaleAnalyticsInstanceRequest", ResponseTypeName: "analytics.ScaleAnalyticsInstanceResponse"}},
+		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeAnalyticsInstanceCompartment", RequestTypeName: "analytics.ChangeAnalyticsInstanceCompartmentRequest", ResponseTypeName: "analytics.ChangeAnalyticsInstanceCompartmentResponse"}, {Phase: "update", MethodName: "ChangeAnalyticsInstanceNetworkEndpoint", RequestTypeName: "analytics.ChangeAnalyticsInstanceNetworkEndpointRequest", ResponseTypeName: "analytics.ChangeAnalyticsInstanceNetworkEndpointResponse"}, {Phase: "update", MethodName: "ScaleAnalyticsInstance", RequestTypeName: "analytics.ScaleAnalyticsInstanceRequest", ResponseTypeName: "analytics.ScaleAnalyticsInstanceResponse"}, {Phase: "update", MethodName: "SetFeatureBundle", RequestTypeName: "analytics.SetFeatureBundleRequest", ResponseTypeName: "analytics.SetFeatureBundleResponse"}, {Phase: "update", MethodName: "SetKmsKey", RequestTypeName: "analytics.SetKmsKeyRequest", ResponseTypeName: "analytics.SetKmsKeyResponse"}},
 		Unsupported:         []generatedruntime.UnsupportedSemantic{},
 	}
 }
