@@ -69,7 +69,7 @@ func newApplicationRuntimeSemantics() *generatedruntime.Semantics {
 		},
 		Delete: generatedruntime.DeleteSemantics{
 			Policy:         "required",
-			PendingStates:  []string{},
+			PendingStates:  []string{"DELETING"},
 			TerminalStates: []string{"DELETED"},
 		},
 		List: &generatedruntime.ListSemantics{
