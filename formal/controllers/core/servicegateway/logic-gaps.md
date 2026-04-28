@@ -29,8 +29,13 @@ gaps: []
   `routeTableId`, `lifecycleState`, and `status.ocid`, and clears stale
   optional fields when OCI later omits them.
 - The pinned `CreateServiceGatewayDetails` SDK surface does not expose
-  `blockTraffic`, so repo-authored create behavior manages `blockTraffic` only
-  after creation through `UpdateServiceGateway`.
+  `blockTraffic`, so repo-authored create behavior treats it as an update-only
+  field on create: once the created or recreated gateway reaches a
+  non-retryable lifecycle state, the runtime reapplies `blockTraffic` through
+  `UpdateServiceGateway` whenever OCI still reports a different value.
+- Tracked OCI identity prefers `status.ocid` and falls back to projected `id`,
+  so delete confirmation and post-create parity keep working for older status
+  records until `status.ocid` is backfilled.
 
 ## Authority and scoped cleanup
 

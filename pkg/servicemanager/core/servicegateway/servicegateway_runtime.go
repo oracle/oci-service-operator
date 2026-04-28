@@ -173,6 +173,7 @@ func (c *serviceGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resour
 	}
 
 	trackedID := currentServiceGatewayID(resource)
+	seedServiceGatewayTrackedOCID(resource, trackedID)
 	explicitRecreate := false
 	if trackedID != "" {
 		if c.initErr != nil {
@@ -222,8 +223,14 @@ func (c *serviceGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resour
 	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
 	if err != nil {
 		c.restoreStatus(resource, previousStatus)
+		return response, err
 	}
-	return response, err
+	if trackedID == "" || explicitRecreate {
+		if postCreateResponse, handled, err := c.applyPostCreateUpdateOnlyParity(ctx, resource); handled || err != nil {
+			return postCreateResponse, err
+		}
+	}
+	return response, nil
 }
 
 func (c *serviceGatewayRuntimeClient) update(
@@ -262,6 +269,38 @@ func (c *serviceGatewayRuntimeClient) updateWithParity(
 	return c.applyLifecycle(resource, response.ServiceGateway)
 }
 
+func (c *serviceGatewayRuntimeClient) applyPostCreateUpdateOnlyParity(
+	ctx context.Context,
+	resource *corev1beta1.ServiceGateway,
+) (servicemanager.OSOKResponse, bool, error) {
+	if resource == nil {
+		return servicemanager.OSOKResponse{}, false, nil
+	}
+
+	current := serviceGatewayFromProjectedStatus(resource.Status)
+	if current.Id == nil || strings.TrimSpace(*current.Id) == "" {
+		return servicemanager.OSOKResponse{}, false, nil
+	}
+	if serviceGatewayLifecycleIsRetryable(current.LifecycleState) {
+		return servicemanager.OSOKResponse{}, false, nil
+	}
+	if boolPtrEqual(current.BlockTraffic, resource.Spec.BlockTraffic) {
+		return servicemanager.OSOKResponse{}, false, nil
+	}
+
+	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	if err != nil {
+		response, failErr := c.fail(resource, err)
+		return response, true, failErr
+	}
+	if !updateNeeded {
+		return servicemanager.OSOKResponse{}, false, nil
+	}
+
+	response, err := c.updateWithParity(ctx, resource, updateRequest)
+	return response, true, err
+}
+
 func (c *serviceGatewayRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.ServiceGateway) (bool, error) {
 	if c.delegate == nil {
 		return false, fmt.Errorf("servicegateway parity delegate is not configured")
@@ -271,6 +310,7 @@ func (c *serviceGatewayRuntimeClient) Delete(ctx context.Context, resource *core
 	}
 
 	trackedID := currentServiceGatewayID(resource)
+	seedServiceGatewayTrackedOCID(resource, trackedID)
 	if trackedID == "" {
 		c.markDeleted(resource, "OCI resource identifier is not recorded")
 		return true, nil
@@ -430,6 +470,16 @@ func convertOCIServicesToStatus(services []coresdk.ServiceIdResponseDetails) []c
 	for _, service := range services {
 		converted = append(converted, corev1beta1.ServiceGatewayService{
 			ServiceId: stringValue(service.ServiceId),
+		})
+	}
+	return converted
+}
+
+func convertStatusServicesToOCIResponse(services []corev1beta1.ServiceGatewayService) []coresdk.ServiceIdResponseDetails {
+	converted := make([]coresdk.ServiceIdResponseDetails, 0, len(services))
+	for _, service := range services {
+		converted = append(converted, coresdk.ServiceIdResponseDetails{
+			ServiceId: stringPointer(service.ServiceId),
 		})
 	}
 	return converted
@@ -633,7 +683,20 @@ func currentServiceGatewayID(resource *corev1beta1.ServiceGateway) string {
 	if resource == nil {
 		return ""
 	}
-	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
+		return ocid
+	}
+	return strings.TrimSpace(resource.Status.Id)
+}
+
+func seedServiceGatewayTrackedOCID(resource *corev1beta1.ServiceGateway, trackedID string) {
+	if resource == nil || strings.TrimSpace(trackedID) == "" {
+		return
+	}
+	if strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)) != "" {
+		return
+	}
+	resource.Status.OsokStatus.Ocid = shared.OCID(trackedID)
 }
 
 func serviceGatewayLifecycleIsRetryable(state coresdk.ServiceGatewayLifecycleStateEnum) bool {
@@ -716,6 +779,13 @@ func stringValue(value *string) string {
 	return *value
 }
 
+func stringPointer(value string) *string {
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	return common.String(value)
+}
+
 func boolValue(value *bool) bool {
 	if value == nil {
 		return false
@@ -754,4 +824,22 @@ func convertOCIToStatusDefinedTags(input map[string]map[string]interface{}) map[
 		converted[namespace] = convertedValues
 	}
 	return converted
+}
+
+func serviceGatewayFromProjectedStatus(status corev1beta1.ServiceGatewayStatus) coresdk.ServiceGateway {
+	current := coresdk.ServiceGateway{
+		BlockTraffic:   common.Bool(status.BlockTraffic),
+		CompartmentId:  stringPointer(status.CompartmentId),
+		Id:             stringPointer(status.Id),
+		LifecycleState: coresdk.ServiceGatewayLifecycleStateEnum(status.LifecycleState),
+		Services:       convertStatusServicesToOCIResponse(status.Services),
+		VcnId:          stringPointer(status.VcnId),
+		DisplayName:    stringPointer(status.DisplayName),
+		FreeformTags:   cloneStringMap(status.FreeformTags),
+		RouteTableId:   stringPointer(status.RouteTableId),
+	}
+	if status.DefinedTags != nil {
+		current.DefinedTags = *util.ConvertToOciDefinedTags(&status.DefinedTags)
+	}
+	return current
 }
