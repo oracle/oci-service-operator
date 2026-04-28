@@ -7,6 +7,7 @@ package project
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -215,6 +216,12 @@ func TestProjectServiceClientCreateOrUpdateResolvesExistingProjectBeforeCreate(t
 			if req.DisplayName == nil || *req.DisplayName != "project-alpha" {
 				t.Fatalf("list displayName = %v, want spec displayName", req.DisplayName)
 			}
+			if req.LifecycleState != "" {
+				t.Fatalf("list lifecycleState = %q, want empty because runtime matches reusability from the response", req.LifecycleState)
+			}
+			if req.CreatedBy != nil {
+				t.Fatalf("list createdBy = %v, want nil because runtime does not bind identity from provider-only filters", req.CreatedBy)
+			}
 			return datasciencesdk.ListProjectsResponse{
 				Items: []datasciencesdk.ProjectSummary{
 					makeSDKProjectSummary(
@@ -354,6 +361,52 @@ func TestProjectServiceClientCreateOrUpdateUpdatesMutableDrift(t *testing.T) {
 	}
 }
 
+func TestProjectServiceClientCreateOrUpdateRejectsCompartmentDriftAgainstLiveProject(t *testing.T) {
+	t.Parallel()
+
+	updateCalls := 0
+
+	client := testProjectClient(&fakeProjectOCIClient{
+		getProjectFn: func(_ context.Context, req datasciencesdk.GetProjectRequest) (datasciencesdk.GetProjectResponse, error) {
+			if req.ProjectId == nil || *req.ProjectId != "ocid1.project.oc1..existing" {
+				t.Fatalf("get projectId = %v, want tracked project ID", req.ProjectId)
+			}
+			return datasciencesdk.GetProjectResponse{
+				Project: makeSDKProject(
+					"ocid1.project.oc1..existing",
+					"ocid1.compartment.oc1..live",
+					"project-alpha",
+					"desired description",
+					datasciencesdk.ProjectLifecycleStateActive,
+				),
+			}, nil
+		},
+		updateProjectFn: func(_ context.Context, _ datasciencesdk.UpdateProjectRequest) (datasciencesdk.UpdateProjectResponse, error) {
+			updateCalls++
+			t.Fatal("UpdateProject() should not be called when compartment drift requires replacement")
+			return datasciencesdk.UpdateProjectResponse{}, nil
+		},
+	})
+
+	resource := makeProjectResource()
+	resource.Status.Id = "ocid1.project.oc1..existing"
+	resource.Status.CompartmentId = resource.Spec.CompartmentId
+
+	_, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil || !strings.Contains(err.Error(), "require replacement when compartmentId changes") {
+		t.Fatalf("CreateOrUpdate() error = %v, want replacement failure for compartmentId drift", err)
+	}
+	if updateCalls != 0 {
+		t.Fatalf("UpdateProject() calls = %d, want 0", updateCalls)
+	}
+	if resource.Status.CompartmentId != "ocid1.compartment.oc1..live" {
+		t.Fatalf("status.compartmentId = %q, want live compartment after force-new validation", resource.Status.CompartmentId)
+	}
+	if resource.Status.LifecycleState != "ACTIVE" {
+		t.Fatalf("status.lifecycleState = %q, want ACTIVE from live project read", resource.Status.LifecycleState)
+	}
+}
+
 func TestProjectServiceClientDeleteFallsBackToListUsingTrackedIdentity(t *testing.T) {
 	t.Parallel()
 
@@ -408,6 +461,12 @@ func TestProjectServiceClientDeleteFallsBackToListUsingTrackedIdentity(t *testin
 			}
 			if req.DisplayName == nil || *req.DisplayName != "observed-name" {
 				t.Fatalf("list displayName = %v, want observed displayName", req.DisplayName)
+			}
+			if req.LifecycleState != "" {
+				t.Fatalf("list lifecycleState = %q, want empty because delete fallback reuses the reviewed identity shape", req.LifecycleState)
+			}
+			if req.CreatedBy != nil {
+				t.Fatalf("list createdBy = %v, want nil because delete fallback does not bind provider-only filters", req.CreatedBy)
 			}
 			return datasciencesdk.ListProjectsResponse{
 				Items: []datasciencesdk.ProjectSummary{
