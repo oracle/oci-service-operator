@@ -412,6 +412,50 @@ func TestCreateOrUpdate_ClearingMutableFieldsTriggersUpdate(t *testing.T) {
 	assert.Empty(t, resource.Status.Services)
 }
 
+func TestCreateOrUpdate_PostCreateBlockTrafficDriftTriggersUpdate(t *testing.T) {
+	var captured coresdk.UpdateServiceGatewayRequest
+	getCalls := 0
+	updateCalls := 0
+	manager := newServiceGatewayTestManager(&fakeServiceGatewayOCIClient{
+		createFn: func(_ context.Context, req coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
+			assert.Equal(t, common.String("ocid1.compartment.oc1..example"), req.CompartmentId)
+			created := makeSDKServiceGateway("ocid1.servicegateway.oc1..create", "test-service-gateway", coresdk.ServiceGatewayLifecycleStateAvailable)
+			created.BlockTraffic = common.Bool(false)
+			return coresdk.CreateServiceGatewayResponse{ServiceGateway: created}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.servicegateway.oc1..create", *req.ServiceGatewayId)
+			current := makeSDKServiceGateway("ocid1.servicegateway.oc1..create", "test-service-gateway", coresdk.ServiceGatewayLifecycleStateAvailable)
+			current.BlockTraffic = common.Bool(false)
+			return coresdk.GetServiceGatewayResponse{ServiceGateway: current}, nil
+		},
+		updateFn: func(_ context.Context, req coresdk.UpdateServiceGatewayRequest) (coresdk.UpdateServiceGatewayResponse, error) {
+			updateCalls++
+			captured = req
+			updated := makeSDKServiceGateway("ocid1.servicegateway.oc1..create", "test-service-gateway", coresdk.ServiceGatewayLifecycleStateAvailable)
+			return coresdk.UpdateServiceGatewayResponse{ServiceGateway: updated}, nil
+		},
+	})
+
+	resource := makeSpecServiceGateway()
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.GreaterOrEqual(t, getCalls, 1)
+	assert.Equal(t, 1, updateCalls)
+	assert.Equal(t, "ocid1.servicegateway.oc1..create", *captured.ServiceGatewayId)
+	assert.Equal(t, true, *captured.BlockTraffic)
+	assert.Nil(t, captured.DisplayName)
+	assert.Nil(t, captured.RouteTableId)
+	assert.Nil(t, captured.FreeformTags)
+	assert.Nil(t, captured.DefinedTags)
+	assert.Nil(t, captured.Services)
+	assert.True(t, resource.Status.BlockTraffic)
+}
+
 func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -557,6 +601,53 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 	assert.True(t, deleted)
 	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+}
+
+func TestCreateOrUpdate_StatusIDFallbackAvoidsRecreateWhenStateMatches(t *testing.T) {
+	createCalls := 0
+	getCalls := 0
+	updateCalls := 0
+	manager := newServiceGatewayTestManager(&fakeServiceGatewayOCIClient{
+		createFn: func(_ context.Context, _ coresdk.CreateServiceGatewayRequest) (coresdk.CreateServiceGatewayResponse, error) {
+			createCalls++
+			return coresdk.CreateServiceGatewayResponse{}, nil
+		},
+		getFn: func(_ context.Context, req coresdk.GetServiceGatewayRequest) (coresdk.GetServiceGatewayResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.servicegateway.oc1..existing", *req.ServiceGatewayId)
+			current := makeSDKServiceGateway("ocid1.servicegateway.oc1..existing", "", coresdk.ServiceGatewayLifecycleStateAvailable)
+			current.BlockTraffic = common.Bool(false)
+			current.Services = []coresdk.ServiceIdResponseDetails{}
+			current.DisplayName = nil
+			current.DefinedTags = nil
+			current.FreeformTags = nil
+			current.RouteTableId = nil
+			return coresdk.GetServiceGatewayResponse{ServiceGateway: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateServiceGatewayRequest) (coresdk.UpdateServiceGatewayResponse, error) {
+			updateCalls++
+			return coresdk.UpdateServiceGatewayResponse{}, nil
+		},
+	})
+
+	resource := makeSpecServiceGateway()
+	resource.Spec.BlockTraffic = false
+	resource.Spec.DisplayName = ""
+	resource.Spec.DefinedTags = nil
+	resource.Spec.FreeformTags = nil
+	resource.Spec.RouteTableId = ""
+	resource.Spec.Services = []corev1beta1.ServiceGatewayService{}
+	resource.Status.Id = "ocid1.servicegateway.oc1..existing"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.GreaterOrEqual(t, getCalls, 1)
+	assert.Equal(t, 0, createCalls)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, shared.OCID("ocid1.servicegateway.oc1..existing"), resource.Status.OsokStatus.Ocid)
+	assert.Equal(t, "ocid1.servicegateway.oc1..existing", resource.Status.Id)
 }
 
 func TestDelete_KeepsFinalizerWhileObservedTerminating(t *testing.T) {
