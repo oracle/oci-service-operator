@@ -17,9 +17,11 @@ gaps: []
   `pkg/servicemanager/ailanguage/project/project_serviceclient.go`.
 - Create, update, and delete are work-request-backed. The runtime stores the
   in-flight OCI work request in `status.async.current`, normalizes AI Language
-  `OperationStatus*` values into shared async classes, normalizes work-request
-  `OperationType*` values into create/update/delete phases, and resumes
-  reconciliation from that shared async tracker across requeues.
+  `OperationStatus*` values (`ACCEPTED`, `IN_PROGRESS`, `WAITING`,
+  `CANCELING`, `SUCCEEDED`, `CANCELED`, and `NEEDS_ATTENTION`) into shared
+  async classes, normalizes work-request `OperationType*` values into
+  create/update/delete phases, and resumes reconciliation from that shared
+  async tracker across requeues.
 - Create-time identity recovery is work-request-backed. The runtime records the
   create response Project OCID when OCI returns it, otherwise resolves the
   created Project OCID from work-request resources before reading the Project
@@ -30,6 +32,11 @@ gaps: []
   reuses `status.compartmentId`, `status.displayName`, and tracked `projectId`
   when `GetProject` returns NotFound so finalizer release does not depend on
   stale spec values.
+- The audited v65.110.0 request surface stays explicit. `ListProjects` keeps
+  optional tracked-identity query field `projectId`, while `GetProject`,
+  `UpdateProject`, and `DeleteProject` use only path `projectId`; the service
+  SDK does not expose lock-override query fields for this resource, so the
+  handwritten runtime scope remains unchanged.
 - Mutable drift is limited to `displayName`, `description`, `freeformTags`, and
   `definedTags`. `compartmentId` remains replacement-only drift, so the live
   runtime never exercises provider-only `ChangeProjectCompartment` even though

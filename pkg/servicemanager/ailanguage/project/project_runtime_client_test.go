@@ -7,6 +7,7 @@ package project
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
@@ -174,6 +175,38 @@ func requireAsyncCurrent(t *testing.T, resource *ailanguagev1beta1.Project, phas
 	}
 	if current.WorkRequestID != workRequestID {
 		t.Fatalf("status.async.current.workRequestId = %q, want %q", current.WorkRequestID, workRequestID)
+	}
+}
+
+func TestProjectRuntimeHooksUseReviewedRequestFields(t *testing.T) {
+	t.Parallel()
+
+	hooks := newProjectDefaultRuntimeHooks(ailanguagesdk.AIServiceLanguageClient{})
+	applyProjectRuntimeHooks(&ProjectServiceManager{}, &hooks, &fakeProjectOCIClient{}, nil)
+
+	if !reflect.DeepEqual(hooks.Create.Fields, projectCreateFields()) {
+		t.Fatalf("create fields = %#v, want %#v", hooks.Create.Fields, projectCreateFields())
+	}
+	if !reflect.DeepEqual(hooks.Get.Fields, projectGetFields()) {
+		t.Fatalf("get fields = %#v, want %#v", hooks.Get.Fields, projectGetFields())
+	}
+	if !reflect.DeepEqual(hooks.List.Fields, projectListFields()) {
+		t.Fatalf("list fields = %#v, want %#v", hooks.List.Fields, projectListFields())
+	}
+	if !reflect.DeepEqual(hooks.Update.Fields, projectUpdateFields()) {
+		t.Fatalf("update fields = %#v, want %#v", hooks.Update.Fields, projectUpdateFields())
+	}
+	if !reflect.DeepEqual(hooks.Delete.Fields, projectDeleteFields()) {
+		t.Fatalf("delete fields = %#v, want %#v", hooks.Delete.Fields, projectDeleteFields())
+	}
+	if hooks.Semantics == nil || hooks.Semantics.Async == nil {
+		t.Fatal("semantics.async = nil, want reviewed work-request semantics")
+	}
+	if hooks.Semantics.Async.Strategy != "workrequest" {
+		t.Fatalf("semantics.async.strategy = %q, want %q", hooks.Semantics.Async.Strategy, "workrequest")
+	}
+	if hooks.Async.GetWorkRequest == nil || hooks.Async.ResolveAction == nil || hooks.Async.ResolvePhase == nil || hooks.Async.RecoverResourceID == nil {
+		t.Fatalf("async hooks = %#v, want reviewed work-request helpers wired", hooks.Async)
 	}
 }
 

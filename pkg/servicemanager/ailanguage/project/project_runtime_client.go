@@ -106,7 +106,11 @@ func applyProjectRuntimeHooks(
 	) (any, bool, error) {
 		return buildProjectUpdateBody(resource, currentResponse)
 	}
+	hooks.Create.Fields = projectCreateFields()
+	hooks.Get.Fields = projectGetFields()
 	hooks.List.Fields = projectListFields()
+	hooks.Update.Fields = projectUpdateFields()
+	hooks.Delete.Fields = projectDeleteFields()
 	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedProjectIdentity
 	hooks.StatusHooks.ProjectStatus = projectStatusFromResponse
 	hooks.ParityHooks.ValidateCreateOnlyDrift = validateProjectCreateOnlyDriftForResponse
