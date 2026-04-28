@@ -68,7 +68,8 @@ else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
 Supported update surface: defined_tags,
-display_name, freeform_tags
+display_name, freeform_tags,
+security_attributes (+1 more)
 Reject before mutate: force-new fields
 byoipv6_cidr_details, cidr_block,
 cidr_blocks, compartment_id (+4 more)
@@ -83,7 +84,7 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateVcn only for mutable\nfields defined_tags, display_name,\nfreeform_tags
+ServiceManager -> OCI: Apply UpdateVcn only for mutable\nfields defined_tags, display_name,\nfreeform_tags, security_attributes\n(+1 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetVcn
 end
@@ -118,7 +119,7 @@ requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
 UPDATING; delete TERMINATING, TERMINATED
 supported drift: defined_tags, display_name,
-freeform_tags
+freeform_tags, security_attributes (+1 more)
 reject before mutate: force-new fields
 byoipv6_cidr_details, cidr_block, cidr_blocks,
 compartment_id (+4 more) and conflicts

@@ -63,10 +63,12 @@ func applyVcnRuntimeHooks(
 		semantics := *hooks.Semantics
 		mutation := semantics.Mutation
 		mutation.ForceNew = nil
+		mutation.Mutable = appendUniqueVcnMutationPaths(mutation.Mutable, "securityAttributes", "isZprOnly")
 		semantics.Mutation = mutation
 		hooks.Semantics = &semantics
 	}
 
+	hooks.BuildUpdateBody = buildVcnUpdateBody
 	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedVcnIdentity
 	hooks.ParityHooks.NormalizeDesiredState = func(resource *corev1beta1.Vcn, currentResponse any) {
 		current, ok := vcnFromResponse(currentResponse)
@@ -187,6 +189,60 @@ func normalizeEquivalentVcnCreateOnlyLists(resource *corev1beta1.Vcn, current co
 	if normalizedStringSlicesEqual(current.Byoipv6CidrBlocks, desiredByoipv6Blocks(resource.Spec.Byoipv6CidrDetails)) {
 		resource.Spec.Byoipv6CidrDetails = reorderByoipv6Details(resource.Spec.Byoipv6CidrDetails, current.Byoipv6CidrBlocks)
 	}
+}
+
+func buildVcnUpdateBody(
+	_ context.Context,
+	resource *corev1beta1.Vcn,
+	_ string,
+	currentResponse any,
+) (any, bool, error) {
+	current, ok := vcnFromResponse(currentResponse)
+	if !ok {
+		return nil, false, fmt.Errorf("unexpected Vcn current response type %T", currentResponse)
+	}
+
+	details := coresdk.UpdateVcnDetails{}
+	updateNeeded := false
+
+	if strings.TrimSpace(resource.Spec.DisplayName) != "" && !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
+		details.DisplayName = common.String(resource.Spec.DisplayName)
+		updateNeeded = true
+	}
+
+	if len(resource.Spec.DefinedTags) > 0 {
+		desiredDefinedTags := convertSharedMapValuesToOCI(resource.Spec.DefinedTags)
+		if !nestedMapEqual(current.DefinedTags, desiredDefinedTags) {
+			details.DefinedTags = desiredDefinedTags
+			updateNeeded = true
+		}
+	}
+
+	if len(resource.Spec.FreeformTags) > 0 {
+		desiredFreeformTags := copyStringMap(resource.Spec.FreeformTags)
+		if !reflect.DeepEqual(current.FreeformTags, desiredFreeformTags) {
+			details.FreeformTags = desiredFreeformTags
+			updateNeeded = true
+		}
+	}
+
+	if resource.Spec.SecurityAttributes != nil {
+		desiredSecurityAttributes := convertSharedMapValuesToOCI(resource.Spec.SecurityAttributes)
+		if !nestedMapEqual(current.SecurityAttributes, desiredSecurityAttributes) {
+			details.SecurityAttributes = desiredSecurityAttributes
+			updateNeeded = true
+		}
+	}
+
+	if boolPtrValue(current.IsZprOnly) != resource.Spec.IsZprOnly {
+		details.IsZprOnly = common.Bool(resource.Spec.IsZprOnly)
+		updateNeeded = true
+	}
+
+	if !updateNeeded {
+		return nil, false, nil
+	}
+	return details, true, nil
 }
 
 func clearVcnProjectedStatus(resource *corev1beta1.Vcn) {
@@ -375,4 +431,61 @@ func stringPtrEqual(actual *string, expected string) bool {
 		return strings.TrimSpace(expected) == ""
 	}
 	return *actual == expected
+}
+
+func boolPtrValue(value *bool) bool {
+	return value != nil && *value
+}
+
+func convertSharedMapValuesToOCI(values map[string]shared.MapValue) map[string]map[string]interface{} {
+	if values == nil {
+		return nil
+	}
+
+	converted := make(map[string]map[string]interface{}, len(values))
+	for outerKey, outerValue := range values {
+		innerMap := make(map[string]interface{}, len(outerValue))
+		for innerKey, innerValue := range outerValue {
+			innerMap[innerKey] = innerValue
+		}
+		converted[outerKey] = innerMap
+	}
+	return converted
+}
+
+func copyStringMap(values map[string]string) map[string]string {
+	if len(values) == 0 {
+		return nil
+	}
+
+	copied := make(map[string]string, len(values))
+	for key, value := range values {
+		copied[key] = value
+	}
+	return copied
+}
+
+func nestedMapEqual(left map[string]map[string]interface{}, right map[string]map[string]interface{}) bool {
+	if len(left) == 0 && len(right) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(left, right)
+}
+
+func appendUniqueVcnMutationPaths(existing []string, extras ...string) []string {
+	seen := make(map[string]struct{}, len(existing)+len(extras))
+	for _, value := range existing {
+		seen[value] = struct{}{}
+	}
+	for _, value := range extras {
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		existing = append(existing, value)
+	}
+	return existing
 }
