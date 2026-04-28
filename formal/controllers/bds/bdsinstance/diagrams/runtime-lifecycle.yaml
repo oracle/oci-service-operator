@@ -26,6 +26,13 @@ repoAuthored:
       - is_secure
       - network_config
       - nodes
+    createOnly:
+      - bds_cluster_version_summary
+      - cluster_admin_password
+      - cluster_public_key
+      - kerberos_realm_name
+      - secret_id
+      - is_secret_reused
   hooks:
     create:
       - helper: tfresource.CreateResource
@@ -49,5 +56,8 @@ notes:
   - Only `displayName`, `bootstrapScriptUrl`, `freeformTags`, `definedTags`,
     and `kmsKeyId` reconcile in place. `compartmentId`, `clusterVersion`,
     `isHighAvailability`, `isSecure`, `clusterProfile`, `networkConfig`, and
-    `nodes` remain replacement-only drift, while the runtime has no secret side
-    effects.
+    `nodes` remain replacement-only drift. `secretId`,
+    `isSecretReused`, `bdsClusterVersionSummary`, `clusterAdminPassword`,
+    `clusterPublicKey`, and `kerberosRealmName` stay create-only for the
+    reviewed runtime, `timeEarliestCertificateExpiration` stays observed
+    status-only, and the runtime has no secret side effects.

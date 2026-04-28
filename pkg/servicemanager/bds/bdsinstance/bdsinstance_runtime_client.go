@@ -31,6 +31,7 @@ func applyBdsInstanceRuntimeHooks(hooks *BdsInstanceRuntimeHooks) {
 	}
 
 	hooks.Semantics = reviewedBdsInstanceRuntimeSemantics()
+	hooks.StatusHooks.ProjectStatus = projectBdsInstanceStatus
 	hooks.BuildUpdateBody = func(
 		_ context.Context,
 		resource *bdsv1beta1.BdsInstance,
@@ -59,12 +60,15 @@ func reviewedBdsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 			"isHighAvailability",
 			"isSecure",
 			"nodes",
+			"secretId",
+			"isSecretReused",
 			"networkConfig",
 			"bootstrapScriptUrl",
 			"freeformTags",
 			"definedTags",
 			"kmsKeyId",
 			"clusterProfile",
+			"bdsClusterVersionSummary",
 		},
 		ConflictsWith: map[string][]string{},
 	}
@@ -122,6 +126,60 @@ func buildBdsInstanceUpdateBody(
 	return updateDetails, updateNeeded, nil
 }
 
+func projectBdsInstanceStatus(resource *bdsv1beta1.BdsInstance, response any) error {
+	if resource == nil {
+		return fmt.Errorf("bdsinstance resource is nil")
+	}
+
+	body, err := bdsInstanceStatusBody(response)
+	if err != nil {
+		return err
+	}
+
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal current BdsInstance response: %w", err)
+	}
+
+	status := bdsv1beta1.BdsInstanceStatus{
+		OsokStatus: resource.Status.OsokStatus,
+	}
+	if err := json.Unmarshal(payload, &status); err != nil {
+		return fmt.Errorf("project BdsInstance status: %w", err)
+	}
+
+	resource.Status = status
+	return nil
+}
+
+func bdsInstanceStatusBody(currentResponse any) (any, error) {
+	switch current := currentResponse.(type) {
+	case bdssdk.BdsInstance:
+		return current, nil
+	case *bdssdk.BdsInstance:
+		if current == nil {
+			return nil, fmt.Errorf("current BdsInstance response is nil")
+		}
+		return *current, nil
+	case bdssdk.BdsInstanceSummary:
+		return current, nil
+	case *bdssdk.BdsInstanceSummary:
+		if current == nil {
+			return nil, fmt.Errorf("current BdsInstance response is nil")
+		}
+		return *current, nil
+	case bdssdk.GetBdsInstanceResponse:
+		return current.BdsInstance, nil
+	case *bdssdk.GetBdsInstanceResponse:
+		if current == nil {
+			return nil, fmt.Errorf("current BdsInstance response is nil")
+		}
+		return current.BdsInstance, nil
+	default:
+		return nil, fmt.Errorf("unsupported current BdsInstance response type %T", currentResponse)
+	}
+}
+
 func bdsInstanceRuntimeBody(currentResponse any) (bdssdk.BdsInstance, error) {
 	switch current := currentResponse.(type) {
 	case bdssdk.BdsInstance:
@@ -146,6 +204,7 @@ func bdsInstanceRuntimeBody(currentResponse any) (bdssdk.BdsInstance, error) {
 			NumberOfNodesRequiringMaintenanceReboot: current.NumberOfNodesRequiringMaintenanceReboot,
 			ClusterVersion:                          current.ClusterVersion,
 			ClusterProfile:                          current.ClusterProfile,
+			TimeEarliestCertificateExpiration:       current.TimeEarliestCertificateExpiration,
 			FreeformTags:                            current.FreeformTags,
 			DefinedTags:                             current.DefinedTags,
 		}, nil
@@ -181,6 +240,16 @@ func validateBdsInstanceObservedCreateOnlyDrift(spec bdsv1beta1.BdsInstanceSpec,
 	}
 	if spec.ClusterProfile != "" && spec.ClusterProfile != string(current.ClusterProfile) {
 		return fmt.Errorf("BdsInstance requires replacement when clusterProfile changes")
+	}
+	if spec.SecretId != "" && spec.SecretId != stringValue(current.SecretId) {
+		return fmt.Errorf("BdsInstance requires replacement when secretId changes")
+	}
+	if spec.IsSecretReused && spec.IsSecretReused != boolValue(current.IsSecretReused) {
+		return fmt.Errorf("BdsInstance requires replacement when isSecretReused changes")
+	}
+	if hasMeaningfulBdsClusterVersionSummary(spec.BdsClusterVersionSummary) &&
+		!matchesBdsClusterVersionSummary(spec.BdsClusterVersionSummary, current.BdsClusterVersionSummary) {
+		return fmt.Errorf("BdsInstance requires replacement when bdsClusterVersionSummary changes")
 	}
 	if !matchesBdsNetworkConfig(spec.NetworkConfig, current.NetworkConfig) {
 		return fmt.Errorf("BdsInstance requires replacement when networkConfig changes")
@@ -229,6 +298,29 @@ func matchesBdsNodes(specNodes []bdsv1beta1.BdsInstanceNode, currentNodes []bdss
 		if !matchesBdsNode(sortedSpecNodes[index], sortedCurrentNodes[index]) {
 			return false
 		}
+	}
+	return true
+}
+
+func hasMeaningfulBdsClusterVersionSummary(spec bdsv1beta1.BdsInstanceBdsClusterVersionSummary) bool {
+	return spec.BdsVersion != "" || spec.OdhVersion != ""
+}
+
+func matchesBdsClusterVersionSummary(
+	spec bdsv1beta1.BdsInstanceBdsClusterVersionSummary,
+	current *bdssdk.BdsClusterVersionSummary,
+) bool {
+	if !hasMeaningfulBdsClusterVersionSummary(spec) {
+		return true
+	}
+	if current == nil {
+		return false
+	}
+	if spec.BdsVersion != stringValue(current.BdsVersion) {
+		return false
+	}
+	if spec.OdhVersion != "" && spec.OdhVersion != stringValue(current.OdhVersion) {
+		return false
 	}
 	return true
 }

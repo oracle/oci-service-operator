@@ -31,7 +31,9 @@ generated-runtime contract.
   `status.lifecycleState`, `status.nodes`, `status.numberOfNodes`,
   `status.clusterVersion`, `status.networkConfig`, `status.clusterDetails`,
   `status.cloudSqlDetails`, `status.freeformTags`, `status.definedTags`,
-  `status.kmsKeyId`, and `status.clusterProfile` read-model fields when OCI
+  `status.kmsKeyId`, `status.clusterProfile`, `status.secretId`,
+  `status.isSecretReused`, `status.bdsClusterVersionSummary`, and
+  `status.timeEarliestCertificateExpiration` read-model fields when OCI
   returns them.
 
 ## Repo-authored semantics
@@ -51,10 +53,18 @@ generated-runtime contract.
   `networkConfig`, and `nodes`; the handwritten drift check rejects those
   changes before OCI mutation rather than silently widening the supported
   update surface.
+- `secretId`, `isSecretReused`, and `bdsClusterVersionSummary` remain
+  create-time inputs only for the reviewed runtime, even though the refreshed
+  SDK now exposes them on the create, update, or read shapes. Post-create
+  reconciles validate those values against observed OCI status when OCI
+  projects them, but they do not widen the in-place mutation surface.
 - `clusterAdminPassword`, `clusterPublicKey`, and `kerberosRealmName` remain
   create-time inputs only. OCI does not project them back on `BdsInstance`, so
   post-create reconciles do not attempt drift detection or reapplication for
   those values.
+- `timeEarliestCertificateExpiration` is observed-status-only. OCI projects it
+  on `BdsInstance` and `BdsInstanceSummary`, and the published runtime carries
+  it into status without treating it as desired-state drift.
 - Provider auxiliary mutators `ChangeBdsInstanceCompartment`,
   `ExecuteBootstrapScript`, `InstallOsPatch`, `RemoveKafka`, `RemoveNode`,
   `StartBdsInstance`, and `StopBdsInstance` remain out-of-scope drift for the
