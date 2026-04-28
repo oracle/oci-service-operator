@@ -57,62 +57,6 @@
       }
     },
     {
-      "astFieldPath": "capacity.capacityValue",
-      "terraformFieldPath": "capacity.capacity_value",
-      "canonicalJoinKey": "capacity.capacityValue",
-      "pathShape": "object",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "confirmedUpdatable",
-        "detail": "Argument Reference marks the field as updatable in place.",
-        "rawSignal": "(updatable)"
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "docsConfirmedCandidate",
-        "finalPolicy": "allowInPlaceUpdate"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "compartmentId",
-      "terraformFieldPath": "compartment_id",
-      "canonicalJoinKey": "compartmentId",
-      "pathShape": "scalar",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "confirmedUpdatable",
-        "detail": "Argument Reference marks the field as updatable in place.",
-        "rawSignal": "(updatable)"
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "docsConfirmedCandidate",
-        "finalPolicy": "allowInPlaceUpdate"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
       "astFieldPath": "definedTags",
       "terraformFieldPath": "defined_tags",
       "canonicalJoinKey": "definedTags",
@@ -252,60 +196,6 @@
       }
     },
     {
-      "astFieldPath": "idcsAccessToken",
-      "terraformFieldPath": "idcs_access_token",
-      "canonicalJoinKey": "idcsAccessToken",
-      "pathShape": "scalar",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "kmsKeyId",
-      "terraformFieldPath": "kms_key_id",
-      "canonicalJoinKey": "kmsKeyId",
-      "pathShape": "scalar",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
       "astFieldPath": "licenseType",
       "terraformFieldPath": "license_type",
       "canonicalJoinKey": "licenseType",
@@ -388,185 +278,24 @@
       }
     },
     {
-      "astFieldPath": "networkEndpointDetails.networkSecurityGroupIds",
-      "terraformFieldPath": "network_endpoint_details.network_security_group_ids",
-      "canonicalJoinKey": "networkEndpointDetails.networkSecurityGroupIds",
-      "pathShape": "object",
+      "astFieldPath": "updateChannel",
+      "terraformFieldPath": "update_channel",
+      "canonicalJoinKey": "updateChannel",
+      "pathShape": "scalar",
       "ast": {
         "updateCandidateState": "updateCandidate",
         "forceNew": false,
         "conflictsWith": null
       },
       "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
       },
       "merge": {
         "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "networkEndpointDetails.subnetId",
-      "terraformFieldPath": "network_endpoint_details.subnet_id",
-      "canonicalJoinKey": "networkEndpointDetails.subnetId",
-      "pathShape": "object",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "networkEndpointDetails.vcnId",
-      "terraformFieldPath": "network_endpoint_details.vcn_id",
-      "canonicalJoinKey": "networkEndpointDetails.vcnId",
-      "pathShape": "object",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "networkEndpointDetails.whitelistedIps",
-      "terraformFieldPath": "network_endpoint_details.whitelisted_ips",
-      "canonicalJoinKey": "networkEndpointDetails.whitelistedIps",
-      "pathShape": "object",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "networkEndpointDetails.whitelistedServices",
-      "terraformFieldPath": "network_endpoint_details.whitelisted_services",
-      "canonicalJoinKey": "networkEndpointDetails.whitelistedServices",
-      "pathShape": "object",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "networkEndpointDetails.whitelistedVcns.id",
-      "terraformFieldPath": "network_endpoint_details.whitelisted_vcns.id",
-      "canonicalJoinKey": "networkEndpointDetails.whitelistedVcns[].id",
-      "pathShape": "listItem",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
-      },
-      "provenance": {
-        "formalImportPath": "imports/analytics/analyticsinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.mutable",
-        "terraformDocsPage": "analytics_analytics_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
-      "astFieldPath": "networkEndpointDetails.whitelistedVcns.whitelistedIps",
-      "terraformFieldPath": "network_endpoint_details.whitelisted_vcns.whitelisted_ips",
-      "canonicalJoinKey": "networkEndpointDetails.whitelistedVcns[].whitelistedIps",
-      "pathShape": "listItem",
-      "ast": {
-        "updateCandidateState": "updateCandidate",
-        "forceNew": false,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "unknown",
-        "finalPolicy": "unknown"
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
       },
       "provenance": {
         "formalImportPath": "imports/analytics/analyticsinstance.json",
