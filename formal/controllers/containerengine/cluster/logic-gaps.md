@@ -23,9 +23,16 @@ list-lookup semantics.
 - Mutation policy is explicit: only `UpdateClusterDetails` fields are mutable
   in place. That mutable surface is `name`, `kubernetesVersion`,
   `definedTags`, `freeformTags`, `imagePolicyConfig`, `type`,
-  `options.admissionControllerOptions`, `options.persistentVolumeConfig`, and
-  `options.serviceLbConfig`. Fields omitted from `UpdateClusterDetails`
-  remain create-only drift and never open implicit replacement.
+  `options.admissionControllerOptions`, `options.persistentVolumeConfig`,
+  `options.serviceLbConfig` including `backendNsgIds`,
+  `options.openIdConnectTokenAuthenticationConfig`, and
+  `options.openIdConnectDiscovery`. Fields omitted from
+  `UpdateClusterDetails` remain create-only drift and never open implicit
+  replacement.
+- Read parity is explicit: `GetCluster` always sets
+  `shouldIncludeOidcConfigFile=true` so the mutable OIDC auth
+  `configurationFile` participates in drift detection and read-after-write
+  follow-up observation instead of being silently truncated from live reads.
 - Pre-create lookup semantics are explicit: `ListClusters` searches by
   `compartmentId`, `name`, and reusable lifecycle state, and only a single
   exact-name match in `ACTIVE`, `CREATING`, or `UPDATING` is safe to reuse.
