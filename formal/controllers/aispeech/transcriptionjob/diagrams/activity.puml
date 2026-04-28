@@ -101,7 +101,8 @@ supported drift: defined_tags, description,
 display_name, freeform_tags
 reject before mutate: force-new fields
 compartment_id
-create-only fields: none
+create-only fields:
+model_details.transcription_settings.additional_settings
 list lookup: oci_ai_speech_transcription_jobs
 filters compartment_id, display_name, id; Exact
 displayName or tracked OCID match within the
@@ -127,10 +128,14 @@ confirms the resource is absent rather than
 stopping at CANCELED.
 Only displayName, description, freeformTags, and
 definedTags reconcile in place. compartmentId is
-replacement-only, there are no secret side
-effects, and the auxiliary
-CancelTranscriptionJob API remains outside the
-published controller surface.
+replacement-only, the refreshed
+modelDetails.transcriptionSettings.additionalSettings
+map is accepted on create and projected back
+through status reads but remains create-only
+drift because UpdateTranscriptionJobDetails
+omits it, there are no secret side effects, and
+the auxiliary CancelTranscriptionJob API remains
+outside the published controller surface.
 The pinned terraform-provider-oci revision has
 no matching speech resource, so the import
 catalog for this row is SDK-shaped and
