@@ -432,6 +432,46 @@ func TestCreateOrUpdate_ZprFieldsTriggerMutableUpdate(t *testing.T) {
 	assert.Equal(t, 3, getCalls)
 }
 
+func TestCreateOrUpdate_ClearsSecurityAttributesWithExplicitEmptySpec(t *testing.T) {
+	var captured coresdk.UpdateVcnRequest
+	getCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			current.IsZprOnly = common.Bool(false)
+			if getCalls >= 3 {
+				current.SecurityAttributes = nil
+				return coresdk.GetVcnResponse{Vcn: current}, nil
+			}
+			current.SecurityAttributes = makeSDKSecurityAttributes("21", "enforce")
+			return coresdk.GetVcnResponse{Vcn: current}, nil
+		},
+		updateFn: func(_ context.Context, req coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			captured = req
+			updated := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			updated.SecurityAttributes = nil
+			updated.IsZprOnly = common.Bool(false)
+			return coresdk.UpdateVcnResponse{Vcn: updated}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.SecurityAttributes = map[string]shared.MapValue{}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, "ocid1.vcn.oc1..existing", *captured.VcnId)
+	assert.NotNil(t, captured.SecurityAttributes)
+	assert.Empty(t, captured.SecurityAttributes)
+	assert.Nil(t, captured.IsZprOnly)
+	assert.Nil(t, resource.Status.SecurityAttributes)
+	assert.Equal(t, 3, getCalls)
+}
+
 func TestCreateOrUpdate_DoesNotUpdateDuringRetryableLiveStates(t *testing.T) {
 	tests := []struct {
 		name  string

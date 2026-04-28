@@ -226,7 +226,7 @@ func buildVcnUpdateBody(
 		}
 	}
 
-	if len(resource.Spec.SecurityAttributes) > 0 {
+	if resource.Spec.SecurityAttributes != nil {
 		desiredSecurityAttributes := convertSharedMapValuesToOCI(resource.Spec.SecurityAttributes)
 		if !nestedMapEqual(current.SecurityAttributes, desiredSecurityAttributes) {
 			details.SecurityAttributes = desiredSecurityAttributes
@@ -438,7 +438,7 @@ func boolPtrValue(value *bool) bool {
 }
 
 func convertSharedMapValuesToOCI(values map[string]shared.MapValue) map[string]map[string]interface{} {
-	if len(values) == 0 {
+	if values == nil {
 		return nil
 	}
 
