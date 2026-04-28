@@ -27,15 +27,15 @@ partition "Observe and Bind" {
 if ("Tracked or explicit OCI identity present?") then (yes)
 :Get the current OCI resource via GetDrg;
 else (no)
-:Resolve an existing OCI resource through\nListDrg using filters compartment_id, state;
+:Resolve an existing OCI resource through\nListDrgs using filters compartmentId,\ndisplayName;
 :Create the OCI resource via CreateDrg when no\nreusable match is found;
 :Persist the resolved or created OCI identity\ninto status;
 endif
 }
 if ("Delete requested?") then (yes)
 partition "Delete" {
-:Delete path uses DeleteDrg with required via\nGetDrg or ListDrg to DELETED confirmation;
-:Confirm deletion via GetDrg or ListDrg until\nOCI reaches DELETED;
+:Delete path uses DeleteDrg with required via\nGetDrg or ListDrgs to NOT_FOUND confirmation;
+:Confirm deletion via GetDrg or ListDrgs until\nOCI reaches NOT_FOUND;
 if ("Delete cleanup and finalizer release succeed?") then (yes)
 :Remove the finalizer after delete completion;
 else (no)
@@ -46,27 +46,28 @@ stop
 else (no)
 partition "Lifecycle Classification" {
 if ("OCI state in retryable set?") then (yes)
-:Request requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING;
+:Request requeue while OCI remains in\nPROVISIONING, UPDATING, TERMINATING,\nTERMINATED;
 stop
 endif
 if ("OCI state is outside success targets?") then (yes)
-:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+:Return an unsuccessful reconcile result until\nOCI reaches AVAILABLE;
 stop
 endif
 }
 partition "Ready and Drift Handling" {
-:Compare live OCI state against the imported\nfield surface;
+:Compare live OCI state against the\nrepo-authored mutation surface;
 if ("Force-new or conflicting drift detected?") then (yes)
-:Reject drift before OCI mutation for force-new\nfields compartment_id;
+:Reject drift before OCI mutation for force-new\nfields compartmentId;
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateDrg only for mutable fields\ndisplay_name;
+:Apply UpdateDrg only for mutable fields\ndefaultDrgRouteTables, definedTags,\ndisplayName, freeformTags;
 else (no)
 :Skip the no-op mutation path;
 endif
 :Run provider helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
-:Return success for the ACTIVE success state;
+:Apply explicit follow-up semantics\ndelete=confirm-delete;
+:Return success for the AVAILABLE success state;
 :Project required status and finalizer policy\nretain-until-confirmed-delete;
 :Requeue on provisioning, updating, terminating;
 }
@@ -92,17 +93,32 @@ status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+UPDATING; delete TERMINATING, TERMINATED
+follow-up: delete=confirm-delete
+supported drift: defaultDrgRouteTables,
+definedTags, displayName, freeformTags
 reject before mutate: force-new fields
-compartment_id
+compartmentId
 create-only fields: none
-list lookup: scaffold_core_drg filters
-compartment_id, state
+list lookup: oci_core_drgs filters
+compartmentId, displayName; tracked OCI ID via
+GetDrg wins; otherwise exact compartmentId plus
+displayName unique match in AVAILABLE,
+PROVISIONING, or UPDATING; blank displayName
+skips reuse and duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Ready state maps to OCI AVAILABLE.
+CreateDrgDetails does not expose
+defaultDrgRouteTables, so requested
+attachment-type defaults reconcile through
+UpdateDrg after the DRG exists.
+Delete completes only after GetDrg returns not
+found; TERMINATING and TERMINATED are accepted
+observed pre-delete states.
+The create-fallback wrapper only recovers
+first-create post-read failures when status
+already carries a created DRG OCID and a
+provisioning-like or AVAILABLE lifecycle state.
 end note
 @enduml

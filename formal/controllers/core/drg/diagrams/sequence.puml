@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetDrg
 else tracked identity is missing
-ServiceManager -> OCI: ListDrg(filters: compartment_id,\nstate)
+ServiceManager -> OCI: ListDrgs(filters: compartmentId,\ndisplayName)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateDrg
 loop create pending PROVISIONING
@@ -52,9 +52,9 @@ end
 alt delete requested
 group Delete
 ServiceManager -> OCI: DeleteDrg
-ServiceManager -> OCI: confirm delete via GetDrg or ListDrg
-loop delete pending DELETING
-ServiceManager -> OCI: GetDrg or ListDrg
+ServiceManager -> OCI: confirm delete via GetDrg or\nListDrgs
+loop delete pending TERMINATING,\nTERMINATED
+ServiceManager -> OCI: GetDrg or ListDrgs
 end
 alt cleanup or finalizer release is blocked
 ServiceManager --> BaseReconciler: retain delete state and retry
@@ -63,25 +63,35 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, TERMINATING,\nTERMINATED
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface: display_name
+Supported update surface:
+defaultDrgRouteTables, definedTags,
+displayName, freeformTags
 Reject before mutate: force-new fields
-compartment_id
-Lookup filters: compartment_id, state
+compartmentId
+Lookup filters: compartmentId,
+displayName
+Lookup matching: tracked OCI ID via
+GetDrg wins; otherwise exact
+compartmentId plus displayName unique
+match in AVAILABLE, PROVISIONING, or
+UPDATING; blank displayName skips reuse
+and duplicate matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateDrg only for mutable\nfields display_name
+ServiceManager -> OCI: Apply UpdateDrg only for mutable\nfields defaultDrgRouteTables,\ndefinedTags, displayName,\nfreeformTags
 loop update pending UPDATING
 ServiceManager -> OCI: GetDrg
 end
 end
 ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ndelete=confirm-delete
 end
 ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
 end
@@ -109,17 +119,32 @@ status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+UPDATING; delete TERMINATING, TERMINATED
+follow-up: delete=confirm-delete
+supported drift: defaultDrgRouteTables,
+definedTags, displayName, freeformTags
 reject before mutate: force-new fields
-compartment_id
+compartmentId
 create-only fields: none
-list lookup: scaffold_core_drg filters
-compartment_id, state
+list lookup: oci_core_drgs filters
+compartmentId, displayName; tracked OCI ID via
+GetDrg wins; otherwise exact compartmentId plus
+displayName unique match in AVAILABLE,
+PROVISIONING, or UPDATING; blank displayName
+skips reuse and duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Ready state maps to OCI AVAILABLE.
+CreateDrgDetails does not expose
+defaultDrgRouteTables, so requested
+attachment-type defaults reconcile through
+UpdateDrg after the DRG exists.
+Delete completes only after GetDrg returns not
+found; TERMINATING and TERMINATED are accepted
+observed pre-delete states.
+The create-fallback wrapper only recovers
+first-create post-read failures when status
+already carries a created DRG OCID and a
+provisioning-like or AVAILABLE lifecycle state.
 end note
 @enduml
