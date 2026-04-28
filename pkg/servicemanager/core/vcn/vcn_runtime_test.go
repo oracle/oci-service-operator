@@ -390,6 +390,44 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	assert.Equal(t, 3, getCalls)
 }
 
+func TestCreateOrUpdate_ClearsDisplayNameWithExplicitEmptySpec(t *testing.T) {
+	var captured coresdk.UpdateVcnRequest
+	getCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "old-name", coresdk.VcnLifecycleStateAvailable)
+			current.IsZprOnly = common.Bool(false)
+			if getCalls >= 3 {
+				current.DisplayName = nil
+			}
+			return coresdk.GetVcnResponse{Vcn: current}, nil
+		},
+		updateFn: func(_ context.Context, req coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			captured = req
+			updated := makeSDKVcn("ocid1.vcn.oc1..existing", "old-name", coresdk.VcnLifecycleStateAvailable)
+			updated.DisplayName = nil
+			updated.IsZprOnly = common.Bool(false)
+			return coresdk.UpdateVcnResponse{Vcn: updated}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.DisplayName = ""
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, "ocid1.vcn.oc1..existing", *captured.VcnId)
+	if assert.NotNil(t, captured.DisplayName) {
+		assert.Equal(t, "", *captured.DisplayName)
+	}
+	assert.Nil(t, captured.DefinedTags)
+	assert.Nil(t, captured.FreeformTags)
+}
+
 func TestCreateOrUpdate_ZprFieldsTriggerMutableUpdate(t *testing.T) {
 	var captured coresdk.UpdateVcnRequest
 	getCalls := 0
@@ -470,6 +508,59 @@ func TestCreateOrUpdate_ClearsSecurityAttributesWithExplicitEmptySpec(t *testing
 	assert.Nil(t, captured.IsZprOnly)
 	assert.Nil(t, resource.Status.SecurityAttributes)
 	assert.Equal(t, 3, getCalls)
+}
+
+func TestCreateOrUpdate_ClearsTagMapsWithExplicitEmptySpec(t *testing.T) {
+	var captured coresdk.UpdateVcnRequest
+	getCalls := 0
+	updateCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			current.IsZprOnly = common.Bool(false)
+			if getCalls >= 3 {
+				current.DefinedTags = nil
+				current.FreeformTags = nil
+			}
+			return coresdk.GetVcnResponse{Vcn: current}, nil
+		},
+		updateFn: func(_ context.Context, req coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			updateCalls++
+			captured = req
+			updated := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			updated.DefinedTags = nil
+			updated.FreeformTags = nil
+			updated.IsZprOnly = common.Bool(false)
+			return coresdk.UpdateVcnResponse{Vcn: updated}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.DefinedTags = map[string]shared.MapValue{}
+	resource.Spec.FreeformTags = map[string]string{}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	if assert.Equal(t, 1, updateCalls) && assert.NotNil(t, captured.VcnId) {
+		assert.Equal(t, "ocid1.vcn.oc1..existing", *captured.VcnId)
+	}
+	if assert.NotNil(t, captured.DefinedTags) {
+		assert.Empty(t, captured.DefinedTags)
+	}
+	if assert.NotNil(t, captured.FreeformTags) {
+		assert.Empty(t, captured.FreeformTags)
+	}
+	assert.Nil(t, captured.DisplayName)
+
+	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, 1, updateCalls)
 }
 
 func TestCreateOrUpdate_DoesNotUpdateDuringRetryableLiveStates(t *testing.T) {
