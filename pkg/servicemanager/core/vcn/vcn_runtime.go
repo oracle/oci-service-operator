@@ -205,12 +205,12 @@ func buildVcnUpdateBody(
 	details := coresdk.UpdateVcnDetails{}
 	updateNeeded := false
 
-	if strings.TrimSpace(resource.Spec.DisplayName) != "" && !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
+	if !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
 		details.DisplayName = common.String(resource.Spec.DisplayName)
 		updateNeeded = true
 	}
 
-	if len(resource.Spec.DefinedTags) > 0 {
+	if resource.Spec.DefinedTags != nil {
 		desiredDefinedTags := convertSharedMapValuesToOCI(resource.Spec.DefinedTags)
 		if !nestedMapEqual(current.DefinedTags, desiredDefinedTags) {
 			details.DefinedTags = desiredDefinedTags
@@ -218,7 +218,7 @@ func buildVcnUpdateBody(
 		}
 	}
 
-	if len(resource.Spec.FreeformTags) > 0 {
+	if resource.Spec.FreeformTags != nil {
 		desiredFreeformTags := copyStringMap(resource.Spec.FreeformTags)
 		if !reflect.DeepEqual(current.FreeformTags, desiredFreeformTags) {
 			details.FreeformTags = desiredFreeformTags
@@ -454,7 +454,7 @@ func convertSharedMapValuesToOCI(values map[string]shared.MapValue) map[string]m
 }
 
 func copyStringMap(values map[string]string) map[string]string {
-	if len(values) == 0 {
+	if values == nil {
 		return nil
 	}
 

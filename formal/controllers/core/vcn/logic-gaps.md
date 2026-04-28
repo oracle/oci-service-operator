@@ -18,6 +18,10 @@ gaps: []
 - Supported in-place updates are `displayName`, `definedTags`,
   `freeformTags`, `securityAttributes`, and `isZprOnly`, matching the pinned
   `UpdateVcnDetails` SDK surface.
+- The handwritten update-body builder keeps clear-to-empty intent for
+  `displayName`, `definedTags`, and `freeformTags`: an empty desired
+  `displayName` clears a retained OCI name, and explicit empty tag maps clear
+  retained OCI tags instead of being pruned from the update request.
 - Mutable drift treats an omitted observed `isZprOnly` value as equivalent to
   `false`, so non-ZPR VCNs do not churn on no-op updates when OCI omits the
   field from read responses.
