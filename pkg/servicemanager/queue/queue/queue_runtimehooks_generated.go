@@ -86,7 +86,7 @@ func newQueueRuntimeSemantics() *generatedruntime.Semantics {
 			MatchFields:        []string{"compartmentId", "displayName", "id", "lifecycleState"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
+			Mutable:       []string{"capabilities", "channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
 			ForceNew:      []string{"compartmentId", "retentionInSeconds"},
 			ConflictsWith: map[string][]string{},
 		},

@@ -30,6 +30,34 @@
   },
   "fields": [
     {
+      "astFieldPath": "capabilities",
+      "terraformFieldPath": "capabilities",
+      "canonicalJoinKey": "capabilities",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/queue/queue.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "queue_queue#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
       "astFieldPath": "channelConsumptionLimit",
       "terraformFieldPath": "channel_consumption_limit",
       "canonicalJoinKey": "channelConsumptionLimit",
