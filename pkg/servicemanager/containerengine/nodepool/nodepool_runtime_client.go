@@ -213,6 +213,7 @@ func normalizeNodePoolCreateDetails(
 		func() { details.NodeConfigDetails = nil },
 	)
 	normalizeNodePoolCreateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
+	normalizeNodePoolCyclingDetails(spec.NodePoolCyclingDetails, &details.NodePoolCyclingDetails)
 }
 
 func normalizeNodePoolUpdateDetails(
@@ -231,6 +232,7 @@ func normalizeNodePoolUpdateDetails(
 		func() { details.NodeConfigDetails = nil },
 	)
 	normalizeNodePoolUpdateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
+	normalizeNodePoolCyclingDetails(spec.NodePoolCyclingDetails, &details.NodePoolCyclingDetails)
 }
 
 func normalizeObservedNodePoolUpdateDetails(details *containerenginesdk.UpdateNodePoolDetails) {
@@ -279,6 +281,21 @@ func normalizeNodePoolNodeConfigDetails(
 			continue
 		}
 		details[i].PreemptibleNodeConfig = nil
+	}
+}
+
+func normalizeNodePoolCyclingDetails(
+	spec containerenginev1beta1.NodePoolCyclingDetails,
+	details **containerenginesdk.NodePoolCyclingDetails,
+) {
+	if details == nil || spec.CycleModes == nil || len(spec.CycleModes) != 0 {
+		return
+	}
+	if *details == nil {
+		*details = &containerenginesdk.NodePoolCyclingDetails{}
+	}
+	if (*details).CycleModes == nil {
+		(*details).CycleModes = []containerenginesdk.CycleModeEnum{}
 	}
 }
 
@@ -521,13 +538,23 @@ func nodePoolJSONMap(value any, preservedEmptyArrays map[string]struct{}) (map[s
 }
 
 func nodePoolPreservedEmptyArrayPaths(spec containerenginev1beta1.NodePoolSpec) map[string]struct{} {
-	if spec.NodeConfigDetails.NsgIds == nil || len(spec.NodeConfigDetails.NsgIds) != 0 {
-		return nil
+	var preserved map[string]struct{}
+
+	if spec.NodeConfigDetails.NsgIds != nil && len(spec.NodeConfigDetails.NsgIds) == 0 {
+		if preserved == nil {
+			preserved = map[string]struct{}{}
+		}
+		preserved["nodeConfigDetails.nsgIds"] = struct{}{}
 	}
 
-	return map[string]struct{}{
-		"nodeConfigDetails.nsgIds": {},
+	if spec.NodePoolCyclingDetails.CycleModes != nil && len(spec.NodePoolCyclingDetails.CycleModes) == 0 {
+		if preserved == nil {
+			preserved = map[string]struct{}{}
+		}
+		preserved["nodePoolCyclingDetails.cycleModes"] = struct{}{}
 	}
+
+	return preserved
 }
 
 func pruneNodePoolJSONValue(value any, path string, preservedEmptyArrays map[string]struct{}) (any, bool) {
