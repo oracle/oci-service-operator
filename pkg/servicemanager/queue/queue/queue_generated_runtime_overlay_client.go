@@ -94,6 +94,9 @@ func (c queueGeneratedRuntimeOverlayClient) CreateOrUpdate(
 		return response, err
 	}
 	if !queueObservedLifecycleFailed(resource) {
+		if err := rememberQueueControllerOwnedCapabilityParityStatus(resource); err != nil {
+			return servicemanager.OSOKResponse{IsSuccessful: false}, err
+		}
 		return response, nil
 	}
 	return queueFinishWithLifecycle(resource, queueFromStatus(resource), "", c.log()), nil
