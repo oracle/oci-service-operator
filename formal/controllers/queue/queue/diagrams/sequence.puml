@@ -69,11 +69,11 @@ ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDAT
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface:
+Supported update surface: capabilities,
 channel_consumption_limit,
 custom_encryption_key_id,
-dead_letter_queue_delivery_count,
-defined_tags (+4 more)
+dead_letter_queue_delivery_count (+5
+more)
 Reject before mutate: force-new fields
 compartment_id, retention_in_seconds
 Lookup filters: compartment_id,
@@ -83,7 +83,7 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateQueue only for mutable\nfields channel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count,\ndefined_tags (+4 more)
+ServiceManager -> OCI: Apply UpdateQueue only for mutable\nfields capabilities,\nchannel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count (+5\nmore)
 loop update pending UPDATING
 ServiceManager -> OCI: GetQueue
 end
@@ -121,10 +121,10 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
-supported drift: channel_consumption_limit,
+supported drift: capabilities,
+channel_consumption_limit,
 custom_encryption_key_id,
-dead_letter_queue_delivery_count, defined_tags
-(+4 more)
+dead_letter_queue_delivery_count (+5 more)
 reject before mutate: force-new fields
 compartment_id, retention_in_seconds
 create-only fields: none
@@ -155,12 +155,17 @@ best-effort; it only completes after GetQueue
 confirms the tracked Queue is gone or exposes
 lifecycle state DELETED.
 Mutable drift is limited to UpdateQueueDetails
-fields such as displayName, timeout, visibility,
-tags, channelConsumptionLimit,
+fields such as capabilities, displayName,
+timeout, visibility, tags,
+channelConsumptionLimit,
 deadLetterQueueDeliveryCount, and
-customEncryptionKeyId. Create-only inputs like
-compartmentId and retentionInSeconds are
-rejected as force-new drift.
+customEncryptionKeyId. Queue steady-state parity
+treats capabilities as the enabled type set
+because GetQueue does not echo consumer-group
+add-on settings after enablement, even though
+the runtime still forwards repo-authored
+capability payloads on create and update when
+that set changes.
 A package-local companion writes or updates the
 same-name endpoint Secret only after ACTIVE when
 messagesEndpoint is present, adopts only

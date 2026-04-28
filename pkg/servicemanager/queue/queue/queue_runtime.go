@@ -7,8 +7,10 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -81,7 +83,7 @@ func applyQueueRuntimeHooks(
 		if resource == nil {
 			return nil, fmt.Errorf("Queue resource is nil")
 		}
-		return buildCreateQueueDetails(resource.Spec), nil
+		return buildCreateQueueDetails(resource.Spec)
 	}
 	hooks.BuildUpdateBody = func(
 		_ context.Context,
@@ -154,6 +156,14 @@ func buildQueueUpdateBody(
 		updateDetails.CustomEncryptionKeyId = common.String(resource.Spec.CustomEncryptionKeyId)
 		updateNeeded = true
 	}
+	desiredCapabilities, capabilitiesChanged, err := desiredQueueCapabilitiesForUpdate(resource.Spec.Capabilities, current.Capabilities)
+	if err != nil {
+		return queuesdk.UpdateQueueDetails{}, false, err
+	}
+	if capabilitiesChanged {
+		updateDetails.Capabilities = desiredCapabilities
+		updateNeeded = true
+	}
 
 	desiredFreeformTags := desiredQueueFreeformTagsForUpdate(resource.Spec.FreeformTags, current.FreeformTags)
 	if !reflect.DeepEqual(current.FreeformTags, desiredFreeformTags) {
@@ -181,6 +191,10 @@ func projectQueueStatus(resource *queuev1beta1.Queue, response any) error {
 	if !ok {
 		return nil
 	}
+	projectedCapabilities, err := projectQueueCapabilities(current.Capabilities)
+	if err != nil {
+		return err
+	}
 
 	resource.Status = queuev1beta1.QueueStatus{
 		OsokStatus:                   resource.Status.OsokStatus,
@@ -201,6 +215,7 @@ func projectQueueStatus(resource *queuev1beta1.Queue, response any) error {
 		DefinedTags:                  convertOCIToStatusDefinedTags(current.DefinedTags),
 		SystemTags:                   convertOCIToStatusDefinedTags(current.SystemTags),
 		ChannelConsumptionLimit:      intValue(current.ChannelConsumptionLimit),
+		Capabilities:                 projectedCapabilities,
 		CreateWorkRequestId:          resource.Status.CreateWorkRequestId,
 		UpdateWorkRequestId:          resource.Status.UpdateWorkRequestId,
 		DeleteWorkRequestId:          resource.Status.DeleteWorkRequestId,
@@ -360,6 +375,7 @@ func queueFromResponse(response any) (queuesdk.Queue, bool) {
 }
 
 func queueFromSummary(summary queuesdk.QueueSummary) queuesdk.Queue {
+	capabilities := queueCapabilitySummariesToDetails(summary.Capabilities)
 	return queuesdk.Queue{
 		Id:               summary.Id,
 		CompartmentId:    summary.CompartmentId,
@@ -372,10 +388,11 @@ func queueFromSummary(summary queuesdk.QueueSummary) queuesdk.Queue {
 		FreeformTags:     summary.FreeformTags,
 		DefinedTags:      summary.DefinedTags,
 		SystemTags:       summary.SystemTags,
+		Capabilities:     capabilities,
 	}
 }
 
-func buildCreateQueueDetails(spec queuev1beta1.QueueSpec) queuesdk.CreateQueueDetails {
+func buildCreateQueueDetails(spec queuev1beta1.QueueSpec) (queuesdk.CreateQueueDetails, error) {
 	createDetails := queuesdk.CreateQueueDetails{
 		DisplayName:   common.String(spec.DisplayName),
 		CompartmentId: common.String(spec.CompartmentId),
@@ -399,6 +416,13 @@ func buildCreateQueueDetails(spec queuev1beta1.QueueSpec) queuesdk.CreateQueueDe
 	if spec.CustomEncryptionKeyId != "" {
 		createDetails.CustomEncryptionKeyId = common.String(spec.CustomEncryptionKeyId)
 	}
+	capabilities, err := buildQueueCapabilities(spec.Capabilities)
+	if err != nil {
+		return queuesdk.CreateQueueDetails{}, err
+	}
+	if len(capabilities) > 0 {
+		createDetails.Capabilities = capabilities
+	}
 	if spec.FreeformTags != nil {
 		createDetails.FreeformTags = cloneStringMap(spec.FreeformTags)
 	}
@@ -406,7 +430,7 @@ func buildCreateQueueDetails(spec queuev1beta1.QueueSpec) queuesdk.CreateQueueDe
 		createDetails.DefinedTags = *util.ConvertToOciDefinedTags(&spec.DefinedTags)
 	}
 
-	return createDetails
+	return createDetails, nil
 }
 
 func validateQueueCreateOnlyDrift(spec queuev1beta1.QueueSpec, current queuesdk.Queue) error {
@@ -573,6 +597,302 @@ func desiredQueueDefinedTagsForUpdate(spec map[string]shared.MapValue, current m
 		return map[string]map[string]interface{}{}
 	}
 	return nil
+}
+
+func buildQueueCapabilities(specs []queuev1beta1.QueueCapability) ([]queuesdk.CapabilityDetails, error) {
+	if len(specs) == 0 {
+		return nil, nil
+	}
+
+	capabilities := make([]queuesdk.CapabilityDetails, 0, len(specs))
+	seenTypes := make(map[string]struct{}, len(specs))
+	for index, spec := range specs {
+		capability, capabilityType, err := buildQueueCapability(spec)
+		if err != nil {
+			return nil, fmt.Errorf("build capabilities[%d]: %w", index, err)
+		}
+		if _, exists := seenTypes[capabilityType]; exists {
+			return nil, fmt.Errorf("build capabilities[%d]: duplicate capability type %q", index, capabilityType)
+		}
+		seenTypes[capabilityType] = struct{}{}
+		capabilities = append(capabilities, capability)
+	}
+	return capabilities, nil
+}
+
+func buildQueueCapability(spec queuev1beta1.QueueCapability) (queuesdk.CapabilityDetails, string, error) {
+	capabilityType, err := queueCapabilityTypeFromSpec(spec)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if rawJSON := strings.TrimSpace(spec.JsonData); rawJSON != "" {
+		capability, rawType, err := queueCapabilityFromJSON(rawJSON, capabilityType)
+		if err != nil {
+			return nil, "", err
+		}
+		return capability, rawType, nil
+	}
+
+	return queueCapabilityFromTypedFields(spec, capabilityType), capabilityType, nil
+}
+
+func queueCapabilityFromTypedFields(
+	spec queuev1beta1.QueueCapability,
+	capabilityType string,
+) queuesdk.CapabilityDetails {
+	payload := map[string]any{
+		"type": capabilityType,
+	}
+
+	if capabilityType != string(queuesdk.QueueCapabilityConsumerGroups) {
+		return payload
+	}
+
+	if spec.IsPrimaryConsumerGroupEnabled {
+		payload["isPrimaryConsumerGroupEnabled"] = true
+	}
+	if value := spec.PrimaryConsumerGroupDisplayName; strings.TrimSpace(value) != "" {
+		payload["primaryConsumerGroupDisplayName"] = value
+	}
+	if value := spec.PrimaryConsumerGroupFilter; strings.TrimSpace(value) != "" {
+		payload["primaryConsumerGroupFilter"] = value
+	}
+	if spec.PrimaryConsumerGroupDeadLetterQueueDeliveryCount != 0 {
+		payload["primaryConsumerGroupDeadLetterQueueDeliveryCount"] = spec.PrimaryConsumerGroupDeadLetterQueueDeliveryCount
+	}
+
+	return payload
+}
+
+func queueCapabilityFromJSON(rawJSON string, fallbackType string) (queuesdk.CapabilityDetails, string, error) {
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(rawJSON), &payload); err != nil {
+		return nil, "", fmt.Errorf("decode jsonData: %w", err)
+	}
+	if payload == nil {
+		payload = map[string]any{}
+	}
+
+	rawType, err := queueCapabilityTypeFromJSON([]byte(rawJSON))
+	if err != nil {
+		return nil, "", fmt.Errorf("parse jsonData type: %w", err)
+	}
+	if fallbackType == "" {
+		fallbackType = rawType
+	}
+	if fallbackType == "" {
+		return nil, "", fmt.Errorf("type is required")
+	}
+	if rawType != "" && rawType != fallbackType {
+		return nil, "", fmt.Errorf("type %q does not match jsonData type %q", fallbackType, rawType)
+	}
+	payload["type"] = fallbackType
+	return payload, fallbackType, nil
+}
+
+func desiredQueueCapabilitiesForUpdate(
+	specs []queuev1beta1.QueueCapability,
+	current []queuesdk.CapabilityDetails,
+) ([]queuesdk.CapabilityDetails, bool, error) {
+	desiredTypes, err := queueCapabilityTypeSetFromSpec(specs)
+	if err != nil {
+		return nil, false, err
+	}
+	currentTypes, err := queueCapabilityTypeSetFromSDK(current)
+	if err != nil {
+		return nil, false, err
+	}
+	if reflect.DeepEqual(currentTypes, desiredTypes) {
+		return nil, false, nil
+	}
+	if len(specs) == 0 {
+		return []queuesdk.CapabilityDetails{}, true, nil
+	}
+	desiredCapabilities, err := buildQueueCapabilities(specs)
+	if err != nil {
+		return nil, false, err
+	}
+	return desiredCapabilities, true, nil
+}
+
+func queueCapabilityTypeSetFromSpec(specs []queuev1beta1.QueueCapability) ([]string, error) {
+	if len(specs) == 0 {
+		return nil, nil
+	}
+
+	capabilityTypes := make([]string, 0, len(specs))
+	seenTypes := make(map[string]struct{}, len(specs))
+	for index, spec := range specs {
+		capabilityType, err := queueCapabilityTypeFromSpec(spec)
+		if err != nil {
+			return nil, fmt.Errorf("resolve capabilities[%d] type: %w", index, err)
+		}
+		if _, exists := seenTypes[capabilityType]; exists {
+			return nil, fmt.Errorf("resolve capabilities[%d] type: duplicate capability type %q", index, capabilityType)
+		}
+		seenTypes[capabilityType] = struct{}{}
+		capabilityTypes = append(capabilityTypes, capabilityType)
+	}
+	sort.Strings(capabilityTypes)
+	return capabilityTypes, nil
+}
+
+func queueCapabilityTypeSetFromSDK(capabilities []queuesdk.CapabilityDetails) ([]string, error) {
+	if len(capabilities) == 0 {
+		return nil, nil
+	}
+
+	capabilityTypes := make([]string, 0, len(capabilities))
+	seenTypes := make(map[string]struct{}, len(capabilities))
+	for index, capability := range capabilities {
+		capabilityType, err := queueCapabilityTypeFromAny(capability)
+		if err != nil {
+			return nil, fmt.Errorf("read capabilities[%d] type: %w", index, err)
+		}
+		if capabilityType == "" {
+			return nil, fmt.Errorf("read capabilities[%d] type: type is empty", index)
+		}
+		if _, exists := seenTypes[capabilityType]; exists {
+			continue
+		}
+		seenTypes[capabilityType] = struct{}{}
+		capabilityTypes = append(capabilityTypes, capabilityType)
+	}
+	sort.Strings(capabilityTypes)
+	return capabilityTypes, nil
+}
+
+func queueCapabilityTypeFromSpec(spec queuev1beta1.QueueCapability) (string, error) {
+	capabilityType := canonicalQueueCapabilityType(spec.Type)
+	rawJSON := strings.TrimSpace(spec.JsonData)
+	if rawJSON == "" {
+		if capabilityType == "" {
+			return "", fmt.Errorf("type is required")
+		}
+		return capabilityType, nil
+	}
+
+	rawType, err := queueCapabilityTypeFromJSON([]byte(rawJSON))
+	if err != nil {
+		return "", fmt.Errorf("parse jsonData type: %w", err)
+	}
+	if capabilityType == "" {
+		capabilityType = rawType
+	} else if rawType != "" && rawType != capabilityType {
+		return "", fmt.Errorf("type %q does not match jsonData type %q", spec.Type, rawType)
+	}
+	if capabilityType == "" {
+		return "", fmt.Errorf("type is required")
+	}
+	return capabilityType, nil
+}
+
+func queueCapabilityTypeFromAny(capability any) (string, error) {
+	rawJSON, err := json.Marshal(capability)
+	if err != nil {
+		return "", fmt.Errorf("marshal capability: %w", err)
+	}
+	return queueCapabilityTypeFromJSON(rawJSON)
+}
+
+func queueCapabilityTypeFromJSON(rawJSON []byte) (string, error) {
+	var discriminator struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(rawJSON, &discriminator); err != nil {
+		return "", err
+	}
+	return canonicalQueueCapabilityType(discriminator.Type), nil
+}
+
+func canonicalQueueCapabilityType(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return ""
+	}
+	if mapped, ok := queuesdk.GetMappingQueueCapabilityEnum(value); ok {
+		return string(mapped)
+	}
+	return strings.ToUpper(value)
+}
+
+func projectQueueCapabilities(capabilities []queuesdk.CapabilityDetails) ([]queuev1beta1.QueueCapability, error) {
+	if len(capabilities) == 0 {
+		return nil, nil
+	}
+
+	projected := make([]queuev1beta1.QueueCapability, 0, len(capabilities))
+	seenTypes := make(map[string]struct{}, len(capabilities))
+	for index, capability := range capabilities {
+		projectedCapability, err := projectQueueCapability(capability)
+		if err != nil {
+			return nil, fmt.Errorf("project capabilities[%d]: %w", index, err)
+		}
+		if _, exists := seenTypes[projectedCapability.Type]; exists {
+			continue
+		}
+		seenTypes[projectedCapability.Type] = struct{}{}
+		projected = append(projected, projectedCapability)
+	}
+	if len(projected) == 0 {
+		return nil, nil
+	}
+	return projected, nil
+}
+
+func projectQueueCapability(capability any) (queuev1beta1.QueueCapability, error) {
+	rawJSON, err := json.Marshal(capability)
+	if err != nil {
+		return queuev1beta1.QueueCapability{}, fmt.Errorf("marshal capability: %w", err)
+	}
+
+	var projected queuev1beta1.QueueCapability
+	if err := json.Unmarshal(rawJSON, &projected); err != nil {
+		return queuev1beta1.QueueCapability{}, fmt.Errorf("decode capability: %w", err)
+	}
+	projected.Type = canonicalQueueCapabilityType(projected.Type)
+	if projected.Type == "" {
+		projected.Type, err = queueCapabilityTypeFromJSON(rawJSON)
+		if err != nil {
+			return queuev1beta1.QueueCapability{}, fmt.Errorf("decode capability type: %w", err)
+		}
+	}
+	if projected.Type == "" {
+		return queuev1beta1.QueueCapability{}, fmt.Errorf("type is required")
+	}
+	if !queueCapabilityUsesTypedProjection(projected.Type) {
+		projected.JsonData = string(rawJSON)
+	}
+	return projected, nil
+}
+
+func queueCapabilityUsesTypedProjection(capabilityType string) bool {
+	switch capabilityType {
+	case string(queuesdk.QueueCapabilityConsumerGroups), string(queuesdk.QueueCapabilityLargeMessages):
+		return true
+	default:
+		return false
+	}
+}
+
+func queueCapabilitySummariesToDetails(capabilities []queuesdk.QueueCapabilityEnum) []queuesdk.CapabilityDetails {
+	if len(capabilities) == 0 {
+		return nil
+	}
+
+	projected := make([]queuesdk.CapabilityDetails, 0, len(capabilities))
+	for _, capability := range capabilities {
+		capabilityType := canonicalQueueCapabilityType(string(capability))
+		if capabilityType == "" {
+			continue
+		}
+		projected = append(projected, map[string]any{"type": capabilityType})
+	}
+	if len(projected) == 0 {
+		return nil
+	}
+	return projected
 }
 
 func stringValue(value *string) string {
