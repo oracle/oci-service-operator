@@ -15,8 +15,15 @@ gaps: []
 - Delete confirmation requires `GetVcn` to stop finding the resource. If OCI
   reports `TERMINATED` before the resource disappears, that state is accepted
   as an observed pre-terminal step, but it is not the final delete confirmation.
-- Supported in-place updates are limited to `displayName`, `definedTags`, and
-  `freeformTags`, matching the pinned `UpdateVcnDetails` SDK surface.
+- Supported in-place updates are `displayName`, `definedTags`,
+  `freeformTags`, `securityAttributes`, and `isZprOnly`, matching the pinned
+  `UpdateVcnDetails` SDK surface.
+- Mutable drift treats an omitted observed `isZprOnly` value as equivalent to
+  `false`, so non-ZPR VCNs do not churn on no-op updates when OCI omits the
+  field from read responses.
+- `securityAttributes` reconciles through the existing generated
+  `map[string]shared.MapValue` CRD surface; widening that schema to match the
+  SDK's full nested-object shape is out of scope for this VCN re-audit.
 - Create-only drift stays out of scope for the first handwritten runtime:
   `compartmentId`, `dnsLabel`, IPv4 CIDR shape (`cidrBlock` and `cidrBlocks`),
   and IPv6 shape inputs (`ipv6PrivateCidrBlocks`, `isIpv6Enabled`,

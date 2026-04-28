@@ -2386,7 +2386,7 @@ func TestExplicitCoreRuntimeArtifactsGenerateFromConfig(t *testing.T) {
 		`TerminalStates: []string{"NOT_FOUND"}`,
 		`ResponseItemsField: "Items"`,
 		`MatchFields: []string{"compartmentId", "displayName", "id", "state"}`,
-		`Mutable: []string{"definedTags", "displayName", "freeformTags"}`,
+		`Mutable: []string{"definedTags", "displayName", "freeformTags", "isZprOnly", "securityAttributes"}`,
 		`ForceNew: []string{"byoipv6CidrDetails", "cidrBlock", "cidrBlocks", "compartmentId", "dnsLabel", "ipv6PrivateCidrBlocks", "isIpv6Enabled", "isOracleGuaAllocationEnabled"}`,
 		`ConflictsWith: map[string][]string{"cidrBlock": []string{"cidrBlocks"}, "cidrBlocks": []string{"cidrBlock"}}`,
 		`AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},`,

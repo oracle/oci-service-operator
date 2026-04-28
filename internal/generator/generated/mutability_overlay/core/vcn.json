@@ -332,6 +332,61 @@
         "terraformDocsPage": "core_vcn#argument-reference",
         "terraformDocsSection": "Argument Reference"
       }
+    },
+    {
+      "astFieldPath": "isZprOnly",
+      "terraformFieldPath": "isZprOnly",
+      "canonicalJoinKey": "isZprOnly",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/core/vcn.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "core_vcn#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "securityAttributes",
+      "terraformFieldPath": "security_attributes",
+      "canonicalJoinKey": "securityAttributes",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "ambiguous",
+        "detail": "Argument Reference contains conflicting or conditional update guidance.",
+        "rawSignal": "(updatable); destruction and recreation; does not support update"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "unknown",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/core/vcn.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "core_vcn#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
     }
   ]
 }

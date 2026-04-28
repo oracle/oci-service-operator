@@ -172,18 +172,41 @@ func makeSDKVcn(id, displayName string, state coresdk.VcnLifecycleStateEnum) cor
 	}
 }
 
+func makeSpecSecurityAttributes(value, mode string) map[string]shared.MapValue {
+	return map[string]shared.MapValue{
+		"Oracle-DataSecurity-ZPR": {
+			"value": value,
+			"mode":  mode,
+		},
+	}
+}
+
+func makeSDKSecurityAttributes(value, mode string) map[string]map[string]interface{} {
+	return map[string]map[string]interface{}{
+		"Oracle-DataSecurity-ZPR": {
+			"value": value,
+			"mode":  mode,
+		},
+	}
+}
+
 func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	var captured coresdk.CreateVcnRequest
 	manager := newTestManager(&fakeVcnOCIClient{
 		createFn: func(_ context.Context, req coresdk.CreateVcnRequest) (coresdk.CreateVcnResponse, error) {
 			captured = req
+			created := makeSDKVcn("ocid1.vcn.oc1..create", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			created.SecurityAttributes = makeSDKSecurityAttributes("42", "audit")
+			created.IsZprOnly = common.Bool(true)
 			return coresdk.CreateVcnResponse{
-				Vcn: makeSDKVcn("ocid1.vcn.oc1..create", "test-vcn", coresdk.VcnLifecycleStateAvailable),
+				Vcn: created,
 			}, nil
 		},
 	})
 
 	resource := makeSpecVcn()
+	resource.Spec.SecurityAttributes = makeSpecSecurityAttributes("42", "audit")
+	resource.Spec.IsZprOnly = true
 	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 
 	assert.NoError(t, err)
@@ -192,12 +215,16 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, common.String("ocid1.compartment.oc1..example"), captured.CompartmentId)
 	assert.Equal(t, []string{"10.0.0.0/16"}, captured.CidrBlocks)
 	assert.Equal(t, common.String("test-vcn"), captured.DisplayName)
+	assert.Equal(t, makeSDKSecurityAttributes("42", "audit"), captured.SecurityAttributes)
+	assert.Equal(t, common.Bool(true), captured.IsZprOnly)
 	assert.Nil(t, captured.DnsLabel)
 	assert.Nil(t, captured.IsIpv6Enabled)
 	assert.Equal(t, "ocid1.vcn.oc1..create", string(resource.Status.OsokStatus.Ocid))
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 	assert.Equal(t, "test-vcn", resource.Status.DisplayName)
 	assert.Equal(t, []string{"10.0.0.0/16"}, resource.Status.CidrBlocks)
+	assert.Equal(t, resource.Spec.SecurityAttributes, resource.Status.SecurityAttributes)
+	assert.True(t, resource.Status.IsZprOnly)
 }
 
 func TestCreateOrUpdate_AllowsObservedOracleAllocatedIPv6WhenCreateFlagWasOmitted(t *testing.T) {
@@ -289,6 +316,8 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 			current.DisplayName = nil
 			current.DefinedTags = nil
 			current.FreeformTags = nil
+			current.SecurityAttributes = nil
+			current.IsZprOnly = nil
 			current.VcnDomainName = nil
 			current.DefaultRouteTableId = nil
 			return coresdk.GetVcnResponse{
@@ -304,9 +333,11 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 	resource.Status.DnsLabel = "stale-dns"
 	resource.Status.FreeformTags = map[string]string{"env": "stale"}
 	resource.Status.DefinedTags = map[string]shared.MapValue{"Operations": {"CostCenter": "42"}}
+	resource.Status.SecurityAttributes = makeSpecSecurityAttributes("42", "audit")
 	resource.Status.Ipv6CidrBlocks = []string{"fd00::/56"}
 	resource.Status.VcnDomainName = "stale.oraclevcn.com"
 	resource.Status.DefaultRouteTableId = "ocid1.routetable.oc1..stale"
+	resource.Status.IsZprOnly = true
 
 	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 
@@ -316,9 +347,11 @@ func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T
 	assert.Equal(t, "", resource.Status.DnsLabel)
 	assert.Nil(t, resource.Status.FreeformTags)
 	assert.Nil(t, resource.Status.DefinedTags)
+	assert.Nil(t, resource.Status.SecurityAttributes)
 	assert.Nil(t, resource.Status.Ipv6CidrBlocks)
 	assert.Equal(t, "", resource.Status.VcnDomainName)
 	assert.Equal(t, "", resource.Status.DefaultRouteTableId)
+	assert.False(t, resource.Status.IsZprOnly)
 }
 
 func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
@@ -354,6 +387,48 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	assert.Equal(t, "new-name", *captured.DisplayName)
 	assert.Nil(t, captured.FreeformTags)
 	assert.Equal(t, "new-name", resource.Status.DisplayName)
+	assert.Equal(t, 3, getCalls)
+}
+
+func TestCreateOrUpdate_ZprFieldsTriggerMutableUpdate(t *testing.T) {
+	var captured coresdk.UpdateVcnRequest
+	getCalls := 0
+	manager := newTestManager(&fakeVcnOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetVcnRequest) (coresdk.GetVcnResponse, error) {
+			getCalls++
+			current := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			if getCalls >= 3 {
+				current.SecurityAttributes = makeSDKSecurityAttributes("42", "audit")
+				current.IsZprOnly = common.Bool(false)
+				return coresdk.GetVcnResponse{Vcn: current}, nil
+			}
+			current.SecurityAttributes = makeSDKSecurityAttributes("21", "enforce")
+			current.IsZprOnly = common.Bool(true)
+			return coresdk.GetVcnResponse{Vcn: current}, nil
+		},
+		updateFn: func(_ context.Context, req coresdk.UpdateVcnRequest) (coresdk.UpdateVcnResponse, error) {
+			captured = req
+			updated := makeSDKVcn("ocid1.vcn.oc1..existing", "test-vcn", coresdk.VcnLifecycleStateAvailable)
+			updated.SecurityAttributes = makeSDKSecurityAttributes("42", "audit")
+			updated.IsZprOnly = common.Bool(false)
+			return coresdk.UpdateVcnResponse{Vcn: updated}, nil
+		},
+	})
+
+	resource := makeSpecVcn()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.vcn.oc1..existing")
+	resource.Spec.SecurityAttributes = makeSpecSecurityAttributes("42", "audit")
+	resource.Spec.IsZprOnly = false
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.Equal(t, "ocid1.vcn.oc1..existing", *captured.VcnId)
+	assert.Equal(t, makeSDKSecurityAttributes("42", "audit"), captured.SecurityAttributes)
+	assert.Equal(t, common.Bool(false), captured.IsZprOnly)
+	assert.Equal(t, resource.Spec.SecurityAttributes, resource.Status.SecurityAttributes)
+	assert.False(t, resource.Status.IsZprOnly)
 	assert.Equal(t, 3, getCalls)
 }
 
