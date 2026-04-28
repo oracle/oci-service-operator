@@ -7,6 +7,7 @@ package transcriptionjob
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -132,6 +133,24 @@ func makeSDKTranscriptionJob(
 	return job
 }
 
+func withSDKTranscriptionJobAdditionalSettings(job aispeech.TranscriptionJob, additionalSettings map[string]string) aispeech.TranscriptionJob {
+	if len(additionalSettings) == 0 {
+		return job
+	}
+
+	settingsCopy := make(map[string]string, len(additionalSettings))
+	for key, value := range additionalSettings {
+		settingsCopy[key] = value
+	}
+
+	job.ModelDetails = &aispeech.TranscriptionModelDetails{
+		TranscriptionSettings: &aispeech.TranscriptionSettings{
+			AdditionalSettings: settingsCopy,
+		},
+	}
+	return job
+}
+
 func requireAsyncCurrent(
 	t *testing.T,
 	resource *aispeechv1beta1.TranscriptionJob,
@@ -163,6 +182,113 @@ func requireTrailingCondition(t *testing.T, resource *aispeechv1beta1.Transcript
 	}
 	if got := conditions[len(conditions)-1].Type; got != condition {
 		t.Fatalf("last condition = %q, want %q", got, condition)
+	}
+}
+
+func TestTranscriptionJobCreateCarriesAdditionalSettingsAndProjectsStatus(t *testing.T) {
+	t.Parallel()
+
+	const createdID = "ocid1.transcriptionjob.oc1..created"
+
+	resource := makeTranscriptionJobResource()
+	resource.Spec.ModelDetails = aispeechv1beta1.TranscriptionJobModelDetails{
+		TranscriptionSettings: aispeechv1beta1.TranscriptionJobModelDetailsTranscriptionSettings{
+			AdditionalSettings: map[string]string{
+				"normalization_mode": "smart",
+				"vocabulary":         "medical",
+			},
+		},
+	}
+
+	client := testTranscriptionJobClient(&fakeTranscriptionJobOCIClient{
+		listTranscriptionJobsFn: func(_ context.Context, req aispeech.ListTranscriptionJobsRequest) (aispeech.ListTranscriptionJobsResponse, error) {
+			if req.CompartmentId == nil || *req.CompartmentId != resource.Spec.CompartmentId {
+				t.Fatalf("list compartmentId = %v, want %q", req.CompartmentId, resource.Spec.CompartmentId)
+			}
+			if req.DisplayName == nil || *req.DisplayName != resource.Spec.DisplayName {
+				t.Fatalf("list displayName = %v, want %q", req.DisplayName, resource.Spec.DisplayName)
+			}
+			if req.Id != nil {
+				t.Fatalf("list id = %v, want nil before create", req.Id)
+			}
+			return aispeech.ListTranscriptionJobsResponse{}, nil
+		},
+		createTranscriptionJobFn: func(_ context.Context, req aispeech.CreateTranscriptionJobRequest) (aispeech.CreateTranscriptionJobResponse, error) {
+			if req.ModelDetails == nil {
+				t.Fatal("create request modelDetails = nil, want additionalSettings carried into create body")
+			}
+			if req.ModelDetails.TranscriptionSettings == nil {
+				t.Fatal("create request transcriptionSettings = nil, want additionalSettings carried into create body")
+			}
+			if !reflect.DeepEqual(
+				req.ModelDetails.TranscriptionSettings.AdditionalSettings,
+				resource.Spec.ModelDetails.TranscriptionSettings.AdditionalSettings,
+			) {
+				t.Fatalf(
+					"create request additionalSettings = %#v, want %#v",
+					req.ModelDetails.TranscriptionSettings.AdditionalSettings,
+					resource.Spec.ModelDetails.TranscriptionSettings.AdditionalSettings,
+				)
+			}
+			return aispeech.CreateTranscriptionJobResponse{
+				TranscriptionJob: withSDKTranscriptionJobAdditionalSettings(
+					makeSDKTranscriptionJob(
+						createdID,
+						resource.Spec.CompartmentId,
+						resource.Spec.DisplayName,
+						resource.Spec.Description,
+						aispeech.TranscriptionJobLifecycleStateAccepted,
+						"",
+					),
+					resource.Spec.ModelDetails.TranscriptionSettings.AdditionalSettings,
+				),
+			}, nil
+		},
+		getTranscriptionJobFn: func(_ context.Context, req aispeech.GetTranscriptionJobRequest) (aispeech.GetTranscriptionJobResponse, error) {
+			if req.TranscriptionJobId == nil || *req.TranscriptionJobId != createdID {
+				t.Fatalf("get transcriptionJobId = %v, want %q", req.TranscriptionJobId, createdID)
+			}
+			return aispeech.GetTranscriptionJobResponse{
+				TranscriptionJob: withSDKTranscriptionJobAdditionalSettings(
+					makeSDKTranscriptionJob(
+						createdID,
+						resource.Spec.CompartmentId,
+						resource.Spec.DisplayName,
+						resource.Spec.Description,
+						aispeech.TranscriptionJobLifecycleStateSucceeded,
+						"",
+					),
+					resource.Spec.ModelDetails.TranscriptionSettings.AdditionalSettings,
+				),
+			}, nil
+		},
+	})
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success after SUCCEEDED follow-up")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue after SUCCEEDED follow-up")
+	}
+	if resource.Status.Id != createdID {
+		t.Fatalf("status.id = %q, want %q", resource.Status.Id, createdID)
+	}
+	if got := string(resource.Status.OsokStatus.Ocid); got != createdID {
+		t.Fatalf("status.status.ocid = %q, want %q", got, createdID)
+	}
+	if !reflect.DeepEqual(
+		resource.Status.ModelDetails.TranscriptionSettings.AdditionalSettings,
+		resource.Spec.ModelDetails.TranscriptionSettings.AdditionalSettings,
+	) {
+		t.Fatalf(
+			"status additionalSettings = %#v, want %#v",
+			resource.Status.ModelDetails.TranscriptionSettings.AdditionalSettings,
+			resource.Spec.ModelDetails.TranscriptionSettings.AdditionalSettings,
+		)
 	}
 }
 
@@ -337,6 +463,71 @@ func TestTranscriptionJobCreateOrUpdateRejectsCompartmentMove(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "TranscriptionJob formal semantics require replacement when compartmentId changes") {
 		t.Fatalf("CreateOrUpdate() error = %q, want replacement message", err)
+	}
+}
+
+func TestTranscriptionJobCreateOrUpdateRejectsAdditionalSettingsDrift(t *testing.T) {
+	t.Parallel()
+
+	updateCalls := 0
+	resource := makeTranscriptionJobResource()
+	resource.Status.Id = "ocid1.transcriptionjob.oc1..existing"
+	resource.Spec.ModelDetails = aispeechv1beta1.TranscriptionJobModelDetails{
+		TranscriptionSettings: aispeechv1beta1.TranscriptionJobModelDetailsTranscriptionSettings{
+			AdditionalSettings: map[string]string{
+				"normalization_mode": "smart",
+			},
+		},
+	}
+
+	liveAdditionalSettings := map[string]string{
+		"normalization_mode": "basic",
+	}
+
+	client := testTranscriptionJobClient(&fakeTranscriptionJobOCIClient{
+		getTranscriptionJobFn: func(_ context.Context, req aispeech.GetTranscriptionJobRequest) (aispeech.GetTranscriptionJobResponse, error) {
+			if req.TranscriptionJobId == nil || *req.TranscriptionJobId != "ocid1.transcriptionjob.oc1..existing" {
+				t.Fatalf("get transcriptionJobId = %v, want tracked TranscriptionJob ID", req.TranscriptionJobId)
+			}
+			return aispeech.GetTranscriptionJobResponse{
+				TranscriptionJob: withSDKTranscriptionJobAdditionalSettings(
+					makeSDKTranscriptionJob(
+						"ocid1.transcriptionjob.oc1..existing",
+						"ocid1.compartment.oc1..example",
+						"job-alpha",
+						"desired description",
+						aispeech.TranscriptionJobLifecycleStateSucceeded,
+						"",
+					),
+					liveAdditionalSettings,
+				),
+			}, nil
+		},
+		updateTranscriptionJobFn: func(_ context.Context, _ aispeech.UpdateTranscriptionJobRequest) (aispeech.UpdateTranscriptionJobResponse, error) {
+			updateCalls++
+			return aispeech.UpdateTranscriptionJobResponse{}, nil
+		},
+	})
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil {
+		t.Fatal("CreateOrUpdate() error = nil, want unsupported additionalSettings drift")
+	}
+	if response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report failure when additionalSettings drift is create-only")
+	}
+	if updateCalls != 0 {
+		t.Fatalf("UpdateTranscriptionJob() calls = %d, want 0", updateCalls)
+	}
+	if !strings.Contains(err.Error(), "modelDetails.transcriptionSettings.additionalSettings") {
+		t.Fatalf("CreateOrUpdate() error = %q, want additionalSettings drift path", err)
+	}
+	if !reflect.DeepEqual(resource.Status.ModelDetails.TranscriptionSettings.AdditionalSettings, liveAdditionalSettings) {
+		t.Fatalf(
+			"status additionalSettings = %#v, want live OCI status %#v",
+			resource.Status.ModelDetails.TranscriptionSettings.AdditionalSettings,
+			liveAdditionalSettings,
+		)
 	}
 }
 
