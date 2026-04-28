@@ -258,6 +258,10 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, string(coresdk.RouteRuleRouteTypeStatic), resource.Status.RouteRules[0].RouteType)
 }
 
+func TestValidateRouteTableSDKContract(t *testing.T) {
+	assert.NoError(t, validateRouteTableSDKContract())
+}
+
 func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 	getCalls := 0
 	updateCalls := 0

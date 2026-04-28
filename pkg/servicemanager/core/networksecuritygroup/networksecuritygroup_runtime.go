@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -29,6 +30,11 @@ import (
 const (
 	networkSecurityGroupRequeueDuration      = time.Minute
 	networkSecurityGroupLifecycleStateUpdate = coresdk.NetworkSecurityGroupLifecycleStateEnum("UPDATING")
+)
+
+var (
+	networkSecurityGroupSDKContractOnce sync.Once
+	networkSecurityGroupSDKContractErr  error
 )
 
 type networkSecurityGroupOCIClient interface {
@@ -154,6 +160,9 @@ func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.C
 	if c.delegate == nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("network security group parity delegate is not configured")
 	}
+	if err := validateNetworkSecurityGroupSDKContract(); err != nil {
+		return c.fail(resource, err)
+	}
 
 	trackedID := currentNetworkSecurityGroupID(resource)
 	explicitRecreate := false
@@ -191,6 +200,9 @@ func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.C
 func (c *networkSecurityGroupGeneratedParityClient) Delete(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup) (bool, error) {
 	if c.delegate == nil {
 		return false, fmt.Errorf("network security group parity delegate is not configured")
+	}
+	if err := validateNetworkSecurityGroupSDKContract(); err != nil {
+		return false, err
 	}
 	return c.delegate.Delete(ctx, resource)
 }
@@ -453,6 +465,55 @@ func networkSecurityGroupLifecycleMessage(current coresdk.NetworkSecurityGroup) 
 		name = "NetworkSecurityGroup"
 	}
 	return fmt.Sprintf("NetworkSecurityGroup %s is %s", name, current.LifecycleState)
+}
+
+func validateNetworkSecurityGroupSDKContract() error {
+	networkSecurityGroupSDKContractOnce.Do(func() {
+		updateFields := reflect.TypeOf(coresdk.UpdateNetworkSecurityGroupDetails{})
+		for _, fieldName := range []string{"DefinedTags", "DisplayName", "FreeformTags"} {
+			if _, ok := updateFields.FieldByName(fieldName); !ok {
+				networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json assumes NetworkSecurityGroup update field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+		if _, ok := updateFields.FieldByName("CompartmentId"); ok {
+			networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json expects compartmentId to remain create-only, but vendored UpdateNetworkSecurityGroupDetails unexpectedly exposes CompartmentId")
+			return
+		}
+		if _, ok := updateFields.FieldByName("VcnId"); ok {
+			networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json expects vcnId to remain create-only, but vendored UpdateNetworkSecurityGroupDetails unexpectedly exposes VcnId")
+			return
+		}
+
+		createFields := reflect.TypeOf(coresdk.CreateNetworkSecurityGroupDetails{})
+		for _, fieldName := range []string{"CompartmentId", "VcnId"} {
+			if _, ok := createFields.FieldByName(fieldName); !ok {
+				networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json assumes NetworkSecurityGroup create field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+
+		lifecycleValues := make(map[string]struct{}, len(coresdk.GetNetworkSecurityGroupLifecycleStateEnumStringValues()))
+		for _, value := range coresdk.GetNetworkSecurityGroupLifecycleStateEnumStringValues() {
+			lifecycleValues[value] = struct{}{}
+		}
+		for _, value := range []string{
+			string(coresdk.NetworkSecurityGroupLifecycleStateAvailable),
+			string(coresdk.NetworkSecurityGroupLifecycleStateProvisioning),
+			string(coresdk.NetworkSecurityGroupLifecycleStateTerminating),
+			string(coresdk.NetworkSecurityGroupLifecycleStateTerminated),
+		} {
+			if _, ok := lifecycleValues[value]; !ok {
+				networkSecurityGroupSDKContractErr = fmt.Errorf("vendored SDK no longer exposes NetworkSecurityGroup lifecycle %q", value)
+				return
+			}
+		}
+		if _, ok := lifecycleValues["ACTIVE"]; ok {
+			networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json still assumes ACTIVE, but vendored SDK now needs reevaluation because ACTIVE unexpectedly exists")
+			return
+		}
+	})
+	return networkSecurityGroupSDKContractErr
 }
 
 func normalizeNetworkSecurityGroupOCIError(err error) error {
