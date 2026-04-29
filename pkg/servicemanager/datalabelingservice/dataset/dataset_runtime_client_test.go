@@ -205,8 +205,8 @@ func TestDatasetCreateOrUpdateCreatesConcretePolymorphicBodyAndTracksLifecycle(t
 	if !ok {
 		t.Fatalf("textFileTypeMetadata type = %T, want datalabelingservice.DelimitedFileTypeMetadata", formatDetails.TextFileTypeMetadata)
 	}
-	if textMetadata.ColumnIndex == nil || *textMetadata.ColumnIndex != resource.Spec.DatasetFormatDetails.TextFileTypeMetadata.ColumnIndex {
-		t.Fatalf("textFileTypeMetadata.ColumnIndex = %#v, want %d", textMetadata.ColumnIndex, resource.Spec.DatasetFormatDetails.TextFileTypeMetadata.ColumnIndex)
+	if textMetadata.ColumnIndex == nil || resource.Spec.DatasetFormatDetails.TextFileTypeMetadata == nil || *textMetadata.ColumnIndex != *resource.Spec.DatasetFormatDetails.TextFileTypeMetadata.ColumnIndex {
+		t.Fatalf("textFileTypeMetadata.ColumnIndex = %#v, want %v", textMetadata.ColumnIndex, resource.Spec.DatasetFormatDetails.TextFileTypeMetadata)
 	}
 
 	if createRequest.CreateDatasetDetails.InitialImportDatasetConfiguration == nil {
@@ -395,6 +395,37 @@ func TestBuildDatasetUpdateBodySupportsClearingOptionalFields(t *testing.T) {
 	}
 }
 
+func TestBuildDatasetCreateDetailsPreservesZeroColumnIndex(t *testing.T) {
+	t.Parallel()
+
+	resource := newDatasetTestResource()
+	resource.Spec.DatasetFormatDetails.TextFileTypeMetadata.ColumnIndex = ptr(0)
+
+	details, err := buildDatasetCreateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildDatasetCreateDetails() error = %v", err)
+	}
+
+	formatDetails, ok := details.DatasetFormatDetails.(datalabelingservicesdk.TextDatasetFormatDetails)
+	if !ok {
+		t.Fatalf("datasetFormatDetails type = %T, want datalabelingservice.TextDatasetFormatDetails", details.DatasetFormatDetails)
+	}
+	textMetadata, ok := formatDetails.TextFileTypeMetadata.(datalabelingservicesdk.DelimitedFileTypeMetadata)
+	if !ok {
+		t.Fatalf("textFileTypeMetadata type = %T, want datalabelingservice.DelimitedFileTypeMetadata", formatDetails.TextFileTypeMetadata)
+	}
+	if textMetadata.ColumnIndex == nil || *textMetadata.ColumnIndex != 0 {
+		t.Fatalf("textFileTypeMetadata.ColumnIndex = %#v, want explicit zero", textMetadata.ColumnIndex)
+	}
+
+	body := datasetSerializedRequestBody(t, datalabelingservicesdk.CreateDatasetRequest{
+		CreateDatasetDetails: details,
+	}, http.MethodPost, "/datasets")
+	if !strings.Contains(body, `"columnIndex":0`) {
+		t.Fatalf("request body %s does not contain explicit zero columnIndex", body)
+	}
+}
+
 func TestDatasetCreateOrUpdateRejectsUnsupportedLabelSetDrift(t *testing.T) {
 	t.Parallel()
 
@@ -459,17 +490,17 @@ func newDatasetTestResource() *datalabelingservicev1beta1.Dataset {
 		Spec: datalabelingservicev1beta1.DatasetSpec{
 			CompartmentId:    "ocid1.compartment.oc1..example",
 			AnnotationFormat: "SINGLE_LABEL",
-			DatasetSourceDetails: datalabelingservicev1beta1.DatasetSourceDetails{
+			DatasetSourceDetails: datalabelingservicev1beta1.DatasetCreateSourceDetails{
 				SourceType: "OBJECT_STORAGE",
 				Namespace:  "datasetns",
 				Bucket:     "dataset-bucket",
 				Prefix:     "records/",
 			},
-			DatasetFormatDetails: datalabelingservicev1beta1.DatasetFormatDetails{
+			DatasetFormatDetails: datalabelingservicev1beta1.DatasetCreateFormatDetails{
 				FormatType: "TEXT",
-				TextFileTypeMetadata: datalabelingservicev1beta1.DatasetFormatDetailsTextFileTypeMetadata{
+				TextFileTypeMetadata: &datalabelingservicev1beta1.DatasetCreateTextFileTypeMetadata{
 					FormatType:      "DELIMITED",
-					ColumnIndex:     2,
+					ColumnIndex:     ptr(2),
 					ColumnName:      "text",
 					ColumnDelimiter: ",",
 					LineDelimiter:   "\n",
@@ -495,11 +526,11 @@ func newDatasetTestResource() *datalabelingservicev1beta1.Dataset {
 			InitialRecordGenerationConfiguration: datalabelingservicev1beta1.DatasetInitialRecordGenerationConfiguration{
 				Limit: 25,
 			},
-			InitialImportDatasetConfiguration: datalabelingservicev1beta1.DatasetInitialImportDatasetConfiguration{
+			InitialImportDatasetConfiguration: datalabelingservicev1beta1.DatasetCreateInitialImportDatasetConfiguration{
 				ImportFormat: datalabelingservicev1beta1.DatasetInitialImportDatasetConfigurationImportFormat{
 					Name: "JSONL_CONSOLIDATED",
 				},
-				ImportMetadataPath: datalabelingservicev1beta1.DatasetInitialImportDatasetConfigurationImportMetadataPath{
+				ImportMetadataPath: datalabelingservicev1beta1.DatasetCreateImportMetadataPath{
 					SourceType: "OBJECT_STORAGE",
 					Namespace:  "datasetns",
 					Bucket:     "dataset-bucket",
@@ -573,7 +604,7 @@ func observedDatasetSummaryFromSpec(
 }
 
 func observedDatasetSourceDetails(
-	spec datalabelingservicev1beta1.DatasetSourceDetails,
+	spec datalabelingservicev1beta1.DatasetCreateSourceDetails,
 ) datalabelingservicesdk.DatasetSourceDetails {
 	if spec.SourceType != "OBJECT_STORAGE" {
 		return nil
@@ -586,7 +617,7 @@ func observedDatasetSourceDetails(
 }
 
 func observedDatasetFormatDetails(
-	spec datalabelingservicev1beta1.DatasetFormatDetails,
+	spec datalabelingservicev1beta1.DatasetCreateFormatDetails,
 ) datalabelingservicesdk.DatasetFormatDetails {
 	switch spec.FormatType {
 	case "DOCUMENT":
@@ -603,13 +634,16 @@ func observedDatasetFormatDetails(
 }
 
 func observedDatasetTextFileTypeMetadata(
-	spec datalabelingservicev1beta1.DatasetFormatDetailsTextFileTypeMetadata,
+	spec *datalabelingservicev1beta1.DatasetCreateTextFileTypeMetadata,
 ) datalabelingservicesdk.TextFileTypeMetadata {
+	if spec == nil {
+		return nil
+	}
 	if spec.FormatType != "DELIMITED" {
 		return nil
 	}
 	return datalabelingservicesdk.DelimitedFileTypeMetadata{
-		ColumnIndex:     common.Int(spec.ColumnIndex),
+		ColumnIndex:     spec.ColumnIndex,
 		ColumnName:      pointerOrNil(spec.ColumnName),
 		ColumnDelimiter: pointerOrNil(spec.ColumnDelimiter),
 		LineDelimiter:   pointerOrNil(spec.LineDelimiter),
@@ -639,7 +673,7 @@ func observedDatasetInitialRecordGenerationConfiguration(
 }
 
 func observedDatasetInitialImportDatasetConfiguration(
-	spec datalabelingservicev1beta1.DatasetInitialImportDatasetConfiguration,
+	spec datalabelingservicev1beta1.DatasetCreateInitialImportDatasetConfiguration,
 ) *datalabelingservicesdk.InitialImportDatasetConfiguration {
 	if spec.ImportFormat.Name == "" {
 		return nil
@@ -654,7 +688,7 @@ func observedDatasetInitialImportDatasetConfiguration(
 }
 
 func observedDatasetImportMetadataPath(
-	spec datalabelingservicev1beta1.DatasetInitialImportDatasetConfigurationImportMetadataPath,
+	spec datalabelingservicev1beta1.DatasetCreateImportMetadataPath,
 ) datalabelingservicesdk.ImportMetadataPath {
 	if spec.SourceType != "OBJECT_STORAGE" {
 		return nil

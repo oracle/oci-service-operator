@@ -20,5 +20,25 @@ apiVersion: datalabelingservice.oracle.com/v1beta1
 kind: Dataset
 metadata:
   name: dataset-sample
-spec: {}
+spec:
+  compartmentId: ocid1.compartment.oc1..exampleuniqueID
+  annotationFormat: SINGLE_LABEL
+  datasetSourceDetails:
+    sourceType: OBJECT_STORAGE
+    namespace: objectstorage-namespace
+    bucket: dataset-bucket
+    prefix: records/
+  datasetFormatDetails:
+    formatType: TEXT
+    textFileTypeMetadata:
+      formatType: DELIMITED
+      columnIndex: 0
+      columnName: text
+      columnDelimiter: ","
+  labelSet:
+    items:
+      - name: positive
+  displayName: dataset-sample
+  description: Sample OCI Data Labeling dataset
+  labelingInstructions: Label each record as positive or negative.
 ```

@@ -63,15 +63,21 @@ spec:
                 description: The OCID of the compartment of the resource.
                 type: string
               datasetFormatDetails:
-                description: DatasetFormatDetails defines nested fields for Dataset.DatasetFormatDetails.
+                description: |-
+                  DatasetCreateFormatDetails defines the supported create-time dataset format
+                  shape for the published Dataset runtime.
                 properties:
                   formatType:
-                    type: string
-                  jsonData:
+                    description: FormatType selects the supported published dataset
+                      format variant.
+                    enum:
+                    - DOCUMENT
+                    - IMAGE
+                    - TEXT
                     type: string
                   textFileTypeMetadata:
-                    description: DatasetFormatDetailsTextFileTypeMetadata defines
-                      nested fields for Dataset.DatasetFormatDetails.TextFileTypeMetadata.
+                    description: TextFileTypeMetadata must be set when FormatType
+                      is TEXT.
                     properties:
                       columnDelimiter:
                         description: A column delimiter
@@ -79,6 +85,7 @@ spec:
                       columnIndex:
                         description: The index of a selected column. This is a zero-based
                           index.
+                        minimum: 0
                         type: integer
                       columnName:
                         description: The name of a selected column.
@@ -87,22 +94,29 @@ spec:
                         description: An escape character.
                         type: string
                       formatType:
-                        type: string
-                      jsonData:
+                        description: FormatType must remain DELIMITED for the published
+                          Dataset rollout.
+                        enum:
+                        - DELIMITED
                         type: string
                       lineDelimiter:
                         description: A line delimiter.
                         type: string
+                    required:
+                    - columnIndex
+                    - formatType
                     type: object
+                required:
+                - formatType
                 type: object
               datasetSourceDetails:
-                description: DatasetSourceDetails defines nested fields for Dataset.DatasetSourceDetails.
+                description: |-
+                  DatasetCreateSourceDetails defines the supported create-time source shape for
+                  the published Dataset runtime.
                 properties:
                   bucket:
                     description: The object storage bucket that contains the dataset
                       data source.
-                    type: string
-                  jsonData:
                     type: string
                   namespace:
                     description: The namespace of the bucket that contains the dataset
@@ -110,12 +124,18 @@ spec:
                     type: string
                   prefix:
                     description: A common path prefix shared by the objects that make
-                      up the dataset. Except for the CSV file type, records are not
-                      generated for the objects whose names exactly match with the
-                      prefix.
+                      up the dataset.
                     type: string
                   sourceType:
+                    description: SourceType must remain OBJECT_STORAGE for the published
+                      Dataset rollout.
+                    enum:
+                    - OBJECT_STORAGE
                     type: string
+                required:
+                - bucket
+                - namespace
+                - sourceType
                 type: object
               definedTags:
                 additionalProperties:
@@ -140,8 +160,9 @@ spec:
                   For example: `{"bar-key": "value"}`
                 type: object
               initialImportDatasetConfiguration:
-                description: DatasetInitialImportDatasetConfiguration defines nested
-                  fields for Dataset.InitialImportDatasetConfiguration.
+                description: |-
+                  DatasetCreateInitialImportDatasetConfiguration defines the supported
+                  create-time import configuration shape for the published Dataset runtime.
                 properties:
                   importFormat:
                     description: DatasetInitialImportDatasetConfigurationImportFormat
@@ -157,13 +178,12 @@ spec:
                     - name
                     type: object
                   importMetadataPath:
-                    description: DatasetInitialImportDatasetConfigurationImportMetadataPath
-                      defines nested fields for Dataset.InitialImportDatasetConfiguration.ImportMetadataPath.
+                    description: |-
+                      DatasetCreateImportMetadataPath defines the supported create-time import
+                      metadata path shape for the published Dataset runtime.
                     properties:
                       bucket:
                         description: Bucket name
-                        type: string
-                      jsonData:
                         type: string
                       namespace:
                         description: Bucket namespace name
@@ -172,7 +192,16 @@ spec:
                         description: Path for the metadata file.
                         type: string
                       sourceType:
+                        description: SourceType must remain OBJECT_STORAGE for the
+                          published Dataset rollout.
+                        enum:
+                        - OBJECT_STORAGE
                         type: string
+                    required:
+                    - bucket
+                    - namespace
+                    - path
+                    - sourceType
                     type: object
                 required:
                 - importFormat

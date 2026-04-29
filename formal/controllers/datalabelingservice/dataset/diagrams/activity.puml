@@ -111,6 +111,12 @@ Reviewed lifecycle mapping treats CREATING as
 provisioning, UPDATING as updating, ACTIVE as
 success, and DELETING as terminating; FAILED and
 NEEDS_ATTENTION are terminal failure states.
+The published Dataset spec uses repo-authored
+create-shape helper types for the supported
+OBJECT_STORAGE and TEXT/DELIMITED rollout so the
+required discriminators stay explicit and
+zero-based columnIndex values survive into
+CreateDatasetDetails.
 Pre-create lookup queries ListDatasets with
 compartmentId, annotationFormat, displayName,
 and an optional tracked id; the runtime skips

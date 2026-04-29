@@ -40,13 +40,13 @@ DatasetSpec defines the desired state of Dataset.
 | --- | --- | --- | --- | --- | --- |
 | `annotationFormat` | The annotation format name required for labeling records. | `string` | Yes | - | - |
 | `compartmentId` | The OCID of the compartment of the resource. | `string` | Yes | - | - |
-| [`datasetFormatDetails`](#kind-dataset-spec-datasetformatdetails) | DatasetFormatDetails defines nested fields for Dataset.DatasetFormatDetails. | `object` | Yes | - | - |
-| [`datasetSourceDetails`](#kind-dataset-spec-datasetsourcedetails) | DatasetSourceDetails defines nested fields for Dataset.DatasetSourceDetails. | `object` | Yes | - | - |
+| [`datasetFormatDetails`](#kind-dataset-spec-datasetformatdetails) | DatasetCreateFormatDetails defines the supported create-time dataset format shape for the published Dataset runtime. | `object` | Yes | - | - |
+| [`datasetSourceDetails`](#kind-dataset-spec-datasetsourcedetails) | DatasetCreateSourceDetails defines the supported create-time source shape for the published Dataset runtime. | `object` | Yes | - | - |
 | `definedTags` | The defined tags for this resource. Each key is predefined and scoped to a namespace. For example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | A user provided description of the dataset | `string` | No | - | - |
 | `displayName` | A user-friendly display name for the resource. | `string` | No | - | - |
 | `freeformTags` | A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only. For example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| [`initialImportDatasetConfiguration`](#kind-dataset-spec-initialimportdatasetconfiguration) | DatasetInitialImportDatasetConfiguration defines nested fields for Dataset.InitialImportDatasetConfiguration. | `object` | No | - | - |
+| [`initialImportDatasetConfiguration`](#kind-dataset-spec-initialimportdatasetconfiguration) | DatasetCreateInitialImportDatasetConfiguration defines the supported create-time import configuration shape for the published Dataset runtime. | `object` | No | - | - |
 | [`initialRecordGenerationConfiguration`](#kind-dataset-spec-initialrecordgenerationconfiguration) | DatasetInitialRecordGenerationConfiguration defines nested fields for Dataset.InitialRecordGenerationConfiguration. | `object` | No | - | - |
 | [`labelSet`](#kind-dataset-spec-labelset) | DatasetLabelSet defines nested fields for Dataset.LabelSet. | `object` | Yes | - | - |
 | `labelingInstructions` | The labeling instructions for human labelers in rich text format | `string` | No | - | - |
@@ -56,29 +56,27 @@ DatasetSpec defines the desired state of Dataset.
 
 [Back to Dataset spec](#kind-dataset-spec)
 
-DatasetFormatDetails defines nested fields for Dataset.DatasetFormatDetails.
+DatasetCreateFormatDetails defines the supported create-time dataset format shape for the published Dataset runtime.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `formatType` | - | `string` | No | - | - |
-| `jsonData` | - | `string` | No | - | - |
-| [`textFileTypeMetadata`](#kind-dataset-spec-datasetformatdetails-textfiletypemetadata) | DatasetFormatDetailsTextFileTypeMetadata defines nested fields for Dataset.DatasetFormatDetails.TextFileTypeMetadata. | `object` | No | - | - |
+| `formatType` | FormatType selects the supported published dataset format variant. | `string` | Yes | - | `DOCUMENT`, `IMAGE`, `TEXT` |
+| [`textFileTypeMetadata`](#kind-dataset-spec-datasetformatdetails-textfiletypemetadata) | TextFileTypeMetadata must be set when FormatType is TEXT. | `object` | No | - | - |
 
 <a id="kind-dataset-spec-datasetformatdetails-textfiletypemetadata"></a>
 ##### Spec.datasetFormatDetails.textFileTypeMetadata
 
 [Back to Dataset spec](#kind-dataset-spec)
 
-DatasetFormatDetailsTextFileTypeMetadata defines nested fields for Dataset.DatasetFormatDetails.TextFileTypeMetadata.
+TextFileTypeMetadata must be set when FormatType is TEXT.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `columnDelimiter` | A column delimiter | `string` | No | - | - |
-| `columnIndex` | The index of a selected column. This is a zero-based index. | `integer` | No | - | - |
+| `columnIndex` | The index of a selected column. This is a zero-based index. | `integer` | Yes | - | - |
 | `columnName` | The name of a selected column. | `string` | No | - | - |
 | `escapeCharacter` | An escape character. | `string` | No | - | - |
-| `formatType` | - | `string` | No | - | - |
-| `jsonData` | - | `string` | No | - | - |
+| `formatType` | FormatType must remain DELIMITED for the published Dataset rollout. | `string` | Yes | - | `DELIMITED` |
 | `lineDelimiter` | A line delimiter. | `string` | No | - | - |
 
 <a id="kind-dataset-spec-datasetsourcedetails"></a>
@@ -86,27 +84,26 @@ DatasetFormatDetailsTextFileTypeMetadata defines nested fields for Dataset.Datas
 
 [Back to Dataset spec](#kind-dataset-spec)
 
-DatasetSourceDetails defines nested fields for Dataset.DatasetSourceDetails.
+DatasetCreateSourceDetails defines the supported create-time source shape for the published Dataset runtime.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `bucket` | The object storage bucket that contains the dataset data source. | `string` | No | - | - |
-| `jsonData` | - | `string` | No | - | - |
-| `namespace` | The namespace of the bucket that contains the dataset data source. | `string` | No | - | - |
-| `prefix` | A common path prefix shared by the objects that make up the dataset. Except for the CSV file type, records are not generated for the objects whose names exactly match with the prefix. | `string` | No | - | - |
-| `sourceType` | - | `string` | No | - | - |
+| `bucket` | The object storage bucket that contains the dataset data source. | `string` | Yes | - | - |
+| `namespace` | The namespace of the bucket that contains the dataset data source. | `string` | Yes | - | - |
+| `prefix` | A common path prefix shared by the objects that make up the dataset. | `string` | No | - | - |
+| `sourceType` | SourceType must remain OBJECT_STORAGE for the published Dataset rollout. | `string` | Yes | - | `OBJECT_STORAGE` |
 
 <a id="kind-dataset-spec-initialimportdatasetconfiguration"></a>
 #### Spec.initialImportDatasetConfiguration
 
 [Back to Dataset spec](#kind-dataset-spec)
 
-DatasetInitialImportDatasetConfiguration defines nested fields for Dataset.InitialImportDatasetConfiguration.
+DatasetCreateInitialImportDatasetConfiguration defines the supported create-time import configuration shape for the published Dataset runtime.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | [`importFormat`](#kind-dataset-spec-initialimportdatasetconfiguration-importformat) | DatasetInitialImportDatasetConfigurationImportFormat defines nested fields for Dataset.InitialImportDatasetConfiguration.ImportFormat. | `object` | Yes | - | - |
-| [`importMetadataPath`](#kind-dataset-spec-initialimportdatasetconfiguration-importmetadatapath) | DatasetInitialImportDatasetConfigurationImportMetadataPath defines nested fields for Dataset.InitialImportDatasetConfiguration.ImportMetadataPath. | `object` | Yes | - | - |
+| [`importMetadataPath`](#kind-dataset-spec-initialimportdatasetconfiguration-importmetadatapath) | DatasetCreateImportMetadataPath defines the supported create-time import metadata path shape for the published Dataset runtime. | `object` | Yes | - | - |
 
 <a id="kind-dataset-spec-initialimportdatasetconfiguration-importformat"></a>
 ##### Spec.initialImportDatasetConfiguration.importFormat
@@ -125,15 +122,14 @@ DatasetInitialImportDatasetConfigurationImportFormat defines nested fields for D
 
 [Back to Dataset spec](#kind-dataset-spec)
 
-DatasetInitialImportDatasetConfigurationImportMetadataPath defines nested fields for Dataset.InitialImportDatasetConfiguration.ImportMetadataPath.
+DatasetCreateImportMetadataPath defines the supported create-time import metadata path shape for the published Dataset runtime.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `bucket` | Bucket name | `string` | No | - | - |
-| `jsonData` | - | `string` | No | - | - |
-| `namespace` | Bucket namespace name | `string` | No | - | - |
-| `path` | Path for the metadata file. | `string` | No | - | - |
-| `sourceType` | - | `string` | No | - | - |
+| `bucket` | Bucket name | `string` | Yes | - | - |
+| `namespace` | Bucket namespace name | `string` | Yes | - | - |
+| `path` | Path for the metadata file. | `string` | Yes | - | - |
+| `sourceType` | SourceType must remain OBJECT_STORAGE for the published Dataset rollout. | `string` | Yes | - | `OBJECT_STORAGE` |
 
 <a id="kind-dataset-spec-initialrecordgenerationconfiguration"></a>
 #### Spec.initialRecordGenerationConfiguration

@@ -21,9 +21,9 @@ type DatasetSpec struct {
 	// +kubebuilder:validation:Required
 	AnnotationFormat string `json:"annotationFormat"`
 	// +kubebuilder:validation:Required
-	DatasetSourceDetails DatasetSourceDetails `json:"datasetSourceDetails"`
+	DatasetSourceDetails DatasetCreateSourceDetails `json:"datasetSourceDetails"`
 	// +kubebuilder:validation:Required
-	DatasetFormatDetails DatasetFormatDetails `json:"datasetFormatDetails"`
+	DatasetFormatDetails DatasetCreateFormatDetails `json:"datasetFormatDetails"`
 	// +kubebuilder:validation:Required
 	LabelSet DatasetLabelSet `json:"labelSet"`
 	// A user-friendly display name for the resource.
@@ -35,7 +35,7 @@ type DatasetSpec struct {
 	// +kubebuilder:validation:Optional
 	InitialRecordGenerationConfiguration DatasetInitialRecordGenerationConfiguration `json:"initialRecordGenerationConfiguration,omitempty"`
 	// +kubebuilder:validation:Optional
-	InitialImportDatasetConfiguration DatasetInitialImportDatasetConfiguration `json:"initialImportDatasetConfiguration,omitempty"`
+	InitialImportDatasetConfiguration DatasetCreateInitialImportDatasetConfiguration `json:"initialImportDatasetConfiguration,omitempty"`
 	// The labeling instructions for human labelers in rich text format
 	// +kubebuilder:validation:Optional
 	LabelingInstructions string `json:"labelingInstructions,omitempty"`

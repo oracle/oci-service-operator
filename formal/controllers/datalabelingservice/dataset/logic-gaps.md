@@ -20,8 +20,12 @@ generated-runtime contract.
 - The reviewed runtime builds `CreateDatasetDetails` explicitly so the
   polymorphic `datasetSourceDetails` and `datasetFormatDetails` payloads reach
   OCI as concrete SDK variants with `sourceType` and `formatType`
-  discriminators, while helper-only `jsonData` scaffold fields stay out of the
-  request body.
+  discriminators, while the published Dataset spec now uses repo-authored
+  create-shape helper types that require those discriminators and keep
+  helper-only `jsonData` scaffold fields out of the CRD and request body.
+- The repo-authored create-shape contract keeps `columnIndex` as an explicit
+  pointer-backed required field for the supported DELIMITED text metadata
+  variant so the zero-based first-column case survives into the OCI request.
 - Lifecycle handling is explicit: `CREATING` requeues as provisioning,
   `UPDATING` requeues as updating, `ACTIVE` settles success, `FAILED` and
   `NEEDS_ATTENTION` are terminal failure states without requeue, and delete
