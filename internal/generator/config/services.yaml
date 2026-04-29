@@ -1352,6 +1352,46 @@ services:
           serviceManager:
             strategy: none
 
+  - service: databasemigration
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/databasemigration
+    group: databasemigration
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Connection
+    observedState:
+      excludedFieldPaths:
+        Connection:
+          - Password
+          - ReplicationPassword
+          - SshKey
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Connection
+          formalSpec: connection
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+
   - service: datalabelingservice
     sdkPackage: github.com/oracle/oci-go-sdk/v65/datalabelingservice
     group: datalabelingservice

@@ -1147,6 +1147,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"dataflow",
 		"database",
 		"databasetools",
+		"databasemigration",
 		"datalabelingservice",
 		"datascience",
 		"email",
@@ -1193,6 +1194,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"core",
 		"dataflow",
 		"database",
+		"databasemigration",
 		"databasetools",
 		"datalabelingservice",
 		"datascience",
@@ -1232,6 +1234,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
+	assertServiceSelection(t, services["databasemigration"], true, SelectionModeExplicit, []string{"Connection"})
 	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
 	assertServiceSelection(t, services["datalabelingservice"], true, SelectionModeExplicit, []string{"Dataset"})
 	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
@@ -1262,12 +1265,13 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasetools", "datalabelingservice", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "ocvp", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "ocvp", "psql", "redis", "streaming")
 	assertAIDocumentRuntimeRolloutMetadata(t, services["aidocument"])
 	assertAILanguageRuntimeRolloutMetadata(t, services["ailanguage"])
 	assertAISpeechRuntimeRolloutMetadata(t, services["aispeech"])
 	assertAIVisionRuntimeRolloutMetadata(t, services["aivision"])
 	assertBDSRuntimeRolloutMetadata(t, services["bds"])
+	assertDatabaseMigrationRuntimeRolloutMetadata(t, services["databasemigration"])
 	assertDatabaseToolsRuntimeRolloutMetadata(t, services["databasetools"])
 	assertDataScienceRuntimeRolloutMetadata(t, services["datascience"])
 
@@ -1278,6 +1282,12 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		webhook:        GenerationStrategyNone,
 	})
 	assertServiceGenerationStrategies(t, services["database"], generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertServiceGenerationStrategies(t, services["databasemigration"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
 		serviceManager: GenerationStrategyGenerated,
 		registration:   GenerationStrategyGenerated,
@@ -1341,7 +1351,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "database", "databasetools", "datalabelingservice", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "database", "databasemigration", "databasetools", "datalabelingservice", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
 	assertFormalSpecFor(t, services["aispeech"], "TranscriptionJob", "transcriptionjob")
@@ -1351,6 +1361,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["containerengine"], "Cluster", "cluster")
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
+	assertFormalSpecFor(t, services["databasemigration"], "Connection", "connection")
 	assertFormalSpecFor(t, services["databasetools"], "DatabaseToolsConnection", "databasetoolsconnection")
 	assertFormalSpecFor(t, services["datalabelingservice"], "Dataset", "dataset")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
@@ -1943,6 +1954,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"core":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"dataflow":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"database":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"databasemigration":   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"databasetools":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"datalabelingservice": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"datascience":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -2573,6 +2585,29 @@ func assertDatabaseToolsRuntimeRolloutMetadata(t *testing.T, service *ServiceCon
 		"WorkRequestLog",
 	} {
 		assertDisabledResourceOverride(t, service.Service, kind, overrides[kind])
+	}
+}
+
+func assertDatabaseMigrationRuntimeRolloutMetadata(t *testing.T, service *ServiceConfig) {
+	t.Helper()
+
+	assertServiceGenerationStrategies(t, service, generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertResourceOverrideCount(t, service, 1)
+
+	async := assertAsyncContract(t, service, "Connection", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)
+	if async.FormalClassification != AsyncStrategyWorkRequest {
+		t.Fatalf("databasemigration Connection formalClassification = %q, want %q", async.FormalClassification, AsyncStrategyWorkRequest)
+	}
+	if async.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf("databasemigration Connection workRequest.source = %q, want %q", async.WorkRequest.Source, AsyncWorkRequestSourceServiceSDK)
+	}
+	if !slices.Equal(async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf("databasemigration Connection workRequest.phases = %v, want %v", async.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete})
 	}
 }
 

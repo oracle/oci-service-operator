@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 183; got != want {
+	if got, want := len(inventory), 184; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 85; got != want {
+	if got, want := countRegistrations(inventory), 86; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 98; got != want {
@@ -38,6 +38,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
+	assertInventorySelectionSource(t, byKey, "databasemigration/Connection", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "databasetools/DatabaseToolsConnection", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datalabelingservice/Dataset", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datascience/Project", "selection.includeKinds")
@@ -77,6 +78,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestLog", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "databasemigration/Connection")
 	assertInventoryRegistration(t, byKey, "databasetools/DatabaseToolsConnection")
 	assertInventoryRegistration(t, byKey, "datalabelingservice/Dataset")
 	assertInventoryException(t, byKey, "datalabelingservice/AnnotationFormat", `controller.strategy="none"`)
@@ -123,6 +125,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "core/Vcn", APIErrorCoverageFamilyManualRuntime)
+	assertReviewedFamily(t, "databasemigration/Connection", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "databasetools/DatabaseToolsConnection", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datalabelingservice/Dataset", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datascience/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)

@@ -1,0 +1,487 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: connections.databasemigration.oracle.com
+spec:
+  group: databasemigration.oracle.com
+  names:
+    kind: Connection
+    listKind: ConnectionList
+    plural: connections
+    singular: connection
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Connection
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Connection
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Connection is the Schema for the connections API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConnectionSpec defines the desired state of Connection.
+            properties:
+              additionalAttributes:
+                description: An array of name-value pair attribute entries.
+                items:
+                  description: ConnectionAdditionalAttribute defines nested fields
+                    for Connection.AdditionalAttribute.
+                  properties:
+                    name:
+                      description: The name of the property entry.
+                      type: string
+                    value:
+                      description: The value of the property entry.
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              connectionString:
+                description: Connect descriptor or Easy Connect Naming method used
+                  to connect to a database.
+                type: string
+              connectionType:
+                type: string
+              databaseId:
+                description: The OCID of the database being referenced.
+                type: string
+              databaseName:
+                description: The name of the database being referenced.
+                type: string
+              dbSystemId:
+                description: The OCID of the database system being referenced.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags. Example: {"Department": "Finance"}
+                type: object
+              host:
+                description: The IP Address of the host.
+                type: string
+              jsonData:
+                type: string
+              keyId:
+                description: The OCID of the key used in cryptographic operations.
+                type: string
+              nsgIds:
+                description: An array of Network Security Group OCIDs used to define
+                  network access for Connections.
+                items:
+                  type: string
+                type: array
+              password:
+                description: The password (credential) used when creating or updating
+                  this resource.
+                type: string
+              port:
+                description: The port to be used for the connection.
+                type: integer
+              replicationPassword:
+                description: The password (credential) used when creating or updating
+                  this resource.
+                type: string
+              replicationUsername:
+                description: The username (credential) used when creating or updating
+                  this resource.
+                type: string
+              securityProtocol:
+                description: Security Type for MySQL.
+                type: string
+              sshHost:
+                description: Name of the host the SSH key is valid for.
+                type: string
+              sshKey:
+                description: Private SSH key string.
+                type: string
+              sshSudoLocation:
+                description: Sudo location
+                type: string
+              sshUser:
+                description: The username (credential) used when creating or updating
+                  this resource.
+                type: string
+              sslCa:
+                description: |-
+                  Database Certificate - The base64 encoded content of mysql.pem file
+                  containing the server public key (for 1 and 2-way SSL).
+                type: string
+              sslCert:
+                description: |-
+                  Client Certificate - The base64 encoded content of client-cert.pem file
+                  containing the client public key (for 2-way SSL).
+                type: string
+              sslCrl:
+                description: |-
+                  Certificates revoked by certificate authorities (CA).
+                  Server certificate must not be on this list (for 1 and 2-way SSL).
+                  Note: This is an optional and that too only applicable if TLS/MTLS option is selected.
+                type: string
+              sslKey:
+                description: Client Key - The client-key.pem containing the client
+                  private key (for 2-way SSL).
+                type: string
+              sslMode:
+                description: SSL modes for MySQL.
+                type: string
+              subnetId:
+                description: OCI resource ID.
+                type: string
+              technologyType:
+                description: |-
+                  The type of MySQL source or target connection.
+                  Example: OCI_MYSQL represents OCI MySQL HeatWave Database Service
+                type: string
+              username:
+                description: The username (credential) used when creating or updating
+                  this resource.
+                type: string
+              vaultId:
+                description: OCI resource ID.
+                type: string
+              wallet:
+                description: |-
+                  The wallet contents used to make connections to a database.  This
+                  attribute is expected to be base64 encoded.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - keyId
+            - password
+            - username
+            - vaultId
+            type: object
+          status:
+            description: ConnectionStatus defines the observed state of Connection.
+            properties:
+              additionalAttributes:
+                description: An array of name-value pair attribute entries.
+                items:
+                  description: ConnectionAdditionalAttribute defines nested fields
+                    for Connection.AdditionalAttribute.
+                  properties:
+                    name:
+                      description: The name of the property entry.
+                      type: string
+                    value:
+                      description: The value of the property entry.
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID of the compartment.
+                type: string
+              connectionString:
+                description: Connect descriptor or Easy Connect Naming method used
+                  to connect to a database.
+                type: string
+              connectionType:
+                type: string
+              databaseId:
+                description: The OCID of the database being referenced.
+                type: string
+              databaseName:
+                description: The name of the database being referenced.
+                type: string
+              dbSystemId:
+                description: The OCID of the database system being referenced.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags. Example: {"Department": "Finance"}
+                type: object
+              host:
+                description: The IP Address of the host.
+                type: string
+              id:
+                description: The OCID of the connection being referenced.
+                type: string
+              ingressIps:
+                description: List of ingress IP addresses from where to connect to
+                  this connection's privateIp.
+                items:
+                  description: ConnectionIngressIp defines nested fields for Connection.IngressIp.
+                  properties:
+                    ingressIp:
+                      description: A Private Endpoint IPv4 or IPv6 Address created
+                        in the customer's subnet.
+                      type: string
+                  type: object
+                type: array
+              jsonData:
+                type: string
+              keyId:
+                description: The OCID of the key used in cryptographic operations.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  The message describing the current state of the connection's lifecycle in detail.
+                  For example, can be used to provide actionable information for a connection in a Failed state.
+                type: string
+              lifecycleState:
+                description: The Connection's current lifecycle state.
+                type: string
+              nsgIds:
+                description: An array of Network Security Group OCIDs used to define
+                  network access for Connections.
+                items:
+                  type: string
+                type: array
+              port:
+                description: The port to be used for the connection.
+                type: integer
+              privateEndpointId:
+                description: The OCID of the resource being referenced.
+                type: string
+              replicationUsername:
+                description: The username (credential) used when creating or updating
+                  this resource.
+                type: string
+              secretId:
+                description: The OCID of the resource being referenced.
+                type: string
+              securityProtocol:
+                description: Security Protocol to be used for the connection.
+                type: string
+              sshHost:
+                description: Name of the host the SSH key is valid for.
+                type: string
+              sshSudoLocation:
+                description: Sudo location
+                type: string
+              sshUser:
+                description: The username (credential) used when creating or updating
+                  this resource.
+                type: string
+              sslMode:
+                description: SSL mode to be used for the connection.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subnetId:
+                description: OCI resource ID.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              technologyType:
+                description: |-
+                  The type of MySQL source or target connection.
+                  Example: OCI_MYSQL represents OCI MySQL HeatWave Database Service
+                type: string
+              timeCreated:
+                description: |-
+                  The time when this resource was created.
+                  An RFC3339 formatted datetime string such as `2016-08-25T21:10:29.600Z`.
+                type: string
+              timeUpdated:
+                description: |-
+                  The time when this resource was updated.
+                  An RFC3339 formatted datetime string such as `2016-08-25T21:10:29.600Z`.
+                type: string
+              username:
+                description: The username (credential) used when creating or updating
+                  this resource.
+                type: string
+              vaultId:
+                description: OCI resource ID.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

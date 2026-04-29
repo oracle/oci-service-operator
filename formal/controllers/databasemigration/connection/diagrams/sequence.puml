@@ -1,0 +1,133 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - databasemigration/Connection
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Connection reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Connection
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetConnection
+else tracked identity is missing
+ServiceManager -> OCI: ListConnections(filters:\ncompartment_id, connection_type,\ndisplay_name, lifecycle_state (+3\nmore))
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateConnection
+loop create pending CREATING
+ServiceManager -> OCI: GetConnection
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetConnection
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteConnection
+ServiceManager -> OCI: confirm delete via GetConnection or\nListConnections
+loop delete pending DELETING
+ServiceManager -> OCI: GetConnection or ListConnections
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+additional_attributes, compartment_id,
+connection_string, database_id (+27
+more)
+Reject before mutate: force-new fields
+connection_type, technology_type
+Lookup filters: compartment_id,
+connection_type, display_name,
+lifecycle_state (+3 more)
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply ChangeConnectionCompartment,\nUpdateConnection only for mutable\nfields additional_attributes,\ncompartment_id, connection_string,\ndatabase_id (+27 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetConnection
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=connection action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=connection action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=connection action=DELETED
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: databasemigration
+slug: connection
+kind: Connection
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: additional_attributes,
+compartment_id, connection_string, database_id
+(+27 more)
+reject before mutate: force-new fields
+connection_type, technology_type
+create-only fields: none
+list lookup: oci_database_migration_connections
+filters compartment_id, connection_type,
+display_name, lifecycle_state (+3 more)
+conflicts: none
+open gaps: none
+Work-request-backed generatedruntime overlay
+with explicit MYSQL/ORACLE request builders and
+required delete confirmation.
+end note
+@enduml

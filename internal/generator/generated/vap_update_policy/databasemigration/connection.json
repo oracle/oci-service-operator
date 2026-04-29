@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "databasemigration",
+    "apiVersion": "databasemigration.oracle.com/v1beta1",
+    "kind": "Connection",
+    "formalSlug": "connection",
+    "providerResource": "oci_database_migration_connection",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "additionalAttributes",
+      "compartmentId",
+      "connectionString",
+      "databaseId",
+      "databaseName",
+      "dbSystemId",
+      "definedTags",
+      "description",
+      "displayName",
+      "freeformTags",
+      "host",
+      "keyId",
+      "nsgIds",
+      "password",
+      "port",
+      "replicationPassword",
+      "replicationUsername",
+      "securityProtocol",
+      "sshHost",
+      "sshKey",
+      "sshSudoLocation",
+      "sshUser",
+      "sslCa",
+      "sslCert",
+      "sslCrl",
+      "sslKey",
+      "sslMode",
+      "subnetId",
+      "username",
+      "vaultId",
+      "wallet"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "connectionType",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "technologyType",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

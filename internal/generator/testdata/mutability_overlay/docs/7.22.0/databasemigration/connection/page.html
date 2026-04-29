@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>compartment_id</code> - (Required) (Updatable) The compartment identifier for the connection.</li>
+      <li><code>connection_type</code> - (Required) Forces a new resource if changed.</li>
+      <li><code>technology_type</code> - (Required) Forces a new resource if changed.</li>
+      <li><code>display_name</code> - (Required) (Updatable) A user-friendly display name for the connection.</li>
+      <li><code>description</code> - (Optional) (Updatable) A user-friendly description for the connection.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Freeform tags for this connection.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this connection.</li>
+      <li><code>vault_id</code> - (Required) (Updatable) The Vault OCID used to store encrypted credentials.</li>
+      <li><code>key_id</code> - (Required) (Updatable) The KMS key OCID used for the connection.</li>
+      <li><code>username</code> - (Required) (Updatable) The primary database username for the connection.</li>
+      <li><code>password</code> - (Required) (Updatable) The primary database password for the connection.</li>
+      <li><code>replication_username</code> - (Optional) (Updatable) The replication username for the connection.</li>
+      <li><code>replication_password</code> - (Optional) (Updatable) The replication password for the connection.</li>
+      <li><code>subnet_id</code> - (Optional) (Updatable) The subnet OCID used by the connection.</li>
+      <li><code>nsg_ids</code> - (Optional) (Updatable) The network security groups applied to the connection.</li>
+      <li><code>database_name</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The MySQL database name.</li>
+      <li><code>host</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The MySQL host address.</li>
+      <li><code>port</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The MySQL port number.</li>
+      <li><code>security_protocol</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The MySQL security protocol.</li>
+      <li><code>ssl_mode</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The MySQL SSL mode.</li>
+      <li><code>ssl_ca</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The CA certificate used for MySQL TLS.</li>
+      <li><code>ssl_crl</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The certificate revocation list used for MySQL TLS.</li>
+      <li><code>ssl_cert</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The client certificate used for MySQL TLS.</li>
+      <li><code>ssl_key</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The client private key used for MySQL TLS.</li>
+      <li><code>additional_attributes</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) Additional MySQL connection attributes.</li>
+      <li><code>db_system_id</code> - (Applicable when <code>connection_type=MYSQL</code>) (Updatable) The MySQL DB System OCID associated with the connection.</li>
+      <li><code>connection_string</code> - (Applicable when <code>connection_type=ORACLE</code>) (Updatable) The Oracle connect descriptor or Easy Connect string.</li>
+      <li><code>database_id</code> - (Applicable when <code>connection_type=ORACLE</code>) (Updatable) The Oracle database OCID associated with the connection.</li>
+      <li><code>ssh_host</code> - (Applicable when <code>connection_type=ORACLE</code>) (Updatable) The SSH host used for the Oracle connection.</li>
+      <li><code>ssh_key</code> - (Applicable when <code>connection_type=ORACLE</code>) (Updatable) The SSH private key used for the Oracle connection.</li>
+      <li><code>ssh_user</code> - (Applicable when <code>connection_type=ORACLE</code>) (Updatable) The SSH username used for the Oracle connection.</li>
+      <li><code>ssh_sudo_location</code> - (Applicable when <code>connection_type=ORACLE</code>) (Updatable) The sudo binary path used for the Oracle connection.</li>
+      <li><code>wallet</code> - (Applicable when <code>connection_type=ORACLE</code>) (Updatable) The base64 encoded Oracle wallet content.</li>
+    </ul>
+  </body>
+</html>

@@ -37,6 +37,7 @@ resources:
 - bases/core.oracle.com_subnets.yaml
 - bases/core.oracle.com_vcns.yaml
 - bases/database.oracle.com_autonomousdatabases.yaml
+- bases/databasemigration.oracle.com_connections.yaml
 - bases/databasetools.oracle.com_databasetoolsconnections.yaml
 - bases/dataflow.oracle.com_applications.yaml
 - bases/datalabelingservice.oracle.com_datasets.yaml

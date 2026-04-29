@@ -15,6 +15,7 @@ import (
 	"unicode"
 
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
+	databasemigrationsdk "github.com/oracle/oci-go-sdk/v65/databasemigration"
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
 	"github.com/oracle/oci-service-operator/pkg/credhelper"
 )
@@ -542,6 +543,22 @@ func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (
 		converted := reflect.New(targetType).Elem()
 		converted.Set(reflect.ValueOf(body))
 		return converted, true, nil
+	case connectionCreateDetailsType:
+		body, err := convertConnectionCreateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
+	case connectionUpdateDetailsType:
+		body, err := convertConnectionUpdateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
 	case databaseToolsConnectionCreateDetailsType:
 		body, err := convertDatabaseToolsConnectionCreateDetails(payload)
 		if err != nil {
@@ -610,6 +627,40 @@ func autonomousDatabaseBaseConcreteType(source string) (reflect.Type, error) {
 	}
 }
 
+func convertConnectionCreateDetails(payload []byte) (databasemigrationsdk.CreateConnectionDetails, error) {
+	concreteType, err := connectionCreateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(databasemigrationsdk.CreateConnectionDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved CreateConnectionDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
+func convertConnectionUpdateDetails(payload []byte) (databasemigrationsdk.UpdateConnectionDetails, error) {
+	concreteType, err := connectionUpdateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(databasemigrationsdk.UpdateConnectionDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved UpdateConnectionDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
 func convertDatabaseToolsConnectionCreateDetails(payload []byte) (databasetoolssdk.CreateDatabaseToolsConnectionDetails, error) {
 	concreteType, err := databaseToolsConnectionCreateConcreteType(payload)
 	if err != nil {
@@ -661,6 +712,38 @@ func databaseToolsConnectionCreateConcreteType(payload []byte) (reflect.Type, er
 		return reflect.TypeOf(databasetoolssdk.CreateDatabaseToolsConnectionOracleDatabaseDetails{}), nil
 	default:
 		return nil, fmt.Errorf("unsupported CreateDatabaseToolsConnectionDetails type %q", connectionType)
+	}
+}
+
+func connectionCreateConcreteType(payload []byte) (reflect.Type, error) {
+	connectionType, err := jsonFieldString(payload, "connectionType")
+	if err != nil {
+		return nil, fmt.Errorf("decode Connection create type: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(connectionType)) {
+	case "MYSQL":
+		return reflect.TypeOf(databasemigrationsdk.CreateMysqlConnectionDetails{}), nil
+	case "ORACLE":
+		return reflect.TypeOf(databasemigrationsdk.CreateOracleConnectionDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported CreateConnectionDetails type %q", connectionType)
+	}
+}
+
+func connectionUpdateConcreteType(payload []byte) (reflect.Type, error) {
+	connectionType, err := jsonFieldString(payload, "connectionType")
+	if err != nil {
+		return nil, fmt.Errorf("decode Connection update type: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(connectionType)) {
+	case "MYSQL":
+		return reflect.TypeOf(databasemigrationsdk.UpdateMysqlConnectionDetails{}), nil
+	case "ORACLE":
+		return reflect.TypeOf(databasemigrationsdk.UpdateOracleConnectionDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported UpdateConnectionDetails type %q", connectionType)
 	}
 }
 
