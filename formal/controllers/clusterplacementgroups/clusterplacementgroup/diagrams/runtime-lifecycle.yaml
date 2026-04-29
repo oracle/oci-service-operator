@@ -1,0 +1,77 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: clusterplacementgroups
+slug: clusterplacementgroup
+kind: ClusterPlacementGroup
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - name
+      - availabilityDomain
+      - id
+    matchRule: exact compartmentId plus name and availabilityDomain unique match with matching clusterPlacementGroupType in ACTIVE, INACTIVE, CREATING, or UPDATING; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - freeformTags
+    forceNew:
+      - availabilityDomain
+      - capabilities
+      - clusterPlacementGroupType
+      - compartmentId
+      - name
+      - placementInstruction
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: clusterplacementgroup
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: clusterplacementgroup
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: clusterplacementgroup
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetClusterPlacementGroup
+    update: GetWorkRequest -> GetClusterPlacementGroup
+    delete: GetWorkRequest -> GetClusterPlacementGroup confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE and INACTIVE as success, and DELETING as terminating;
+    FAILED is terminal and DELETED is only a delete-confirmation target.
+  - Create, update, and delete responses expose work-request headers. The
+    runtime resumes through GetWorkRequest, recovers the affected
+    ClusterPlacementGroup OCID from work-request resources when needed, and
+    rereads GetClusterPlacementGroup before settling.
+  - Pre-create reuse only runs when spec.name and spec.availabilityDomain are
+    present and keeps exact compartmentId plus name and availabilityDomain
+    matching bounded to ACTIVE, INACTIVE, CREATING, or UPDATING summaries with
+    matching clusterPlacementGroupType.
+  - Only description, freeformTags, and definedTags reconcile in place;
+    availabilityDomain, capabilities, clusterPlacementGroupType,
+    compartmentId, name, and placementInstruction remain replacement-only, and
+    the activate/deactivate/compartment-change helpers stay out of scope for
+    the published runtime.
+  - Delete keeps the finalizer until the work request is terminal and
+    GetClusterPlacementGroup confirms the resource is gone or returns DELETED.

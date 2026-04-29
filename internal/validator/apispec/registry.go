@@ -11,6 +11,7 @@ import (
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
+	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
@@ -1568,6 +1569,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "budget.BudgetSummary",
+			},
+		},
+	},
+	{
+		Name:       "ClusterplacementgroupsClusterPlacementGroup",
+		SpecType:   reflect.TypeOf(clusterplacementgroupsv1beta1.ClusterPlacementGroupSpec{}),
+		StatusType: reflect.TypeOf(clusterplacementgroupsv1beta1.ClusterPlacementGroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "clusterplacementgroups.CreateClusterPlacementGroupDetails",
+			},
+			{
+				SDKStruct: "clusterplacementgroups.UpdateClusterPlacementGroupDetails",
+			},
+			{
+				SDKStruct: "clusterplacementgroups.ClusterPlacementGroup",
+			},
+			{
+				SDKStruct: "clusterplacementgroups.ClusterPlacementGroupCollection",
+			},
+			{
+				SDKStruct: "clusterplacementgroups.ClusterPlacementGroupSummary",
 			},
 		},
 	},

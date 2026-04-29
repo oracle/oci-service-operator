@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 81,
-    "mappings": 341,
-    "trackedMappings": 341,
+    "specs": 82,
+    "mappings": 346,
+    "trackedMappings": 346,
     "untrackedMappings": 0,
-    "presentFields": 3920,
-    "missingFields": 31,
-    "mandatoryPresentFields": 1218,
-    "mandatoryMissingFields": 28,
-    "extraSpecFields": 416,
-    "overallCoveragePercent": 99.21538850923817,
-    "mandatoryCoveragePercent": 97.75280898876404
+    "presentFields": 3959,
+    "missingFields": 32,
+    "mandatoryPresentFields": 1242,
+    "mandatoryMissingFields": 29,
+    "extraSpecFields": 422,
+    "overallCoveragePercent": 99.19819594086695,
+    "mandatoryCoveragePercent": 97.7183320220299
   },
   "services": [
     {
@@ -124,6 +124,20 @@
       "extraSpecFields": 4,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "clusterplacementgroups",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 39,
+      "missingFields": 1,
+      "mandatoryPresentFields": 24,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 6,
+      "overallCoveragePercent": 97.5,
+      "mandatoryCoveragePercent": 96
     },
     {
       "service": "containerengine",

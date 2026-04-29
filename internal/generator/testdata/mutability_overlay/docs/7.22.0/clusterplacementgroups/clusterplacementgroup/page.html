@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>availability_domain</code> - (Required) The availability domain where you want to create the cluster placement group.</li>
+      <li><code>capabilities</code> - (Optional) A list of resources that you can create in a cluster placement group.
+        <ul>
+          <li><code>items</code> - (Required) The supported resources.
+            <ul>
+              <li><code>name</code> - (Required) The type of resource.</li>
+              <li><code>service</code> - (Required) The service that the resource is part of.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>cluster_placement_group_type</code> - (Required) ClusterPlacementGroup Identifier.</li>
+      <li><code>compartment_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the cluster placement group.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: <code>{&#34;foo-namespace.bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>description</code> - (Required) (Updatable) A description of the cluster placement group.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only. Example: <code>{&#34;bar-key&#34;: &#34;value&#34;}</code></li>
+      <li><code>name</code> - (Required) The friendly name of the cluster placement group.</li>
+      <li><code>opc_dry_run</code> - (Optional) When set to <code>true</code>, the request performs validation on the submitted data without modifying configuration item details.</li>
+      <li><code>placement_instruction</code> - (Optional) Details that inform cluster placement group provisioning.
+        <ul>
+          <li><code>type</code> - (Required) The type of placement instruction.</li>
+          <li><code>value</code> - (Required) The value of the token designated for placement of the cluster placement group upon creation.</li>
+        </ul>
+      </li>
+      <li><code>state</code> - (Optional) (Updatable) The target state for the Cluster Placement Group. Could be set to <code>ACTIVE</code> or <code>INACTIVE</code>. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>
