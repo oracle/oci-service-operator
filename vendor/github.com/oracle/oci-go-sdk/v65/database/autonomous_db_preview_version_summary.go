@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -15,10 +15,10 @@ import (
 	"strings"
 )
 
-// AutonomousDbPreviewVersionSummary The Autonomous Database preview version. Note that preview version software is only available for Autonomous Database Serverless instances (https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/).
+// AutonomousDbPreviewVersionSummary The Autonomous AI Database preview version. Note that preview version software is only available for Autonomous AI Database Serverless instances (https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless/).
 type AutonomousDbPreviewVersionSummary struct {
 
-	// A valid Autonomous Database preview version.
+	// A valid Autonomous AI Database preview version.
 	Version *string `mandatory:"true" json:"version"`
 
 	// The date and time when the preview version availability begins.
@@ -27,11 +27,14 @@ type AutonomousDbPreviewVersionSummary struct {
 	// The date and time when the preview version availability ends.
 	TimePreviewEnd *common.SDKTime `mandatory:"false" json:"timePreviewEnd"`
 
-	// The Autonomous Database workload type. The following values are valid:
-	// - OLTP - indicates an Autonomous Transaction Processing database
-	// - DW - indicates an Autonomous Data Warehouse database
-	// - AJD - indicates an Autonomous JSON Database
-	// - APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.
+	// The Autonomous AI Database workload type. The following values are valid:
+	// - OLTP - indicates an Autonomous AI Transaction Processing database
+	// - DW - indicates an Autonomous AI Lakehouse database
+	// - AJD - indicates an Autonomous AI JSON Database
+	// - APEX - indicates an Autonomous AI Database with the Oracle APEX AI Application Development workload type.
+	// - LH - indicates an Oracle Autonomous AI Lakehouse database
+	// **Note** Starting December 2026, DW will not be supported as a valid value for this parameter.
+	//
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	DbWorkload AutonomousDbPreviewVersionSummaryDbWorkloadEnum `mandatory:"false" json:"dbWorkload,omitempty"`
 
@@ -53,7 +56,7 @@ func (m AutonomousDbPreviewVersionSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DbWorkload: %s. Supported values are: %s.", m.DbWorkload, strings.Join(GetAutonomousDbPreviewVersionSummaryDbWorkloadEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -67,6 +70,7 @@ const (
 	AutonomousDbPreviewVersionSummaryDbWorkloadDw   AutonomousDbPreviewVersionSummaryDbWorkloadEnum = "DW"
 	AutonomousDbPreviewVersionSummaryDbWorkloadAjd  AutonomousDbPreviewVersionSummaryDbWorkloadEnum = "AJD"
 	AutonomousDbPreviewVersionSummaryDbWorkloadApex AutonomousDbPreviewVersionSummaryDbWorkloadEnum = "APEX"
+	AutonomousDbPreviewVersionSummaryDbWorkloadLh   AutonomousDbPreviewVersionSummaryDbWorkloadEnum = "LH"
 )
 
 var mappingAutonomousDbPreviewVersionSummaryDbWorkloadEnum = map[string]AutonomousDbPreviewVersionSummaryDbWorkloadEnum{
@@ -74,6 +78,7 @@ var mappingAutonomousDbPreviewVersionSummaryDbWorkloadEnum = map[string]Autonomo
 	"DW":   AutonomousDbPreviewVersionSummaryDbWorkloadDw,
 	"AJD":  AutonomousDbPreviewVersionSummaryDbWorkloadAjd,
 	"APEX": AutonomousDbPreviewVersionSummaryDbWorkloadApex,
+	"LH":   AutonomousDbPreviewVersionSummaryDbWorkloadLh,
 }
 
 var mappingAutonomousDbPreviewVersionSummaryDbWorkloadEnumLowerCase = map[string]AutonomousDbPreviewVersionSummaryDbWorkloadEnum{
@@ -81,6 +86,7 @@ var mappingAutonomousDbPreviewVersionSummaryDbWorkloadEnumLowerCase = map[string
 	"dw":   AutonomousDbPreviewVersionSummaryDbWorkloadDw,
 	"ajd":  AutonomousDbPreviewVersionSummaryDbWorkloadAjd,
 	"apex": AutonomousDbPreviewVersionSummaryDbWorkloadApex,
+	"lh":   AutonomousDbPreviewVersionSummaryDbWorkloadLh,
 }
 
 // GetAutonomousDbPreviewVersionSummaryDbWorkloadEnumValues Enumerates the set of values for AutonomousDbPreviewVersionSummaryDbWorkloadEnum
@@ -99,6 +105,7 @@ func GetAutonomousDbPreviewVersionSummaryDbWorkloadEnumStringValues() []string {
 		"DW",
 		"AJD",
 		"APEX",
+		"LH",
 	}
 }
 

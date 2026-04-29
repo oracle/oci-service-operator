@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -20,16 +20,19 @@ type NlbIpVersionEnum string
 const (
 	NlbIpVersionIpv4        NlbIpVersionEnum = "IPV4"
 	NlbIpVersionIpv4AndIpv6 NlbIpVersionEnum = "IPV4_AND_IPV6"
+	NlbIpVersionIpv6        NlbIpVersionEnum = "IPV6"
 )
 
 var mappingNlbIpVersionEnum = map[string]NlbIpVersionEnum{
 	"IPV4":          NlbIpVersionIpv4,
 	"IPV4_AND_IPV6": NlbIpVersionIpv4AndIpv6,
+	"IPV6":          NlbIpVersionIpv6,
 }
 
 var mappingNlbIpVersionEnumLowerCase = map[string]NlbIpVersionEnum{
 	"ipv4":          NlbIpVersionIpv4,
 	"ipv4_and_ipv6": NlbIpVersionIpv4AndIpv6,
+	"ipv6":          NlbIpVersionIpv6,
 }
 
 // GetNlbIpVersionEnumValues Enumerates the set of values for NlbIpVersionEnum
@@ -46,6 +49,7 @@ func GetNlbIpVersionEnumStringValues() []string {
 	return []string{
 		"IPV4",
 		"IPV4_AND_IPV6",
+		"IPV6",
 	}
 }
 

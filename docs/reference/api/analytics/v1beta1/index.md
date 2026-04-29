@@ -38,18 +38,22 @@ AnalyticsInstanceSpec defines the desired state of AnalyticsInstance.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `adminUser` | user name of the authorized user. | `string` | No | - | - |
 | [`capacity`](#kind-analyticsinstance-spec-capacity) | AnalyticsInstanceCapacity defines nested fields for AnalyticsInstance.Capacity. | `object` | Yes | - | - |
 | `compartmentId` | The OCID of the compartment. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Optional description. | `string` | No | - | - |
+| `domainId` | domain id for which the user is authorized. | `string` | No | - | - |
 | `emailNotification` | Email address receiving notifications. | `string` | No | - | - |
+| `featureBundle` | The feature set of an Analytics instance. | `string` | No | - | - |
 | `featureSet` | Analytics feature set. | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `idcsAccessToken` | IDCS access token identifying a stripe and service administrator user. | `string` | No | - | - |
-| `kmsKeyId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption. | `string` | No | - | - |
+| `kmsKeyId` | OCID of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption. | `string` | No | - | - |
 | `licenseType` | The license used for the service. | `string` | Yes | - | - |
 | `name` | The name of the Analytics instance. This name must be unique in the tenancy and cannot be changed. | `string` | Yes | - | - |
 | [`networkEndpointDetails`](#kind-analyticsinstance-spec-networkendpointdetails) | AnalyticsInstanceNetworkEndpointDetails defines nested fields for AnalyticsInstance.NetworkEndpointDetails. | `object` | No | - | - |
+| `updateChannel` | Analytics instance update channel. | `string` | No | - | - |
 
 <a id="kind-analyticsinstance-spec-capacity"></a>
 #### Spec.capacity
@@ -60,8 +64,8 @@ AnalyticsInstanceCapacity defines nested fields for AnalyticsInstance.Capacity.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `capacityType` | The capacity model to use. | `string` | Yes | - | - |
-| `capacityValue` | The capacity value selected (OLPU count, number of users, ...etc...). This parameter affects the number of CPUs, amount of memory or other resources allocated to the instance. | `integer` | Yes | - | - |
+| `capacityType` | The capacity model to use. Accepted values are: OLPU_COUNT, USER_COUNT | `string` | Yes | - | - |
+| `capacityValue` | The capacity value selected, either the number of OCPUs (OLPU_COUNT) or the number of users (USER_COUNT). This parameter affects the number of OCPUs, amount of memory, and other resources allocated to the instance. | `integer` | Yes | - | - |
 
 <a id="kind-analyticsinstance-spec-networkendpointdetails"></a>
 #### Spec.networkEndpointDetails
@@ -102,13 +106,15 @@ AnalyticsInstanceStatus defines the observed state of AnalyticsInstance.
 | --- | --- | --- | --- | --- | --- |
 | [`capacity`](#kind-analyticsinstance-status-capacity) | AnalyticsInstanceCapacity defines nested fields for AnalyticsInstance.Capacity. | `object` | No | - | - |
 | `compartmentId` | The OCID of the compartment. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Optional description. | `string` | No | - | - |
+| `domainId` | Identity domain OCID. | `string` | No | - | - |
 | `emailNotification` | Email address receiving notifications. | `string` | No | - | - |
+| `featureBundle` | The feature set of an Analytics instance. | `string` | No | - | - |
 | `featureSet` | Analytics feature set. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The resource OCID. | `string` | No | - | - |
-| `kmsKeyId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption. | `string` | No | - | - |
+| `kmsKeyId` | OCID of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption. | `string` | No | - | - |
 | `licenseType` | The license used for the service. | `string` | No | - | - |
 | `lifecycleState` | The current state of an instance. | `string` | No | - | - |
 | `name` | The name of the Analytics instance. This name must be unique in the tenancy and cannot be changed. | `string` | No | - | - |
@@ -116,8 +122,10 @@ AnalyticsInstanceStatus defines the observed state of AnalyticsInstance.
 | [`privateAccessChannels`](#kind-analyticsinstance-status-privateaccesschannels) | Map of PrivateAccessChannel unique identifier key as KEY and PrivateAccessChannel Object as VALUE. | `map[string, object]` | No | - | - |
 | `serviceUrl` | URL of the Analytics service. | `string` | No | - | - |
 | [`status`](#kind-analyticsinstance-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | System tags for this resource. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time the instance was created, in the format defined by RFC3339. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 | `timeUpdated` | The date and time the instance was last updated (in the format defined by RFC3339). This timestamp represents updates made through this API. External events do not influence it. | `string` | No | - | - |
+| `updateChannel` | Analytics instance update channel. | `string` | No | - | - |
 | [`vanityUrlDetails`](#kind-analyticsinstance-status-vanityurldetails) | Map of VanityUrl unique identifier key as KEY and VanityUrl Object as VALUE. | `map[string, object]` | No | - | - |
 
 <a id="kind-analyticsinstance-status-capacity"></a>
@@ -129,8 +137,8 @@ AnalyticsInstanceCapacity defines nested fields for AnalyticsInstance.Capacity.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `capacityType` | The capacity model to use. | `string` | Yes | - | - |
-| `capacityValue` | The capacity value selected (OLPU count, number of users, ...etc...). This parameter affects the number of CPUs, amount of memory or other resources allocated to the instance. | `integer` | Yes | - | - |
+| `capacityType` | The capacity model to use. Accepted values are: OLPU_COUNT, USER_COUNT | `string` | Yes | - | - |
+| `capacityValue` | The capacity value selected, either the number of OCPUs (OLPU_COUNT) or the number of users (USER_COUNT). This parameter affects the number of OCPUs, amount of memory, and other resources allocated to the instance. | `integer` | Yes | - | - |
 
 <a id="kind-analyticsinstance-status-networkendpointdetails"></a>
 #### Status.networkEndpointDetails

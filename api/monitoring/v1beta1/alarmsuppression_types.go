@@ -19,16 +19,6 @@ type AlarmSuppressionSpec struct {
 	// A user-friendly name for the alarm suppression. It does not have to be unique, and it's changeable. Avoid entering confidential information.
 	// +kubebuilder:validation:Required
 	DisplayName string `json:"displayName"`
-	// A filter to suppress only alarm state entries that include the set of specified dimension key-value pairs.
-	// If you specify {"availabilityDomain": "phx-ad-1"}
-	// and the alarm state entry corresponds to the set {"availabilityDomain": "phx-ad-1" and "resourceId": "ocid1.instance.region1.phx.exampleuniqueID"},
-	// then this alarm will be included for suppression.
-	// The value cannot be an empty object.
-	// Only a single value is allowed per key. No grouping of multiple values is allowed under the same key.
-	// Maximum characters (after serialization): 4000. This maximum satisfies typical use cases.
-	// The response for an exceeded maximum is `HTTP 400` with an "dimensions values are too long" message.
-	// +kubebuilder:validation:Required
-	Dimensions map[string]string `json:"dimensions"`
 	// The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
 	// Example: `2023-02-01T01:02:29.600Z`
 	// +kubebuilder:validation:Required
@@ -37,6 +27,12 @@ type AlarmSuppressionSpec struct {
 	// Example: `2023-02-01T02:02:29.600Z`
 	// +kubebuilder:validation:Required
 	TimeSuppressUntil string `json:"timeSuppressUntil"`
+	// The level of this alarm suppression.
+	// `ALARM` indicates a suppression of the entire alarm, regardless of dimension.
+	// `DIMENSION` indicates a suppression configured for specified dimensions.
+	// Defaut: `DIMENSION`
+	// +kubebuilder:validation:Optional
+	Level string `json:"level,omitempty"`
 	// Human-readable reason for this alarm suppression.
 	// It does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
@@ -45,6 +41,16 @@ type AlarmSuppressionSpec struct {
 	// Example: `Planned outage due to change IT-1234.`
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// A filter to suppress only alarm state entries that include the set of specified dimension key-value pairs.
+	// If you specify {"availabilityDomain": "phx-ad-1"}
+	// and the alarm state entry corresponds to the set {"availabilityDomain": "phx-ad-1" and "resourceId": "ocid1.instance.region1.phx.exampleuniqueID"},
+	// then this alarm will be included for suppression.
+	// This is required only when the value of level is `DIMENSION`. If required, the value cannot be an empty object.
+	// Only a single value is allowed per key. No grouping of multiple values is allowed under the same key.
+	// Maximum characters (after serialization): 4000. This maximum satisfies typical use cases.
+	// The response for an exceeded maximum is `HTTP 400` with an "dimensions values are too long" message.
+	// +kubebuilder:validation:Optional
+	Dimensions map[string]string `json:"dimensions,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
@@ -53,6 +59,14 @@ type AlarmSuppressionSpec struct {
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Array of all preconditions for alarm suppression.
+	// Example: `[{
+	//   conditionType: "RECURRENCE",
+	//   suppressionRecurrence: "FRQ=DAILY;BYHOUR=10",
+	//   suppressionDuration: "PT1H"
+	// }]`
+	// +kubebuilder:validation:Optional
+	SuppressionConditions []AlarmSuppressionSuppressionCondition `json:"suppressionConditions,omitempty"`
 }
 
 // AlarmSuppressionTarget defines nested fields for AlarmSuppression.AlarmSuppressionTarget.
@@ -61,24 +75,55 @@ type AlarmSuppressionTarget struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	TargetType string `json:"targetType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm that is the target of the alarm suppression.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm that is the target of the alarm suppression.
 	// +kubebuilder:validation:Optional
 	AlarmId string `json:"alarmId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment or tenancy that is the
+	// target of the alarm suppression.
+	// Example: `ocid1.compartment.oc1..exampleuniqueID`
+	// +kubebuilder:validation:Optional
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// When true, the alarm suppression targets all alarms under all compartments and subcompartments of
+	// the tenancy specified. The parameter can only be set to true when compartmentId is the tenancy OCID
+	// (the tenancy is the root compartment). When false, the alarm suppression targets only the alarms under
+	// the specified compartment.
+	// +kubebuilder:validation:Optional
+	CompartmentIdInSubtree bool `json:"compartmentIdInSubtree,omitempty"`
+}
+
+// AlarmSuppressionSuppressionCondition defines nested fields for AlarmSuppression.SuppressionCondition.
+type AlarmSuppressionSuppressionCondition struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	ConditionType string `json:"conditionType,omitempty"`
+	// Frequency and start time of the recurring suppression. The format follows
+	// the iCalendar specification (RFC 5545, section 3.3.10) (https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10).
+	// Supported rule parts:
+	// * `FREQ`: Frequency of the recurring suppression: `WEEKLY` or `DAILY` only.
+	// * `BYDAY`: Comma separated days. Use with weekly suppressions only. Supported values: `MO`, `TU`, `WE`, `TH`, `FR`, `SA` ,`SU`.
+	// * `BYHOUR`, `BYMINUTE`, `BYSECOND`: Start time in UTC, after `timeSuppressFrom` value. Default is 00:00:00 UTC after `timeSuppressFrom`.
+	// +kubebuilder:validation:Optional
+	SuppressionRecurrence string `json:"suppressionRecurrence,omitempty"`
+	// Duration of the recurring suppression. Specified as a string in ISO 8601 format. Minimum: `PT1M` (1 minute). Maximum: `PT24H` (24 hours).
+	// +kubebuilder:validation:Optional
+	SuppressionDuration string `json:"suppressionDuration,omitempty"`
 }
 
 // AlarmSuppressionStatus defines the observed state of AlarmSuppression.
 type AlarmSuppressionStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm suppression.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm suppression.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm suppression.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm suppression.
 	CompartmentId          string                 `json:"compartmentId,omitempty"`
 	AlarmSuppressionTarget AlarmSuppressionTarget `json:"alarmSuppressionTarget,omitempty"`
+	// The level of this alarm suppression.
+	// `ALARM` indicates a suppression of the entire alarm, regardless of dimension.
+	// `DIMENSION` indicates a suppression configured for specified dimensions.
+	Level string `json:"level,omitempty"`
 	// A user-friendly name for the alarm suppression. It does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
-	// Configured dimension filter for suppressing alarm state entries that include the set of specified dimension key-value pairs.
-	// Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
-	Dimensions map[string]string `json:"dimensions,omitempty"`
 	// The start date and time for the suppression to take place, inclusive. Format defined by RFC3339.
 	// Example: `2018-02-01T01:02:29.600Z`
 	TimeSuppressFrom string `json:"timeSuppressFrom,omitempty"`
@@ -94,6 +139,13 @@ type AlarmSuppressionStatus struct {
 	// The date and time the alarm suppression was last updated (deleted). Format defined by RFC3339.
 	// Example: `2018-02-03T01:02:29.600Z`
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// Array of all preconditions for alarm suppression.
+	// Example: `[{
+	//   conditionType: "RECURRENCE",
+	//   suppressionRecurrence: "FRQ=DAILY;BYHOUR=10",
+	//   suppressionDuration: "PT1H"
+	// }]`
+	SuppressionConditions []AlarmSuppressionSuppressionCondition `json:"suppressionConditions,omitempty"`
 	// Human-readable reason for this alarm suppression.
 	// It does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
@@ -101,6 +153,9 @@ type AlarmSuppressionStatus struct {
 	// such as a ticket number.
 	// Example: `Planned outage due to change IT-1234.`
 	Description string `json:"description,omitempty"`
+	// Configured dimension filter for suppressing alarm state entries that include the set of specified dimension key-value pairs.
+	// Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
+	Dimensions map[string]string `json:"dimensions,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`

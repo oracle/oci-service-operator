@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -7,7 +7,7 @@
 // Use the Monitoring API to manage metric queries and alarms for assessing the health, capacity, and performance of your cloud resources.
 // Endpoints vary by operation. For PostMetricData, use the `telemetry-ingestion` endpoints; for all other operations, use the `telemetry` endpoints.
 // For more information, see
-// the Monitoring documentation (https://docs.cloud.oracle.com/iaas/Content/Monitoring/home.htm).
+// the Monitoring documentation (https://docs.oracle.com/iaas/Content/Monitoring/home.htm).
 //
 
 package monitoring
@@ -22,7 +22,7 @@ import (
 // AlarmSuppressionHistoryItem A summary of properties for the specified alarm suppression history item.
 type AlarmSuppressionHistoryItem struct {
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm suppression.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the alarm suppression.
 	SuppressionId *string `mandatory:"true" json:"suppressionId"`
 
 	AlarmSuppressionTarget AlarmSuppressionTarget `mandatory:"true" json:"alarmSuppressionTarget"`
@@ -54,6 +54,14 @@ type AlarmSuppressionHistoryItem struct {
 	// Configured dimension filter for suppressing alarm state entries that include the set of specified dimension key-value pairs.
 	// Example: `{"resourceId": "ocid1.instance.region1.phx.exampleuniqueID"}`
 	Dimensions map[string]string `mandatory:"false" json:"dimensions"`
+
+	// Array of all preconditions for alarm suppression.
+	// Example: `[{
+	//   conditionType: "RECURRENCE",
+	//   suppressionRecurrence: "FRQ=DAILY;BYHOUR=10",
+	//   suppressionDuration: "PT1H"
+	// }]`
+	SuppressionConditions []SuppressionCondition `mandatory:"false" json:"suppressionConditions"`
 }
 
 func (m AlarmSuppressionHistoryItem) String() string {
@@ -70,7 +78,7 @@ func (m AlarmSuppressionHistoryItem) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -80,6 +88,7 @@ func (m *AlarmSuppressionHistoryItem) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
 		Description            *string                              `json:"description"`
 		Dimensions             map[string]string                    `json:"dimensions"`
+		SuppressionConditions  []suppressioncondition               `json:"suppressionConditions"`
 		SuppressionId          *string                              `json:"suppressionId"`
 		AlarmSuppressionTarget alarmsuppressiontarget               `json:"alarmSuppressionTarget"`
 		Level                  AlarmSuppressionHistoryItemLevelEnum `json:"level"`
@@ -97,6 +106,18 @@ func (m *AlarmSuppressionHistoryItem) UnmarshalJSON(data []byte) (e error) {
 
 	m.Dimensions = model.Dimensions
 
+	m.SuppressionConditions = make([]SuppressionCondition, len(model.SuppressionConditions))
+	for i, n := range model.SuppressionConditions {
+		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
+		if e != nil {
+			return e
+		}
+		if nn != nil {
+			m.SuppressionConditions[i] = nn.(SuppressionCondition)
+		} else {
+			m.SuppressionConditions[i] = nil
+		}
+	}
 	m.SuppressionId = model.SuppressionId
 
 	nn, e = model.AlarmSuppressionTarget.UnmarshalPolymorphicJSON(model.AlarmSuppressionTarget.JsonData)

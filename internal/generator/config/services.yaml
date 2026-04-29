@@ -96,8 +96,15 @@ services:
         - kind: Project
           formalSpec: project
           async:
-            strategy: lifecycle
+            strategy: workrequest
             runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
         - kind: Endpoint
           controller:
             strategy: none
@@ -129,6 +136,38 @@ services:
           serviceManager:
             strategy: none
         - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
+  - service: aispeech
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aispeech
+    group: aispeech
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - TranscriptionJob
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: TranscriptionJob
+          formalSpec: transcriptionjob
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+        - kind: TranscriptionTask
           controller:
             strategy: none
           serviceManager:
@@ -866,7 +905,7 @@ services:
           formalSpec: application
           async:
             strategy: lifecycle
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: lifecycle
           serviceManager:
             packagePath: dataflow/application
@@ -1187,9 +1226,6 @@ services:
         - EmailDomain
         - Sender
         - Suppression
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1204,6 +1240,11 @@ services:
       webhooks:
         strategy: none
       resources:
+        - kind: Dkim
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
         - kind: EmailDomain
           formalSpec: emaildomain
           sample:
@@ -1239,6 +1280,11 @@ services:
                 emailAddress: sender@example.com
                 freeformTags:
                   managed-by: oci-service-operator
+        - kind: Suppression
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: events
     sdkPackage: github.com/oracle/oci-go-sdk/v65/events
@@ -1312,9 +1358,6 @@ services:
         - DedicatedAiCluster
         - Endpoint
         - Model
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1584,26 +1627,15 @@ services:
       mode: explicit
       includeKinds:
         - Backend
-        - BackendHealth
         - BackendSet
-        - BackendSetHealth
         - Certificate
-        - HealthChecker
         - Hostname
         - Listener
-        - ListenerRule
         - LoadBalancer
-        - LoadBalancerHealth
-        - LoadBalancerShape
-        - NetworkSecurityGroup
         - PathRouteSet
-        - Policy
-        - Protocol
         - RoutingPolicy
         - RuleSet
         - SSLCipherSuite
-        - Shape
-        - WorkRequest
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1693,6 +1725,16 @@ services:
                   urlPath: /healthz
                   port: 8080
                   returnCode: 200
+        - kind: Certificate
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Hostname
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
         - kind: Listener
           formalSpec: listener
           specFields:
@@ -1738,6 +1780,26 @@ services:
                 shapeDetails:
                   minimumBandwidthInMbps: 10
                   maximumBandwidthInMbps: 10
+        - kind: PathRouteSet
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: RoutingPolicy
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: RuleSet
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: SSLCipherSuite
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: logging
     sdkPackage: github.com/oracle/oci-go-sdk/v65/logging
@@ -1752,11 +1814,7 @@ services:
         - Log
         - LogGroup
         - LogSavedSearch
-        - Service
         - UnifiedAgentConfiguration
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1802,6 +1860,21 @@ services:
                     service: service_name
                     resource: ocid1.resource.oc1..exampleuniqueID
                     category: category_name
+        - kind: LogGroup
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: LogSavedSearch
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: UnifiedAgentConfiguration
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: monitoring
     sdkPackage: github.com/oracle/oci-go-sdk/v65/monitoring
@@ -1814,10 +1887,7 @@ services:
       mode: explicit
       includeKinds:
         - Alarm
-        - AlarmHistory
-        - AlarmStatus
         - AlarmSuppression
-        - Metric
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1855,6 +1925,11 @@ services:
                 destinations:
                   - ocid1.onstopic.oc1..exampleuniqueID
                 isEnabled: true
+        - kind: AlarmSuppression
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
     observedState:
       sdkAliases:
         AlarmHistory:
@@ -1871,21 +1946,7 @@ services:
       mode: explicit
       includeKinds:
         - AcceptedAgreement
-        - Agreement
-        - Category
-        - LaunchEligibility
-        - Listing
-        - Package
         - Publication
-        - PublicationPackage
-        - Publisher
-        - Report
-        - ReportType
-        - Tax
-        - ThirdPartyPaidListingEligibility
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -1935,6 +1996,11 @@ services:
                 agreementId: ocid1.agreement.oc1..exampleuniqueID
                 signature: "<listing-package-agreement-signature>"
                 displayName: "acceptedagreement-sample"
+        - kind: Publication
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: mysql
     sdkPackage: github.com/oracle/oci-go-sdk/v65/mysql
@@ -2069,9 +2135,10 @@ services:
         strategy: none
       resources:
         - kind: Table
+          formalSpec: table
           async:
             strategy: lifecycle
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: lifecycle
     observedState:
       sdkAliases:
@@ -2125,12 +2192,6 @@ services:
         - Cluster
         - EsxiHost
         - Sddc
-        - SupportedCommitment
-        - SupportedHostShape
-        - SupportedVmwareSoftwareVersion
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -2173,6 +2234,11 @@ services:
                   nsxEdgeVTepVlanId: ocid1.vlan.oc1..exampleuniqueID
           serviceManager:
             packagePath: ocvp/cluster
+        - kind: EsxiHost
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
         - kind: Sddc
           formalSpec: sddc
           sample:
@@ -2226,20 +2292,15 @@ services:
         - AuthenticationProvider
         - Channel
         - DigitalAssistant
-        - DigitalAssistantParameter
         - ImportedPackage
         - OdaInstance
         - OdaInstanceAttachment
         - OdaPrivateEndpoint
         - OdaPrivateEndpointAttachment
         - OdaPrivateEndpointScanProxy
-        - Package
         - Skill
         - SkillParameter
         - Translator
-        - WorkRequest
-        - WorkRequestError
-        - WorkRequestLog
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -2253,6 +2314,75 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: AuthenticationProvider
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Channel
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: OdaInstanceId
+              type: string
+              tag: 'json:"odaInstanceId"'
+              comments:
+                - Unique Digital Assistant instance identifier.
+              markers:
+                - +kubebuilder:validation:Required
+        - kind: DigitalAssistant
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: ImportedPackage
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaInstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaInstanceAttachment
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaPrivateEndpoint
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaPrivateEndpointAttachment
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: OdaPrivateEndpointScanProxy
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Skill
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: SkillParameter
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Translator
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: opensearch
     sdkPackage: github.com/oracle/oci-go-sdk/v65/opensearch
@@ -2454,7 +2584,7 @@ services:
           formalSpec: queue
           async:
             strategy: workrequest
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: workrequest
             workRequest:
               source: service-sdk
@@ -2534,7 +2664,7 @@ services:
           formalSpec: rediscluster
           async:
             strategy: workrequest
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: workrequest
             workRequest:
               source: service-sdk
@@ -2620,7 +2750,6 @@ services:
         - CustomTable
         - Query
         - Schedule
-        - ScheduledRun
         - UsageCarbonEmissionsQuery
     async:
       strategy: lifecycle
@@ -2724,6 +2853,11 @@ services:
                 savedReportId: ocid1.savedreport.oc1..exampleuniqueID
                 freeformTags:
                   workload: finops
+        - kind: UsageCarbonEmissionsQuery
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
 
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault

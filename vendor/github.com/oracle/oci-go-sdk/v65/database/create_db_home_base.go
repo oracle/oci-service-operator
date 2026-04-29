@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -26,35 +26,39 @@ type CreateDbHomeBase interface {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	GetKmsKeyId() *string
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous AI Database Serverless does not use key versions, hence is not applicable for Autonomous AI Database Serverless instances.
 	GetKmsKeyVersionId() *string
 
-	// The database software image OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)
+	// The database software image OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
 	GetDatabaseSoftwareImageId() *string
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	GetFreeformTags() map[string]string
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	GetDefinedTags() map[string]map[string]interface{}
 
 	// If true, the customer acknowledges that the specified Oracle Database software is an older release that is not currently supported by OCI.
 	GetIsDesupportedVersion() *bool
+
+	// Indicates whether unified autiding is enabled or not. Set to True to enable unified auditing on respective DBHome.
+	GetIsUnifiedAuditingEnabled() *bool
 }
 
 type createdbhomebase struct {
-	JsonData                []byte
-	DisplayName             *string                           `mandatory:"false" json:"displayName"`
-	KmsKeyId                *string                           `mandatory:"false" json:"kmsKeyId"`
-	KmsKeyVersionId         *string                           `mandatory:"false" json:"kmsKeyVersionId"`
-	DatabaseSoftwareImageId *string                           `mandatory:"false" json:"databaseSoftwareImageId"`
-	FreeformTags            map[string]string                 `mandatory:"false" json:"freeformTags"`
-	DefinedTags             map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
-	IsDesupportedVersion    *bool                             `mandatory:"false" json:"isDesupportedVersion"`
-	Source                  string                            `json:"source"`
+	JsonData                 []byte
+	DisplayName              *string                           `mandatory:"false" json:"displayName"`
+	KmsKeyId                 *string                           `mandatory:"false" json:"kmsKeyId"`
+	KmsKeyVersionId          *string                           `mandatory:"false" json:"kmsKeyVersionId"`
+	DatabaseSoftwareImageId  *string                           `mandatory:"false" json:"databaseSoftwareImageId"`
+	FreeformTags             map[string]string                 `mandatory:"false" json:"freeformTags"`
+	DefinedTags              map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+	IsDesupportedVersion     *bool                             `mandatory:"false" json:"isDesupportedVersion"`
+	IsUnifiedAuditingEnabled *bool                             `mandatory:"false" json:"isUnifiedAuditingEnabled"`
+	Source                   string                            `json:"source"`
 }
 
 // UnmarshalJSON unmarshals json
@@ -75,6 +79,7 @@ func (m *createdbhomebase) UnmarshalJSON(data []byte) error {
 	m.FreeformTags = s.Model.FreeformTags
 	m.DefinedTags = s.Model.DefinedTags
 	m.IsDesupportedVersion = s.Model.IsDesupportedVersion
+	m.IsUnifiedAuditingEnabled = s.Model.IsUnifiedAuditingEnabled
 	m.Source = s.Model.Source
 
 	return err
@@ -97,6 +102,10 @@ func (m *createdbhomebase) UnmarshalPolymorphicJSON(data []byte) (interface{}, e
 		mm := CreateDbHomeWithDbSystemIdFromBackupDetails{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
+	case "VM_CLUSTER_DATABASE":
+		mm := CreateDbHomeWithVmClusterIdFromDatabaseDetails{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "VM_CLUSTER_BACKUP":
 		mm := CreateDbHomeWithVmClusterIdFromBackupDetails{}
 		err = json.Unmarshal(data, &mm)
@@ -110,7 +119,7 @@ func (m *createdbhomebase) UnmarshalPolymorphicJSON(data []byte) (interface{}, e
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for CreateDbHomeBase: %s.", m.Source)
+		common.Logf("Received unsupported enum value for CreateDbHomeBase: %s.", m.Source)
 		return *m, nil
 	}
 }
@@ -150,6 +159,11 @@ func (m createdbhomebase) GetIsDesupportedVersion() *bool {
 	return m.IsDesupportedVersion
 }
 
+// GetIsUnifiedAuditingEnabled returns IsUnifiedAuditingEnabled
+func (m createdbhomebase) GetIsUnifiedAuditingEnabled() *bool {
+	return m.IsUnifiedAuditingEnabled
+}
+
 func (m createdbhomebase) String() string {
 	return common.PointerString(m)
 }
@@ -161,7 +175,7 @@ func (m createdbhomebase) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -171,27 +185,30 @@ type CreateDbHomeBaseSourceEnum string
 
 // Set of constants representing the allowable values for CreateDbHomeBaseSourceEnum
 const (
-	CreateDbHomeBaseSourceNone            CreateDbHomeBaseSourceEnum = "NONE"
-	CreateDbHomeBaseSourceDbBackup        CreateDbHomeBaseSourceEnum = "DB_BACKUP"
-	CreateDbHomeBaseSourceDatabase        CreateDbHomeBaseSourceEnum = "DATABASE"
-	CreateDbHomeBaseSourceVmClusterBackup CreateDbHomeBaseSourceEnum = "VM_CLUSTER_BACKUP"
-	CreateDbHomeBaseSourceVmClusterNew    CreateDbHomeBaseSourceEnum = "VM_CLUSTER_NEW"
+	CreateDbHomeBaseSourceNone              CreateDbHomeBaseSourceEnum = "NONE"
+	CreateDbHomeBaseSourceDbBackup          CreateDbHomeBaseSourceEnum = "DB_BACKUP"
+	CreateDbHomeBaseSourceDatabase          CreateDbHomeBaseSourceEnum = "DATABASE"
+	CreateDbHomeBaseSourceVmClusterBackup   CreateDbHomeBaseSourceEnum = "VM_CLUSTER_BACKUP"
+	CreateDbHomeBaseSourceVmClusterNew      CreateDbHomeBaseSourceEnum = "VM_CLUSTER_NEW"
+	CreateDbHomeBaseSourceVmClusterDatabase CreateDbHomeBaseSourceEnum = "VM_CLUSTER_DATABASE"
 )
 
 var mappingCreateDbHomeBaseSourceEnum = map[string]CreateDbHomeBaseSourceEnum{
-	"NONE":              CreateDbHomeBaseSourceNone,
-	"DB_BACKUP":         CreateDbHomeBaseSourceDbBackup,
-	"DATABASE":          CreateDbHomeBaseSourceDatabase,
-	"VM_CLUSTER_BACKUP": CreateDbHomeBaseSourceVmClusterBackup,
-	"VM_CLUSTER_NEW":    CreateDbHomeBaseSourceVmClusterNew,
+	"NONE":                CreateDbHomeBaseSourceNone,
+	"DB_BACKUP":           CreateDbHomeBaseSourceDbBackup,
+	"DATABASE":            CreateDbHomeBaseSourceDatabase,
+	"VM_CLUSTER_BACKUP":   CreateDbHomeBaseSourceVmClusterBackup,
+	"VM_CLUSTER_NEW":      CreateDbHomeBaseSourceVmClusterNew,
+	"VM_CLUSTER_DATABASE": CreateDbHomeBaseSourceVmClusterDatabase,
 }
 
 var mappingCreateDbHomeBaseSourceEnumLowerCase = map[string]CreateDbHomeBaseSourceEnum{
-	"none":              CreateDbHomeBaseSourceNone,
-	"db_backup":         CreateDbHomeBaseSourceDbBackup,
-	"database":          CreateDbHomeBaseSourceDatabase,
-	"vm_cluster_backup": CreateDbHomeBaseSourceVmClusterBackup,
-	"vm_cluster_new":    CreateDbHomeBaseSourceVmClusterNew,
+	"none":                CreateDbHomeBaseSourceNone,
+	"db_backup":           CreateDbHomeBaseSourceDbBackup,
+	"database":            CreateDbHomeBaseSourceDatabase,
+	"vm_cluster_backup":   CreateDbHomeBaseSourceVmClusterBackup,
+	"vm_cluster_new":      CreateDbHomeBaseSourceVmClusterNew,
+	"vm_cluster_database": CreateDbHomeBaseSourceVmClusterDatabase,
 }
 
 // GetCreateDbHomeBaseSourceEnumValues Enumerates the set of values for CreateDbHomeBaseSourceEnum
@@ -211,6 +228,7 @@ func GetCreateDbHomeBaseSourceEnumStringValues() []string {
 		"DATABASE",
 		"VM_CLUSTER_BACKUP",
 		"VM_CLUSTER_NEW",
+		"VM_CLUSTER_DATABASE",
 	}
 }
 

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "aispeech",
+  "slug": "transcriptionjob",
+  "kind": "TranscriptionJob",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_ai_speech_transcription_job",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTranscriptionJob",
+        "requestType": "aispeech.CreateTranscriptionJobRequest",
+        "responseType": "aispeech.CreateTranscriptionJobResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTranscriptionJob",
+        "requestType": "aispeech.GetTranscriptionJobRequest",
+        "responseType": "aispeech.GetTranscriptionJobResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTranscriptionJobs",
+        "requestType": "aispeech.ListTranscriptionJobsRequest",
+        "responseType": "aispeech.ListTranscriptionJobsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTranscriptionJob",
+        "requestType": "aispeech.UpdateTranscriptionJobRequest",
+        "responseType": "aispeech.UpdateTranscriptionJobResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTranscriptionJob",
+        "requestType": "aispeech.DeleteTranscriptionJobRequest",
+        "responseType": "aispeech.DeleteTranscriptionJobResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "ACCEPTED",
+        "IN_PROGRESS"
+      ],
+      "target": [
+        "SUCCEEDED"
+      ]
+    },
+    "update": {
+      "pending": [
+        "ACCEPTED",
+        "IN_PROGRESS"
+      ],
+      "target": [
+        "SUCCEEDED"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "CANCELING",
+      "CANCELED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_ai_speech_transcription_jobs",
+    "collectionField": "transcription_job_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/aispeech/transcriptionjob/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/aispeech/transcriptionjob/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned provider boundary: terraform-provider-oci at the sources.lock revision does not register an aispeech TranscriptionJob resource or datasource, so this row keeps a repo-curated oci_ai_speech_transcription_job placeholder identifier and records the reviewed OCI SDK CRUD surface instead of formal-import output.",
+    "Pinned OCI SDK contract: CreateTranscriptionJob, GetTranscriptionJob, ListTranscriptionJobs, UpdateTranscriptionJob, and DeleteTranscriptionJob form the published CRUD surface, while CancelTranscriptionJob remains an auxiliary SDK operation outside the controller-backed runtime contract.",
+    "Pinned OCI SDK lifecycle shape: TranscriptionJob exposes ACCEPTED, IN_PROGRESS, SUCCEEDED, FAILED, CANCELING, and CANCELED. Repo-authored controller semantics map ACCEPTED and IN_PROGRESS to provisioning, SUCCEEDED to active, FAILED to terminal failure, and keep CANCELING or CANCELED as delete breadcrumbs until GetTranscriptionJob returns not found.",
+    "Repo-authored mutation and lookup policy stays explicit: only displayName, description, freeformTags, and definedTags reconcile in place; compartmentId remains replacement-only drift; the refreshed modelDetails.transcriptionSettings.additionalSettings map is carried by CreateTranscriptionJob and read-model status projection, but UpdateTranscriptionJobDetails still omits it so later drift remains create-only; list reuse is restricted to the compartment-filtered ListTranscriptionJobs request shape with exact displayName or tracked OCID matching."
+  ]
+}

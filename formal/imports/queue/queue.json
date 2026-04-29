@@ -64,6 +64,7 @@
   },
   "mutation": {
     "mutable": [
+      "capabilities",
       "channel_consumption_limit",
       "custom_encryption_key_id",
       "dead_letter_queue_delivery_count",
@@ -147,6 +148,7 @@
   "notes": [
     "Queue create, update, and delete are work-request-backed operations in the handwritten runtime.",
     "The repo-authored Queue runtime recovers the created Queue OCID from work-request resources instead of binding by display-name-only list lookup.",
-    "Status projection, create-only drift rejection, required delete confirmation, and ready-only endpoint Secret side effects are explicit repo-authored semantics layered on top of these provider facts."
+    "Status projection, create-only drift rejection, required delete confirmation, and ready-only endpoint Secret side effects are explicit repo-authored semantics layered on top of these provider facts.",
+    "Queue capability payloads are forwarded on create and update, and steady-state parity for the non-observable consumer-group add-on fields is controller-owned because GetQueue still does not echo those fields back after enablement."
   ]
 }

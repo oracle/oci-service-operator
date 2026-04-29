@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -27,7 +27,7 @@ type MaintenanceRun struct {
 	// The user-friendly name for the maintenance run.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The current state of the maintenance run. For Autonomous Database Serverless instances, valid states are IN_PROGRESS, SUCCEEDED, and FAILED.
+	// The current state of the maintenance run. For Autonomous AI Database Serverless instances, valid states are IN_PROGRESS, SUCCEEDED, and FAILED.
 	LifecycleState MaintenanceRunLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
 	// The date and time the maintenance run is scheduled to occur.
@@ -54,7 +54,7 @@ type MaintenanceRun struct {
 	// Maintenance type.
 	MaintenanceType MaintenanceRunMaintenanceTypeEnum `mandatory:"false" json:"maintenanceType,omitempty"`
 
-	// The unique identifier of the patch. The identifier string includes the patch type, the Oracle Database version, and the patch creation date (using the format YYMMDD). For example, the identifier `ru_patch_19.9.0.0_201030` is used for an RU patch for Oracle Database 19.9.0.0 that was released October 30, 2020.
+	// The unique identifier of the patch. The identifier string includes the patch type, the Oracle AI Database version, and the patch creation date (using the format YYMMDD). For example, the identifier `ru_patch_19.9.0.0_201030` is used for an RU patch for Oracle AI Database 19.9.0.0 that was released October 30, 2020.
 	PatchId *string `mandatory:"false" json:"patchId"`
 
 	// Maintenance sub-type.
@@ -63,11 +63,14 @@ type MaintenanceRun struct {
 	// Indicates if an automatic DST Time Zone file update is enabled for the Autonomous Container Database. If enabled along with Release Update, patching will be done in a Non-Rolling manner.
 	IsDstFileUpdateEnabled *bool `mandatory:"false" json:"isDstFileUpdateEnabled"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the maintenance run for the Autonomous Data Guard association's peer container database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the maintenance run for the Autonomous Data Guard association's peer container database.
 	PeerMaintenanceRunId *string `mandatory:"false" json:"peerMaintenanceRunId"`
 
+	// The list of OCIDs for the maintenance runs associated with their Autonomous Data Guard peer container databases.
+	PeerMaintenanceRunIds []string `mandatory:"false" json:"peerMaintenanceRunIds"`
+
 	// Cloud Exadata infrastructure node patching method, either "ROLLING" or "NONROLLING". Default value is ROLLING.
-	// *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
+	// *IMPORTANT*: Non-rolling infrastructure patching involves system down time. See Oracle-Managed Infrastructure Maintenance Updates (https://docs.oracle.com/iaas/Content/Database/Concepts/examaintenance.htm#Oracle) for more information.
 	PatchingMode MaintenanceRunPatchingModeEnum `mandatory:"false" json:"patchingMode,omitempty"`
 
 	// Contain the patch failure count.
@@ -105,6 +108,19 @@ type MaintenanceRun struct {
 
 	// The estimated start time of the next infrastruture component patching operation.
 	EstimatedComponentPatchingStartTime *common.SDKTime `mandatory:"false" json:"estimatedComponentPatchingStartTime"`
+
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// If `FALSE`, the maintenance run doesn't support granular maintenance.
+	IsMaintenanceRunGranular *bool `mandatory:"false" json:"isMaintenanceRunGranular"`
+
+	// The total time taken by corresponding resource activity in minutes.
+	TotalTimeTakenInMins *int `mandatory:"false" json:"totalTimeTakenInMins"`
+
+	// The Autonomous AI Database Software Image OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	DatabaseSoftwareImageId *string `mandatory:"false" json:"databaseSoftwareImageId"`
 }
 
 func (m MaintenanceRun) String() string {
@@ -136,7 +152,7 @@ func (m MaintenanceRun) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for PatchingStatus: %s. Supported values are: %s.", m.PatchingStatus, strings.Join(GetMaintenanceRunPatchingStatusEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -146,39 +162,42 @@ type MaintenanceRunLifecycleStateEnum string
 
 // Set of constants representing the allowable values for MaintenanceRunLifecycleStateEnum
 const (
-	MaintenanceRunLifecycleStateScheduled  MaintenanceRunLifecycleStateEnum = "SCHEDULED"
-	MaintenanceRunLifecycleStateInProgress MaintenanceRunLifecycleStateEnum = "IN_PROGRESS"
-	MaintenanceRunLifecycleStateSucceeded  MaintenanceRunLifecycleStateEnum = "SUCCEEDED"
-	MaintenanceRunLifecycleStateSkipped    MaintenanceRunLifecycleStateEnum = "SKIPPED"
-	MaintenanceRunLifecycleStateFailed     MaintenanceRunLifecycleStateEnum = "FAILED"
-	MaintenanceRunLifecycleStateUpdating   MaintenanceRunLifecycleStateEnum = "UPDATING"
-	MaintenanceRunLifecycleStateDeleting   MaintenanceRunLifecycleStateEnum = "DELETING"
-	MaintenanceRunLifecycleStateDeleted    MaintenanceRunLifecycleStateEnum = "DELETED"
-	MaintenanceRunLifecycleStateCanceled   MaintenanceRunLifecycleStateEnum = "CANCELED"
+	MaintenanceRunLifecycleStateScheduled      MaintenanceRunLifecycleStateEnum = "SCHEDULED"
+	MaintenanceRunLifecycleStateInProgress     MaintenanceRunLifecycleStateEnum = "IN_PROGRESS"
+	MaintenanceRunLifecycleStateSucceeded      MaintenanceRunLifecycleStateEnum = "SUCCEEDED"
+	MaintenanceRunLifecycleStateSkipped        MaintenanceRunLifecycleStateEnum = "SKIPPED"
+	MaintenanceRunLifecycleStateFailed         MaintenanceRunLifecycleStateEnum = "FAILED"
+	MaintenanceRunLifecycleStateUpdating       MaintenanceRunLifecycleStateEnum = "UPDATING"
+	MaintenanceRunLifecycleStateDeleting       MaintenanceRunLifecycleStateEnum = "DELETING"
+	MaintenanceRunLifecycleStateDeleted        MaintenanceRunLifecycleStateEnum = "DELETED"
+	MaintenanceRunLifecycleStateCanceled       MaintenanceRunLifecycleStateEnum = "CANCELED"
+	MaintenanceRunLifecycleStatePartialSuccess MaintenanceRunLifecycleStateEnum = "PARTIAL_SUCCESS"
 )
 
 var mappingMaintenanceRunLifecycleStateEnum = map[string]MaintenanceRunLifecycleStateEnum{
-	"SCHEDULED":   MaintenanceRunLifecycleStateScheduled,
-	"IN_PROGRESS": MaintenanceRunLifecycleStateInProgress,
-	"SUCCEEDED":   MaintenanceRunLifecycleStateSucceeded,
-	"SKIPPED":     MaintenanceRunLifecycleStateSkipped,
-	"FAILED":      MaintenanceRunLifecycleStateFailed,
-	"UPDATING":    MaintenanceRunLifecycleStateUpdating,
-	"DELETING":    MaintenanceRunLifecycleStateDeleting,
-	"DELETED":     MaintenanceRunLifecycleStateDeleted,
-	"CANCELED":    MaintenanceRunLifecycleStateCanceled,
+	"SCHEDULED":       MaintenanceRunLifecycleStateScheduled,
+	"IN_PROGRESS":     MaintenanceRunLifecycleStateInProgress,
+	"SUCCEEDED":       MaintenanceRunLifecycleStateSucceeded,
+	"SKIPPED":         MaintenanceRunLifecycleStateSkipped,
+	"FAILED":          MaintenanceRunLifecycleStateFailed,
+	"UPDATING":        MaintenanceRunLifecycleStateUpdating,
+	"DELETING":        MaintenanceRunLifecycleStateDeleting,
+	"DELETED":         MaintenanceRunLifecycleStateDeleted,
+	"CANCELED":        MaintenanceRunLifecycleStateCanceled,
+	"PARTIAL_SUCCESS": MaintenanceRunLifecycleStatePartialSuccess,
 }
 
 var mappingMaintenanceRunLifecycleStateEnumLowerCase = map[string]MaintenanceRunLifecycleStateEnum{
-	"scheduled":   MaintenanceRunLifecycleStateScheduled,
-	"in_progress": MaintenanceRunLifecycleStateInProgress,
-	"succeeded":   MaintenanceRunLifecycleStateSucceeded,
-	"skipped":     MaintenanceRunLifecycleStateSkipped,
-	"failed":      MaintenanceRunLifecycleStateFailed,
-	"updating":    MaintenanceRunLifecycleStateUpdating,
-	"deleting":    MaintenanceRunLifecycleStateDeleting,
-	"deleted":     MaintenanceRunLifecycleStateDeleted,
-	"canceled":    MaintenanceRunLifecycleStateCanceled,
+	"scheduled":       MaintenanceRunLifecycleStateScheduled,
+	"in_progress":     MaintenanceRunLifecycleStateInProgress,
+	"succeeded":       MaintenanceRunLifecycleStateSucceeded,
+	"skipped":         MaintenanceRunLifecycleStateSkipped,
+	"failed":          MaintenanceRunLifecycleStateFailed,
+	"updating":        MaintenanceRunLifecycleStateUpdating,
+	"deleting":        MaintenanceRunLifecycleStateDeleting,
+	"deleted":         MaintenanceRunLifecycleStateDeleted,
+	"canceled":        MaintenanceRunLifecycleStateCanceled,
+	"partial_success": MaintenanceRunLifecycleStatePartialSuccess,
 }
 
 // GetMaintenanceRunLifecycleStateEnumValues Enumerates the set of values for MaintenanceRunLifecycleStateEnum
@@ -202,6 +221,7 @@ func GetMaintenanceRunLifecycleStateEnumStringValues() []string {
 		"DELETING",
 		"DELETED",
 		"CANCELED",
+		"PARTIAL_SUCCESS",
 	}
 }
 
@@ -324,36 +344,39 @@ type MaintenanceRunMaintenanceSubtypeEnum string
 
 // Set of constants representing the allowable values for MaintenanceRunMaintenanceSubtypeEnum
 const (
-	MaintenanceRunMaintenanceSubtypeQuarterly       MaintenanceRunMaintenanceSubtypeEnum = "QUARTERLY"
-	MaintenanceRunMaintenanceSubtypeHardware        MaintenanceRunMaintenanceSubtypeEnum = "HARDWARE"
-	MaintenanceRunMaintenanceSubtypeCritical        MaintenanceRunMaintenanceSubtypeEnum = "CRITICAL"
-	MaintenanceRunMaintenanceSubtypeInfrastructure  MaintenanceRunMaintenanceSubtypeEnum = "INFRASTRUCTURE"
-	MaintenanceRunMaintenanceSubtypeDatabase        MaintenanceRunMaintenanceSubtypeEnum = "DATABASE"
-	MaintenanceRunMaintenanceSubtypeOneoff          MaintenanceRunMaintenanceSubtypeEnum = "ONEOFF"
-	MaintenanceRunMaintenanceSubtypeSecurityMonthly MaintenanceRunMaintenanceSubtypeEnum = "SECURITY_MONTHLY"
-	MaintenanceRunMaintenanceSubtypeTimezone        MaintenanceRunMaintenanceSubtypeEnum = "TIMEZONE"
+	MaintenanceRunMaintenanceSubtypeQuarterly                   MaintenanceRunMaintenanceSubtypeEnum = "QUARTERLY"
+	MaintenanceRunMaintenanceSubtypeHardware                    MaintenanceRunMaintenanceSubtypeEnum = "HARDWARE"
+	MaintenanceRunMaintenanceSubtypeCritical                    MaintenanceRunMaintenanceSubtypeEnum = "CRITICAL"
+	MaintenanceRunMaintenanceSubtypeInfrastructure              MaintenanceRunMaintenanceSubtypeEnum = "INFRASTRUCTURE"
+	MaintenanceRunMaintenanceSubtypeDatabase                    MaintenanceRunMaintenanceSubtypeEnum = "DATABASE"
+	MaintenanceRunMaintenanceSubtypeOneoff                      MaintenanceRunMaintenanceSubtypeEnum = "ONEOFF"
+	MaintenanceRunMaintenanceSubtypeSecurityMonthly             MaintenanceRunMaintenanceSubtypeEnum = "SECURITY_MONTHLY"
+	MaintenanceRunMaintenanceSubtypeTimezone                    MaintenanceRunMaintenanceSubtypeEnum = "TIMEZONE"
+	MaintenanceRunMaintenanceSubtypeCustomDatabaseSoftwareImage MaintenanceRunMaintenanceSubtypeEnum = "CUSTOM_DATABASE_SOFTWARE_IMAGE"
 )
 
 var mappingMaintenanceRunMaintenanceSubtypeEnum = map[string]MaintenanceRunMaintenanceSubtypeEnum{
-	"QUARTERLY":        MaintenanceRunMaintenanceSubtypeQuarterly,
-	"HARDWARE":         MaintenanceRunMaintenanceSubtypeHardware,
-	"CRITICAL":         MaintenanceRunMaintenanceSubtypeCritical,
-	"INFRASTRUCTURE":   MaintenanceRunMaintenanceSubtypeInfrastructure,
-	"DATABASE":         MaintenanceRunMaintenanceSubtypeDatabase,
-	"ONEOFF":           MaintenanceRunMaintenanceSubtypeOneoff,
-	"SECURITY_MONTHLY": MaintenanceRunMaintenanceSubtypeSecurityMonthly,
-	"TIMEZONE":         MaintenanceRunMaintenanceSubtypeTimezone,
+	"QUARTERLY":                      MaintenanceRunMaintenanceSubtypeQuarterly,
+	"HARDWARE":                       MaintenanceRunMaintenanceSubtypeHardware,
+	"CRITICAL":                       MaintenanceRunMaintenanceSubtypeCritical,
+	"INFRASTRUCTURE":                 MaintenanceRunMaintenanceSubtypeInfrastructure,
+	"DATABASE":                       MaintenanceRunMaintenanceSubtypeDatabase,
+	"ONEOFF":                         MaintenanceRunMaintenanceSubtypeOneoff,
+	"SECURITY_MONTHLY":               MaintenanceRunMaintenanceSubtypeSecurityMonthly,
+	"TIMEZONE":                       MaintenanceRunMaintenanceSubtypeTimezone,
+	"CUSTOM_DATABASE_SOFTWARE_IMAGE": MaintenanceRunMaintenanceSubtypeCustomDatabaseSoftwareImage,
 }
 
 var mappingMaintenanceRunMaintenanceSubtypeEnumLowerCase = map[string]MaintenanceRunMaintenanceSubtypeEnum{
-	"quarterly":        MaintenanceRunMaintenanceSubtypeQuarterly,
-	"hardware":         MaintenanceRunMaintenanceSubtypeHardware,
-	"critical":         MaintenanceRunMaintenanceSubtypeCritical,
-	"infrastructure":   MaintenanceRunMaintenanceSubtypeInfrastructure,
-	"database":         MaintenanceRunMaintenanceSubtypeDatabase,
-	"oneoff":           MaintenanceRunMaintenanceSubtypeOneoff,
-	"security_monthly": MaintenanceRunMaintenanceSubtypeSecurityMonthly,
-	"timezone":         MaintenanceRunMaintenanceSubtypeTimezone,
+	"quarterly":                      MaintenanceRunMaintenanceSubtypeQuarterly,
+	"hardware":                       MaintenanceRunMaintenanceSubtypeHardware,
+	"critical":                       MaintenanceRunMaintenanceSubtypeCritical,
+	"infrastructure":                 MaintenanceRunMaintenanceSubtypeInfrastructure,
+	"database":                       MaintenanceRunMaintenanceSubtypeDatabase,
+	"oneoff":                         MaintenanceRunMaintenanceSubtypeOneoff,
+	"security_monthly":               MaintenanceRunMaintenanceSubtypeSecurityMonthly,
+	"timezone":                       MaintenanceRunMaintenanceSubtypeTimezone,
+	"custom_database_software_image": MaintenanceRunMaintenanceSubtypeCustomDatabaseSoftwareImage,
 }
 
 // GetMaintenanceRunMaintenanceSubtypeEnumValues Enumerates the set of values for MaintenanceRunMaintenanceSubtypeEnum
@@ -376,6 +399,7 @@ func GetMaintenanceRunMaintenanceSubtypeEnumStringValues() []string {
 		"ONEOFF",
 		"SECURITY_MONTHLY",
 		"TIMEZONE",
+		"CUSTOM_DATABASE_SOFTWARE_IMAGE",
 	}
 }
 
@@ -435,18 +459,24 @@ const (
 	MaintenanceRunPatchingStatusPatching  MaintenanceRunPatchingStatusEnum = "PATCHING"
 	MaintenanceRunPatchingStatusWaiting   MaintenanceRunPatchingStatusEnum = "WAITING"
 	MaintenanceRunPatchingStatusScheduled MaintenanceRunPatchingStatusEnum = "SCHEDULED"
+	MaintenanceRunPatchingStatusComplete  MaintenanceRunPatchingStatusEnum = "COMPLETE"
+	MaintenanceRunPatchingStatusFailed    MaintenanceRunPatchingStatusEnum = "FAILED"
 )
 
 var mappingMaintenanceRunPatchingStatusEnum = map[string]MaintenanceRunPatchingStatusEnum{
 	"PATCHING":  MaintenanceRunPatchingStatusPatching,
 	"WAITING":   MaintenanceRunPatchingStatusWaiting,
 	"SCHEDULED": MaintenanceRunPatchingStatusScheduled,
+	"COMPLETE":  MaintenanceRunPatchingStatusComplete,
+	"FAILED":    MaintenanceRunPatchingStatusFailed,
 }
 
 var mappingMaintenanceRunPatchingStatusEnumLowerCase = map[string]MaintenanceRunPatchingStatusEnum{
 	"patching":  MaintenanceRunPatchingStatusPatching,
 	"waiting":   MaintenanceRunPatchingStatusWaiting,
 	"scheduled": MaintenanceRunPatchingStatusScheduled,
+	"complete":  MaintenanceRunPatchingStatusComplete,
+	"failed":    MaintenanceRunPatchingStatusFailed,
 }
 
 // GetMaintenanceRunPatchingStatusEnumValues Enumerates the set of values for MaintenanceRunPatchingStatusEnum
@@ -464,6 +494,8 @@ func GetMaintenanceRunPatchingStatusEnumStringValues() []string {
 		"PATCHING",
 		"WAITING",
 		"SCHEDULED",
+		"COMPLETE",
+		"FAILED",
 	}
 }
 

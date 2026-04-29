@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCertificateAuthorityBundle.go.html to see an example of how to use GetCertificateAuthorityBundleRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCertificateAuthorityBundle.go.html to see an example of how to use GetCertificateAuthorityBundleRequest.
 type GetCertificateAuthorityBundleRequest struct {
 
 	// The OCID of the certificate authority (CA).
@@ -74,7 +74,7 @@ func (request GetCertificateAuthorityBundleRequest) ValidateEnumValue() (bool, e
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for Stage: %s. Supported values are: %s.", request.Stage, strings.Join(GetGetCertificateAuthorityBundleStageEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -109,27 +109,30 @@ type GetCertificateAuthorityBundleStageEnum string
 
 // Set of constants representing the allowable values for GetCertificateAuthorityBundleStageEnum
 const (
-	GetCertificateAuthorityBundleStageCurrent    GetCertificateAuthorityBundleStageEnum = "CURRENT"
-	GetCertificateAuthorityBundleStagePending    GetCertificateAuthorityBundleStageEnum = "PENDING"
-	GetCertificateAuthorityBundleStageLatest     GetCertificateAuthorityBundleStageEnum = "LATEST"
-	GetCertificateAuthorityBundleStagePrevious   GetCertificateAuthorityBundleStageEnum = "PREVIOUS"
-	GetCertificateAuthorityBundleStageDeprecated GetCertificateAuthorityBundleStageEnum = "DEPRECATED"
+	GetCertificateAuthorityBundleStageCurrent           GetCertificateAuthorityBundleStageEnum = "CURRENT"
+	GetCertificateAuthorityBundleStagePending           GetCertificateAuthorityBundleStageEnum = "PENDING"
+	GetCertificateAuthorityBundleStagePendingActivation GetCertificateAuthorityBundleStageEnum = "PENDING_ACTIVATION"
+	GetCertificateAuthorityBundleStageLatest            GetCertificateAuthorityBundleStageEnum = "LATEST"
+	GetCertificateAuthorityBundleStagePrevious          GetCertificateAuthorityBundleStageEnum = "PREVIOUS"
+	GetCertificateAuthorityBundleStageDeprecated        GetCertificateAuthorityBundleStageEnum = "DEPRECATED"
 )
 
 var mappingGetCertificateAuthorityBundleStageEnum = map[string]GetCertificateAuthorityBundleStageEnum{
-	"CURRENT":    GetCertificateAuthorityBundleStageCurrent,
-	"PENDING":    GetCertificateAuthorityBundleStagePending,
-	"LATEST":     GetCertificateAuthorityBundleStageLatest,
-	"PREVIOUS":   GetCertificateAuthorityBundleStagePrevious,
-	"DEPRECATED": GetCertificateAuthorityBundleStageDeprecated,
+	"CURRENT":            GetCertificateAuthorityBundleStageCurrent,
+	"PENDING":            GetCertificateAuthorityBundleStagePending,
+	"PENDING_ACTIVATION": GetCertificateAuthorityBundleStagePendingActivation,
+	"LATEST":             GetCertificateAuthorityBundleStageLatest,
+	"PREVIOUS":           GetCertificateAuthorityBundleStagePrevious,
+	"DEPRECATED":         GetCertificateAuthorityBundleStageDeprecated,
 }
 
 var mappingGetCertificateAuthorityBundleStageEnumLowerCase = map[string]GetCertificateAuthorityBundleStageEnum{
-	"current":    GetCertificateAuthorityBundleStageCurrent,
-	"pending":    GetCertificateAuthorityBundleStagePending,
-	"latest":     GetCertificateAuthorityBundleStageLatest,
-	"previous":   GetCertificateAuthorityBundleStagePrevious,
-	"deprecated": GetCertificateAuthorityBundleStageDeprecated,
+	"current":            GetCertificateAuthorityBundleStageCurrent,
+	"pending":            GetCertificateAuthorityBundleStagePending,
+	"pending_activation": GetCertificateAuthorityBundleStagePendingActivation,
+	"latest":             GetCertificateAuthorityBundleStageLatest,
+	"previous":           GetCertificateAuthorityBundleStagePrevious,
+	"deprecated":         GetCertificateAuthorityBundleStageDeprecated,
 }
 
 // GetGetCertificateAuthorityBundleStageEnumValues Enumerates the set of values for GetCertificateAuthorityBundleStageEnum
@@ -146,6 +149,7 @@ func GetGetCertificateAuthorityBundleStageEnumStringValues() []string {
 	return []string{
 		"CURRENT",
 		"PENDING",
+		"PENDING_ACTIVATION",
 		"LATEST",
 		"PREVIOUS",
 		"DEPRECATED",

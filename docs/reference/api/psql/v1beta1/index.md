@@ -42,9 +42,9 @@ DbSystemSpec defines the desired state of DbSystem.
 | --- | --- | --- | --- | --- | --- |
 | [`adminPassword`](#kind-dbsystem-spec-adminpassword) | The administrative password sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `password` key. If omitted, `spec.credentials.passwordDetails` remains available for plaintext or OCI Vault secret input. | `object` | No | - | - |
 | [`adminUsername`](#kind-dbsystem-spec-adminusername) | The administrative username sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `username` key. If omitted, `spec.credentials.username` remains available for direct credential input. | `object` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | Yes | - | - |
-| `configId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No | - | - |
-| [`credentials`](#kind-dbsystem-spec-credentials) | DbSystemCredentials defines nested fields for DbSystem.Credentials. | `object` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | Yes | - | - |
+| `configId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No | - | - |
+| [`credentials`](#kind-dbsystem-spec-credentials) | DbSystemCredentials defines nested fields for DbSystem.Credentials. | `object` | Yes | - | - |
 | [`dbConfigurationParams`](#kind-dbsystem-spec-dbconfigurationparams) | DbSystemDbConfigurationParams defines nested fields for DbSystem.DbConfigurationParams. | `object` | No | - | - |
 | `dbVersion` | Version of database system software. | `string` | Yes | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
@@ -126,7 +126,7 @@ DbSystemCredentialsPasswordDetails defines nested fields for DbSystem.Credential
 | `jsonData` | - | `string` | No | - | - |
 | `password` | The database system password. | `string` | No | - | - |
 | `passwordType` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret where the password is stored. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret where the password is stored. | `string` | No | - | - |
 | `secretVersion` | The secret version of the stored password. | `string` | No | - | - |
 
 <a id="kind-dbsystem-spec-dbconfigurationparams"></a>
@@ -139,7 +139,7 @@ DbSystemDbConfigurationParams defines nested fields for DbSystem.DbConfiguration
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `applyConfig` | Whether a configuration update requires a restart of the database instance or a reload of the configuration. Some configuration changes require a restart of database instances to be applied. | `string` | No | - | - |
-| `configId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration. | `string` | Yes | - | - |
+| `configId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration. | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-spec-instancesdetails"></a>
 #### Spec.instancesDetails[]
@@ -164,7 +164,7 @@ DbSystemManagementPolicy defines nested fields for DbSystem.ManagementPolicy.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | [`backupPolicy`](#kind-dbsystem-spec-managementpolicy-backuppolicy) | DbSystemManagementPolicyBackupPolicy defines nested fields for DbSystem.ManagementPolicy.BackupPolicy. | `object` | No | - | - |
-| `maintenanceWindowStart` | The start of the maintenance window. | `string` | No | - | - |
+| `maintenanceWindowStart` | The start of the maintenance window in UTC. This string is of the format: "{day-of-week} {time-of-day}". "{day-of-week}" is a case-insensitive string like "mon", "tue", &c. "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. | `string` | No | - | - |
 
 <a id="kind-dbsystem-spec-managementpolicy-backuppolicy"></a>
 ##### Spec.managementPolicy.backupPolicy
@@ -176,11 +176,25 @@ DbSystemManagementPolicyBackupPolicy defines nested fields for DbSystem.Manageme
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `backupStart` | Hour of the day when the backup starts. | `string` | No | - | - |
+| [`copyPolicy`](#kind-dbsystem-spec-managementpolicy-backuppolicy-copypolicy) | DbSystemManagementPolicyBackupPolicyCopyPolicy defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.CopyPolicy. | `object` | No | - | - |
 | `daysOfTheMonth` | Day of the month when the backup should start. To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day. | `list[integer]` | No | - | - |
 | `daysOfTheWeek` | The day of the week that the backup starts. | `list[string]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `kind` | - | `string` | No | - | - |
 | `retentionDays` | How many days the data should be stored after the database system deletion. | `integer` | No | - | - |
+
+<a id="kind-dbsystem-spec-managementpolicy-backuppolicy-copypolicy"></a>
+###### Spec.managementPolicy.backupPolicy.copyPolicy
+
+[Back to DbSystem spec](#kind-dbsystem-spec)
+
+DbSystemManagementPolicyBackupPolicyCopyPolicy defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.CopyPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | target compartment to place a new backup | `string` | Yes | - | - |
+| `regions` | List of region names of the remote region | `list[string]` | No | - | - |
+| `retentionPeriod` | Retention period in days of the backup copy. | `integer` | No | - | - |
 
 <a id="kind-dbsystem-spec-networkdetails"></a>
 #### Spec.networkDetails
@@ -191,9 +205,10 @@ DbSystemNetworkDetails defines nested fields for DbSystem.NetworkDetails.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `nsgIds` | List of customer Network Security Group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the database system. | `list[string]` | No | - | - |
+| `isReaderEndpointEnabled` | Specifies if the reader endpoint is enabled on the dbSystem. | `boolean` | No | - | - |
+| `nsgIds` | List of customer Network Security Group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the database system. | `list[string]` | No | - | - |
 | `primaryDbEndpointPrivateIp` | Private IP in customer subnet. The value is optional. If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet. | `string` | No | - | - |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the customer subnet associated with the database system. | `string` | Yes | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the customer subnet associated with the database system. | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-spec-source"></a>
 #### Spec.source
@@ -204,7 +219,7 @@ DbSystemSource defines nested fields for DbSystem.Source.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `backupId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the database system backup. | `string` | No | - | - |
+| `backupId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the database system backup. | `string` | No | - | - |
 | `isHavingRestoreConfigOverrides` | Deprecated. Don't use. | `boolean` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |
@@ -234,8 +249,8 @@ DbSystemStatus defines the observed state of DbSystem.
 | [`adminPasswordSource`](#kind-dbsystem-status-adminpasswordsource) | The last applied secret reference for the administrative password. | `object` | No | - | - |
 | `adminUsername` | The database system administrator username. | `string` | No | - | - |
 | [`adminUsernameSource`](#kind-dbsystem-status-adminusernamesource) | The last applied secret reference for the administrative username. | `object` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | No | - | - |
-| `configId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the database system. | `string` | No | - | - |
+| `configId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration associated with the database system. | `string` | No | - | - |
 | `dbVersion` | The major and minor versions of the database system software. | `string` | No | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | A description of the database system. | `string` | No | - | - |
@@ -327,7 +342,7 @@ DbSystemManagementPolicy defines nested fields for DbSystem.ManagementPolicy.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | [`backupPolicy`](#kind-dbsystem-status-managementpolicy-backuppolicy) | DbSystemManagementPolicyBackupPolicy defines nested fields for DbSystem.ManagementPolicy.BackupPolicy. | `object` | No | - | - |
-| `maintenanceWindowStart` | The start of the maintenance window. | `string` | No | - | - |
+| `maintenanceWindowStart` | The start of the maintenance window in UTC. This string is of the format: "{day-of-week} {time-of-day}". "{day-of-week}" is a case-insensitive string like "mon", "tue", &c. "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero. | `string` | No | - | - |
 
 <a id="kind-dbsystem-status-managementpolicy-backuppolicy"></a>
 ##### Status.managementPolicy.backupPolicy
@@ -339,11 +354,25 @@ DbSystemManagementPolicyBackupPolicy defines nested fields for DbSystem.Manageme
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `backupStart` | Hour of the day when the backup starts. | `string` | No | - | - |
+| [`copyPolicy`](#kind-dbsystem-status-managementpolicy-backuppolicy-copypolicy) | DbSystemManagementPolicyBackupPolicyCopyPolicy defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.CopyPolicy. | `object` | No | - | - |
 | `daysOfTheMonth` | Day of the month when the backup should start. To ensure that the backup runs monthly, the latest day of the month that you can use to schedule a backup is the the 28th day. | `list[integer]` | No | - | - |
 | `daysOfTheWeek` | The day of the week that the backup starts. | `list[string]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `kind` | - | `string` | No | - | - |
 | `retentionDays` | How many days the data should be stored after the database system deletion. | `integer` | No | - | - |
+
+<a id="kind-dbsystem-status-managementpolicy-backuppolicy-copypolicy"></a>
+###### Status.managementPolicy.backupPolicy.copyPolicy
+
+[Back to DbSystem status](#kind-dbsystem-status)
+
+DbSystemManagementPolicyBackupPolicyCopyPolicy defines nested fields for DbSystem.ManagementPolicy.BackupPolicy.CopyPolicy.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | target compartment to place a new backup | `string` | Yes | - | - |
+| `regions` | List of region names of the remote region | `list[string]` | No | - | - |
+| `retentionPeriod` | Retention period in days of the backup copy. | `integer` | No | - | - |
 
 <a id="kind-dbsystem-status-networkdetails"></a>
 #### Status.networkDetails
@@ -354,9 +383,10 @@ DbSystemNetworkDetails defines nested fields for DbSystem.NetworkDetails.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `nsgIds` | List of customer Network Security Group OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the database system. | `list[string]` | No | - | - |
+| `isReaderEndpointEnabled` | Specifies if the reader endpoint is enabled on the dbSystem. | `boolean` | No | - | - |
+| `nsgIds` | List of customer Network Security Group OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the database system. | `list[string]` | No | - | - |
 | `primaryDbEndpointPrivateIp` | Private IP in customer subnet. The value is optional. If the IP is not provided, the IP will be chosen from the available IP addresses from the specified subnet. | `string` | No | - | - |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the customer subnet associated with the database system. | `string` | Yes | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the customer subnet associated with the database system. | `string` | Yes | - | - |
 
 <a id="kind-dbsystem-status-source"></a>
 #### Status.source
@@ -367,7 +397,7 @@ DbSystemSource defines nested fields for DbSystem.Source.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `backupId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the database system backup. | `string` | No | - | - |
+| `backupId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the database system backup. | `string` | No | - | - |
 | `isHavingRestoreConfigOverrides` | Deprecated. Don't use. | `boolean` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |

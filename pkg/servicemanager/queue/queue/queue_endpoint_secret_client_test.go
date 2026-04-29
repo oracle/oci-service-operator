@@ -594,10 +594,11 @@ func TestQueueManagerInstallsExplicitRuntimePath(t *testing.T) {
 	if !ok {
 		t.Fatalf("manager client type = %T, want queueEndpointSecretClient", manager.client)
 	}
-	if _, ok := client.delegate.(*queueRuntimeClient); !ok {
-		t.Fatalf("wrapped delegate type = %T, want *queueRuntimeClient", client.delegate)
+	overlayClient, ok := client.delegate.(queueGeneratedRuntimeOverlayClient)
+	if !ok {
+		t.Fatalf("wrapped delegate type = %T, want queueGeneratedRuntimeOverlayClient", client.delegate)
 	}
-	if _, ok := client.delegate.(defaultQueueServiceClient); ok {
-		t.Fatal("wrapped delegate should not use the generated default Queue client")
+	if _, ok := overlayClient.delegate.(defaultQueueServiceClient); !ok {
+		t.Fatalf("overlay delegate type = %T, want defaultQueueServiceClient", overlayClient.delegate)
 	}
 }

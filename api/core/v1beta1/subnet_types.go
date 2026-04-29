@@ -14,16 +14,10 @@ import (
 
 // SubnetSpec defines the desired state of Subnet.
 type SubnetSpec struct {
-	// The CIDR IP address range of the subnet. The CIDR must maintain the following rules -
-	// a. The CIDR block is valid and correctly formatted.
-	// b. The new range is within one of the parent VCN ranges.
-	// Example: `10.0.1.0/24`
-	// +kubebuilder:validation:Required
-	CidrBlock string `json:"cidrBlock"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the subnet.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the subnet.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN to contain the subnet.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN to contain the subnet.
 	// +kubebuilder:validation:Required
 	VcnId string `json:"vcnId"`
 	// Controls whether the subnet is regional or specific to an availability domain. Oracle
@@ -38,12 +32,24 @@ type SubnetSpec struct {
 	// Example: `Uocm:PHX-AD-1`
 	// +kubebuilder:validation:Optional
 	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The CIDR IP address range of the subnet. The CIDR must maintain the following rules -
+	// a. The CIDR block is valid and correctly formatted.
+	// b. The new range is within one of the parent VCN ranges.
+	// Example: `10.0.1.0/24`
+	// +kubebuilder:validation:Optional
+	CidrBlock string `json:"cidrBlock,omitempty"`
+	// The list of all IPv4 CIDR blocks for the subnet that meets the following criteria:
+	// - Ipv4 CIDR blocks must be valid.
+	// - Multiple Ipv4 CIDR blocks must not overlap each other or the on-premises network CIDR block.
+	// - The number of prefixes must not exceed the limit of IPv4 prefixes allowed to a subnet.
+	// +kubebuilder:validation:Optional
+	Ipv4CidrBlocks []string `json:"ipv4CidrBlocks,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the set of DHCP options the subnet will use. If you don't
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the set of DHCP options the subnet will use. If you don't
 	// provide a value, the subnet uses the VCN's default set of DHCP options.
 	// +kubebuilder:validation:Optional
 	DhcpOptionsId string `json:"dhcpOptionsId,omitempty"`
@@ -60,19 +66,19 @@ type SubnetSpec struct {
 	// hostnames of instances in the subnet. It can only be set if the VCN itself
 	// was created with a DNS label.
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// Example: `subnet123`
 	// +kubebuilder:validation:Optional
 	DnsLabel string `json:"dnsLabel,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Use this to enable IPv6 addressing for this subnet. The VCN must be enabled for IPv6.
 	// You can't change this subnet characteristic later. All subnets are /64 in size. The subnet
 	// portion of the IPv6 address is the fourth hextet from the left (1111 in the following example).
-	// For important details about IPv6 addressing in a VCN, see IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// For important details about IPv6 addressing in a VCN, see IPv6 Addresses (https://docs.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
 	// Example: `2001:0db8:0123:1111::/64`
 	// +kubebuilder:validation:Optional
 	Ipv6CidrBlock string `json:"ipv6CidrBlock,omitempty"`
@@ -103,7 +109,7 @@ type SubnetSpec struct {
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	ProhibitPublicIpOnVnic bool `json:"prohibitPublicIpOnVnic,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the subnet will use. If you don't provide a value,
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the subnet will use. If you don't provide a value,
 	// the subnet uses the VCN's default route table.
 	// +kubebuilder:validation:Optional
 	RouteTableId string `json:"routeTableId,omitempty"`
@@ -121,15 +127,15 @@ type SubnetStatus struct {
 	// The subnet's CIDR block.
 	// Example: `10.0.1.0/24`
 	CidrBlock string `json:"cidrBlock,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the subnet.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the subnet.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The subnet's Oracle ID (OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
+	// The subnet's Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)).
 	Id string `json:"id,omitempty"`
 	// The subnet's current state.
 	LifecycleState string `json:"lifecycleState,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table that the subnet uses.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table that the subnet uses.
 	RouteTableId string `json:"routeTableId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the subnet is in.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN the subnet is in.
 	VcnId string `json:"vcnId,omitempty"`
 	// The IP address of the virtual router.
 	// Example: `10.0.14.1`
@@ -141,11 +147,16 @@ type SubnetStatus struct {
 	// instead of an AD-specific subnet. Oracle recommends creating regional subnets.
 	// Example: `Uocm:PHX-AD-1`
 	AvailabilityDomain string `json:"availabilityDomain,omitempty"`
+	// The list of all IPv4 CIDR blocks for the subnet that meets the following criteria:
+	// - Ipv4 CIDR blocks must be valid.
+	// - Multiple Ipv4 CIDR blocks must not overlap each other or the on-premises network CIDR block.
+	// - The number of prefixes must not exceed the limit of IPv4 prefixes allowed to a subnet.
+	Ipv4CidrBlocks []string `json:"ipv4CidrBlocks,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the set of DHCP options that the subnet uses.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the set of DHCP options that the subnet uses.
 	DhcpOptionsId string `json:"dhcpOptionsId,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
@@ -158,15 +169,15 @@ type SubnetStatus struct {
 	// The absence of this parameter means the Internet and VCN Resolver
 	// will not resolve hostnames of instances in this subnet.
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// Example: `subnet123`
 	DnsLabel string `json:"dnsLabel,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// For an IPv6-enabled subnet, this is the IPv6 prefix for the subnet's IP address space.
-	// The subnet size is always /64. See IPv6 Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
+	// The subnet size is always /64. See IPv6 Addresses (https://docs.oracle.com/iaas/Content/Network/Concepts/ipv6.htm).
 	// Example: `2001:0db8:0123:1111::/64`
 	Ipv6CidrBlock string `json:"ipv6CidrBlock,omitempty"`
 	// The list of all IPv6 prefixes (Oracle allocated IPv6 GUA, ULA or private IPv6 prefixes, BYOIPv6 prefixes) for the subnet.
@@ -203,7 +214,7 @@ type SubnetStatus struct {
 	// The subnet's domain name, which consists of the subnet's DNS label,
 	// the VCN's DNS label, and the `oraclevcn.com` domain.
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// Example: `subnet123.vcn1.oraclevcn.com`
 	SubnetDomainName string `json:"subnetDomainName,omitempty"`
 	// The date and time the subnet was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).

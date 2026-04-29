@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Vault Key Management API
 //
-// Use the Key Management API to manage vaults and keys. For more information, see Managing Vaults (https://docs.cloud.oracle.com/Content/KeyManagement/Tasks/managingvaults.htm) and Managing Keys (https://docs.cloud.oracle.com/Content/KeyManagement/Tasks/managingkeys.htm).
+// Use the Key Management API to manage vaults and keys. For more information, see Managing Vaults (https://docs.oracle.com/iaas/Content/KeyManagement/Tasks/managingvaults.htm) and Managing Keys (https://docs.oracle.com/iaas/Content/KeyManagement/Tasks/managingkeys.htm).
 //
 
 package keymanagement
@@ -18,13 +18,13 @@ import (
 // HsmPartition Dedicated KMS-HSM Partition Management
 type HsmPartition struct {
 
-	// The OCID of the HSM resource.
+	// The OCID of the HSM resource. Each HSM resource has a unique OCID as an identifier.
 	Id *string `mandatory:"true" json:"id"`
 
 	// The OCID of the compartment that contains a particular HSM resource.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
-	// Details of PortNumber and PortType.
+	// Details of a single portInformation item include the PortNumber (an integer used as an identifier) and the PortType (refers to either an enum value of Managementutility,Clientutility, or null)
 	PortInformation []PortInformation `mandatory:"true" json:"portInformation"`
 
 	// The date and time a HSMPartition was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
@@ -35,7 +35,8 @@ type HsmPartition struct {
 	// Example: `2018-04-03T21:10:29.600Z`
 	TimeUpdated *common.SDKTime `mandatory:"true" json:"timeUpdated"`
 
-	// The HSMPartition's current lifecycle state.
+	// A HSMCluster resource's current lifecycle state.
+	// Example: `ACTIVE`
 	LifecycleState HsmPartitionLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 }
 
@@ -53,7 +54,7 @@ func (m HsmPartition) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -67,6 +68,10 @@ const (
 	HsmPartitionLifecycleStateInactive           HsmPartitionLifecycleStateEnum = "INACTIVE"
 	HsmPartitionLifecycleStateActivating         HsmPartitionLifecycleStateEnum = "ACTIVATING"
 	HsmPartitionLifecycleStateActivationRequired HsmPartitionLifecycleStateEnum = "ACTIVATION_REQUIRED"
+	HsmPartitionLifecycleStateSchedulingDeletion HsmPartitionLifecycleStateEnum = "SCHEDULING_DELETION"
+	HsmPartitionLifecycleStatePendingDeletion    HsmPartitionLifecycleStateEnum = "PENDING_DELETION"
+	HsmPartitionLifecycleStateDeleting           HsmPartitionLifecycleStateEnum = "DELETING"
+	HsmPartitionLifecycleStateDeleted            HsmPartitionLifecycleStateEnum = "DELETED"
 )
 
 var mappingHsmPartitionLifecycleStateEnum = map[string]HsmPartitionLifecycleStateEnum{
@@ -74,6 +79,10 @@ var mappingHsmPartitionLifecycleStateEnum = map[string]HsmPartitionLifecycleStat
 	"INACTIVE":            HsmPartitionLifecycleStateInactive,
 	"ACTIVATING":          HsmPartitionLifecycleStateActivating,
 	"ACTIVATION_REQUIRED": HsmPartitionLifecycleStateActivationRequired,
+	"SCHEDULING_DELETION": HsmPartitionLifecycleStateSchedulingDeletion,
+	"PENDING_DELETION":    HsmPartitionLifecycleStatePendingDeletion,
+	"DELETING":            HsmPartitionLifecycleStateDeleting,
+	"DELETED":             HsmPartitionLifecycleStateDeleted,
 }
 
 var mappingHsmPartitionLifecycleStateEnumLowerCase = map[string]HsmPartitionLifecycleStateEnum{
@@ -81,6 +90,10 @@ var mappingHsmPartitionLifecycleStateEnumLowerCase = map[string]HsmPartitionLife
 	"inactive":            HsmPartitionLifecycleStateInactive,
 	"activating":          HsmPartitionLifecycleStateActivating,
 	"activation_required": HsmPartitionLifecycleStateActivationRequired,
+	"scheduling_deletion": HsmPartitionLifecycleStateSchedulingDeletion,
+	"pending_deletion":    HsmPartitionLifecycleStatePendingDeletion,
+	"deleting":            HsmPartitionLifecycleStateDeleting,
+	"deleted":             HsmPartitionLifecycleStateDeleted,
 }
 
 // GetHsmPartitionLifecycleStateEnumValues Enumerates the set of values for HsmPartitionLifecycleStateEnum
@@ -99,6 +112,10 @@ func GetHsmPartitionLifecycleStateEnumStringValues() []string {
 		"INACTIVE",
 		"ACTIVATING",
 		"ACTIVATION_REQUIRED",
+		"SCHEDULING_DELETION",
+		"PENDING_DELETION",
+		"DELETING",
+		"DELETED",
 	}
 }
 

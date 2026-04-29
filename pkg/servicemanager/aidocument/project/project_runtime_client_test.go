@@ -7,8 +7,10 @@ package project
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr"
 	aidocumentsdk "github.com/oracle/oci-go-sdk/v65/aidocument"
@@ -116,6 +118,30 @@ func makeSDKProjectSummary(
 	}
 }
 
+func makeSDKProjectLock(
+	lockType aidocumentsdk.ResourceLockTypeEnum,
+	compartmentID string,
+	relatedResourceID string,
+	message string,
+	createdAt time.Time,
+) aidocumentsdk.ResourceLock {
+	lock := aidocumentsdk.ResourceLock{
+		Type:          lockType,
+		CompartmentId: common.String(compartmentID),
+	}
+	if relatedResourceID != "" {
+		lock.RelatedResourceId = common.String(relatedResourceID)
+	}
+	if message != "" {
+		lock.Message = common.String(message)
+	}
+	if !createdAt.IsZero() {
+		sdkTime := common.SDKTime{Time: createdAt.UTC()}
+		lock.TimeCreated = &sdkTime
+	}
+	return lock
+}
+
 func requireAsyncCurrent(t *testing.T, resource *aidocumentv1beta1.Project, phase shared.OSOKAsyncPhase, workRequestID string) {
 	t.Helper()
 
@@ -131,11 +157,40 @@ func requireAsyncCurrent(t *testing.T, resource *aidocumentv1beta1.Project, phas
 	}
 }
 
+func TestProjectRuntimeHooksUseReviewedRequestFields(t *testing.T) {
+	t.Parallel()
+
+	hooks := newProjectRuntimeHooks(&ProjectServiceManager{}, aidocumentsdk.AIServiceDocumentClient{})
+
+	if !reflect.DeepEqual(hooks.Create.Fields, projectCreateFields()) {
+		t.Fatalf("create fields = %#v, want %#v", hooks.Create.Fields, projectCreateFields())
+	}
+	if !reflect.DeepEqual(hooks.Get.Fields, projectGetFields()) {
+		t.Fatalf("get fields = %#v, want %#v", hooks.Get.Fields, projectGetFields())
+	}
+	if !reflect.DeepEqual(hooks.List.Fields, projectListFields()) {
+		t.Fatalf("list fields = %#v, want %#v", hooks.List.Fields, projectListFields())
+	}
+	if !reflect.DeepEqual(hooks.Update.Fields, projectUpdateFields()) {
+		t.Fatalf("update fields = %#v, want %#v", hooks.Update.Fields, projectUpdateFields())
+	}
+	if !reflect.DeepEqual(hooks.Delete.Fields, projectDeleteFields()) {
+		t.Fatalf("delete fields = %#v, want %#v", hooks.Delete.Fields, projectDeleteFields())
+	}
+	if hooks.Semantics == nil {
+		t.Fatal("semantics = nil, want reviewed semantics")
+	}
+	if len(hooks.Semantics.AuxiliaryOperations) != 0 {
+		t.Fatalf("semantics.auxiliaryOperations = %#v, want reviewed omission of ChangeProjectCompartment", hooks.Semantics.AuxiliaryOperations)
+	}
+}
+
 func TestProjectServiceClientCreateOrUpdateCreatesAndRequeuesWhileCreating(t *testing.T) {
 	t.Parallel()
 
 	var createRequest aidocumentsdk.CreateProjectRequest
 	var getRequest aidocumentsdk.GetProjectRequest
+	lockCreatedAt := time.Date(2026, time.April, 28, 1, 2, 3, 0, time.UTC)
 
 	client := testProjectClient(&fakeProjectOCIClient{
 		createProjectFn: func(_ context.Context, req aidocumentsdk.CreateProjectRequest) (aidocumentsdk.CreateProjectResponse, error) {
@@ -154,14 +209,24 @@ func TestProjectServiceClientCreateOrUpdateCreatesAndRequeuesWhileCreating(t *te
 		},
 		getProjectFn: func(_ context.Context, req aidocumentsdk.GetProjectRequest) (aidocumentsdk.GetProjectResponse, error) {
 			getRequest = req
-			return aidocumentsdk.GetProjectResponse{
-				Project: makeSDKProject(
-					"ocid1.project.oc1..created",
+			project := makeSDKProject(
+				"ocid1.project.oc1..created",
+				"ocid1.compartment.oc1..example",
+				"project-alpha",
+				"desired description",
+				aidocumentsdk.ProjectLifecycleStateCreating,
+			)
+			project.Locks = []aidocumentsdk.ResourceLock{
+				makeSDKProjectLock(
+					aidocumentsdk.ResourceLockTypeDelete,
 					"ocid1.compartment.oc1..example",
-					"project-alpha",
-					"desired description",
-					aidocumentsdk.ProjectLifecycleStateCreating,
+					"ocid1.model.oc1..example",
+					"protect linked model",
+					lockCreatedAt,
 				),
+			}
+			return aidocumentsdk.GetProjectResponse{
+				Project: project,
 			}, nil
 		},
 	})
@@ -191,6 +256,24 @@ func TestProjectServiceClientCreateOrUpdateCreatesAndRequeuesWhileCreating(t *te
 	}
 	if resource.Status.OsokStatus.OpcRequestID != "opc-create-1" {
 		t.Fatalf("status.opcRequestId = %q, want %q", resource.Status.OsokStatus.OpcRequestID, "opc-create-1")
+	}
+	if len(resource.Status.Locks) != 1 {
+		t.Fatalf("status.locks length = %d, want 1", len(resource.Status.Locks))
+	}
+	if resource.Status.Locks[0].Type != string(aidocumentsdk.ResourceLockTypeDelete) {
+		t.Fatalf("status.locks[0].type = %q, want %q", resource.Status.Locks[0].Type, aidocumentsdk.ResourceLockTypeDelete)
+	}
+	if resource.Status.Locks[0].CompartmentId != "ocid1.compartment.oc1..example" {
+		t.Fatalf("status.locks[0].compartmentId = %q, want example compartment", resource.Status.Locks[0].CompartmentId)
+	}
+	if resource.Status.Locks[0].RelatedResourceId != "ocid1.model.oc1..example" {
+		t.Fatalf("status.locks[0].relatedResourceId = %q, want linked model ID", resource.Status.Locks[0].RelatedResourceId)
+	}
+	if resource.Status.Locks[0].Message != "protect linked model" {
+		t.Fatalf("status.locks[0].message = %q, want lock message", resource.Status.Locks[0].Message)
+	}
+	if resource.Status.Locks[0].TimeCreated != lockCreatedAt.Format(time.RFC3339Nano) {
+		t.Fatalf("status.locks[0].timeCreated = %q, want %q", resource.Status.Locks[0].TimeCreated, lockCreatedAt.Format(time.RFC3339Nano))
 	}
 	requireAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, "wr-create-1")
 	if resource.Status.OsokStatus.Async.Current.RawStatus != "CREATING" {
@@ -389,6 +472,9 @@ func TestProjectServiceClientCreateOrUpdateUpdatesMutableDrift(t *testing.T) {
 	if updateRequest.ProjectId == nil || *updateRequest.ProjectId != "ocid1.project.oc1..existing" {
 		t.Fatalf("update projectId = %v, want tracked project ID", updateRequest.ProjectId)
 	}
+	if updateRequest.IsLockOverride != nil {
+		t.Fatalf("update isLockOverride = %#v, want reviewed hook field omission", updateRequest.IsLockOverride)
+	}
 	if updateRequest.UpdateProjectDetails.Description == nil || *updateRequest.UpdateProjectDetails.Description != "desired description" {
 		t.Fatalf("update description = %v, want %q", updateRequest.UpdateProjectDetails.Description, "desired description")
 	}
@@ -507,6 +593,9 @@ func TestProjectServiceClientDeleteFallsBackToListUsingID(t *testing.T) {
 			deleteCalls++
 			if req.ProjectId == nil || *req.ProjectId != "ocid1.project.oc1..existing" {
 				t.Fatalf("delete projectId = %v, want tracked project ID", req.ProjectId)
+			}
+			if req.IsLockOverride != nil {
+				t.Fatalf("delete isLockOverride = %#v, want reviewed hook field omission", req.IsLockOverride)
 			}
 			return aidocumentsdk.DeleteProjectResponse{
 				OpcRequestId:     common.String("opc-delete-1"),

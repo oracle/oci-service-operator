@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "core",
+  "slug": "drg",
+  "kind": "Drg",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_core_drg",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDrg",
+        "requestType": "core.CreateDrgRequest",
+        "responseType": "core.CreateDrgResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDrg",
+        "requestType": "core.GetDrgRequest",
+        "responseType": "core.GetDrgResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDrgs",
+        "requestType": "core.ListDrgsRequest",
+        "responseType": "core.ListDrgsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDrg",
+        "requestType": "core.UpdateDrgRequest",
+        "responseType": "core.UpdateDrgResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDrg",
+        "requestType": "core.DeleteDrgRequest",
+        "responseType": "core.DeleteDrgResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "AVAILABLE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "default_drg_route_tables",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "TERMINATING",
+      "TERMINATED"
+    ],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_core_drgs",
+    "collectionField": "drg",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/core/drg/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/core/drg/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateDrgDetails accepts compartment_id, defined_tags, display_name, and freeform_tags, while UpdateDrgDetails adds default_drg_route_tables as the only extra mutable surface; requested default route-table overrides therefore reconcile after create rather than inside CreateDrg.",
+    "Vendored SDK lifecycle success is AVAILABLE; the handwritten runtime requeues PROVISIONING, defensive literal UPDATING, TERMINATING, and TERMINATED states.",
+    "ListDrgsRequest only filters by compartmentId and returns Items []Drg. The handwritten runtime binds by exact compartment_id plus display_name within the requested compartment, rereads a single candidate through GetDrg, skips reuse when display_name is blank, and fails on duplicates instead of guessing.",
+    "Delete confirmation is absence-based rather than a DELETED SDK state, so observed TERMINATING and TERMINATED keep the finalizer in place until GetDrg returns not found. The create-fallback wrapper only recovers first-create post-read failures when status already carries the created DRG OCID plus a provisioning-like or AVAILABLE lifecycle."
+  ]
+}

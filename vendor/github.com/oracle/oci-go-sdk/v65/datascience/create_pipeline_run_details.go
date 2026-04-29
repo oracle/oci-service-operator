@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -19,13 +19,13 @@ import (
 // CreatePipelineRunDetails The information about new PipelineRun.
 type CreatePipelineRunDetails struct {
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the pipeline run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment where you want to create the pipeline run.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the pipeline for which pipeline run is created.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the pipeline for which pipeline run is created.
 	PipelineId *string `mandatory:"true" json:"pipelineId"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project to associate the pipeline run with.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the project to associate the pipeline run with.
 	ProjectId *string `mandatory:"false" json:"projectId"`
 
 	// A user-friendly display name for the resource.
@@ -35,14 +35,22 @@ type CreatePipelineRunDetails struct {
 
 	LogConfigurationOverrideDetails *PipelineLogConfigurationDetails `mandatory:"false" json:"logConfigurationOverrideDetails"`
 
+	InfrastructureConfigurationOverrideDetails *PipelineInfrastructureConfigurationDetails `mandatory:"false" json:"infrastructureConfigurationOverrideDetails"`
+
+	// The storage mount override details to mount to the instance running the pipeline step.
+	StorageMountConfigurationOverrideDetailsList []StorageMountConfigurationDetails `mandatory:"false" json:"storageMountConfigurationOverrideDetailsList"`
+
+	// Parameters override used in the pipeline run.
+	ParametersOverride map[string]string `mandatory:"false" json:"parametersOverride"`
+
 	// Array of step override details. Only Step Configuration is allowed to be overridden.
 	StepOverrideDetails []PipelineStepOverrideDetails `mandatory:"false" json:"stepOverrideDetails"`
 
-	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
-	// Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -62,7 +70,7 @@ func (m CreatePipelineRunDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -70,16 +78,19 @@ func (m CreatePipelineRunDetails) ValidateEnumValue() (bool, error) {
 // UnmarshalJSON unmarshals from json
 func (m *CreatePipelineRunDetails) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		ProjectId                       *string                           `json:"projectId"`
-		DisplayName                     *string                           `json:"displayName"`
-		ConfigurationOverrideDetails    pipelineconfigurationdetails      `json:"configurationOverrideDetails"`
-		LogConfigurationOverrideDetails *PipelineLogConfigurationDetails  `json:"logConfigurationOverrideDetails"`
-		StepOverrideDetails             []PipelineStepOverrideDetails     `json:"stepOverrideDetails"`
-		FreeformTags                    map[string]string                 `json:"freeformTags"`
-		DefinedTags                     map[string]map[string]interface{} `json:"definedTags"`
-		SystemTags                      map[string]map[string]interface{} `json:"systemTags"`
-		CompartmentId                   *string                           `json:"compartmentId"`
-		PipelineId                      *string                           `json:"pipelineId"`
+		ProjectId                                    *string                                     `json:"projectId"`
+		DisplayName                                  *string                                     `json:"displayName"`
+		ConfigurationOverrideDetails                 pipelineconfigurationdetails                `json:"configurationOverrideDetails"`
+		LogConfigurationOverrideDetails              *PipelineLogConfigurationDetails            `json:"logConfigurationOverrideDetails"`
+		InfrastructureConfigurationOverrideDetails   *PipelineInfrastructureConfigurationDetails `json:"infrastructureConfigurationOverrideDetails"`
+		StorageMountConfigurationOverrideDetailsList []storagemountconfigurationdetails          `json:"storageMountConfigurationOverrideDetailsList"`
+		ParametersOverride                           map[string]string                           `json:"parametersOverride"`
+		StepOverrideDetails                          []PipelineStepOverrideDetails               `json:"stepOverrideDetails"`
+		FreeformTags                                 map[string]string                           `json:"freeformTags"`
+		DefinedTags                                  map[string]map[string]interface{}           `json:"definedTags"`
+		SystemTags                                   map[string]map[string]interface{}           `json:"systemTags"`
+		CompartmentId                                *string                                     `json:"compartmentId"`
+		PipelineId                                   *string                                     `json:"pipelineId"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -102,6 +113,22 @@ func (m *CreatePipelineRunDetails) UnmarshalJSON(data []byte) (e error) {
 	}
 
 	m.LogConfigurationOverrideDetails = model.LogConfigurationOverrideDetails
+
+	m.InfrastructureConfigurationOverrideDetails = model.InfrastructureConfigurationOverrideDetails
+
+	m.StorageMountConfigurationOverrideDetailsList = make([]StorageMountConfigurationDetails, len(model.StorageMountConfigurationOverrideDetailsList))
+	for i, n := range model.StorageMountConfigurationOverrideDetailsList {
+		nn, e = n.UnmarshalPolymorphicJSON(n.JsonData)
+		if e != nil {
+			return e
+		}
+		if nn != nil {
+			m.StorageMountConfigurationOverrideDetailsList[i] = nn.(StorageMountConfigurationDetails)
+		} else {
+			m.StorageMountConfigurationOverrideDetailsList[i] = nil
+		}
+	}
+	m.ParametersOverride = model.ParametersOverride
 
 	m.StepOverrideDetails = make([]PipelineStepOverrideDetails, len(model.StepOverrideDetails))
 	copy(m.StepOverrideDetails, model.StepOverrideDetails)

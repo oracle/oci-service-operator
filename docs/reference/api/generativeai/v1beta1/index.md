@@ -21,9 +21,6 @@ No customer-visible package currently exposes `generativeai.oracle.com/v1beta1`.
 | [DedicatedAiCluster](#kind-dedicatedaicluster) | Namespaced | [Sample](../../../samples/generativeai/v1beta1/dedicatedaicluster.md) | - |
 | [Endpoint](#kind-endpoint) | Namespaced | [Sample](../../../samples/generativeai/v1beta1/endpoint.md) | - |
 | [Model](#kind-model) | Namespaced | [Sample](../../../samples/generativeai/v1beta1/model.md) | - |
-| [WorkRequest](#kind-workrequest) | Namespaced | [Sample](../../../samples/generativeai/v1beta1/workrequest.md) | - |
-| [WorkRequestError](#kind-workrequesterror) | Namespaced | [Sample](../../../samples/generativeai/v1beta1/workrequesterror.md) | - |
-| [WorkRequestLog](#kind-workrequestlog) | Namespaced | [Sample](../../../samples/generativeai/v1beta1/workrequestlog.md) | - |
 
 <a id="kind-dedicatedaicluster"></a>
 ## DedicatedAiCluster
@@ -44,13 +41,13 @@ DedicatedAiClusterSpec defines the desired state of DedicatedAiCluster.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The compartment OCID to create the dedicated AI cluster in. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the dedicated AI cluster. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `type` | The dedicated AI cluster type indicating whether this is a fine-tuning/training processor or hosting/inference processor. Allowed values are: - HOSTING - FINE_TUNING | `string` | Yes | - | - |
 | `unitCount` | The number of dedicated units in this AI cluster. | `integer` | Yes | - | - |
-| `unitShape` | The shape of dedicated unit in this AI cluster. The underlying hardware configuration is hidden from customers. Allowed values are: - LARGE_COHERE - SMALL_COHERE - EMBED_COHERE - LLAMA2_70 | `string` | Yes | - | - |
+| `unitShape` | The shape of dedicated unit in this AI cluster. The underlying hardware configuration is hidden from customers. Allowed values are: - LARGE_COHERE - LARGE_COHERE_V2 - SMALL_COHERE - SMALL_COHERE_V2 - SMALL_COHERE_4 - EMBED_COHERE - LLAMA2_70 - LARGE_GENERIC - LARGE_COHERE_V2_2 - LARGE_GENERIC_4 - SMALL_GENERIC_V2 - LARGE_GENERIC_2 - LARGE_GENERIC_V3 - LARGE_COHERE_V3 - RERANK_COHERE - SMALL_GENERIC_V1 - MEDIUM_GENERIC_V1 - LARGE_GENERIC_V1 - A10_X1 - A10_X2 - A10_X4 - A100_40G_X1 - A100_40G_X2 - A100_40G_X4 - A100_40G_X8 - A100_80G_X1 - A100_80G_X2 - A100_80G_X4 - A100_80G_X8 - H100_X1 - H100_X2 - H100_X4 - H100_X8 - H200_X1 - H200_X2 - H200_X4 - H200_X8 The following shapes can only be used to deploy imported models: - A10_X1, A10_X2, A10_X4 - A100_40G_X1, A100_40G_X2, A100_40G_X4, A100_40G_X8 - A100_80G_X1, A100_80G_X2, A100_80G_X4, A100_80G_X8 - H100_X1, H100_X2, H100_X4, H100_X8 - H200_X1, H200_X2, H200_X4, H200_X8 - OAI_A10_X2 - OAI_H100_X1 - OAI_H100_X2 - OAI_H200_X1 - OAI_A100_80G_X1 - OAI_A100_80G_X2 - OAI_A100_40G_X1 - OAI_A100_40G_X4 | `string` | Yes | - | - |
 
 <a id="kind-dedicatedaicluster-status"></a>
 ### Status
@@ -61,11 +58,11 @@ DedicatedAiClusterStatus defines the observed state of DedicatedAiCluster.
 | --- | --- | --- | --- | --- | --- |
 | [`capacity`](#kind-dedicatedaicluster-status-capacity) | DedicatedAiClusterCapacity defines nested fields for DedicatedAiCluster.Capacity. | `object` | No | - | - |
 | `compartmentId` | The compartment OCID to create the dedicated AI cluster in. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the dedicated AI cluster. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster. | `string` | No | - | - |
 | `lifecycleDetails` | A message describing the current state with detail that can provide actionable information. | `string` | No | - | - |
 | `lifecycleState` | The current state of the dedicated AI cluster. | `string` | No | - | - |
 | [`status`](#kind-dedicatedaicluster-status-status) | - | `object` | Yes | - | - |
@@ -170,11 +167,14 @@ EndpointSpec defines the desired state of Endpoint.
 | `compartmentId` | The compartment OCID to create the endpoint in. | `string` | Yes | - | - |
 | [`contentModerationConfig`](#kind-endpoint-spec-contentmoderationconfig) | EndpointContentModerationConfig defines nested fields for Endpoint.ContentModerationConfig. | `object` | No | - | - |
 | `dedicatedAiClusterId` | The OCID of the dedicated AI cluster on which a model will be deployed to. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the endpoint. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `modelId` | The ID of the model that's used to create this endpoint. | `string` | Yes | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `generativeAiPrivateEndpointId` | The OCID of the Generative AI private endpoint to which this endpoint is attached to. | `string` | No | - | - |
+| `modelId` | The OCID of the model that's used to create this endpoint. | `string` | Yes | - | - |
+| [`piiDetectionConfig`](#kind-endpoint-spec-piidetectionconfig) | EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig. | `object` | No | - | - |
+| [`promptInjectionConfig`](#kind-endpoint-spec-promptinjectionconfig) | EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig. | `object` | No | - | - |
 
 <a id="kind-endpoint-spec-contentmoderationconfig"></a>
 #### Spec.contentModerationConfig
@@ -186,6 +186,34 @@ EndpointContentModerationConfig defines nested fields for Endpoint.ContentModera
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `isEnabled` | Whether to enable the content moderation feature. | `boolean` | Yes | - | - |
+| `mode` | Enum for the modes of operation for inference protection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-spec-piidetectionconfig"></a>
+#### Spec.piiDetectionConfig
+
+[Back to Endpoint spec](#kind-endpoint-spec)
+
+EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the PII detection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for PII detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-spec-promptinjectionconfig"></a>
+#### Spec.promptInjectionConfig
+
+[Back to Endpoint spec](#kind-endpoint-spec)
+
+EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the prompt injection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for prompt injection detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
 
 <a id="kind-endpoint-status"></a>
 ### Status
@@ -197,14 +225,17 @@ EndpointStatus defines the observed state of Endpoint.
 | `compartmentId` | The compartment OCID to create the endpoint in. | `string` | No | - | - |
 | [`contentModerationConfig`](#kind-endpoint-status-contentmoderationconfig) | EndpointContentModerationConfig defines nested fields for Endpoint.ContentModerationConfig. | `object` | No | - | - |
 | `dedicatedAiClusterId` | The OCID of the dedicated AI cluster on which the model will be deployed to. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the endpoint. | `string` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `generativeAiPrivateEndpointId` | The OCID of the Generative AI private endpoint to which this endpoint is attached to. | `string` | No | - | - |
 | `id` | An OCID that uniquely identifies this endpoint resource. | `string` | No | - | - |
 | `lifecycleDetails` | A message describing the current state of the endpoint in more detail that can provide actionable information. | `string` | No | - | - |
 | `lifecycleState` | The current state of the endpoint. | `string` | No | - | - |
 | `modelId` | The OCID of the model that's used to create this endpoint. | `string` | No | - | - |
+| [`piiDetectionConfig`](#kind-endpoint-status-piidetectionconfig) | EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig. | `object` | No | - | - |
+| [`promptInjectionConfig`](#kind-endpoint-status-promptinjectionconfig) | EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig. | `object` | No | - | - |
 | [`status`](#kind-endpoint-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time that the endpoint was created in the format of an RFC3339 datetime string. | `string` | No | - | - |
@@ -220,6 +251,34 @@ EndpointContentModerationConfig defines nested fields for Endpoint.ContentModera
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `isEnabled` | Whether to enable the content moderation feature. | `boolean` | Yes | - | - |
+| `mode` | Enum for the modes of operation for inference protection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-status-piidetectionconfig"></a>
+#### Status.piiDetectionConfig
+
+[Back to Endpoint status](#kind-endpoint-status)
+
+EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the PII detection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for PII detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
+
+<a id="kind-endpoint-status-promptinjectionconfig"></a>
+#### Status.promptInjectionConfig
+
+[Back to Endpoint status](#kind-endpoint-status)
+
+EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isEnabled` | Whether to enable the prompt injection feature. | `boolean` | Yes | - | - |
+| `mode` | The mode of operation for prompt injection detection. | `string` | No | - | - |
+| `modelId` | The OCID of the model used for the feature. | `string` | No | - | - |
 
 <a id="kind-endpoint-status-status"></a>
 #### Status.status
@@ -300,11 +359,11 @@ ModelSpec defines the desired state of Model.
 | --- | --- | --- | --- | --- | --- |
 | `baseModelId` | The OCID of the base model that's used for fine-tuning. | `string` | Yes | - | - |
 | `compartmentId` | The compartment OCID for fine-tuned models. For pretrained models, this value is null. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the model. | `string` | No | - | - |
 | `displayName` | A user-friendly name. | `string` | No | - | - |
 | [`fineTuneDetails`](#kind-model-spec-finetunedetails) | ModelFineTuneDetails defines nested fields for Model.FineTuneDetails. | `object` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `vendor` | The provider of the model. | `string` | No | - | - |
 | `version` | The version of the model. | `string` | No | - | - |
 
@@ -335,6 +394,9 @@ ModelFineTuneDetailsTrainingConfig defines nested fields for Model.FineTuneDetai
 | `jsonData` | - | `string` | No | - | - |
 | `learningRate` | The initial learning rate to be used during training | `number` | No | - | - |
 | `logModelMetricsIntervalInSteps` | Determines how frequently to log model metrics. Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics. | `integer` | No | - | - |
+| `loraAlpha` | This parameter represents the scaling factor for the weight matrices in LoRA. | `integer` | No | - | - |
+| `loraDropout` | This parameter indicates the dropout probability for LoRA layers. | `number` | No | - | - |
+| `loraR` | This parameter represents the LoRA rank of the update matrices. | `integer` | No | - | - |
 | `numOfLastLayers` | The number of last layers to be fine-tuned. | `integer` | No | - | - |
 | `totalTrainingEpochs` | The maximum number of training epochs to run for. | `integer` | No | - | - |
 | `trainingBatchSize` | The batch size used during training. | `integer` | No | - | - |
@@ -365,11 +427,11 @@ ModelStatus defines the observed state of Model.
 | `baseModelId` | The OCID of the base model that's used for fine-tuning. For pretrained models, the value is null. | `string` | No | - | - |
 | `capabilities` | Describes what this model can be used for. | `list[string]` | No | - | - |
 | `compartmentId` | The compartment OCID for fine-tuned models. For pretrained models, this value is null. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | An optional description of the model. | `string` | No | - | - |
 | `displayName` | A user-friendly name. | `string` | No | - | - |
 | [`fineTuneDetails`](#kind-model-status-finetunedetails) | ModelFineTuneDetails defines nested fields for Model.FineTuneDetails. | `object` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | An ID that uniquely identifies a pretrained or fine-tuned model. | `string` | No | - | - |
 | `isLongTermSupported` | Whether a model is supported long-term. Only applicable to base models. | `boolean` | No | - | - |
 | `lifecycleDetails` | A message describing the current state of the model in more detail that can provide actionable information. | `string` | No | - | - |
@@ -378,7 +440,9 @@ ModelStatus defines the observed state of Model.
 | [`status`](#kind-model-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time that the model was created in the format of an RFC3339 datetime string. | `string` | No | - | - |
+| `timeDedicatedRetired` | The timestamp indicating when the custom model and its associated foundation model will be fully retired. | `string` | No | - | - |
 | `timeDeprecated` | Corresponds to the time when the custom model and its associated foundation model will be deprecated. | `string` | No | - | - |
+| `timeOnDemandRetired` | The timestamp indicating when the base model will no longer be available for on-demand usage. | `string` | No | - | - |
 | `timeUpdated` | The date and time that the model was updated in the format of an RFC3339 datetime string. | `string` | No | - | - |
 | `type` | The model type indicating whether this is a pretrained/base model or a custom/fine-tuned model. | `string` | No | - | - |
 | `vendor` | The provider of the base model. | `string` | No | - | - |
@@ -411,6 +475,9 @@ ModelFineTuneDetailsTrainingConfig defines nested fields for Model.FineTuneDetai
 | `jsonData` | - | `string` | No | - | - |
 | `learningRate` | The initial learning rate to be used during training | `number` | No | - | - |
 | `logModelMetricsIntervalInSteps` | Determines how frequently to log model metrics. Every step is logged for the first 20 steps and then follows this parameter for log frequency. Set to 0 to disable logging the model metrics. | `integer` | No | - | - |
+| `loraAlpha` | This parameter represents the scaling factor for the weight matrices in LoRA. | `integer` | No | - | - |
+| `loraDropout` | This parameter indicates the dropout probability for LoRA layers. | `number` | No | - | - |
+| `loraR` | This parameter represents the LoRA rank of the update matrices. | `integer` | No | - | - |
 | `numOfLastLayers` | The number of last layers to be fine-tuned. | `integer` | No | - | - |
 | `totalTrainingEpochs` | The maximum number of training epochs to run for. | `integer` | No | - | - |
 | `trainingBatchSize` | The batch size used during training. | `integer` | No | - | - |
@@ -495,291 +562,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to Model status](#kind-model-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequest"></a>
-## WorkRequest
-
-WorkRequest is the Schema for the workrequests API.
-
-- `Plural`: `workrequests`
-- `Scope`: `Namespaced`
-- `APIVersion`: `generativeai.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/generativeai/v1beta1/workrequest.md) (`config/samples/generativeai_v1beta1_workrequest.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequest-spec"></a>
-### Spec
-
-WorkRequestSpec defines the desired state of WorkRequest.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequest-status"></a>
-### Status
-
-WorkRequestStatus defines the observed state of WorkRequest.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. | `string` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the work request. | `string` | No | - | - |
-| `operationType` | The asynchronous operation tracked by this work request. | `string` | No | - | - |
-| `percentComplete` | Shows the progress of the operation tracked by the work request, as a percentage of the total work that must be performed. | `number` | No | - | - |
-| [`resources`](#kind-workrequest-status-resources) | The resources that are affected by the work request. | `list[object]` | No | - | - |
-| `sdkStatus` | The status of the work request. This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
-| [`status`](#kind-workrequest-status-status) | - | `object` | Yes | - | - |
-| `timeAccepted` | The date and time the work request was created, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
-| `timeFinished` | The date and time the work request was finished, in the format defined by RFC 3339 (https://tools.ietf.org/rfc/rfc3339). | `string` | No | - | - |
-| `timeStarted` | The date and time the work request was started, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
-
-<a id="kind-workrequest-status-resources"></a>
-#### Status.resources[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-WorkRequestResource defines nested fields for WorkRequest.Resource.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `actionType` | The way in which this resource is affected by the operation tracked in the work request. A resource being created, updated, or deleted remains in the IN_PROGRESS state until work is complete for that resource, at which point it transitions to CREATED, UPDATED, or DELETED, respectively. | `string` | No | - | - |
-| `entityType` | The resource type that the work request affects. | `string` | No | - | - |
-| `entityUri` | The URI path that you can use for a GET request to access the resource metadata. | `string` | No | - | - |
-| `identifier` | An OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource. | `string` | No | - | - |
-| `metadata` | Additional information that helps to explain the resource. | `map[string, string]` | No | - | - |
-
-<a id="kind-workrequest-status-status"></a>
-#### Status.status
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequest-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequest-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequest-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequest-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequest-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequesterror"></a>
-## WorkRequestError
-
-WorkRequestError is the Schema for the workrequesterrors API.
-
-- `Plural`: `workrequesterrors`
-- `Scope`: `Namespaced`
-- `APIVersion`: `generativeai.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/generativeai/v1beta1/workrequesterror.md) (`config/samples/generativeai_v1beta1_workrequesterror.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequesterror-spec"></a>
-### Spec
-
-WorkRequestErrorSpec defines the desired state of WorkRequestError.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequesterror-status"></a>
-### Status
-
-WorkRequestErrorStatus defines the observed state of WorkRequestError.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `code` | A machine-usable code for the error that occurred. For a list of error codes, see API Errors (https://docs.cloud.oracle.com/iaas/Content/API/References/apierrors.htm). | `string` | No | - | - |
-| `message` | A human-readable error message. | `string` | No | - | - |
-| [`status`](#kind-workrequesterror-status-status) | - | `object` | Yes | - | - |
-| `timestamp` | The date and time that the error occurred, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequesterror-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequesterror-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequesterror-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequestlog"></a>
-## WorkRequestLog
-
-WorkRequestLog is the Schema for the workrequestlogs API.
-
-- `Plural`: `workrequestlogs`
-- `Scope`: `Namespaced`
-- `APIVersion`: `generativeai.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/generativeai/v1beta1/workrequestlog.md) (`config/samples/generativeai_v1beta1_workrequestlog.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequestlog-spec"></a>
-### Spec
-
-WorkRequestLogSpec defines the desired state of WorkRequestLog.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequestlog-status"></a>
-### Status
-
-WorkRequestLogStatus defines the observed state of WorkRequestLog.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`status`](#kind-workrequestlog-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-workrequestlog-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequestlog-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequestlog-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequestlog-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |

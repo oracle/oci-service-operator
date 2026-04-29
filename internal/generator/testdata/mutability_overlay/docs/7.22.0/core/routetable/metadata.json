@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "core",
+  "kind": "RouteTable",
+  "formalSlug": "routetable",
+  "providerResource": "oci_core_route_table",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/core_route_table",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/core_route_table",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/core/routetable/page.html",
+  "bodySHA256": "f3165f35ad7d11a9fdd56e881d0a6cc2338ab4e2453e37de1d8dcc001a8236f7",
+  "bodyBytes": 4576,
+  "fixtureBodyPath": "7.22.0/core/routetable/page.html"
+}

@@ -33,6 +33,21 @@ type ProjectSpec struct {
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
+// ProjectLock defines nested fields for Project.Lock.
+type ProjectLock struct {
+	// Lock type.
+	Type string `json:"type,omitempty"`
+	// The lock compartment ID.
+	CompartmentId string `json:"compartmentId,omitempty"`
+	// The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
+	RelatedResourceId string `json:"relatedResourceId,omitempty"`
+	// A message added by the lock creator. The message typically gives an
+	// indication of why the resource is locked.
+	Message string `json:"message,omitempty"`
+	// Indicates when the lock was created, in the format defined by RFC 3339.
+	TimeCreated string `json:"timeCreated,omitempty"`
+}
+
 // ProjectStatus defines the observed state of Project.
 type ProjectStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
@@ -61,6 +76,8 @@ type ProjectStatus struct {
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// For example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// Locks associated with this resource.
+	Locks []ProjectLock `json:"locks,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -21,20 +21,15 @@ No customer-visible package currently exposes `oda.oracle.com/v1beta1`.
 | [AuthenticationProvider](#kind-authenticationprovider) | Namespaced | [Sample](../../../samples/oda/v1beta1/authenticationprovider.md) | - |
 | [Channel](#kind-channel) | Namespaced | [Sample](../../../samples/oda/v1beta1/channel.md) | - |
 | [DigitalAssistant](#kind-digitalassistant) | Namespaced | [Sample](../../../samples/oda/v1beta1/digitalassistant.md) | - |
-| [DigitalAssistantParameter](#kind-digitalassistantparameter) | Namespaced | [Sample](../../../samples/oda/v1beta1/digitalassistantparameter.md) | - |
 | [ImportedPackage](#kind-importedpackage) | Namespaced | [Sample](../../../samples/oda/v1beta1/importedpackage.md) | - |
 | [OdaInstance](#kind-odainstance) | Namespaced | [Sample](../../../samples/oda/v1beta1/odainstance.md) | - |
 | [OdaInstanceAttachment](#kind-odainstanceattachment) | Namespaced | [Sample](../../../samples/oda/v1beta1/odainstanceattachment.md) | - |
 | [OdaPrivateEndpoint](#kind-odaprivateendpoint) | Namespaced | [Sample](../../../samples/oda/v1beta1/odaprivateendpoint.md) | - |
 | [OdaPrivateEndpointAttachment](#kind-odaprivateendpointattachment) | Namespaced | [Sample](../../../samples/oda/v1beta1/odaprivateendpointattachment.md) | - |
 | [OdaPrivateEndpointScanProxy](#kind-odaprivateendpointscanproxy) | Namespaced | [Sample](../../../samples/oda/v1beta1/odaprivateendpointscanproxy.md) | - |
-| [Package](#kind-package) | Namespaced | [Sample](../../../samples/oda/v1beta1/package.md) | - |
 | [Skill](#kind-skill) | Namespaced | [Sample](../../../samples/oda/v1beta1/skill.md) | - |
 | [SkillParameter](#kind-skillparameter) | Namespaced | [Sample](../../../samples/oda/v1beta1/skillparameter.md) | - |
 | [Translator](#kind-translator) | Namespaced | [Sample](../../../samples/oda/v1beta1/translator.md) | - |
-| [WorkRequest](#kind-workrequest) | Namespaced | [Sample](../../../samples/oda/v1beta1/workrequest.md) | - |
-| [WorkRequestError](#kind-workrequesterror) | Namespaced | [Sample](../../../samples/oda/v1beta1/workrequesterror.md) | - |
-| [WorkRequestLog](#kind-workrequestlog) | Namespaced | [Sample](../../../samples/oda/v1beta1/workrequestlog.md) | - |
 
 <a id="kind-authenticationprovider"></a>
 ## AuthenticationProvider
@@ -205,6 +200,7 @@ ChannelSpec defines the desired state of Channel.
 | `msaAppId` | The Microsoft App ID that you obtained when you created your bot registration in Azure. | `string` | No | - | - |
 | `msaAppPassword` | The client secret that you obtained from your bot registration. | `string` | No | - | - |
 | `name` | The Channel's name. The name can contain only letters, numbers, periods, and underscores. The name must begin with a letter. | `string` | Yes | - | - |
+| `odaInstanceId` | Unique Digital Assistant instance identifier. | `string` | Yes | - | - |
 | `originalConnectorsUrl` | The original connectors URL (used for backward compatibility). | `string` | No | - | - |
 | `outboundMessageTopic` | The topic outbound messages are sent on. | `string` | No | - | - |
 | `outboundUrl` | The URL to send response and error messages to. | `string` | No | - | - |
@@ -447,100 +443,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to DigitalAssistant status](#kind-digitalassistant-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-digitalassistantparameter"></a>
-## DigitalAssistantParameter
-
-DigitalAssistantParameter is the Schema for the digitalassistantparameters API.
-
-- `Plural`: `digitalassistantparameters`
-- `Scope`: `Namespaced`
-- `APIVersion`: `oda.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/oda/v1beta1/digitalassistantparameter.md) (`config/samples/oda_v1beta1_digitalassistantparameter.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-digitalassistantparameter-spec"></a>
-### Spec
-
-DigitalAssistantParameterSpec defines the desired state of DigitalAssistantParameter.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `value` | The current value. The value will be interpreted based on the `type`. | `string` | Yes | - | - |
-
-<a id="kind-digitalassistantparameter-status"></a>
-### Status
-
-DigitalAssistantParameterStatus defines the observed state of DigitalAssistantParameter.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `description` | A description of the Parameter. | `string` | No | - | - |
-| `displayName` | The display name for the Parameter. | `string` | No | - | - |
-| `lifecycleState` | The Parameter's current state. | `string` | No | - | - |
-| `name` | The Parameter name. This must be unique within the parent resource. | `string` | No | - | - |
-| [`status`](#kind-digitalassistantparameter-status-status) | - | `object` | Yes | - | - |
-| `type` | The value type. | `string` | No | - | - |
-| `value` | The current value. The value will be interpreted based on the `type`. | `string` | No | - | - |
-
-<a id="kind-digitalassistantparameter-status-status"></a>
-#### Status.status
-
-[Back to DigitalAssistantParameter status](#kind-digitalassistantparameter-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-digitalassistantparameter-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-digitalassistantparameter-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-digitalassistantparameter-status-status-async"></a>
-##### Status.status.async
-
-[Back to DigitalAssistantParameter status](#kind-digitalassistantparameter-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-digitalassistantparameter-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-digitalassistantparameter-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to DigitalAssistantParameter status](#kind-digitalassistantparameter-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-digitalassistantparameter-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to DigitalAssistantParameter status](#kind-digitalassistantparameter-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
@@ -931,13 +833,13 @@ OdaPrivateEndpointSpec defines the desired state of OdaPrivateEndpoint.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | Yes | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | Yes | - | - |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description of the ODA private endpoint. | `string` | No | - | - |
 | `displayName` | User-defined name for the ODA private endpoint. Avoid entering confidential information. You can change this value. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `nsgIds` | List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | Yes | - | - |
+| `nsgIds` | List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | Yes | - | - |
 
 <a id="kind-odaprivateendpoint-status"></a>
 ### Status
@@ -946,16 +848,16 @@ OdaPrivateEndpointStatus defines the observed state of OdaPrivateEndpoint.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to. | `string` | No | - | - |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description of the ODA private endpoint. | `string` | No | - | - |
 | `displayName` | User-defined name for the ODA private endpoint. Avoid entering confidential information. You can change this value. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that was assigned when the ODA private endpoint was created. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that was assigned when the ODA private endpoint was created. | `string` | No | - | - |
 | `lifecycleState` | The current state of the ODA private endpoint. | `string` | No | - | - |
-| `nsgIds` | List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
+| `nsgIds` | List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm) | `list[string]` | No | - | - |
 | [`status`](#kind-odaprivateendpoint-status-status) | - | `object` | Yes | - | - |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | No | - | - |
+| `subnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to. | `string` | No | - | - |
 | `timeCreated` | When the resource was created. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
 | `timeUpdated` | When the resource was last updated. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
 
@@ -1036,8 +938,8 @@ OdaPrivateEndpointAttachmentSpec defines the desired state of OdaPrivateEndpoint
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `odaInstanceId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | Yes | - | - |
-| `odaPrivateEndpointId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | Yes | - | - |
+| `odaInstanceId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | Yes | - | - |
+| `odaPrivateEndpointId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | Yes | - | - |
 
 <a id="kind-odaprivateendpointattachment-status"></a>
 ### Status
@@ -1046,11 +948,11 @@ OdaPrivateEndpointAttachmentStatus defines the observed state of OdaPrivateEndpo
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint attachment belongs to. | `string` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Attachment. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint attachment belongs to. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Attachment. | `string` | No | - | - |
 | `lifecycleState` | The current state of the ODA Private Endpoint attachment. | `string` | No | - | - |
-| `odaInstanceId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | No | - | - |
-| `odaPrivateEndpointId` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | No | - | - |
+| `odaInstanceId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the attached ODA Instance. | `string` | No | - | - |
+| `odaPrivateEndpointId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint. | `string` | No | - | - |
 | [`status`](#kind-odaprivateendpointattachment-status-status) | - | `object` | Yes | - | - |
 | `timeCreated` | When the resource was created. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
 | `timeUpdated` | When the resource was last updated. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
@@ -1156,7 +1058,7 @@ OdaPrivateEndpointScanProxyStatus defines the observed state of OdaPrivateEndpoi
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `id` | The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Scan Proxy. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Scan Proxy. | `string` | No | - | - |
 | `lifecycleState` | The current state of the ODA Private Endpoint Scan Proxy. | `string` | No | - | - |
 | `protocol` | The protocol used for communication between client, scanProxy and RAC's scan listeners | `string` | No | - | - |
 | [`scanListenerInfos`](#kind-odaprivateendpointscanproxy-status-scanlistenerinfos) | The FQDN/IPs and port information of customer's Real Application Cluster (RAC)'s SCAN listeners. | `list[object]` | No | - | - |
@@ -1227,140 +1129,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to OdaPrivateEndpointScanProxy status](#kind-odaprivateendpointscanproxy-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-package"></a>
-## Package
-
-Package is the Schema for the packages API.
-
-- `Plural`: `packages`
-- `Scope`: `Namespaced`
-- `APIVersion`: `oda.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/oda/v1beta1/package.md) (`config/samples/oda_v1beta1_package.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-package-spec"></a>
-### Spec
-
-PackageSpec defines the desired state of Package.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-package-status"></a>
-### Status
-
-PackageStatus defines the observed state of Package.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
-| `description` | Description of the package. | `string` | No | - | - |
-| `displayName` | Display name for the package (displayed in UI and user-facing applications). | `string` | No | - | - |
-| `freeformTags` | Simple key-value pair that is applied without any predefined name, type, or scope. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `id` | Unique immutable identifier that was assigned when the Package was registered. | `string` | No | - | - |
-| `name` | Name of package. | `string` | No | - | - |
-| `publisherId` | ID of the publisher providing the package. | `string` | No | - | - |
-| [`publisherMetadata`](#kind-package-status-publishermetadata) | A map of metadata key/value pairs that further describes the publisher and the platform in which the package might be used. | `list[object]` | No | - | - |
-| `resourceTypes` | A list of resource types describing the content of the package. | `list[string]` | No | - | - |
-| [`resourceTypesMetadata`](#kind-package-status-resourcetypesmetadata) | A map of resource type to metadata key/value map that further describes the content for the resource types in this package.. Keys are resource type names, values are a map of name/value pairs per resource type. | `list[object]` | No | - | - |
-| [`status`](#kind-package-status-status) | - | `object` | Yes | - | - |
-| `timePublished` | When the package was last published. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
-| `version` | Version of the package. | `string` | No | - | - |
-
-<a id="kind-package-status-publishermetadata"></a>
-#### Status.publisherMetadata[]
-
-[Back to Package status](#kind-package-status)
-
-PackagePublisherMetadata defines nested fields for Package.PublisherMetadata.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `name` | Name of property. | `string` | No | - | - |
-| `value` | Value for the property. | `string` | No | - | - |
-
-<a id="kind-package-status-resourcetypesmetadata"></a>
-#### Status.resourceTypesMetadata[]
-
-[Back to Package status](#kind-package-status)
-
-PackageResourceTypesMetadata defines nested fields for Package.ResourceTypesMetadata.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`properties`](#kind-package-status-resourcetypesmetadata-properties) | Any properties needed to describe the content and its usage for this resource type, and within the containing package. | `list[object]` | No | - | - |
-| `resourceType` | The type of the resource described by this metadata object. | `string` | No | - | - |
-
-<a id="kind-package-status-resourcetypesmetadata-properties"></a>
-##### Status.resourceTypesMetadata[].properties[]
-
-[Back to Package status](#kind-package-status)
-
-PackageResourceTypesMetadataProperty defines nested fields for Package.ResourceTypesMetadata.Property.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `name` | Name of property. | `string` | No | - | - |
-| `value` | Value for the property. | `string` | No | - | - |
-
-<a id="kind-package-status-status"></a>
-#### Status.status
-
-[Back to Package status](#kind-package-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-package-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-package-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-package-status-status-async"></a>
-##### Status.status.async
-
-[Back to Package status](#kind-package-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-package-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-package-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to Package status](#kind-package-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-package-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to Package status](#kind-package-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
@@ -1683,295 +1451,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to Translator status](#kind-translator-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequest"></a>
-## WorkRequest
-
-WorkRequest is the Schema for the workrequests API.
-
-- `Plural`: `workrequests`
-- `Scope`: `Namespaced`
-- `APIVersion`: `oda.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/oda/v1beta1/workrequest.md) (`config/samples/oda_v1beta1_workrequest.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequest-spec"></a>
-### Spec
-
-WorkRequestSpec defines the desired state of WorkRequest.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequest-status"></a>
-### Status
-
-WorkRequestStatus defines the observed state of WorkRequest.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The identifier of the compartment that contains the work request. | `string` | No | - | - |
-| `id` | The identifier of the work request. | `string` | No | - | - |
-| `odaInstanceId` | The identifier of the Digital Assistant instance to which this work request pertains. | `string` | No | - | - |
-| `percentComplete` | Percentage of the request completed. | `number` | No | - | - |
-| `requestAction` | The type of the operation that's associated with the work request. | `string` | No | - | - |
-| `resourceId` | The identifier of the resource to which this work request pertains. | `string` | No | - | - |
-| [`resources`](#kind-workrequest-status-resources) | The resources that this work request affects. | `list[object]` | No | - | - |
-| `sdkStatus` | The status of current work request. This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
-| [`status`](#kind-workrequest-status-status) | - | `object` | Yes | - | - |
-| `statusMessage` | A short message that provides more detail about the current status. For example, if a work request fails, then this may include information about why it failed. | `string` | No | - | - |
-| `timeAccepted` | The date and time that the request was created, as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
-| `timeFinished` | The date and time that the object finished, as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339). CKQ | `string` | No | - | - |
-| `timeStarted` | The date and time that the request was started, as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), CKQ section 14.29. | `string` | No | - | - |
-
-<a id="kind-workrequest-status-resources"></a>
-#### Status.resources[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-WorkRequestResource defines nested fields for WorkRequest.Resource.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `resourceAction` | The action to take against the resource. | `string` | No | - | - |
-| `resourceId` | The identifier of the resource that is the subject of the request. | `string` | No | - | - |
-| `resourceType` | The resource type that the work request affects. | `string` | No | - | - |
-| `resourceUri` | The URI path that the user can do a GET on to access the resource metadata. | `string` | No | - | - |
-| `status` | The current state of the work request. The `SUCCEEDED`, `FAILED`, AND `CANCELED` states correspond to the action being performed. | `string` | No | - | - |
-| `statusMessage` | Short message providing more detail for the current status. For example, if an operation fails this may include information about the reason for the failure and a possible resolution. | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status"></a>
-#### Status.status
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequest-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequest-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequest-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequest-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequest-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequesterror"></a>
-## WorkRequestError
-
-WorkRequestError is the Schema for the workrequesterrors API.
-
-- `Plural`: `workrequesterrors`
-- `Scope`: `Namespaced`
-- `APIVersion`: `oda.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/oda/v1beta1/workrequesterror.md) (`config/samples/oda_v1beta1_workrequesterror.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequesterror-spec"></a>
-### Spec
-
-WorkRequestErrorSpec defines the desired state of WorkRequestError.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequesterror-status"></a>
-### Status
-
-WorkRequestErrorStatus defines the observed state of WorkRequestError.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `code` | A machine-usable code for the error that occurred. Error codes are listed at (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm) | `string` | No | - | - |
-| `message` | A human-readable description of the issue. | `string` | No | - | - |
-| [`status`](#kind-workrequesterror-status-status) | - | `object` | Yes | - | - |
-| `timeStamp` | When the error occurred. A date-time string as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29. | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequesterror-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequesterror-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequesterror-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequestlog"></a>
-## WorkRequestLog
-
-WorkRequestLog is the Schema for the workrequestlogs API.
-
-- `Plural`: `workrequestlogs`
-- `Scope`: `Namespaced`
-- `APIVersion`: `oda.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/oda/v1beta1/workrequestlog.md) (`config/samples/oda_v1beta1_workrequestlog.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequestlog-spec"></a>
-### Spec
-
-WorkRequestLogSpec defines the desired state of WorkRequestLog.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequestlog-status"></a>
-### Status
-
-WorkRequestLogStatus defines the observed state of WorkRequestLog.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`status`](#kind-workrequestlog-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-workrequestlog-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequestlog-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequestlog-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequestlog-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |

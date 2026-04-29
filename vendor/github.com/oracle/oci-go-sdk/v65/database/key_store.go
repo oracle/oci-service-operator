@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -19,10 +19,10 @@ import (
 // KeyStore A key store to connect to an on-premise encryption key appliance like Oracle Key Vault.
 type KeyStore struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the key store.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The user-friendly name for the key store. The name does not need to be unique.
@@ -42,14 +42,24 @@ type KeyStore struct {
 	// List of databases associated with the key store.
 	AssociatedDatabases []KeyStoreAssociatedDatabaseDetails `mandatory:"false" json:"associatedDatabases"`
 
+	// List of long term backups of Autonomous AI Databases associated with this backup destination.The maximum associated number of long term backup listed here would be 1024.
+	AssociatedLongTermBackups []AssociatedLongTermBackup `mandatory:"false" json:"associatedLongTermBackups"`
+
+	// Indicates the number of long term backups of Autonomous AI Databases associated with this backup destination.
+	AssociatedLongTermBackupCount *int `mandatory:"false" json:"associatedLongTermBackupCount"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
 }
 
 func (m KeyStore) String() string {
@@ -66,7 +76,7 @@ func (m KeyStore) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -74,16 +84,19 @@ func (m KeyStore) ValidateEnumValue() (bool, error) {
 // UnmarshalJSON unmarshals from json
 func (m *KeyStore) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		TimeCreated         *common.SDKTime                     `json:"timeCreated"`
-		LifecycleDetails    *string                             `json:"lifecycleDetails"`
-		AssociatedDatabases []KeyStoreAssociatedDatabaseDetails `json:"associatedDatabases"`
-		FreeformTags        map[string]string                   `json:"freeformTags"`
-		DefinedTags         map[string]map[string]interface{}   `json:"definedTags"`
-		Id                  *string                             `json:"id"`
-		CompartmentId       *string                             `json:"compartmentId"`
-		DisplayName         *string                             `json:"displayName"`
-		LifecycleState      KeyStoreLifecycleStateEnum          `json:"lifecycleState"`
-		TypeDetails         keystoretypedetails                 `json:"typeDetails"`
+		TimeCreated                   *common.SDKTime                     `json:"timeCreated"`
+		LifecycleDetails              *string                             `json:"lifecycleDetails"`
+		AssociatedDatabases           []KeyStoreAssociatedDatabaseDetails `json:"associatedDatabases"`
+		AssociatedLongTermBackups     []AssociatedLongTermBackup          `json:"associatedLongTermBackups"`
+		AssociatedLongTermBackupCount *int                                `json:"associatedLongTermBackupCount"`
+		FreeformTags                  map[string]string                   `json:"freeformTags"`
+		DefinedTags                   map[string]map[string]interface{}   `json:"definedTags"`
+		SystemTags                    map[string]map[string]interface{}   `json:"systemTags"`
+		Id                            *string                             `json:"id"`
+		CompartmentId                 *string                             `json:"compartmentId"`
+		DisplayName                   *string                             `json:"displayName"`
+		LifecycleState                KeyStoreLifecycleStateEnum          `json:"lifecycleState"`
+		TypeDetails                   keystoretypedetails                 `json:"typeDetails"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -97,9 +110,15 @@ func (m *KeyStore) UnmarshalJSON(data []byte) (e error) {
 
 	m.AssociatedDatabases = make([]KeyStoreAssociatedDatabaseDetails, len(model.AssociatedDatabases))
 	copy(m.AssociatedDatabases, model.AssociatedDatabases)
+	m.AssociatedLongTermBackups = make([]AssociatedLongTermBackup, len(model.AssociatedLongTermBackups))
+	copy(m.AssociatedLongTermBackups, model.AssociatedLongTermBackups)
+	m.AssociatedLongTermBackupCount = model.AssociatedLongTermBackupCount
+
 	m.FreeformTags = model.FreeformTags
 
 	m.DefinedTags = model.DefinedTags
+
+	m.SystemTags = model.SystemTags
 
 	m.Id = model.Id
 
@@ -127,18 +146,21 @@ type KeyStoreLifecycleStateEnum string
 
 // Set of constants representing the allowable values for KeyStoreLifecycleStateEnum
 const (
-	KeyStoreLifecycleStateActive  KeyStoreLifecycleStateEnum = "ACTIVE"
-	KeyStoreLifecycleStateDeleted KeyStoreLifecycleStateEnum = "DELETED"
+	KeyStoreLifecycleStateActive         KeyStoreLifecycleStateEnum = "ACTIVE"
+	KeyStoreLifecycleStateDeleted        KeyStoreLifecycleStateEnum = "DELETED"
+	KeyStoreLifecycleStateNeedsAttention KeyStoreLifecycleStateEnum = "NEEDS_ATTENTION"
 )
 
 var mappingKeyStoreLifecycleStateEnum = map[string]KeyStoreLifecycleStateEnum{
-	"ACTIVE":  KeyStoreLifecycleStateActive,
-	"DELETED": KeyStoreLifecycleStateDeleted,
+	"ACTIVE":          KeyStoreLifecycleStateActive,
+	"DELETED":         KeyStoreLifecycleStateDeleted,
+	"NEEDS_ATTENTION": KeyStoreLifecycleStateNeedsAttention,
 }
 
 var mappingKeyStoreLifecycleStateEnumLowerCase = map[string]KeyStoreLifecycleStateEnum{
-	"active":  KeyStoreLifecycleStateActive,
-	"deleted": KeyStoreLifecycleStateDeleted,
+	"active":          KeyStoreLifecycleStateActive,
+	"deleted":         KeyStoreLifecycleStateDeleted,
+	"needs_attention": KeyStoreLifecycleStateNeedsAttention,
 }
 
 // GetKeyStoreLifecycleStateEnumValues Enumerates the set of values for KeyStoreLifecycleStateEnum
@@ -155,6 +177,7 @@ func GetKeyStoreLifecycleStateEnumStringValues() []string {
 	return []string{
 		"ACTIVE",
 		"DELETED",
+		"NEEDS_ATTENTION",
 	}
 }
 

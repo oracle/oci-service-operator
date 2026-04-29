@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "mysql",
+    "apiVersion": "mysql.oracle.com/v1beta1",
+    "kind": "DbSystem",
+    "formalSlug": "dbsystem",
+    "providerResource": "oci_mysql_mysql_db_system",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "accessMode",
+      "backupPolicy.copyPolicies.backupCopyRetentionInDays",
+      "backupPolicy.copyPolicies.copyToRegion",
+      "backupPolicy.definedTags",
+      "backupPolicy.freeformTags",
+      "backupPolicy.isEnabled",
+      "backupPolicy.pitrPolicy.isEnabled",
+      "backupPolicy.retentionInDays",
+      "backupPolicy.softDelete",
+      "backupPolicy.windowStartTime",
+      "configurationId",
+      "crashRecovery",
+      "customerContacts.email",
+      "dataStorage.isAutoExpandStorageEnabled",
+      "dataStorage.maxStorageSizeInGbs",
+      "databaseConsole.port",
+      "databaseConsole.status",
+      "databaseManagement",
+      "databaseMode",
+      "definedTags",
+      "deletionPolicy.automaticBackupRetention",
+      "deletionPolicy.finalBackup",
+      "deletionPolicy.isDeleteProtected",
+      "description",
+      "displayName",
+      "encryptData.keyGenerationType",
+      "encryptData.keyId",
+      "freeformTags",
+      "hostnameLabel",
+      "isHighlyAvailable",
+      "maintenance.maintenanceDisabledWindows.timeEnd",
+      "maintenance.maintenanceDisabledWindows.timeStart",
+      "maintenance.maintenanceScheduleType",
+      "maintenance.versionPreference",
+      "maintenance.versionTrackPreference",
+      "maintenance.windowStartTime",
+      "nsgIds",
+      "readEndpoint.excludeIps",
+      "readEndpoint.isEnabled",
+      "readEndpoint.readEndpointHostnameLabel",
+      "readEndpoint.readEndpointIpAddress",
+      "rest.configuration",
+      "rest.port",
+      "secureConnections.certificateGenerationType",
+      "secureConnections.certificateId",
+      "securityAttributes",
+      "shapeName",
+      "telemetryConfiguration.logs.destination",
+      "telemetryConfiguration.logs.destinationConfigurations.value",
+      "telemetryConfiguration.logs.logTypes"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "adminPassword",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "adminUsername",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "availabilityDomain",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "dataStorageSizeInGb",
+        "decision": "unknown",
+        "mergeCase": "unresolvedJoin",
+        "docsEvidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      {
+        "fieldPath": "faultDomain",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "ipAddress",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "mysqlVersion",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "port",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "portX",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "shutdownType",
+        "decision": "unknown",
+        "mergeCase": "unresolvedJoin",
+        "docsEvidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      {
+        "fieldPath": "source",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "source.backupId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "source.dbSystemId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "source.recoveryPoint",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "source.sourceType",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "source.sourceUrl",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "state",
+        "decision": "unknown",
+        "mergeCase": "unresolvedJoin",
+        "docsEvidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      {
+        "fieldPath": "subnetId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "telemetryConfiguration.logs.destinationConfigurations.key",
+        "decision": "unknown",
+        "mergeCase": "astOnlyCandidate",
+        "docsEvidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-// ResizeOpensearchClusterVerticalDetails The OCPU and memory configuration to update on an existing OpenSearch cluster for vertical resizing (https://docs.cloud.oracle.com/iaas/Content/search-opensearch/Tasks/resizingacluster.htm#vertical).
+// ResizeOpensearchClusterVerticalDetails The OCPU and memory configuration to update on an existing OpenSearch cluster for vertical resizing (https://docs.oracle.com/iaas/Content/search-opensearch/Tasks/resizingacluster.htm#vertical).
 type ResizeOpensearchClusterVerticalDetails struct {
 
 	// The number of OCPUs to configure for the cluster's master nodes.
@@ -23,6 +23,9 @@ type ResizeOpensearchClusterVerticalDetails struct {
 
 	// The amount of memory in GB, to configure for the cluster's master nodes.
 	MasterNodeHostMemoryGB *int `mandatory:"false" json:"masterNodeHostMemoryGB"`
+
+	// The node shape for the cluster's master nodes.
+	MasterNodeHostShape *string `mandatory:"false" json:"masterNodeHostShape"`
 
 	// The number of OCPUs to configure for the cluster's data nodes.
 	DataNodeHostOcpuCount *int `mandatory:"false" json:"dataNodeHostOcpuCount"`
@@ -33,11 +36,41 @@ type ResizeOpensearchClusterVerticalDetails struct {
 	// The amount of storage in GB, to configure per node for the cluster's data nodes.
 	DataNodeStorageGB *int `mandatory:"false" json:"dataNodeStorageGB"`
 
+	// The node shape for the cluster's data nodes.
+	DataNodeHostShape *string `mandatory:"false" json:"dataNodeHostShape"`
+
 	// The number of OCPUs to configure for the cluster's OpenSearch Dashboard nodes.
 	OpendashboardNodeHostOcpuCount *int `mandatory:"false" json:"opendashboardNodeHostOcpuCount"`
 
 	// The amount of memory in GB, to configure for the cluster's OpenSearch Dashboard nodes.
 	OpendashboardNodeHostMemoryGB *int `mandatory:"false" json:"opendashboardNodeHostMemoryGB"`
+
+	// The node shape for the cluster's OpenSearch Dashboard nodes.
+	OpendashboardNodeHostShape *string `mandatory:"false" json:"opendashboardNodeHostShape"`
+
+	// The node shape for the cluster's search nodes.
+	SearchNodeHostShape *string `mandatory:"false" json:"searchNodeHostShape"`
+
+	// The number of OCPUs configured for the cluster's search nodes.
+	SearchNodeHostOcpuCount *int `mandatory:"false" json:"searchNodeHostOcpuCount"`
+
+	// The amount of memory in GB, for the cluster's search nodes.
+	SearchNodeHostMemoryGB *int `mandatory:"false" json:"searchNodeHostMemoryGB"`
+
+	// The amount of storage in GB, to configure per node for the cluster's search nodes.
+	SearchNodeStorageGB *int `mandatory:"false" json:"searchNodeStorageGB"`
+
+	// The node shape for the cluster's ML nodes.
+	MlNodeHostShape *string `mandatory:"false" json:"mlNodeHostShape"`
+
+	// The number of OCPUs configured for the cluster's ML nodes.
+	MlNodeHostOcpuCount *int `mandatory:"false" json:"mlNodeHostOcpuCount"`
+
+	// The amount of memory in GB, for the cluster's ML nodes.
+	MlNodeHostMemoryGB *int `mandatory:"false" json:"mlNodeHostMemoryGB"`
+
+	// The amount of storage in GB, to configure per node for the cluster's ML nodes.
+	MlNodeStorageGB *int `mandatory:"false" json:"mlNodeStorageGB"`
 
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
@@ -59,7 +92,7 @@ func (m ResizeOpensearchClusterVerticalDetails) ValidateEnumValue() (bool, error
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

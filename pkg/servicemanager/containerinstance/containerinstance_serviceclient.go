@@ -14,6 +14,7 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	containerinstancessdk "github.com/oracle/oci-go-sdk/v65/containerinstances"
+	coresdk "github.com/oracle/oci-go-sdk/v65/core"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -25,12 +26,21 @@ type ContainerInstanceClientInterface interface {
 	CreateContainerInstance(ctx context.Context, request containerinstancessdk.CreateContainerInstanceRequest) (containerinstancessdk.CreateContainerInstanceResponse, error)
 	GetContainerInstance(ctx context.Context, request containerinstancessdk.GetContainerInstanceRequest) (containerinstancessdk.GetContainerInstanceResponse, error)
 	ListContainerInstances(ctx context.Context, request containerinstancessdk.ListContainerInstancesRequest) (containerinstancessdk.ListContainerInstancesResponse, error)
+	GetContainer(ctx context.Context, request containerinstancessdk.GetContainerRequest) (containerinstancessdk.GetContainerResponse, error)
 	UpdateContainerInstance(ctx context.Context, request containerinstancessdk.UpdateContainerInstanceRequest) (containerinstancessdk.UpdateContainerInstanceResponse, error)
 	DeleteContainerInstance(ctx context.Context, request containerinstancessdk.DeleteContainerInstanceRequest) (containerinstancessdk.DeleteContainerInstanceResponse, error)
 }
 
+type ContainerInstanceVnicClientInterface interface {
+	GetVnic(ctx context.Context, request coresdk.GetVnicRequest) (coresdk.GetVnicResponse, error)
+}
+
 func getContainerInstanceClient(provider common.ConfigurationProvider) (containerinstancessdk.ContainerInstanceClient, error) {
 	return containerinstancessdk.NewContainerInstanceClientWithConfigurationProvider(provider)
+}
+
+func getContainerInstanceVnicClient(provider common.ConfigurationProvider) (coresdk.VirtualNetworkClient, error) {
+	return coresdk.NewVirtualNetworkClientWithConfigurationProvider(provider)
 }
 
 // getOCIClient returns the injected client if set, otherwise creates one from the provider.
@@ -39,6 +49,13 @@ func (c *ContainerInstanceServiceManager) getOCIClient() (ContainerInstanceClien
 		return c.ociClient, nil
 	}
 	return getContainerInstanceClient(c.Provider)
+}
+
+func (c *ContainerInstanceServiceManager) getVnicClient() (ContainerInstanceVnicClientInterface, error) {
+	if c.vnicClient != nil {
+		return c.vnicClient, nil
+	}
+	return getContainerInstanceVnicClient(c.Provider)
 }
 
 // CreateContainerInstance calls the OCI API to create a new container instance.
@@ -146,35 +163,53 @@ func (c *ContainerInstanceServiceManager) GetContainerInstanceOcid(ctx context.C
 		return nil, err
 	}
 
-	req := containerinstancessdk.ListContainerInstancesRequest{
-		CompartmentId:      common.String(ci.Spec.CompartmentId),
-		DisplayName:        common.String(ci.Spec.DisplayName),
-		AvailabilityDomain: common.String(ci.Spec.AvailabilityDomain),
-		Limit:              common.Int(50),
-	}
-
-	resp, err := client.ListContainerInstances(ctx, req)
-	if err != nil {
-		c.Log.ErrorLog(err, "Error listing ContainerInstances")
-		return nil, err
-	}
-
-	for _, item := range resp.Items {
-		switch item.LifecycleState {
-		case containerinstancessdk.ContainerInstanceLifecycleStateActive,
-			containerinstancessdk.ContainerInstanceLifecycleStateCreating,
-			containerinstancessdk.ContainerInstanceLifecycleStateUpdating,
-			containerinstancessdk.ContainerInstanceLifecycleStateInactive:
-			if item.Id != nil {
-				c.Log.DebugLog(fmt.Sprintf("ContainerInstance %s exists with OCID %s", ci.Spec.DisplayName, *item.Id))
-				ocid := shared.OCID(*item.Id)
-				return &ocid, nil
+	for _, state := range reusableContainerInstanceLifecycleStates() {
+		var page *string
+		for {
+			req := containerinstancessdk.ListContainerInstancesRequest{
+				CompartmentId:      common.String(ci.Spec.CompartmentId),
+				DisplayName:        common.String(ci.Spec.DisplayName),
+				AvailabilityDomain: common.String(ci.Spec.AvailabilityDomain),
+				LifecycleState:     state,
+				Limit:              common.Int(50),
+				Page:               page,
 			}
+
+			resp, err := client.ListContainerInstances(ctx, req)
+			if err != nil {
+				c.Log.ErrorLog(err, "Error listing ContainerInstances")
+				return nil, err
+			}
+
+			for _, item := range resp.Items {
+				if !isReusableContainerInstanceState(item.LifecycleState) {
+					continue
+				}
+				if item.Id != nil {
+					c.Log.DebugLog(fmt.Sprintf("ContainerInstance %s exists with OCID %s", ci.Spec.DisplayName, *item.Id))
+					ocid := shared.OCID(*item.Id)
+					return &ocid, nil
+				}
+			}
+
+			if resp.OpcNextPage == nil || *resp.OpcNextPage == "" {
+				break
+			}
+			page = resp.OpcNextPage
 		}
 	}
 
 	c.Log.DebugLog(fmt.Sprintf("ContainerInstance %s does not exist", ci.Spec.DisplayName))
 	return nil, nil
+}
+
+func isReusableContainerInstanceState(state containerinstancessdk.ContainerInstanceLifecycleStateEnum) bool {
+	for _, candidate := range reusableContainerInstanceLifecycleStates() {
+		if state == candidate {
+			return true
+		}
+	}
+	return false
 }
 
 // UpdateContainerInstance updates an existing container instance when supported mutable fields drift.
@@ -184,27 +219,10 @@ func (c *ContainerInstanceServiceManager) UpdateContainerInstance(ctx context.Co
 	if err != nil {
 		return err
 	}
-	if err := validateImmutableContainerInstanceFields(ci, existing); err != nil {
+
+	updateDetails, updateNeeded := buildUpdateContainerInstanceDetails(ci, existing)
+	if err := c.validateCreateOnlyContainerInstanceFields(ctx, ci, existing, updateNeeded); err != nil {
 		return err
-	}
-
-	updateDetails := containerinstancessdk.UpdateContainerInstanceDetails{}
-	updateNeeded := false
-
-	if ci.Spec.DisplayName != "" && safeString(existing.DisplayName) != ci.Spec.DisplayName {
-		updateDetails.DisplayName = common.String(ci.Spec.DisplayName)
-		updateNeeded = true
-	}
-	if ci.Spec.FreeformTags != nil && !reflect.DeepEqual(existing.FreeformTags, ci.Spec.FreeformTags) {
-		updateDetails.FreeformTags = ci.Spec.FreeformTags
-		updateNeeded = true
-	}
-	if ci.Spec.DefinedTags != nil {
-		desiredDefinedTags := *util.ConvertToOciDefinedTags(&ci.Spec.DefinedTags)
-		if !reflect.DeepEqual(existing.DefinedTags, desiredDefinedTags) {
-			updateDetails.DefinedTags = desiredDefinedTags
-			updateNeeded = true
-		}
 	}
 	if !updateNeeded {
 		return nil
@@ -226,6 +244,28 @@ func (c *ContainerInstanceServiceManager) UpdateContainerInstance(ctx context.Co
 	}
 	servicemanager.RecordResponseOpcRequestID(&ci.Status.OsokStatus, response)
 	return err
+}
+
+func buildUpdateContainerInstanceDetails(ci *containerinstancesv1beta1.ContainerInstance,
+	existing *containerinstancessdk.ContainerInstance) (containerinstancessdk.UpdateContainerInstanceDetails, bool) {
+	updateDetails := containerinstancessdk.UpdateContainerInstanceDetails{}
+	updateNeeded := false
+	if ci.Spec.DisplayName != "" && safeString(existing.DisplayName) != ci.Spec.DisplayName {
+		updateDetails.DisplayName = common.String(ci.Spec.DisplayName)
+		updateNeeded = true
+	}
+	if ci.Spec.FreeformTags != nil && !reflect.DeepEqual(existing.FreeformTags, ci.Spec.FreeformTags) {
+		updateDetails.FreeformTags = ci.Spec.FreeformTags
+		updateNeeded = true
+	}
+	if ci.Spec.DefinedTags != nil {
+		desiredDefinedTags := *util.ConvertToOciDefinedTags(&ci.Spec.DefinedTags)
+		if !reflect.DeepEqual(existing.DefinedTags, desiredDefinedTags) {
+			updateDetails.DefinedTags = desiredDefinedTags
+			updateNeeded = true
+		}
+	}
+	return updateDetails, updateNeeded
 }
 
 // DeleteContainerInstance deletes the container instance for the given OCID.
@@ -346,8 +386,6 @@ func buildHealthChecks(specChecks []containerinstancesv1beta1.ContainerInstanceC
 		checkType := strings.ToUpper(strings.TrimSpace(check.HealthCheckType))
 		if checkType == "" {
 			switch {
-			case len(check.Command) > 0:
-				checkType = "COMMAND"
 			case check.Path != "" || len(check.Headers) > 0:
 				checkType = "HTTP"
 			case check.Port != 0:
@@ -359,17 +397,6 @@ func buildHealthChecks(specChecks []containerinstancesv1beta1.ContainerInstanceC
 
 		base := healthCheckBase(check)
 		switch checkType {
-		case "COMMAND":
-			healthChecks = append(healthChecks, containerinstancessdk.CreateContainerCommandHealthCheckDetails{
-				Command:               append([]string(nil), check.Command...),
-				Name:                  base.Name,
-				InitialDelayInSeconds: base.InitialDelayInSeconds,
-				IntervalInSeconds:     base.IntervalInSeconds,
-				FailureThreshold:      base.FailureThreshold,
-				SuccessThreshold:      base.SuccessThreshold,
-				TimeoutInSeconds:      base.TimeoutInSeconds,
-				FailureAction:         base.FailureAction,
-			})
 		case "HTTP":
 			headers := make([]containerinstancessdk.HealthCheckHttpHeader, 0, len(check.Headers))
 			for _, header := range check.Headers {
@@ -623,6 +650,29 @@ func buildImagePullSecrets(specSecrets []containerinstancesv1beta1.ContainerInst
 	return secrets, nil
 }
 
+func (c *ContainerInstanceServiceManager) validateCreateOnlyContainerInstanceFields(ctx context.Context,
+	ci *containerinstancesv1beta1.ContainerInstance,
+	existing *containerinstancessdk.ContainerInstance,
+	updateNeeded bool,
+) error {
+	if err := validateImmutableContainerInstanceFields(ci, existing); err != nil {
+		return err
+	}
+	if err := c.validateContainerDrift(ctx, ci, existing, updateNeeded); err != nil {
+		return err
+	}
+	if err := c.validateVnicDrift(ctx, ci, existing, updateNeeded); err != nil {
+		return err
+	}
+	if err := validateVolumeDrift(ci, existing, updateNeeded); err != nil {
+		return err
+	}
+	if err := validateImagePullSecretDrift(ci, existing, updateNeeded); err != nil {
+		return err
+	}
+	return nil
+}
+
 func validateImmutableContainerInstanceFields(ci *containerinstancesv1beta1.ContainerInstance, existing *containerinstancessdk.ContainerInstance) error {
 	switch {
 	case safeString(existing.CompartmentId) != "" && safeString(existing.CompartmentId) != ci.Spec.CompartmentId:
@@ -654,5 +704,613 @@ func validateImmutableContainerInstanceFields(ci *containerinstancesv1beta1.Cont
 		}
 	}
 
+	if existing.DnsConfig != nil && hasDesiredDNSConfig(ci.Spec.DnsConfig) && !reflect.DeepEqual(dnsConfigFromSDK(existing.DnsConfig), ci.Spec.DnsConfig) {
+		return fmt.Errorf("dnsConfig cannot be updated in place")
+	}
+
 	return nil
+}
+
+func (c *ContainerInstanceServiceManager) validateContainerDrift(ctx context.Context,
+	ci *containerinstancesv1beta1.ContainerInstance,
+	existing *containerinstancessdk.ContainerInstance,
+	updateNeeded bool,
+) error {
+	if len(existing.Containers) == 0 {
+		if safeInt(existing.ContainerCount) > 0 && safeInt(existing.ContainerCount) != len(ci.Spec.Containers) {
+			return fmt.Errorf("containers cannot be updated in place")
+		}
+		if updateNeeded && safeInt(existing.ContainerCount) > 0 {
+			return fmt.Errorf("containers cannot be verified before updating mutable fields")
+		}
+		return nil
+	}
+	if len(existing.Containers) != len(ci.Spec.Containers) {
+		return fmt.Errorf("containers cannot be updated in place")
+	}
+
+	client, err := c.getOCIClient()
+	if err != nil {
+		return err
+	}
+	for i, observedRef := range existing.Containers {
+		containerID := safeString(observedRef.ContainerId)
+		if containerID == "" {
+			if updateNeeded {
+				return fmt.Errorf("containers[%d] cannot be verified before updating mutable fields", i)
+			}
+			continue
+		}
+		resp, err := client.GetContainer(ctx, containerinstancessdk.GetContainerRequest{
+			ContainerId: common.String(containerID),
+		})
+		if err != nil {
+			return fmt.Errorf("get container %s for create-only drift validation: %w", containerID, err)
+		}
+		if err := validateContainerMatchesDesired(i, ci.Spec.Containers[i], resp.Container); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateContainerMatchesDesired(index int,
+	desired containerinstancesv1beta1.ContainerInstanceContainer,
+	observed containerinstancessdk.Container,
+) error {
+	prefix := fmt.Sprintf("containers[%d]", index)
+	if safeString(observed.ImageUrl) != desired.ImageUrl {
+		return fmt.Errorf("%s.imageUrl cannot be updated in place", prefix)
+	}
+	if desired.DisplayName != "" && safeString(observed.DisplayName) != desired.DisplayName {
+		return fmt.Errorf("%s.displayName cannot be updated in place", prefix)
+	}
+	if len(desired.Command) > 0 || len(observed.Command) > 0 {
+		if !reflect.DeepEqual(observed.Command, desired.Command) {
+			return fmt.Errorf("%s.command cannot be updated in place", prefix)
+		}
+	}
+	if len(desired.Arguments) > 0 || len(observed.Arguments) > 0 {
+		if !reflect.DeepEqual(observed.Arguments, desired.Arguments) {
+			return fmt.Errorf("%s.arguments cannot be updated in place", prefix)
+		}
+	}
+	if desired.WorkingDirectory != "" && safeString(observed.WorkingDirectory) != desired.WorkingDirectory {
+		return fmt.Errorf("%s.workingDirectory cannot be updated in place", prefix)
+	}
+	if len(desired.EnvironmentVariables) > 0 || len(observed.EnvironmentVariables) > 0 {
+		if !reflect.DeepEqual(observed.EnvironmentVariables, desired.EnvironmentVariables) {
+			return fmt.Errorf("%s.environmentVariables cannot be updated in place", prefix)
+		}
+	}
+	if len(desired.VolumeMounts) > 0 || len(observed.VolumeMounts) > 0 {
+		if !reflect.DeepEqual(observedVolumeMounts(observed.VolumeMounts), desiredVolumeMounts(desired.VolumeMounts)) {
+			return fmt.Errorf("%s.volumeMounts cannot be updated in place", prefix)
+		}
+	}
+	if desired.IsResourcePrincipalDisabled || safeBool(observed.IsResourcePrincipalDisabled) {
+		if safeBool(observed.IsResourcePrincipalDisabled) != desired.IsResourcePrincipalDisabled {
+			return fmt.Errorf("%s.isResourcePrincipalDisabled cannot be updated in place", prefix)
+		}
+	}
+	if desired.ResourceConfig.VcpusLimit != 0 || desired.ResourceConfig.MemoryLimitInGBs != 0 || observed.ResourceConfig != nil {
+		if !reflect.DeepEqual(observedContainerResourceConfig(observed.ResourceConfig), desiredContainerResourceConfig(desired.ResourceConfig)) {
+			return fmt.Errorf("%s.resourceConfig cannot be updated in place", prefix)
+		}
+	}
+	if len(desired.HealthChecks) > 0 || len(observed.HealthChecks) > 0 {
+		desiredChecks, err := desiredHealthChecks(desired.HealthChecks)
+		if err != nil {
+			return err
+		}
+		if !reflect.DeepEqual(observedHealthChecks(observed.HealthChecks), desiredChecks) {
+			return fmt.Errorf("%s.healthChecks cannot be updated in place", prefix)
+		}
+	}
+	if hasDesiredSecurityContext(desired.SecurityContext) || observed.SecurityContext != nil {
+		if !reflect.DeepEqual(observedSecurityContext(observed.SecurityContext), desiredSecurityContext(desired.SecurityContext)) {
+			return fmt.Errorf("%s.securityContext cannot be updated in place", prefix)
+		}
+	}
+	if len(desired.FreeformTags) > 0 && !reflect.DeepEqual(observed.FreeformTags, desired.FreeformTags) {
+		return fmt.Errorf("%s.freeformTags cannot be updated in place", prefix)
+	}
+	if desired.DefinedTags != nil && !reflect.DeepEqual(observed.DefinedTags, desiredDefinedTags(desired.DefinedTags)) {
+		return fmt.Errorf("%s.definedTags cannot be updated in place", prefix)
+	}
+	return nil
+}
+
+type comparableVolumeMount struct {
+	MountPath  string
+	VolumeName string
+	SubPath    string
+	IsReadOnly bool
+	Partition  int
+}
+
+func desiredVolumeMounts(in []containerinstancesv1beta1.ContainerInstanceContainerVolumeMount) []comparableVolumeMount {
+	out := make([]comparableVolumeMount, 0, len(in))
+	for _, mount := range in {
+		out = append(out, comparableVolumeMount{
+			MountPath:  mount.MountPath,
+			VolumeName: mount.VolumeName,
+			SubPath:    mount.SubPath,
+			IsReadOnly: mount.IsReadOnly,
+			Partition:  mount.Partition,
+		})
+	}
+	return out
+}
+
+func observedVolumeMounts(in []containerinstancessdk.VolumeMount) []comparableVolumeMount {
+	out := make([]comparableVolumeMount, 0, len(in))
+	for _, mount := range in {
+		out = append(out, comparableVolumeMount{
+			MountPath:  safeString(mount.MountPath),
+			VolumeName: safeString(mount.VolumeName),
+			SubPath:    safeString(mount.SubPath),
+			IsReadOnly: safeBool(mount.IsReadOnly),
+			Partition:  safeInt(mount.Partition),
+		})
+	}
+	return out
+}
+
+type comparableContainerResourceConfig struct {
+	VcpusLimit       float32
+	MemoryLimitInGBs float32
+}
+
+func desiredContainerResourceConfig(in containerinstancesv1beta1.ContainerInstanceContainerResourceConfig) comparableContainerResourceConfig {
+	return comparableContainerResourceConfig{
+		VcpusLimit:       in.VcpusLimit,
+		MemoryLimitInGBs: in.MemoryLimitInGBs,
+	}
+}
+
+func observedContainerResourceConfig(in *containerinstancessdk.ContainerResourceConfig) comparableContainerResourceConfig {
+	if in == nil {
+		return comparableContainerResourceConfig{}
+	}
+	return comparableContainerResourceConfig{
+		VcpusLimit:       safeFloat32(in.VcpusLimit),
+		MemoryLimitInGBs: safeFloat32(in.MemoryLimitInGBs),
+	}
+}
+
+type comparableHealthCheck struct {
+	HealthCheckType       string
+	Name                  string
+	InitialDelayInSeconds int
+	IntervalInSeconds     int
+	FailureThreshold      int
+	SuccessThreshold      int
+	TimeoutInSeconds      int
+	FailureAction         string
+	Path                  string
+	Port                  int
+	Headers               []comparableHealthCheckHeader
+}
+
+type comparableHealthCheckHeader struct {
+	Name  string
+	Value string
+}
+
+func desiredHealthChecks(in []containerinstancesv1beta1.ContainerInstanceContainerHealthCheck) ([]comparableHealthCheck, error) {
+	out := make([]comparableHealthCheck, 0, len(in))
+	for _, check := range in {
+		checkType := strings.ToUpper(strings.TrimSpace(check.HealthCheckType))
+		if checkType == "" {
+			switch {
+			case check.Path != "" || len(check.Headers) > 0:
+				checkType = "HTTP"
+			case check.Port != 0:
+				checkType = "TCP"
+			default:
+				return nil, fmt.Errorf("container healthCheckType is required")
+			}
+		}
+		next := comparableHealthCheck{
+			HealthCheckType:       checkType,
+			Name:                  check.Name,
+			InitialDelayInSeconds: check.InitialDelayInSeconds,
+			IntervalInSeconds:     check.IntervalInSeconds,
+			FailureThreshold:      check.FailureThreshold,
+			SuccessThreshold:      check.SuccessThreshold,
+			TimeoutInSeconds:      check.TimeoutInSeconds,
+			FailureAction:         check.FailureAction,
+			Path:                  check.Path,
+			Port:                  check.Port,
+		}
+		for _, header := range check.Headers {
+			next.Headers = append(next.Headers, comparableHealthCheckHeader{Name: header.Name, Value: header.Value})
+		}
+		out = append(out, next)
+	}
+	return out, nil
+}
+
+func observedHealthChecks(in []containerinstancessdk.ContainerHealthCheck) []comparableHealthCheck {
+	out := make([]comparableHealthCheck, 0, len(in))
+	for _, check := range in {
+		next := comparableHealthCheck{
+			Name:                  safeString(check.GetName()),
+			InitialDelayInSeconds: safeInt(check.GetInitialDelayInSeconds()),
+			IntervalInSeconds:     safeInt(check.GetIntervalInSeconds()),
+			FailureThreshold:      safeInt(check.GetFailureThreshold()),
+			SuccessThreshold:      safeInt(check.GetSuccessThreshold()),
+			TimeoutInSeconds:      safeInt(check.GetTimeoutInSeconds()),
+			FailureAction:         string(check.GetFailureAction()),
+		}
+		switch typed := check.(type) {
+		case containerinstancessdk.ContainerHttpHealthCheck:
+			next.HealthCheckType = "HTTP"
+			next.Path = safeString(typed.Path)
+			next.Port = safeInt(typed.Port)
+			for _, header := range typed.Headers {
+				next.Headers = append(next.Headers, comparableHealthCheckHeader{
+					Name:  safeString(header.Name),
+					Value: safeString(header.Value),
+				})
+			}
+		case containerinstancessdk.ContainerTcpHealthCheck:
+			next.HealthCheckType = "TCP"
+			next.Port = safeInt(typed.Port)
+		}
+		out = append(out, next)
+	}
+	return out
+}
+
+type comparableSecurityContext struct {
+	SecurityContextType       string
+	RunAsUser                 int
+	RunAsGroup                int
+	IsNonRootUserCheckEnabled bool
+	IsRootFileSystemReadonly  bool
+	AddCapabilities           []string
+	DropCapabilities          []string
+}
+
+func hasDesiredSecurityContext(in containerinstancesv1beta1.ContainerInstanceContainerSecurityContext) bool {
+	return strings.TrimSpace(in.SecurityContextType) != "" ||
+		in.RunAsUser != 0 ||
+		in.RunAsGroup != 0 ||
+		in.IsNonRootUserCheckEnabled ||
+		in.IsRootFileSystemReadonly ||
+		len(in.Capabilities.AddCapabilities) > 0 ||
+		len(in.Capabilities.DropCapabilities) > 0
+}
+
+func desiredSecurityContext(in containerinstancesv1beta1.ContainerInstanceContainerSecurityContext) comparableSecurityContext {
+	if !hasDesiredSecurityContext(in) {
+		return comparableSecurityContext{}
+	}
+	return comparableSecurityContext{
+		SecurityContextType:       "LINUX",
+		RunAsUser:                 in.RunAsUser,
+		RunAsGroup:                in.RunAsGroup,
+		IsNonRootUserCheckEnabled: in.IsNonRootUserCheckEnabled,
+		IsRootFileSystemReadonly:  in.IsRootFileSystemReadonly,
+		AddCapabilities:           append([]string(nil), in.Capabilities.AddCapabilities...),
+		DropCapabilities:          append([]string(nil), in.Capabilities.DropCapabilities...),
+	}
+}
+
+func observedSecurityContext(in containerinstancessdk.SecurityContext) comparableSecurityContext {
+	if in == nil {
+		return comparableSecurityContext{}
+	}
+	if linux, ok := in.(containerinstancessdk.LinuxSecurityContext); ok {
+		out := comparableSecurityContext{
+			SecurityContextType:       "LINUX",
+			RunAsUser:                 safeInt(linux.RunAsUser),
+			RunAsGroup:                safeInt(linux.RunAsGroup),
+			IsNonRootUserCheckEnabled: safeBool(linux.IsNonRootUserCheckEnabled),
+			IsRootFileSystemReadonly:  safeBool(linux.IsRootFileSystemReadonly),
+		}
+		if linux.Capabilities != nil {
+			for _, capability := range linux.Capabilities.AddCapabilities {
+				out.AddCapabilities = append(out.AddCapabilities, string(capability))
+			}
+			for _, capability := range linux.Capabilities.DropCapabilities {
+				out.DropCapabilities = append(out.DropCapabilities, string(capability))
+			}
+		}
+		return out
+	}
+	return comparableSecurityContext{SecurityContextType: fmt.Sprintf("%T", in)}
+}
+
+func (c *ContainerInstanceServiceManager) validateVnicDrift(ctx context.Context,
+	ci *containerinstancesv1beta1.ContainerInstance,
+	existing *containerinstancessdk.ContainerInstance,
+	updateNeeded bool,
+) error {
+	if len(existing.Vnics) == 0 {
+		if updateNeeded && len(ci.Spec.Vnics) > 0 {
+			return fmt.Errorf("vnics cannot be verified before updating mutable fields")
+		}
+		return nil
+	}
+	if len(existing.Vnics) != len(ci.Spec.Vnics) {
+		return fmt.Errorf("vnics cannot be updated in place")
+	}
+	client, err := c.getVnicClient()
+	if err != nil {
+		return err
+	}
+	for i, observedRef := range existing.Vnics {
+		vnicID := safeString(observedRef.VnicId)
+		if vnicID == "" {
+			if updateNeeded {
+				return fmt.Errorf("vnics[%d] cannot be verified before updating mutable fields", i)
+			}
+			continue
+		}
+		resp, err := client.GetVnic(ctx, coresdk.GetVnicRequest{VnicId: common.String(vnicID)})
+		if err != nil {
+			return fmt.Errorf("get VNIC %s for create-only drift validation: %w", vnicID, err)
+		}
+		if err := validateVnicMatchesDesired(i, ci.Spec.Vnics[i], resp.Vnic); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateVnicMatchesDesired(index int,
+	desired containerinstancesv1beta1.ContainerInstanceVnic,
+	observed coresdk.Vnic,
+) error {
+	prefix := fmt.Sprintf("vnics[%d]", index)
+	if safeString(observed.SubnetId) != desired.SubnetId {
+		return fmt.Errorf("%s.subnetId cannot be updated in place", prefix)
+	}
+	if desired.DisplayName != "" && safeString(observed.DisplayName) != desired.DisplayName {
+		return fmt.Errorf("%s.displayName cannot be updated in place", prefix)
+	}
+	if desired.HostnameLabel != "" && safeString(observed.HostnameLabel) != desired.HostnameLabel {
+		return fmt.Errorf("%s.hostnameLabel cannot be updated in place", prefix)
+	}
+	observedPublicIP := safeString(observed.PublicIp) != ""
+	if desired.IsPublicIpAssigned || observedPublicIP {
+		if observedPublicIP != desired.IsPublicIpAssigned {
+			return fmt.Errorf("%s.isPublicIpAssigned cannot be updated in place", prefix)
+		}
+	}
+	if desired.SkipSourceDestCheck || safeBool(observed.SkipSourceDestCheck) {
+		if safeBool(observed.SkipSourceDestCheck) != desired.SkipSourceDestCheck {
+			return fmt.Errorf("%s.skipSourceDestCheck cannot be updated in place", prefix)
+		}
+	}
+	if len(desired.NsgIds) > 0 || len(observed.NsgIds) > 0 {
+		if !reflect.DeepEqual(observed.NsgIds, desired.NsgIds) {
+			return fmt.Errorf("%s.nsgIds cannot be updated in place", prefix)
+		}
+	}
+	if desired.PrivateIp != "" && safeString(observed.PrivateIp) != desired.PrivateIp {
+		return fmt.Errorf("%s.privateIp cannot be updated in place", prefix)
+	}
+	if len(desired.FreeformTags) > 0 && !reflect.DeepEqual(observed.FreeformTags, desired.FreeformTags) {
+		return fmt.Errorf("%s.freeformTags cannot be updated in place", prefix)
+	}
+	if desired.DefinedTags != nil && !reflect.DeepEqual(observed.DefinedTags, desiredDefinedTags(desired.DefinedTags)) {
+		return fmt.Errorf("%s.definedTags cannot be updated in place", prefix)
+	}
+	return nil
+}
+
+func observedVolumeCount(existing *containerinstancessdk.ContainerInstance) int {
+	if len(existing.Volumes) > 0 {
+		return len(existing.Volumes)
+	}
+	return safeInt(existing.VolumeCount)
+}
+
+func validateVolumeDrift(ci *containerinstancesv1beta1.ContainerInstance,
+	existing *containerinstancessdk.ContainerInstance,
+	updateNeeded bool,
+) error {
+	if len(existing.Volumes) == 0 {
+		if observedVolumeCount(existing) > 0 && observedVolumeCount(existing) != len(ci.Spec.Volumes) {
+			return fmt.Errorf("volumes cannot be updated in place")
+		}
+		if updateNeeded && observedVolumeCount(existing) > 0 {
+			return fmt.Errorf("volumes cannot be verified before updating mutable fields")
+		}
+		return nil
+	}
+	desired, err := desiredVolumes(ci.Spec.Volumes)
+	if err != nil {
+		return err
+	}
+	observed := observedVolumes(existing.Volumes)
+	if len(observed) != len(desired) {
+		return fmt.Errorf("volumes cannot be updated in place")
+	}
+	for i := range observed {
+		if !reflect.DeepEqual(observed[i], desired[i]) {
+			return fmt.Errorf("volumes[%d] cannot be updated in place", i)
+		}
+	}
+	return nil
+}
+
+type comparableVolume struct {
+	Name         string
+	VolumeType   string
+	BackingStore string
+	Configs      []comparableVolumeConfig
+}
+
+type comparableVolumeConfig struct {
+	FileName string
+	Path     string
+	Data     []byte
+}
+
+func desiredVolumes(in []containerinstancesv1beta1.ContainerInstanceVolume) ([]comparableVolume, error) {
+	out := make([]comparableVolume, 0, len(in))
+	for _, volume := range in {
+		volumeType := strings.ToUpper(strings.TrimSpace(volume.VolumeType))
+		if volumeType == "" {
+			if len(volume.Configs) > 0 {
+				volumeType = "CONFIGFILE"
+			} else {
+				volumeType = "EMPTYDIR"
+			}
+		}
+		next := comparableVolume{
+			Name:       volume.Name,
+			VolumeType: volumeType,
+		}
+		switch volumeType {
+		case "CONFIGFILE":
+			for _, config := range volume.Configs {
+				data, err := base64.StdEncoding.DecodeString(config.Data)
+				if err != nil {
+					return nil, fmt.Errorf("decode volume config %q: %w", config.FileName, err)
+				}
+				next.Configs = append(next.Configs, comparableVolumeConfig{
+					FileName: config.FileName,
+					Path:     config.Path,
+					Data:     data,
+				})
+			}
+		case "EMPTYDIR":
+			next.BackingStore = volume.BackingStore
+		default:
+			return nil, fmt.Errorf("unsupported volumeType %q", volume.VolumeType)
+		}
+		out = append(out, next)
+	}
+	return out, nil
+}
+
+func observedVolumes(in []containerinstancessdk.ContainerVolume) []comparableVolume {
+	out := make([]comparableVolume, 0, len(in))
+	for _, volume := range in {
+		switch typed := volume.(type) {
+		case containerinstancessdk.ContainerConfigFileVolume:
+			next := comparableVolume{
+				Name:       safeString(typed.Name),
+				VolumeType: "CONFIGFILE",
+			}
+			for _, config := range typed.Configs {
+				next.Configs = append(next.Configs, comparableVolumeConfig{
+					FileName: safeString(config.FileName),
+					Path:     safeString(config.Path),
+					Data:     append([]byte(nil), config.Data...),
+				})
+			}
+			out = append(out, next)
+		case containerinstancessdk.ContainerEmptyDirVolume:
+			out = append(out, comparableVolume{
+				Name:         safeString(typed.Name),
+				VolumeType:   "EMPTYDIR",
+				BackingStore: string(typed.BackingStore),
+			})
+		default:
+			out = append(out, comparableVolume{Name: safeString(volume.GetName())})
+		}
+	}
+	return out
+}
+
+func hasDesiredDNSConfig(spec containerinstancesv1beta1.ContainerInstanceDnsConfig) bool {
+	return len(spec.Nameservers) > 0 || len(spec.Searches) > 0 || len(spec.Options) > 0
+}
+
+func dnsConfigFromSDK(config *containerinstancessdk.ContainerDnsConfig) containerinstancesv1beta1.ContainerInstanceDnsConfig {
+	if config == nil {
+		return containerinstancesv1beta1.ContainerInstanceDnsConfig{}
+	}
+	return containerinstancesv1beta1.ContainerInstanceDnsConfig{
+		Nameservers: append([]string(nil), config.Nameservers...),
+		Searches:    append([]string(nil), config.Searches...),
+		Options:     append([]string(nil), config.Options...),
+	}
+}
+
+func validateImagePullSecretDrift(ci *containerinstancesv1beta1.ContainerInstance,
+	existing *containerinstancessdk.ContainerInstance,
+	updateNeeded bool,
+) error {
+	if len(existing.ImagePullSecrets) == 0 {
+		if updateNeeded && len(ci.Spec.ImagePullSecrets) > 0 {
+			return fmt.Errorf("imagePullSecrets cannot be verified before updating mutable fields")
+		}
+		return nil
+	}
+	if len(existing.ImagePullSecrets) != len(ci.Spec.ImagePullSecrets) {
+		return fmt.Errorf("imagePullSecrets cannot be updated in place")
+	}
+	for i := range existing.ImagePullSecrets {
+		if err := validateImagePullSecretMatchesDesired(i, ci.Spec.ImagePullSecrets[i], existing.ImagePullSecrets[i], updateNeeded); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateImagePullSecretMatchesDesired(index int,
+	desired containerinstancesv1beta1.ContainerInstanceImagePullSecret,
+	existing containerinstancessdk.ImagePullSecret,
+	updateNeeded bool,
+) error {
+	if existing == nil {
+		return fmt.Errorf("imagePullSecrets[%d] cannot be updated in place", index)
+	}
+	prefix := fmt.Sprintf("imagePullSecrets[%d]", index)
+	if safeString(existing.GetRegistryEndpoint()) != desired.RegistryEndpoint {
+		return fmt.Errorf("%s.registryEndpoint cannot be updated in place", prefix)
+	}
+	desiredType := desiredImagePullSecretType(desired)
+	switch observed := existing.(type) {
+	case containerinstancessdk.VaultImagePullSecret:
+		if desiredType != "VAULT" {
+			return fmt.Errorf("%s.secretType cannot be updated in place", prefix)
+		}
+		if safeString(observed.SecretId) != desired.SecretId {
+			return fmt.Errorf("%s.secretId cannot be updated in place", prefix)
+		}
+	case containerinstancessdk.BasicImagePullSecret:
+		if desiredType != "BASIC" {
+			return fmt.Errorf("%s.secretType cannot be updated in place", prefix)
+		}
+		if updateNeeded && (desired.Username != "" || desired.Password != "") {
+			return fmt.Errorf("%s BASIC credentials cannot be verified before updating mutable fields", prefix)
+		}
+	default:
+		return fmt.Errorf("%s.secretType cannot be verified before updating mutable fields", prefix)
+	}
+	return nil
+}
+
+func desiredImagePullSecretType(desired containerinstancesv1beta1.ContainerInstanceImagePullSecret) string {
+	secretType := strings.ToUpper(strings.TrimSpace(desired.SecretType))
+	if secretType == "" && strings.TrimSpace(desired.SecretId) != "" {
+		return "VAULT"
+	}
+	if secretType == "" {
+		return "BASIC"
+	}
+	return secretType
+}
+
+func desiredDefinedTags(in map[string]shared.MapValue) map[string]map[string]interface{} {
+	if in == nil {
+		return nil
+	}
+	return *util.ConvertToOciDefinedTags(&in)
+}
+
+func safeBool(value *bool) bool {
+	if value == nil {
+		return false
+	}
+	return *value
 }

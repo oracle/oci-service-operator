@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "routingpolicy",
+  "kind": "RoutingPolicy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_loadbalancer_routingpolicy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateRoutingPolicy",
+        "requestType": "loadbalancer.CreateRoutingPolicyRequest",
+        "responseType": "loadbalancer.CreateRoutingPolicyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetRoutingPolicy",
+        "requestType": "loadbalancer.GetRoutingPolicyRequest",
+        "responseType": "loadbalancer.GetRoutingPolicyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListRoutingPolicy",
+        "requestType": "loadbalancer.ListRoutingPolicyRequest",
+        "responseType": "loadbalancer.ListRoutingPolicyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateRoutingPolicy",
+        "requestType": "loadbalancer.UpdateRoutingPolicyRequest",
+        "responseType": "loadbalancer.UpdateRoutingPolicyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteRoutingPolicy",
+        "requestType": "loadbalancer.DeleteRoutingPolicyRequest",
+        "responseType": "loadbalancer.DeleteRoutingPolicyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_routingpolicy",
+    "collectionField": "routingpolicy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/routingpolicy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/routingpolicy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/routingpolicy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

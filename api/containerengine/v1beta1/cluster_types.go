@@ -34,12 +34,12 @@ type ClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	KmsKeyId string `json:"kmsKeyId,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -102,12 +102,12 @@ type ClusterOptionsAdmissionControllerOptions struct {
 // ClusterOptionsPersistentVolumeConfig defines nested fields for Cluster.Options.PersistentVolumeConfig.
 type ClusterOptionsPersistentVolumeConfig struct {
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -116,15 +116,80 @@ type ClusterOptionsPersistentVolumeConfig struct {
 // ClusterOptionsServiceLbConfig defines nested fields for Cluster.Options.ServiceLbConfig.
 type ClusterOptionsServiceLbConfig struct {
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// A list of the OCIDs of the network security groups (NSGs) associated to backends to LBs (pods/nodes/virtual pods, etc.). Rules necessary for LB to backend communication would be added when rule management mode is set to NSG via annotations. see NetworkSecurityGroup.
+	// +kubebuilder:validation:Optional
+	BackendNsgIds []string `json:"backendNsgIds,omitempty"`
+}
+
+// ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaim.
+type ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim struct {
+	// The key of the pair.
+	// +kubebuilder:validation:Optional
+	Key string `json:"key,omitempty"`
+	// The value of the pair.
+	// +kubebuilder:validation:Optional
+	Value string `json:"value,omitempty"`
+}
+
+// ClusterOptionsOpenIdConnectTokenAuthenticationConfig defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.
+type ClusterOptionsOpenIdConnectTokenAuthenticationConfig struct {
+	// Whether the cluster has OIDC Auth Config enabled. Defaults to false.
+	// +kubebuilder:validation:Required
+	IsOpenIdConnectAuthEnabled bool `json:"isOpenIdConnectAuthEnabled"`
+	// URL of the provider that allows the API server to discover public signing keys.
+	// Only URLs that use the https:// scheme are accepted. This is typically the provider's discovery URL,
+	// changed to have an empty path.
+	// +kubebuilder:validation:Optional
+	IssuerUrl string `json:"issuerUrl,omitempty"`
+	// A client id that all tokens must be issued for.
+	// +kubebuilder:validation:Optional
+	ClientId string `json:"clientId,omitempty"`
+	// JWT claim to use as the user name. By default sub, which is expected to be a unique identifier of the end
+	// user. Admins can choose other claims, such as email or name, depending on their provider. However, claims
+	// other than email will be prefixed with the issuer URL to prevent naming clashes with other plugins.
+	// +kubebuilder:validation:Optional
+	UsernameClaim string `json:"usernameClaim,omitempty"`
+	// Prefix prepended to username claims to prevent clashes with existing names (such as system:users).
+	// For example, the value oidc: will create usernames like oidc:jane.doe. If this flag isn't provided and
+	// --oidc-username-claim is a value other than email the prefix defaults to ( Issuer URL )# where
+	// ( Issuer URL ) is the value of --oidc-issuer-url. The value - can be used to disable all prefixing.
+	// +kubebuilder:validation:Optional
+	UsernamePrefix string `json:"usernamePrefix,omitempty"`
+	// JWT claim to use as the user's group. If the claim is present it must be an array of strings.
+	// +kubebuilder:validation:Optional
+	GroupsClaim string `json:"groupsClaim,omitempty"`
+	// Prefix prepended to group claims to prevent clashes with existing names (such as system:groups).
+	// +kubebuilder:validation:Optional
+	GroupsPrefix string `json:"groupsPrefix,omitempty"`
+	// A key=value pair that describes a required claim in the ID Token. If set, the claim is verified to be present
+	// in the ID Token with a matching value. Repeat this flag to specify multiple claims.
+	// +kubebuilder:validation:Optional
+	RequiredClaims []ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim `json:"requiredClaims,omitempty"`
+	// A Base64 encoded public RSA or ECDSA certificates used to signed your identity provider's web certificate.
+	// +kubebuilder:validation:Optional
+	CaCertificate string `json:"caCertificate,omitempty"`
+	// The signing algorithms accepted. Default is ["RS256"].
+	// +kubebuilder:validation:Optional
+	SigningAlgorithms []string `json:"signingAlgorithms,omitempty"`
+	// A Base64 encoded string of a Kubernetes OIDC Auth Config file. More info here (https://kubernetes.io/docs/reference/access-authn-authz/authentication/#using-authentication-configuration)
+	// +kubebuilder:validation:Optional
+	ConfigurationFile string `json:"configurationFile,omitempty"`
+}
+
+// ClusterOptionsOpenIdConnectDiscovery defines nested fields for Cluster.Options.OpenIdConnectDiscovery.
+type ClusterOptionsOpenIdConnectDiscovery struct {
+	// Whether the cluster has OIDC Discovery enabled. Defaults to false. If set to true, the cluster will be assigned a public OIDC Discovery endpoint.
+	// +kubebuilder:validation:Optional
+	IsOpenIdConnectDiscoveryEnabled bool `json:"isOpenIdConnectDiscoveryEnabled,omitempty"`
 }
 
 // ClusterOptions defines nested fields for Cluster.Options.
@@ -132,6 +197,9 @@ type ClusterOptions struct {
 	// The OCIDs of the subnets used for Kubernetes services load balancers.
 	// +kubebuilder:validation:Optional
 	ServiceLbSubnetIds []string `json:"serviceLbSubnetIds,omitempty"`
+	// IP family to use for single stack or define the order of IP families for dual-stack
+	// +kubebuilder:validation:Optional
+	IpFamilies []string `json:"ipFamilies,omitempty"`
 	// Network configuration for Kubernetes.
 	// +kubebuilder:validation:Optional
 	KubernetesNetworkConfig ClusterOptionsKubernetesNetworkConfig `json:"kubernetesNetworkConfig,omitempty"`
@@ -145,6 +213,10 @@ type ClusterOptions struct {
 	PersistentVolumeConfig ClusterOptionsPersistentVolumeConfig `json:"persistentVolumeConfig,omitempty"`
 	// +kubebuilder:validation:Optional
 	ServiceLbConfig ClusterOptionsServiceLbConfig `json:"serviceLbConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	OpenIdConnectTokenAuthenticationConfig ClusterOptionsOpenIdConnectTokenAuthenticationConfig `json:"openIdConnectTokenAuthenticationConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	OpenIdConnectDiscovery ClusterOptionsOpenIdConnectDiscovery `json:"openIdConnectDiscovery,omitempty"`
 }
 
 // ClusterImagePolicyConfigKeyDetail defines nested fields for Cluster.ImagePolicyConfig.KeyDetail.
@@ -207,6 +279,8 @@ type ClusterEndpoints struct {
 	// The FQDN assigned to the Kubernetes API private endpoint.
 	// Example: 'https://yourVcnHostnameEndpoint'
 	VcnHostnameEndpoint string `json:"vcnHostnameEndpoint,omitempty"`
+	// The IPv6 networking Kubernetes API server endpoint.
+	Ipv6Endpoint string `json:"ipv6Endpoint,omitempty"`
 }
 
 // ClusterStatus defines the observed state of Cluster.
@@ -227,11 +301,11 @@ type ClusterStatus struct {
 	// The OCID of the KMS key to be used as the master encryption key for Kubernetes secret encryption.
 	KmsKeyId string `json:"kmsKeyId,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
@@ -241,7 +315,7 @@ type ClusterStatus struct {
 	Options ClusterOptions `json:"options,omitempty"`
 	// Metadata about the cluster.
 	Metadata ClusterMetadata `json:"metadata,omitempty"`
-	// The state of the cluster masters.
+	// The state of the cluster masters. For more information, see Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm)
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// Details about the state of the cluster masters.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
@@ -255,6 +329,10 @@ type ClusterStatus struct {
 	ClusterPodNetworkOptions []ClusterPodNetworkOption `json:"clusterPodNetworkOptions,omitempty"`
 	// Type of cluster
 	Type string `json:"type,omitempty"`
+	// The cluster-specific OpenID Connect Discovery endpoint
+	OpenIdConnectDiscoveryEndpoint string `json:"openIdConnectDiscoveryEndpoint,omitempty"`
+	// The cluster-specific OpenID Connect Discovery Key to derive the DiscoveryEndpoint
+	OpenIdConnectDiscoveryKey string `json:"openIdConnectDiscoveryKey,omitempty"`
 }
 
 // +kubebuilder:object:root=true

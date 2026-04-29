@@ -296,8 +296,8 @@ func TestQueryServiceClientBindsExistingQueryWithoutCreate(t *testing.T) {
 	if createCalled {
 		t.Fatal("CreateQuery() should not be called when ListQueries finds a matching query")
 	}
-	if getCalls != 2 {
-		t.Fatalf("GetQuery() calls = %d, want 2 reads of the bound query", getCalls)
+	if getCalls != 1 {
+		t.Fatalf("GetQuery() calls = %d, want 1 read of the bound query", getCalls)
 	}
 	if got := string(resource.Status.OsokStatus.Ocid); got != "ocid1.query.oc1..existing" {
 		t.Fatalf("status.ocid = %q, want existing query OCID", got)

@@ -1,12 +1,12 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Object Storage Service API
 //
 // Use Object Storage and Archive Storage APIs to manage buckets, objects, and related resources.
-// For more information, see Overview of Object Storage (https://docs.cloud.oracle.com/Content/Object/Concepts/objectstorageoverview.htm) and
-// Overview of Archive Storage (https://docs.cloud.oracle.com/Content/Archive/Concepts/archivestorageoverview.htm).
+// For more information, see Overview of Object Storage (https://docs.oracle.com/iaas/Content/Object/Concepts/objectstorageoverview.htm) and
+// Overview of Archive Storage (https://docs.oracle.com/iaas/Content/Archive/Concepts/archivestorageoverview.htm).
 //
 
 package objectstorage
@@ -20,24 +20,27 @@ type WorkRequestResourceMetadataKeyEnum string
 
 // Set of constants representing the allowable values for WorkRequestResourceMetadataKeyEnum
 const (
-	WorkRequestResourceMetadataKeyRegion    WorkRequestResourceMetadataKeyEnum = "REGION"
-	WorkRequestResourceMetadataKeyNamespace WorkRequestResourceMetadataKeyEnum = "NAMESPACE"
-	WorkRequestResourceMetadataKeyBucket    WorkRequestResourceMetadataKeyEnum = "BUCKET"
-	WorkRequestResourceMetadataKeyObject    WorkRequestResourceMetadataKeyEnum = "OBJECT"
+	WorkRequestResourceMetadataKeyRegion              WorkRequestResourceMetadataKeyEnum = "REGION"
+	WorkRequestResourceMetadataKeyNamespace           WorkRequestResourceMetadataKeyEnum = "NAMESPACE"
+	WorkRequestResourceMetadataKeyBucket              WorkRequestResourceMetadataKeyEnum = "BUCKET"
+	WorkRequestResourceMetadataKeyObject              WorkRequestResourceMetadataKeyEnum = "OBJECT"
+	WorkRequestResourceMetadataKeyPrivateEndpointName WorkRequestResourceMetadataKeyEnum = "PRIVATE_ENDPOINT_NAME"
 )
 
 var mappingWorkRequestResourceMetadataKeyEnum = map[string]WorkRequestResourceMetadataKeyEnum{
-	"REGION":    WorkRequestResourceMetadataKeyRegion,
-	"NAMESPACE": WorkRequestResourceMetadataKeyNamespace,
-	"BUCKET":    WorkRequestResourceMetadataKeyBucket,
-	"OBJECT":    WorkRequestResourceMetadataKeyObject,
+	"REGION":                WorkRequestResourceMetadataKeyRegion,
+	"NAMESPACE":             WorkRequestResourceMetadataKeyNamespace,
+	"BUCKET":                WorkRequestResourceMetadataKeyBucket,
+	"OBJECT":                WorkRequestResourceMetadataKeyObject,
+	"PRIVATE_ENDPOINT_NAME": WorkRequestResourceMetadataKeyPrivateEndpointName,
 }
 
 var mappingWorkRequestResourceMetadataKeyEnumLowerCase = map[string]WorkRequestResourceMetadataKeyEnum{
-	"region":    WorkRequestResourceMetadataKeyRegion,
-	"namespace": WorkRequestResourceMetadataKeyNamespace,
-	"bucket":    WorkRequestResourceMetadataKeyBucket,
-	"object":    WorkRequestResourceMetadataKeyObject,
+	"region":                WorkRequestResourceMetadataKeyRegion,
+	"namespace":             WorkRequestResourceMetadataKeyNamespace,
+	"bucket":                WorkRequestResourceMetadataKeyBucket,
+	"object":                WorkRequestResourceMetadataKeyObject,
+	"private_endpoint_name": WorkRequestResourceMetadataKeyPrivateEndpointName,
 }
 
 // GetWorkRequestResourceMetadataKeyEnumValues Enumerates the set of values for WorkRequestResourceMetadataKeyEnum
@@ -56,6 +59,7 @@ func GetWorkRequestResourceMetadataKeyEnumStringValues() []string {
 		"NAMESPACE",
 		"BUCKET",
 		"OBJECT",
+		"PRIVATE_ENDPOINT_NAME",
 	}
 }
 

@@ -40,27 +40,41 @@ type AnalyticsInstanceSpec struct {
 	// +kubebuilder:validation:Optional
 	IdcsAccessToken string `json:"idcsAccessToken,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
+	// Analytics instance update channel.
+	// +kubebuilder:validation:Optional
+	UpdateChannel string `json:"updateChannel,omitempty"`
+	// OCID of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
 	// +kubebuilder:validation:Optional
 	KmsKeyId string `json:"kmsKeyId,omitempty"`
+	// domain id for which the user is authorized.
+	// +kubebuilder:validation:Optional
+	DomainId string `json:"domainId,omitempty"`
+	// user name of the authorized user.
+	// +kubebuilder:validation:Optional
+	AdminUser string `json:"adminUser,omitempty"`
+	// The feature set of an Analytics instance.
+	// +kubebuilder:validation:Optional
+	FeatureBundle string `json:"featureBundle,omitempty"`
 }
 
 // AnalyticsInstanceCapacity defines nested fields for AnalyticsInstance.Capacity.
 type AnalyticsInstanceCapacity struct {
 	// The capacity model to use.
+	// Accepted values are:
+	// OLPU_COUNT, USER_COUNT
 	// +kubebuilder:validation:Required
 	CapacityType string `json:"capacityType"`
-	// The capacity value selected (OLPU count, number of users, ...etc...). This parameter affects the
-	// number of CPUs, amount of memory or other resources allocated to the instance.
+	// The capacity value selected, either the number of OCPUs (OLPU_COUNT) or the number of users (USER_COUNT).
+	// This parameter affects the number of OCPUs, amount of memory, and other resources allocated to the instance.
 	// +kubebuilder:validation:Required
 	CapacityValue int `json:"capacityValue"`
 }
@@ -182,6 +196,8 @@ type AnalyticsInstanceStatus struct {
 	LicenseType string `json:"licenseType,omitempty"`
 	// Email address receiving notifications.
 	EmailNotification string `json:"emailNotification,omitempty"`
+	// Analytics instance update channel.
+	UpdateChannel string `json:"updateChannel,omitempty"`
 	// Map of PrivateAccessChannel unique identifier key as KEY and PrivateAccessChannel Object as VALUE.
 	PrivateAccessChannels map[string]AnalyticsInstancePrivateAccessChannels `json:"privateAccessChannels,omitempty"`
 	// Map of VanityUrl unique identifier key as KEY and VanityUrl Object as VALUE.
@@ -189,19 +205,26 @@ type AnalyticsInstanceStatus struct {
 	// URL of the Analytics service.
 	ServiceUrl string `json:"serviceUrl,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
+	// System tags for this resource. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"key": "value"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// OCID of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
 	KmsKeyId string `json:"kmsKeyId,omitempty"`
 	// The date and time the instance was last updated (in the format defined by RFC3339).
 	// This timestamp represents updates made through this API. External events do not
 	// influence it.
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The feature set of an Analytics instance.
+	FeatureBundle string `json:"featureBundle,omitempty"`
+	// Identity domain OCID.
+	DomainId string `json:"domainId,omitempty"`
 }
 
 // +kubebuilder:object:root=true

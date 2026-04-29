@@ -20,6 +20,14 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+type bdsInstanceOCIClient interface {
+	CreateBdsInstance(context.Context, bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error)
+	GetBdsInstance(context.Context, bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error)
+	ListBdsInstances(context.Context, bdssdk.ListBdsInstancesRequest) (bdssdk.ListBdsInstancesResponse, error)
+	UpdateBdsInstance(context.Context, bdssdk.UpdateBdsInstanceRequest) (bdssdk.UpdateBdsInstanceResponse, error)
+	DeleteBdsInstance(context.Context, bdssdk.DeleteBdsInstanceRequest) (bdssdk.DeleteBdsInstanceResponse, error)
+}
+
 type fakeBdsInstanceOCIClient struct {
 	createFn func(context.Context, bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error)
 	getFn    func(context.Context, bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error)
@@ -67,8 +75,25 @@ func newBdsInstanceTestManager(client bdsInstanceOCIClient) *BdsInstanceServiceM
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewBdsInstanceServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
+		hooks := newBdsInstanceDefaultRuntimeHooks(bdssdk.BdsClient{})
+		hooks.Create.Call = func(ctx context.Context, request bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error) {
+			return client.CreateBdsInstance(ctx, request)
+		}
+		hooks.Get.Call = func(ctx context.Context, request bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error) {
+			return client.GetBdsInstance(ctx, request)
+		}
+		hooks.List.Call = func(ctx context.Context, request bdssdk.ListBdsInstancesRequest) (bdssdk.ListBdsInstancesResponse, error) {
+			return client.ListBdsInstances(ctx, request)
+		}
+		hooks.Update.Call = func(ctx context.Context, request bdssdk.UpdateBdsInstanceRequest) (bdssdk.UpdateBdsInstanceResponse, error) {
+			return client.UpdateBdsInstance(ctx, request)
+		}
+		hooks.Delete.Call = func(ctx context.Context, request bdssdk.DeleteBdsInstanceRequest) (bdssdk.DeleteBdsInstanceResponse, error) {
+			return client.DeleteBdsInstance(ctx, request)
+		}
+		applyBdsInstanceRuntimeHooks(&hooks)
 		manager.WithClient(defaultBdsInstanceServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*bdsv1beta1.BdsInstance](newBdsInstanceRuntimeConfig(log, client)),
+			ServiceClient: generatedruntime.NewServiceClient[*bdsv1beta1.BdsInstance](buildBdsInstanceGeneratedRuntimeConfig(manager, hooks)),
 		})
 	}
 	return manager
@@ -259,6 +284,86 @@ func TestBdsInstanceCreateOrUpdate_ReviewedLifecycleProjection(t *testing.T) {
 	}
 }
 
+func TestBdsInstanceCreateOrUpdate_CreateRequestIncludesReviewedSecretInputs(t *testing.T) {
+	t.Parallel()
+
+	ocid := "ocid1.bdsinstance.oc1..created"
+	createCalls := 0
+	listCalls := 0
+	var capturedCreate bdssdk.CreateBdsInstanceRequest
+
+	manager := newBdsInstanceTestManager(&fakeBdsInstanceOCIClient{
+		createFn: func(_ context.Context, req bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error) {
+			createCalls++
+			capturedCreate = req
+			return bdssdk.CreateBdsInstanceResponse{}, nil
+		},
+		listFn: func(_ context.Context, req bdssdk.ListBdsInstancesRequest) (bdssdk.ListBdsInstancesResponse, error) {
+			listCalls++
+			if !assert.NotNil(t, req.CompartmentId) || !assert.NotNil(t, req.DisplayName) {
+				return bdssdk.ListBdsInstancesResponse{}, nil
+			}
+			assert.Equal(t, "ocid1.compartment.oc1..example", *req.CompartmentId)
+			assert.Equal(t, "test-bds", *req.DisplayName)
+			if listCalls == 1 {
+				return bdssdk.ListBdsInstancesResponse{}, nil
+			}
+
+			created := common.SDKTime{Time: time.Date(2026, 4, 7, 12, 0, 0, 0, time.UTC)}
+			return bdssdk.ListBdsInstancesResponse{
+				Items: []bdssdk.BdsInstanceSummary{
+					{
+						Id:                   common.String(ocid),
+						CompartmentId:        common.String("ocid1.compartment.oc1..example"),
+						DisplayName:          common.String("test-bds"),
+						LifecycleState:       bdssdk.BdsInstanceLifecycleStateActive,
+						NumberOfNodes:        intPtr(1),
+						IsHighAvailability:   boolPtr(false),
+						IsSecure:             boolPtr(false),
+						IsCloudSqlConfigured: boolPtr(false),
+						IsKafkaConfigured:    boolPtr(false),
+						TimeCreated:          &created,
+						ClusterVersion:       bdssdk.BdsInstanceClusterVersionOdh20,
+					},
+				},
+			}, nil
+		},
+	})
+
+	resource := makeSpecBdsInstance()
+	resource.Spec.ClusterAdminPassword = ""
+	resource.Spec.SecretId = "ocid1.vaultsecret.oc1..example"
+	resource.Spec.IsSecretReused = true
+	resource.Spec.BdsClusterVersionSummary = bdsv1beta1.BdsInstanceBdsClusterVersionSummary{
+		BdsVersion: "3.5.0",
+		OdhVersion: "2.0.1",
+	}
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, 1, createCalls)
+	assert.Equal(t, 2, listCalls)
+	if assert.NotNil(t, capturedCreate.SecretId) {
+		assert.Equal(t, "ocid1.vaultsecret.oc1..example", *capturedCreate.SecretId)
+	}
+	if assert.NotNil(t, capturedCreate.IsSecretReused) {
+		assert.True(t, *capturedCreate.IsSecretReused)
+	}
+	if assert.NotNil(t, capturedCreate.BdsClusterVersionSummary) {
+		if assert.NotNil(t, capturedCreate.BdsClusterVersionSummary.BdsVersion) {
+			assert.Equal(t, "3.5.0", *capturedCreate.BdsClusterVersionSummary.BdsVersion)
+		}
+		if assert.NotNil(t, capturedCreate.BdsClusterVersionSummary.OdhVersion) {
+			assert.Equal(t, "2.0.1", *capturedCreate.BdsClusterVersionSummary.OdhVersion)
+		}
+	}
+	assert.True(t, response.IsSuccessful)
+	assert.False(t, response.ShouldRequeue)
+}
+
 func TestBdsInstanceCreateOrUpdate_UpdatesOnlyMutableFields(t *testing.T) {
 	t.Parallel()
 
@@ -333,6 +438,8 @@ func TestBdsInstanceCreateOrUpdate_UpdatesOnlyMutableFields(t *testing.T) {
 	if assert.NotNil(t, capturedUpdate.KmsKeyId) {
 		assert.Equal(t, "", *capturedUpdate.KmsKeyId)
 	}
+	assert.Nil(t, capturedUpdate.SecretId)
+	assert.Nil(t, capturedUpdate.IsSecretReused)
 	assert.Empty(t, capturedUpdate.FreeformTags)
 	assert.Empty(t, capturedUpdate.DefinedTags)
 
@@ -343,6 +450,93 @@ func TestBdsInstanceCreateOrUpdate_UpdatesOnlyMutableFields(t *testing.T) {
 		assert.Equal(t, shared.OSOKAsyncPhaseUpdate, resource.Status.OsokStatus.Async.Current.Phase)
 		assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
 		assert.Equal(t, "wr-bds-update", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+	}
+}
+
+func TestBdsInstanceCreateOrUpdate_ReviewedSecretDriftRequiresReplacement(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name        string
+		prepareSpec func(*bdsv1beta1.BdsInstance)
+		prepareLive func(*bdssdk.BdsInstance)
+		wantErr     string
+	}{
+		{
+			name: "secret id drift requires replacement",
+			prepareSpec: func(resource *bdsv1beta1.BdsInstance) {
+				resource.Spec.ClusterAdminPassword = ""
+				resource.Spec.SecretId = "ocid1.vaultsecret.oc1..desired"
+			},
+			prepareLive: func(current *bdssdk.BdsInstance) {
+				current.SecretId = common.String("ocid1.vaultsecret.oc1..current")
+			},
+			wantErr: "secretId",
+		},
+		{
+			name: "is secret reused drift requires replacement",
+			prepareSpec: func(resource *bdsv1beta1.BdsInstance) {
+				resource.Spec.IsSecretReused = true
+			},
+			prepareLive: func(current *bdssdk.BdsInstance) {
+				current.IsSecretReused = boolPtr(false)
+			},
+			wantErr: "isSecretReused",
+		},
+		{
+			name: "cluster version summary drift requires replacement",
+			prepareSpec: func(resource *bdsv1beta1.BdsInstance) {
+				resource.Spec.BdsClusterVersionSummary = bdsv1beta1.BdsInstanceBdsClusterVersionSummary{
+					BdsVersion: "3.5.0",
+					OdhVersion: "2.1.0",
+				}
+			},
+			prepareLive: func(current *bdssdk.BdsInstance) {
+				current.BdsClusterVersionSummary = &bdssdk.BdsClusterVersionSummary{
+					BdsVersion: common.String("3.4.0"),
+					OdhVersion: common.String("2.0.0"),
+				}
+			},
+			wantErr: "bdsClusterVersionSummary",
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			ocid := "ocid1.bdsinstance.oc1..reviewed-drift"
+			updateCalls := 0
+
+			manager := newBdsInstanceTestManager(&fakeBdsInstanceOCIClient{
+				getFn: func(_ context.Context, req bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error) {
+					if !assert.NotNil(t, req.BdsInstanceId) {
+						return bdssdk.GetBdsInstanceResponse{}, nil
+					}
+					assert.Equal(t, ocid, *req.BdsInstanceId)
+					current := makeSDKBdsInstance(ocid, bdssdk.BdsInstanceLifecycleStateActive)
+					tc.prepareLive(&current)
+					return bdssdk.GetBdsInstanceResponse{BdsInstance: current}, nil
+				},
+				updateFn: func(_ context.Context, _ bdssdk.UpdateBdsInstanceRequest) (bdssdk.UpdateBdsInstanceResponse, error) {
+					updateCalls++
+					return bdssdk.UpdateBdsInstanceResponse{}, nil
+				},
+			})
+
+			resource := makeSpecBdsInstance()
+			resource.Status.Id = ocid
+			resource.Status.OsokStatus.Ocid = shared.OCID(ocid)
+			tc.prepareSpec(resource)
+
+			response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+			assert.Error(t, err)
+			assert.False(t, response.IsSuccessful)
+			assert.Contains(t, err.Error(), tc.wantErr)
+			assert.Equal(t, 0, updateCalls)
+			assert.Equal(t, shared.Failed, trailingBdsCondition(resource))
+		})
 	}
 }
 
@@ -378,6 +572,48 @@ func TestBdsInstanceCreateOrUpdate_NodeDriftRequiresReplacement(t *testing.T) {
 	assert.Contains(t, err.Error(), "nodes")
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, shared.Failed, trailingBdsCondition(resource))
+}
+
+func TestBdsInstanceCreateOrUpdate_ProjectsRefreshedStatusFields(t *testing.T) {
+	t.Parallel()
+
+	ocid := "ocid1.bdsinstance.oc1..status"
+	earliest := common.SDKTime{Time: time.Date(2026, 4, 9, 15, 30, 0, 0, time.UTC)}
+	current := makeSDKBdsInstance(ocid, bdssdk.BdsInstanceLifecycleStateActive)
+	current.SecretId = common.String("ocid1.vaultsecret.oc1..status")
+	current.IsSecretReused = boolPtr(true)
+	current.BdsClusterVersionSummary = &bdssdk.BdsClusterVersionSummary{
+		BdsVersion: common.String("3.5.0"),
+		OdhVersion: common.String("2.0.1"),
+	}
+	current.TimeEarliestCertificateExpiration = &earliest
+
+	manager := newBdsInstanceTestManager(&fakeBdsInstanceOCIClient{
+		getFn: func(_ context.Context, req bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error) {
+			if !assert.NotNil(t, req.BdsInstanceId) {
+				return bdssdk.GetBdsInstanceResponse{}, nil
+			}
+			assert.Equal(t, ocid, *req.BdsInstanceId)
+			return bdssdk.GetBdsInstanceResponse{BdsInstance: current}, nil
+		},
+	})
+
+	resource := makeSpecBdsInstance()
+	resource.Status.Id = ocid
+	resource.Status.OsokStatus.Ocid = shared.OCID(ocid)
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.True(t, response.IsSuccessful)
+	assert.False(t, response.ShouldRequeue)
+	assert.Equal(t, "ocid1.vaultsecret.oc1..status", resource.Status.SecretId)
+	assert.True(t, resource.Status.IsSecretReused)
+	assert.Equal(t, "3.5.0", resource.Status.BdsClusterVersionSummary.BdsVersion)
+	assert.Equal(t, "2.0.1", resource.Status.BdsClusterVersionSummary.OdhVersion)
+	assert.Equal(t, earliest.Time.Format(time.RFC3339), resource.Status.TimeEarliestCertificateExpiration)
 }
 
 func TestBdsInstanceDelete_ConfirmedDeleteStates(t *testing.T) {

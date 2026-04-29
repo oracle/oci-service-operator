@@ -15,101 +15,30 @@ import (
 	bdssdk "github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
 
-type bdsInstanceOCIClient interface {
-	CreateBdsInstance(context.Context, bdssdk.CreateBdsInstanceRequest) (bdssdk.CreateBdsInstanceResponse, error)
-	GetBdsInstance(context.Context, bdssdk.GetBdsInstanceRequest) (bdssdk.GetBdsInstanceResponse, error)
-	ListBdsInstances(context.Context, bdssdk.ListBdsInstancesRequest) (bdssdk.ListBdsInstancesResponse, error)
-	UpdateBdsInstance(context.Context, bdssdk.UpdateBdsInstanceRequest) (bdssdk.UpdateBdsInstanceResponse, error)
-	DeleteBdsInstance(context.Context, bdssdk.DeleteBdsInstanceRequest) (bdssdk.DeleteBdsInstanceResponse, error)
-}
-
 func init() {
-	newBdsInstanceServiceClient = func(manager *BdsInstanceServiceManager) BdsInstanceServiceClient {
-		sdkClient, err := bdssdk.NewBdsClientWithConfigurationProvider(manager.Provider)
-		config := newBdsInstanceRuntimeConfig(manager.Log, sdkClient)
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize BdsInstance OCI client: %w", err)
-		}
-		return defaultBdsInstanceServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*bdsv1beta1.BdsInstance](config),
-		}
-	}
+	registerBdsInstanceRuntimeHooksMutator(func(_ *BdsInstanceServiceManager, hooks *BdsInstanceRuntimeHooks) {
+		applyBdsInstanceRuntimeHooks(hooks)
+	})
 }
 
-func newBdsInstanceRuntimeConfig(
-	log loggerutil.OSOKLogger,
-	sdkClient bdsInstanceOCIClient,
-) generatedruntime.Config[*bdsv1beta1.BdsInstance] {
-	return generatedruntime.Config[*bdsv1beta1.BdsInstance]{
-		Kind:      "BdsInstance",
-		SDKName:   "BdsInstance",
-		Log:       log,
-		Semantics: reviewedBdsInstanceRuntimeSemantics(),
-		BuildUpdateBody: func(
-			_ context.Context,
-			resource *bdsv1beta1.BdsInstance,
-			_ string,
-			currentResponse any,
-		) (any, bool, error) {
-			return buildBdsInstanceUpdateBody(resource, currentResponse)
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.CreateBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateBdsInstance(ctx, *request.(*bdssdk.CreateBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CreateBdsInstanceDetails", RequestName: "CreateBdsInstanceDetails", Contribution: "body"},
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.GetBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetBdsInstance(ctx, *request.(*bdssdk.GetBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "BdsInstanceId", RequestName: "bdsInstanceId", Contribution: "path", PreferResourceID: true},
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.ListBdsInstancesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListBdsInstances(ctx, *request.(*bdssdk.ListBdsInstancesRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
-				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
-				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
-				{FieldName: "Page", RequestName: "page", Contribution: "query"},
-				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
-				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.UpdateBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateBdsInstance(ctx, *request.(*bdssdk.UpdateBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "BdsInstanceId", RequestName: "bdsInstanceId", Contribution: "path", PreferResourceID: true},
-				{FieldName: "UpdateBdsInstanceDetails", RequestName: "UpdateBdsInstanceDetails", Contribution: "body"},
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &bdssdk.DeleteBdsInstanceRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteBdsInstance(ctx, *request.(*bdssdk.DeleteBdsInstanceRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "BdsInstanceId", RequestName: "bdsInstanceId", Contribution: "path", PreferResourceID: true},
-			},
-		},
+func applyBdsInstanceRuntimeHooks(hooks *BdsInstanceRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Semantics = reviewedBdsInstanceRuntimeSemantics()
+	hooks.StatusHooks.ProjectStatus = projectBdsInstanceStatus
+	hooks.BuildUpdateBody = func(
+		_ context.Context,
+		resource *bdsv1beta1.BdsInstance,
+		_ string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildBdsInstanceUpdateBody(resource, currentResponse)
 	}
 }
 
@@ -131,12 +60,15 @@ func reviewedBdsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 			"isHighAvailability",
 			"isSecure",
 			"nodes",
+			"secretId",
+			"isSecretReused",
 			"networkConfig",
 			"bootstrapScriptUrl",
 			"freeformTags",
 			"definedTags",
 			"kmsKeyId",
 			"clusterProfile",
+			"bdsClusterVersionSummary",
 		},
 		ConflictsWith: map[string][]string{},
 	}
@@ -194,6 +126,60 @@ func buildBdsInstanceUpdateBody(
 	return updateDetails, updateNeeded, nil
 }
 
+func projectBdsInstanceStatus(resource *bdsv1beta1.BdsInstance, response any) error {
+	if resource == nil {
+		return fmt.Errorf("bdsinstance resource is nil")
+	}
+
+	body, err := bdsInstanceStatusBody(response)
+	if err != nil {
+		return err
+	}
+
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("marshal current BdsInstance response: %w", err)
+	}
+
+	status := bdsv1beta1.BdsInstanceStatus{
+		OsokStatus: resource.Status.OsokStatus,
+	}
+	if err := json.Unmarshal(payload, &status); err != nil {
+		return fmt.Errorf("project BdsInstance status: %w", err)
+	}
+
+	resource.Status = status
+	return nil
+}
+
+func bdsInstanceStatusBody(currentResponse any) (any, error) {
+	switch current := currentResponse.(type) {
+	case bdssdk.BdsInstance:
+		return current, nil
+	case *bdssdk.BdsInstance:
+		if current == nil {
+			return nil, fmt.Errorf("current BdsInstance response is nil")
+		}
+		return *current, nil
+	case bdssdk.BdsInstanceSummary:
+		return current, nil
+	case *bdssdk.BdsInstanceSummary:
+		if current == nil {
+			return nil, fmt.Errorf("current BdsInstance response is nil")
+		}
+		return *current, nil
+	case bdssdk.GetBdsInstanceResponse:
+		return current.BdsInstance, nil
+	case *bdssdk.GetBdsInstanceResponse:
+		if current == nil {
+			return nil, fmt.Errorf("current BdsInstance response is nil")
+		}
+		return current.BdsInstance, nil
+	default:
+		return nil, fmt.Errorf("unsupported current BdsInstance response type %T", currentResponse)
+	}
+}
+
 func bdsInstanceRuntimeBody(currentResponse any) (bdssdk.BdsInstance, error) {
 	switch current := currentResponse.(type) {
 	case bdssdk.BdsInstance:
@@ -218,6 +204,7 @@ func bdsInstanceRuntimeBody(currentResponse any) (bdssdk.BdsInstance, error) {
 			NumberOfNodesRequiringMaintenanceReboot: current.NumberOfNodesRequiringMaintenanceReboot,
 			ClusterVersion:                          current.ClusterVersion,
 			ClusterProfile:                          current.ClusterProfile,
+			TimeEarliestCertificateExpiration:       current.TimeEarliestCertificateExpiration,
 			FreeformTags:                            current.FreeformTags,
 			DefinedTags:                             current.DefinedTags,
 		}, nil
@@ -253,6 +240,16 @@ func validateBdsInstanceObservedCreateOnlyDrift(spec bdsv1beta1.BdsInstanceSpec,
 	}
 	if spec.ClusterProfile != "" && spec.ClusterProfile != string(current.ClusterProfile) {
 		return fmt.Errorf("BdsInstance requires replacement when clusterProfile changes")
+	}
+	if spec.SecretId != "" && spec.SecretId != stringValue(current.SecretId) {
+		return fmt.Errorf("BdsInstance requires replacement when secretId changes")
+	}
+	if spec.IsSecretReused && spec.IsSecretReused != boolValue(current.IsSecretReused) {
+		return fmt.Errorf("BdsInstance requires replacement when isSecretReused changes")
+	}
+	if hasMeaningfulBdsClusterVersionSummary(spec.BdsClusterVersionSummary) &&
+		!matchesBdsClusterVersionSummary(spec.BdsClusterVersionSummary, current.BdsClusterVersionSummary) {
+		return fmt.Errorf("BdsInstance requires replacement when bdsClusterVersionSummary changes")
 	}
 	if !matchesBdsNetworkConfig(spec.NetworkConfig, current.NetworkConfig) {
 		return fmt.Errorf("BdsInstance requires replacement when networkConfig changes")
@@ -301,6 +298,29 @@ func matchesBdsNodes(specNodes []bdsv1beta1.BdsInstanceNode, currentNodes []bdss
 		if !matchesBdsNode(sortedSpecNodes[index], sortedCurrentNodes[index]) {
 			return false
 		}
+	}
+	return true
+}
+
+func hasMeaningfulBdsClusterVersionSummary(spec bdsv1beta1.BdsInstanceBdsClusterVersionSummary) bool {
+	return spec.BdsVersion != "" || spec.OdhVersion != ""
+}
+
+func matchesBdsClusterVersionSummary(
+	spec bdsv1beta1.BdsInstanceBdsClusterVersionSummary,
+	current *bdssdk.BdsClusterVersionSummary,
+) bool {
+	if !hasMeaningfulBdsClusterVersionSummary(spec) {
+		return true
+	}
+	if current == nil {
+		return false
+	}
+	if spec.BdsVersion != stringValue(current.BdsVersion) {
+		return false
+	}
+	if spec.OdhVersion != "" && spec.OdhVersion != stringValue(current.OdhVersion) {
+		return false
 	}
 	return true
 }

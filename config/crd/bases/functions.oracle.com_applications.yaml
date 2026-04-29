@@ -75,7 +75,7 @@ spec:
                     type: string
                   type: object
                 description: |-
-                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               displayName:
@@ -88,7 +88,7 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               imagePolicyConfig:
@@ -106,7 +106,7 @@ spec:
                         fields for Application.ImagePolicyConfig.KeyDetail.
                       properties:
                         kmsKeyId:
-                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                             of the KMS key that will be used to verify the image signature.
                           type: string
                       required:
@@ -117,11 +117,21 @@ spec:
                 - isPolicyEnabled
                 type: object
               networkSecurityGroupIds:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                   of the Network Security Groups to add the application to.
                 items:
                   type: string
                 type: array
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
               shape:
                 description: |-
                   Valid values are `GENERIC_X86`, `GENERIC_ARM` and `GENERIC_X86_ARM`. Default is `GENERIC_X86`. Setting this to `GENERIC_X86`, will run the functions in the application on X86 processor architecture.
@@ -131,7 +141,7 @@ spec:
                   `GENERIC_X86`, `GENERIC_ARM`, `GENERIC_X86_ARM`
                 type: string
               subnetIds:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                   of the subnets in which to run functions in the application.
                 items:
                   type: string
@@ -180,7 +190,7 @@ spec:
                     type: string
                   type: object
                 description: |-
-                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               displayName:
@@ -192,11 +202,11 @@ spec:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
                   of the application.
                 type: string
               imagePolicyConfig:
@@ -214,7 +224,7 @@ spec:
                         fields for Application.ImagePolicyConfig.KeyDetail.
                       properties:
                         kmsKeyId:
-                          description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                             of the KMS key that will be used to verify the image signature.
                           type: string
                       required:
@@ -228,11 +238,21 @@ spec:
                 description: The current state of the application.
                 type: string
               networkSecurityGroupIds:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                   of the Network Security Groups to add the application to.
                 items:
                   type: string
                 type: array
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
               shape:
                 description: |-
                   Valid values are `GENERIC_X86`, `GENERIC_ARM` and `GENERIC_X86_ARM`. Default is `GENERIC_X86`. Setting this to `GENERIC_X86`, will run the functions in the application on X86 processor architecture.
@@ -342,7 +362,7 @@ spec:
                     type: string
                 type: object
               subnetIds:
-                description: The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s
                   of the subnets in which to run functions in the application.
                 items:
                   type: string

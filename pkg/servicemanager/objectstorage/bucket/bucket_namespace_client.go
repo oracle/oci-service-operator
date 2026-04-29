@@ -31,76 +31,80 @@ type namespaceResolvingBucketServiceClient struct {
 }
 
 func init() {
-	newBucketServiceClient = func(manager *BucketServiceManager) BucketServiceClient {
-		sdkClient, err := objectstoragesdk.NewObjectStorageClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*objectstoragev1beta1.Bucket]{
-			Kind:      "Bucket",
-			SDKName:   "Bucket",
-			Log:       manager.Log,
-			Semantics: newBucketRuntimeSemantics(),
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &objectstoragesdk.CreateBucketRequest{} },
-				Fields: []generatedruntime.RequestField{
-					bucketNamespaceField(),
-					{FieldName: "CreateBucketDetails", Contribution: "body"},
-				},
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateBucket(ctx, *request.(*objectstoragesdk.CreateBucketRequest))
-				},
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &objectstoragesdk.GetBucketRequest{} },
-				Fields: []generatedruntime.RequestField{
-					bucketNamespaceField(),
-					bucketNameField(),
-				},
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetBucket(ctx, *request.(*objectstoragesdk.GetBucketRequest))
-				},
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &objectstoragesdk.ListBucketsRequest{} },
-				Fields: []generatedruntime.RequestField{
-					bucketNamespaceField(),
-					{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-				},
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListBuckets(ctx, *request.(*objectstoragesdk.ListBucketsRequest))
-				},
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &objectstoragesdk.UpdateBucketRequest{} },
-				Fields: []generatedruntime.RequestField{
-					bucketNamespaceField(),
-					bucketNameField(),
-					{FieldName: "UpdateBucketDetails", Contribution: "body"},
-				},
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateBucket(ctx, *request.(*objectstoragesdk.UpdateBucketRequest))
-				},
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &objectstoragesdk.DeleteBucketRequest{} },
-				Fields: []generatedruntime.RequestField{
-					bucketNamespaceField(),
-					bucketNameField(),
-				},
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteBucket(ctx, *request.(*objectstoragesdk.DeleteBucketRequest))
-				},
-			},
-		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Bucket OCI client: %w", err)
-		}
-		delegate := defaultBucketServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*objectstoragev1beta1.Bucket](config),
-		}
+	registerBucketRuntimeHooksMutator(func(manager *BucketServiceManager, hooks *BucketRuntimeHooks) {
+		applyBucketRuntimeHooks(hooks)
+		appendBucketNamespaceRuntimeWrapper(manager, hooks)
+	})
+}
 
-		return &namespaceResolvingBucketServiceClient{
-			delegate:        delegate,
-			namespaceGetter: sdkClient,
-		}
+func applyBucketRuntimeHooks(hooks *BucketRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Create.Fields = bucketCreateFields()
+	hooks.Get.Fields = bucketGetFields()
+	hooks.List.Fields = bucketListFields()
+	hooks.Update.Fields = bucketUpdateFields()
+	hooks.Delete.Fields = bucketDeleteFields()
+}
+
+func appendBucketNamespaceRuntimeWrapper(manager *BucketServiceManager, hooks *BucketRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate BucketServiceClient) BucketServiceClient {
+		return newNamespaceResolvingBucketServiceClient(manager, delegate)
+	})
+}
+
+func newNamespaceResolvingBucketServiceClient(manager *BucketServiceManager, delegate BucketServiceClient) *namespaceResolvingBucketServiceClient {
+	client := &namespaceResolvingBucketServiceClient{delegate: delegate}
+	if manager == nil {
+		return client
+	}
+
+	sdkClient, err := objectstoragesdk.NewObjectStorageClientWithConfigurationProvider(manager.Provider)
+	if err == nil {
+		client.namespaceGetter = sdkClient
+	}
+	return client
+}
+
+func bucketCreateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		bucketNamespaceField(),
+		{FieldName: "CreateBucketDetails", Contribution: "body"},
+	}
+}
+
+func bucketGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		bucketNamespaceField(),
+		bucketNameField(),
+	}
+}
+
+func bucketListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		bucketNamespaceField(),
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+	}
+}
+
+func bucketUpdateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		bucketNamespaceField(),
+		bucketNameField(),
+		{FieldName: "UpdateBucketDetails", Contribution: "body"},
+	}
+}
+
+func bucketDeleteFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		bucketNamespaceField(),
+		bucketNameField(),
 	}
 }
 

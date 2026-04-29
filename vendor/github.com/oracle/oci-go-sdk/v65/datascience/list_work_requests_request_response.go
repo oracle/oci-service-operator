@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,14 +15,17 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/datascience/ListWorkRequests.go.html to see an example of how to use ListWorkRequestsRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/datascience/ListWorkRequests.go.html to see an example of how to use ListWorkRequestsRequest.
 type ListWorkRequestsRequest struct {
 
-	// <b>Filter</b> results by the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+	// <b>Filter</b> results by the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" contributesTo:"query" name:"compartmentId"`
 
-	// <b>Filter</b> results by OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm). Must be an OCID of the correct type for the resource type.
+	// <b>Filter</b> results by OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). Must be an OCID of the correct type for the resource type.
 	Id *string `mandatory:"false" contributesTo:"query" name:"id"`
+
+	// <b>Filter</b> results by the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the resource associated with the work request.
+	ResourceId *string `mandatory:"false" contributesTo:"query" name:"resourceId"`
 
 	// <b>Filter</b> results by the type of the operation associated with the work request.
 	OperationType ListWorkRequestsOperationTypeEnum `mandatory:"false" contributesTo:"query" name:"operationType" omitEmpty:"true"`
@@ -33,13 +36,13 @@ type ListWorkRequestsRequest struct {
 	// For list pagination. The maximum number of results per page,
 	// or items to return in a paginated "List" call.
 	// 1 is the minimum, 100 is the maximum.
-	// See List Pagination (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/usingapi.htm#nine).
+	// See List Pagination (https://docs.oracle.com/iaas/Content/General/Concepts/usingapi.htm#nine).
 	// Example: `50`
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
 
 	// For list pagination. The value of the `opc-next-page` response
 	// header from the previous "List" call.
-	// See List Pagination (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/usingapi.htm#nine).
+	// See List Pagination (https://docs.oracle.com/iaas/Content/General/Concepts/usingapi.htm#nine).
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
 
 	// Specifies sort order to use, either `ASC` (ascending) or `DESC` (descending).
@@ -100,7 +103,7 @@ func (request ListWorkRequestsRequest) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortBy: %s. Supported values are: %s.", request.SortBy, strings.Join(GetListWorkRequestsSortByEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -114,10 +117,10 @@ type ListWorkRequestsResponse struct {
 	// A list of []WorkRequestSummary instances
 	Items []WorkRequestSummary `presentIn:"body"`
 
-	// Retrieves the next page of results. When this header appears in the response, additional pages of results remain. See List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// Retrieves the next page of results. When this header appears in the response, additional pages of results remain. See List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 
-	// Retrieves the previous page of results. When this header appears in the response, previous pages of results exist. See List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// Retrieves the previous page of results. When this header appears in the response, previous pages of results exist. See List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcPrevPage *string `presentIn:"header" name:"opc-prev-page"`
 
 	// Unique Oracle assigned identifier for the request. If you need to contact
@@ -139,84 +142,162 @@ type ListWorkRequestsOperationTypeEnum string
 
 // Set of constants representing the allowable values for ListWorkRequestsOperationTypeEnum
 const (
-	ListWorkRequestsOperationTypeNotebookSessionCreate     ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_CREATE"
-	ListWorkRequestsOperationTypeNotebookSessionDelete     ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_DELETE"
-	ListWorkRequestsOperationTypeNotebookSessionActivate   ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_ACTIVATE"
-	ListWorkRequestsOperationTypeNotebookSessionDeactivate ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_DEACTIVATE"
-	ListWorkRequestsOperationTypeModelversionsetDelete     ListWorkRequestsOperationTypeEnum = "MODELVERSIONSET_DELETE"
-	ListWorkRequestsOperationTypeExportModelArtifact       ListWorkRequestsOperationTypeEnum = "EXPORT_MODEL_ARTIFACT"
-	ListWorkRequestsOperationTypeImportModelArtifact       ListWorkRequestsOperationTypeEnum = "IMPORT_MODEL_ARTIFACT"
-	ListWorkRequestsOperationTypeModelDeploymentCreate     ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_CREATE"
-	ListWorkRequestsOperationTypeModelDeploymentDelete     ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_DELETE"
-	ListWorkRequestsOperationTypeModelDeploymentActivate   ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_ACTIVATE"
-	ListWorkRequestsOperationTypeModelDeploymentDeactivate ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_DEACTIVATE"
-	ListWorkRequestsOperationTypeModelDeploymentUpdate     ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_UPDATE"
-	ListWorkRequestsOperationTypeProjectDelete             ListWorkRequestsOperationTypeEnum = "PROJECT_DELETE"
-	ListWorkRequestsOperationTypeWorkrequestCancel         ListWorkRequestsOperationTypeEnum = "WORKREQUEST_CANCEL"
-	ListWorkRequestsOperationTypeJobDelete                 ListWorkRequestsOperationTypeEnum = "JOB_DELETE"
-	ListWorkRequestsOperationTypePipelineCreate            ListWorkRequestsOperationTypeEnum = "PIPELINE_CREATE"
-	ListWorkRequestsOperationTypePipelineDelete            ListWorkRequestsOperationTypeEnum = "PIPELINE_DELETE"
-	ListWorkRequestsOperationTypePipelineRunCreate         ListWorkRequestsOperationTypeEnum = "PIPELINE_RUN_CREATE"
-	ListWorkRequestsOperationTypePipelineRunCancel         ListWorkRequestsOperationTypeEnum = "PIPELINE_RUN_CANCEL"
-	ListWorkRequestsOperationTypePipelineRunDelete         ListWorkRequestsOperationTypeEnum = "PIPELINE_RUN_DELETE"
-	ListWorkRequestsOperationTypePrivateEndpointCreate     ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_CREATE"
-	ListWorkRequestsOperationTypePrivateEndpointDelete     ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_DELETE"
-	ListWorkRequestsOperationTypePrivateEndpointMove       ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_MOVE"
-	ListWorkRequestsOperationTypePrivateEndpointUpdate     ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_UPDATE"
+	ListWorkRequestsOperationTypeNotebookSessionCreate             ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_CREATE"
+	ListWorkRequestsOperationTypeNotebookSessionDelete             ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_DELETE"
+	ListWorkRequestsOperationTypeNotebookSessionActivate           ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_ACTIVATE"
+	ListWorkRequestsOperationTypeNotebookSessionDeactivate         ListWorkRequestsOperationTypeEnum = "NOTEBOOK_SESSION_DEACTIVATE"
+	ListWorkRequestsOperationTypeModelversionsetDelete             ListWorkRequestsOperationTypeEnum = "MODELVERSIONSET_DELETE"
+	ListWorkRequestsOperationTypeExportModelArtifact               ListWorkRequestsOperationTypeEnum = "EXPORT_MODEL_ARTIFACT"
+	ListWorkRequestsOperationTypeImportModelArtifact               ListWorkRequestsOperationTypeEnum = "IMPORT_MODEL_ARTIFACT"
+	ListWorkRequestsOperationTypeModelDeploymentCreate             ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_CREATE"
+	ListWorkRequestsOperationTypeModelDeploymentDelete             ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_DELETE"
+	ListWorkRequestsOperationTypeModelDeploymentActivate           ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_ACTIVATE"
+	ListWorkRequestsOperationTypeModelDeploymentDeactivate         ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_DEACTIVATE"
+	ListWorkRequestsOperationTypeModelDeploymentUpdate             ListWorkRequestsOperationTypeEnum = "MODEL_DEPLOYMENT_UPDATE"
+	ListWorkRequestsOperationTypeProjectDelete                     ListWorkRequestsOperationTypeEnum = "PROJECT_DELETE"
+	ListWorkRequestsOperationTypeWorkrequestCancel                 ListWorkRequestsOperationTypeEnum = "WORKREQUEST_CANCEL"
+	ListWorkRequestsOperationTypeJobDelete                         ListWorkRequestsOperationTypeEnum = "JOB_DELETE"
+	ListWorkRequestsOperationTypePipelineCreate                    ListWorkRequestsOperationTypeEnum = "PIPELINE_CREATE"
+	ListWorkRequestsOperationTypePipelineDelete                    ListWorkRequestsOperationTypeEnum = "PIPELINE_DELETE"
+	ListWorkRequestsOperationTypePipelineRunCreate                 ListWorkRequestsOperationTypeEnum = "PIPELINE_RUN_CREATE"
+	ListWorkRequestsOperationTypePipelineRunCancel                 ListWorkRequestsOperationTypeEnum = "PIPELINE_RUN_CANCEL"
+	ListWorkRequestsOperationTypePipelineRunDelete                 ListWorkRequestsOperationTypeEnum = "PIPELINE_RUN_DELETE"
+	ListWorkRequestsOperationTypeMlApplicationPackageUpload        ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_PACKAGE_UPLOAD"
+	ListWorkRequestsOperationTypeMlApplicationTriggerStart         ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_TRIGGER_START"
+	ListWorkRequestsOperationTypeMlApplicationImplementationDelete ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_IMPLEMENTATION_DELETE"
+	ListWorkRequestsOperationTypeMlApplicationImplementationUpdate ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_IMPLEMENTATION_UPDATE"
+	ListWorkRequestsOperationTypeMlApplicationImplementationMove   ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_IMPLEMENTATION_MOVE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceCreate       ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_CREATE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceUpdate       ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_UPDATE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceDelete       ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_DELETE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceMove         ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_MOVE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceViewCreate   ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_VIEW_CREATE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceViewUpdate   ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_VIEW_UPDATE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceViewDelete   ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_VIEW_DELETE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceViewUpgrade  ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_VIEW_UPGRADE"
+	ListWorkRequestsOperationTypeMlApplicationInstanceViewMove     ListWorkRequestsOperationTypeEnum = "ML_APPLICATION_INSTANCE_VIEW_MOVE"
+	ListWorkRequestsOperationTypePrivateEndpointCreate             ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_CREATE"
+	ListWorkRequestsOperationTypePrivateEndpointDelete             ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_DELETE"
+	ListWorkRequestsOperationTypePrivateEndpointMove               ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_MOVE"
+	ListWorkRequestsOperationTypePrivateEndpointUpdate             ListWorkRequestsOperationTypeEnum = "PRIVATE_ENDPOINT_UPDATE"
+	ListWorkRequestsOperationTypeScheduleCreate                    ListWorkRequestsOperationTypeEnum = "SCHEDULE_CREATE"
+	ListWorkRequestsOperationTypeScheduleUpdate                    ListWorkRequestsOperationTypeEnum = "SCHEDULE_UPDATE"
+	ListWorkRequestsOperationTypeScheduleDelete                    ListWorkRequestsOperationTypeEnum = "SCHEDULE_DELETE"
+	ListWorkRequestsOperationTypeScheduleMove                      ListWorkRequestsOperationTypeEnum = "SCHEDULE_MOVE"
+	ListWorkRequestsOperationTypeScheduleActivate                  ListWorkRequestsOperationTypeEnum = "SCHEDULE_ACTIVATE"
+	ListWorkRequestsOperationTypeScheduleDeactivate                ListWorkRequestsOperationTypeEnum = "SCHEDULE_DEACTIVATE"
+	ListWorkRequestsOperationTypeRegisterModelArtifact             ListWorkRequestsOperationTypeEnum = "REGISTER_MODEL_ARTIFACT"
+	ListWorkRequestsOperationTypeRestoreArchivedModel              ListWorkRequestsOperationTypeEnum = "RESTORE_ARCHIVED_MODEL"
+	ListWorkRequestsOperationTypeModelGroupCreate                  ListWorkRequestsOperationTypeEnum = "MODEL_GROUP_CREATE"
+	ListWorkRequestsOperationTypeModelGroupUpdate                  ListWorkRequestsOperationTypeEnum = "MODEL_GROUP_UPDATE"
+	ListWorkRequestsOperationTypeModelGroupDelete                  ListWorkRequestsOperationTypeEnum = "MODEL_GROUP_DELETE"
+	ListWorkRequestsOperationTypeModelGroupVersionHistoryDelete    ListWorkRequestsOperationTypeEnum = "MODEL_GROUP_VERSION_HISTORY_DELETE"
 )
 
 var mappingListWorkRequestsOperationTypeEnum = map[string]ListWorkRequestsOperationTypeEnum{
-	"NOTEBOOK_SESSION_CREATE":     ListWorkRequestsOperationTypeNotebookSessionCreate,
-	"NOTEBOOK_SESSION_DELETE":     ListWorkRequestsOperationTypeNotebookSessionDelete,
-	"NOTEBOOK_SESSION_ACTIVATE":   ListWorkRequestsOperationTypeNotebookSessionActivate,
-	"NOTEBOOK_SESSION_DEACTIVATE": ListWorkRequestsOperationTypeNotebookSessionDeactivate,
-	"MODELVERSIONSET_DELETE":      ListWorkRequestsOperationTypeModelversionsetDelete,
-	"EXPORT_MODEL_ARTIFACT":       ListWorkRequestsOperationTypeExportModelArtifact,
-	"IMPORT_MODEL_ARTIFACT":       ListWorkRequestsOperationTypeImportModelArtifact,
-	"MODEL_DEPLOYMENT_CREATE":     ListWorkRequestsOperationTypeModelDeploymentCreate,
-	"MODEL_DEPLOYMENT_DELETE":     ListWorkRequestsOperationTypeModelDeploymentDelete,
-	"MODEL_DEPLOYMENT_ACTIVATE":   ListWorkRequestsOperationTypeModelDeploymentActivate,
-	"MODEL_DEPLOYMENT_DEACTIVATE": ListWorkRequestsOperationTypeModelDeploymentDeactivate,
-	"MODEL_DEPLOYMENT_UPDATE":     ListWorkRequestsOperationTypeModelDeploymentUpdate,
-	"PROJECT_DELETE":              ListWorkRequestsOperationTypeProjectDelete,
-	"WORKREQUEST_CANCEL":          ListWorkRequestsOperationTypeWorkrequestCancel,
-	"JOB_DELETE":                  ListWorkRequestsOperationTypeJobDelete,
-	"PIPELINE_CREATE":             ListWorkRequestsOperationTypePipelineCreate,
-	"PIPELINE_DELETE":             ListWorkRequestsOperationTypePipelineDelete,
-	"PIPELINE_RUN_CREATE":         ListWorkRequestsOperationTypePipelineRunCreate,
-	"PIPELINE_RUN_CANCEL":         ListWorkRequestsOperationTypePipelineRunCancel,
-	"PIPELINE_RUN_DELETE":         ListWorkRequestsOperationTypePipelineRunDelete,
-	"PRIVATE_ENDPOINT_CREATE":     ListWorkRequestsOperationTypePrivateEndpointCreate,
-	"PRIVATE_ENDPOINT_DELETE":     ListWorkRequestsOperationTypePrivateEndpointDelete,
-	"PRIVATE_ENDPOINT_MOVE":       ListWorkRequestsOperationTypePrivateEndpointMove,
-	"PRIVATE_ENDPOINT_UPDATE":     ListWorkRequestsOperationTypePrivateEndpointUpdate,
+	"NOTEBOOK_SESSION_CREATE":              ListWorkRequestsOperationTypeNotebookSessionCreate,
+	"NOTEBOOK_SESSION_DELETE":              ListWorkRequestsOperationTypeNotebookSessionDelete,
+	"NOTEBOOK_SESSION_ACTIVATE":            ListWorkRequestsOperationTypeNotebookSessionActivate,
+	"NOTEBOOK_SESSION_DEACTIVATE":          ListWorkRequestsOperationTypeNotebookSessionDeactivate,
+	"MODELVERSIONSET_DELETE":               ListWorkRequestsOperationTypeModelversionsetDelete,
+	"EXPORT_MODEL_ARTIFACT":                ListWorkRequestsOperationTypeExportModelArtifact,
+	"IMPORT_MODEL_ARTIFACT":                ListWorkRequestsOperationTypeImportModelArtifact,
+	"MODEL_DEPLOYMENT_CREATE":              ListWorkRequestsOperationTypeModelDeploymentCreate,
+	"MODEL_DEPLOYMENT_DELETE":              ListWorkRequestsOperationTypeModelDeploymentDelete,
+	"MODEL_DEPLOYMENT_ACTIVATE":            ListWorkRequestsOperationTypeModelDeploymentActivate,
+	"MODEL_DEPLOYMENT_DEACTIVATE":          ListWorkRequestsOperationTypeModelDeploymentDeactivate,
+	"MODEL_DEPLOYMENT_UPDATE":              ListWorkRequestsOperationTypeModelDeploymentUpdate,
+	"PROJECT_DELETE":                       ListWorkRequestsOperationTypeProjectDelete,
+	"WORKREQUEST_CANCEL":                   ListWorkRequestsOperationTypeWorkrequestCancel,
+	"JOB_DELETE":                           ListWorkRequestsOperationTypeJobDelete,
+	"PIPELINE_CREATE":                      ListWorkRequestsOperationTypePipelineCreate,
+	"PIPELINE_DELETE":                      ListWorkRequestsOperationTypePipelineDelete,
+	"PIPELINE_RUN_CREATE":                  ListWorkRequestsOperationTypePipelineRunCreate,
+	"PIPELINE_RUN_CANCEL":                  ListWorkRequestsOperationTypePipelineRunCancel,
+	"PIPELINE_RUN_DELETE":                  ListWorkRequestsOperationTypePipelineRunDelete,
+	"ML_APPLICATION_PACKAGE_UPLOAD":        ListWorkRequestsOperationTypeMlApplicationPackageUpload,
+	"ML_APPLICATION_TRIGGER_START":         ListWorkRequestsOperationTypeMlApplicationTriggerStart,
+	"ML_APPLICATION_IMPLEMENTATION_DELETE": ListWorkRequestsOperationTypeMlApplicationImplementationDelete,
+	"ML_APPLICATION_IMPLEMENTATION_UPDATE": ListWorkRequestsOperationTypeMlApplicationImplementationUpdate,
+	"ML_APPLICATION_IMPLEMENTATION_MOVE":   ListWorkRequestsOperationTypeMlApplicationImplementationMove,
+	"ML_APPLICATION_INSTANCE_CREATE":       ListWorkRequestsOperationTypeMlApplicationInstanceCreate,
+	"ML_APPLICATION_INSTANCE_UPDATE":       ListWorkRequestsOperationTypeMlApplicationInstanceUpdate,
+	"ML_APPLICATION_INSTANCE_DELETE":       ListWorkRequestsOperationTypeMlApplicationInstanceDelete,
+	"ML_APPLICATION_INSTANCE_MOVE":         ListWorkRequestsOperationTypeMlApplicationInstanceMove,
+	"ML_APPLICATION_INSTANCE_VIEW_CREATE":  ListWorkRequestsOperationTypeMlApplicationInstanceViewCreate,
+	"ML_APPLICATION_INSTANCE_VIEW_UPDATE":  ListWorkRequestsOperationTypeMlApplicationInstanceViewUpdate,
+	"ML_APPLICATION_INSTANCE_VIEW_DELETE":  ListWorkRequestsOperationTypeMlApplicationInstanceViewDelete,
+	"ML_APPLICATION_INSTANCE_VIEW_UPGRADE": ListWorkRequestsOperationTypeMlApplicationInstanceViewUpgrade,
+	"ML_APPLICATION_INSTANCE_VIEW_MOVE":    ListWorkRequestsOperationTypeMlApplicationInstanceViewMove,
+	"PRIVATE_ENDPOINT_CREATE":              ListWorkRequestsOperationTypePrivateEndpointCreate,
+	"PRIVATE_ENDPOINT_DELETE":              ListWorkRequestsOperationTypePrivateEndpointDelete,
+	"PRIVATE_ENDPOINT_MOVE":                ListWorkRequestsOperationTypePrivateEndpointMove,
+	"PRIVATE_ENDPOINT_UPDATE":              ListWorkRequestsOperationTypePrivateEndpointUpdate,
+	"SCHEDULE_CREATE":                      ListWorkRequestsOperationTypeScheduleCreate,
+	"SCHEDULE_UPDATE":                      ListWorkRequestsOperationTypeScheduleUpdate,
+	"SCHEDULE_DELETE":                      ListWorkRequestsOperationTypeScheduleDelete,
+	"SCHEDULE_MOVE":                        ListWorkRequestsOperationTypeScheduleMove,
+	"SCHEDULE_ACTIVATE":                    ListWorkRequestsOperationTypeScheduleActivate,
+	"SCHEDULE_DEACTIVATE":                  ListWorkRequestsOperationTypeScheduleDeactivate,
+	"REGISTER_MODEL_ARTIFACT":              ListWorkRequestsOperationTypeRegisterModelArtifact,
+	"RESTORE_ARCHIVED_MODEL":               ListWorkRequestsOperationTypeRestoreArchivedModel,
+	"MODEL_GROUP_CREATE":                   ListWorkRequestsOperationTypeModelGroupCreate,
+	"MODEL_GROUP_UPDATE":                   ListWorkRequestsOperationTypeModelGroupUpdate,
+	"MODEL_GROUP_DELETE":                   ListWorkRequestsOperationTypeModelGroupDelete,
+	"MODEL_GROUP_VERSION_HISTORY_DELETE":   ListWorkRequestsOperationTypeModelGroupVersionHistoryDelete,
 }
 
 var mappingListWorkRequestsOperationTypeEnumLowerCase = map[string]ListWorkRequestsOperationTypeEnum{
-	"notebook_session_create":     ListWorkRequestsOperationTypeNotebookSessionCreate,
-	"notebook_session_delete":     ListWorkRequestsOperationTypeNotebookSessionDelete,
-	"notebook_session_activate":   ListWorkRequestsOperationTypeNotebookSessionActivate,
-	"notebook_session_deactivate": ListWorkRequestsOperationTypeNotebookSessionDeactivate,
-	"modelversionset_delete":      ListWorkRequestsOperationTypeModelversionsetDelete,
-	"export_model_artifact":       ListWorkRequestsOperationTypeExportModelArtifact,
-	"import_model_artifact":       ListWorkRequestsOperationTypeImportModelArtifact,
-	"model_deployment_create":     ListWorkRequestsOperationTypeModelDeploymentCreate,
-	"model_deployment_delete":     ListWorkRequestsOperationTypeModelDeploymentDelete,
-	"model_deployment_activate":   ListWorkRequestsOperationTypeModelDeploymentActivate,
-	"model_deployment_deactivate": ListWorkRequestsOperationTypeModelDeploymentDeactivate,
-	"model_deployment_update":     ListWorkRequestsOperationTypeModelDeploymentUpdate,
-	"project_delete":              ListWorkRequestsOperationTypeProjectDelete,
-	"workrequest_cancel":          ListWorkRequestsOperationTypeWorkrequestCancel,
-	"job_delete":                  ListWorkRequestsOperationTypeJobDelete,
-	"pipeline_create":             ListWorkRequestsOperationTypePipelineCreate,
-	"pipeline_delete":             ListWorkRequestsOperationTypePipelineDelete,
-	"pipeline_run_create":         ListWorkRequestsOperationTypePipelineRunCreate,
-	"pipeline_run_cancel":         ListWorkRequestsOperationTypePipelineRunCancel,
-	"pipeline_run_delete":         ListWorkRequestsOperationTypePipelineRunDelete,
-	"private_endpoint_create":     ListWorkRequestsOperationTypePrivateEndpointCreate,
-	"private_endpoint_delete":     ListWorkRequestsOperationTypePrivateEndpointDelete,
-	"private_endpoint_move":       ListWorkRequestsOperationTypePrivateEndpointMove,
-	"private_endpoint_update":     ListWorkRequestsOperationTypePrivateEndpointUpdate,
+	"notebook_session_create":              ListWorkRequestsOperationTypeNotebookSessionCreate,
+	"notebook_session_delete":              ListWorkRequestsOperationTypeNotebookSessionDelete,
+	"notebook_session_activate":            ListWorkRequestsOperationTypeNotebookSessionActivate,
+	"notebook_session_deactivate":          ListWorkRequestsOperationTypeNotebookSessionDeactivate,
+	"modelversionset_delete":               ListWorkRequestsOperationTypeModelversionsetDelete,
+	"export_model_artifact":                ListWorkRequestsOperationTypeExportModelArtifact,
+	"import_model_artifact":                ListWorkRequestsOperationTypeImportModelArtifact,
+	"model_deployment_create":              ListWorkRequestsOperationTypeModelDeploymentCreate,
+	"model_deployment_delete":              ListWorkRequestsOperationTypeModelDeploymentDelete,
+	"model_deployment_activate":            ListWorkRequestsOperationTypeModelDeploymentActivate,
+	"model_deployment_deactivate":          ListWorkRequestsOperationTypeModelDeploymentDeactivate,
+	"model_deployment_update":              ListWorkRequestsOperationTypeModelDeploymentUpdate,
+	"project_delete":                       ListWorkRequestsOperationTypeProjectDelete,
+	"workrequest_cancel":                   ListWorkRequestsOperationTypeWorkrequestCancel,
+	"job_delete":                           ListWorkRequestsOperationTypeJobDelete,
+	"pipeline_create":                      ListWorkRequestsOperationTypePipelineCreate,
+	"pipeline_delete":                      ListWorkRequestsOperationTypePipelineDelete,
+	"pipeline_run_create":                  ListWorkRequestsOperationTypePipelineRunCreate,
+	"pipeline_run_cancel":                  ListWorkRequestsOperationTypePipelineRunCancel,
+	"pipeline_run_delete":                  ListWorkRequestsOperationTypePipelineRunDelete,
+	"ml_application_package_upload":        ListWorkRequestsOperationTypeMlApplicationPackageUpload,
+	"ml_application_trigger_start":         ListWorkRequestsOperationTypeMlApplicationTriggerStart,
+	"ml_application_implementation_delete": ListWorkRequestsOperationTypeMlApplicationImplementationDelete,
+	"ml_application_implementation_update": ListWorkRequestsOperationTypeMlApplicationImplementationUpdate,
+	"ml_application_implementation_move":   ListWorkRequestsOperationTypeMlApplicationImplementationMove,
+	"ml_application_instance_create":       ListWorkRequestsOperationTypeMlApplicationInstanceCreate,
+	"ml_application_instance_update":       ListWorkRequestsOperationTypeMlApplicationInstanceUpdate,
+	"ml_application_instance_delete":       ListWorkRequestsOperationTypeMlApplicationInstanceDelete,
+	"ml_application_instance_move":         ListWorkRequestsOperationTypeMlApplicationInstanceMove,
+	"ml_application_instance_view_create":  ListWorkRequestsOperationTypeMlApplicationInstanceViewCreate,
+	"ml_application_instance_view_update":  ListWorkRequestsOperationTypeMlApplicationInstanceViewUpdate,
+	"ml_application_instance_view_delete":  ListWorkRequestsOperationTypeMlApplicationInstanceViewDelete,
+	"ml_application_instance_view_upgrade": ListWorkRequestsOperationTypeMlApplicationInstanceViewUpgrade,
+	"ml_application_instance_view_move":    ListWorkRequestsOperationTypeMlApplicationInstanceViewMove,
+	"private_endpoint_create":              ListWorkRequestsOperationTypePrivateEndpointCreate,
+	"private_endpoint_delete":              ListWorkRequestsOperationTypePrivateEndpointDelete,
+	"private_endpoint_move":                ListWorkRequestsOperationTypePrivateEndpointMove,
+	"private_endpoint_update":              ListWorkRequestsOperationTypePrivateEndpointUpdate,
+	"schedule_create":                      ListWorkRequestsOperationTypeScheduleCreate,
+	"schedule_update":                      ListWorkRequestsOperationTypeScheduleUpdate,
+	"schedule_delete":                      ListWorkRequestsOperationTypeScheduleDelete,
+	"schedule_move":                        ListWorkRequestsOperationTypeScheduleMove,
+	"schedule_activate":                    ListWorkRequestsOperationTypeScheduleActivate,
+	"schedule_deactivate":                  ListWorkRequestsOperationTypeScheduleDeactivate,
+	"register_model_artifact":              ListWorkRequestsOperationTypeRegisterModelArtifact,
+	"restore_archived_model":               ListWorkRequestsOperationTypeRestoreArchivedModel,
+	"model_group_create":                   ListWorkRequestsOperationTypeModelGroupCreate,
+	"model_group_update":                   ListWorkRequestsOperationTypeModelGroupUpdate,
+	"model_group_delete":                   ListWorkRequestsOperationTypeModelGroupDelete,
+	"model_group_version_history_delete":   ListWorkRequestsOperationTypeModelGroupVersionHistoryDelete,
 }
 
 // GetListWorkRequestsOperationTypeEnumValues Enumerates the set of values for ListWorkRequestsOperationTypeEnum
@@ -251,10 +332,36 @@ func GetListWorkRequestsOperationTypeEnumStringValues() []string {
 		"PIPELINE_RUN_CREATE",
 		"PIPELINE_RUN_CANCEL",
 		"PIPELINE_RUN_DELETE",
+		"ML_APPLICATION_PACKAGE_UPLOAD",
+		"ML_APPLICATION_TRIGGER_START",
+		"ML_APPLICATION_IMPLEMENTATION_DELETE",
+		"ML_APPLICATION_IMPLEMENTATION_UPDATE",
+		"ML_APPLICATION_IMPLEMENTATION_MOVE",
+		"ML_APPLICATION_INSTANCE_CREATE",
+		"ML_APPLICATION_INSTANCE_UPDATE",
+		"ML_APPLICATION_INSTANCE_DELETE",
+		"ML_APPLICATION_INSTANCE_MOVE",
+		"ML_APPLICATION_INSTANCE_VIEW_CREATE",
+		"ML_APPLICATION_INSTANCE_VIEW_UPDATE",
+		"ML_APPLICATION_INSTANCE_VIEW_DELETE",
+		"ML_APPLICATION_INSTANCE_VIEW_UPGRADE",
+		"ML_APPLICATION_INSTANCE_VIEW_MOVE",
 		"PRIVATE_ENDPOINT_CREATE",
 		"PRIVATE_ENDPOINT_DELETE",
 		"PRIVATE_ENDPOINT_MOVE",
 		"PRIVATE_ENDPOINT_UPDATE",
+		"SCHEDULE_CREATE",
+		"SCHEDULE_UPDATE",
+		"SCHEDULE_DELETE",
+		"SCHEDULE_MOVE",
+		"SCHEDULE_ACTIVATE",
+		"SCHEDULE_DEACTIVATE",
+		"REGISTER_MODEL_ARTIFACT",
+		"RESTORE_ARCHIVED_MODEL",
+		"MODEL_GROUP_CREATE",
+		"MODEL_GROUP_UPDATE",
+		"MODEL_GROUP_DELETE",
+		"MODEL_GROUP_VERSION_HISTORY_DELETE",
 	}
 }
 

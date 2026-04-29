@@ -41,27 +41,58 @@ type vaultOCIClient interface {
 }
 
 type vaultRuntimeClient struct {
-	generated generatedruntime.ServiceClient[*keymanagementv1beta1.Vault]
-	sdk       vaultOCIClient
-	log       loggerutil.OSOKLogger
-	initErr   error
+	delegate VaultServiceClient
+	sdk      vaultOCIClient
+	log      loggerutil.OSOKLogger
+	initErr  error
 }
 
 func init() {
-	newVaultServiceClient = func(manager *VaultServiceManager) VaultServiceClient {
-		sdkClient, err := keymanagementsdk.NewKmsVaultClientWithConfigurationProvider(manager.Provider)
-		config := newVaultRuntimeConfig(manager.Log, sdkClient)
-		initErr := err
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Vault OCI client: %w", err)
-		}
-		return &vaultRuntimeClient{
-			generated: generatedruntime.NewServiceClient[*keymanagementv1beta1.Vault](config),
-			sdk:       sdkClient,
-			log:       manager.Log,
-			initErr:   initErr,
-		}
+	registerVaultRuntimeHooksMutator(func(manager *VaultServiceManager, hooks *VaultRuntimeHooks) {
+		applyVaultRuntimeHooks(manager, hooks)
+		appendVaultRuntimeWrapper(manager, hooks)
+	})
+}
+
+func applyVaultRuntimeHooks(manager *VaultServiceManager, hooks *VaultRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
 	}
+
+	hooks.Semantics = newVaultRuntimeSemantics()
+	hooks.BuildCreateBody = func(ctx context.Context, resource *keymanagementv1beta1.Vault, namespace string) (any, error) {
+		return buildVaultCreateDetails(ctx, resource, namespace)
+	}
+}
+
+func appendVaultRuntimeWrapper(manager *VaultServiceManager, hooks *VaultRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate VaultServiceClient) VaultServiceClient {
+		return newVaultRuntimeClient(manager, delegate)
+	})
+}
+
+func newVaultRuntimeClient(manager *VaultServiceManager, delegate VaultServiceClient) *vaultRuntimeClient {
+	runtimeClient := &vaultRuntimeClient{delegate: delegate}
+	if manager == nil {
+		return runtimeClient
+	}
+
+	runtimeClient.log = manager.Log
+	if manager.Provider == nil {
+		return runtimeClient
+	}
+	sdkClient, err := keymanagementsdk.NewKmsVaultClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize Vault OCI client: %w", err)
+		return runtimeClient
+	}
+
+	runtimeClient.sdk = sdkClient
+	return runtimeClient
 }
 
 func newVaultRuntimeConfig(log loggerutil.OSOKLogger, sdkClient vaultOCIClient) generatedruntime.Config[*keymanagementv1beta1.Vault] {
@@ -72,48 +103,7 @@ func newVaultRuntimeConfig(log loggerutil.OSOKLogger, sdkClient vaultOCIClient) 
 		BuildCreateBody: func(ctx context.Context, resource *keymanagementv1beta1.Vault, namespace string) (any, error) {
 			return buildVaultCreateDetails(ctx, resource, namespace)
 		},
-		Semantics: &generatedruntime.Semantics{
-			Async: &generatedruntime.AsyncSemantics{
-				Strategy:             "lifecycle",
-				Runtime:              "generatedruntime",
-				FormalClassification: "lifecycle",
-			},
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"BACKUP_IN_PROGRESS", "CREATING", "RESTORING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"ACTIVE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"CANCELLING_DELETION", "DELETING", "PENDING_DELETION", "SCHEDULING_DELETION"},
-				TerminalStates: []string{"DELETED"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "vaultType"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				UpdateCandidate: []string{"definedTags", "displayName", "freeformTags"},
-				Mutable:         []string{"definedTags", "displayName", "freeformTags"},
-				ForceNew:        []string{"compartmentId", "externalKeyManagerMetadata", "vaultType"},
-				ConflictsWith:   map[string][]string{},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-		},
+		Semantics: newVaultRuntimeSemantics(),
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &keymanagementsdk.CreateVaultRequest{} },
 			Call: func(ctx context.Context, request any) (any, error) {
@@ -158,6 +148,51 @@ func newVaultRuntimeConfig(log loggerutil.OSOKLogger, sdkClient vaultOCIClient) 
 	}
 }
 
+func newVaultRuntimeSemantics() *generatedruntime.Semantics {
+	return &generatedruntime.Semantics{
+		Async: &generatedruntime.AsyncSemantics{
+			Strategy:             "lifecycle",
+			Runtime:              "generatedruntime",
+			FormalClassification: "lifecycle",
+		},
+		StatusProjection:  "required",
+		SecretSideEffects: "none",
+		FinalizerPolicy:   "retain-until-confirmed-delete",
+		Lifecycle: generatedruntime.LifecycleSemantics{
+			ProvisioningStates: []string{"BACKUP_IN_PROGRESS", "CREATING", "RESTORING"},
+			UpdatingStates:     []string{"UPDATING"},
+			ActiveStates:       []string{"ACTIVE"},
+		},
+		Delete: generatedruntime.DeleteSemantics{
+			Policy:         "required",
+			PendingStates:  []string{"CANCELLING_DELETION", "DELETING", "PENDING_DELETION", "SCHEDULING_DELETION"},
+			TerminalStates: []string{"DELETED"},
+		},
+		List: &generatedruntime.ListSemantics{
+			ResponseItemsField: "Items",
+			MatchFields:        []string{"compartmentId", "displayName", "vaultType"},
+		},
+		Mutation: generatedruntime.MutationSemantics{
+			UpdateCandidate: []string{"definedTags", "displayName", "freeformTags"},
+			Mutable:         []string{"definedTags", "displayName", "freeformTags"},
+			ForceNew:        []string{"compartmentId", "externalKeyManagerMetadata", "vaultType"},
+			ConflictsWith:   map[string][]string{},
+		},
+		CreateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
+		},
+		UpdateFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "read-after-write",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
+		},
+		DeleteFollowUp: generatedruntime.FollowUpSemantics{
+			Strategy: "confirm-delete",
+			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
+		},
+	}
+}
+
 func buildVaultCreateDetails(ctx context.Context, resource *keymanagementv1beta1.Vault, namespace string) (keymanagementsdk.CreateVaultDetails, error) {
 	resolvedSpec, err := generatedruntime.ResolveSpecValue(resource, ctx, nil, namespace)
 	if err != nil {
@@ -177,8 +212,12 @@ func buildVaultCreateDetails(ctx context.Context, resource *keymanagementv1beta1
 }
 
 func (c *vaultRuntimeClient) CreateOrUpdate(ctx context.Context, resource *keymanagementv1beta1.Vault, req ctrl.Request) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Vault delegate is not configured")
+	}
+
 	working := cloneVaultForGeneratedRuntime(resource)
-	response, err := c.generated.CreateOrUpdate(ctx, &working, req)
+	response, err := c.delegate.CreateOrUpdate(ctx, &working, req)
 	resource.Status = working.Status
 	if err != nil || !response.IsSuccessful {
 		return response, err
@@ -201,6 +240,9 @@ func (c *vaultRuntimeClient) Delete(ctx context.Context, resource *keymanagement
 	if c.initErr != nil {
 		return false, c.initErr
 	}
+	if c.sdk == nil {
+		return false, fmt.Errorf("Vault OCI client is not configured")
+	}
 
 	current, found, err := c.resolveVault(ctx, resource)
 	if err != nil {
@@ -220,6 +262,8 @@ func (c *vaultRuntimeClient) Delete(ctx context.Context, resource *keymanagement
 		clearVaultDeletionScheduleStatus(resource)
 		return true, nil
 	case "PENDING_DELETION", "SCHEDULING_DELETION", "DELETING":
+		// Vault deletion is a scheduled control-plane state. Once OCI reports
+		// the schedule is accepted, Kubernetes finalizer retention is complete.
 		c.markVaultCondition(resource, shared.Terminating, vaultLifecycleMessage(lifecycleState))
 		return true, nil
 	case "CANCELLING_DELETION":
@@ -293,6 +337,13 @@ func desiredVaultDeletionAction(resource *keymanagementv1beta1.Vault) vaultDelet
 }
 
 func (c *vaultRuntimeClient) scheduleVaultDeletion(ctx context.Context, resource *keymanagementv1beta1.Vault) (servicemanager.OSOKResponse, error) {
+	if c.initErr != nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, c.initErr
+	}
+	if c.sdk == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Vault OCI client is not configured")
+	}
+
 	vaultID := currentVaultID(resource)
 	if vaultID == "" {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Vault identity is not recorded")
@@ -354,6 +405,8 @@ func (c *vaultRuntimeClient) confirmVaultDeleteAccepted(ctx context.Context, res
 		clearVaultDeletionScheduleStatus(resource)
 		return true, nil
 	case "PENDING_DELETION", "SCHEDULING_DELETION", "DELETING":
+		// Vault deletion is a scheduled control-plane state. Once OCI reports
+		// the schedule is accepted, Kubernetes finalizer retention is complete.
 		c.markVaultCondition(resource, shared.Terminating, vaultLifecycleMessage(lifecycleState))
 		return true, nil
 	case "CANCELLING_DELETION":

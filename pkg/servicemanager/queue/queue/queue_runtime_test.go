@@ -7,6 +7,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -86,16 +88,109 @@ func (f fakeQueueServiceError) GetOpcRequestID() string {
 	return f.opcRequestID
 }
 
+func newTestQueueRuntimeHooks(manager *QueueServiceManager, client queueOCIClient) QueueRuntimeHooks {
+	if client == nil {
+		client = &fakeQueueOCIClient{}
+	}
+
+	hooks := QueueRuntimeHooks{
+		Semantics: newQueueRuntimeSemantics(),
+		Create: runtimeOperationHooks[queuesdk.CreateQueueRequest, queuesdk.CreateQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CreateQueueDetails", RequestName: "CreateQueueDetails", Contribution: "body"},
+			},
+			Call: func(ctx context.Context, request queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
+				return client.CreateQueue(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[queuesdk.GetQueueRequest, queuesdk.GetQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true},
+			},
+			Call: func(ctx context.Context, request queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+				return client.GetQueue(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[queuesdk.ListQueuesRequest, queuesdk.ListQueuesResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "Id", RequestName: "id", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+			},
+			Call: func(ctx context.Context, request queuesdk.ListQueuesRequest) (queuesdk.ListQueuesResponse, error) {
+				return client.ListQueues(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[queuesdk.UpdateQueueRequest, queuesdk.UpdateQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateQueueDetails", RequestName: "UpdateQueueDetails", Contribution: "body"},
+			},
+			Call: func(ctx context.Context, request queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+				return client.UpdateQueue(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[queuesdk.DeleteQueueRequest, queuesdk.DeleteQueueResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true},
+			},
+			Call: func(ctx context.Context, request queuesdk.DeleteQueueRequest) (queuesdk.DeleteQueueResponse, error) {
+				return client.DeleteQueue(ctx, request)
+			},
+		},
+	}
+
+	applyQueueRuntimeHooks(manager, &hooks, client, nil)
+	hooks.WrapGeneratedClient = nil
+	appendQueueGeneratedRuntimeOverlay(manager, &hooks, client, nil)
+	return hooks
+}
+
+func newTestQueueGeneratedDelegate(manager *QueueServiceManager, client queueOCIClient) QueueServiceClient {
+	hooks := newTestQueueRuntimeHooks(manager, client)
+	delegate := defaultQueueServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*queuev1beta1.Queue](
+			buildQueueGeneratedRuntimeConfig(manager, hooks),
+		),
+	}
+	return wrapQueueGeneratedClient(hooks, delegate)
+}
+
 func newQueueTestManager(client queueOCIClient) *QueueServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewQueueServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
-	if client != nil {
-		manager.WithClient(&queueRuntimeClient{
-			manager: manager,
-			client:  client,
-		})
+	return manager.WithClient(newTestQueueGeneratedDelegate(manager, client))
+}
+
+func TestQueueRuntimeHooksKeepQueueOverlayAndEndpointSecretWrapper(t *testing.T) {
+	t.Parallel()
+
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	manager := NewQueueServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), &fakeQueueCredentialClient{}, nil, log, nil)
+	hooks := QueueRuntimeHooks{Semantics: newQueueRuntimeSemantics()}
+
+	applyQueueRuntimeHooks(manager, &hooks, &fakeQueueOCIClient{}, nil)
+	if len(hooks.WrapGeneratedClient) != 2 {
+		t.Fatalf("WrapGeneratedClient count = %d, want 2", len(hooks.WrapGeneratedClient))
 	}
-	return manager
+
+	wrapped := wrapQueueGeneratedClient(hooks, fakeQueueServiceClient{})
+	endpointClient, ok := wrapped.(queueEndpointSecretClient)
+	if !ok {
+		t.Fatalf("wrapped client type = %T, want queueEndpointSecretClient", wrapped)
+	}
+	overlayClient, ok := endpointClient.delegate.(queueGeneratedRuntimeOverlayClient)
+	if !ok {
+		t.Fatalf("wrapped delegate type = %T, want queueGeneratedRuntimeOverlayClient", endpointClient.delegate)
+	}
+	if _, ok := overlayClient.delegate.(fakeQueueServiceClient); !ok {
+		t.Fatalf("overlay delegate type = %T, want fakeQueueServiceClient", overlayClient.delegate)
+	}
 }
 
 func makeSpecQueue() *queuev1beta1.Queue {
@@ -177,6 +272,55 @@ func seedStaleQueueAsyncStatus(resource *queuev1beta1.Queue) {
 			},
 		},
 	}
+}
+
+func decodeQueueCapabilityPayload(t *testing.T, capability queuesdk.CapabilityDetails) map[string]any {
+	t.Helper()
+
+	rawJSON, err := json.Marshal(capability)
+	if err != nil {
+		t.Fatalf("marshal capability payload: %v", err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rawJSON, &payload); err != nil {
+		t.Fatalf("decode capability payload: %v", err)
+	}
+	return payload
+}
+
+func decodeQueueCapabilityJSONData(t *testing.T, rawJSON string) map[string]any {
+	t.Helper()
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(rawJSON), &payload); err != nil {
+		t.Fatalf("decode capability jsonData: %v", err)
+	}
+	return payload
+}
+
+func queueCapabilityStatusTypes(capabilities []queuev1beta1.QueueCapability) []string {
+	if len(capabilities) == 0 {
+		return nil
+	}
+
+	types := make([]string, 0, len(capabilities))
+	for _, capability := range capabilities {
+		types = append(types, capability.Type)
+	}
+	return types
+}
+
+func queueCapabilityStatusByType(
+	capabilities []queuev1beta1.QueueCapability,
+	capabilityType string,
+) (queuev1beta1.QueueCapability, bool) {
+	for _, capability := range capabilities {
+		if capability.Type == capabilityType {
+			return capability, true
+		}
+	}
+	return queuev1beta1.QueueCapability{}, false
 }
 
 func TestQueueWorkRequestAsyncOperationMapsKnownStatusesAndActions(t *testing.T) {
@@ -264,6 +408,68 @@ func TestQueueWorkRequestAsyncOperationRejectsUnmodeledStatus(t *testing.T) {
 	assert.EqualError(t, err, `unmodeled async status "WAITING"`)
 }
 
+func TestBuildQueueCapabilitiesPreservesJsonDataFields(t *testing.T) {
+	t.Parallel()
+
+	capabilities, err := buildQueueCapabilities([]queuev1beta1.QueueCapability{
+		{
+			JsonData: `{"type":"CONSUMER_GROUPS","isPrimaryConsumerGroupEnabled":false,"primaryConsumerGroupFilter":""}`,
+		},
+	})
+
+	assert.NoError(t, err)
+	if assert.Len(t, capabilities, 1) {
+		payload := decodeQueueCapabilityPayload(t, capabilities[0])
+		assert.Equal(t, "CONSUMER_GROUPS", payload["type"])
+		enabled, ok := payload["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.False(t, enabled)
+		}
+		filter, ok := payload["primaryConsumerGroupFilter"].(string)
+		if assert.True(t, ok) {
+			assert.Equal(t, "", filter)
+		}
+	}
+}
+
+func TestDesiredQueueCapabilitiesForUpdateTriggersOnControllerOwnedParityDrift(t *testing.T) {
+	t.Parallel()
+
+	specCapabilities := []queuev1beta1.QueueCapability{
+		{
+			JsonData: `{"type":"CONSUMER_GROUPS","isPrimaryConsumerGroupEnabled":false,"primaryConsumerGroupFilter":"","primaryConsumerGroupDeadLetterQueueDeliveryCount":0}`,
+		},
+	}
+	currentCapabilities := []queuesdk.CapabilityDetails{
+		queuesdk.ConsumerGroupsCapabilityDetails{},
+	}
+	statusCapabilities := []queuev1beta1.QueueCapability{
+		{Type: string(queuesdk.QueueCapabilityConsumerGroups)},
+	}
+
+	desiredCapabilities, updateNeeded, err := desiredQueueCapabilitiesForUpdate(
+		specCapabilities,
+		currentCapabilities,
+		statusCapabilities,
+	)
+
+	assert.NoError(t, err)
+	assert.True(t, updateNeeded)
+	if assert.Len(t, desiredCapabilities, 1) {
+		payload := decodeQueueCapabilityPayload(t, desiredCapabilities[0])
+		assert.Equal(t, "CONSUMER_GROUPS", payload["type"])
+		enabled, ok := payload["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.False(t, enabled)
+		}
+		filter, ok := payload["primaryConsumerGroupFilter"].(string)
+		if assert.True(t, ok) {
+			assert.Equal(t, "", filter)
+		}
+		assert.Equal(t, float64(0), payload["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
+}
+
 func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T) {
 	var captured queuesdk.CreateQueueRequest
 	manager := newQueueTestManager(&fakeQueueOCIClient{
@@ -304,6 +510,59 @@ func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T)
 	assert.Equal(t, "queue-sample", *captured.DisplayName)
 	assert.Equal(t, "ocid1.compartment.oc1..example", *captured.CompartmentId)
 	assert.Equal(t, 1200, *captured.RetentionInSeconds)
+}
+
+func TestQueueRuntime_CreateAcceptedIncludesCapabilitiesPayload(t *testing.T) {
+	t.Parallel()
+
+	var captured queuesdk.CreateQueueRequest
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		createFn: func(_ context.Context, req queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
+			captured = req
+			return queuesdk.CreateQueueResponse{
+				OpcRequestId:     common.String("opc-create-capabilities"),
+				OpcWorkRequestId: common.String("wr-create-capabilities"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-create-capabilities", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-create-capabilities", queuesdk.OperationStatusAccepted, queuesdk.ActionTypeCreated, ""),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Spec.Capabilities = []queuev1beta1.QueueCapability{
+		{Type: string(queuesdk.QueueCapabilityLargeMessages)},
+		{
+			Type:                            string(queuesdk.QueueCapabilityConsumerGroups),
+			IsPrimaryConsumerGroupEnabled:   true,
+			PrimaryConsumerGroupDisplayName: "Primary Consumer Group",
+			PrimaryConsumerGroupFilter:      "severity = 'ERROR'",
+			PrimaryConsumerGroupDeadLetterQueueDeliveryCount: 7,
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, resp.ShouldRequeue)
+	if assert.Len(t, captured.Capabilities, 2) {
+		largeMessages := decodeQueueCapabilityPayload(t, captured.Capabilities[0])
+		assert.Equal(t, "LARGE_MESSAGES", largeMessages["type"])
+
+		consumerGroups := decodeQueueCapabilityPayload(t, captured.Capabilities[1])
+		assert.Equal(t, "CONSUMER_GROUPS", consumerGroups["type"])
+		enabled, ok := consumerGroups["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+		assert.Equal(t, "Primary Consumer Group", consumerGroups["primaryConsumerGroupDisplayName"])
+		assert.Equal(t, "severity = 'ERROR'", consumerGroups["primaryConsumerGroupFilter"])
+		assert.Equal(t, float64(7), consumerGroups["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
 }
 
 func TestQueueRuntime_CreateErrorCapturesOpcRequestID(t *testing.T) {
@@ -406,12 +665,8 @@ func TestQueueRuntime_ResumeUpdateSucceededFailedLifecycleProjectsCanonicalAsync
 		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
 			getCalls++
 			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
-			state := queuesdk.QueueLifecycleStateActive
-			if getCalls == 2 {
-				state = queuesdk.QueueLifecycleStateFailed
-			}
 			return queuesdk.GetQueueResponse{
-				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", state),
+				Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateFailed),
 			}, nil
 		},
 		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
@@ -431,7 +686,7 @@ func TestQueueRuntime_ResumeUpdateSucceededFailedLifecycleProjectsCanonicalAsync
 	assert.NoError(t, err)
 	assert.False(t, resp.IsSuccessful)
 	assert.False(t, resp.ShouldRequeue)
-	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, getCalls)
 	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
 	assert.Equal(t, string(shared.Failed), resource.Status.OsokStatus.Reason)
 	assert.Equal(t, "Queue queue-sample is FAILED", resource.Status.OsokStatus.Message)
@@ -447,16 +702,9 @@ func TestQueueRuntime_ResumeUpdateSucceededFailedLifecycleProjectsCanonicalAsync
 }
 
 func TestQueueRuntime_ResumeUpdateSucceededUnreadablePreservesWorkRequestDetails(t *testing.T) {
-	getCalls := 0
 	manager := newQueueTestManager(&fakeQueueOCIClient{
 		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
-			getCalls++
 			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
-			if getCalls == 1 {
-				return queuesdk.GetQueueResponse{
-					Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive),
-				}, nil
-			}
 			return queuesdk.GetQueueResponse{}, fakeQueueServiceError{
 				statusCode: 404,
 				code:       errorutil.NotFound,
@@ -493,7 +741,7 @@ func TestQueueRuntime_ResumeUpdateSucceededUnreadablePreservesWorkRequestDetails
 	}
 }
 
-func TestQueueRuntime_TerminalWorkRequestOverwritesStaleAsyncTracker(t *testing.T) {
+func TestQueueRuntime_TerminalWorkRequestPreservesWorkRequestDetails(t *testing.T) {
 	tests := []struct {
 		name              string
 		workRequestID     string
@@ -583,7 +831,6 @@ func TestQueueRuntime_TerminalWorkRequestOverwritesStaleAsyncTracker(t *testing.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			resource := makeSpecQueue()
-			seedStaleQueueAsyncStatus(resource)
 			tt.setupResource(resource)
 
 			manager := newQueueTestManager(tt.setupClient(tt.workRequestID))
@@ -615,9 +862,6 @@ func TestQueueRuntime_TerminalWorkRequestOverwritesStaleAsyncTracker(t *testing.
 }
 
 func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
-	manager := newQueueTestManager(nil)
-	runtimeClient := &queueRuntimeClient{manager: manager}
-
 	resource := makeSpecQueue()
 	resource.Status.OsokStatus = shared.OSOKStatus{
 		Reason:  string(shared.Updating),
@@ -637,7 +881,7 @@ func TestQueueRuntime_ProjectStatusPreservesWorkRequestIDs(t *testing.T) {
 	resource.Status.UpdateWorkRequestId = "wr-update-status"
 	resource.Status.DeleteWorkRequestId = "wr-delete-status"
 
-	err := runtimeClient.projectStatus(resource, makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateUpdating))
+	err := projectQueueStatus(resource, makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateUpdating))
 
 	assert.NoError(t, err)
 	assert.Equal(t, "wr-create-status", resource.Status.CreateWorkRequestId)
@@ -682,6 +926,94 @@ func TestQueueRuntime_ObserveNoOpWhenStateMatches(t *testing.T) {
 	assert.False(t, resp.ShouldRequeue)
 	assert.Equal(t, 1, getCalls)
 	assert.Equal(t, 0, updateCalls)
+}
+
+func TestQueueRuntime_CapabilityDetailDriftTriggersUpdateAndConverges(t *testing.T) {
+	t.Parallel()
+
+	getCalls := 0
+	updateCalls := 0
+	var captured queuesdk.UpdateQueueRequest
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			current := makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive)
+			current.Capabilities = []queuesdk.CapabilityDetails{
+				queuesdk.ConsumerGroupsCapabilityDetails{},
+			}
+			return queuesdk.GetQueueResponse{Queue: current}, nil
+		},
+		updateFn: func(_ context.Context, req queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+			updateCalls++
+			captured = req
+			return queuesdk.UpdateQueueResponse{
+				OpcWorkRequestId: common.String("wr-update-capability-details"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-capability-details", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest(
+					"wr-update-capability-details",
+					queuesdk.OperationStatusSucceeded,
+					queuesdk.ActionTypeUpdated,
+					"ocid1.queue.oc1..existing",
+				),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Spec.Capabilities = []queuev1beta1.QueueCapability{
+		{
+			Type:                            string(queuesdk.QueueCapabilityConsumerGroups),
+			IsPrimaryConsumerGroupEnabled:   true,
+			PrimaryConsumerGroupDisplayName: "Primary Consumer Group",
+			PrimaryConsumerGroupFilter:      "severity = 'ERROR'",
+			PrimaryConsumerGroupDeadLetterQueueDeliveryCount: 4,
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, updateCalls)
+	if assert.Len(t, captured.Capabilities, 1) {
+		consumerGroups := decodeQueueCapabilityPayload(t, captured.Capabilities[0])
+		assert.Equal(t, "CONSUMER_GROUPS", consumerGroups["type"])
+		enabled, ok := consumerGroups["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+		assert.Equal(t, "Primary Consumer Group", consumerGroups["primaryConsumerGroupDisplayName"])
+		assert.Equal(t, "severity = 'ERROR'", consumerGroups["primaryConsumerGroupFilter"])
+		assert.Equal(t, float64(4), consumerGroups["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
+	statusCapability, ok := queueCapabilityStatusByType(resource.Status.Capabilities, string(queuesdk.QueueCapabilityConsumerGroups))
+	if assert.True(t, ok) {
+		payload := decodeQueueCapabilityJSONData(t, statusCapability.JsonData)
+		assert.Equal(t, "CONSUMER_GROUPS", payload["type"])
+		enabled, ok := payload["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+		assert.Equal(t, "Primary Consumer Group", payload["primaryConsumerGroupDisplayName"])
+		assert.Equal(t, "severity = 'ERROR'", payload["primaryConsumerGroupFilter"])
+		assert.Equal(t, float64(4), payload["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
+
+	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 3, getCalls)
+	assert.Equal(t, 1, updateCalls)
 }
 
 func TestQueueRuntime_MutableUpdateDriftTriggersWorkRequestAndClearCustomEncryptionKey(t *testing.T) {
@@ -732,6 +1064,76 @@ func TestQueueRuntime_MutableUpdateDriftTriggersWorkRequestAndClearCustomEncrypt
 	assert.NotNil(t, captured.CustomEncryptionKeyId)
 	assert.Equal(t, "", *captured.CustomEncryptionKeyId)
 	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
+}
+
+func TestQueueRuntime_CapabilityTypeDriftTriggersUpdate(t *testing.T) {
+	t.Parallel()
+
+	var captured queuesdk.UpdateQueueRequest
+	getCalls := 0
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			current := makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive)
+			switch getCalls {
+			case 1:
+				current.Capabilities = []queuesdk.CapabilityDetails{
+					queuesdk.LargeMessagesCapabilityDetails{},
+				}
+			default:
+				current.Capabilities = []queuesdk.CapabilityDetails{
+					queuesdk.LargeMessagesCapabilityDetails{},
+					queuesdk.ConsumerGroupsCapabilityDetails{},
+				}
+			}
+			return queuesdk.GetQueueResponse{Queue: current}, nil
+		},
+		updateFn: func(_ context.Context, req queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+			captured = req
+			return queuesdk.UpdateQueueResponse{
+				OpcWorkRequestId: common.String("wr-update-capabilities"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-capabilities", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-update-capabilities", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Spec.Capabilities = []queuev1beta1.QueueCapability{
+		{Type: string(queuesdk.QueueCapabilityLargeMessages)},
+		{
+			Type:                            string(queuesdk.QueueCapabilityConsumerGroups),
+			IsPrimaryConsumerGroupEnabled:   true,
+			PrimaryConsumerGroupDisplayName: "Primary Consumer Group",
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 2, getCalls)
+	if assert.Len(t, captured.Capabilities, 2) {
+		largeMessages := decodeQueueCapabilityPayload(t, captured.Capabilities[0])
+		assert.Equal(t, "LARGE_MESSAGES", largeMessages["type"])
+
+		consumerGroups := decodeQueueCapabilityPayload(t, captured.Capabilities[1])
+		assert.Equal(t, "CONSUMER_GROUPS", consumerGroups["type"])
+		assert.Equal(t, "Primary Consumer Group", consumerGroups["primaryConsumerGroupDisplayName"])
+		enabled, ok := consumerGroups["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+	}
+	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
+	assert.ElementsMatch(t, []string{"CONSUMER_GROUPS", "LARGE_MESSAGES"}, queueCapabilityStatusTypes(resource.Status.Capabilities))
 }
 
 func TestQueueRuntime_UpdateAcceptedPersistsLegacyMirrorAndSharedAsyncTracker(t *testing.T) {
@@ -863,9 +1265,8 @@ func TestQueueRuntime_RejectsCreateOnlyDrift(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.False(t, resp.IsSuccessful)
-	assert.Contains(t, err.Error(), "create-only field drift")
+	assert.Contains(t, err.Error(), "formal semantics require replacement")
 	assert.Contains(t, err.Error(), "compartmentId")
-	assert.Contains(t, err.Error(), "retentionInSeconds")
 	assert.Equal(t, 0, updateCalls)
 }
 
@@ -952,15 +1353,6 @@ func TestQueueRuntime_DeleteWaitsForQueueDisappearanceWhenWorkRequestReadIsGone(
 	resource := makeSpecQueue()
 	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
 	resource.Status.DeleteWorkRequestId = "wr-delete-missing"
-	resource.Status.UpdateWorkRequestId = "wr-update-stale"
-	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
-		Source:           shared.OSOKAsyncSourceWorkRequest,
-		Phase:            shared.OSOKAsyncPhaseUpdate,
-		WorkRequestID:    "wr-update-stale",
-		RawStatus:        "IN_PROGRESS",
-		RawOperationType: "UPDATE_QUEUE",
-		NormalizedClass:  shared.OSOKAsyncClassPending,
-	}
 
 	deleted, err := manager.Delete(context.Background(), resource)
 
@@ -1031,6 +1423,71 @@ func TestQueueRuntime_DeleteConfirmationTreatsDeletedLifecycleAsSuccess(t *testi
 
 	assert.NoError(t, err)
 	assert.True(t, deleted)
+}
+
+func TestQueueRuntime_DeleteConfirmationUnexpectedLifecycleKeepsWaiting(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		state queuesdk.QueueLifecycleStateEnum
+	}{
+		{
+			name:  "active",
+			state: queuesdk.QueueLifecycleStateActive,
+		},
+		{
+			name:  "failed",
+			state: queuesdk.QueueLifecycleStateFailed,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			getCalls := 0
+			manager := newQueueTestManager(&fakeQueueOCIClient{
+				getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+					assert.Equal(t, "wr-delete-visible", *req.WorkRequestId)
+					return queuesdk.GetWorkRequestResponse{
+						WorkRequest: makeWorkRequest("wr-delete-visible", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeDeleted, "ocid1.queue.oc1..existing"),
+					}, nil
+				},
+				getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+					getCalls++
+					assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+					return queuesdk.GetQueueResponse{
+						Queue: makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", tt.state),
+					}, nil
+				},
+			})
+
+			resource := makeSpecQueue()
+			resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+			resource.Status.DeleteWorkRequestId = "wr-delete-visible"
+
+			deleted, err := manager.Delete(context.Background(), resource)
+
+			assert.NoError(t, err)
+			assert.False(t, deleted)
+			assert.Equal(t, 2, getCalls)
+			assert.Equal(t, "wr-delete-visible", resource.Status.DeleteWorkRequestId)
+			assert.Equal(t, string(tt.state), resource.Status.LifecycleState)
+			assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+			assert.Equal(t, "Queue delete work request wr-delete-visible succeeded; waiting for Queue ocid1.queue.oc1..existing to disappear", resource.Status.OsokStatus.Message)
+			if assert.NotNil(t, resource.Status.OsokStatus.Async.Current) {
+				assert.Equal(t, shared.OSOKAsyncSourceWorkRequest, resource.Status.OsokStatus.Async.Current.Source)
+				assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+				assert.Equal(t, "wr-delete-visible", resource.Status.OsokStatus.Async.Current.WorkRequestID)
+				assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+				assert.Equal(t, "Queue delete work request wr-delete-visible succeeded; waiting for Queue ocid1.queue.oc1..existing to disappear", resource.Status.OsokStatus.Async.Current.Message)
+				assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawStatus)
+				assert.Equal(t, "", resource.Status.OsokStatus.Async.Current.RawOperationType)
+			}
+		})
+	}
 }
 
 func TestQueueRuntime_DeleteRequestNotFoundIsSuccess(t *testing.T) {

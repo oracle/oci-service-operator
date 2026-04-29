@@ -399,11 +399,13 @@ func TestBuildDbSystemCreateDetailsMatchesLegacyStandaloneProjection(t *testing.
 		IsHighlyAvailable:    common.Bool(resource.Spec.IsHighlyAvailable),
 		AvailabilityDomain:   common.String(resource.Spec.AvailabilityDomain),
 		ConfigurationId:      common.String(resource.Spec.ConfigurationId),
+		NsgIds:               []string{},
 		AdminUsername:        common.String("admin"),
 		AdminPassword:        common.String("ChangeMe123!!"),
 		DataStorageSizeInGBs: common.Int(resource.Spec.DataStorageSizeInGBs),
 		Port:                 common.Int(resource.Spec.Port),
 		PortX:                common.Int(resource.Spec.PortX),
+		CustomerContacts:     []mysqlsdk.CustomerContact{},
 	}
 
 	if !reflect.DeepEqual(current, legacy) {

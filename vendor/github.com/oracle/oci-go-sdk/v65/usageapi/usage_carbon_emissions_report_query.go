@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Usage API
 //
-// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the dimension of your choosing. The Usage API is used by the Cost Analysis tool in the Console. Also see Using the Usage API (https://docs.cloud.oracle.com/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
+// Use the Usage API to view your Oracle Cloud usage and costs. The API allows you to request data that meets the specified filter criteria, and to group that data by the chosen dimension. The Usage API is used by Cost Analysis (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm), Scheduled Reports (https://docs.oracle.com/iaas/Content/Billing/Concepts/scheduledreportoverview.htm), and Carbon Emissions Analysis (https://docs.oracle.com/iaas/Content/General/Concepts/emissions-management.htm) in the Console. Also see Using the Usage API (https://docs.oracle.com/iaas/Content/Billing/Concepts/costanalysisoverview.htm#cost_analysis_using_the_api) for more information.
 //
 
 package usageapi
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-// UsageCarbonEmissionsReportQuery The request of the generated usage carbon emissions report.
+// UsageCarbonEmissionsReportQuery The request of the generated carbon emissions usage report.
 type UsageCarbonEmissionsReportQuery struct {
 
 	// Tenant ID.
@@ -27,7 +27,16 @@ type UsageCarbonEmissionsReportQuery struct {
 	// The usage end time.
 	TimeUsageEnded *common.SDKTime `mandatory:"false" json:"timeUsageEnded"`
 
-	// Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up.
+	// Specifies the method used for emission calculation, such as POWER_BASED or SPEND_BASED
+	EmissionCalculationMethod RequestUsageCarbonEmissionsDetailsEmissionCalculationMethodEnum `mandatory:"false" json:"emissionCalculationMethod,omitempty"`
+
+	// Specifies the type of emission, such as MARKET_BASED or LOCATION_BASED.
+	EmissionType RequestUsageCarbonEmissionsDetailsEmissionTypeEnum `mandatory:"false" json:"emissionType,omitempty"`
+
+	// The carbon emission granularity. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation.
+	Granularity RequestUsageCarbonEmissionsDetailsGranularityEnum `mandatory:"false" json:"granularity,omitempty"`
+
+	// Specifies whether aggregated by time. If isAggregateByTime is true, all usage or costs over the query time period are summed.
 	IsAggregateByTime *bool `mandatory:"false" json:"isAggregateByTime"`
 
 	// Specifies what to aggregate the result by.
@@ -47,7 +56,7 @@ type UsageCarbonEmissionsReportQuery struct {
 
 	Filter *Filter `mandatory:"false" json:"filter"`
 
-	// The UI date range, for example, LAST_THREE_MONTHS. It will override timeUsageStarted and timeUsageEnded properties.
+	// The user interface date range, for example, LAST_THREE_MONTHS. Overrides the timeUsageStarted and timeUsageEnded properties.
 	DateRangeName UsageCarbonEmissionsReportQueryDateRangeNameEnum `mandatory:"false" json:"dateRangeName,omitempty"`
 }
 
@@ -61,11 +70,20 @@ func (m UsageCarbonEmissionsReportQuery) String() string {
 func (m UsageCarbonEmissionsReportQuery) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
+	if _, ok := GetMappingRequestUsageCarbonEmissionsDetailsEmissionCalculationMethodEnum(string(m.EmissionCalculationMethod)); !ok && m.EmissionCalculationMethod != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for EmissionCalculationMethod: %s. Supported values are: %s.", m.EmissionCalculationMethod, strings.Join(GetRequestUsageCarbonEmissionsDetailsEmissionCalculationMethodEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingRequestUsageCarbonEmissionsDetailsEmissionTypeEnum(string(m.EmissionType)); !ok && m.EmissionType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for EmissionType: %s. Supported values are: %s.", m.EmissionType, strings.Join(GetRequestUsageCarbonEmissionsDetailsEmissionTypeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingRequestUsageCarbonEmissionsDetailsGranularityEnum(string(m.Granularity)); !ok && m.Granularity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for Granularity: %s. Supported values are: %s.", m.Granularity, strings.Join(GetRequestUsageCarbonEmissionsDetailsGranularityEnumStringValues(), ",")))
+	}
 	if _, ok := GetMappingUsageCarbonEmissionsReportQueryDateRangeNameEnum(string(m.DateRangeName)); !ok && m.DateRangeName != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DateRangeName: %s. Supported values are: %s.", m.DateRangeName, strings.Join(GetUsageCarbonEmissionsReportQueryDateRangeNameEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

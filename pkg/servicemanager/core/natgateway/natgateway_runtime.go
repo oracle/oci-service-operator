@@ -49,20 +49,115 @@ type natGatewayRuntimeClient struct {
 }
 
 func init() {
-	generatedFactory := newNatGatewayServiceClient
-	newNatGatewayServiceClient = func(manager *NatGatewayServiceManager) NatGatewayServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &natGatewayRuntimeClient{
-			manager:  manager,
-			delegate: delegate,
-			client:   sdkClient,
+	registerNatGatewayRuntimeHooksMutator(func(manager *NatGatewayServiceManager, hooks *NatGatewayRuntimeHooks) {
+		applyNatGatewayRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applyNatGatewayRuntimeHooks(
+	manager *NatGatewayServiceManager,
+	hooks *NatGatewayRuntimeHooks,
+	client natGatewayOCIClient,
+) {
+	if hooks == nil {
+		return
+	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	runtimeClient := newNatGatewayRuntimeClient(manager, nil, client)
+
+	hooks.BuildCreateBody = func(_ context.Context, resource *corev1beta1.NatGateway, _ string) (any, error) {
+		return buildCreateNatGatewayDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = func(_ context.Context, resource *corev1beta1.NatGateway, _ string, currentResponse any) (any, bool, error) {
+		current, ok := natGatewayFromResponse(currentResponse)
+		if !ok {
+			return nil, false, fmt.Errorf("unexpected NatGateway current response type %T", currentResponse)
 		}
+		request, updateNeeded, err := runtimeClient.buildUpdateRequest(resource, current)
 		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize NatGateway OCI client: %w", err)
+			return nil, false, err
 		}
+		return request.UpdateNatGatewayDetails, updateNeeded, nil
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ProjectStatus = func(resource *corev1beta1.NatGateway, response any) error {
+		current, ok := natGatewayFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected NatGateway status response type %T", response)
+		}
+		return runtimeClient.projectStatus(resource, current)
+	}
+	hooks.StatusHooks.ApplyLifecycle = func(resource *corev1beta1.NatGateway, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := natGatewayFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected NatGateway lifecycle response type %T", response))
+		}
+		return runtimeClient.applyLifecycle(resource, current)
+	}
+	hooks.StatusHooks.MarkDeleted = runtimeClient.markDeleted
+	hooks.StatusHooks.MarkTerminating = func(resource *corev1beta1.NatGateway, response any) {
+		current, ok := natGatewayFromResponse(response)
+		if !ok {
+			return
+		}
+		runtimeClient.markTerminating(resource, current)
+	}
+	hooks.ParityHooks.ValidateCreateOnlyDrift = func(resource *corev1beta1.NatGateway, response any) error {
+		current, ok := natGatewayFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected NatGateway current response type %T", response)
+		}
+		return validateNatGatewayCreateOnlyDrift(resource, current)
+	}
+	hooks.ParityHooks.RequiresParityHandling = func(resource *corev1beta1.NatGateway, response any) bool {
+		current, ok := natGatewayFromResponse(response)
+		if !ok {
+			return false
+		}
+		return natGatewayRequiresParityUpdate(resource, current)
+	}
+	hooks.ParityHooks.ApplyParityUpdate = func(ctx context.Context, resource *corev1beta1.NatGateway, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := natGatewayFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected NatGateway parity response type %T", response))
+		}
+		return runtimeClient.update(ctx, resource, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate NatGatewayServiceClient) NatGatewayServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
+}
+
+func newNatGatewayRuntimeClient(
+	manager *NatGatewayServiceManager,
+	delegate NatGatewayServiceClient,
+	client natGatewayOCIClient,
+) *natGatewayRuntimeClient {
+	runtimeClient := &natGatewayRuntimeClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
 		return runtimeClient
 	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize NatGateway OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.NatGateway, req ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -71,6 +166,7 @@ func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 	}
 
 	trackedID := currentNatGatewayID(resource)
+	seedNatGatewayTrackedOCID(resource, trackedID)
 	explicitRecreate := false
 	if trackedID != "" {
 		if c.initErr != nil {
@@ -80,21 +176,13 @@ func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 			return c.fail(resource, fmt.Errorf("natgateway parity OCI client is not configured"))
 		}
 
-		current, err := c.get(ctx, trackedID)
+		_, err := c.get(ctx, trackedID)
 		if err != nil {
 			if isNatGatewayReadNotFoundOCI(err) {
 				c.clearTrackedIdentity(resource)
 				explicitRecreate = true
 			} else {
 				return c.fail(resource, normalizeNatGatewayOCIError(err))
-			}
-		} else if !natGatewayLifecycleIsRetryable(current.LifecycleState) {
-			updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
-			if err != nil {
-				return c.fail(resource, err)
-			}
-			if updateNeeded && natGatewayRequiresParityUpdate(resource, current) {
-				return c.updateWithParity(ctx, resource, updateRequest)
 			}
 		}
 	}
@@ -115,6 +203,26 @@ func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 		resource.Status.PublicIpIdCreateIntent = publicIPIDCreateIntent
 	}
 	return response, err
+}
+
+func (c *natGatewayRuntimeClient) update(
+	ctx context.Context,
+	resource *corev1beta1.NatGateway,
+	current coresdk.NatGateway,
+) (servicemanager.OSOKResponse, error) {
+	if err := c.projectStatus(resource, current); err != nil {
+		return c.fail(resource, err)
+	}
+
+	updateRequest, updateNeeded, err := c.buildUpdateRequest(resource, current)
+	if err != nil {
+		return c.fail(resource, err)
+	}
+	if !updateNeeded {
+		return c.applyLifecycle(resource, current)
+	}
+
+	return c.updateWithParity(ctx, resource, updateRequest)
 }
 
 func (c *natGatewayRuntimeClient) updateWithParity(
@@ -142,6 +250,7 @@ func (c *natGatewayRuntimeClient) Delete(ctx context.Context, resource *corev1be
 	}
 
 	trackedID := currentNatGatewayID(resource)
+	seedNatGatewayTrackedOCID(resource, trackedID)
 	if trackedID == "" {
 		c.markDeleted(resource, "OCI resource identifier is not recorded")
 		return true, nil
@@ -397,6 +506,21 @@ func (c *natGatewayRuntimeClient) projectStatus(resource *corev1beta1.NatGateway
 	return nil
 }
 
+func natGatewayFromResponse(response any) (coresdk.NatGateway, bool) {
+	switch typed := response.(type) {
+	case coresdk.NatGateway:
+		return typed, true
+	case coresdk.CreateNatGatewayResponse:
+		return typed.NatGateway, true
+	case coresdk.GetNatGatewayResponse:
+		return typed.NatGateway, true
+	case coresdk.UpdateNatGatewayResponse:
+		return typed.NatGateway, true
+	default:
+		return coresdk.NatGateway{}, false
+	}
+}
+
 func natGatewayLifecycleMessage(current coresdk.NatGateway) string {
 	name := ""
 	if current.DisplayName != nil {
@@ -436,7 +560,20 @@ func currentNatGatewayID(resource *corev1beta1.NatGateway) string {
 	if resource == nil {
 		return ""
 	}
-	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
+		return ocid
+	}
+	return strings.TrimSpace(resource.Status.Id)
+}
+
+func seedNatGatewayTrackedOCID(resource *corev1beta1.NatGateway, trackedID string) {
+	if resource == nil || strings.TrimSpace(trackedID) == "" {
+		return
+	}
+	if strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)) != "" {
+		return
+	}
+	resource.Status.OsokStatus.Ocid = shared.OCID(trackedID)
 }
 
 func natGatewayLifecycleIsRetryable(state coresdk.NatGatewayLifecycleStateEnum) bool {

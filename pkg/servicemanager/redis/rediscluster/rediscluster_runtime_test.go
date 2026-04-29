@@ -15,6 +15,7 @@ import (
 	redisv1beta1 "github.com/oracle/oci-service-operator/api/redis/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -86,16 +87,100 @@ func (f fakeRedisServiceError) GetOpcRequestID() string {
 	return f.opcRequestID
 }
 
+func newTestRedisRuntimeHooks(manager *RedisClusterServiceManager, client redisOCIClient) RedisClusterRuntimeHooks {
+	if client == nil {
+		client = &fakeRedisOCIClient{}
+	}
+
+	hooks := RedisClusterRuntimeHooks{
+		Semantics: newRedisClusterRuntimeSemantics(),
+		Create: runtimeOperationHooks[redissdk.CreateRedisClusterRequest, redissdk.CreateRedisClusterResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CreateRedisClusterDetails", RequestName: "CreateRedisClusterDetails", Contribution: "body"},
+			},
+			Call: func(ctx context.Context, request redissdk.CreateRedisClusterRequest) (redissdk.CreateRedisClusterResponse, error) {
+				return client.CreateRedisCluster(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[redissdk.GetRedisClusterRequest, redissdk.GetRedisClusterResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "RedisClusterId", RequestName: "redisClusterId", Contribution: "path", PreferResourceID: true},
+			},
+			Call: func(ctx context.Context, request redissdk.GetRedisClusterRequest) (redissdk.GetRedisClusterResponse, error) {
+				return client.GetRedisCluster(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[redissdk.ListRedisClustersRequest, redissdk.ListRedisClustersResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
+				{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+				{FieldName: "Id", RequestName: "id", Contribution: "query"},
+				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+				{FieldName: "Page", RequestName: "page", Contribution: "query"},
+				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+				{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+			},
+			Call: func(ctx context.Context, request redissdk.ListRedisClustersRequest) (redissdk.ListRedisClustersResponse, error) {
+				return client.ListRedisClusters(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[redissdk.UpdateRedisClusterRequest, redissdk.UpdateRedisClusterResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "RedisClusterId", RequestName: "redisClusterId", Contribution: "path", PreferResourceID: true},
+				{FieldName: "UpdateRedisClusterDetails", RequestName: "UpdateRedisClusterDetails", Contribution: "body"},
+			},
+			Call: func(ctx context.Context, request redissdk.UpdateRedisClusterRequest) (redissdk.UpdateRedisClusterResponse, error) {
+				return client.UpdateRedisCluster(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[redissdk.DeleteRedisClusterRequest, redissdk.DeleteRedisClusterResponse]{
+			Fields: []generatedruntime.RequestField{
+				{FieldName: "RedisClusterId", RequestName: "redisClusterId", Contribution: "path", PreferResourceID: true},
+			},
+			Call: func(ctx context.Context, request redissdk.DeleteRedisClusterRequest) (redissdk.DeleteRedisClusterResponse, error) {
+				return client.DeleteRedisCluster(ctx, request)
+			},
+		},
+	}
+
+	applyRedisClusterRuntimeHooks(manager, &hooks, client, nil)
+	hooks.WrapGeneratedClient = nil
+	return hooks
+}
+
+func newTestRedisGeneratedDelegate(manager *RedisClusterServiceManager, client redisOCIClient) RedisClusterServiceClient {
+	hooks := newTestRedisRuntimeHooks(manager, client)
+	delegate := defaultRedisClusterServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*redisv1beta1.RedisCluster](
+			buildRedisClusterGeneratedRuntimeConfig(manager, hooks),
+		),
+	}
+	return wrapRedisClusterGeneratedClient(hooks, delegate)
+}
+
 func newRedisTestManager(client redisOCIClient) *RedisClusterServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewRedisClusterServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
-	if client != nil {
-		manager.WithClient(&redisRuntimeClient{
-			manager: manager,
-			client:  client,
-		})
+	return manager.WithClient(newTestRedisGeneratedDelegate(manager, client))
+}
+
+func TestRedisRuntimeHooksKeepDeleteGuardWrapper(t *testing.T) {
+	t.Parallel()
+
+	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
+	manager := NewRedisClusterServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
+	hooks := RedisClusterRuntimeHooks{Semantics: newRedisClusterRuntimeSemantics()}
+
+	applyRedisClusterRuntimeHooks(manager, &hooks, &fakeRedisOCIClient{}, nil)
+	if len(hooks.WrapGeneratedClient) != 1 {
+		t.Fatalf("WrapGeneratedClient count = %d, want 1", len(hooks.WrapGeneratedClient))
 	}
-	return manager
+
+	wrapped := hooks.WrapGeneratedClient[0](&fakeRedisDeleteGuardDelegate{})
+	if _, ok := wrapped.(redisDeleteGuardClient); !ok {
+		t.Fatalf("wrapped client type = %T, want redisDeleteGuardClient", wrapped)
+	}
 }
 
 func makeSpecRedisCluster() *redisv1beta1.RedisCluster {
@@ -311,7 +396,21 @@ func TestRedisWorkRequestOperationTypeCoverage(t *testing.T) {
 			redissdk.OperationTypeCreateRedisConfigSet,
 			redissdk.OperationTypeUpdateRedisConfigSet,
 			redissdk.OperationTypeDeleteRedisConfigSet,
-			redissdk.OperationTypeMoveRedisConfigSet:
+			redissdk.OperationTypeMoveRedisConfigSet,
+			redissdk.OperationTypeMigrateCluster,
+			redissdk.OperationTypeClusterRollback,
+			redissdk.OperationTypeAttachOciCacheUsers,
+			redissdk.OperationTypeDetachOciCacheUsers,
+			redissdk.OperationTypeCreateOciCacheUser,
+			redissdk.OperationTypeUpdateOciCacheUser,
+			redissdk.OperationTypeDeleteOciCacheUser,
+			redissdk.OperationTypeCreateOciCacheConfigSet,
+			redissdk.OperationTypeUpdateOciCacheConfigSet,
+			redissdk.OperationTypeDeleteOciCacheConfigSet,
+			redissdk.OperationTypeChangeOciCacheConfigSetCompartment,
+			redissdk.OperationTypeChangeOciCacheUserCompartment,
+			redissdk.OperationTypePatchOciCacheCluster,
+			redissdk.OperationTypeReplaceOciCacheNode:
 			phase, ok := redisWorkRequestPhaseFromOperationType(operation)
 			assert.False(t, ok)
 			assert.Equal(t, shared.OSOKAsyncPhase(""), phase)

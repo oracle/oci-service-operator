@@ -16,7 +16,6 @@ import (
 	usageapicustomtableservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/usageapi/customtable"
 	usageapiqueryservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/usageapi/query"
 	usageapischeduleservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/usageapi/schedule"
-	usageapischeduledrunservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/usageapi/scheduledrun"
 	usageapiusagecarbonemissionsqueryservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/usageapi/usagecarbonemissionsquery"
 )
 
@@ -57,17 +56,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Schedule controller: %w", err)
-			}
-			if err := (&usageapicontrollers.ScheduledRunReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"ScheduledRun",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return usageapischeduledrunservicemanager.NewScheduledRunServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup ScheduledRun controller: %w", err)
 			}
 			if err := (&usageapicontrollers.UsageCarbonEmissionsQueryReconciler{
 				Reconciler: NewBaseReconciler(

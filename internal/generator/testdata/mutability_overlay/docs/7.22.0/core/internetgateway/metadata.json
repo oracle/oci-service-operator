@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "core",
+  "kind": "InternetGateway",
+  "formalSlug": "internetgateway",
+  "providerResource": "oci_core_internet_gateway",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/core_internet_gateway",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/core_internet_gateway",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/core/internetgateway/page.html",
+  "bodySHA256": "f20693d6c5ffdcf9d44833cf8caf9b30c828bea337b48f421cd93e4b90183d4d",
+  "bodyBytes": 1927,
+  "fixtureBodyPath": "7.22.0/core/internetgateway/page.html"
+}

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -18,7 +18,7 @@ import (
 // AutoScalePolicyMetricRule Metric and threshold details for triggering an autoscale action.
 type AutoScalePolicyMetricRule struct {
 
-	// Allowed value is CPU_UTILIZATION.
+	// Allowed values are CPU_UTILIZATION and MEMORY_UTILIZATION.
 	MetricType AutoScalePolicyMetricRuleMetricTypeEnum `mandatory:"true" json:"metricType"`
 
 	Threshold *MetricThresholdRule `mandatory:"true" json:"threshold"`
@@ -38,7 +38,7 @@ func (m AutoScalePolicyMetricRule) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -48,15 +48,18 @@ type AutoScalePolicyMetricRuleMetricTypeEnum string
 
 // Set of constants representing the allowable values for AutoScalePolicyMetricRuleMetricTypeEnum
 const (
-	AutoScalePolicyMetricRuleMetricTypeCpuUtilization AutoScalePolicyMetricRuleMetricTypeEnum = "CPU_UTILIZATION"
+	AutoScalePolicyMetricRuleMetricTypeCpuUtilization    AutoScalePolicyMetricRuleMetricTypeEnum = "CPU_UTILIZATION"
+	AutoScalePolicyMetricRuleMetricTypeMemoryUtilization AutoScalePolicyMetricRuleMetricTypeEnum = "MEMORY_UTILIZATION"
 )
 
 var mappingAutoScalePolicyMetricRuleMetricTypeEnum = map[string]AutoScalePolicyMetricRuleMetricTypeEnum{
-	"CPU_UTILIZATION": AutoScalePolicyMetricRuleMetricTypeCpuUtilization,
+	"CPU_UTILIZATION":    AutoScalePolicyMetricRuleMetricTypeCpuUtilization,
+	"MEMORY_UTILIZATION": AutoScalePolicyMetricRuleMetricTypeMemoryUtilization,
 }
 
 var mappingAutoScalePolicyMetricRuleMetricTypeEnumLowerCase = map[string]AutoScalePolicyMetricRuleMetricTypeEnum{
-	"cpu_utilization": AutoScalePolicyMetricRuleMetricTypeCpuUtilization,
+	"cpu_utilization":    AutoScalePolicyMetricRuleMetricTypeCpuUtilization,
+	"memory_utilization": AutoScalePolicyMetricRuleMetricTypeMemoryUtilization,
 }
 
 // GetAutoScalePolicyMetricRuleMetricTypeEnumValues Enumerates the set of values for AutoScalePolicyMetricRuleMetricTypeEnum
@@ -72,6 +75,7 @@ func GetAutoScalePolicyMetricRuleMetricTypeEnumValues() []AutoScalePolicyMetricR
 func GetAutoScalePolicyMetricRuleMetricTypeEnumStringValues() []string {
 	return []string{
 		"CPU_UTILIZATION",
+		"MEMORY_UTILIZATION",
 	}
 }
 

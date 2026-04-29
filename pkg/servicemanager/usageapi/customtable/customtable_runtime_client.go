@@ -25,13 +25,22 @@ type synchronousCustomTableServiceClient struct {
 }
 
 func init() {
-	delegateFactory := newCustomTableServiceClient
-	newCustomTableServiceClient = func(manager *CustomTableServiceManager) CustomTableServiceClient {
+	registerCustomTableRuntimeHooksMutator(func(manager *CustomTableServiceManager, hooks *CustomTableRuntimeHooks) {
+		appendSynchronousCustomTableRuntimeWrapper(manager, hooks)
+	})
+}
+
+func appendSynchronousCustomTableRuntimeWrapper(manager *CustomTableServiceManager, hooks *CustomTableRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate CustomTableServiceClient) CustomTableServiceClient {
 		return &synchronousCustomTableServiceClient{
-			delegate: delegateFactory(manager),
+			delegate: delegate,
 			log:      manager.Log,
 		}
-	}
+	})
 }
 
 func (c *synchronousCustomTableServiceClient) CreateOrUpdate(

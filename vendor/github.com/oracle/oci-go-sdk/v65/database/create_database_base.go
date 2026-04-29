@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -20,7 +20,7 @@ import (
 // **Warning:** Oracle recommends that you avoid using any confidential information when you supply string values using the API.
 type CreateDatabaseBase interface {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Home.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Home.
 	GetDbHomeId() *string
 
 	// A valid Oracle Database version. For a list of supported versions, use the ListDbVersions operation.
@@ -30,7 +30,7 @@ type CreateDatabaseBase interface {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	GetKmsKeyId() *string
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous AI Database Serverless does not use key versions, hence is not applicable for Autonomous AI Database Serverless instances.
 	GetKmsKeyVersionId() *string
 }
 
@@ -76,12 +76,20 @@ func (m *createdatabasebase) UnmarshalPolymorphicJSON(data []byte) (interface{},
 		mm := CreateNewDatabaseDetails{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
+	case "DATAGUARD":
+		mm := CreateStandByDatabaseDetails{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
+	case "DATABASE":
+		mm := CreateDatabaseFromDatabase{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "DB_BACKUP":
 		mm := CreateDatabaseFromBackup{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for CreateDatabaseBase: %s.", m.Source)
+		common.Logf("Received unsupported enum value for CreateDatabaseBase: %s.", m.Source)
 		return *m, nil
 	}
 }
@@ -117,7 +125,7 @@ func (m createdatabasebase) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -127,18 +135,24 @@ type CreateDatabaseBaseSourceEnum string
 
 // Set of constants representing the allowable values for CreateDatabaseBaseSourceEnum
 const (
-	CreateDatabaseBaseSourceNone     CreateDatabaseBaseSourceEnum = "NONE"
-	CreateDatabaseBaseSourceDbBackup CreateDatabaseBaseSourceEnum = "DB_BACKUP"
+	CreateDatabaseBaseSourceNone      CreateDatabaseBaseSourceEnum = "NONE"
+	CreateDatabaseBaseSourceDbBackup  CreateDatabaseBaseSourceEnum = "DB_BACKUP"
+	CreateDatabaseBaseSourceDatabase  CreateDatabaseBaseSourceEnum = "DATABASE"
+	CreateDatabaseBaseSourceDataguard CreateDatabaseBaseSourceEnum = "DATAGUARD"
 )
 
 var mappingCreateDatabaseBaseSourceEnum = map[string]CreateDatabaseBaseSourceEnum{
 	"NONE":      CreateDatabaseBaseSourceNone,
 	"DB_BACKUP": CreateDatabaseBaseSourceDbBackup,
+	"DATABASE":  CreateDatabaseBaseSourceDatabase,
+	"DATAGUARD": CreateDatabaseBaseSourceDataguard,
 }
 
 var mappingCreateDatabaseBaseSourceEnumLowerCase = map[string]CreateDatabaseBaseSourceEnum{
 	"none":      CreateDatabaseBaseSourceNone,
 	"db_backup": CreateDatabaseBaseSourceDbBackup,
+	"database":  CreateDatabaseBaseSourceDatabase,
+	"dataguard": CreateDatabaseBaseSourceDataguard,
 }
 
 // GetCreateDatabaseBaseSourceEnumValues Enumerates the set of values for CreateDatabaseBaseSourceEnum
@@ -155,6 +169,8 @@ func GetCreateDatabaseBaseSourceEnumStringValues() []string {
 	return []string{
 		"NONE",
 		"DB_BACKUP",
+		"DATABASE",
+		"DATAGUARD",
 	}
 }
 

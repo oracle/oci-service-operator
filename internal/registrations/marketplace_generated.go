@@ -14,21 +14,7 @@ import (
 	marketplacecontrollers "github.com/oracle/oci-service-operator/controllers/marketplace"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	marketplaceacceptedagreementservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/acceptedagreement"
-	marketplaceagreementservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/agreement"
-	marketplacecategoryservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/category"
-	marketplacelauncheligibilityservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/launcheligibility"
-	marketplacelistingservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/listing"
-	marketplacepackageservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/package"
 	marketplacepublicationservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/publication"
-	marketplacepublicationpackageservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/publicationpackage"
-	marketplacepublisherservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/publisher"
-	marketplacereportservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/report"
-	marketplacereporttypeservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/reporttype"
-	marketplacetaxservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/tax"
-	marketplacethirdpartypaidlistingeligibilityservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/thirdpartypaidlistingeligibility"
-	marketplaceworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/workrequest"
-	marketplaceworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/workrequesterror"
-	marketplaceworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplace/workrequestlog"
 )
 
 func init() {
@@ -47,61 +33,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup AcceptedAgreement controller: %w", err)
 			}
-			if err := (&marketplacecontrollers.AgreementReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Agreement",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplaceagreementservicemanager.NewAgreementServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Agreement controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.CategoryReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Category",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacecategoryservicemanager.NewCategoryServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Category controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.LaunchEligibilityReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"LaunchEligibility",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacelauncheligibilityservicemanager.NewLaunchEligibilityServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup LaunchEligibility controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.ListingReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Listing",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacelistingservicemanager.NewListingServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Listing controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.PackageReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Package",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacepackageservicemanager.NewPackageServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Package controller: %w", err)
-			}
 			if err := (&marketplacecontrollers.PublicationReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -112,105 +43,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Publication controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.PublicationPackageReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"PublicationPackage",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacepublicationpackageservicemanager.NewPublicationPackageServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup PublicationPackage controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.PublisherReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Publisher",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacepublisherservicemanager.NewPublisherServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Publisher controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.ReportReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Report",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacereportservicemanager.NewReportServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Report controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.ReportTypeReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"ReportType",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacereporttypeservicemanager.NewReportTypeServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup ReportType controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.TaxReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Tax",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacetaxservicemanager.NewTaxServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Tax controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.ThirdPartyPaidListingEligibilityReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"ThirdPartyPaidListingEligibility",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplacethirdpartypaidlistingeligibilityservicemanager.NewThirdPartyPaidListingEligibilityServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup ThirdPartyPaidListingEligibility controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplaceworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplaceworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&marketplacecontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return marketplaceworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

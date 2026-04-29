@@ -19,7 +19,7 @@ import (
 )
 
 // DkimServiceClient is the handwritten extension seam for Dkim runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*DkimServiceManager).WithClient.
 type DkimServiceClient interface {
 	CreateOrUpdate(context.Context, *emailv1beta1.Dkim, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ DkimServiceClient = defaultDkimServiceClient{}
 
 var newDkimServiceClient = func(manager *DkimServiceManager) DkimServiceClient {
 	sdkClient, err := emailsdk.NewEmailClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*emailv1beta1.Dkim]{
-		Kind:    "Dkim",
-		SDKName: "Dkim",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.CreateDkimRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateDkim(ctx, *request.(*emailsdk.CreateDkimRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.GetDkimRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetDkim(ctx, *request.(*emailsdk.GetDkimRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.ListDkimsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListDkims(ctx, *request.(*emailsdk.ListDkimsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.UpdateDkimRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateDkim(ctx, *request.(*emailsdk.UpdateDkimRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &emailsdk.DeleteDkimRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteDkim(ctx, *request.(*emailsdk.DeleteDkimRequest))
-			},
-		},
-	}
+	hooks := newDkimRuntimeHooks(manager, sdkClient)
+	config := buildDkimGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Dkim OCI client: %w", err)
 	}
-	return defaultDkimServiceClient{
+	delegate := defaultDkimServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*emailv1beta1.Dkim](config),
 	}
+	return wrapDkimGeneratedClient(hooks, delegate)
 }

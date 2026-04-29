@@ -30,7 +30,7 @@ type RuleSetItemCondition struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	AttributeName string `json:"attributeName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
 	// must match.
 	// You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
 	// **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
@@ -130,6 +130,20 @@ type RuleSetItemRedirectUri struct {
 	Query string `json:"query,omitempty"`
 }
 
+// RuleSetItemIpMaxConnection defines nested fields for RuleSet.Item.IpMaxConnection.
+type RuleSetItemIpMaxConnection struct {
+	// Each element in the list should be valid IPv4 or IPv6 CIDR Block address.
+	// Example: '["129.213.176.0/24", "150.136.187.0/24", "2002::1234:abcd:ffff:c0a8:101/64"]'
+	// +kubebuilder:validation:Required
+	IpAddresses []string `json:"ipAddresses"`
+	// The maximum number of simultaneous connections that the specified IPs can make to the
+	// Listener. IPs without a maxConnections setting can make either defaultMaxConnections
+	// simultaneous connections to a listener or, if no defaultMaxConnections is specified, an
+	// unlimited number of simultaneous connections to a listener.
+	// +kubebuilder:validation:Required
+	MaxConnections int `json:"maxConnections"`
+}
+
 // RuleSetItem defines nested fields for RuleSet.Item.
 type RuleSetItem struct {
 	// +kubebuilder:validation:Optional
@@ -180,7 +194,7 @@ type RuleSetItem struct {
 	// By default, you can specify only the standard HTTP methods defined in the
 	// HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also
 	// see a list of supported standard HTTP methods in the Load Balancing service documentation at
-	// Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm).
+	// Managing Rule Sets (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrulesets.htm).
 	// Your backend application must be able to handle the methods specified in this list.
 	// The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
 	// My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
@@ -197,6 +211,14 @@ type RuleSetItem struct {
 	// example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// The maximum number of connections that the any IP can make to a listener unless the IP is mentioned
+	// in maxConnections. If no defaultMaxConnections is specified the default is unlimited.
+	// +kubebuilder:validation:Optional
+	DefaultMaxConnections int `json:"defaultMaxConnections,omitempty"`
+	// An array of IPs that have a maxConnection setting different than the default and what
+	// that maxConnection setting is
+	// +kubebuilder:validation:Optional
+	IpMaxConnections []RuleSetItemIpMaxConnection `json:"ipMaxConnections,omitempty"`
 	// Indicates whether or not invalid characters in client header fields will be allowed.
 	// Valid names are composed of English letters, digits, hyphens and underscores.
 	// If "true", invalid characters are allowed in the HTTP header.

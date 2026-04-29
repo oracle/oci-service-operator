@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -51,6 +51,9 @@ type AnalyticsInstance struct {
 	// Email address receiving notifications.
 	EmailNotification *string `mandatory:"false" json:"emailNotification"`
 
+	// Analytics instance update channel.
+	UpdateChannel UpdateChannelEnum `mandatory:"false" json:"updateChannel,omitempty"`
+
 	// Map of PrivateAccessChannel unique identifier key as KEY and PrivateAccessChannel Object as VALUE.
 	PrivateAccessChannels map[string]PrivateAccessChannel `mandatory:"false" json:"privateAccessChannels"`
 
@@ -61,22 +64,32 @@ type AnalyticsInstance struct {
 	ServiceUrl *string `mandatory:"false" json:"serviceUrl"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
+	// System tags for this resource. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"key": "value"}}`
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// OCID of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
 	// The date and time the instance was last updated (in the format defined by RFC3339).
 	// This timestamp represents updates made through this API. External events do not
 	// influence it.
 	TimeUpdated *common.SDKTime `mandatory:"false" json:"timeUpdated"`
+
+	// The feature set of an Analytics instance.
+	FeatureBundle FeatureBundleEnum `mandatory:"false" json:"featureBundle,omitempty"`
+
+	// Identity domain OCID.
+	DomainId *string `mandatory:"false" json:"domainId"`
 }
 
 func (m AnalyticsInstance) String() string {
@@ -98,8 +111,14 @@ func (m AnalyticsInstance) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingLicenseTypeEnum(string(m.LicenseType)); !ok && m.LicenseType != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseType: %s. Supported values are: %s.", m.LicenseType, strings.Join(GetLicenseTypeEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingUpdateChannelEnum(string(m.UpdateChannel)); !ok && m.UpdateChannel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for UpdateChannel: %s. Supported values are: %s.", m.UpdateChannel, strings.Join(GetUpdateChannelEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingFeatureBundleEnum(string(m.FeatureBundle)); !ok && m.FeatureBundle != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for FeatureBundle: %s. Supported values are: %s.", m.FeatureBundle, strings.Join(GetFeatureBundleEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -110,13 +129,17 @@ func (m *AnalyticsInstance) UnmarshalJSON(data []byte) (e error) {
 		Description            *string                             `json:"description"`
 		LicenseType            LicenseTypeEnum                     `json:"licenseType"`
 		EmailNotification      *string                             `json:"emailNotification"`
+		UpdateChannel          UpdateChannelEnum                   `json:"updateChannel"`
 		PrivateAccessChannels  map[string]PrivateAccessChannel     `json:"privateAccessChannels"`
 		VanityUrlDetails       map[string]VanityUrlDetails         `json:"vanityUrlDetails"`
 		ServiceUrl             *string                             `json:"serviceUrl"`
 		DefinedTags            map[string]map[string]interface{}   `json:"definedTags"`
 		FreeformTags           map[string]string                   `json:"freeformTags"`
+		SystemTags             map[string]map[string]interface{}   `json:"systemTags"`
 		KmsKeyId               *string                             `json:"kmsKeyId"`
 		TimeUpdated            *common.SDKTime                     `json:"timeUpdated"`
+		FeatureBundle          FeatureBundleEnum                   `json:"featureBundle"`
+		DomainId               *string                             `json:"domainId"`
 		Id                     *string                             `json:"id"`
 		Name                   *string                             `json:"name"`
 		CompartmentId          *string                             `json:"compartmentId"`
@@ -138,6 +161,8 @@ func (m *AnalyticsInstance) UnmarshalJSON(data []byte) (e error) {
 
 	m.EmailNotification = model.EmailNotification
 
+	m.UpdateChannel = model.UpdateChannel
+
 	m.PrivateAccessChannels = model.PrivateAccessChannels
 
 	m.VanityUrlDetails = model.VanityUrlDetails
@@ -148,9 +173,15 @@ func (m *AnalyticsInstance) UnmarshalJSON(data []byte) (e error) {
 
 	m.FreeformTags = model.FreeformTags
 
+	m.SystemTags = model.SystemTags
+
 	m.KmsKeyId = model.KmsKeyId
 
 	m.TimeUpdated = model.TimeUpdated
+
+	m.FeatureBundle = model.FeatureBundle
+
+	m.DomainId = model.DomainId
 
 	m.Id = model.Id
 

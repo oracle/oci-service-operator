@@ -74,9 +74,54 @@ type OpensearchClusterSpec struct {
 	// The bare metal shape for the cluster's master nodes.
 	// +kubebuilder:validation:Optional
 	MasterNodeHostBareMetalShape string `json:"masterNodeHostBareMetalShape,omitempty"`
+	// The node shape for the cluster's master nodes.
+	// +kubebuilder:validation:Optional
+	MasterNodeHostShape string `json:"masterNodeHostShape,omitempty"`
 	// The bare metal shape for the cluster's data nodes.
 	// +kubebuilder:validation:Optional
 	DataNodeHostBareMetalShape string `json:"dataNodeHostBareMetalShape,omitempty"`
+	// The node shape for the cluster's data nodes.
+	// +kubebuilder:validation:Optional
+	DataNodeHostShape string `json:"dataNodeHostShape,omitempty"`
+	// The node shape for the cluster's OpenSearch Dashboard nodes.
+	// +kubebuilder:validation:Optional
+	OpendashboardNodeHostShape string `json:"opendashboardNodeHostShape,omitempty"`
+	// The number of search nodes configured for the cluster.
+	// +kubebuilder:validation:Optional
+	SearchNodeCount int `json:"searchNodeCount,omitempty"`
+	// The instance type for the cluster's search nodes.
+	// +kubebuilder:validation:Optional
+	SearchNodeHostType string `json:"searchNodeHostType,omitempty"`
+	// The node shape for the cluster's search nodes.
+	// +kubebuilder:validation:Optional
+	SearchNodeHostShape string `json:"searchNodeHostShape,omitempty"`
+	// The number of OCPUs configured for the cluster's search nodes.
+	// +kubebuilder:validation:Optional
+	SearchNodeHostOcpuCount int `json:"searchNodeHostOcpuCount,omitempty"`
+	// The amount of memory in GB, for the cluster's search nodes.
+	// +kubebuilder:validation:Optional
+	SearchNodeHostMemoryGB int `json:"searchNodeHostMemoryGB,omitempty"`
+	// The amount of storage in GB, to configure per node for the cluster's search nodes.
+	// +kubebuilder:validation:Optional
+	SearchNodeStorageGB int `json:"searchNodeStorageGB,omitempty"`
+	// The number of ML nodes configured for the cluster.
+	// +kubebuilder:validation:Optional
+	MlNodeCount int `json:"mlNodeCount,omitempty"`
+	// The instance type for the cluster's ML nodes.
+	// +kubebuilder:validation:Optional
+	MlNodeHostType string `json:"mlNodeHostType,omitempty"`
+	// The node shape for the cluster's ML nodes.
+	// +kubebuilder:validation:Optional
+	MlNodeHostShape string `json:"mlNodeHostShape,omitempty"`
+	// The number of OCPUs configured for the cluster's ML nodes.
+	// +kubebuilder:validation:Optional
+	MlNodeHostOcpuCount int `json:"mlNodeHostOcpuCount,omitempty"`
+	// The amount of memory in GB, for the cluster's ML nodes.
+	// +kubebuilder:validation:Optional
+	MlNodeHostMemoryGB int `json:"mlNodeHostMemoryGB,omitempty"`
+	// The amount of storage in GB, to configure per node for the cluster's ML nodes.
+	// +kubebuilder:validation:Optional
+	MlNodeStorageGB int `json:"mlNodeStorageGB,omitempty"`
 	// The security mode of the cluster.
 	// +kubebuilder:validation:Optional
 	SecurityMode string `json:"securityMode,omitempty"`
@@ -86,6 +131,27 @@ type OpensearchClusterSpec struct {
 	// The password hash of the master user that are used to manage security config
 	// +kubebuilder:validation:Optional
 	SecurityMasterUserPasswordHash string `json:"securityMasterUserPasswordHash,omitempty"`
+	// +kubebuilder:validation:Optional
+	SecuritySamlConfig OpensearchClusterSecuritySamlConfig `json:"securitySamlConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	BackupPolicy OpensearchClusterBackupPolicy `json:"backupPolicy,omitempty"`
+	// The OCID of the NSG where the private endpoint vnic will be attached.
+	// +kubebuilder:validation:Optional
+	NsgId string `json:"nsgId,omitempty"`
+	// The customer IP addresses of the endpoint in customer VCN
+	// +kubebuilder:validation:Optional
+	ReverseConnectionEndpointCustomerIps []string `json:"reverseConnectionEndpointCustomerIps,omitempty"`
+	// List of inbound clusters that will be queried using cross cluster search
+	// +kubebuilder:validation:Optional
+	InboundClusterIds []string `json:"inboundClusterIds,omitempty"`
+	// +kubebuilder:validation:Optional
+	OutboundClusterConfig OpensearchClusterOutboundClusterConfig `json:"outboundClusterConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	MaintenanceDetails OpensearchClusterMaintenanceDetails `json:"maintenanceDetails,omitempty"`
+	// +kubebuilder:validation:Optional
+	LoadBalancerConfig OpensearchClusterLoadBalancerConfig `json:"loadBalancerConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	CertificateConfig OpensearchClusterCertificateConfig `json:"certificateConfig,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -98,6 +164,122 @@ type OpensearchClusterSpec struct {
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	// +kubebuilder:validation:Optional
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// Security attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
+}
+
+// OpensearchClusterSecuritySamlConfig defines nested fields for OpensearchCluster.SecuritySamlConfig.
+type OpensearchClusterSecuritySamlConfig struct {
+	// A flag determine whether SAML is enabled
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// The content of identity provider metadata
+	// +kubebuilder:validation:Required
+	IdpMetadataContent string `json:"idpMetadataContent"`
+	// The unique name for a identity provider entity
+	// +kubebuilder:validation:Required
+	IdpEntityId string `json:"idpEntityId"`
+	// The endpoint of opendashboard
+	// +kubebuilder:validation:Optional
+	OpendashboardUrl string `json:"opendashboardUrl,omitempty"`
+	// The backend role of admins who have all permissions like local master user
+	// +kubebuilder:validation:Optional
+	AdminBackendRole string `json:"adminBackendRole,omitempty"`
+	// The subject key is used to get username from SAML assertion. By default, it is NameID
+	// +kubebuilder:validation:Optional
+	SubjectKey string `json:"subjectKey,omitempty"`
+	// The roles key is sued to get backend roles from SAML assertion
+	// +kubebuilder:validation:Optional
+	RolesKey string `json:"rolesKey,omitempty"`
+}
+
+// OpensearchClusterBackupPolicy defines nested fields for OpensearchCluster.BackupPolicy.
+type OpensearchClusterBackupPolicy struct {
+	// Specifies if automatic backups are enabled.
+	// +kubebuilder:validation:Optional
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// Specifies how long backup copy should remain on Storage in days
+	// +kubebuilder:validation:Optional
+	RetentionInDays int `json:"retentionInDays,omitempty"`
+	// Specifies how often backup should be performed
+	// +kubebuilder:validation:Optional
+	FrequencyInHours int `json:"frequencyInHours,omitempty"`
+}
+
+// OpensearchClusterOutboundClusterConfigOutboundCluster defines nested fields for OpensearchCluster.OutboundClusterConfig.OutboundCluster.
+type OpensearchClusterOutboundClusterConfigOutboundCluster struct {
+	// Name of the Outbound cluster. Avoid entering confidential information.
+	// +kubebuilder:validation:Required
+	DisplayName string `json:"displayName"`
+	// OCID of the Outbound cluster
+	// +kubebuilder:validation:Required
+	SeedClusterId string `json:"seedClusterId"`
+	// Sets the time interval between regular application-level ping messages that are sent to try and keep outbound cluster connections alive. If set to -1, application-level ping messages to this outbound cluster are not sent. If unset, application-level ping messages are sent according to the global transport.ping_schedule setting, which defaults to -1 meaning that pings are not sent.
+	// +kubebuilder:validation:Optional
+	PingSchedule string `json:"pingSchedule,omitempty"`
+	// Flag to indicate whether to skip the Outbound cluster during cross cluster search, if it is unavailable
+	// +kubebuilder:validation:Optional
+	IsSkipUnavailable bool `json:"isSkipUnavailable,omitempty"`
+	// Mode for the cross cluster connection
+	// +kubebuilder:validation:Optional
+	Mode string `json:"mode,omitempty"`
+}
+
+// OpensearchClusterOutboundClusterConfig defines nested fields for OpensearchCluster.OutboundClusterConfig.
+type OpensearchClusterOutboundClusterConfig struct {
+	// Flag to indicate whether outbound cluster configuration is enabled
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// List of outbound clusters to be connected to the inbound cluster
+	// +kubebuilder:validation:Required
+	OutboundClusters []OpensearchClusterOutboundClusterConfigOutboundCluster `json:"outboundClusters"`
+}
+
+// OpensearchClusterMaintenanceDetails defines nested fields for OpensearchCluster.MaintenanceDetails.
+type OpensearchClusterMaintenanceDetails struct {
+	// The Email IDs given by the customer to get notified about maintenance activities
+	// +kubebuilder:validation:Optional
+	NotificationEmailIds []string `json:"notificationEmailIds,omitempty"`
+}
+
+// OpensearchClusterLoadBalancerConfig defines nested fields for OpensearchCluster.LoadBalancerConfig.
+type OpensearchClusterLoadBalancerConfig struct {
+	// Load balancer service for OpenSearch and OpenDashboard load balancer. Default value is LOAD_BALANCER.
+	// +kubebuilder:validation:Required
+	LoadBalancerServiceType string `json:"loadBalancerServiceType"`
+	// Minimum bandwidth (Mbps) of OpenSearch load balancer. Not applicable for network load balancer service.
+	// +kubebuilder:validation:Optional
+	LoadBalancerMinBandwidthInMbps int `json:"loadBalancerMinBandwidthInMbps,omitempty"`
+	// Maximum bandwidth (Mbps) of OpenSearch load balancer. Not applicable for network load balancer service.
+	// +kubebuilder:validation:Optional
+	LoadBalancerMaxBandwidthInMbps int `json:"loadBalancerMaxBandwidthInMbps,omitempty"`
+}
+
+// OpensearchClusterCertificateConfig defines nested fields for OpensearchCluster.CertificateConfig.
+type OpensearchClusterCertificateConfig struct {
+	// Specifies whether the certificate to be used in cluster is managed by OpenSearch or OCI Certificates service.
+	// +kubebuilder:validation:Optional
+	ClusterCertificateMode string `json:"clusterCertificateMode,omitempty"`
+	// Specifies whether the certificate to be used in dashboard is managed by OpenSearch or OCI Certificates service.
+	// +kubebuilder:validation:Optional
+	DashboardCertificateMode string `json:"dashboardCertificateMode,omitempty"`
+	// certificate to be used for OpenSearch cluster api communication
+	// +kubebuilder:validation:Optional
+	OpenSearchApiCertificateId string `json:"openSearchApiCertificateId,omitempty"`
+	// certificate to be used for OpenSearch dashboard api communication
+	// +kubebuilder:validation:Optional
+	OpenSearchDashboardCertificateId string `json:"openSearchDashboardCertificateId,omitempty"`
+}
+
+// OpensearchClusterReverseConnectionEndpoint defines nested fields for OpensearchCluster.ReverseConnectionEndpoint.
+type OpensearchClusterReverseConnectionEndpoint struct {
+	// The IP addresses of the endpoint in customer VCN
+	CustomerIp string `json:"customerIp,omitempty"`
+	// The NAT IP addresses of the endpoint in service VCN
+	NatIp string `json:"natIp,omitempty"`
 }
 
 // OpensearchClusterStatus defines the observed state of OpensearchCluster.
@@ -174,10 +356,44 @@ type OpensearchClusterStatus struct {
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// Security attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// The bare metal shape for the cluster's master nodes.
 	MasterNodeHostBareMetalShape string `json:"masterNodeHostBareMetalShape,omitempty"`
+	// The node shape for the cluster's master nodes.
+	MasterNodeHostShape string `json:"masterNodeHostShape,omitempty"`
 	// The bare metal shape for the cluster's data nodes.
 	DataNodeHostBareMetalShape string `json:"dataNodeHostBareMetalShape,omitempty"`
+	// The node shape for the cluster's data nodes.
+	DataNodeHostShape string `json:"dataNodeHostShape,omitempty"`
+	// The number of search nodes configured for the cluster.
+	SearchNodeCount int `json:"searchNodeCount,omitempty"`
+	// The instance type for the cluster's search nodes.
+	SearchNodeHostType string `json:"searchNodeHostType,omitempty"`
+	// The node shape for the cluster's search nodes.
+	SearchNodeHostShape string `json:"searchNodeHostShape,omitempty"`
+	// The number of OCPUs configured for the cluster's search nodes.
+	SearchNodeHostOcpuCount int `json:"searchNodeHostOcpuCount,omitempty"`
+	// The amount of memory in GB, for the cluster's search nodes.
+	SearchNodeHostMemoryGB int `json:"searchNodeHostMemoryGB,omitempty"`
+	// The amount of storage in GB, to configure per node for the cluster's search nodes.
+	SearchNodeStorageGB int `json:"searchNodeStorageGB,omitempty"`
+	// The number of ML nodes configured for the cluster.
+	MlNodeCount int `json:"mlNodeCount,omitempty"`
+	// The instance type for the cluster's ML nodes.
+	MlNodeHostType string `json:"mlNodeHostType,omitempty"`
+	// The node shape for the cluster's ML nodes.
+	MlNodeHostShape string `json:"mlNodeHostShape,omitempty"`
+	// The number of OCPUs configured for the cluster's ML nodes.
+	MlNodeHostOcpuCount int `json:"mlNodeHostOcpuCount,omitempty"`
+	// The amount of memory in GB, for the cluster's ML nodes.
+	MlNodeHostMemoryGB int `json:"mlNodeHostMemoryGB,omitempty"`
+	// The amount of storage in GB, to configure per node for the cluster's ML nodes.
+	MlNodeStorageGB int `json:"mlNodeStorageGB,omitempty"`
+	// The node shape for the cluster's OpenSearch Dashboard nodes.
+	OpendashboardNodeHostShape string `json:"opendashboardNodeHostShape,omitempty"`
 	// The fully qualified domain name (FQDN) for the cluster's API endpoint.
 	Fqdn string `json:"fqdn,omitempty"`
 	// The security mode of the cluster.
@@ -185,7 +401,21 @@ type OpensearchClusterStatus struct {
 	// The name of the master user that are used to manage security config
 	SecurityMasterUserName string `json:"securityMasterUserName,omitempty"`
 	// The password hash of the master user that are used to manage security config
-	SecurityMasterUserPasswordHash string `json:"securityMasterUserPasswordHash,omitempty"`
+	SecurityMasterUserPasswordHash string                              `json:"securityMasterUserPasswordHash,omitempty"`
+	SecuritySamlConfig             OpensearchClusterSecuritySamlConfig `json:"securitySamlConfig,omitempty"`
+	BackupPolicy                   OpensearchClusterBackupPolicy       `json:"backupPolicy,omitempty"`
+	// The OCID of the NSG where the private endpoint vnic will be attached.
+	NsgId string `json:"nsgId,omitempty"`
+	// The customer IP addresses of the endpoint in customer VCN
+	ReverseConnectionEndpointCustomerIps []string `json:"reverseConnectionEndpointCustomerIps,omitempty"`
+	// The list of reverse connection endpoints.
+	ReverseConnectionEndpoints []OpensearchClusterReverseConnectionEndpoint `json:"reverseConnectionEndpoints,omitempty"`
+	OutboundClusterConfig      OpensearchClusterOutboundClusterConfig       `json:"outboundClusterConfig,omitempty"`
+	// List of inbound clusters for which this cluster is an outbound cluster
+	InboundClusterIds  []string                            `json:"inboundClusterIds,omitempty"`
+	MaintenanceDetails OpensearchClusterMaintenanceDetails `json:"maintenanceDetails,omitempty"`
+	LoadBalancerConfig OpensearchClusterLoadBalancerConfig `json:"loadBalancerConfig,omitempty"`
+	CertificateConfig  OpensearchClusterCertificateConfig  `json:"certificateConfig,omitempty"`
 }
 
 // +kubebuilder:object:root=true

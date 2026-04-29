@@ -71,7 +71,7 @@ Supported update surface: defined_tags,
 freeform_tags,
 image_policy_config.is_policy_enabled,
 image_policy_config.key_details.kms_key_id
-(+8 more)
+(+22 more)
 Reject before mutate: force-new fields
 cluster_pod_network_options.cni_type,
 cluster_pod_network_options.json_data,
@@ -85,7 +85,7 @@ opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply UpdateCluster only for mutable\nfields defined_tags, freeform_tags,\nimage_policy_config.is_policy_enabled,\nimage_policy_config.key_details.kms_key_id\n(+8 more)
+ServiceManager -> OCI: Apply UpdateCluster only for mutable\nfields defined_tags, freeform_tags,\nimage_policy_config.is_policy_enabled,\nimage_policy_config.key_details.kms_key_id\n(+22 more)
 loop update pending UPDATING
 ServiceManager -> OCI: GetCluster
 end
@@ -121,7 +121,7 @@ provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
 supported drift: defined_tags, freeform_tags,
 image_policy_config.is_policy_enabled,
-image_policy_config.key_details.kms_key_id (+8
+image_policy_config.key_details.kms_key_id (+22
 more)
 reject before mutate: force-new fields
 cluster_pod_network_options.cni_type,

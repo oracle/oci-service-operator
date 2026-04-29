@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -29,8 +29,9 @@ type PatchHistorySummary struct {
 
 	// The type of current patch history.
 	// DP - Data Plane patch(This history type is internal available only)
-	// ODH - Oracle Distribution of Hadoop patch
-	// OS - Operating System patch
+	// ODH - Oracle Distribution of Hadoop update
+	// OS - Operating System update
+	// BDS - Big Data Service update
 	PatchType PatchHistorySummaryPatchTypeEnum `mandatory:"true" json:"patchType"`
 }
 
@@ -51,7 +52,7 @@ func (m PatchHistorySummary) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -109,16 +110,19 @@ type PatchHistorySummaryPatchTypeEnum string
 const (
 	PatchHistorySummaryPatchTypeOdh PatchHistorySummaryPatchTypeEnum = "ODH"
 	PatchHistorySummaryPatchTypeOs  PatchHistorySummaryPatchTypeEnum = "OS"
+	PatchHistorySummaryPatchTypeBds PatchHistorySummaryPatchTypeEnum = "BDS"
 )
 
 var mappingPatchHistorySummaryPatchTypeEnum = map[string]PatchHistorySummaryPatchTypeEnum{
 	"ODH": PatchHistorySummaryPatchTypeOdh,
 	"OS":  PatchHistorySummaryPatchTypeOs,
+	"BDS": PatchHistorySummaryPatchTypeBds,
 }
 
 var mappingPatchHistorySummaryPatchTypeEnumLowerCase = map[string]PatchHistorySummaryPatchTypeEnum{
 	"odh": PatchHistorySummaryPatchTypeOdh,
 	"os":  PatchHistorySummaryPatchTypeOs,
+	"bds": PatchHistorySummaryPatchTypeBds,
 }
 
 // GetPatchHistorySummaryPatchTypeEnumValues Enumerates the set of values for PatchHistorySummaryPatchTypeEnum
@@ -135,6 +139,7 @@ func GetPatchHistorySummaryPatchTypeEnumStringValues() []string {
 	return []string{
 		"ODH",
 		"OS",
+		"BDS",
 	}
 }
 

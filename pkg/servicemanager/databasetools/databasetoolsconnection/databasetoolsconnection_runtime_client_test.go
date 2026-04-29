@@ -397,6 +397,12 @@ func TestDatabaseToolsConnectionServiceClientCreateOrUpdateResolvesExistingUsing
 			if req.RelatedResourceIdentifier == nil || *req.RelatedResourceIdentifier != "ocid1.postgresqldbsystem.oc1..service-a" {
 				t.Fatalf("list relatedResourceIdentifier = %v, want spec related resource identifier", req.RelatedResourceIdentifier)
 			}
+			if len(req.Type) != 0 {
+				t.Fatalf("list type = %#v, want omitted reviewed request field", req.Type)
+			}
+			if len(req.RuntimeSupport) != 0 {
+				t.Fatalf("list runtimeSupport = %#v, want omitted reviewed request field", req.RuntimeSupport)
+			}
 			return databasetoolssdk.ListDatabaseToolsConnectionsResponse{
 				DatabaseToolsConnectionCollection: databasetoolssdk.DatabaseToolsConnectionCollection{
 					Items: []databasetoolssdk.DatabaseToolsConnectionSummary{
@@ -529,6 +535,9 @@ func TestDatabaseToolsConnectionServiceClientCreateOrUpdateUpdatesOracleConnecti
 	if updateRequest.DatabaseToolsConnectionId == nil || *updateRequest.DatabaseToolsConnectionId != "ocid1.databasetoolsconnection.oc1..existing" {
 		t.Fatalf("update databaseToolsConnectionId = %v, want tracked connection ID", updateRequest.DatabaseToolsConnectionId)
 	}
+	if updateRequest.IsLockOverride != nil {
+		t.Fatalf("update isLockOverride = %#v, want reviewed hook field omission", updateRequest.IsLockOverride)
+	}
 
 	details, ok := updateRequest.UpdateDatabaseToolsConnectionDetails.(databasetoolssdk.UpdateDatabaseToolsConnectionOracleDatabaseDetails)
 	if !ok {
@@ -587,6 +596,9 @@ func TestDatabaseToolsConnectionServiceClientDeleteConfirmsLifecycleDelete(t *te
 			deleteCalls++
 			if req.DatabaseToolsConnectionId == nil || *req.DatabaseToolsConnectionId != "ocid1.databasetoolsconnection.oc1..existing" {
 				t.Fatalf("delete databaseToolsConnectionId = %v, want tracked connection ID", req.DatabaseToolsConnectionId)
+			}
+			if req.IsLockOverride != nil {
+				t.Fatalf("delete isLockOverride = %#v, want reviewed hook field omission", req.IsLockOverride)
 			}
 			return databasetoolssdk.DeleteDatabaseToolsConnectionResponse{
 				OpcRequestId:     common.String("opc-delete-1"),

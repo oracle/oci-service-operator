@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -15,18 +15,19 @@ import (
 	"strings"
 )
 
-// AutonomousDatabaseBackupSummary An Autonomous Database backup.
-// To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized, talk to an administrator. If you're an administrator who needs to write policies to give users access, see Getting Started with Policies (https://docs.cloud.oracle.com/Content/Identity/Concepts/policygetstarted.htm).
+// AutonomousDatabaseBackupSummary An Autonomous AI Database backup.
+// To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized, talk to an administrator. If you're an administrator who needs to write policies to give users access, see Getting Started with Policies (https://docs.oracle.com/iaas/Content/Identity/Concepts/policygetstarted.htm).
+//
 // **Warning:** Oracle recommends that you avoid using any confidential information when you supply string values using the API.
 type AutonomousDatabaseBackupSummary struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Autonomous Database backup.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Autonomous AI Database backup.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Autonomous AI Database.
 	AutonomousDatabaseId *string `mandatory:"true" json:"autonomousDatabaseId"`
 
 	// The user-friendly name for the backup. The name does not have to be unique.
@@ -53,10 +54,10 @@ type AutonomousDatabaseBackupSummary struct {
 	// The size of the database in terabytes at the time the backup was taken.
 	DatabaseSizeInTBs *float32 `mandatory:"false" json:"databaseSizeInTBs"`
 
-	// Indicates whether the backup can be used to restore the associated Autonomous Database.
+	// Indicates whether the backup can be used to restore the associated Autonomous AI Database.
 	IsRestorable *bool `mandatory:"false" json:"isRestorable"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
 	KeyStoreId *string `mandatory:"false" json:"keyStoreId"`
 
 	// The wallet name for Oracle Key Vault.
@@ -65,10 +66,10 @@ type AutonomousDatabaseBackupSummary struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId *string `mandatory:"false" json:"vaultId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous AI Database Serverless does not use key versions, hence is not applicable for Autonomous AI Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
 	// Retention period, in days, for long-term backups
@@ -77,13 +78,25 @@ type AutonomousDatabaseBackupSummary struct {
 	// Timestamp until when the backup will be available
 	TimeAvailableTill *common.SDKTime `mandatory:"false" json:"timeAvailableTill"`
 
-	// A valid Oracle Database version for Autonomous Database.
+	// A valid Oracle AI Database version for Autonomous AI Database.
+	// When you specify 23ai for dbversion, the system will provision a 23ai database, but the UI will display it as 26ai.
+	// When you specify 26ai for dbversion, the system will provision and display a 26ai database as expected.
+	// For new databases, it is recommended to use either 19c or 26ai.
+	// **Note** Starting December 2026, 23ai will not be supported as a valid value for this parameter.
 	DbVersion *string `mandatory:"false" json:"dbVersion"`
 
 	// The backup size in terrabytes (TB).
 	SizeInTBs *float64 `mandatory:"false" json:"sizeInTBs"`
 
 	BackupDestinationDetails *BackupDestinationDetails `mandatory:"false" json:"backupDestinationDetails"`
+
+	// The infrastructure type this resource belongs to.
+	InfrastructureType AutonomousDatabaseBackupSummaryInfrastructureTypeEnum `mandatory:"false" json:"infrastructureType,omitempty"`
+
+	// Name of the region in which backup is taken in.
+	Region *string `mandatory:"false" json:"region"`
+
+	SourceDatabaseDetails *SourceDatabaseDetails `mandatory:"false" json:"sourceDatabaseDetails"`
 }
 
 func (m AutonomousDatabaseBackupSummary) String() string {
@@ -102,8 +115,11 @@ func (m AutonomousDatabaseBackupSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetAutonomousDatabaseBackupSummaryLifecycleStateEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnum(string(m.InfrastructureType)); !ok && m.InfrastructureType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for InfrastructureType: %s. Supported values are: %s.", m.InfrastructureType, strings.Join(GetAutonomousDatabaseBackupSummaryInfrastructureTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -113,21 +129,30 @@ type AutonomousDatabaseBackupSummaryTypeEnum string
 
 // Set of constants representing the allowable values for AutonomousDatabaseBackupSummaryTypeEnum
 const (
-	AutonomousDatabaseBackupSummaryTypeIncremental AutonomousDatabaseBackupSummaryTypeEnum = "INCREMENTAL"
-	AutonomousDatabaseBackupSummaryTypeFull        AutonomousDatabaseBackupSummaryTypeEnum = "FULL"
-	AutonomousDatabaseBackupSummaryTypeLongterm    AutonomousDatabaseBackupSummaryTypeEnum = "LONGTERM"
+	AutonomousDatabaseBackupSummaryTypeIncremental           AutonomousDatabaseBackupSummaryTypeEnum = "INCREMENTAL"
+	AutonomousDatabaseBackupSummaryTypeFull                  AutonomousDatabaseBackupSummaryTypeEnum = "FULL"
+	AutonomousDatabaseBackupSummaryTypeLongterm              AutonomousDatabaseBackupSummaryTypeEnum = "LONGTERM"
+	AutonomousDatabaseBackupSummaryTypeVirtualFull           AutonomousDatabaseBackupSummaryTypeEnum = "VIRTUAL_FULL"
+	AutonomousDatabaseBackupSummaryTypeCumulativeIncremental AutonomousDatabaseBackupSummaryTypeEnum = "CUMULATIVE_INCREMENTAL"
+	AutonomousDatabaseBackupSummaryTypeRollForwardImageCopy  AutonomousDatabaseBackupSummaryTypeEnum = "ROLL_FORWARD_IMAGE_COPY"
 )
 
 var mappingAutonomousDatabaseBackupSummaryTypeEnum = map[string]AutonomousDatabaseBackupSummaryTypeEnum{
-	"INCREMENTAL": AutonomousDatabaseBackupSummaryTypeIncremental,
-	"FULL":        AutonomousDatabaseBackupSummaryTypeFull,
-	"LONGTERM":    AutonomousDatabaseBackupSummaryTypeLongterm,
+	"INCREMENTAL":             AutonomousDatabaseBackupSummaryTypeIncremental,
+	"FULL":                    AutonomousDatabaseBackupSummaryTypeFull,
+	"LONGTERM":                AutonomousDatabaseBackupSummaryTypeLongterm,
+	"VIRTUAL_FULL":            AutonomousDatabaseBackupSummaryTypeVirtualFull,
+	"CUMULATIVE_INCREMENTAL":  AutonomousDatabaseBackupSummaryTypeCumulativeIncremental,
+	"ROLL_FORWARD_IMAGE_COPY": AutonomousDatabaseBackupSummaryTypeRollForwardImageCopy,
 }
 
 var mappingAutonomousDatabaseBackupSummaryTypeEnumLowerCase = map[string]AutonomousDatabaseBackupSummaryTypeEnum{
-	"incremental": AutonomousDatabaseBackupSummaryTypeIncremental,
-	"full":        AutonomousDatabaseBackupSummaryTypeFull,
-	"longterm":    AutonomousDatabaseBackupSummaryTypeLongterm,
+	"incremental":             AutonomousDatabaseBackupSummaryTypeIncremental,
+	"full":                    AutonomousDatabaseBackupSummaryTypeFull,
+	"longterm":                AutonomousDatabaseBackupSummaryTypeLongterm,
+	"virtual_full":            AutonomousDatabaseBackupSummaryTypeVirtualFull,
+	"cumulative_incremental":  AutonomousDatabaseBackupSummaryTypeCumulativeIncremental,
+	"roll_forward_image_copy": AutonomousDatabaseBackupSummaryTypeRollForwardImageCopy,
 }
 
 // GetAutonomousDatabaseBackupSummaryTypeEnumValues Enumerates the set of values for AutonomousDatabaseBackupSummaryTypeEnum
@@ -145,6 +170,9 @@ func GetAutonomousDatabaseBackupSummaryTypeEnumStringValues() []string {
 		"INCREMENTAL",
 		"FULL",
 		"LONGTERM",
+		"VIRTUAL_FULL",
+		"CUMULATIVE_INCREMENTAL",
+		"ROLL_FORWARD_IMAGE_COPY",
 	}
 }
 
@@ -209,5 +237,47 @@ func GetAutonomousDatabaseBackupSummaryLifecycleStateEnumStringValues() []string
 // GetMappingAutonomousDatabaseBackupSummaryLifecycleStateEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingAutonomousDatabaseBackupSummaryLifecycleStateEnum(val string) (AutonomousDatabaseBackupSummaryLifecycleStateEnum, bool) {
 	enum, ok := mappingAutonomousDatabaseBackupSummaryLifecycleStateEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// AutonomousDatabaseBackupSummaryInfrastructureTypeEnum Enum with underlying type: string
+type AutonomousDatabaseBackupSummaryInfrastructureTypeEnum string
+
+// Set of constants representing the allowable values for AutonomousDatabaseBackupSummaryInfrastructureTypeEnum
+const (
+	AutonomousDatabaseBackupSummaryInfrastructureTypeCloud           AutonomousDatabaseBackupSummaryInfrastructureTypeEnum = "CLOUD"
+	AutonomousDatabaseBackupSummaryInfrastructureTypeCloudAtCustomer AutonomousDatabaseBackupSummaryInfrastructureTypeEnum = "CLOUD_AT_CUSTOMER"
+)
+
+var mappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnum = map[string]AutonomousDatabaseBackupSummaryInfrastructureTypeEnum{
+	"CLOUD":             AutonomousDatabaseBackupSummaryInfrastructureTypeCloud,
+	"CLOUD_AT_CUSTOMER": AutonomousDatabaseBackupSummaryInfrastructureTypeCloudAtCustomer,
+}
+
+var mappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnumLowerCase = map[string]AutonomousDatabaseBackupSummaryInfrastructureTypeEnum{
+	"cloud":             AutonomousDatabaseBackupSummaryInfrastructureTypeCloud,
+	"cloud_at_customer": AutonomousDatabaseBackupSummaryInfrastructureTypeCloudAtCustomer,
+}
+
+// GetAutonomousDatabaseBackupSummaryInfrastructureTypeEnumValues Enumerates the set of values for AutonomousDatabaseBackupSummaryInfrastructureTypeEnum
+func GetAutonomousDatabaseBackupSummaryInfrastructureTypeEnumValues() []AutonomousDatabaseBackupSummaryInfrastructureTypeEnum {
+	values := make([]AutonomousDatabaseBackupSummaryInfrastructureTypeEnum, 0)
+	for _, v := range mappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetAutonomousDatabaseBackupSummaryInfrastructureTypeEnumStringValues Enumerates the set of values in String for AutonomousDatabaseBackupSummaryInfrastructureTypeEnum
+func GetAutonomousDatabaseBackupSummaryInfrastructureTypeEnumStringValues() []string {
+	return []string{
+		"CLOUD",
+		"CLOUD_AT_CUSTOMER",
+	}
+}
+
+// GetMappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnum(val string) (AutonomousDatabaseBackupSummaryInfrastructureTypeEnum, bool) {
+	enum, ok := mappingAutonomousDatabaseBackupSummaryInfrastructureTypeEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

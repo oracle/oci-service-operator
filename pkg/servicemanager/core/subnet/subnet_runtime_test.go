@@ -95,82 +95,26 @@ func (f fakeServiceError) GetOpcRequestID() string {
 	return ""
 }
 
-func newTestGeneratedDelegate(manager *SubnetServiceManager, client subnetOCIClient) SubnetServiceClient {
+func newTestSubnetRuntimeHooks(manager *SubnetServiceManager, client subnetOCIClient) SubnetRuntimeHooks {
 	if client == nil {
 		client = &fakeSubnetOCIClient{}
 	}
 
-	config := generatedruntime.Config[*corev1beta1.Subnet]{
-		Kind:    "Subnet",
-		SDKName: "Subnet",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService: "core",
-			FormalSlug:    "subnet",
-			Async: &generatedruntime.AsyncSemantics{
-				Strategy:             "lifecycle",
-				Runtime:              "generatedruntime",
-				FormalClassification: "lifecycle",
-			},
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{"UPDATING"},
-				ActiveStates:       []string{"AVAILABLE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATED", "TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"cidrBlock", "definedTags", "dhcpOptionsId", "displayName", "freeformTags", "ipv6CidrBlock", "ipv6CidrBlocks", "routeTableId", "securityListIds"},
-				ForceNew:      []string{"availabilityDomain", "compartmentId", "dnsLabel", "prohibitInternetIngress", "prohibitPublicIpOnVnic", "vcnId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateSubnetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateSubnet(ctx, *request.(*coresdk.CreateSubnetRequest))
-			},
+	hooks := SubnetRuntimeHooks{
+		Semantics: newSubnetRuntimeSemantics(),
+		Create: runtimeOperationHooks[coresdk.CreateSubnetRequest, coresdk.CreateSubnetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateSubnetDetails", RequestName: "CreateSubnetDetails", Contribution: "body"}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetSubnetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetSubnet(ctx, *request.(*coresdk.GetSubnetRequest))
+			Call: func(ctx context.Context, request coresdk.CreateSubnetRequest) (coresdk.CreateSubnetResponse, error) {
+				return client.CreateSubnet(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[coresdk.GetSubnetRequest, coresdk.GetSubnetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "SubnetId", RequestName: "subnetId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListSubnetsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListSubnets(ctx, *request.(*coresdk.ListSubnetsRequest))
+			Call: func(ctx context.Context, request coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+				return client.GetSubnet(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[coresdk.ListSubnetsRequest, coresdk.ListSubnetsResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
@@ -181,40 +125,43 @@ func newTestGeneratedDelegate(manager *SubnetServiceManager, client subnetOCICli
 				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateSubnetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateSubnet(ctx, *request.(*coresdk.UpdateSubnetRequest))
+			Call: func(ctx context.Context, request coresdk.ListSubnetsRequest) (coresdk.ListSubnetsResponse, error) {
+				return client.ListSubnets(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[coresdk.UpdateSubnetRequest, coresdk.UpdateSubnetResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "SubnetId", RequestName: "subnetId", Contribution: "path", PreferResourceID: true},
 				{FieldName: "UpdateSubnetDetails", RequestName: "UpdateSubnetDetails", Contribution: "body"},
 			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteSubnetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteSubnet(ctx, *request.(*coresdk.DeleteSubnetRequest))
+			Call: func(ctx context.Context, request coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error) {
+				return client.UpdateSubnet(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[coresdk.DeleteSubnetRequest, coresdk.DeleteSubnetResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "SubnetId", RequestName: "subnetId", Contribution: "path", PreferResourceID: true}},
+			Call: func(ctx context.Context, request coresdk.DeleteSubnetRequest) (coresdk.DeleteSubnetResponse, error) {
+				return client.DeleteSubnet(ctx, request)
+			},
 		},
 	}
+	applySubnetRuntimeHooks(manager, &hooks, client)
+	return hooks
+}
 
-	return defaultSubnetServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Subnet](config),
+func newTestGeneratedDelegate(manager *SubnetServiceManager, client subnetOCIClient) SubnetServiceClient {
+	hooks := newTestSubnetRuntimeHooks(manager, client)
+	delegate := defaultSubnetServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Subnet](buildSubnetGeneratedRuntimeConfig(manager, hooks)),
 	}
+	return wrapSubnetGeneratedClient(hooks, delegate)
 }
 
 func newTestManager(client subnetOCIClient) *SubnetServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewSubnetServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&subnetRuntimeClient{
-			manager:  manager,
-			delegate: newTestGeneratedDelegate(manager, client),
-			client:   client,
-		})
+		manager.WithClient(newTestGeneratedDelegate(manager, client))
 	}
 	return manager
 }
@@ -413,10 +360,88 @@ func TestCreateOrUpdate_ObserveByStatusOCID(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, resp.IsSuccessful)
-	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, getCalls)
 	assert.Equal(t, 0, updateCalls)
 	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 	assert.Equal(t, "10.0.1.1", resource.Status.VirtualRouterIp)
+}
+
+func TestCreateOrUpdate_ObserveByStatusOCIDClearsStaleAsyncFailure(t *testing.T) {
+	updateCalls := 0
+	manager := newTestManager(&fakeSubnetOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+			assert.Equal(t, "ocid1.subnet.oc1..existing", *req.SubnetId)
+			return coresdk.GetSubnetResponse{
+				Subnet: makeSDKSubnet("ocid1.subnet.oc1..existing", "test-subnet", coresdk.SubnetLifecycleStateAvailable),
+			}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error) {
+			updateCalls++
+			return coresdk.UpdateSubnetResponse{}, nil
+		},
+	})
+
+	resource := makeSpecSubnet()
+	resource.Status.OsokStatus = shared.OSOKStatus{
+		Ocid:   shared.OCID("ocid1.subnet.oc1..existing"),
+		Reason: string(shared.Failed),
+		Async: shared.OSOKAsyncTracker{
+			Current: &shared.OSOKAsyncOperation{
+				Source:          shared.OSOKAsyncSourceLifecycle,
+				Phase:           shared.OSOKAsyncPhaseCreate,
+				RawStatus:       "PROVISIONING",
+				NormalizedClass: shared.OSOKAsyncClassFailed,
+			},
+		},
+		Conditions: []shared.OSOKCondition{
+			{Type: shared.Provisioning, Status: "True"},
+			{Type: shared.Failed, Status: "False"},
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 0, updateCalls)
+	assert.Nil(t, resource.Status.OsokStatus.Async.Current)
+	assert.Equal(t, string(shared.Active), resource.Status.OsokStatus.Reason)
+	assert.Len(t, resource.Status.OsokStatus.Conditions, 1)
+	assert.Equal(t, shared.Active, resource.Status.OsokStatus.Conditions[0].Type)
+}
+
+func TestCreateOrUpdate_OmittedCollectionFieldsDoNotClearCurrentDefaults(t *testing.T) {
+	updateCalls := 0
+	manager := newTestManager(&fakeSubnetOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
+			assert.Equal(t, "ocid1.subnet.oc1..existing", *req.SubnetId)
+			current := makeSDKSubnet("ocid1.subnet.oc1..existing", "test-subnet", coresdk.SubnetLifecycleStateAvailable)
+			current.SecurityListIds = []string{"ocid1.securitylist.oc1..default"}
+			current.Ipv6CidrBlocks = []string{"2001:db8::/64"}
+			return coresdk.GetSubnetResponse{Subnet: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error) {
+			updateCalls++
+			return coresdk.UpdateSubnetResponse{}, nil
+		},
+	})
+
+	resource := makeSpecSubnet()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.subnet.oc1..existing")
+	resource.Spec.SecurityListIds = nil
+	resource.Spec.Ipv6CidrBlocks = nil
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 0, updateCalls)
+	assert.Nil(t, resource.Spec.SecurityListIds)
+	assert.Nil(t, resource.Spec.Ipv6CidrBlocks)
+	assert.Equal(t, []string{"ocid1.securitylist.oc1..default"}, resource.Status.SecurityListIds)
+	assert.Equal(t, []string{"2001:db8::/64"}, resource.Status.Ipv6CidrBlocks)
 }
 
 func TestCreateOrUpdate_ClearsStaleOptionalStatusFieldsOnProjection(t *testing.T) {
@@ -479,7 +504,7 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 		updateFn: func(_ context.Context, req coresdk.UpdateSubnetRequest) (coresdk.UpdateSubnetResponse, error) {
 			captured = req
 			updated := makeSDKSubnet("ocid1.subnet.oc1..existing", "new-name", coresdk.SubnetLifecycleStateAvailable)
-			return coresdk.UpdateSubnetResponse{Subnet: updated}, nil
+			return coresdk.UpdateSubnetResponse{OpcRequestId: common.String("opc-update-1"), Subnet: updated}, nil
 		},
 	})
 
@@ -496,7 +521,8 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	assert.Equal(t, "ocid1.routetable.oc1..example", *captured.RouteTableId)
 	assert.Equal(t, []string{"ocid1.securitylist.oc1..a", "ocid1.securitylist.oc1..b"}, captured.SecurityListIds)
 	assert.Equal(t, "new-name", resource.Status.DisplayName)
-	assert.Equal(t, 3, getCalls)
+	assert.Equal(t, "opc-update-1", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, 1, getCalls)
 }
 
 func TestCreateOrUpdate_RejectsUnsupportedCreateOnlyDrift(t *testing.T) {
@@ -706,7 +732,7 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 	manager := newTestManager(&fakeSubnetOCIClient{
 		deleteFn: func(_ context.Context, req coresdk.DeleteSubnetRequest) (coresdk.DeleteSubnetResponse, error) {
 			assert.Equal(t, "ocid1.subnet.oc1..delete", *req.SubnetId)
-			return coresdk.DeleteSubnetResponse{}, nil
+			return coresdk.DeleteSubnetResponse{OpcRequestId: common.String("opc-delete-1")}, nil
 		},
 		getFn: func(_ context.Context, _ coresdk.GetSubnetRequest) (coresdk.GetSubnetResponse, error) {
 			return coresdk.GetSubnetResponse{}, fakeServiceError{statusCode: 404, code: "NotFound", message: "not found"}
@@ -721,6 +747,7 @@ func TestDelete_ConfirmsDeletionOnNotFound(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, done)
 	assert.NotNil(t, resource.Status.OsokStatus.DeletedAt)
+	assert.Equal(t, "opc-delete-1", resource.Status.OsokStatus.OpcRequestID)
 }
 
 func TestDelete_RequeuesWhileTerminating(t *testing.T) {

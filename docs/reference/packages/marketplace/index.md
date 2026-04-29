@@ -24,18 +24,4 @@ Manage OCI Marketplace resources from Kubernetes.
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `marketplace/AcceptedAgreement` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/acceptedagreement.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-acceptedagreement) |
-| `marketplace/Agreement` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/agreement.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-agreement) |
-| `marketplace/Category` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/category.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-category) |
-| `marketplace/LaunchEligibility` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/launcheligibility.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-launcheligibility) |
-| `marketplace/Listing` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/listing.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-listing) |
-| `marketplace/Package` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/package.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-package) |
 | `marketplace/Publication` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/publication.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-publication) |
-| `marketplace/PublicationPackage` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/publicationpackage.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-publicationpackage) |
-| `marketplace/Publisher` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/publisher.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-publisher) |
-| `marketplace/Report` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/report.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-report) |
-| `marketplace/ReportType` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/reporttype.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-reporttype) |
-| `marketplace/Tax` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/tax.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-tax) |
-| `marketplace/ThirdPartyPaidListingEligibility` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/thirdpartypaidlistingeligibility.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-thirdpartypaidlistingeligibility) |
-| `marketplace/WorkRequest` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/workrequest.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-workrequest) |
-| `marketplace/WorkRequestError` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/workrequesterror.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-workrequesterror) |
-| `marketplace/WorkRequestLog` | `marketplace.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplace/v1beta1/workrequestlog.md) | [Reference](../../api/marketplace/v1beta1/index.md#kind-workrequestlog) |

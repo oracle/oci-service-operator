@@ -19,7 +19,7 @@ import (
 )
 
 // EsxiHostServiceClient is the handwritten extension seam for EsxiHost runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*EsxiHostServiceManager).WithClient.
 type EsxiHostServiceClient interface {
 	CreateOrUpdate(context.Context, *ocvpv1beta1.EsxiHost, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ EsxiHostServiceClient = defaultEsxiHostServiceClient{}
 
 var newEsxiHostServiceClient = func(manager *EsxiHostServiceManager) EsxiHostServiceClient {
 	sdkClient, err := ocvpsdk.NewEsxiHostClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*ocvpv1beta1.EsxiHost]{
-		Kind:    "EsxiHost",
-		SDKName: "EsxiHost",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.CreateEsxiHostRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateEsxiHost(ctx, *request.(*ocvpsdk.CreateEsxiHostRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.GetEsxiHostRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetEsxiHost(ctx, *request.(*ocvpsdk.GetEsxiHostRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.ListEsxiHostsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListEsxiHosts(ctx, *request.(*ocvpsdk.ListEsxiHostsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.UpdateEsxiHostRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateEsxiHost(ctx, *request.(*ocvpsdk.UpdateEsxiHostRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &ocvpsdk.DeleteEsxiHostRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteEsxiHost(ctx, *request.(*ocvpsdk.DeleteEsxiHostRequest))
-			},
-		},
-	}
+	hooks := newEsxiHostRuntimeHooks(manager, sdkClient)
+	config := buildEsxiHostGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize EsxiHost OCI client: %w", err)
 	}
-	return defaultEsxiHostServiceClient{
+	delegate := defaultEsxiHostServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.EsxiHost](config),
 	}
+	return wrapEsxiHostGeneratedClient(hooks, delegate)
 }

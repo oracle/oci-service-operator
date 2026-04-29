@@ -116,6 +116,7 @@ type ServiceManagerModel struct {
 	ListOperation            *RuntimeOperationModel
 	UpdateOperation          *RuntimeOperationModel
 	DeleteOperation          *RuntimeOperationModel
+	RuntimeHooksFileName     string
 	ServiceClientFileName    string
 	ServiceManagerFileName   string
 }

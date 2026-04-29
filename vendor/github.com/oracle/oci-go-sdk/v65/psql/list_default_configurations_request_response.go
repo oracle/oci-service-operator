@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/psql/ListDefaultConfigurations.go.html to see an example of how to use ListDefaultConfigurationsRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/psql/ListDefaultConfigurations.go.html to see an example of how to use ListDefaultConfigurationsRequest.
 type ListDefaultConfigurationsRequest struct {
 
 	// A filter to return only resources if their `lifecycleState` matches the given `lifecycleState`.
@@ -24,12 +24,17 @@ type ListDefaultConfigurationsRequest struct {
 	// A filter to return only resources that match the entire display name given.
 	DisplayName *string `mandatory:"false" contributesTo:"query" name:"displayName"`
 
-	// Verison of the PostgreSQL database, such as 14.9.
+	// Version of the PostgreSQL database, such as 14.9.
 	DbVersion *string `mandatory:"false" contributesTo:"query" name:"dbVersion"`
 
-	// The name of the shape for the configuration.
-	// Example: `VM.Standard.E4.Flex`
+	// The compute name of the shape for the configuration.
 	Shape *string `mandatory:"false" contributesTo:"query" name:"shape"`
+
+	// The instance ocpu count for the configuration.
+	InstanceOcpuCount *int `mandatory:"false" contributesTo:"query" name:"instanceOcpuCount"`
+
+	// The instance memory size in GBs for the configuration.
+	InstanceMemorySizeInGBs *int `mandatory:"false" contributesTo:"query" name:"instanceMemorySizeInGBs"`
 
 	// A unique identifier for the configuration.
 	ConfigurationId *string `mandatory:"false" contributesTo:"query" name:"configurationId"`
@@ -95,7 +100,7 @@ func (request ListDefaultConfigurationsRequest) ValidateEnumValue() (bool, error
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SortBy: %s. Supported values are: %s.", request.SortBy, strings.Join(GetListDefaultConfigurationsSortByEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

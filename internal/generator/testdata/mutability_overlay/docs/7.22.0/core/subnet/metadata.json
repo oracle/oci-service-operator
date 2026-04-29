@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "core",
+  "kind": "Subnet",
+  "formalSlug": "subnet",
+  "providerResource": "oci_core_subnet",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/core_subnet",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/core_subnet",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/core/subnet/page.html",
+  "bodySHA256": "8c974b05041c5a77d6700e4373777dcc36e0841e87a1f6ca5303ca04d23d1ed7",
+  "bodyBytes": 7251,
+  "fixtureBodyPath": "7.22.0/core/subnet/page.html"
+}

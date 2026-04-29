@@ -79,7 +79,9 @@ more)
 reject before mutate: force-new fields
 cluster_profile, cluster_version,
 compartment_id, is_high_availability (+3 more)
-create-only fields: none
+create-only fields: bds_cluster_version_summary,
+cluster_admin_password, cluster_public_key,
+kerberos_realm_name (+2 more)
 list lookup: oci_bds_bds_instances filters
 compartment_id, display_name, state
 conflicts: none
@@ -101,8 +103,15 @@ Only `displayName`, `bootstrapScriptUrl`,
 reconcile in place. `compartmentId`,
 `clusterVersion`, `isHighAvailability`,
 `isSecure`, `clusterProfile`, `networkConfig`,
-and `nodes` remain replacement-only drift, while
-the runtime has no secret side effects.
+and `nodes` remain replacement-only drift.
+`secretId`, `isSecretReused`,
+`bdsClusterVersionSummary`,
+`clusterAdminPassword`, `clusterPublicKey`, and
+`kerberosRealmName` stay create-only for the
+reviewed runtime,
+`timeEarliestCertificateExpiration` stays
+observed status-only, and the runtime has no
+secret side effects.
 end note
 note right of delete_pending
 delete policy: required

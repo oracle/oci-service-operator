@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -98,7 +98,7 @@ func (client *NosqlClient) ConfigurationProvider() *common.ConfigurationProvider
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ChangeTableCompartment.go.html to see an example of how to use ChangeTableCompartment API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ChangeTableCompartment.go.html to see an example of how to use ChangeTableCompartment API.
 // A default retry strategy applies to this operation ChangeTableCompartment()
 func (client NosqlClient) ChangeTableCompartment(ctx context.Context, request ChangeTableCompartmentRequest) (response ChangeTableCompartmentResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -161,7 +161,7 @@ func (client NosqlClient) changeTableCompartment(ctx context.Context, request co
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/CreateIndex.go.html to see an example of how to use CreateIndex API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/CreateIndex.go.html to see an example of how to use CreateIndex API.
 // A default retry strategy applies to this operation CreateIndex()
 func (client NosqlClient) CreateIndex(ctx context.Context, request CreateIndexRequest) (response CreateIndexResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -220,11 +220,11 @@ func (client NosqlClient) createIndex(ctx context.Context, request common.OCIReq
 	return response, err
 }
 
-// CreateReplica Add a replica for this table
+// CreateReplica Add a replica for this table. The table's schema must be frozen prior to this operation.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/CreateReplica.go.html to see an example of how to use CreateReplica API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/CreateReplica.go.html to see an example of how to use CreateReplica API.
 // A default retry strategy applies to this operation CreateReplica()
 func (client NosqlClient) CreateReplica(ctx context.Context, request CreateReplicaRequest) (response CreateReplicaResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -287,7 +287,7 @@ func (client NosqlClient) createReplica(ctx context.Context, request common.OCIR
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/CreateTable.go.html to see an example of how to use CreateTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/CreateTable.go.html to see an example of how to use CreateTable API.
 // A default retry strategy applies to this operation CreateTable()
 func (client NosqlClient) CreateTable(ctx context.Context, request CreateTableRequest) (response CreateTableResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -350,7 +350,7 @@ func (client NosqlClient) createTable(ctx context.Context, request common.OCIReq
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteIndex.go.html to see an example of how to use DeleteIndex API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteIndex.go.html to see an example of how to use DeleteIndex API.
 func (client NosqlClient) DeleteIndex(ctx context.Context, request DeleteIndexRequest) (response DeleteIndexResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -407,7 +407,7 @@ func (client NosqlClient) deleteIndex(ctx context.Context, request common.OCIReq
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteReplica.go.html to see an example of how to use DeleteReplica API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteReplica.go.html to see an example of how to use DeleteReplica API.
 func (client NosqlClient) DeleteReplica(ctx context.Context, request DeleteReplicaRequest) (response DeleteReplicaResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -464,7 +464,7 @@ func (client NosqlClient) deleteReplica(ctx context.Context, request common.OCIR
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteRow.go.html to see an example of how to use DeleteRow API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteRow.go.html to see an example of how to use DeleteRow API.
 func (client NosqlClient) DeleteRow(ctx context.Context, request DeleteRowRequest) (response DeleteRowResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -521,7 +521,7 @@ func (client NosqlClient) deleteRow(ctx context.Context, request common.OCIReque
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteTable.go.html to see an example of how to use DeleteTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteTable.go.html to see an example of how to use DeleteTable API.
 func (client NosqlClient) DeleteTable(ctx context.Context, request DeleteTableRequest) (response DeleteTableResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -578,7 +578,7 @@ func (client NosqlClient) deleteTable(ctx context.Context, request common.OCIReq
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteWorkRequest.go.html to see an example of how to use DeleteWorkRequest API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/DeleteWorkRequest.go.html to see an example of how to use DeleteWorkRequest API.
 func (client NosqlClient) DeleteWorkRequest(ctx context.Context, request DeleteWorkRequestRequest) (response DeleteWorkRequestResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -631,11 +631,73 @@ func (client NosqlClient) deleteWorkRequest(ctx context.Context, request common.
 	return response, err
 }
 
+// GetConfiguration Retrieves the current service-level configuration.  The
+// service may of the standard MULTI_TENANCY type, or of the
+// HOSTED environment type.  In the latter case, information about the
+// current state of the environment's global encryption key is
+// included in the response.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetConfiguration.go.html to see an example of how to use GetConfiguration API.
+// A default retry strategy applies to this operation GetConfiguration()
+func (client NosqlClient) GetConfiguration(ctx context.Context, request GetConfigurationRequest) (response GetConfigurationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.DefaultRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getConfiguration, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = GetConfigurationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = GetConfigurationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetConfigurationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetConfigurationResponse")
+	}
+	return
+}
+
+// getConfiguration implements the OCIOperation interface (enables retrying operations)
+func (client NosqlClient) getConfiguration(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/configuration", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetConfigurationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/nosql-database/20190828/Configuration/GetConfiguration"
+		err = common.PostProcessServiceError(err, "Nosql", "GetConfiguration", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponseWithPolymorphicBody(httpResponse, &response, &configuration{})
+	return response, err
+}
+
 // GetIndex Get information about a single index.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetIndex.go.html to see an example of how to use GetIndex API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetIndex.go.html to see an example of how to use GetIndex API.
 // A default retry strategy applies to this operation GetIndex()
 func (client NosqlClient) GetIndex(ctx context.Context, request GetIndexRequest) (response GetIndexResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -693,7 +755,7 @@ func (client NosqlClient) getIndex(ctx context.Context, request common.OCIReques
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetRow.go.html to see an example of how to use GetRow API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetRow.go.html to see an example of how to use GetRow API.
 // A default retry strategy applies to this operation GetRow()
 func (client NosqlClient) GetRow(ctx context.Context, request GetRowRequest) (response GetRowResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -751,7 +813,7 @@ func (client NosqlClient) getRow(ctx context.Context, request common.OCIRequest,
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetTable.go.html to see an example of how to use GetTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetTable.go.html to see an example of how to use GetTable API.
 // A default retry strategy applies to this operation GetTable()
 func (client NosqlClient) GetTable(ctx context.Context, request GetTableRequest) (response GetTableResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -809,7 +871,7 @@ func (client NosqlClient) getTable(ctx context.Context, request common.OCIReques
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetWorkRequest.go.html to see an example of how to use GetWorkRequest API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/GetWorkRequest.go.html to see an example of how to use GetWorkRequest API.
 // A default retry strategy applies to this operation GetWorkRequest()
 func (client NosqlClient) GetWorkRequest(ctx context.Context, request GetWorkRequestRequest) (response GetWorkRequestResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -867,7 +929,7 @@ func (client NosqlClient) getWorkRequest(ctx context.Context, request common.OCI
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListIndexes.go.html to see an example of how to use ListIndexes API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListIndexes.go.html to see an example of how to use ListIndexes API.
 // A default retry strategy applies to this operation ListIndexes()
 func (client NosqlClient) ListIndexes(ctx context.Context, request ListIndexesRequest) (response ListIndexesResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -925,7 +987,7 @@ func (client NosqlClient) listIndexes(ctx context.Context, request common.OCIReq
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListTableUsage.go.html to see an example of how to use ListTableUsage API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListTableUsage.go.html to see an example of how to use ListTableUsage API.
 // A default retry strategy applies to this operation ListTableUsage()
 func (client NosqlClient) ListTableUsage(ctx context.Context, request ListTableUsageRequest) (response ListTableUsageResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -983,7 +1045,7 @@ func (client NosqlClient) listTableUsage(ctx context.Context, request common.OCI
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListTables.go.html to see an example of how to use ListTables API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListTables.go.html to see an example of how to use ListTables API.
 // A default retry strategy applies to this operation ListTables()
 func (client NosqlClient) ListTables(ctx context.Context, request ListTablesRequest) (response ListTablesResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -1041,7 +1103,7 @@ func (client NosqlClient) listTables(ctx context.Context, request common.OCIRequ
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListWorkRequestErrors.go.html to see an example of how to use ListWorkRequestErrors API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListWorkRequestErrors.go.html to see an example of how to use ListWorkRequestErrors API.
 // A default retry strategy applies to this operation ListWorkRequestErrors()
 func (client NosqlClient) ListWorkRequestErrors(ctx context.Context, request ListWorkRequestErrorsRequest) (response ListWorkRequestErrorsResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -1099,7 +1161,7 @@ func (client NosqlClient) listWorkRequestErrors(ctx context.Context, request com
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListWorkRequestLogs.go.html to see an example of how to use ListWorkRequestLogs API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListWorkRequestLogs.go.html to see an example of how to use ListWorkRequestLogs API.
 // A default retry strategy applies to this operation ListWorkRequestLogs()
 func (client NosqlClient) ListWorkRequestLogs(ctx context.Context, request ListWorkRequestLogsRequest) (response ListWorkRequestLogsResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -1157,7 +1219,7 @@ func (client NosqlClient) listWorkRequestLogs(ctx context.Context, request commo
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListWorkRequests.go.html to see an example of how to use ListWorkRequests API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/ListWorkRequests.go.html to see an example of how to use ListWorkRequests API.
 // A default retry strategy applies to this operation ListWorkRequests()
 func (client NosqlClient) ListWorkRequests(ctx context.Context, request ListWorkRequestsRequest) (response ListWorkRequestsResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -1215,7 +1277,7 @@ func (client NosqlClient) listWorkRequests(ctx context.Context, request common.O
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/PrepareStatement.go.html to see an example of how to use PrepareStatement API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/PrepareStatement.go.html to see an example of how to use PrepareStatement API.
 // A default retry strategy applies to this operation PrepareStatement()
 func (client NosqlClient) PrepareStatement(ctx context.Context, request PrepareStatementRequest) (response PrepareStatementResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -1273,7 +1335,7 @@ func (client NosqlClient) prepareStatement(ctx context.Context, request common.O
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/Query.go.html to see an example of how to use Query API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/Query.go.html to see an example of how to use Query API.
 func (client NosqlClient) Query(ctx context.Context, request QueryRequest) (response QueryResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1330,7 +1392,7 @@ func (client NosqlClient) query(ctx context.Context, request common.OCIRequest, 
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/SummarizeStatement.go.html to see an example of how to use SummarizeStatement API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/SummarizeStatement.go.html to see an example of how to use SummarizeStatement API.
 // A default retry strategy applies to this operation SummarizeStatement()
 func (client NosqlClient) SummarizeStatement(ctx context.Context, request SummarizeStatementRequest) (response SummarizeStatementResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -1384,11 +1446,128 @@ func (client NosqlClient) summarizeStatement(ctx context.Context, request common
 	return response, err
 }
 
+// UnassignKmsKey Removes the global encryption key, if such exists, from a
+// Hosted Environment, reverting to Oracle-managed encryption.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/UnassignKmsKey.go.html to see an example of how to use UnassignKmsKey API.
+func (client NosqlClient) UnassignKmsKey(ctx context.Context, request UnassignKmsKeyRequest) (response UnassignKmsKeyResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.unassignKmsKey, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UnassignKmsKeyResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UnassignKmsKeyResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UnassignKmsKeyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UnassignKmsKeyResponse")
+	}
+	return
+}
+
+// unassignKmsKey implements the OCIOperation interface (enables retrying operations)
+func (client NosqlClient) unassignKmsKey(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/configuration/actions/unassignkmskey", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UnassignKmsKeyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/nosql-database/20190828/Configuration/UnassignKmsKey"
+		err = common.PostProcessServiceError(err, "Nosql", "UnassignKmsKey", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateConfiguration Updates the service-level configuration.  The discriminator value
+// `UpdateConfigurationDetails.environment` must match the service's
+// environment type.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/UpdateConfiguration.go.html to see an example of how to use UpdateConfiguration API.
+func (client NosqlClient) UpdateConfiguration(ctx context.Context, request UpdateConfigurationRequest) (response UpdateConfigurationResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateConfiguration, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = UpdateConfigurationResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = UpdateConfigurationResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateConfigurationResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateConfigurationResponse")
+	}
+	return
+}
+
+// updateConfiguration implements the OCIOperation interface (enables retrying operations)
+func (client NosqlClient) updateConfiguration(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/configuration", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateConfigurationResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/nosql-database/20190828/Configuration/UpdateConfiguration"
+		err = common.PostProcessServiceError(err, "Nosql", "UpdateConfiguration", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateRow Write a single row into the table.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/UpdateRow.go.html to see an example of how to use UpdateRow API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/UpdateRow.go.html to see an example of how to use UpdateRow API.
 func (client NosqlClient) UpdateRow(ctx context.Context, request UpdateRowRequest) (response UpdateRowResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -1446,7 +1625,7 @@ func (client NosqlClient) updateRow(ctx context.Context, request common.OCIReque
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/UpdateTable.go.html to see an example of how to use UpdateTable API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/nosql/UpdateTable.go.html to see an example of how to use UpdateTable API.
 func (client NosqlClient) UpdateTable(ctx context.Context, request UpdateTableRequest) (response UpdateTableResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()

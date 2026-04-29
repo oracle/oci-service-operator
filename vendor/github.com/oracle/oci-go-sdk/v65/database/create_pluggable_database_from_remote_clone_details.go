@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -34,6 +34,12 @@ type CreatePluggableDatabaseFromRemoteCloneDetails struct {
 	DblinkUserPassword *string `mandatory:"false" json:"dblinkUserPassword"`
 
 	RefreshableCloneDetails *CreatePluggableDatabaseRefreshableCloneDetails `mandatory:"false" json:"refreshableCloneDetails"`
+
+	// True if Pluggable Database needs to be thin cloned and false if Pluggable Database needs to be thick cloned.
+	IsThinClone *bool `mandatory:"false" json:"isThinClone"`
+
+	// The OCID of the Source Pluggable Database Snapshot id.
+	SourcePluggableDatabaseSnapshotId *string `mandatory:"false" json:"sourcePluggableDatabaseSnapshotId"`
 }
 
 func (m CreatePluggableDatabaseFromRemoteCloneDetails) String() string {
@@ -47,7 +53,7 @@ func (m CreatePluggableDatabaseFromRemoteCloneDetails) ValidateEnumValue() (bool
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

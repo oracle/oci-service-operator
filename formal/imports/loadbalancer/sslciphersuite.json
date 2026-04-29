@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "loadbalancer",
+  "slug": "sslciphersuite",
+  "kind": "SSLCipherSuite",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_loadbalancer_sslciphersuite",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSSLCipherSuite",
+        "requestType": "loadbalancer.CreateSSLCipherSuiteRequest",
+        "responseType": "loadbalancer.CreateSSLCipherSuiteResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSSLCipherSuite",
+        "requestType": "loadbalancer.GetSSLCipherSuiteRequest",
+        "responseType": "loadbalancer.GetSSLCipherSuiteResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSSLCipherSuite",
+        "requestType": "loadbalancer.ListSSLCipherSuiteRequest",
+        "responseType": "loadbalancer.ListSSLCipherSuiteResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSSLCipherSuite",
+        "requestType": "loadbalancer.UpdateSSLCipherSuiteRequest",
+        "responseType": "loadbalancer.UpdateSSLCipherSuiteResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSSLCipherSuite",
+        "requestType": "loadbalancer.DeleteSSLCipherSuiteRequest",
+        "responseType": "loadbalancer.DeleteSSLCipherSuiteResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_loadbalancer_sslciphersuite",
+    "collectionField": "sslciphersuite",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/loadbalancer/sslciphersuite/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/loadbalancer/sslciphersuite/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for loadbalancer/sslciphersuite; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

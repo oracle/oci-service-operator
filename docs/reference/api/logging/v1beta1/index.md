@@ -21,11 +21,7 @@ No customer-visible package currently exposes `logging.oracle.com/v1beta1`.
 | [Log](#kind-log) | Namespaced | [Sample](../../../samples/logging/v1beta1/log.md) | - |
 | [LogGroup](#kind-loggroup) | Namespaced | [Sample](../../../samples/logging/v1beta1/loggroup.md) | - |
 | [LogSavedSearch](#kind-logsavedsearch) | Namespaced | [Sample](../../../samples/logging/v1beta1/logsavedsearch.md) | - |
-| [Service](#kind-service) | Namespaced | [Sample](../../../samples/logging/v1beta1/service.md) | - |
 | [UnifiedAgentConfiguration](#kind-unifiedagentconfiguration) | Namespaced | [Sample](../../../samples/logging/v1beta1/unifiedagentconfiguration.md) | - |
-| [WorkRequest](#kind-workrequest) | Namespaced | [Sample](../../../samples/logging/v1beta1/workrequest.md) | - |
-| [WorkRequestError](#kind-workrequesterror) | Namespaced | [Sample](../../../samples/logging/v1beta1/workrequesterror.md) | - |
-| [WorkRequestLog](#kind-workrequestlog) | Namespaced | [Sample](../../../samples/logging/v1beta1/workrequestlog.md) | - |
 
 <a id="kind-log"></a>
 ## Log
@@ -46,9 +42,9 @@ LogSpec defines the desired state of Log.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | [`configuration`](#kind-log-spec-configuration) | LogConfiguration defines nested fields for Log.Configuration. | `object` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `isEnabled` | Whether or not this resource is currently enabled. | `boolean` | No | - | - |
 | `logGroupId` | The OCID of the log group that owns this log. | `string` | Yes | - | - |
 | `logType` | The logType that the log object is for, whether custom or service. | `string` | Yes | - | - |
@@ -103,9 +99,9 @@ LogStatus defines the observed state of Log.
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | No | - | - |
 | [`configuration`](#kind-log-status-configuration) | LogConfiguration defines nested fields for Log.Configuration. | `object` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the resource. | `string` | No | - | - |
 | `isEnabled` | Whether or not this resource is currently enabled. | `boolean` | No | - | - |
 | `lifecycleState` | The pipeline state. | `string` | No | - | - |
@@ -235,10 +231,10 @@ LogGroupSpec defines the desired state of LogGroup.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description for this resource. | `string` | No | - | - |
 | `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 
 <a id="kind-loggroup-status"></a>
 ### Status
@@ -248,10 +244,10 @@ LogGroupStatus defines the observed state of LogGroup.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description for this resource. | `string` | No | - | - |
 | `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the resource. | `string` | No | - | - |
 | `lifecycleState` | The log group object state. | `string` | No | - | - |
 | [`status`](#kind-loggroup-status-status) | - | `object` | Yes | - | - |
@@ -336,9 +332,9 @@ LogSavedSearchSpec defines the desired state of LogSavedSearch.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description for this resource. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `name` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | Yes | - | - |
 | `query` | The search query that is saved. | `string` | Yes | - | - |
 
@@ -350,9 +346,9 @@ LogSavedSearchStatus defines the observed state of LogSavedSearch.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description for this resource. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the resource. | `string` | No | - | - |
 | `lifecycleState` | The state of the LogSavedSearch | `string` | No | - | - |
 | `name` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
@@ -420,137 +416,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
 
-<a id="kind-service"></a>
-## Service
-
-Service is the Schema for the services API.
-
-- `Plural`: `services`
-- `Scope`: `Namespaced`
-- `APIVersion`: `logging.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/logging/v1beta1/service.md) (`config/samples/logging_v1beta1_service.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-service-spec"></a>
-### Spec
-
-ServiceSpec defines the desired state of Service.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-service-status"></a>
-### Status
-
-ServiceStatus defines the observed state of Service.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `endpoint` | Service endpoint. | `string` | No | - | - |
-| `id` | Service ID. | `string` | No | - | - |
-| `name` | User-friendly service name. | `string` | No | - | - |
-| `namespace` | Apollo project namespace, if any. | `string` | No | - | - |
-| [`resourceTypes`](#kind-service-status-resourcetypes) | Type of resource that a service provides. | `list[object]` | No | - | - |
-| `servicePrincipalName` | Service ID as set in Service Principal. | `string` | No | - | - |
-| [`status`](#kind-service-status-status) | - | `object` | Yes | - | - |
-| `tenantId` | Tenant OCID. | `string` | No | - | - |
-
-<a id="kind-service-status-resourcetypes"></a>
-#### Status.resourceTypes[]
-
-[Back to Service status](#kind-service-status)
-
-ServiceResourceType defines nested fields for Service.ResourceType.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`categories`](#kind-service-status-resourcetypes-categories) | Categories for resources. | `list[object]` | No | - | - |
-| `name` | Resource type name. | `string` | No | - | - |
-
-<a id="kind-service-status-resourcetypes-categories"></a>
-##### Status.resourceTypes[].categories[]
-
-[Back to Service status](#kind-service-status)
-
-ServiceResourceTypeCategory defines nested fields for Service.ResourceType.Category.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `displayName` | Category display name. Avoid entering confidential information. | `string` | No | - | - |
-| `name` | Category name. | `string` | No | - | - |
-| [`parameters`](#kind-service-status-resourcetypes-categories-parameters) | Parameters the category supports. | `list[object]` | No | - | - |
-
-<a id="kind-service-status-resourcetypes-categories-parameters"></a>
-###### Status.resourceTypes[].categories[].parameters[]
-
-[Back to Service status](#kind-service-status)
-
-ServiceResourceTypeCategoryParameter defines nested fields for Service.ResourceType.Category.Parameter.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `name` | Parameter name. | `string` | No | - | - |
-| `pattern` | Java regex pattern to validate a parameter value. | `string` | No | - | - |
-| `type` | - | `string` | No | - | - |
-
-<a id="kind-service-status-status"></a>
-#### Status.status
-
-[Back to Service status](#kind-service-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-service-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-service-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-service-status-status-async"></a>
-##### Status.status.async
-
-[Back to Service status](#kind-service-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-service-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-service-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to Service status](#kind-service-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-service-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to Service status](#kind-service-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
 <a id="kind-unifiedagentconfiguration"></a>
 ## UnifiedAgentConfiguration
 
@@ -570,10 +435,10 @@ UnifiedAgentConfigurationSpec defines the desired state of UnifiedAgentConfigura
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `description` | Description for this resource. | `string` | No | - | - |
-| `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `description` | Description for this resource. | `string` | Yes | - | - |
+| `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | Yes | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`groupAssociation`](#kind-unifiedagentconfiguration-spec-groupassociation) | UnifiedAgentConfigurationGroupAssociation defines nested fields for UnifiedAgentConfiguration.GroupAssociation. | `object` | No | - | - |
 | `isEnabled` | Whether or not this resource is currently enabled. | `boolean` | Yes | - | - |
 | [`serviceConfiguration`](#kind-unifiedagentconfiguration-spec-serviceconfiguration) | UnifiedAgentConfigurationServiceConfiguration defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration. | `object` | Yes | - | - |
@@ -598,10 +463,105 @@ UnifiedAgentConfigurationServiceConfiguration defines nested fields for UnifiedA
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`applicationConfigurations`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations) | Unified Agent monitoring application configuration details. | `list[object]` | No | - | - |
 | `configurationType` | - | `string` | No | - | - |
 | [`destination`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-destination) | UnifiedAgentConfigurationServiceConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination. | `object` | No | - | - |
+| [`filter`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter) | Logging filter object. | `list[object]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | [`sources`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-sources) | Logging source object. | `list[object]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations"></a>
+##### Spec.serviceConfiguration.applicationConfigurations[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`destination`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-destination) | UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Destination. | `object` | No | - | - |
+| [`filter`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-filter) | UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Filter. | `object` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`source`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-source) | UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source. | `object` | No | - | - |
+| `sourceType` | - | `string` | No | - | - |
+| [`sources`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-sources) | Tail log source objects. | `list[object]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-destination"></a>
+###### Spec.serviceConfiguration.applicationConfigurations[].destination
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Destination.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | Yes | - | - |
+| `metricsNamespace` | Namespace to which metrics will be emitted. | `string` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-filter"></a>
+###### Spec.serviceConfiguration.applicationConfigurations[].filter
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Filter.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowList` | List of metrics regex to be allowed. | `list[string]` | No | - | - |
+| `denyList` | List of metrics regex to be denied. | `list[string]` | No | - | - |
+| `name` | Unique name for the filter. | `string` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-source"></a>
+###### Spec.serviceConfiguration.applicationConfigurations[].source
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Unique name for the source. | `string` | Yes | - | - |
+| [`scrapeTargets`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-source-scrapetargets) | List of UnifiedAgentKubernetesScrapeTarget. | `list[object]` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-source-scrapetargets"></a>
+###### Spec.serviceConfiguration.applicationConfigurations[].source.scrapeTargets[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `k8sNamespace` | K8s namespace of the resource. | `string` | Yes | - | - |
+| `resourceGroup` | Resource group in OCI monitoring. | `string` | No | - | - |
+| `resourceType` | Type of resource to scrape metrics. | `string` | Yes | - | - |
+| `serviceName` | Name of the service prepended to the endpoints. | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-sources"></a>
+###### Spec.serviceConfiguration.applicationConfigurations[].sources[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Unique name for the source. | `string` | Yes | - | - |
+| [`scrapeTargets`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-sources-scrapetargets) | List of UnifiedAgentKubernetesScrapeTarget. | `list[object]` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-applicationconfigurations-sources-scrapetargets"></a>
+###### Spec.serviceConfiguration.applicationConfigurations[].sources[].scrapeTargets[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `k8sNamespace` | K8s namespace of the resource. | `string` | Yes | - | - |
+| `resourceGroup` | Resource group in OCI monitoring. | `string` | No | - | - |
+| `resourceType` | Type of resource to scrape metrics. | `string` | Yes | - | - |
+| `serviceName` | Name of the service prepended to the endpoints. | `string` | No | - | - |
 
 <a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-destination"></a>
 ##### Spec.serviceConfiguration.destination
@@ -648,7 +608,7 @@ UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfig
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `metrics` | List of unified monitoring agent operational metrics. | `list[string]` | No | - | - |
-| [`recordInput`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-destination-operationalmetricsconfiguration-source-recordinput) | UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Source.RecordInput. | `object` | No | - | - |
+| [`recordInput`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-destination-operationalmetricsconfiguration-source-recordinput) | UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Source.RecordInput. | `object` | Yes | - | - |
 | `type` | Type of the unified monitoring agent operational metrics source object. | `string` | Yes | - | - |
 
 <a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-destination-operationalmetricsconfiguration-source-recordinput"></a>
@@ -663,6 +623,178 @@ UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfig
 | `namespace` | Namespace to emit the operational metrics. | `string` | Yes | - | - |
 | `resourceGroup` | Resource group to emit the operational metrics. | `string` | No | - | - |
 
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter"></a>
+##### Spec.serviceConfiguration.filter[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`allowList`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-allowlist) | A list of filtering rules to include logs | `list[object]` | No | - | - |
+| `customFilterType` | Type of the custom filter | `string` | No | - | - |
+| [`customSections`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-customsections) | List of custom sections in custom filter | `list[object]` | No | - | - |
+| [`denyList`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-denylist) | A list of filtering rules to reject logs | `list[object]` | No | - | - |
+| `emitInvalidRecordToError` | If true, emit invalid record to @ERROR label. Invalid cases are: 1) key does not exist; 2) the format does not match; or 3) an unexpected error. You can rescue unexpected format logs in the @ERROR lable. If you want to ignore these errors, set this to false. | `boolean` | No | - | - |
+| `filterType` | - | `string` | No | - | - |
+| `hashValueField` | Store the parsed values as a hash value in a field. | `string` | No | - | - |
+| `injectKeyPrefix` | Store the parsed values with the specified key name prefix. | `string` | No | - | - |
+| `isAutoTypecastEnabled` | If true, automatically casts the field types. | `boolean` | No | - | - |
+| `isRenewRecordEnabled` | If true, it modifies a new empty hash | `boolean` | No | - | - |
+| `isRubyEnabled` | When set to true, the full Ruby syntax is enabled in the ${} expression. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `keepKeys` | A list of keys to keep. Only relevant if isRenewRecordEnabled is set to true | `list[string]` | No | - | - |
+| `keyName` | The field name in the record to parse. | `string` | No | - | - |
+| `name` | Unique name for the filter. | `string` | Yes | - | - |
+| `params` | Parameters of the custom filter | `map[string, string]` | No | - | - |
+| [`parser`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser) | UnifiedAgentConfigurationServiceConfigurationFilterParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser. | `object` | No | - | - |
+| [`recordList`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-recordlist) | Add new key-value pairs in logs | `list[object]` | No | - | - |
+| `removeKeyNameField` | If true, remove the keyName field when parsing is succeeded. | `boolean` | No | - | - |
+| `removeKeys` | A list of keys to delete | `list[string]` | No | - | - |
+| `renewTimeKey` | Overwrites the time of logs with this value, this value must be a Unix timestamp. | `string` | No | - | - |
+| `replaceInvalidSequence` | If true, the invalid string is replaced with safe characters and is re-parsed. | `boolean` | No | - | - |
+| `reserveData` | If true, keep the original key-value pair in the parsed result. | `boolean` | No | - | - |
+| `reserveTime` | If true, keep the original event time in the parsed result. | `boolean` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-allowlist"></a>
+###### Spec.serviceConfiguration.filter[].allowList[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilterAllowList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.AllowList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The field name to which the regular expression is applied | `string` | No | - | - |
+| `pattern` | The regular expression | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-customsections"></a>
+###### Spec.serviceConfiguration.filter[].customSections[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilterCustomSection defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.CustomSection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The name of the custom section | `string` | No | - | - |
+| `params` | Parameters in the custom section | `map[string, string]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-denylist"></a>
+###### Spec.serviceConfiguration.filter[].denyList[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilterDenyList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.DenyList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The field name to which the regular expression is applied | `string` | No | - | - |
+| `pattern` | The regular expression | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser"></a>
+###### Spec.serviceConfiguration.filter[].parser
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilterParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `delimiter` | TSV delimiter. | `string` | No | - | - |
+| `expression` | Regex pattern. | `string` | No | - | - |
+| `fieldTimeKey` | Specifies the time field for the event time. If the event doesn't have this field, the current time is used. | `string` | No | - | - |
+| `format` | Mutiline pattern format. | `list[string]` | No | - | - |
+| `formatFirstline` | First line pattern format. | `string` | No | - | - |
+| `grokFailureKey` | Grok failure key. | `string` | No | - | - |
+| `grokNameKey` | Grok name key. | `string` | No | - | - |
+| `isEstimateCurrentEvent` | If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified. | `boolean` | No | - | - |
+| `isKeepTimeKey` | If true, keep the time field in the record. | `boolean` | No | - | - |
+| `isMergeCriFields` | If you don't need stream or logtag fields, set this to false. | `boolean` | No | - | - |
+| `isNullEmptyString` | If true, an empty string field is replaced with a null value. | `boolean` | No | - | - |
+| `isSupportColonlessIdent` | Specifies whether or not to support colonless ident. Corresponds to the Fluentd support_colonless_ident parameter. | `boolean` | No | - | - |
+| `isWithPriority` | Specifies with priority or not. Corresponds to the Fluentd with_priority parameter. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `keys` | TSV keys. | `list[string]` | No | - | - |
+| `messageFormat` | Syslog message format. | `string` | No | - | - |
+| `messageKey` | Specifies the field name to contain logs. | `string` | No | - | - |
+| `multiLineStartRegexp` | Multiline start regexp pattern. | `string` | No | - | - |
+| [`nestedParser`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser-nestedparser) | Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey. | `object` | No | - | - |
+| `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
+| `parserType` | - | `string` | No | - | - |
+| [`patterns`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser-patterns) | Grok pattern object. | `list[object]` | No | - | - |
+| [`recordInput`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser-recordinput) | UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.RecordInput. | `object` | No | - | - |
+| `rfc5424TimeFormat` | RFC 5424 time format. | `string` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
+| `syslogParserType` | Syslog parser type. | `string` | No | - | - |
+| `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
+| `timeType` | JSON parser time type. | `string` | No | - | - |
+| `timeoutInMilliseconds` | Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern. | `integer` | No | - | - |
+| `types` | Specify types for converting a field into another type. For example, With this configuration: <parse> @type csv keys time,host,req_id,user time_key time </parse> This incoming event: "2013/02/28 12:00:00,192.168.0.1,111,-" is parsed as: 1362020400 (2013/02/28/ 12:00:00) record: { "host" : "192.168.0.1", "req_id" : "111", "user" : "-" } | `map[string, string]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser-nestedparser"></a>
+###### Spec.serviceConfiguration.filter[].parser.nestedParser
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `fieldTimeKey` | Specifies the time field for the event time. If the event doesn't have this field, the current time is used. | `string` | No | - | - |
+| `isEstimateCurrentEvent` | If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified. | `boolean` | No | - | - |
+| `isKeepTimeKey` | If true, keep the time field in the record. | `boolean` | No | - | - |
+| `isNullEmptyString` | If true, an empty string field is replaced with a null value. | `boolean` | No | - | - |
+| `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
+| `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
+| `timeType` | JSON parser time type. | `string` | No | - | - |
+| `timeoutInMilliseconds` | Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern. | `integer` | No | - | - |
+| `types` | Specify types for converting a field into another type. For example, With this configuration: <parse> @type csv keys time,host,req_id,user time_key time </parse> This incoming event: "2013/02/28 12:00:00,192.168.0.1,111,-" is parsed as: 1362020400 (2013/02/28/ 12:00:00) record: { "host" : "192.168.0.1", "req_id" : "111", "user" : "-" } | `map[string, string]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser-patterns"></a>
+###### Spec.serviceConfiguration.filter[].parser.patterns[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilterParserPattern defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.Pattern.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `fieldTimeFormat` | Process value using the specified format. This is available only when time_type is a string. | `string` | No | - | - |
+| `fieldTimeKey` | Specify the time field for the event time. If the event doesn't have this field, the current time is used. | `string` | No | - | - |
+| `fieldTimeZone` | Use the specified time zone. The time value can be parsed or formatted in the specified time zone. | `string` | No | - | - |
+| `name` | The name key to tag this Grok pattern. | `string` | No | - | - |
+| `pattern` | The Grok pattern. | `string` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-parser-recordinput"></a>
+###### Spec.serviceConfiguration.filter[].parser.recordInput
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.RecordInput.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `dimensions` | Dimensions to be added for metrics. | `map[string, string]` | No | - | - |
+| `namespace` | Namespace to emit metrics. | `string` | No | - | - |
+| `resourceGroup` | Resource group to emit metrics. | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-filter-recordlist"></a>
+###### Spec.serviceConfiguration.filter[].recordList[]
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationFilterRecordList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.RecordList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | A new key | `string` | No | - | - |
+| `value` | A new value | `string` | No | - | - |
+
 <a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-sources"></a>
 ##### Spec.serviceConfiguration.sources[]
 
@@ -672,12 +804,25 @@ UnifiedAgentConfigurationServiceConfigurationSource defines nested fields for Un
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`advancedOptions`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-advancedoptions) | UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions. | `object` | No | - | - |
 | `channels` | Windows event log channels. | `list[string]` | No | - | - |
+| `customPlugin` | User customized source plugin. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Unique name for the source. | `string` | Yes | - | - |
 | [`parser`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-parser) | UnifiedAgentConfigurationServiceConfigurationSourceParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser. | `object` | No | - | - |
 | `paths` | Absolute paths for log source files. Wildcards can be used. | `list[string]` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-advancedoptions"></a>
+###### Spec.serviceConfiguration.sources[].advancedOptions
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isReadFromHead` | Starts to read the logs from the head of the file or the last read position recorded in pos_file, not tail. | `boolean` | No | - | - |
 
 <a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-parser"></a>
 ###### Spec.serviceConfiguration.sources[].parser
@@ -708,9 +853,12 @@ UnifiedAgentConfigurationServiceConfigurationSourceParser defines nested fields 
 | `multiLineStartRegexp` | Multiline start regexp pattern. | `string` | No | - | - |
 | [`nestedParser`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-parser-nestedparser) | Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey. | `object` | No | - | - |
 | `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
 | `parserType` | - | `string` | No | - | - |
 | [`patterns`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-parser-patterns) | Grok pattern object. | `list[object]` | No | - | - |
+| [`recordInput`](#kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-parser-recordinput) | UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.RecordInput. | `object` | No | - | - |
 | `rfc5424TimeFormat` | RFC 5424 time format. | `string` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
 | `syslogParserType` | Syslog parser type. | `string` | No | - | - |
 | `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
 | `timeType` | JSON parser time type. | `string` | No | - | - |
@@ -731,6 +879,8 @@ Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeForm
 | `isKeepTimeKey` | If true, keep the time field in the record. | `boolean` | No | - | - |
 | `isNullEmptyString` | If true, an empty string field is replaced with a null value. | `boolean` | No | - | - |
 | `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
 | `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
 | `timeType` | JSON parser time type. | `string` | No | - | - |
 | `timeoutInMilliseconds` | Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern. | `integer` | No | - | - |
@@ -751,6 +901,19 @@ UnifiedAgentConfigurationServiceConfigurationSourceParserPattern defines nested 
 | `name` | The name key to tag this Grok pattern. | `string` | No | - | - |
 | `pattern` | The Grok pattern. | `string` | Yes | - | - |
 
+<a id="kind-unifiedagentconfiguration-spec-serviceconfiguration-sources-parser-recordinput"></a>
+###### Spec.serviceConfiguration.sources[].parser.recordInput
+
+[Back to UnifiedAgentConfiguration spec](#kind-unifiedagentconfiguration-spec)
+
+UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.RecordInput.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `dimensions` | Dimensions to be added for metrics. | `map[string, string]` | No | - | - |
+| `namespace` | Namespace to emit metrics. | `string` | No | - | - |
+| `resourceGroup` | Resource group to emit metrics. | `string` | No | - | - |
+
 <a id="kind-unifiedagentconfiguration-status"></a>
 ### Status
 
@@ -761,10 +924,10 @@ UnifiedAgentConfigurationStatus defines the observed state of UnifiedAgentConfig
 | `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | No | - | - |
 | `configurationState` | State of unified agent service configuration. | `string` | No | - | - |
 | `configurationType` | Type of Unified Agent service configuration. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | Description for this resource. | `string` | No | - | - |
 | `displayName` | The user-friendly display name. This must be unique within the enclosing resource, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`groupAssociation`](#kind-unifiedagentconfiguration-status-groupassociation) | UnifiedAgentConfigurationGroupAssociation defines nested fields for UnifiedAgentConfiguration.GroupAssociation. | `object` | No | - | - |
 | `id` | The OCID of the resource. | `string` | No | - | - |
 | `isEnabled` | Whether or not this resource is currently enabled. | `boolean` | No | - | - |
@@ -794,10 +957,105 @@ UnifiedAgentConfigurationServiceConfiguration defines nested fields for UnifiedA
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`applicationConfigurations`](#kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations) | Unified Agent monitoring application configuration details. | `list[object]` | No | - | - |
 | `configurationType` | - | `string` | No | - | - |
 | [`destination`](#kind-unifiedagentconfiguration-status-serviceconfiguration-destination) | UnifiedAgentConfigurationServiceConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination. | `object` | No | - | - |
+| [`filter`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter) | Logging filter object. | `list[object]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | [`sources`](#kind-unifiedagentconfiguration-status-serviceconfiguration-sources) | Logging source object. | `list[object]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations"></a>
+##### Status.serviceConfiguration.applicationConfigurations[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfiguration defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`destination`](#kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-destination) | UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Destination. | `object` | No | - | - |
+| [`filter`](#kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-filter) | UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Filter. | `object` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| [`source`](#kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-source) | UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source. | `object` | No | - | - |
+| `sourceType` | - | `string` | No | - | - |
+| [`sources`](#kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-sources) | Tail log source objects. | `list[object]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-destination"></a>
+###### Status.serviceConfiguration.applicationConfigurations[].destination
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationDestination defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Destination.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID of the compartment that the resource belongs to. | `string` | Yes | - | - |
+| `metricsNamespace` | Namespace to which metrics will be emitted. | `string` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-filter"></a>
+###### Status.serviceConfiguration.applicationConfigurations[].filter
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Filter.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `allowList` | List of metrics regex to be allowed. | `list[string]` | No | - | - |
+| `denyList` | List of metrics regex to be denied. | `list[string]` | No | - | - |
+| `name` | Unique name for the filter. | `string` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-source"></a>
+###### Status.serviceConfiguration.applicationConfigurations[].source
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Unique name for the source. | `string` | Yes | - | - |
+| [`scrapeTargets`](#kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-source-scrapetargets) | List of UnifiedAgentKubernetesScrapeTarget. | `list[object]` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-source-scrapetargets"></a>
+###### Status.serviceConfiguration.applicationConfigurations[].source.scrapeTargets[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `k8sNamespace` | K8s namespace of the resource. | `string` | Yes | - | - |
+| `resourceGroup` | Resource group in OCI monitoring. | `string` | No | - | - |
+| `resourceType` | Type of resource to scrape metrics. | `string` | Yes | - | - |
+| `serviceName` | Name of the service prepended to the endpoints. | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-sources"></a>
+###### Status.serviceConfiguration.applicationConfigurations[].sources[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSource defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | Unique name for the source. | `string` | Yes | - | - |
+| [`scrapeTargets`](#kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-sources-scrapetargets) | List of UnifiedAgentKubernetesScrapeTarget. | `list[object]` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-applicationconfigurations-sources-scrapetargets"></a>
+###### Status.serviceConfiguration.applicationConfigurations[].sources[].scrapeTargets[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationApplicationConfigurationSourceScrapeTarget defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.ApplicationConfiguration.Source.ScrapeTarget.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `k8sNamespace` | K8s namespace of the resource. | `string` | Yes | - | - |
+| `resourceGroup` | Resource group in OCI monitoring. | `string` | No | - | - |
+| `resourceType` | Type of resource to scrape metrics. | `string` | Yes | - | - |
+| `serviceName` | Name of the service prepended to the endpoints. | `string` | No | - | - |
 
 <a id="kind-unifiedagentconfiguration-status-serviceconfiguration-destination"></a>
 ##### Status.serviceConfiguration.destination
@@ -844,7 +1102,7 @@ UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfig
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `metrics` | List of unified monitoring agent operational metrics. | `list[string]` | No | - | - |
-| [`recordInput`](#kind-unifiedagentconfiguration-status-serviceconfiguration-destination-operationalmetricsconfiguration-source-recordinput) | UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Source.RecordInput. | `object` | No | - | - |
+| [`recordInput`](#kind-unifiedagentconfiguration-status-serviceconfiguration-destination-operationalmetricsconfiguration-source-recordinput) | UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfigurationSourceRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Destination.OperationalMetricsConfiguration.Source.RecordInput. | `object` | Yes | - | - |
 | `type` | Type of the unified monitoring agent operational metrics source object. | `string` | Yes | - | - |
 
 <a id="kind-unifiedagentconfiguration-status-serviceconfiguration-destination-operationalmetricsconfiguration-source-recordinput"></a>
@@ -859,6 +1117,178 @@ UnifiedAgentConfigurationServiceConfigurationDestinationOperationalMetricsConfig
 | `namespace` | Namespace to emit the operational metrics. | `string` | Yes | - | - |
 | `resourceGroup` | Resource group to emit the operational metrics. | `string` | No | - | - |
 
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter"></a>
+##### Status.serviceConfiguration.filter[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilter defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`allowList`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-allowlist) | A list of filtering rules to include logs | `list[object]` | No | - | - |
+| `customFilterType` | Type of the custom filter | `string` | No | - | - |
+| [`customSections`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-customsections) | List of custom sections in custom filter | `list[object]` | No | - | - |
+| [`denyList`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-denylist) | A list of filtering rules to reject logs | `list[object]` | No | - | - |
+| `emitInvalidRecordToError` | If true, emit invalid record to @ERROR label. Invalid cases are: 1) key does not exist; 2) the format does not match; or 3) an unexpected error. You can rescue unexpected format logs in the @ERROR lable. If you want to ignore these errors, set this to false. | `boolean` | No | - | - |
+| `filterType` | - | `string` | No | - | - |
+| `hashValueField` | Store the parsed values as a hash value in a field. | `string` | No | - | - |
+| `injectKeyPrefix` | Store the parsed values with the specified key name prefix. | `string` | No | - | - |
+| `isAutoTypecastEnabled` | If true, automatically casts the field types. | `boolean` | No | - | - |
+| `isRenewRecordEnabled` | If true, it modifies a new empty hash | `boolean` | No | - | - |
+| `isRubyEnabled` | When set to true, the full Ruby syntax is enabled in the ${} expression. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `keepKeys` | A list of keys to keep. Only relevant if isRenewRecordEnabled is set to true | `list[string]` | No | - | - |
+| `keyName` | The field name in the record to parse. | `string` | No | - | - |
+| `name` | Unique name for the filter. | `string` | Yes | - | - |
+| `params` | Parameters of the custom filter | `map[string, string]` | No | - | - |
+| [`parser`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser) | UnifiedAgentConfigurationServiceConfigurationFilterParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser. | `object` | No | - | - |
+| [`recordList`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-recordlist) | Add new key-value pairs in logs | `list[object]` | No | - | - |
+| `removeKeyNameField` | If true, remove the keyName field when parsing is succeeded. | `boolean` | No | - | - |
+| `removeKeys` | A list of keys to delete | `list[string]` | No | - | - |
+| `renewTimeKey` | Overwrites the time of logs with this value, this value must be a Unix timestamp. | `string` | No | - | - |
+| `replaceInvalidSequence` | If true, the invalid string is replaced with safe characters and is re-parsed. | `boolean` | No | - | - |
+| `reserveData` | If true, keep the original key-value pair in the parsed result. | `boolean` | No | - | - |
+| `reserveTime` | If true, keep the original event time in the parsed result. | `boolean` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-allowlist"></a>
+###### Status.serviceConfiguration.filter[].allowList[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilterAllowList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.AllowList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The field name to which the regular expression is applied | `string` | No | - | - |
+| `pattern` | The regular expression | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-customsections"></a>
+###### Status.serviceConfiguration.filter[].customSections[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilterCustomSection defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.CustomSection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `name` | The name of the custom section | `string` | No | - | - |
+| `params` | Parameters in the custom section | `map[string, string]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-denylist"></a>
+###### Status.serviceConfiguration.filter[].denyList[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilterDenyList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.DenyList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The field name to which the regular expression is applied | `string` | No | - | - |
+| `pattern` | The regular expression | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser"></a>
+###### Status.serviceConfiguration.filter[].parser
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilterParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `delimiter` | TSV delimiter. | `string` | No | - | - |
+| `expression` | Regex pattern. | `string` | No | - | - |
+| `fieldTimeKey` | Specifies the time field for the event time. If the event doesn't have this field, the current time is used. | `string` | No | - | - |
+| `format` | Mutiline pattern format. | `list[string]` | No | - | - |
+| `formatFirstline` | First line pattern format. | `string` | No | - | - |
+| `grokFailureKey` | Grok failure key. | `string` | No | - | - |
+| `grokNameKey` | Grok name key. | `string` | No | - | - |
+| `isEstimateCurrentEvent` | If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified. | `boolean` | No | - | - |
+| `isKeepTimeKey` | If true, keep the time field in the record. | `boolean` | No | - | - |
+| `isMergeCriFields` | If you don't need stream or logtag fields, set this to false. | `boolean` | No | - | - |
+| `isNullEmptyString` | If true, an empty string field is replaced with a null value. | `boolean` | No | - | - |
+| `isSupportColonlessIdent` | Specifies whether or not to support colonless ident. Corresponds to the Fluentd support_colonless_ident parameter. | `boolean` | No | - | - |
+| `isWithPriority` | Specifies with priority or not. Corresponds to the Fluentd with_priority parameter. | `boolean` | No | - | - |
+| `jsonData` | - | `string` | No | - | - |
+| `keys` | TSV keys. | `list[string]` | No | - | - |
+| `messageFormat` | Syslog message format. | `string` | No | - | - |
+| `messageKey` | Specifies the field name to contain logs. | `string` | No | - | - |
+| `multiLineStartRegexp` | Multiline start regexp pattern. | `string` | No | - | - |
+| [`nestedParser`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser-nestedparser) | Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey. | `object` | No | - | - |
+| `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
+| `parserType` | - | `string` | No | - | - |
+| [`patterns`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser-patterns) | Grok pattern object. | `list[object]` | No | - | - |
+| [`recordInput`](#kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser-recordinput) | UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.RecordInput. | `object` | No | - | - |
+| `rfc5424TimeFormat` | RFC 5424 time format. | `string` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
+| `syslogParserType` | Syslog parser type. | `string` | No | - | - |
+| `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
+| `timeType` | JSON parser time type. | `string` | No | - | - |
+| `timeoutInMilliseconds` | Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern. | `integer` | No | - | - |
+| `types` | Specify types for converting a field into another type. For example, With this configuration: <parse> @type csv keys time,host,req_id,user time_key time </parse> This incoming event: "2013/02/28 12:00:00,192.168.0.1,111,-" is parsed as: 1362020400 (2013/02/28/ 12:00:00) record: { "host" : "192.168.0.1", "req_id" : "111", "user" : "-" } | `map[string, string]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser-nestedparser"></a>
+###### Status.serviceConfiguration.filter[].parser.nestedParser
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `fieldTimeKey` | Specifies the time field for the event time. If the event doesn't have this field, the current time is used. | `string` | No | - | - |
+| `isEstimateCurrentEvent` | If true, use Fluent::EventTime.now(current time) as a timestamp when the time_key is specified. | `boolean` | No | - | - |
+| `isKeepTimeKey` | If true, keep the time field in the record. | `boolean` | No | - | - |
+| `isNullEmptyString` | If true, an empty string field is replaced with a null value. | `boolean` | No | - | - |
+| `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
+| `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
+| `timeType` | JSON parser time type. | `string` | No | - | - |
+| `timeoutInMilliseconds` | Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern. | `integer` | No | - | - |
+| `types` | Specify types for converting a field into another type. For example, With this configuration: <parse> @type csv keys time,host,req_id,user time_key time </parse> This incoming event: "2013/02/28 12:00:00,192.168.0.1,111,-" is parsed as: 1362020400 (2013/02/28/ 12:00:00) record: { "host" : "192.168.0.1", "req_id" : "111", "user" : "-" } | `map[string, string]` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser-patterns"></a>
+###### Status.serviceConfiguration.filter[].parser.patterns[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilterParserPattern defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.Pattern.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `fieldTimeFormat` | Process value using the specified format. This is available only when time_type is a string. | `string` | No | - | - |
+| `fieldTimeKey` | Specify the time field for the event time. If the event doesn't have this field, the current time is used. | `string` | No | - | - |
+| `fieldTimeZone` | Use the specified time zone. The time value can be parsed or formatted in the specified time zone. | `string` | No | - | - |
+| `name` | The name key to tag this Grok pattern. | `string` | No | - | - |
+| `pattern` | The Grok pattern. | `string` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-parser-recordinput"></a>
+###### Status.serviceConfiguration.filter[].parser.recordInput
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilterParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.Parser.RecordInput.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `dimensions` | Dimensions to be added for metrics. | `map[string, string]` | No | - | - |
+| `namespace` | Namespace to emit metrics. | `string` | No | - | - |
+| `resourceGroup` | Resource group to emit metrics. | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-filter-recordlist"></a>
+###### Status.serviceConfiguration.filter[].recordList[]
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationFilterRecordList defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Filter.RecordList.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | A new key | `string` | No | - | - |
+| `value` | A new value | `string` | No | - | - |
+
 <a id="kind-unifiedagentconfiguration-status-serviceconfiguration-sources"></a>
 ##### Status.serviceConfiguration.sources[]
 
@@ -868,12 +1298,25 @@ UnifiedAgentConfigurationServiceConfigurationSource defines nested fields for Un
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| [`advancedOptions`](#kind-unifiedagentconfiguration-status-serviceconfiguration-sources-advancedoptions) | UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions. | `object` | No | - | - |
 | `channels` | Windows event log channels. | `list[string]` | No | - | - |
+| `customPlugin` | User customized source plugin. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `name` | Unique name for the source. | `string` | Yes | - | - |
 | [`parser`](#kind-unifiedagentconfiguration-status-serviceconfiguration-sources-parser) | UnifiedAgentConfigurationServiceConfigurationSourceParser defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser. | `object` | No | - | - |
 | `paths` | Absolute paths for log source files. Wildcards can be used. | `list[string]` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-sources-advancedoptions"></a>
+###### Status.serviceConfiguration.sources[].advancedOptions
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationSourceAdvancedOptions defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.AdvancedOptions.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isReadFromHead` | Starts to read the logs from the head of the file or the last read position recorded in pos_file, not tail. | `boolean` | No | - | - |
 
 <a id="kind-unifiedagentconfiguration-status-serviceconfiguration-sources-parser"></a>
 ###### Status.serviceConfiguration.sources[].parser
@@ -904,9 +1347,12 @@ UnifiedAgentConfigurationServiceConfigurationSourceParser defines nested fields 
 | `multiLineStartRegexp` | Multiline start regexp pattern. | `string` | No | - | - |
 | [`nestedParser`](#kind-unifiedagentconfiguration-status-serviceconfiguration-sources-parser-nestedparser) | Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeFormat, and isKeepTimeKey. | `object` | No | - | - |
 | `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
 | `parserType` | - | `string` | No | - | - |
 | [`patterns`](#kind-unifiedagentconfiguration-status-serviceconfiguration-sources-parser-patterns) | Grok pattern object. | `list[object]` | No | - | - |
+| [`recordInput`](#kind-unifiedagentconfiguration-status-serviceconfiguration-sources-parser-recordinput) | UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.RecordInput. | `object` | No | - | - |
 | `rfc5424TimeFormat` | RFC 5424 time format. | `string` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
 | `syslogParserType` | Syslog parser type. | `string` | No | - | - |
 | `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
 | `timeType` | JSON parser time type. | `string` | No | - | - |
@@ -927,6 +1373,8 @@ Optional nested JSON Parser for CRI. Supported fields are fieldTimeKey, timeForm
 | `isKeepTimeKey` | If true, keep the time field in the record. | `boolean` | No | - | - |
 | `isNullEmptyString` | If true, an empty string field is replaced with a null value. | `boolean` | No | - | - |
 | `nullValuePattern` | Specify the null value pattern. | `string` | No | - | - |
+| `parseNested` | If true, a separator parameter can be further defined. | `boolean` | No | - | - |
+| `separator` | Keys of adjacent levels are joined by the separator. | `string` | No | - | - |
 | `timeFormat` | Process time value using the specified format. | `string` | No | - | - |
 | `timeType` | JSON parser time type. | `string` | No | - | - |
 | `timeoutInMilliseconds` | Specify the timeout for parse processing. This is mainly for detecting an incorrect regexp pattern. | `integer` | No | - | - |
@@ -946,6 +1394,19 @@ UnifiedAgentConfigurationServiceConfigurationSourceParserPattern defines nested 
 | `fieldTimeZone` | Use the specified time zone. The time value can be parsed or formatted in the specified time zone. | `string` | No | - | - |
 | `name` | The name key to tag this Grok pattern. | `string` | No | - | - |
 | `pattern` | The Grok pattern. | `string` | Yes | - | - |
+
+<a id="kind-unifiedagentconfiguration-status-serviceconfiguration-sources-parser-recordinput"></a>
+###### Status.serviceConfiguration.sources[].parser.recordInput
+
+[Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
+
+UnifiedAgentConfigurationServiceConfigurationSourceParserRecordInput defines nested fields for UnifiedAgentConfiguration.ServiceConfiguration.Source.Parser.RecordInput.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `dimensions` | Dimensions to be added for metrics. | `map[string, string]` | No | - | - |
+| `namespace` | Namespace to emit metrics. | `string` | No | - | - |
+| `resourceGroup` | Resource group to emit metrics. | `string` | No | - | - |
 
 <a id="kind-unifiedagentconfiguration-status-status"></a>
 #### Status.status
@@ -997,292 +1458,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to UnifiedAgentConfiguration status](#kind-unifiedagentconfiguration-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequest"></a>
-## WorkRequest
-
-WorkRequest is the Schema for the workrequests API.
-
-- `Plural`: `workrequests`
-- `Scope`: `Namespaced`
-- `APIVersion`: `logging.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/logging/v1beta1/workrequest.md) (`config/samples/logging_v1beta1_workrequest.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequest-spec"></a>
-### Spec
-
-WorkRequestSpec defines the desired state of WorkRequest.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequest-status"></a>
-### Status
-
-WorkRequestStatus defines the observed state of WorkRequest.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The work request's compartment OCID. | `string` | No | - | - |
-| `id` | The work request OCID. | `string` | No | - | - |
-| `operationType` | The type of work the work request is doing. | `string` | No | - | - |
-| `percentComplete` | Percentage of the request completed. | `number` | No | - | - |
-| [`resources`](#kind-workrequest-status-resources) | The resources this work request affects. | `list[object]` | No | - | - |
-| `sdkStatus` | The current status of the work request. This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
-| [`status`](#kind-workrequest-status-status) | - | `object` | Yes | - | - |
-| `timeAccepted` | The time the work request was accepted. | `string` | No | - | - |
-| `timeFinished` | The time the work request was finished. | `string` | No | - | - |
-| `timeStarted` | The time the work request was started. | `string` | No | - | - |
-
-<a id="kind-workrequest-status-resources"></a>
-#### Status.resources[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-WorkRequestResource defines nested fields for WorkRequest.Resource.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `actionType` | The way in which this resource is affected by the work tracked in the work request. A resource being created, updated, or deleted will remain in the IN_PROGRESS state until work is complete for that resource, at which point it will transition to CREATED, UPDATED, or DELETED, respectively. | `string` | No | - | - |
-| `entityType` | The resource type the work request affects. | `string` | No | - | - |
-| `entityUri` | The URI path that the user can do a GET on to access the resource metadata. | `string` | No | - | - |
-| `identifier` | The resource identifier the work request affects. | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status"></a>
-#### Status.status
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequest-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequest-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequest-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequest-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequest-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequesterror"></a>
-## WorkRequestError
-
-WorkRequestError is the Schema for the workrequesterrors API.
-
-- `Plural`: `workrequesterrors`
-- `Scope`: `Namespaced`
-- `APIVersion`: `logging.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/logging/v1beta1/workrequesterror.md) (`config/samples/logging_v1beta1_workrequesterror.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequesterror-spec"></a>
-### Spec
-
-WorkRequestErrorSpec defines the desired state of WorkRequestError.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequesterror-status"></a>
-### Status
-
-WorkRequestErrorStatus defines the observed state of WorkRequestError.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `code` | A machine-usable code for the error that occured. Error codes are listed at https://docs.cloud.oracle.com/Content/API/References/apierrors.htm. | `string` | No | - | - |
-| `message` | A human readable description of the issue encountered. | `string` | No | - | - |
-| [`status`](#kind-workrequesterror-status-status) | - | `object` | Yes | - | - |
-| `timestamp` | The time the error occured. An RFC3339-formatted date and time string. | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequesterror-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequesterror-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequesterror-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequestlog"></a>
-## WorkRequestLog
-
-WorkRequestLog is the Schema for the workrequestlogs API.
-
-- `Plural`: `workrequestlogs`
-- `Scope`: `Namespaced`
-- `APIVersion`: `logging.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/logging/v1beta1/workrequestlog.md) (`config/samples/logging_v1beta1_workrequestlog.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequestlog-spec"></a>
-### Spec
-
-WorkRequestLogSpec defines the desired state of WorkRequestLog.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequestlog-status"></a>
-### Status
-
-WorkRequestLogStatus defines the observed state of WorkRequestLog.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | Human-readable log message. | `string` | No | - | - |
-| [`status`](#kind-workrequestlog-status-status) | - | `object` | Yes | - | - |
-| `timestamp` | The time the log message was written. An RFC3339-formatted date and time string. | `string` | No | - | - |
-
-<a id="kind-workrequestlog-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequestlog-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequestlog-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequestlog-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |

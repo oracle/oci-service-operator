@@ -19,7 +19,7 @@ import (
 )
 
 // LogSavedSearchServiceClient is the handwritten extension seam for LogSavedSearch runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*LogSavedSearchServiceManager).WithClient.
 type LogSavedSearchServiceClient interface {
 	CreateOrUpdate(context.Context, *loggingv1beta1.LogSavedSearch, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ LogSavedSearchServiceClient = defaultLogSavedSearchServiceClient{}
 
 var newLogSavedSearchServiceClient = func(manager *LogSavedSearchServiceManager) LogSavedSearchServiceClient {
 	sdkClient, err := loggingsdk.NewLoggingManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loggingv1beta1.LogSavedSearch]{
-		Kind:    "LogSavedSearch",
-		SDKName: "LogSavedSearch",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.CreateLogSavedSearchRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateLogSavedSearch(ctx, *request.(*loggingsdk.CreateLogSavedSearchRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.GetLogSavedSearchRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetLogSavedSearch(ctx, *request.(*loggingsdk.GetLogSavedSearchRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.ListLogSavedSearchesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListLogSavedSearches(ctx, *request.(*loggingsdk.ListLogSavedSearchesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.UpdateLogSavedSearchRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateLogSavedSearch(ctx, *request.(*loggingsdk.UpdateLogSavedSearchRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loggingsdk.DeleteLogSavedSearchRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteLogSavedSearch(ctx, *request.(*loggingsdk.DeleteLogSavedSearchRequest))
-			},
-		},
-	}
+	hooks := newLogSavedSearchRuntimeHooks(manager, sdkClient)
+	config := buildLogSavedSearchGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize LogSavedSearch OCI client: %w", err)
 	}
-	return defaultLogSavedSearchServiceClient{
+	delegate := defaultLogSavedSearchServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loggingv1beta1.LogSavedSearch](config),
 	}
+	return wrapLogSavedSearchGeneratedClient(hooks, delegate)
 }

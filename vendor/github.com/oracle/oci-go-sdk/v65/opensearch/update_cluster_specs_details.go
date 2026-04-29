@@ -1,0 +1,87 @@
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
+// Code generated. DO NOT EDIT.
+
+// OpenSearch Service API
+//
+// The OpenSearch service API provides access to OCI Search Service with OpenSearch.
+//
+
+package opensearch
+
+import (
+	"fmt"
+	"github.com/oracle/oci-go-sdk/v65/common"
+	"strings"
+)
+
+// UpdateClusterSpecsDetails update cluster specs in Kiev.
+type UpdateClusterSpecsDetails struct {
+
+	// OCID of the Opensearch Cluster.
+	ClusterId *string `mandatory:"true" json:"clusterId"`
+
+	// Updated value of OCPU's configured for master nodes of the cluster.
+	MasterNodeHostOcpuCount *int `mandatory:"false" json:"masterNodeHostOcpuCount"`
+
+	// Updated value of memory for master nodes in the cluster (in GB).
+	MasterNodeHostMemoryGB *int `mandatory:"false" json:"masterNodeHostMemoryGB"`
+
+	// The node shape for the cluster's master nodes.
+	MasterNodeHostShape *string `mandatory:"false" json:"masterNodeHostShape"`
+
+	// Updated value of OCPU's configured for data nodes of the cluster.
+	DataNodeHostOcpuCount *int `mandatory:"false" json:"dataNodeHostOcpuCount"`
+
+	// Updated value of memory for data nodes in the cluster (in GB).
+	DataNodeHostMemoryGB *int `mandatory:"false" json:"dataNodeHostMemoryGB"`
+
+	// The node shape for the cluster's data nodes.
+	DataNodeHostShape *string `mandatory:"false" json:"dataNodeHostShape"`
+
+	// The node shape for the cluster's search nodes.
+	SearchNodeHostShape *string `mandatory:"false" json:"searchNodeHostShape"`
+
+	// The number of OCPUs configured for the cluster's search nodes.
+	SearchNodeHostOcpuCount *int `mandatory:"false" json:"searchNodeHostOcpuCount"`
+
+	// The amount of memory in GB, for the cluster's search nodes.
+	SearchNodeHostMemoryGB *int `mandatory:"false" json:"searchNodeHostMemoryGB"`
+
+	// The node shape for the cluster's ML nodes.
+	MlNodeHostShape *string `mandatory:"false" json:"mlNodeHostShape"`
+
+	// The number of OCPUs configured for the cluster's ML nodes.
+	MlNodeHostOcpuCount *int `mandatory:"false" json:"mlNodeHostOcpuCount"`
+
+	// The amount of memory in GB, for the cluster's ML nodes.
+	MlNodeHostMemoryGB *int `mandatory:"false" json:"mlNodeHostMemoryGB"`
+
+	// Updated version of the software the cluster is currently running.
+	SoftwareVersion *string `mandatory:"false" json:"softwareVersion"`
+
+	// Updated version of the dashboard software the cluster is currently running.
+	DashboardSoftwareVersion *string `mandatory:"false" json:"dashboardSoftwareVersion"`
+
+	// The shape node for the cluster's OpenSearch Dashboard nodes.
+	OpendashboardNodeHostShape *string `mandatory:"false" json:"opendashboardNodeHostShape"`
+
+	// Updated Private endpoint of cluster.
+	ClusterPrivateEndpoint *string `mandatory:"false" json:"clusterPrivateEndpoint"`
+}
+
+func (m UpdateClusterSpecsDetails) String() string {
+	return common.PointerString(m)
+}
+
+// ValidateEnumValue returns an error when providing an unsupported enum value
+// This function is being called during constructing API request process
+// Not recommended for calling this function directly
+func (m UpdateClusterSpecsDetails) ValidateEnumValue() (bool, error) {
+	errMessage := []string{}
+
+	if len(errMessage) > 0 {
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
+	}
+	return false, nil
+}

@@ -1,15 +1,16 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"strings"
@@ -36,13 +37,19 @@ type AutonomousContainerDatabaseSummary struct {
 	// Database patch model preference.
 	PatchModel AutonomousContainerDatabaseSummaryPatchModelEnum `mandatory:"true" json:"patchModel"`
 
+	// Customer Contacts. Setting this to an empty list removes all customer contacts.
+	CustomerContacts []CustomerContact `mandatory:"false" json:"customerContacts"`
+
+	// The OKV End Point Group name for the Autonomous Container Database.
+	OkvEndPointGroupName *string `mandatory:"false" json:"okvEndPointGroupName"`
+
 	// **Deprecated.** The `DB_UNIQUE_NAME` value is set by Oracle Cloud Infrastructure.  Do not specify a value for this parameter. Specifying a value for this field will cause Terraform operations to fail.
 	DbUniqueName *string `mandatory:"false" json:"dbUniqueName"`
 
 	// The Database name for the Autonomous Container Database. The name must be unique within the Cloud Autonomous VM Cluster, starting with an alphabetic character, followed by 1 to 7 alphanumeric characters.
 	DbName *string `mandatory:"false" json:"dbName"`
 
-	// **No longer used.** For Autonomous Database on dedicated Exadata infrastructure, the container database is created within a specified `cloudAutonomousVmCluster`.
+	// **No longer used.** For Autonomous AI Database on dedicated Exadata infrastructure, the container database is created within a specified `cloudAutonomousVmCluster`.
 	AutonomousExadataInfrastructureId *string `mandatory:"false" json:"autonomousExadataInfrastructureId"`
 
 	// The OCID of the Autonomous VM Cluster.
@@ -51,20 +58,22 @@ type AutonomousContainerDatabaseSummary struct {
 	// The infrastructure type this resource belongs to.
 	InfrastructureType AutonomousContainerDatabaseSummaryInfrastructureTypeEnum `mandatory:"false" json:"infrastructureType,omitempty"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the cloud Autonomous Exadata VM Cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cloud Autonomous Exadata VM Cluster.
 	CloudAutonomousVmClusterId *string `mandatory:"false" json:"cloudAutonomousVmClusterId"`
 
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId *string `mandatory:"false" json:"vaultId"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous AI Database Serverless does not use key versions, hence is not applicable for Autonomous AI Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
 	// Key History Entry.
 	KeyHistoryEntry []AutonomousDatabaseKeyHistoryEntry `mandatory:"false" json:"keyHistoryEntry"`
+
+	EncryptionKeyLocationDetails EncryptionKeyLocationDetails `mandatory:"false" json:"encryptionKeyLocationDetails"`
 
 	// Additional information about the current lifecycle state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
@@ -75,13 +84,13 @@ type AutonomousContainerDatabaseSummary struct {
 	// The date and time the Autonomous Container Database will be reverted to Standby from Snapshot Standby.
 	TimeSnapshotStandbyRevert *common.SDKTime `mandatory:"false" json:"timeSnapshotStandbyRevert"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last patch applied on the system.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the last patch applied on the system.
 	PatchId *string `mandatory:"false" json:"patchId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last maintenance run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the last maintenance run.
 	LastMaintenanceRunId *string `mandatory:"false" json:"lastMaintenanceRunId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the next maintenance run.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the next maintenance run.
 	NextMaintenanceRunId *string `mandatory:"false" json:"nextMaintenanceRunId"`
 
 	MaintenanceWindow *MaintenanceWindow `mandatory:"false" json:"maintenanceWindow"`
@@ -96,37 +105,52 @@ type AutonomousContainerDatabaseSummary struct {
 	// Indicates if an automatic DST Time Zone file update is enabled for the Autonomous Container Database. If enabled along with Release Update, patching will be done in a Non-Rolling manner.
 	IsDstFileUpdateEnabled *bool `mandatory:"false" json:"isDstFileUpdateEnabled"`
 
-	// DST Time-zone File version of the Autonomous Container Database.
+	// DST Time-Zone File version of the Autonomous Container Database.
 	DstFileVersion *string `mandatory:"false" json:"dstFileVersion"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
-	// The Data Guard role of the Autonomous Container Database or Autonomous Database, if Autonomous Data Guard is enabled.
+	// System tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// The Data Guard role of the Autonomous Container Database or Autonomous AI Database, if Autonomous Data Guard is enabled.
 	Role AutonomousContainerDatabaseSummaryRoleEnum `mandatory:"false" json:"role,omitempty"`
 
 	// The availability domain of the Autonomous Container Database.
 	AvailabilityDomain *string `mandatory:"false" json:"availabilityDomain"`
 
-	// Oracle Database version of the Autonomous Container Database.
+	// Oracle AI Database version of the Autonomous Container Database.
 	DbVersion *string `mandatory:"false" json:"dbVersion"`
 
 	BackupConfig *AutonomousContainerDatabaseBackupConfig `mandatory:"false" json:"backupConfig"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
+	// This list describes the backup destination properties associated with the Autonomous Container Database (ACD) 's preferred backup destination. The object at a given index is associated with the destination present at the same index in the backup destination details list of the ACD Backup Configuration.
+	BackupDestinationPropertiesList []BackupDestinationProperties `mandatory:"false" json:"backupDestinationPropertiesList"`
+
+	// A backup config object holds information about preferred backup destinations only. This object holds information about the associated backup destinations, such as secondary backup destinations created for local backups or remote replicated backups.
+	AssociatedBackupConfigurationDetails []BackupDestinationConfigurationSummary `mandatory:"false" json:"associatedBackupConfigurationDetails"`
+
+	RecoveryApplianceDetails *RecoveryApplianceDetails `mandatory:"false" json:"recoveryApplianceDetails"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
 	KeyStoreId *string `mandatory:"false" json:"keyStoreId"`
 
 	// The wallet name for Oracle Key Vault.
 	KeyStoreWalletName *string `mandatory:"false" json:"keyStoreWalletName"`
 
-	// The amount of memory (in GBs) enabled per ECPU or OCPU in the Autonomous VM Cluster.
+	// The amount of memory (in GBs rounded off to nearest integer value) enabled per ECPU or OCPU in the Autonomous VM Cluster. This is deprecated. Please refer to memoryPerComputeUnitInGBs for accurate value.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
+
+	// The amount of memory (in GBs) to be enabled per OCPU or ECPU.
+	MemoryPerComputeUnitInGBs *float32 `mandatory:"false" json:"memoryPerComputeUnitInGBs"`
 
 	// Sum of CPUs available on the Autonomous VM Cluster + Sum of reclaimable CPUs available in the Autonomous Container Database.
 	AvailableCpus *float32 `mandatory:"false" json:"availableCpus"`
@@ -134,13 +158,16 @@ type AutonomousContainerDatabaseSummary struct {
 	// The number of CPUs allocated to the Autonomous VM cluster.
 	TotalCpus *int `mandatory:"false" json:"totalCpus"`
 
-	// CPUs that continue to be included in the count of CPUs available to the Autonomous Container Database even after one of its Autonomous Database is terminated or scaled down. You can release them to the available CPUs at its parent Autonomous VM Cluster level by restarting the Autonomous Container Database.
+	// CPUs that continue to be included in the count of CPUs available to the Autonomous Container Database even after one of its Autonomous AI Database is terminated or scaled down. You can release them to the available CPUs at its parent Autonomous VM Cluster level by restarting the Autonomous Container Database.
 	ReclaimableCpus *float32 `mandatory:"false" json:"reclaimableCpus"`
 
-	// An array of CPU values that can be used to successfully provision a single Autonomous Database.
+	// An array of CPU values that can be used to successfully provision a single Autonomous AI Database.
 	ProvisionableCpus []float32 `mandatory:"false" json:"provisionableCpus"`
 
-	// The compute model of the Autonomous Container Database. For Autonomous Database on Dedicated Exadata Infrastructure, the CPU type (ECPUs or OCPUs) is determined by the parent Autonomous Exadata VM Cluster's compute model. ECPU compute model is the recommended model and OCPU compute model is legacy. See Compute Models in Autonomous Database on Dedicated Exadata Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak) for more details.
+	// List of One-Off patches that has been successfully applied to Autonomous Container Database
+	ListOneOffPatches []string `mandatory:"false" json:"listOneOffPatches"`
+
+	// The compute model of the Autonomous Container Database. For Autonomous AI Database on Dedicated Exadata Infrastructure, the CPU type (ECPUs or OCPUs) is determined by the parent Autonomous Exadata VM Cluster's compute model. ECPU compute model is the recommended model and OCPU compute model is legacy. See Compute Models in Autonomous AI Database on Dedicated Exadata Infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbak) for more details.
 	ComputeModel AutonomousContainerDatabaseSummaryComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
 
 	// The number of CPUs provisioned in an Autonomous Container Database.
@@ -149,23 +176,34 @@ type AutonomousContainerDatabaseSummary struct {
 	// The number of CPUs reserved in an Autonomous Container Database.
 	ReservedCpus *float32 `mandatory:"false" json:"reservedCpus"`
 
-	// The largest Autonomous Database (CPU) that can be created in a new Autonomous Container Database.
+	// The largest Autonomous AI Database (CPU) that can be created in a new Autonomous Container Database.
 	LargestProvisionableAutonomousDatabaseInCpus *float32 `mandatory:"false" json:"largestProvisionableAutonomousDatabaseInCpus"`
 
 	// The timestamp of last successful backup. Here NULL value represents either there are no successful backups or backups are not configured for this Autonomous Container Database.
 	TimeOfLastBackup *common.SDKTime `mandatory:"false" json:"timeOfLastBackup"`
 
-	// The value above which an Autonomous Database will be split across multiple nodes. This value defaults to 16 when the "CPU per VM" value on the Autonomous VM Cluster is greater than 16. Otherwise, it defaults to the "CPU per VM" value.
+	// The CPU value beyond which an Autonomous AI Database will be opened across multiple nodes. The default value of this attribute is 16 for OCPUs and 64 for ECPUs.
 	DbSplitThreshold *int `mandatory:"false" json:"dbSplitThreshold"`
 
-	// The percentage of CPUs to reserve for a single node Autonomous Database, in increments of 25.
+	// The percentage of CPUs reserved across nodes to support node failover. Allowed values are 0%, 25%, and 50%, with 50% being the default option.
 	VmFailoverReservation *int `mandatory:"false" json:"vmFailoverReservation"`
 
-	// This option determines whether to open an Autonomous Database across the maximum number of nodes or the least number of nodes. The default will be for the minimum number of VMs.
+	// Determines whether an Autonomous AI Database must be opened across the maximum number of nodes or the least number of nodes. By default, Minimum nodes is selected.
 	DistributionAffinity AutonomousContainerDatabaseSummaryDistributionAffinityEnum `mandatory:"false" json:"distributionAffinity,omitempty"`
 
 	// Enabling SHARED server architecture enables a database server to allow many client processes to share very few server processes, thereby increasing the number of supported users.
 	NetServicesArchitecture AutonomousContainerDatabaseSummaryNetServicesArchitectureEnum `mandatory:"false" json:"netServicesArchitecture,omitempty"`
+
+	// Indicates if it is multiple standby Autonomous Dataguard
+	IsMultipleStandby *bool `mandatory:"false" json:"isMultipleStandby"`
+
+	// **Deprecated.** Indicates whether the Autonomous AI Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	IsDataGuardEnabled *bool `mandatory:"false" json:"isDataGuardEnabled"`
+
+	Dataguard *AutonomousContainerDatabaseDataguard `mandatory:"false" json:"dataguard"`
+
+	// Array of Dg associations.
+	DataguardGroupMembers []AutonomousContainerDatabaseDataguard `mandatory:"false" json:"dataguardGroupMembers"`
 }
 
 func (m AutonomousContainerDatabaseSummary) String() string {
@@ -206,9 +244,216 @@ func (m AutonomousContainerDatabaseSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for NetServicesArchitecture: %s. Supported values are: %s.", m.NetServicesArchitecture, strings.Join(GetAutonomousContainerDatabaseSummaryNetServicesArchitectureEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
+}
+
+// UnmarshalJSON unmarshals from json
+func (m *AutonomousContainerDatabaseSummary) UnmarshalJSON(data []byte) (e error) {
+	model := struct {
+		CustomerContacts                             []CustomerContact                                               `json:"customerContacts"`
+		OkvEndPointGroupName                         *string                                                         `json:"okvEndPointGroupName"`
+		DbUniqueName                                 *string                                                         `json:"dbUniqueName"`
+		DbName                                       *string                                                         `json:"dbName"`
+		AutonomousExadataInfrastructureId            *string                                                         `json:"autonomousExadataInfrastructureId"`
+		AutonomousVmClusterId                        *string                                                         `json:"autonomousVmClusterId"`
+		InfrastructureType                           AutonomousContainerDatabaseSummaryInfrastructureTypeEnum        `json:"infrastructureType"`
+		CloudAutonomousVmClusterId                   *string                                                         `json:"cloudAutonomousVmClusterId"`
+		KmsKeyId                                     *string                                                         `json:"kmsKeyId"`
+		VaultId                                      *string                                                         `json:"vaultId"`
+		KmsKeyVersionId                              *string                                                         `json:"kmsKeyVersionId"`
+		KeyHistoryEntry                              []AutonomousDatabaseKeyHistoryEntry                             `json:"keyHistoryEntry"`
+		EncryptionKeyLocationDetails                 encryptionkeylocationdetails                                    `json:"encryptionKeyLocationDetails"`
+		LifecycleDetails                             *string                                                         `json:"lifecycleDetails"`
+		TimeCreated                                  *common.SDKTime                                                 `json:"timeCreated"`
+		TimeSnapshotStandbyRevert                    *common.SDKTime                                                 `json:"timeSnapshotStandbyRevert"`
+		PatchId                                      *string                                                         `json:"patchId"`
+		LastMaintenanceRunId                         *string                                                         `json:"lastMaintenanceRunId"`
+		NextMaintenanceRunId                         *string                                                         `json:"nextMaintenanceRunId"`
+		MaintenanceWindow                            *MaintenanceWindow                                              `json:"maintenanceWindow"`
+		StandbyMaintenanceBufferInDays               *int                                                            `json:"standbyMaintenanceBufferInDays"`
+		VersionPreference                            AutonomousContainerDatabaseSummaryVersionPreferenceEnum         `json:"versionPreference"`
+		IsDstFileUpdateEnabled                       *bool                                                           `json:"isDstFileUpdateEnabled"`
+		DstFileVersion                               *string                                                         `json:"dstFileVersion"`
+		FreeformTags                                 map[string]string                                               `json:"freeformTags"`
+		DefinedTags                                  map[string]map[string]interface{}                               `json:"definedTags"`
+		SystemTags                                   map[string]map[string]interface{}                               `json:"systemTags"`
+		Role                                         AutonomousContainerDatabaseSummaryRoleEnum                      `json:"role"`
+		AvailabilityDomain                           *string                                                         `json:"availabilityDomain"`
+		DbVersion                                    *string                                                         `json:"dbVersion"`
+		BackupConfig                                 *AutonomousContainerDatabaseBackupConfig                        `json:"backupConfig"`
+		BackupDestinationPropertiesList              []BackupDestinationProperties                                   `json:"backupDestinationPropertiesList"`
+		AssociatedBackupConfigurationDetails         []BackupDestinationConfigurationSummary                         `json:"associatedBackupConfigurationDetails"`
+		RecoveryApplianceDetails                     *RecoveryApplianceDetails                                       `json:"recoveryApplianceDetails"`
+		KeyStoreId                                   *string                                                         `json:"keyStoreId"`
+		KeyStoreWalletName                           *string                                                         `json:"keyStoreWalletName"`
+		MemoryPerOracleComputeUnitInGBs              *int                                                            `json:"memoryPerOracleComputeUnitInGBs"`
+		MemoryPerComputeUnitInGBs                    *float32                                                        `json:"memoryPerComputeUnitInGBs"`
+		AvailableCpus                                *float32                                                        `json:"availableCpus"`
+		TotalCpus                                    *int                                                            `json:"totalCpus"`
+		ReclaimableCpus                              *float32                                                        `json:"reclaimableCpus"`
+		ProvisionableCpus                            []float32                                                       `json:"provisionableCpus"`
+		ListOneOffPatches                            []string                                                        `json:"listOneOffPatches"`
+		ComputeModel                                 AutonomousContainerDatabaseSummaryComputeModelEnum              `json:"computeModel"`
+		ProvisionedCpus                              *float32                                                        `json:"provisionedCpus"`
+		ReservedCpus                                 *float32                                                        `json:"reservedCpus"`
+		LargestProvisionableAutonomousDatabaseInCpus *float32                                                        `json:"largestProvisionableAutonomousDatabaseInCpus"`
+		TimeOfLastBackup                             *common.SDKTime                                                 `json:"timeOfLastBackup"`
+		DbSplitThreshold                             *int                                                            `json:"dbSplitThreshold"`
+		VmFailoverReservation                        *int                                                            `json:"vmFailoverReservation"`
+		DistributionAffinity                         AutonomousContainerDatabaseSummaryDistributionAffinityEnum      `json:"distributionAffinity"`
+		NetServicesArchitecture                      AutonomousContainerDatabaseSummaryNetServicesArchitectureEnum   `json:"netServicesArchitecture"`
+		IsMultipleStandby                            *bool                                                           `json:"isMultipleStandby"`
+		IsDataGuardEnabled                           *bool                                                           `json:"isDataGuardEnabled"`
+		Dataguard                                    *AutonomousContainerDatabaseDataguard                           `json:"dataguard"`
+		DataguardGroupMembers                        []AutonomousContainerDatabaseDataguard                          `json:"dataguardGroupMembers"`
+		Id                                           *string                                                         `json:"id"`
+		CompartmentId                                *string                                                         `json:"compartmentId"`
+		DisplayName                                  *string                                                         `json:"displayName"`
+		ServiceLevelAgreementType                    AutonomousContainerDatabaseSummaryServiceLevelAgreementTypeEnum `json:"serviceLevelAgreementType"`
+		LifecycleState                               AutonomousContainerDatabaseSummaryLifecycleStateEnum            `json:"lifecycleState"`
+		PatchModel                                   AutonomousContainerDatabaseSummaryPatchModelEnum                `json:"patchModel"`
+	}{}
+
+	e = json.Unmarshal(data, &model)
+	if e != nil {
+		return
+	}
+	var nn interface{}
+	m.CustomerContacts = make([]CustomerContact, len(model.CustomerContacts))
+	copy(m.CustomerContacts, model.CustomerContacts)
+	m.OkvEndPointGroupName = model.OkvEndPointGroupName
+
+	m.DbUniqueName = model.DbUniqueName
+
+	m.DbName = model.DbName
+
+	m.AutonomousExadataInfrastructureId = model.AutonomousExadataInfrastructureId
+
+	m.AutonomousVmClusterId = model.AutonomousVmClusterId
+
+	m.InfrastructureType = model.InfrastructureType
+
+	m.CloudAutonomousVmClusterId = model.CloudAutonomousVmClusterId
+
+	m.KmsKeyId = model.KmsKeyId
+
+	m.VaultId = model.VaultId
+
+	m.KmsKeyVersionId = model.KmsKeyVersionId
+
+	m.KeyHistoryEntry = make([]AutonomousDatabaseKeyHistoryEntry, len(model.KeyHistoryEntry))
+	copy(m.KeyHistoryEntry, model.KeyHistoryEntry)
+	nn, e = model.EncryptionKeyLocationDetails.UnmarshalPolymorphicJSON(model.EncryptionKeyLocationDetails.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.EncryptionKeyLocationDetails = nn.(EncryptionKeyLocationDetails)
+	} else {
+		m.EncryptionKeyLocationDetails = nil
+	}
+
+	m.LifecycleDetails = model.LifecycleDetails
+
+	m.TimeCreated = model.TimeCreated
+
+	m.TimeSnapshotStandbyRevert = model.TimeSnapshotStandbyRevert
+
+	m.PatchId = model.PatchId
+
+	m.LastMaintenanceRunId = model.LastMaintenanceRunId
+
+	m.NextMaintenanceRunId = model.NextMaintenanceRunId
+
+	m.MaintenanceWindow = model.MaintenanceWindow
+
+	m.StandbyMaintenanceBufferInDays = model.StandbyMaintenanceBufferInDays
+
+	m.VersionPreference = model.VersionPreference
+
+	m.IsDstFileUpdateEnabled = model.IsDstFileUpdateEnabled
+
+	m.DstFileVersion = model.DstFileVersion
+
+	m.FreeformTags = model.FreeformTags
+
+	m.DefinedTags = model.DefinedTags
+
+	m.SystemTags = model.SystemTags
+
+	m.Role = model.Role
+
+	m.AvailabilityDomain = model.AvailabilityDomain
+
+	m.DbVersion = model.DbVersion
+
+	m.BackupConfig = model.BackupConfig
+
+	m.BackupDestinationPropertiesList = make([]BackupDestinationProperties, len(model.BackupDestinationPropertiesList))
+	copy(m.BackupDestinationPropertiesList, model.BackupDestinationPropertiesList)
+	m.AssociatedBackupConfigurationDetails = make([]BackupDestinationConfigurationSummary, len(model.AssociatedBackupConfigurationDetails))
+	copy(m.AssociatedBackupConfigurationDetails, model.AssociatedBackupConfigurationDetails)
+	m.RecoveryApplianceDetails = model.RecoveryApplianceDetails
+
+	m.KeyStoreId = model.KeyStoreId
+
+	m.KeyStoreWalletName = model.KeyStoreWalletName
+
+	m.MemoryPerOracleComputeUnitInGBs = model.MemoryPerOracleComputeUnitInGBs
+
+	m.MemoryPerComputeUnitInGBs = model.MemoryPerComputeUnitInGBs
+
+	m.AvailableCpus = model.AvailableCpus
+
+	m.TotalCpus = model.TotalCpus
+
+	m.ReclaimableCpus = model.ReclaimableCpus
+
+	m.ProvisionableCpus = make([]float32, len(model.ProvisionableCpus))
+	copy(m.ProvisionableCpus, model.ProvisionableCpus)
+	m.ListOneOffPatches = make([]string, len(model.ListOneOffPatches))
+	copy(m.ListOneOffPatches, model.ListOneOffPatches)
+	m.ComputeModel = model.ComputeModel
+
+	m.ProvisionedCpus = model.ProvisionedCpus
+
+	m.ReservedCpus = model.ReservedCpus
+
+	m.LargestProvisionableAutonomousDatabaseInCpus = model.LargestProvisionableAutonomousDatabaseInCpus
+
+	m.TimeOfLastBackup = model.TimeOfLastBackup
+
+	m.DbSplitThreshold = model.DbSplitThreshold
+
+	m.VmFailoverReservation = model.VmFailoverReservation
+
+	m.DistributionAffinity = model.DistributionAffinity
+
+	m.NetServicesArchitecture = model.NetServicesArchitecture
+
+	m.IsMultipleStandby = model.IsMultipleStandby
+
+	m.IsDataGuardEnabled = model.IsDataGuardEnabled
+
+	m.Dataguard = model.Dataguard
+
+	m.DataguardGroupMembers = make([]AutonomousContainerDatabaseDataguard, len(model.DataguardGroupMembers))
+	copy(m.DataguardGroupMembers, model.DataguardGroupMembers)
+	m.Id = model.Id
+
+	m.CompartmentId = model.CompartmentId
+
+	m.DisplayName = model.DisplayName
+
+	m.ServiceLevelAgreementType = model.ServiceLevelAgreementType
+
+	m.LifecycleState = model.LifecycleState
+
+	m.PatchModel = model.PatchModel
+
+	return
 }
 
 // AutonomousContainerDatabaseSummaryServiceLevelAgreementTypeEnum Enum with underlying type: string

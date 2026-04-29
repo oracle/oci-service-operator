@@ -81,7 +81,16 @@ type UsageCarbonEmissionsQueryQueryDefinitionReportQuery struct {
 	// The usage end time.
 	// +kubebuilder:validation:Optional
 	TimeUsageEnded string `json:"timeUsageEnded,omitempty"`
-	// Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up.
+	// Specifies the method used for emission calculation, such as POWER_BASED or SPEND_BASED
+	// +kubebuilder:validation:Optional
+	EmissionCalculationMethod string `json:"emissionCalculationMethod,omitempty"`
+	// Specifies the type of emission, such as MARKET_BASED or LOCATION_BASED.
+	// +kubebuilder:validation:Optional
+	EmissionType string `json:"emissionType,omitempty"`
+	// The carbon emission granularity. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation.
+	// +kubebuilder:validation:Optional
+	Granularity string `json:"granularity,omitempty"`
+	// Specifies whether aggregated by time. If isAggregateByTime is true, all usage or costs over the query time period are summed.
 	// +kubebuilder:validation:Optional
 	IsAggregateByTime bool `json:"isAggregateByTime,omitempty"`
 	// Specifies what to aggregate the result by.
@@ -101,7 +110,7 @@ type UsageCarbonEmissionsQueryQueryDefinitionReportQuery struct {
 	CompartmentDepth int `json:"compartmentDepth,omitempty"`
 	// +kubebuilder:validation:Optional
 	Filter UsageCarbonEmissionsQueryQueryDefinitionReportQueryFilter `json:"filter,omitempty"`
-	// The UI date range, for example, LAST_THREE_MONTHS. It will override timeUsageStarted and timeUsageEnded properties.
+	// The user interface date range, for example, LAST_THREE_MONTHS. Overrides the timeUsageStarted and timeUsageEnded properties.
 	// +kubebuilder:validation:Optional
 	DateRangeName string `json:"dateRangeName,omitempty"`
 }

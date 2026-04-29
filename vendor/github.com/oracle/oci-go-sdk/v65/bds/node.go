@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -77,6 +77,24 @@ type Node struct {
 
 	// The date and time the instance is expected to be stopped / started, in the format defined by RFC3339.
 	TimeMaintenanceRebootDue *common.SDKTime `mandatory:"false" json:"timeMaintenanceRebootDue"`
+
+	// BDS-assigned Operating System version for the node.
+	OsVersion *string `mandatory:"false" json:"osVersion"`
+
+	// Indicates if the node requires a reboot to either reflect the latest os kernel or take actions for maintenance reboot.
+	IsRebootRequired *bool `mandatory:"false" json:"isRebootRequired"`
+
+	// Version of the ODH (Oracle Distribution including Apache Hadoop) for the node.
+	OdhVersion *string `mandatory:"false" json:"odhVersion"`
+
+	// The date and time the instance was replaced by a new vm with a node backup.
+	TimeReplaced *common.SDKTime `mandatory:"false" json:"timeReplaced"`
+
+	// The node back id that was used for replacing the node.
+	NodeBackupId *string `mandatory:"false" json:"nodeBackupId"`
+
+	// ID of the certificate configuration which is used to generate the certificate for the node.
+	CertificateConfigurationId *string `mandatory:"false" json:"certificateConfigurationId"`
 }
 
 func (m Node) String() string {
@@ -96,7 +114,7 @@ func (m Node) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

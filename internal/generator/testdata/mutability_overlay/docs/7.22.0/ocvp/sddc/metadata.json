@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "ocvp",
+  "kind": "Sddc",
+  "formalSlug": "sddc",
+  "providerResource": "oci_ocvp_sddc",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/ocvp_sddc",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/ocvp_sddc",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/ocvp/sddc/page.html",
+  "bodySHA256": "8125a51a775e71d3edfcbf05a11b9f8ba2e3278498788cf3bc1b7e4f8da0e3ee",
+  "bodyBytes": 25875,
+  "fixtureBodyPath": "7.22.0/ocvp/sddc/page.html"
+}

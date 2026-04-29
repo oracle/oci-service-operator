@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>availability_domain</code> - (Optional) Controls whether the subnet is regional or specific to an availability domain. Oracle recommends creating regional subnets because they&#39;re more flexible and make it easier to implement failover across availability domains. Originally, AD-specific subnets were the only kind available to use. To create a regional subnet, omit this attribute. Then any resources later created in this subnet (such as a Compute instance) can be created in any availability domain in the region. To instead create an AD-specific subnet, set this attribute to the availability domain you want this subnet to be in. Then any resources later created in this subnet can only be created in that availability domain. Example: <code>Uocm:PHX-AD-1</code></li>
+      <li><code>cidr_block</code> - (Optional) (Updatable) The CIDR IP address range of the subnet. The CIDR must maintain the following rules - a. The CIDR block is valid and correctly formatted. b. The new range is within one of the parent VCN ranges. Example: <code>10.0.1.0/24</code></li>
+      <li><code>compartment_id</code> - (Required) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the subnet.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).  Example: <code>{&#34;Operations.CostCenter&#34;: &#34;42&#34;}</code></li>
+      <li><code>dhcp_options_id</code> - (Optional) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the set of DHCP options the subnet will use. If you don&#39;t provide a value, the subnet uses the VCN&#39;s default set of DHCP options.</li>
+      <li><code>display_name</code> - (Optional) (Updatable) A user-friendly name. Does not have to be unique, and it&#39;s changeable. Avoid entering confidential information.</li>
+      <li><code>dns_label</code> - (Optional) A DNS label for the subnet, used in conjunction with the VNIC&#39;s hostname and VCN&#39;s DNS label to form a fully qualified domain name (FQDN) for each VNIC within this subnet (for example, <code>bminstance1.subnet123.vcn1.oraclevcn.com</code>). Must be an alphanumeric string that begins with a letter and is unique within the VCN. The value cannot be changed. This value must be set if you want to use the Internet and VCN Resolver to resolve the hostnames of instances in the subnet. It can only be set if the VCN itself was created with a DNS label. For more information, see [DNS in Your Virtual Cloud Network](https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm). Example: <code>subnet123</code></li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).  Example: <code>{&#34;Department&#34;: &#34;Finance&#34;}</code></li>
+      <li><code>ipv4cidr_blocks</code> - (Optional) The list of all IPv4 CIDR blocks for the subnet that meets the following criteria:
+        <ul>
+          <li>Ipv4 CIDR blocks must be valid.</li>
+          <li>Multiple Ipv4 CIDR blocks must not overlap each other or the on-premises network CIDR block.</li>
+          <li>The number of prefixes must not exceed the limit of IPv4 prefixes allowed to a subnet.</li>
+        </ul>
+      </li>
+      <li><code>ipv6cidr_block</code> - (Optional) (Updatable) Use this to enable IPv6 addressing for this subnet. The VCN must be enabled for IPv6. You can&#39;t change this subnet characteristic later. All subnets are /64 in size. The subnet portion of the IPv6 address is the fourth hextet from the left (1111 in the following example). For important details about IPv6 addressing in a VCN, see [IPv6 Addresses](https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/ipv6.htm). Example: <code>2001:0db8:0123:1111::/64</code></li>
+      <li><code>ipv6cidr_blocks</code> - (Optional) (Updatable) The list of all IPv6 prefixes (Oracle allocated IPv6 GUA, ULA or private IPv6 prefixes, BYOIPv6 prefixes) for the subnet that meets the following criteria:
+        <ul>
+          <li>The prefixes must be valid.</li>
+          <li>Multiple prefixes must not overlap each other or the on-premises network prefix.</li>
+          <li>The number of prefixes must not exceed the limit of IPv6 prefixes allowed to a subnet.</li>
+        </ul>
+      </li>
+      <li><code>prohibit_internet_ingress</code> - (Optional) Whether to disallow ingress internet traffic to VNICs within this subnet. Defaults to false. For IPv6, if <code>prohibitInternetIngress</code> is set to <code>true</code>, internet access is not allowed for any IPv6s assigned to VNICs in the subnet. Otherwise, ingress internet traffic is allowed by default. <code>prohibitPublicIpOnVnic</code> will be set to the value of <code>prohibitInternetIngress</code> to dictate IPv4 behavior in this subnet. Only one or the other flag should be specified. Example: <code>true</code></li>
+      <li><code>prohibit_public_ip_on_vnic</code> - (Optional) Whether VNICs within this subnet can have public IP addresses. Defaults to false, which means VNICs created in this subnet will automatically be assigned public IP addresses unless specified otherwise during instance launch or VNIC creation (with the <code>assignPublicIp</code> flag in [CreateVnicDetails](https://docs.cloud.oracle.com/iaas/api/#/en/iaas/latest/CreateVnicDetails/)). If <code>prohibitPublicIpOnVnic</code> is set to true, VNICs created in this subnet cannot have public IP addresses (that is, it&#39;s a private subnet). If you intend to use an IPv6 prefix, you should use the flag <code>prohibitInternetIngress</code> to specify ingress internet traffic behavior of the subnet. Example: <code>true</code></li>
+      <li><code>route_table_id</code> - (Optional) (Updatable) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the route table the subnet will use. If you don&#39;t provide a value, the subnet uses the VCN&#39;s default route table.</li>
+      <li><code>security_list_ids</code> - (Optional) (Updatable) The OCIDs of the security list or lists the subnet will use. If you don&#39;t provide a value, the subnet uses the VCN&#39;s default security list. Remember that security lists are associated *with the subnet*, but the rules are applied to the individual VNICs in the subnet.</li>
+      <li><code>vcn_id</code> - (Required) The [OCID](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VCN to contain the subnet. ** IMPORTANT ** Any change to a property that does not support update will force the destruction and recreation of the resource with the new property values</li>
+    </ul>
+  </body>
+</html>

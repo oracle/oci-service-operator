@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -45,17 +45,29 @@ type CreateAnalyticsInstanceDetails struct {
 	IdcsAccessToken *string `mandatory:"false" json:"idcsAccessToken"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
+	// Analytics instance update channel.
+	UpdateChannel UpdateChannelEnum `mandatory:"false" json:"updateChannel,omitempty"`
+
+	// OCID of the OCI Vault Key encrypting the customer data stored in this Analytics instance. A null value indicates Oracle managed default encryption.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
+
+	// domain id for which the user is authorized.
+	DomainId *string `mandatory:"false" json:"domainId"`
+
+	// user name of the authorized user.
+	AdminUser *string `mandatory:"false" json:"adminUser"`
+
+	// The feature set of an Analytics instance.
+	FeatureBundle FeatureBundleEnum `mandatory:"false" json:"featureBundle,omitempty"`
 }
 
 func (m CreateAnalyticsInstanceDetails) String() string {
@@ -74,8 +86,14 @@ func (m CreateAnalyticsInstanceDetails) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseType: %s. Supported values are: %s.", m.LicenseType, strings.Join(GetLicenseTypeEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingUpdateChannelEnum(string(m.UpdateChannel)); !ok && m.UpdateChannel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for UpdateChannel: %s. Supported values are: %s.", m.UpdateChannel, strings.Join(GetUpdateChannelEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingFeatureBundleEnum(string(m.FeatureBundle)); !ok && m.FeatureBundle != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for FeatureBundle: %s. Supported values are: %s.", m.FeatureBundle, strings.Join(GetFeatureBundleEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -89,7 +107,11 @@ func (m *CreateAnalyticsInstanceDetails) UnmarshalJSON(data []byte) (e error) {
 		IdcsAccessToken        *string                           `json:"idcsAccessToken"`
 		DefinedTags            map[string]map[string]interface{} `json:"definedTags"`
 		FreeformTags           map[string]string                 `json:"freeformTags"`
+		UpdateChannel          UpdateChannelEnum                 `json:"updateChannel"`
 		KmsKeyId               *string                           `json:"kmsKeyId"`
+		DomainId               *string                           `json:"domainId"`
+		AdminUser              *string                           `json:"adminUser"`
+		FeatureBundle          FeatureBundleEnum                 `json:"featureBundle"`
 		Name                   *string                           `json:"name"`
 		CompartmentId          *string                           `json:"compartmentId"`
 		FeatureSet             FeatureSetEnum                    `json:"featureSet"`
@@ -122,7 +144,15 @@ func (m *CreateAnalyticsInstanceDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.FreeformTags = model.FreeformTags
 
+	m.UpdateChannel = model.UpdateChannel
+
 	m.KmsKeyId = model.KmsKeyId
+
+	m.DomainId = model.DomainId
+
+	m.AdminUser = model.AdminUser
+
+	m.FeatureBundle = model.FeatureBundle
 
 	m.Name = model.Name
 

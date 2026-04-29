@@ -62,7 +62,7 @@ if ("Force-new or conflicting drift detected?") then (yes)
 stop
 endif
 if ("Supported mutable drift detected?") then (yes)
-:Apply UpdateQueue only for mutable fields\nchannel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count, defined_tags\n(+4 more);
+:Apply UpdateQueue only for mutable fields\ncapabilities, channel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count (+5 more);
 else (no)
 :Skip the no-op mutation path;
 endif
@@ -99,10 +99,10 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
-supported drift: channel_consumption_limit,
+supported drift: capabilities,
+channel_consumption_limit,
 custom_encryption_key_id,
-dead_letter_queue_delivery_count, defined_tags
-(+4 more)
+dead_letter_queue_delivery_count (+5 more)
 reject before mutate: force-new fields
 compartment_id, retention_in_seconds
 create-only fields: none
@@ -133,12 +133,17 @@ best-effort; it only completes after GetQueue
 confirms the tracked Queue is gone or exposes
 lifecycle state DELETED.
 Mutable drift is limited to UpdateQueueDetails
-fields such as displayName, timeout, visibility,
-tags, channelConsumptionLimit,
+fields such as capabilities, displayName,
+timeout, visibility, tags,
+channelConsumptionLimit,
 deadLetterQueueDeliveryCount, and
-customEncryptionKeyId. Create-only inputs like
-compartmentId and retentionInSeconds are
-rejected as force-new drift.
+customEncryptionKeyId. Queue steady-state parity
+treats capabilities as the enabled type set
+because GetQueue does not echo consumer-group
+add-on settings after enablement, even though
+the runtime still forwards repo-authored
+capability payloads on create and update when
+that set changes.
 A package-local companion writes or updates the
 same-name endpoint Secret only after ACTIVE when
 messagesEndpoint is present, adopts only

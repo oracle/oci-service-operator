@@ -19,7 +19,7 @@ import (
 )
 
 // PathRouteSetServiceClient is the handwritten extension seam for PathRouteSet runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*PathRouteSetServiceManager).WithClient.
 type PathRouteSetServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.PathRouteSet, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ PathRouteSetServiceClient = defaultPathRouteSetServiceClient{}
 
 var newPathRouteSetServiceClient = func(manager *PathRouteSetServiceManager) PathRouteSetServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.PathRouteSet]{
-		Kind:    "PathRouteSet",
-		SDKName: "PathRouteSet",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreatePathRouteSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreatePathRouteSet(ctx, *request.(*loadbalancersdk.CreatePathRouteSetRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetPathRouteSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetPathRouteSet(ctx, *request.(*loadbalancersdk.GetPathRouteSetRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListPathRouteSetsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListPathRouteSets(ctx, *request.(*loadbalancersdk.ListPathRouteSetsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdatePathRouteSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdatePathRouteSet(ctx, *request.(*loadbalancersdk.UpdatePathRouteSetRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeletePathRouteSetRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeletePathRouteSet(ctx, *request.(*loadbalancersdk.DeletePathRouteSetRequest))
-			},
-		},
-	}
+	hooks := newPathRouteSetRuntimeHooks(manager, sdkClient)
+	config := buildPathRouteSetGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize PathRouteSet OCI client: %w", err)
 	}
-	return defaultPathRouteSetServiceClient{
+	delegate := defaultPathRouteSetServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.PathRouteSet](config),
 	}
+	return wrapPathRouteSetGeneratedClient(hooks, delegate)
 }

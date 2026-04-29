@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -20,6 +20,7 @@ type KeyStoreTypeEnum string
 const (
 	KeyStoreTypeJavaKeyStore   KeyStoreTypeEnum = "JAVA_KEY_STORE"
 	KeyStoreTypeJavaTrustStore KeyStoreTypeEnum = "JAVA_TRUST_STORE"
+	KeyStoreTypePem            KeyStoreTypeEnum = "PEM"
 	KeyStoreTypePkcs12         KeyStoreTypeEnum = "PKCS12"
 	KeyStoreTypeSso            KeyStoreTypeEnum = "SSO"
 )
@@ -27,6 +28,7 @@ const (
 var mappingKeyStoreTypeEnum = map[string]KeyStoreTypeEnum{
 	"JAVA_KEY_STORE":   KeyStoreTypeJavaKeyStore,
 	"JAVA_TRUST_STORE": KeyStoreTypeJavaTrustStore,
+	"PEM":              KeyStoreTypePem,
 	"PKCS12":           KeyStoreTypePkcs12,
 	"SSO":              KeyStoreTypeSso,
 }
@@ -34,6 +36,7 @@ var mappingKeyStoreTypeEnum = map[string]KeyStoreTypeEnum{
 var mappingKeyStoreTypeEnumLowerCase = map[string]KeyStoreTypeEnum{
 	"java_key_store":   KeyStoreTypeJavaKeyStore,
 	"java_trust_store": KeyStoreTypeJavaTrustStore,
+	"pem":              KeyStoreTypePem,
 	"pkcs12":           KeyStoreTypePkcs12,
 	"sso":              KeyStoreTypeSso,
 }
@@ -52,6 +55,7 @@ func GetKeyStoreTypeEnumStringValues() []string {
 	return []string{
 		"JAVA_KEY_STORE",
 		"JAVA_TRUST_STORE",
+		"PEM",
 		"PKCS12",
 		"SSO",
 	}

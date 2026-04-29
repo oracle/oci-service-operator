@@ -1,11 +1,11 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Load Balancing API
 //
 // API for the Load Balancing service. Use this API to manage load balancers, backend sets, and related items. For more
-// information, see Overview of Load Balancing (https://docs.cloud.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm).
+// information, see Overview of Load Balancing (https://docs.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm).
 //
 
 package loadbalancer
@@ -23,8 +23,8 @@ import (
 // level, performance, and compatibility of your data traffic.
 // **Warning:** Oracle recommends that you avoid using any confidential information when you supply string values using the API.
 // Oracle created the following predefined cipher suites that you can specify when you define a resource's
-// SSL configuration (https://docs.cloud.oracle.com/api/#/en/loadbalancer/20170115/datatypes/SSLConfigurationDetails). You can create custom
-// cipher suites (https://docs.cloud.oracle.com/api/#/en/loadbalancer/20170115/SSLCipherSuite/CreateSSLCipherSuite) if the predefined cipher
+// SSL configuration (https://docs.oracle.com/iaas/api/#/en/loadbalancer/20170115/datatypes/SSLConfigurationDetails). You can create custom
+// cipher suites (https://docs.oracle.com/iaas/api/#/en/loadbalancer/20170115/SSLCipherSuite/CreateSSLCipherSuite) if the predefined cipher
 // suites do not meet your requirements.
 //
 //   - __oci-default-ssl-cipher-suite-v1__
@@ -172,6 +172,69 @@ import (
 //     "RC4-MD5"
 //     "RC4-SHA"
 //     "SEED-SHA"
+//   - __oci-default-http2-ssl-cipher-suite-v1__
+//     "ECDHE-RSA-AES256-GCM-SHA384"
+//     "ECDHE-ECDSA-AES256-GCM-SHA384"
+//     "ECDHE-RSA-AES128-GCM-SHA256"
+//     "ECDHE-ECDSA-AES128-GCM-SHA256"
+//     "DHE-RSA-AES256-GCM-SHA384"
+//     "DHE-RSA-AES128-GCM-SHA256"
+//   - __oci-default-http2-tls-13-ssl-cipher-suite-v1__
+//     "TLS_AES_128_GCM_SHA256"
+//     "TLS_AES_256_GCM_SHA384"
+//     "TLS_CHACHA20_POLY1305_SHA256"
+//   - __oci-default-http2-tls-12-13-ssl-cipher-suite-v1__
+//     "ECDHE-RSA-AES256-GCM-SHA384"
+//     "ECDHE-ECDSA-AES256-GCM-SHA384"
+//     "ECDHE-RSA-AES128-GCM-SHA256"
+//     "ECDHE-ECDSA-AES128-GCM-SHA256"
+//     "DHE-RSA-AES256-GCM-SHA384"
+//     "DHE-RSA-AES128-GCM-SHA256"
+//     "TLS_AES_128_GCM_SHA256"
+//     "TLS_AES_256_GCM_SHA384"
+//     "TLS_CHACHA20_POLY1305_SHA256"
+//   - __oci-tls-13-recommended-ssl-cipher-suite-v1__
+//     "TLS_AES_128_GCM_SHA256"
+//     "TLS_AES_256_GCM_SHA384"
+//     "TLS_CHACHA20_POLY1305_SHA256"
+//   - __oci-tls-12-13-wider-ssl-cipher-suite-v1__
+//     "TLS_AES_128_GCM_SHA256"
+//     "TLS_AES_256_GCM_SHA384"
+//     "TLS_CHACHA20_POLY1305_SHA256"
+//     "ECDHE-ECDSA-AES128-GCM-SHA256"
+//     "ECDHE-RSA-AES128-GCM-SHA256"
+//     "ECDHE-ECDSA-AES128-SHA256"
+//     "ECDHE-RSA-AES128-SHA256"
+//     "ECDHE-ECDSA-AES256-GCM-SHA384"
+//     "ECDHE-RSA-AES256-GCM-SHA384"
+//     "ECDHE-ECDSA-AES256-SHA384"
+//     "ECDHE-RSA-AES256-SHA384"
+//     "AES128-GCM-SHA256"
+//     "AES128-SHA256"
+//     "AES256-GCM-SHA384"
+//     "AES256-SHA256"
+//   - __oci-tls-11-12-13-wider-ssl-cipher-suite-v1__
+//     "TLS_AES_128_GCM_SHA256"
+//     "TLS_AES_256_GCM_SHA384"
+//     "TLS_CHACHA20_POLY1305_SHA256"
+//     "ECDHE-ECDSA-AES128-GCM-SHA256"
+//     "ECDHE-RSA-AES128-GCM-SHA256"
+//     "ECDHE-ECDSA-AES128-SHA256"
+//     "ECDHE-RSA-AES128-SHA256"
+//     "ECDHE-ECDSA-AES256-GCM-SHA384"
+//     "ECDHE-RSA-AES256-GCM-SHA384"
+//     "ECDHE-ECDSA-AES256-SHA384"
+//     "ECDHE-RSA-AES256-SHA384"
+//     "AES128-GCM-SHA256"
+//     "AES128-SHA256"
+//     "AES256-GCM-SHA384"
+//     "AES256-SHA256"
+//     "ECDHE-ECDSA-AES128-SHA"
+//     "ECDHE-RSA-AES128-SHA"
+//     "ECDHE-RSA-AES256-SHA"
+//     "ECDHE-ECDSA-AES256-SHA"
+//     "AES128-SHA"
+//     "AES256-SHA"
 type SslCipherSuite struct {
 
 	// A friendly name for the SSL cipher suite. It must be unique and it cannot be changed.
@@ -182,11 +245,23 @@ type SslCipherSuite struct {
 	// * oci-compatible-ssl-cipher-suite-v1
 	// * oci-wider-compatible-ssl-cipher-suite-v1
 	// * oci-customized-ssl-cipher-suite
+	// * oci-default-http2-ssl-cipher-suite-v1
+	// * oci-default-http2-tls-13-ssl-cipher-suite-v1
+	// * oci-default-http2-tls-12-13-ssl-cipher-suite-v1
+	// * oci-tls-13-recommended-ssl-cipher-suite-v1
+	// * oci-tls-12-13-wider-ssl-cipher-suite-v1
+	// * oci-tls-11-12-13-wider-ssl-cipher-suite-v1
 	// example: `example_cipher_suite`
 	Name *string `mandatory:"true" json:"name"`
 
 	// A list of SSL ciphers the load balancer must support for HTTPS or SSL connections.
 	// The following ciphers are valid values for this property:
+	// *  __TLSv1.3 ciphers__
+	//         "TLS_AES_128_GCM_SHA256"
+	//         "TLS_AES_256_GCM_SHA384"
+	//         "TLS_CHACHA20_POLY1305_SHA256"
+	//         "TLS_AES_128_CCM_SHA256"
+	//         "TLS_AES_128_CCM_8_SHA256"
 	// *  __TLSv1.2 ciphers__
 	//         "AES128-GCM-SHA256"
 	//         "AES128-SHA256"
@@ -299,7 +374,7 @@ func (m SslCipherSuite) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

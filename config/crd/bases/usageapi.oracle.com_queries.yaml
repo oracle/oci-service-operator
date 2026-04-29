@@ -132,11 +132,9 @@ spec:
                           fields for Query.QueryDefinition.ReportQuery.Forecast.
                         properties:
                           forecastType:
-                            description: BASIC uses the exponential smoothing (ETS)
-                              model to project future usage/costs based on history
-                              data. The basis for projections is a periodic set of
-                              equivalent historical days for which the projection
-                              is being made.
+                            description: |-
+                              BASIC uses the exponential smoothing (ETS) model to project future usage or costs based on history data.
+                              The basis for projections is a periodic set of equivalent historical days for which the projection is being made.
                             type: string
                           timeForecastEnded:
                             description: The forecast end time.
@@ -158,8 +156,8 @@ spec:
                         type: string
                       groupBy:
                         description: |-
-                          Aggregate the result by.
-                          example:
+                          Specifies what to aggregate the result by.
+                          For example:
                             `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
                               "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
                               "resourceId", "tenantId", "tenantName"]`
@@ -187,18 +185,18 @@ spec:
                           type: object
                         type: array
                       isAggregateByTime:
-                        description: Whether aggregated by time. If isAggregateByTime
-                          is true, all usage/cost over the query time period will
+                        description: Specifies whether aggregated by time. If isAggregateByTime
+                          is true, all usage or cost over the query time period will
                           be added up.
                         type: boolean
                       queryType:
                         description: |-
                           The query usage type. COST by default if it is missing.
-                          Usage - Query the usage data.
-                          Cost - Query the cost/billing data.
-                          Credit - Query the credit adjustments data.
-                          ExpiredCredit - Query the expired credits data
-                          AllCredit - Query the credit adjustments and expired credit
+                          * Usage: Query the usage data.
+                          * Cost: Query the cost/billing data.
+                          * Credit: Query the credit adjustments data.
+                          * ExpiredCredit: Query the expired credits data.
+                          * AllCredit: Query the credit adjustments and expired credit.
                         type: string
                       tenantId:
                         description: Tenant ID.
@@ -312,11 +310,9 @@ spec:
                           fields for Query.QueryDefinition.ReportQuery.Forecast.
                         properties:
                           forecastType:
-                            description: BASIC uses the exponential smoothing (ETS)
-                              model to project future usage/costs based on history
-                              data. The basis for projections is a periodic set of
-                              equivalent historical days for which the projection
-                              is being made.
+                            description: |-
+                              BASIC uses the exponential smoothing (ETS) model to project future usage or costs based on history data.
+                              The basis for projections is a periodic set of equivalent historical days for which the projection is being made.
                             type: string
                           timeForecastEnded:
                             description: The forecast end time.
@@ -338,8 +334,8 @@ spec:
                         type: string
                       groupBy:
                         description: |-
-                          Aggregate the result by.
-                          example:
+                          Specifies what to aggregate the result by.
+                          For example:
                             `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
                               "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
                               "resourceId", "tenantId", "tenantName"]`
@@ -367,18 +363,18 @@ spec:
                           type: object
                         type: array
                       isAggregateByTime:
-                        description: Whether aggregated by time. If isAggregateByTime
-                          is true, all usage/cost over the query time period will
+                        description: Specifies whether aggregated by time. If isAggregateByTime
+                          is true, all usage or cost over the query time period will
                           be added up.
                         type: boolean
                       queryType:
                         description: |-
                           The query usage type. COST by default if it is missing.
-                          Usage - Query the usage data.
-                          Cost - Query the cost/billing data.
-                          Credit - Query the credit adjustments data.
-                          ExpiredCredit - Query the expired credits data
-                          AllCredit - Query the credit adjustments and expired credit
+                          * Usage: Query the usage data.
+                          * Cost: Query the cost/billing data.
+                          * Credit: Query the credit adjustments data.
+                          * ExpiredCredit: Query the expired credits data.
+                          * AllCredit: Query the credit adjustments and expired credit.
                         type: string
                       tenantId:
                         description: Tenant ID.

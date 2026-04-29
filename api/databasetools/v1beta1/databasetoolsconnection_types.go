@@ -30,10 +30,13 @@ type DatabaseToolsConnectionSpec struct {
 	// Specifies whether this connection is supported by the Database Tools Runtime.
 	// +kubebuilder:validation:Optional
 	RuntimeSupport string `json:"runtimeSupport,omitempty"`
+	// Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault).
+	// +kubebuilder:validation:Optional
+	RuntimeIdentity string `json:"runtimeIdentity,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	// +kubebuilder:validation:Required
 	DisplayName string `json:"displayName"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// +kubebuilder:validation:Optional
@@ -41,7 +44,7 @@ type DatabaseToolsConnectionSpec struct {
 	// The JDBC URL used to connect to the Generic JDBC database system.
 	// +kubebuilder:validation:Optional
 	Url string `json:"url,omitempty"`
-	// The user name.
+	// The database user name.
 	// +kubebuilder:validation:Optional
 	UserName string `json:"userName,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -58,7 +61,7 @@ type DatabaseToolsConnectionSpec struct {
 	ConnectionString string `json:"connectionString,omitempty"`
 	// +kubebuilder:validation:Optional
 	RelatedResource DatabaseToolsConnectionRelatedResource `json:"relatedResource,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
 	// +kubebuilder:validation:Optional
 	PrivateEndpointId string `json:"privateEndpointId,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -88,7 +91,7 @@ type DatabaseToolsConnectionUserPassword struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the user password.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password.
 	// +kubebuilder:validation:Optional
 	SecretId string `json:"secretId,omitempty"`
 }
@@ -99,7 +102,7 @@ type DatabaseToolsConnectionKeyStoreKeyStoreContent struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the key store.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store.
 	// +kubebuilder:validation:Optional
 	SecretId string `json:"secretId,omitempty"`
 }
@@ -110,7 +113,7 @@ type DatabaseToolsConnectionKeyStoreKeyStorePassword struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the key store password.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store password.
 	// +kubebuilder:validation:Optional
 	SecretId string `json:"secretId,omitempty"`
 }
@@ -131,7 +134,7 @@ type DatabaseToolsConnectionRelatedResource struct {
 	// The resource entity type.
 	// +kubebuilder:validation:Required
 	EntityType string `json:"entityType"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the related resource.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the related resource.
 	// +kubebuilder:validation:Required
 	Identifier string `json:"identifier"`
 }
@@ -142,7 +145,7 @@ type DatabaseToolsConnectionProxyClientUserPassword struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	ValueType string `json:"valueType,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the user password.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password.
 	// +kubebuilder:validation:Optional
 	SecretId string `json:"secretId,omitempty"`
 }
@@ -180,21 +183,25 @@ type DatabaseToolsConnectionStatus struct {
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 	// Locks associated with this resource.
 	Locks []DatabaseToolsConnectionLock `json:"locks,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools connection.
 	Id string `json:"id,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The current state of the Database Tools connection.
 	LifecycleState string `json:"lifecycleState,omitempty"`
 	// The time the Database Tools connection was created. An RFC3339 formatted datetime string.
 	TimeCreated string `json:"timeCreated,omitempty"`
-	// The time the DatabaseToolsConnection was updated. An RFC3339 formatted datetime string.
+	// The time the Database Tools connection was updated. An RFC3339 formatted datetime string.
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// Specifies whether this connection is supported by the Database Tools Runtime.
 	RuntimeSupport string `json:"runtimeSupport,omitempty"`
-	Type           string `json:"type,omitempty"`
+	// Specifies the Database Tools Runtime endpoint.
+	RuntimeEndpoint string `json:"runtimeEndpoint,omitempty"`
+	// Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault).
+	RuntimeIdentity string `json:"runtimeIdentity,omitempty"`
+	Type            string `json:"type,omitempty"`
 	// The connect descriptor or Easy Connect Naming method used to connect to the database.
 	ConnectionString string                                 `json:"connectionString,omitempty"`
 	RelatedResource  DatabaseToolsConnectionRelatedResource `json:"relatedResource,omitempty"`
@@ -206,7 +213,7 @@ type DatabaseToolsConnectionStatus struct {
 	// The Oracle wallet or Java Keystores containing trusted certificates for authenticating the server's public certificate and
 	// the client private key and associated certificates required for client authentication.
 	KeyStores []DatabaseToolsConnectionKeyStore `json:"keyStores,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
 	PrivateEndpointId string                             `json:"privateEndpointId,omitempty"`
 	ProxyClient       DatabaseToolsConnectionProxyClient `json:"proxyClient,omitempty"`
 	// The JDBC URL used to connect to the Generic JDBC database system.

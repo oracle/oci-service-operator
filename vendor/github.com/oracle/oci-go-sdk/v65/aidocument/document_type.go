@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -18,42 +18,45 @@ type DocumentTypeEnum string
 
 // Set of constants representing the allowable values for DocumentTypeEnum
 const (
-	DocumentTypeInvoice       DocumentTypeEnum = "INVOICE"
-	DocumentTypeReceipt       DocumentTypeEnum = "RECEIPT"
-	DocumentTypeResume        DocumentTypeEnum = "RESUME"
-	DocumentTypeTaxForm       DocumentTypeEnum = "TAX_FORM"
-	DocumentTypeDriverLicense DocumentTypeEnum = "DRIVER_LICENSE"
-	DocumentTypePassport      DocumentTypeEnum = "PASSPORT"
-	DocumentTypeBankStatement DocumentTypeEnum = "BANK_STATEMENT"
-	DocumentTypeCheck         DocumentTypeEnum = "CHECK"
-	DocumentTypePayslip       DocumentTypeEnum = "PAYSLIP"
-	DocumentTypeOthers        DocumentTypeEnum = "OTHERS"
+	DocumentTypeInvoice           DocumentTypeEnum = "INVOICE"
+	DocumentTypeReceipt           DocumentTypeEnum = "RECEIPT"
+	DocumentTypeResume            DocumentTypeEnum = "RESUME"
+	DocumentTypeTaxForm           DocumentTypeEnum = "TAX_FORM"
+	DocumentTypeDriverLicense     DocumentTypeEnum = "DRIVER_LICENSE"
+	DocumentTypePassport          DocumentTypeEnum = "PASSPORT"
+	DocumentTypeBankStatement     DocumentTypeEnum = "BANK_STATEMENT"
+	DocumentTypeCheck             DocumentTypeEnum = "CHECK"
+	DocumentTypePayslip           DocumentTypeEnum = "PAYSLIP"
+	DocumentTypeOthers            DocumentTypeEnum = "OTHERS"
+	DocumentTypeHealthInsuranceId DocumentTypeEnum = "HEALTH_INSURANCE_ID"
 )
 
 var mappingDocumentTypeEnum = map[string]DocumentTypeEnum{
-	"INVOICE":        DocumentTypeInvoice,
-	"RECEIPT":        DocumentTypeReceipt,
-	"RESUME":         DocumentTypeResume,
-	"TAX_FORM":       DocumentTypeTaxForm,
-	"DRIVER_LICENSE": DocumentTypeDriverLicense,
-	"PASSPORT":       DocumentTypePassport,
-	"BANK_STATEMENT": DocumentTypeBankStatement,
-	"CHECK":          DocumentTypeCheck,
-	"PAYSLIP":        DocumentTypePayslip,
-	"OTHERS":         DocumentTypeOthers,
+	"INVOICE":             DocumentTypeInvoice,
+	"RECEIPT":             DocumentTypeReceipt,
+	"RESUME":              DocumentTypeResume,
+	"TAX_FORM":            DocumentTypeTaxForm,
+	"DRIVER_LICENSE":      DocumentTypeDriverLicense,
+	"PASSPORT":            DocumentTypePassport,
+	"BANK_STATEMENT":      DocumentTypeBankStatement,
+	"CHECK":               DocumentTypeCheck,
+	"PAYSLIP":             DocumentTypePayslip,
+	"OTHERS":              DocumentTypeOthers,
+	"HEALTH_INSURANCE_ID": DocumentTypeHealthInsuranceId,
 }
 
 var mappingDocumentTypeEnumLowerCase = map[string]DocumentTypeEnum{
-	"invoice":        DocumentTypeInvoice,
-	"receipt":        DocumentTypeReceipt,
-	"resume":         DocumentTypeResume,
-	"tax_form":       DocumentTypeTaxForm,
-	"driver_license": DocumentTypeDriverLicense,
-	"passport":       DocumentTypePassport,
-	"bank_statement": DocumentTypeBankStatement,
-	"check":          DocumentTypeCheck,
-	"payslip":        DocumentTypePayslip,
-	"others":         DocumentTypeOthers,
+	"invoice":             DocumentTypeInvoice,
+	"receipt":             DocumentTypeReceipt,
+	"resume":              DocumentTypeResume,
+	"tax_form":            DocumentTypeTaxForm,
+	"driver_license":      DocumentTypeDriverLicense,
+	"passport":            DocumentTypePassport,
+	"bank_statement":      DocumentTypeBankStatement,
+	"check":               DocumentTypeCheck,
+	"payslip":             DocumentTypePayslip,
+	"others":              DocumentTypeOthers,
+	"health_insurance_id": DocumentTypeHealthInsuranceId,
 }
 
 // GetDocumentTypeEnumValues Enumerates the set of values for DocumentTypeEnum
@@ -78,6 +81,7 @@ func GetDocumentTypeEnumStringValues() []string {
 		"CHECK",
 		"PAYSLIP",
 		"OTHERS",
+		"HEALTH_INSURANCE_ID",
 	}
 }
 

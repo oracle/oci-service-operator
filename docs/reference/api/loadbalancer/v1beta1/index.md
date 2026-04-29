@@ -19,26 +19,15 @@ No customer-visible package currently exposes `loadbalancer.oracle.com/v1beta1`.
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [Backend](#kind-backend) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/backend.md) | - |
-| [BackendHealth](#kind-backendhealth) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/backendhealth.md) | - |
 | [BackendSet](#kind-backendset) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/backendset.md) | - |
-| [BackendSetHealth](#kind-backendsethealth) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/backendsethealth.md) | - |
 | [Certificate](#kind-certificate) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/certificate.md) | - |
-| [HealthChecker](#kind-healthchecker) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/healthchecker.md) | - |
 | [Hostname](#kind-hostname) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/hostname.md) | - |
 | [Listener](#kind-listener) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/listener.md) | - |
-| [ListenerRule](#kind-listenerrule) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/listenerrule.md) | - |
 | [LoadBalancer](#kind-loadbalancer) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/loadbalancer.md) | - |
-| [LoadBalancerHealth](#kind-loadbalancerhealth) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/loadbalancerhealth.md) | - |
-| [LoadBalancerShape](#kind-loadbalancershape) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/loadbalancershape.md) | - |
-| [NetworkSecurityGroup](#kind-networksecuritygroup) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/networksecuritygroup.md) | - |
 | [PathRouteSet](#kind-pathrouteset) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/pathrouteset.md) | - |
-| [Policy](#kind-policy) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/policy.md) | - |
-| [Protocol](#kind-protocol) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/protocol.md) | - |
 | [RoutingPolicy](#kind-routingpolicy) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/routingpolicy.md) | - |
 | [RuleSet](#kind-ruleset) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/ruleset.md) | - |
 | [SSLCipherSuite](#kind-sslciphersuite) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/sslciphersuite.md) | - |
-| [Shape](#kind-shape) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/shape.md) | - |
-| [WorkRequest](#kind-workrequest) | Namespaced | [Sample](../../../samples/loadbalancer/v1beta1/workrequest.md) | - |
 
 <a id="kind-backend"></a>
 ## Backend
@@ -63,9 +52,10 @@ BackendSpec defines the desired state of Backend.
 | `drain` | Whether the load balancer should drain this server. Servers marked "drain" receive no new incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | Yes | - | - |
 | `loadBalancerId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer associated with the backend set and server. | `string` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections the load balancer can make to the backend. If this is not set or set to 0 then the maximum number of simultaneous connections the load balancer can make to the backend is unlimited. If setting maxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | `offline` | Whether the load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | Yes | - | - |
-| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
+| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
 
 <a id="kind-backend-status"></a>
 ### Status
@@ -79,11 +69,12 @@ BackendStatus defines the observed state of Backend.
 | `drain` | Whether the load balancer should drain this server. Servers marked "drain" receive no new incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | No | - | - |
 | `loadBalancerId` | The bound load balancer OCID used to address this backend. | `string` | No | - | - |
+| `maxConnections` | The maximum number of simultaneous connections the load balancer can make to the backend. If this is not set or set to 0 then the maximum number of simultaneous connections the load balancer can make to the backend is unlimited. Example: `300` | `integer` | No | - | - |
 | `name` | A read-only field showing the IP address and port that uniquely identify this backend server in the backend set. Example: `10.0.0.3:8080` | `string` | No | - | - |
 | `offline` | Whether the load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | No | - | - |
 | [`status`](#kind-backend-status-status) | - | `object` | Yes | - | - |
-| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
+| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
 
 <a id="kind-backend-status-status"></a>
 #### Status.status
@@ -144,108 +135,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
 
-<a id="kind-backendhealth"></a>
-## BackendHealth
-
-BackendHealth is the Schema for the backendhealths API.
-
-- `Plural`: `backendhealths`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/backendhealth.md) (`config/samples/loadbalancer_v1beta1_backendhealth.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-backendhealth-spec"></a>
-### Spec
-
-BackendHealthSpec defines the desired state of BackendHealth.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-backendhealth-status"></a>
-### Status
-
-BackendHealthStatus defines the observed state of BackendHealth.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`healthCheckResults`](#kind-backendhealth-status-healthcheckresults) | A list of the most recent health check results returned for the specified backend server. | `list[object]` | No | - | - |
-| `sdkStatus` | The general health status of the specified backend server as reported by the primary and standby load balancers. * **OK:** Both health checks returned `OK`. * **WARNING:** One health check returned `OK` and one did not. * **CRITICAL:** Neither health check returned `OK`. * **UNKNOWN:** One or both health checks returned `UNKNOWN`, or the system was unable to retrieve metrics at this time. This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
-| [`status`](#kind-backendhealth-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-backendhealth-status-healthcheckresults"></a>
-#### Status.healthCheckResults[]
-
-[Back to BackendHealth status](#kind-backendhealth-status)
-
-BackendHealthHealthCheckResult defines nested fields for BackendHealth.HealthCheckResult.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `healthCheckStatus` | The result of the most recent health check. | `string` | No | - | - |
-| `sourceIpAddress` | The IP address of the health check status report provider. This identifier helps you differentiate same-subnet load balancers that report health check status. Example: `10.0.0.7` | `string` | No | - | - |
-| `subnetId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet hosting the load balancer that reported this health check status. | `string` | No | - | - |
-| `timestamp` | The date and time the data was retrieved, in the format defined by RFC3339. Example: `2017-06-02T18:28:11+00:00` | `string` | No | - | - |
-
-<a id="kind-backendhealth-status-status"></a>
-#### Status.status
-
-[Back to BackendHealth status](#kind-backendhealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-backendhealth-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-backendhealth-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-backendhealth-status-status-async"></a>
-##### Status.status.async
-
-[Back to BackendHealth status](#kind-backendhealth-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-backendhealth-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-backendhealth-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to BackendHealth status](#kind-backendhealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-backendhealth-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to BackendHealth status](#kind-backendhealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
 <a id="kind-backendset"></a>
 ## BackendSet
 
@@ -264,6 +153,7 @@ BackendSetSpec defines the desired state of BackendSet.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendMaxConnections` | The maximum number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting. If this is not set or set to 0 then the number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting is unlimited. If setting backendMaxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | [`backends`](#kind-backendset-spec-backends) | - | `list[object]` | No | - | - |
 | [`healthChecker`](#kind-backendset-spec-healthchecker) | BackendSetHealthChecker defines nested fields for BackendSet.HealthChecker. | `object` | Yes | - | - |
 | [`lbCookieSessionPersistenceConfiguration`](#kind-backendset-spec-lbcookiesessionpersistenceconfiguration) | BackendSetLbCookieSessionPersistenceConfiguration defines nested fields for BackendSet.LbCookieSessionPersistenceConfiguration. | `object` | No | - | - |
@@ -285,9 +175,10 @@ BackendSetBackend defines nested fields for BackendSet.Backend.
 | `backup` | Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy. **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy. Example: `false` | `boolean` | No | - | - |
 | `drain` | Whether the load balancer should drain this server. Servers marked "drain" receive no new incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections the load balancer can make to the backend. If this is not set or set to 0 then the maximum number of simultaneous connections the load balancer can make to the backend is unlimited. If setting maxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | `offline` | Whether the load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | Yes | - | - |
-| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
+| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
 
 <a id="kind-backendset-spec-healthchecker"></a>
 #### Spec.healthChecker
@@ -349,7 +240,8 @@ BackendSetSslConfiguration defines nested fields for BackendSet.SslConfiguration
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -362,6 +254,7 @@ BackendSetStatus defines the observed state of BackendSet.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendMaxConnections` | The maximum number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting. If this is not set or set to 0 then the number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting is unlimited. Example: `300` | `integer` | No | - | - |
 | [`backends`](#kind-backendset-status-backends) | - | `list[object]` | No | - | - |
 | [`healthChecker`](#kind-backendset-status-healthchecker) | BackendSetHealthChecker defines nested fields for BackendSet.HealthChecker. | `object` | No | - | - |
 | [`lbCookieSessionPersistenceConfiguration`](#kind-backendset-status-lbcookiesessionpersistenceconfiguration) | BackendSetLbCookieSessionPersistenceConfiguration defines nested fields for BackendSet.LbCookieSessionPersistenceConfiguration. | `object` | No | - | - |
@@ -384,9 +277,10 @@ BackendSetBackend defines nested fields for BackendSet.Backend.
 | `backup` | Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy. **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy. Example: `false` | `boolean` | No | - | - |
 | `drain` | Whether the load balancer should drain this server. Servers marked "drain" receive no new incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections the load balancer can make to the backend. If this is not set or set to 0 then the maximum number of simultaneous connections the load balancer can make to the backend is unlimited. If setting maxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | `offline` | Whether the load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | Yes | - | - |
-| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
+| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
 
 <a id="kind-backendset-status-healthchecker"></a>
 #### Status.healthChecker
@@ -448,7 +342,8 @@ BackendSetSslConfiguration defines nested fields for BackendSet.SslConfiguration
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -504,97 +399,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to BackendSet status](#kind-backendset-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-backendsethealth"></a>
-## BackendSetHealth
-
-BackendSetHealth is the Schema for the backendsethealths API.
-
-- `Plural`: `backendsethealths`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/backendsethealth.md) (`config/samples/loadbalancer_v1beta1_backendsethealth.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-backendsethealth-spec"></a>
-### Spec
-
-BackendSetHealthSpec defines the desired state of BackendSetHealth.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-backendsethealth-status"></a>
-### Status
-
-BackendSetHealthStatus defines the observed state of BackendSetHealth.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `criticalStateBackendNames` | A list of backend servers that are currently in the `CRITICAL` health state. The list identifies each backend server by IP address and port. Example: `10.0.0.4:8080` | `list[string]` | No | - | - |
-| `sdkStatus` | Overall health status of the backend set. * **OK:** All backend servers in the backend set return a status of `OK`. * **WARNING:** Half or more of the backend set's backend servers return a status of `OK` and at least one backend server returns a status of `WARNING`, `CRITICAL`, or `UNKNOWN`. * **CRITICAL:** Fewer than half of the backend set's backend servers return a status of `OK`. * **UNKNOWN:** More than half of the backend set's backend servers return a status of `UNKNOWN`, the system was unable to retrieve metrics, or the backend set does not have a listener attached. This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
-| [`status`](#kind-backendsethealth-status-status) | - | `object` | Yes | - | - |
-| `totalBackendCount` | The total number of backend servers in this backend set. Example: `7` | `integer` | No | - | - |
-| `unknownStateBackendNames` | A list of backend servers that are currently in the `UNKNOWN` health state. The list identifies each backend server by IP address and port. Example: `10.0.0.5:8080` | `list[string]` | No | - | - |
-| `warningStateBackendNames` | A list of backend servers that are currently in the `WARNING` health state. The list identifies each backend server by IP address and port. Example: `10.0.0.3:8080` | `list[string]` | No | - | - |
-
-<a id="kind-backendsethealth-status-status"></a>
-#### Status.status
-
-[Back to BackendSetHealth status](#kind-backendsethealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-backendsethealth-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-backendsethealth-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-backendsethealth-status-status-async"></a>
-##### Status.status.async
-
-[Back to BackendSetHealth status](#kind-backendsethealth-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-backendsethealth-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-backendsethealth-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to BackendSetHealth status](#kind-backendsethealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-backendsethealth-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to BackendSetHealth status](#kind-backendsethealth-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
@@ -699,111 +503,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
 
-<a id="kind-healthchecker"></a>
-## HealthChecker
-
-HealthChecker is the Schema for the healthcheckers API.
-
-- `Plural`: `healthcheckers`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/healthchecker.md) (`config/samples/loadbalancer_v1beta1_healthchecker.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-healthchecker-spec"></a>
-### Spec
-
-HealthCheckerSpec defines the desired state of HealthChecker.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `intervalInMillis` | The interval between health checks, in milliseconds. Example: `10000` | `integer` | Yes | - | - |
-| `isForcePlainText` | Specifies if health checks should always be done using plain text instead of depending on whether or not the associated backend set is using SSL. If "true", health checks will be done using plain text even if the associated backend set is configured to use SSL. If "false", health checks will be done using SSL encryption if the associated backend set is configured to use SSL. If the backend set is not so configured the health checks will be done using plain text. Example: `true` | `boolean` | No | - | - |
-| `port` | The backend server port against which to run the health check. Example: `8080` | `integer` | Yes | - | - |
-| `protocol` | The protocol the health check must use; either HTTP or TCP. Example: `HTTP` | `string` | Yes | - | - |
-| `responseBodyRegex` | A regular expression for parsing the response body from the backend server. Example: `^((?!false).\|\s)*$` | `string` | Yes | - | - |
-| `retries` | The number of retries to attempt before a backend server is considered "unhealthy". This number also applies when recovering a server to the "healthy" state. Example: `3` | `integer` | Yes | - | - |
-| `returnCode` | The status code a healthy backend server should return. Example: `200` | `integer` | Yes | - | - |
-| `timeoutInMillis` | The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply returns within this timeout period. Example: `3000` | `integer` | Yes | - | - |
-| `urlPath` | The path against which to run the health check. Example: `/healthcheck` | `string` | No | - | - |
-
-<a id="kind-healthchecker-status"></a>
-### Status
-
-HealthCheckerStatus defines the observed state of HealthChecker.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `intervalInMillis` | The interval between health checks, in milliseconds. The default is 10000 (10 seconds). Example: `10000` | `integer` | No | - | - |
-| `isForcePlainText` | Specifies if health checks should always be done using plain text instead of depending on whether or not the associated backend set is using SSL. If "true", health checks will be done using plain text even if the associated backend set is configured to use SSL. If "false", health checks will be done using SSL encryption if the associated backend set is configured to use SSL. If the backend set is not so configured the health checks will be done using plain text. Example: `false` | `boolean` | No | - | - |
-| `port` | The backend server port against which to run the health check. If the port is not specified, the load balancer uses the port information from the `Backend` object. Example: `8080` | `integer` | No | - | - |
-| `protocol` | The protocol the health check must use; either HTTP or TCP. Example: `HTTP` | `string` | No | - | - |
-| `responseBodyRegex` | A regular expression for parsing the response body from the backend server. Example: `^((?!false).\|\s)*$` | `string` | No | - | - |
-| `retries` | The number of retries to attempt before a backend server is considered "unhealthy". This number also applies when recovering a server to the "healthy" state. Defaults to 3. Example: `3` | `integer` | No | - | - |
-| `returnCode` | The status code a healthy backend server should return. If you configure the health check policy to use the HTTP protocol, you can use common HTTP status codes such as "200". Example: `200` | `integer` | No | - | - |
-| [`status`](#kind-healthchecker-status-status) | - | `object` | Yes | - | - |
-| `timeoutInMillis` | The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply returns within this timeout period. Defaults to 3000 (3 seconds). Example: `3000` | `integer` | No | - | - |
-| `urlPath` | The path against which to run the health check. Example: `/healthcheck` | `string` | No | - | - |
-
-<a id="kind-healthchecker-status-status"></a>
-#### Status.status
-
-[Back to HealthChecker status](#kind-healthchecker-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-healthchecker-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-healthchecker-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-healthchecker-status-status-async"></a>
-##### Status.status.async
-
-[Back to HealthChecker status](#kind-healthchecker-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-healthchecker-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-healthchecker-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to HealthChecker status](#kind-healthchecker-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-healthchecker-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to HealthChecker status](#kind-healthchecker-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
 <a id="kind-hostname"></a>
 ## Hostname
 
@@ -822,7 +521,7 @@ HostnameSpec defines the desired state of Hostname.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | Yes | - | - |
+| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | Yes | - | - |
 | `name` | A friendly name for the hostname resource. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_hostname_001` | `string` | Yes | - | - |
 
 <a id="kind-hostname-status"></a>
@@ -832,7 +531,7 @@ HostnameStatus defines the observed state of Hostname.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | No | - | - |
+| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | No | - | - |
 | `name` | A friendly name for the hostname resource. It must be unique and it cannot be changed. Avoid entering confidential information. Example: `example_hostname_001` | `string` | No | - | - |
 | [`status`](#kind-hostname-status-status) | - | `object` | Yes | - | - |
 
@@ -934,8 +633,9 @@ ListenerConnectionConfiguration defines nested fields for Listener.ConnectionCon
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendTcpProxyProtocolOptions` | An array that represents the PPV2 Options that can be enabled on TCP Listeners. Example: ["PP2_TYPE_AUTHORITY"] | `list[string]` | No | - | - |
 | `backendTcpProxyProtocolVersion` | The backend TCP Proxy Protocol version. Example: `1` | `integer` | No | - | - |
-| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
+| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.oracle.com/iaas/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
 
 <a id="kind-listener-spec-sslconfiguration"></a>
 #### Spec.sslConfiguration
@@ -949,7 +649,8 @@ ListenerSslConfiguration defines nested fields for Listener.SslConfiguration.
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -984,8 +685,9 @@ ListenerConnectionConfiguration defines nested fields for Listener.ConnectionCon
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendTcpProxyProtocolOptions` | An array that represents the PPV2 Options that can be enabled on TCP Listeners. Example: ["PP2_TYPE_AUTHORITY"] | `list[string]` | No | - | - |
 | `backendTcpProxyProtocolVersion` | The backend TCP Proxy Protocol version. Example: `1` | `integer` | No | - | - |
-| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
+| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.oracle.com/iaas/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
 
 <a id="kind-listener-status-sslconfiguration"></a>
 #### Status.sslConfiguration
@@ -999,7 +701,8 @@ ListenerSslConfiguration defines nested fields for Listener.SslConfiguration.
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -1064,147 +767,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
 
-<a id="kind-listenerrule"></a>
-## ListenerRule
-
-ListenerRule is the Schema for the listenerrules API.
-
-- `Plural`: `listenerrules`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/listenerrule.md) (`config/samples/loadbalancer_v1beta1_listenerrule.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-listenerrule-spec"></a>
-### Spec
-
-ListenerRuleSpec defines the desired state of ListenerRule.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-listenerrule-status"></a>
-### Status
-
-ListenerRuleStatus defines the observed state of ListenerRule.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`rule`](#kind-listenerrule-status-rule) | A rule object that applies to the listener. | `object` | No | - | - |
-| `ruleSetName` | The name of the rule set that the rule belongs to. | `string` | No | - | - |
-| [`status`](#kind-listenerrule-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-listenerrule-status-rule"></a>
-#### Status.rule
-
-[Back to ListenerRule status](#kind-listenerrule-status)
-
-A rule object that applies to the listener.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `action` | - | `string` | No | - | - |
-| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
-| `areInvalidCharactersAllowed` | Indicates whether or not invalid characters in client header fields will be allowed. Valid names are composed of English letters, digits, hyphens and underscores. If "true", invalid characters are allowed in the HTTP header. If "false", invalid characters are not allowed in the HTTP header | `boolean` | No | - | - |
-| [`conditions`](#kind-listenerrule-status-rule-conditions) | - | `list[object]` | No | - | - |
-| `description` | A brief description of the access control rule. Avoid entering confidential information. example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.` | `string` | No | - | - |
-| `header` | A header name that conforms to RFC 7230. Example: `example_header_name` | `string` | No | - | - |
-| `httpLargeHeaderSizeInKB` | The maximum size of each buffer used for reading http client request header. This value indicates the maximum size allowed for each buffer. The allowed values for buffer size are 8, 16, 32 and 64. | `integer` | No | - | - |
-| `jsonData` | - | `string` | No | - | - |
-| `prefix` | A string to prepend to the header value. The resulting header value must conform to RFC 7230. With the following exceptions: * value cannot contain `$` * value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid. Example: `example_prefix_value` | `string` | No | - | - |
-| [`redirectUri`](#kind-listenerrule-status-rule-redirecturi) | ListenerRuleRuleRedirectUri defines nested fields for ListenerRule.Rule.RedirectUri. | `object` | No | - | - |
-| `responseCode` | The HTTP status code to return when the incoming request is redirected. The status line returned with the code is mapped from the standard HTTP specification. Valid response codes for redirection are: * 301 * 302 * 303 * 307 * 308 The default value is `302` (Found). Example: `301` | `integer` | No | - | - |
-| `statusCode` | The HTTP status code to return when the requested HTTP method is not in the list of allowed methods. The associated status line returned with the code is mapped from the standard HTTP specification. The default value is `405 (Method Not Allowed)`. Example: 403 | `integer` | No | - | - |
-| `suffix` | A string to append to the header value. The resulting header value must conform to RFC 7230. With the following exceptions: * value cannot contain `$` * value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid. Example: `example_suffix_value` | `string` | No | - | - |
-| `value` | A header value that conforms to RFC 7230. With the following exceptions: * value cannot contain `$` * value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid. Example: `example_value` | `string` | No | - | - |
-
-<a id="kind-listenerrule-status-rule-conditions"></a>
-##### Status.rule.conditions[]
-
-[Back to ListenerRule status](#kind-listenerrule-status)
-
-ListenerRuleRuleCondition defines nested fields for ListenerRule.Rule.Condition.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `attributeName` | - | `string` | No | - | - |
-| `attributeValue` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
-| `jsonData` | - | `string` | No | - | - |
-| `operator` | A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the incoming URI. * **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string. * **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the `attributeValue` string. * **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue` string. | `string` | No | - | - |
-
-<a id="kind-listenerrule-status-rule-redirecturi"></a>
-##### Status.rule.redirectUri
-
-[Back to ListenerRule status](#kind-listenerrule-status)
-
-ListenerRuleRuleRedirectUri defines nested fields for ListenerRule.Rule.RedirectUri.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `host` | The valid domain name (hostname) or IP address to use in the redirect URI. When this value is null, not set, or set to `{host}`, the service preserves the original domain name from the incoming HTTP request URI. All RedirectUri tokens are valid for this property. You can use any token more than once. Curly braces are valid in this property only to surround tokens, such as `{host}` Examples: * **example.com** appears as `example.com` in the redirect URI. * **in{host}** appears as `inexample.com` in the redirect URI if `example.com` is the hostname in the incoming HTTP request URI. * **{port}{host}** appears as `8081example.com` in the redirect URI if `example.com` is the hostname and the port is `8081` in the incoming HTTP request URI. | `string` | No | - | - |
-| `path` | The HTTP URI path to use in the redirect URI. When this value is null, not set, or set to `{path}`, the service preserves the original path from the incoming HTTP request URI. To omit the path from the redirect URI, set this value to an empty string, "". All RedirectUri tokens are valid for this property. You can use any token more than once. The path string must begin with `/` if it does not begin with the `{path}` token. Examples: * __/example/video/123__ appears as `/example/video/123` in the redirect URI. * __/example{path}__ appears as `/example/video/123` in the redirect URI if `/video/123` is the path in the incoming HTTP request URI. * __{path}/123__ appears as `/example/video/123` in the redirect URI if `/example/video` is the path in the incoming HTTP request URI. * __{path}123__ appears as `/example/video123` in the redirect URI if `/example/video` is the path in the incoming HTTP request URI. * __/{host}/123__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname in the incoming HTTP request URI. * __/{host}/{port}__ appears as `/example.com/123` in the redirect URI if `example.com` is the hostname and `123` is the port in the incoming HTTP request URI. * __/{query}__ appears as `/lang=en` in the redirect URI if the query is `lang=en` in the incoming HTTP request URI. | `string` | No | - | - |
-| `port` | The communication port to use in the redirect URI. Valid values include integers from 1 to 65535. When this value is null, the service preserves the original port from the incoming HTTP request URI. Example: `8081` | `integer` | No | - | - |
-| `protocol` | The HTTP protocol to use in the redirect URI. When this value is null, not set, or set to `{protocol}`, the service preserves the original protocol from the incoming HTTP request URI. Allowed values are: * HTTP * HTTPS * {protocol} `{protocol}` is the only valid token for this property. It can appear only once in the value string. Example: `HTTPS` | `string` | No | - | - |
-| `query` | The query string to use in the redirect URI. When this value is null, not set, or set to `{query}`, the service preserves the original query parameters from the incoming HTTP request URI. All `RedirectUri` tokens are valid for this property. You can use any token more than once. If the query string does not begin with the `{query}` token, it must begin with the question mark (?) character. You can specify multiple query parameters as a single string. Separate each query parameter with an ampersand (&) character. To omit all incoming query parameters from the redirect URI, set this value to an empty string, "". If the specified query string results in a redirect URI ending with `?` or `&`, the last character is truncated. For example, if the incoming URI is `http://host.com:8080/documents` and the query property value is `?lang=en&{query}`, the redirect URI is `http://host.com:8080/documents?lang=en`. The system truncates the final ampersand (&) because the incoming URI included no value to replace the {query} token. Examples: * **lang=en&time_zone=PST** appears as `lang=en&time_zone=PST` in the redirect URI. * **{query}** appears as `lang=en&time_zone=PST` in the redirect URI if `lang=en&time_zone=PST` is the query string in the incoming HTTP request. If the incoming HTTP request has no query parameters, the `{query}` token renders as an empty string. * **lang=en&{query}&time_zone=PST** appears as `lang=en&country=us&time_zone=PST` in the redirect URI if `country=us` is the query string in the incoming HTTP request. If the incoming HTTP request has no query parameters, this value renders as `lang=en&time_zone=PST`. * **protocol={protocol}&hostname={host}** appears as `protocol=http&hostname=example.com` in the redirect URI if the protocol is `HTTP` and the hostname is `example.com` in the incoming HTTP request. * **port={port}&hostname={host}** appears as `port=8080&hostname=example.com` in the redirect URI if the port is `8080` and the hostname is `example.com` in the incoming HTTP request URI. | `string` | No | - | - |
-
-<a id="kind-listenerrule-status-status"></a>
-#### Status.status
-
-[Back to ListenerRule status](#kind-listenerrule-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-listenerrule-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-listenerrule-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-listenerrule-status-status-async"></a>
-##### Status.status.async
-
-[Back to ListenerRule status](#kind-listenerrule-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-listenerrule-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-listenerrule-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to ListenerRule status](#kind-listenerrule-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-listenerrule-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to ListenerRule status](#kind-listenerrule-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
 <a id="kind-loadbalancer"></a>
 ## LoadBalancer
 
@@ -1225,22 +787,27 @@ LoadBalancerSpec defines the desired state of LoadBalancer.
 | --- | --- | --- | --- | --- | --- |
 | [`backendSets`](#kind-loadbalancer-spec-backendsets) | - | `map[string, object]` | No | - | - |
 | [`certificates`](#kind-loadbalancer-spec-certificates) | - | `map[string, object]` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment in which to create the load balancer. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to create the load balancer. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A user-friendly name. It does not have to be unique, and it is changeable. Avoid entering confidential information. Example: `example_load_balancer` | `string` | Yes | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`hostnames`](#kind-loadbalancer-spec-hostnames) | - | `map[string, object]` | No | - | - |
 | `ipMode` | Whether the load balancer has an IPv4 or IPv6 IP address. If "IPV4", the service assigns an IPv4 address and the load balancer supports IPv4 traffic. If "IPV6", the service assigns an IPv6 address and the load balancer supports IPv6 traffic. Example: "ipMode":"IPV6" | `string` | No | - | - |
-| `isPrivate` | Whether the load balancer has a VCN-local (private) IP address. If "true", the service assigns a private IP address to the load balancer. If "false", the service assigns a public IP address to the load balancer. A public load balancer is accessible from the internet, depending on your VCN's security list rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securitylists.htm). For more information about public and private load balancers, see How Load Balancing Works (https://docs.cloud.oracle.com/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works). Example: `true` | `boolean` | No | - | - |
+| `ipv6SubnetCidr` | Applies to IPV6 LB creation only. Used to disambiguate which subnet prefix should be used to create an IPv6 LB. Example: "2002::1234:abcd:ffff:c0a8:101/64" | `string` | No | - | - |
+| `isDeleteProtectionEnabled` | Whether or not the load balancer has delete protection enabled. If "true", the loadbalancer will be protected against deletion if configured to accept traffic. If "false", the loadbalancer will not be protected against deletion. Delete protection will not be enabled unless a value of "true" is provided. Example: `true` | `boolean` | No | - | - |
+| `isPrivate` | Whether the load balancer has a VCN-local (private) IP address. If "true", the service assigns a private IP address to the load balancer. If "false", the service assigns a public IP address to the load balancer. A public load balancer is accessible from the internet, depending on your VCN's security list rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securitylists.htm). For more information about public and private load balancers, see How Load Balancing Works (https://docs.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works). Example: `true` | `boolean` | No | - | - |
+| `isRequestIdEnabled` | Whether or not the load balancer has the Request Id feature enabled for HTTP listeners. If "true", the load balancer will attach a unique request id header to every request passed through from the load balancer to load balancer backends. This same request id header also will be added to the response the lb received from the backend handling the request before the load balancer returns the response to the requestor. The name of the unique request id header is set the by value of requestIdHeader. If "false", the loadbalancer not add this unique request id header to either the request passed through to the load balancer backends nor to the reponse returned to the user. New load balancers have the Request Id feature disabled unless isRequestIdEnabled is set to true. Example: `true` | `boolean` | No | - | - |
 | [`listeners`](#kind-loadbalancer-spec-listeners) | - | `map[string, object]` | No | - | - |
-| `networkSecurityGroupIds` | An array of NSG OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with this load balancer. During the load balancer's creation, the service adds the new load balancer to the specified NSGs. The benefits of using NSGs with the load balancer include: * NSGs define network security rules to govern ingress and egress traffic for the load balancer. * The network security rules of other resources can reference the NSGs associated with the load balancer to ensure access. Example: `["ocid1.nsg.oc1.phx.unique_ID"]` | `list[string]` | No | - | - |
+| `networkSecurityGroupIds` | An array of NSG OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with this load balancer. During the load balancer's creation, the service adds the new load balancer to the specified NSGs. The benefits of using NSGs with the load balancer include: * NSGs define network security rules to govern ingress and egress traffic for the load balancer. * The network security rules of other resources can reference the NSGs associated with the load balancer to ensure access. Example: `["ocid1.nsg.oc1.phx.unique_ID"]` | `list[string]` | No | - | - |
 | [`pathRouteSets`](#kind-loadbalancer-spec-pathroutesets) | - | `map[string, object]` | No | - | - |
+| `requestIdHeader` | If isRequestIdEnabled is true then this field contains the name of the header field that contains the unique request id that is attached to every request from the load balancer to the load balancer backends and to every response from the load balancer. If a request to the load balancer already contains a header with same name as specified in requestIdHeader then the load balancer will not change the value of that field. If isRequestIdEnabled is false then this field is ignored. If this field is not set or is set to "" then this field defaults to X-Request-Id **Notes:** * Unless the header name is "" it must start with "X-" prefix. * Setting the header name to "" will set it to the default: X-Request-Id. | `string` | No | - | - |
 | [`reservedIps`](#kind-loadbalancer-spec-reservedips) | An array of reserved Ips. | `list[object]` | No | - | - |
 | [`ruleSets`](#kind-loadbalancer-spec-rulesets) | - | `map[string, object]` | No | - | - |
+| `securityAttributes` | Extended Defined tags for ZPR for this resource. Each key is predefined and scoped to a namespace. Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit", "usagetype" : "zpr"}}}` | `map[string, map[string, string]]` | No | - | - |
 | [`shapeDetails`](#kind-loadbalancer-spec-shapedetails) | The configuration details to create load balancer using Flexible shape. This is required only if shapeName is `Flexible`. | `object` | No | - | - |
-| `shapeName` | A template that determines the total pre-provisioned bandwidth (ingress plus egress). To get a list of available shapes, use the ListShapes operation. Example: `flexible` NOTE: Starting May 2023, Fixed shapes - 10Mbps, 100Mbps, 400Mbps, 8000Mbps would be deprecated and only shape allowed would be `Flexible` | `string` | Yes | - | - |
+| `shapeName` | A template that determines the total pre-provisioned bandwidth (ingress plus egress). To get a list of available shapes, use the ListShapes operation. Example: `flexible` NOTE: After May 2023, Fixed shapes - 10Mbps, 100Mbps, 400Mbps, 8000Mbps would be deprecated and only shape allowed would be `Flexible` | `string` | Yes | - | - |
 | [`sslCipherSuites`](#kind-loadbalancer-spec-sslciphersuites) | - | `map[string, object]` | No | - | - |
-| `subnetIds` | An array of subnet OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). | `list[string]` | Yes | - | - |
+| `subnetIds` | An array of subnet OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). | `list[string]` | Yes | - | - |
 
 <a id="kind-loadbalancer-spec-backendsets"></a>
 #### Spec.backendSets{}
@@ -1251,6 +818,7 @@ LoadBalancerBackendSets defines nested fields for LoadBalancer.BackendSets.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendMaxConnections` | The maximum number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting. If this is not set or set to 0 then the number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting is unlimited. If setting backendMaxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | [`backends`](#kind-loadbalancer-spec-backendsets-backends) | - | `list[object]` | No | - | - |
 | [`healthChecker`](#kind-loadbalancer-spec-backendsets-healthchecker) | LoadBalancerBackendSetsHealthChecker defines nested fields for LoadBalancer.BackendSets.HealthChecker. | `object` | Yes | - | - |
 | [`lbCookieSessionPersistenceConfiguration`](#kind-loadbalancer-spec-backendsets-lbcookiesessionpersistenceconfiguration) | LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration defines nested fields for LoadBalancer.BackendSets.LbCookieSessionPersistenceConfiguration. | `object` | No | - | - |
@@ -1270,9 +838,10 @@ LoadBalancerBackendSetsBackend defines nested fields for LoadBalancer.BackendSet
 | `backup` | Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy. **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy. Example: `false` | `boolean` | No | - | - |
 | `drain` | Whether the load balancer should drain this server. Servers marked "drain" receive no new incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections the load balancer can make to the backend. If this is not set or set to 0 then the maximum number of simultaneous connections the load balancer can make to the backend is unlimited. If setting maxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | `offline` | Whether the load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | Yes | - | - |
-| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
+| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
 
 <a id="kind-loadbalancer-spec-backendsets-healthchecker"></a>
 ##### Spec.backendSets{}.healthChecker
@@ -1334,7 +903,8 @@ LoadBalancerBackendSetsSslConfiguration defines nested fields for LoadBalancer.B
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -1364,7 +934,7 @@ LoadBalancerHostnames defines nested fields for LoadBalancer.Hostnames.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | Yes | - | - |
+| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | Yes | - | - |
 | `name` | The name of the hostname resource. Example: `example_hostname_001` | `string` | Yes | - | - |
 
 <a id="kind-loadbalancer-spec-listeners"></a>
@@ -1395,8 +965,9 @@ LoadBalancerListenersConnectionConfiguration defines nested fields for LoadBalan
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendTcpProxyProtocolOptions` | An array that represents the PPV2 Options that can be enabled on TCP Listeners. Example: ["PP2_TYPE_AUTHORITY"] | `list[string]` | No | - | - |
 | `backendTcpProxyProtocolVersion` | The backend TCP Proxy Protocol version. Example: `1` | `integer` | No | - | - |
-| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
+| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.oracle.com/iaas/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
 
 <a id="kind-loadbalancer-spec-listeners-sslconfiguration"></a>
 ##### Spec.listeners{}.sslConfiguration
@@ -1410,7 +981,8 @@ LoadBalancerListenersSslConfiguration defines nested fields for LoadBalancer.Lis
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -1449,7 +1021,7 @@ The type of matching to apply to incoming URIs.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
+| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
 
 <a id="kind-loadbalancer-spec-reservedips"></a>
 #### Spec.reservedIps[]
@@ -1460,7 +1032,7 @@ LoadBalancerReservedIp defines nested fields for LoadBalancer.ReservedIp.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `id` | - | `string` | No | - | - |
+| `id` | Ocid of the Reserved IP/Public Ip created with VCN. Reserved IPs are IPs which already registered using VCN API. Create a reserved Public IP and then while creating the load balancer pass the ocid of the reserved IP in this field reservedIp to attach the Ip to Load balancer. Load balancer will be configured to listen to traffic on this IP. Reserved IPs will not be deleted when the Load balancer is deleted. They will be unattached from the Load balancer. Example: "ocid1.publicip.oc1.phx.unique_ID" IPV6 example: "ocid1.ipv6.oc1.phx.unique_ID" | `string` | No | - | - |
 
 <a id="kind-loadbalancer-spec-rulesets"></a>
 #### Spec.ruleSets{}
@@ -1483,12 +1055,14 @@ LoadBalancerRuleSetsItem defines nested fields for LoadBalancer.RuleSets.Item.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `action` | - | `string` | No | - | - |
-| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
+| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
 | `areInvalidCharactersAllowed` | Indicates whether or not invalid characters in client header fields will be allowed. Valid names are composed of English letters, digits, hyphens and underscores. If "true", invalid characters are allowed in the HTTP header. If "false", invalid characters are not allowed in the HTTP header | `boolean` | No | - | - |
 | [`conditions`](#kind-loadbalancer-spec-rulesets-items-conditions) | - | `list[object]` | No | - | - |
+| `defaultMaxConnections` | The maximum number of connections that the any IP can make to a listener unless the IP is mentioned in maxConnections. If no defaultMaxConnections is specified the default is unlimited. | `integer` | No | - | - |
 | `description` | A brief description of the access control rule. Avoid entering confidential information. example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.` | `string` | No | - | - |
 | `header` | A header name that conforms to RFC 7230. Example: `example_header_name` | `string` | No | - | - |
 | `httpLargeHeaderSizeInKB` | The maximum size of each buffer used for reading http client request header. This value indicates the maximum size allowed for each buffer. The allowed values for buffer size are 8, 16, 32 and 64. | `integer` | No | - | - |
+| [`ipMaxConnections`](#kind-loadbalancer-spec-rulesets-items-ipmaxconnections) | An array of IPs that have a maxConnection setting different than the default and what that maxConnection setting is | `list[object]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `prefix` | A string to prepend to the header value. The resulting header value must conform to RFC 7230. With the following exceptions: * value cannot contain `$` * value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid. Example: `example_prefix_value` | `string` | No | - | - |
 | [`redirectUri`](#kind-loadbalancer-spec-rulesets-items-redirecturi) | LoadBalancerRuleSetsItemRedirectUri defines nested fields for LoadBalancer.RuleSets.Item.RedirectUri. | `object` | No | - | - |
@@ -1507,9 +1081,21 @@ LoadBalancerRuleSetsItemCondition defines nested fields for LoadBalancer.RuleSet
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `attributeName` | - | `string` | No | - | - |
-| `attributeValue` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
+| `attributeValue` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `operator` | A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the incoming URI. * **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string. * **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the `attributeValue` string. * **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue` string. | `string` | No | - | - |
+
+<a id="kind-loadbalancer-spec-rulesets-items-ipmaxconnections"></a>
+###### Spec.ruleSets{}.items[].ipMaxConnections[]
+
+[Back to LoadBalancer spec](#kind-loadbalancer-spec)
+
+LoadBalancerRuleSetsItemIpMaxConnection defines nested fields for LoadBalancer.RuleSets.Item.IpMaxConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ipAddresses` | Each element in the list should be valid IPv4 or IPv6 CIDR Block address. Example: '["129.213.176.0/24", "150.136.187.0/24", "2002::1234:abcd:ffff:c0a8:101/64"]' | `list[string]` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections that the specified IPs can make to the Listener. IPs without a maxConnections setting can make either defaultMaxConnections simultaneous connections to a listener or, if no defaultMaxConnections is specified, an unlimited number of simultaneous connections to a listener. | `integer` | Yes | - | - |
 
 <a id="kind-loadbalancer-spec-rulesets-items-redirecturi"></a>
 ###### Spec.ruleSets{}.items[].redirectUri
@@ -1547,8 +1133,8 @@ LoadBalancerSslCipherSuites defines nested fields for LoadBalancer.SslCipherSuit
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | Yes | - | - |
-| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite example: `example_cipher_suite` | `string` | Yes | - | - |
+| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.3 ciphers__ "TLS_AES_128_GCM_SHA256" "TLS_AES_256_GCM_SHA384" "TLS_CHACHA20_POLY1305_SHA256" "TLS_AES_128_CCM_SHA256" "TLS_AES_128_CCM_8_SHA256" * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | Yes | - | - |
+| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite * oci-default-http2-ssl-cipher-suite-v1 * oci-default-http2-tls-13-ssl-cipher-suite-v1 * oci-default-http2-tls-12-13-ssl-cipher-suite-v1 * oci-tls-13-recommended-ssl-cipher-suite-v1 * oci-tls-12-13-wider-ssl-cipher-suite-v1 * oci-tls-11-12-13-wider-ssl-cipher-suite-v1 example: `example_cipher_suite` | `string` | Yes | - | - |
 
 <a id="kind-loadbalancer-status"></a>
 ### Status
@@ -1559,26 +1145,31 @@ LoadBalancerStatus defines the observed state of LoadBalancer.
 | --- | --- | --- | --- | --- | --- |
 | [`backendSets`](#kind-loadbalancer-status-backendsets) | - | `map[string, object]` | No | - | - |
 | [`certificates`](#kind-loadbalancer-status-certificates) | - | `map[string, object]` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the load balancer. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the load balancer. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A user-friendly name. It does not have to be unique, and it is changeable. Example: `example_load_balancer` | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`hostnames`](#kind-loadbalancer-status-hostnames) | - | `map[string, object]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the load balancer. | `string` | No | - | - |
 | [`ipAddresses`](#kind-loadbalancer-status-ipaddresses) | An array of IP addresses. | `list[object]` | No | - | - |
-| `isPrivate` | Whether the load balancer has a VCN-local (private) IP address. If "true", the service assigns a private IP address to the load balancer. If "false", the service assigns a public IP address to the load balancer. A public load balancer is accessible from the internet, depending on your VCN's security list rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securitylists.htm). For more information about public and private load balancers, see How Load Balancing Works (https://docs.cloud.oracle.com/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works). Example: `true` | `boolean` | No | - | - |
+| `ipMode` | Whether the load balancer has an IPv4 or IPv6 IP address. If "IPV4", the service assigns an IPv4 address and the load balancer supports IPv4 traffic. If "IPV6", the service assigns an IPv6 address and the load balancer supports IPv6 traffic. Example: "ipMode":"IPV6" | `string` | No | - | - |
+| `isDeleteProtectionEnabled` | Whether or not the load balancer has delete protection enabled. If "true", the loadbalancer will be protected against deletion if configured to accept traffic. If "false", the loadbalancer will not be protected against deletion. Delete protection is not be enabled unless this field is set to "true". Example: `true` | `boolean` | No | - | - |
+| `isPrivate` | Whether the load balancer has a VCN-local (private) IP address. If "true", the service assigns a private IP address to the load balancer. If "false", the service assigns a public IP address to the load balancer. A public load balancer is accessible from the internet, depending on your VCN's security list rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securitylists.htm). For more information about public and private load balancers, see How Load Balancing Works (https://docs.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works). Example: `true` | `boolean` | No | - | - |
+| `isRequestIdEnabled` | Whether or not the load balancer has the Request Id feature enabled for HTTP listeners. If "true", the load balancer will attach a unique request id header to every request passed through from the load balancer to load balancer backends. This same request id header also will be added to the response the lb received from the backend handling the request before the load balancer returns the response to the requestor. The name of the unique request id header is set the by value of requestIdHeader. If "false", the loadbalancer not add this unique request id header to either the request passed through to the load balancer backends nor to the reponse returned to the user. Example: `true` | `boolean` | No | - | - |
 | `lifecycleState` | The current state of the load balancer. | `string` | No | - | - |
 | [`listeners`](#kind-loadbalancer-status-listeners) | - | `map[string, object]` | No | - | - |
-| `networkSecurityGroupIds` | An array of NSG OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the load balancer. During the load balancer's creation, the service adds the new load balancer to the specified NSGs. The benefits of associating the load balancer with NSGs include: * NSGs define network security rules to govern ingress and egress traffic for the load balancer. * The network security rules of other resources can reference the NSGs associated with the load balancer to ensure access. Example: ["ocid1.nsg.oc1.phx.unique_ID"] | `list[string]` | No | - | - |
+| `networkSecurityGroupIds` | An array of NSG OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the load balancer. During the load balancer's creation, the service adds the new load balancer to the specified NSGs. The benefits of associating the load balancer with NSGs include: * NSGs define network security rules to govern ingress and egress traffic for the load balancer. * The network security rules of other resources can reference the NSGs associated with the load balancer to ensure access. Example: ["ocid1.nsg.oc1.phx.unique_ID"] | `list[string]` | No | - | - |
 | [`pathRouteSets`](#kind-loadbalancer-status-pathroutesets) | - | `map[string, object]` | No | - | - |
+| `requestIdHeader` | If isRequestIdEnabled is true then this field contains the name of the header field that contains the unique request id that is attached to every request from the load balancer to the load balancer backends and to every response from the load balancer. If a request to the load balancer already contains a header with same name as specified in requestIdHeader then the load balancer will not change the value of that field. If this field is set to "" this field defaults to X-Request-Id. | `string` | No | - | - |
 | [`routingPolicies`](#kind-loadbalancer-status-routingpolicies) | - | `map[string, object]` | No | - | - |
 | [`ruleSets`](#kind-loadbalancer-status-rulesets) | - | `map[string, object]` | No | - | - |
+| `securityAttributes` | Extended Defined tags for ZPR for this resource. Each key is predefined and scoped to a namespace. Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit", "usagetype" : "zpr"}}}` | `map[string, map[string, string]]` | No | - | - |
 | [`shapeDetails`](#kind-loadbalancer-status-shapedetails) | LoadBalancerShapeDetails defines nested fields for LoadBalancer.ShapeDetails. | `object` | No | - | - |
 | `shapeName` | A template that determines the total pre-provisioned bandwidth (ingress plus egress). To get a list of available shapes, use the ListShapes operation. Example: `100Mbps` | `string` | No | - | - |
 | [`sslCipherSuites`](#kind-loadbalancer-status-sslciphersuites) | - | `map[string, object]` | No | - | - |
 | [`status`](#kind-loadbalancer-status-status) | - | `object` | Yes | - | - |
-| `subnetIds` | An array of subnet OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). | `list[string]` | No | - | - |
-| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). System tags can be viewed by users, but can only be created by the system. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `subnetIds` | An array of subnet OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). | `list[string]` | No | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). System tags can be viewed by users, but can only be created by the system. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time the load balancer was created, in the format defined by RFC3339. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 
 <a id="kind-loadbalancer-status-backendsets"></a>
@@ -1590,6 +1181,7 @@ LoadBalancerBackendSets defines nested fields for LoadBalancer.BackendSets.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendMaxConnections` | The maximum number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting. If this is not set or set to 0 then the number of simultaneous connections the load balancer can make to any backend in the backend set unless the backend has its own maxConnections setting is unlimited. If setting backendMaxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | [`backends`](#kind-loadbalancer-status-backendsets-backends) | - | `list[object]` | No | - | - |
 | [`healthChecker`](#kind-loadbalancer-status-backendsets-healthchecker) | LoadBalancerBackendSetsHealthChecker defines nested fields for LoadBalancer.BackendSets.HealthChecker. | `object` | Yes | - | - |
 | [`lbCookieSessionPersistenceConfiguration`](#kind-loadbalancer-status-backendsets-lbcookiesessionpersistenceconfiguration) | LoadBalancerBackendSetsLbCookieSessionPersistenceConfiguration defines nested fields for LoadBalancer.BackendSets.LbCookieSessionPersistenceConfiguration. | `object` | No | - | - |
@@ -1609,9 +1201,10 @@ LoadBalancerBackendSetsBackend defines nested fields for LoadBalancer.BackendSet
 | `backup` | Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy. **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy. Example: `false` | `boolean` | No | - | - |
 | `drain` | Whether the load balancer should drain this server. Servers marked "drain" receive no new incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections the load balancer can make to the backend. If this is not set or set to 0 then the maximum number of simultaneous connections the load balancer can make to the backend is unlimited. If setting maxConnections to some value other than 0 then that value must be greater or equal to 256. Example: `300` | `integer` | No | - | - |
 | `offline` | Whether the load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | Yes | - | - |
-| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
+| `weight` | The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections as a server weighted '1'. For more information on load balancing policies, see How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm). Example: `3` | `integer` | No | - | - |
 
 <a id="kind-loadbalancer-status-backendsets-healthchecker"></a>
 ##### Status.backendSets{}.healthChecker
@@ -1673,7 +1266,8 @@ LoadBalancerBackendSetsSslConfiguration defines nested fields for LoadBalancer.B
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -1703,7 +1297,7 @@ LoadBalancerHostnames defines nested fields for LoadBalancer.Hostnames.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | Yes | - | - |
+| `hostname` | A virtual hostname. For more information about virtual hostname string construction, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing). Example: `app.example.com` | `string` | Yes | - | - |
 | `name` | The name of the hostname resource. Example: `example_hostname_001` | `string` | Yes | - | - |
 
 <a id="kind-loadbalancer-status-ipaddresses"></a>
@@ -1728,7 +1322,7 @@ LoadBalancerIpAddressReservedIp defines nested fields for LoadBalancer.IpAddress
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `id` | - | `string` | No | - | - |
+| `id` | Ocid of the Reserved IP/Public Ip created with VCN. Reserved IPs are IPs which already registered using VCN API. Create a reserved Public IP and then while creating the load balancer pass the ocid of the reserved IP in this field reservedIp to attach the Ip to Load balancer. Load balancer will be configured to listen to traffic on this IP. Reserved IPs will not be deleted when the Load balancer is deleted. They will be unattached from the Load balancer. Example: "ocid1.publicip.oc1.phx.unique_ID" IPV6 example: "ocid1.ipv6.oc1.phx.unique_ID" | `string` | No | - | - |
 
 <a id="kind-loadbalancer-status-listeners"></a>
 #### Status.listeners{}
@@ -1758,8 +1352,9 @@ LoadBalancerListenersConnectionConfiguration defines nested fields for LoadBalan
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendTcpProxyProtocolOptions` | An array that represents the PPV2 Options that can be enabled on TCP Listeners. Example: ["PP2_TYPE_AUTHORITY"] | `list[string]` | No | - | - |
 | `backendTcpProxyProtocolVersion` | The backend TCP Proxy Protocol version. Example: `1` | `integer` | No | - | - |
-| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
+| `idleTimeout` | The maximum idle time, in seconds, allowed between two successive receive or two successive send operations between the client and backend servers. A send operation does not reset the timer for receive operations. A receive operation does not reset the timer for send operations. For more information, see Connection Configuration (https://docs.oracle.com/iaas/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration). Example: `1200` | `integer (int64)` | Yes | - | - |
 
 <a id="kind-loadbalancer-status-listeners-sslconfiguration"></a>
 ##### Status.listeners{}.sslConfiguration
@@ -1773,7 +1368,8 @@ LoadBalancerListenersSslConfiguration defines nested fields for LoadBalancer.Lis
 | `certificateIds` | Ids for OCI certificates service certificates. Currently only a single Id may be passed. Example: `[ocid1.certificate.oc1.us-ashburn-1.amaaaaaaav3bgsaa5o2q7rh5nfmkkukfkogasqhk6af2opufhjlqg7m6jqzq]` | `list[string]` | No | - | - |
 | `certificateName` | A friendly name for the certificate bundle. It must be unique and it cannot be changed. Valid certificate bundle names include only alphanumeric characters, dashes, and underscores. Certificate bundle names cannot contain spaces. Avoid entering confidential information. Example: `example_certificate_bundle` | `string` | No | - | - |
 | `cipherSuiteName` | The name of the cipher suite to use for HTTPS or SSL connections. If this field is not specified, the default is `oci-default-ssl-cipher-suite-v1`. **Notes:** * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. Clients cannot perform an SSL handshake if there is an incompatible configuration. * You must ensure compatibility between the ciphers configured in the cipher suite and the configured certificates. For example, RSA-based ciphers require RSA certificates and ECDSA-based ciphers require ECDSA certificates. * If the cipher configuration is not modified after load balancer creation, the `GET` operation returns `oci-default-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing listeners that predate this feature. * If the cipher configuration was modified using Oracle operations after load balancer creation, the `GET` operation returns `oci-customized-ssl-cipher-suite` as the value of this field in the SSL configuration for existing listeners that predate this feature. * The `GET` operation returns `oci-wider-compatible-ssl-cipher-suite-v1` as the value of this field in the SSL configuration for existing backend sets that predate this feature. * If the `GET` operation on a listener returns `oci-customized-ssl-cipher-suite` as the value of this field, you must specify an appropriate predefined or custom cipher suite name when updating the resource. * The `oci-customized-ssl-cipher-suite` Oracle reserved cipher suite name is not accepted as valid input for this field. example: `example_cipher_suite` | `string` | No | - | - |
-| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
+| `hasSessionResumption` | Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again. If "true", the service resumes the previous TLS encrypted session. If "false", the service starts a new TLS encrypted session. Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance. Example: `true` | `boolean` | No | - | - |
+| `protocols` | A list of SSL protocols the load balancer must support for HTTPS or SSL connections. The load balancer uses SSL protocols to establish a secure connection between a client and a server. A secure connection ensures that all data passed between the client and the server is private. The Load Balancing service supports the following protocols: * TLSv1 * TLSv1.1 * TLSv1.2 * TLSv1.3 If this field is not specified, TLSv1.2 is the default. **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols. **Notes:** * The handshake to establish an SSL connection fails if the client supports none of the specified protocols. * You must ensure compatibility between the specified SSL protocols and the ciphers configured in the cipher suite. * For all existing load balancer listeners and backend sets that predate this feature, the `GET` operation displays a list of SSL protocols currently used by those resources. example: `["TLSv1.1", "TLSv1.2"]` | `list[string]` | No | - | - |
 | `serverOrderPreference` | When this attribute is set to ENABLED, the system gives preference to the server ciphers over the client ciphers. **Note:** This configuration is applicable only when the load balancer is acting as an SSL/HTTPS server. This field is ignored when the `SSLConfiguration` object is associated with a backend set. | `string` | No | - | - |
 | `trustedCertificateAuthorityIds` | Ids for OCI certificates service CA or CA bundles for the load balancer to trust. Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]` | `list[string]` | No | - | - |
 | `verifyDepth` | The maximum depth for peer certificate chain verification. Example: `3` | `integer` | No | - | - |
@@ -1812,7 +1408,7 @@ The type of matching to apply to incoming URIs.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
+| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
 
 <a id="kind-loadbalancer-status-routingpolicies"></a>
 #### Status.routingPolicies{}
@@ -1874,12 +1470,14 @@ LoadBalancerRuleSetsItem defines nested fields for LoadBalancer.RuleSets.Item.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `action` | - | `string` | No | - | - |
-| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
+| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
 | `areInvalidCharactersAllowed` | Indicates whether or not invalid characters in client header fields will be allowed. Valid names are composed of English letters, digits, hyphens and underscores. If "true", invalid characters are allowed in the HTTP header. If "false", invalid characters are not allowed in the HTTP header | `boolean` | No | - | - |
 | [`conditions`](#kind-loadbalancer-status-rulesets-items-conditions) | - | `list[object]` | No | - | - |
+| `defaultMaxConnections` | The maximum number of connections that the any IP can make to a listener unless the IP is mentioned in maxConnections. If no defaultMaxConnections is specified the default is unlimited. | `integer` | No | - | - |
 | `description` | A brief description of the access control rule. Avoid entering confidential information. example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.` | `string` | No | - | - |
 | `header` | A header name that conforms to RFC 7230. Example: `example_header_name` | `string` | No | - | - |
 | `httpLargeHeaderSizeInKB` | The maximum size of each buffer used for reading http client request header. This value indicates the maximum size allowed for each buffer. The allowed values for buffer size are 8, 16, 32 and 64. | `integer` | No | - | - |
+| [`ipMaxConnections`](#kind-loadbalancer-status-rulesets-items-ipmaxconnections) | An array of IPs that have a maxConnection setting different than the default and what that maxConnection setting is | `list[object]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `prefix` | A string to prepend to the header value. The resulting header value must conform to RFC 7230. With the following exceptions: * value cannot contain `$` * value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid. Example: `example_prefix_value` | `string` | No | - | - |
 | [`redirectUri`](#kind-loadbalancer-status-rulesets-items-redirecturi) | LoadBalancerRuleSetsItemRedirectUri defines nested fields for LoadBalancer.RuleSets.Item.RedirectUri. | `object` | No | - | - |
@@ -1898,9 +1496,21 @@ LoadBalancerRuleSetsItemCondition defines nested fields for LoadBalancer.RuleSet
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `attributeName` | - | `string` | No | - | - |
-| `attributeValue` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
+| `attributeValue` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `operator` | A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the incoming URI. * **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string. * **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the `attributeValue` string. * **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue` string. | `string` | No | - | - |
+
+<a id="kind-loadbalancer-status-rulesets-items-ipmaxconnections"></a>
+###### Status.ruleSets{}.items[].ipMaxConnections[]
+
+[Back to LoadBalancer status](#kind-loadbalancer-status)
+
+LoadBalancerRuleSetsItemIpMaxConnection defines nested fields for LoadBalancer.RuleSets.Item.IpMaxConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ipAddresses` | Each element in the list should be valid IPv4 or IPv6 CIDR Block address. Example: '["129.213.176.0/24", "150.136.187.0/24", "2002::1234:abcd:ffff:c0a8:101/64"]' | `list[string]` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections that the specified IPs can make to the Listener. IPs without a maxConnections setting can make either defaultMaxConnections simultaneous connections to a listener or, if no defaultMaxConnections is specified, an unlimited number of simultaneous connections to a listener. | `integer` | Yes | - | - |
 
 <a id="kind-loadbalancer-status-rulesets-items-redirecturi"></a>
 ###### Status.ruleSets{}.items[].redirectUri
@@ -1938,8 +1548,8 @@ LoadBalancerSslCipherSuites defines nested fields for LoadBalancer.SslCipherSuit
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | Yes | - | - |
-| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite example: `example_cipher_suite` | `string` | Yes | - | - |
+| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.3 ciphers__ "TLS_AES_128_GCM_SHA256" "TLS_AES_256_GCM_SHA384" "TLS_CHACHA20_POLY1305_SHA256" "TLS_AES_128_CCM_SHA256" "TLS_AES_128_CCM_8_SHA256" * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | Yes | - | - |
+| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite * oci-default-http2-ssl-cipher-suite-v1 * oci-default-http2-tls-13-ssl-cipher-suite-v1 * oci-default-http2-tls-12-13-ssl-cipher-suite-v1 * oci-tls-13-recommended-ssl-cipher-suite-v1 * oci-tls-12-13-wider-ssl-cipher-suite-v1 * oci-tls-11-12-13-wider-ssl-cipher-suite-v1 example: `example_cipher_suite` | `string` | Yes | - | - |
 
 <a id="kind-loadbalancer-status-status"></a>
 #### Status.status
@@ -2000,288 +1610,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
 
-<a id="kind-loadbalancerhealth"></a>
-## LoadBalancerHealth
-
-LoadBalancerHealth is the Schema for the loadbalancerhealths API.
-
-- `Plural`: `loadbalancerhealths`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/loadbalancerhealth.md) (`config/samples/loadbalancer_v1beta1_loadbalancerhealth.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-loadbalancerhealth-spec"></a>
-### Spec
-
-LoadBalancerHealthSpec defines the desired state of LoadBalancerHealth.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-loadbalancerhealth-status"></a>
-### Status
-
-LoadBalancerHealthStatus defines the observed state of LoadBalancerHealth.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `criticalStateBackendSetNames` | A list of backend sets that are currently in the `CRITICAL` health state. The list identifies each backend set by the friendly name you assigned when you created it. Example: `example_backend_set` | `list[string]` | No | - | - |
-| `loadBalancerId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer the health status is associated with. | `string` | No | - | - |
-| `sdkStatus` | The overall health status of the load balancer. * **OK:** All backend sets associated with the load balancer return a status of `OK`. * **WARNING:** At least one of the backend sets associated with the load balancer returns a status of `WARNING`, no backend sets return a status of `CRITICAL`, and the load balancer life cycle state is `ACTIVE`. * **CRITICAL:** One or more of the backend sets associated with the load balancer return a status of `CRITICAL`. * **UNKNOWN:** If any one of the following conditions is true: * The load balancer life cycle state is not `ACTIVE`. * No backend sets are defined for the load balancer. * More than half of the backend sets associated with the load balancer return a status of `UNKNOWN`, none of the backend sets return a status of `WARNING` or `CRITICAL`, and the load balancer life cycle state is `ACTIVE`. * The system could not retrieve metrics for any reason. This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
-| [`status`](#kind-loadbalancerhealth-status-status) | - | `object` | Yes | - | - |
-| `totalBackendSetCount` | The total number of backend sets associated with this load balancer. Example: `4` | `integer` | No | - | - |
-| `unknownStateBackendSetNames` | A list of backend sets that are currently in the `UNKNOWN` health state. The list identifies each backend set by the friendly name you assigned when you created it. Example: `example_backend_set2` | `list[string]` | No | - | - |
-| `warningStateBackendSetNames` | A list of backend sets that are currently in the `WARNING` health state. The list identifies each backend set by the friendly name you assigned when you created it. Example: `example_backend_set3` | `list[string]` | No | - | - |
-
-<a id="kind-loadbalancerhealth-status-status"></a>
-#### Status.status
-
-[Back to LoadBalancerHealth status](#kind-loadbalancerhealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-loadbalancerhealth-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-loadbalancerhealth-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-loadbalancerhealth-status-status-async"></a>
-##### Status.status.async
-
-[Back to LoadBalancerHealth status](#kind-loadbalancerhealth-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-loadbalancerhealth-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-loadbalancerhealth-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to LoadBalancerHealth status](#kind-loadbalancerhealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-loadbalancerhealth-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to LoadBalancerHealth status](#kind-loadbalancerhealth-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-loadbalancershape"></a>
-## LoadBalancerShape
-
-LoadBalancerShape is the Schema for the loadbalancershapes API.
-
-- `Plural`: `loadbalancershapes`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/loadbalancershape.md) (`config/samples/loadbalancer_v1beta1_loadbalancershape.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-loadbalancershape-spec"></a>
-### Spec
-
-LoadBalancerShapeSpec defines the desired state of LoadBalancerShape.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`shapeDetails`](#kind-loadbalancershape-spec-shapedetails) | The configuration details to update load balancer to a different profile. | `object` | No | - | - |
-| `shapeName` | The new shape name for the load balancer. Allowed values are : * 10Mbps * 100Mbps * 400Mbps * 8000Mbps * Flexible Example: `flexible` * NOTE: Fixed shapes 10Mbps, 100Mbps, 400Mbps, 8000Mbps will be deprecated from May 2023. This api * will only support `Flexible` shape after that date. | `string` | Yes | - | - |
-
-<a id="kind-loadbalancershape-spec-shapedetails"></a>
-#### Spec.shapeDetails
-
-[Back to LoadBalancerShape spec](#kind-loadbalancershape-spec)
-
-The configuration details to update load balancer to a different profile.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `maximumBandwidthInMbps` | Bandwidth in Mbps that determines the maximum bandwidth (ingress plus egress) that the load balancer can achieve. This bandwidth cannot be always guaranteed. For a guaranteed bandwidth use the minimumBandwidthInMbps parameter. The values must be between minimumBandwidthInMbps and 8000 (8Gbps). Example: `1500` | `integer` | Yes | - | - |
-| `minimumBandwidthInMbps` | Bandwidth in Mbps that determines the total pre-provisioned bandwidth (ingress plus egress). The values must be between 10 and the maximumBandwidthInMbps. Example: `150` | `integer` | Yes | - | - |
-
-<a id="kind-loadbalancershape-status"></a>
-### Status
-
-LoadBalancerShapeStatus defines the observed state of LoadBalancerShape.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `name` | The name of the shape. Example: `100Mbps` | `string` | No | - | - |
-| [`status`](#kind-loadbalancershape-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-loadbalancershape-status-status"></a>
-#### Status.status
-
-[Back to LoadBalancerShape status](#kind-loadbalancershape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-loadbalancershape-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-loadbalancershape-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-loadbalancershape-status-status-async"></a>
-##### Status.status.async
-
-[Back to LoadBalancerShape status](#kind-loadbalancershape-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-loadbalancershape-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-loadbalancershape-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to LoadBalancerShape status](#kind-loadbalancershape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-loadbalancershape-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to LoadBalancerShape status](#kind-loadbalancershape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-networksecuritygroup"></a>
-## NetworkSecurityGroup
-
-NetworkSecurityGroup is the Schema for the networksecuritygroups API.
-
-- `Plural`: `networksecuritygroups`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/networksecuritygroup.md) (`config/samples/loadbalancer_v1beta1_networksecuritygroup.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-networksecuritygroup-spec"></a>
-### Spec
-
-NetworkSecurityGroupSpec defines the desired state of NetworkSecurityGroup.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `networkSecurityGroupIds` | An array of NSG OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the load balancer. During the load balancer's creation, the service adds the new load balancer to the specified NSGs. The benefits of associating the load balancer with NSGs include: * NSGs define network security rules to govern ingress and egress traffic for the load balancer. * The network security rules of other resources can reference the NSGs associated with the load balancer to ensure access. | `list[string]` | No | - | - |
-
-<a id="kind-networksecuritygroup-status"></a>
-### Status
-
-NetworkSecurityGroupStatus defines the observed state of NetworkSecurityGroup.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`status`](#kind-networksecuritygroup-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-networksecuritygroup-status-status"></a>
-#### Status.status
-
-[Back to NetworkSecurityGroup status](#kind-networksecuritygroup-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-networksecuritygroup-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-networksecuritygroup-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-networksecuritygroup-status-status-async"></a>
-##### Status.status.async
-
-[Back to NetworkSecurityGroup status](#kind-networksecuritygroup-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-networksecuritygroup-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-networksecuritygroup-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to NetworkSecurityGroup status](#kind-networksecuritygroup-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-networksecuritygroup-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to NetworkSecurityGroup status](#kind-networksecuritygroup-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
 <a id="kind-pathrouteset"></a>
 ## PathRouteSet
 
@@ -2325,7 +1653,7 @@ The type of matching to apply to incoming URIs.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
+| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
 
 <a id="kind-pathrouteset-status"></a>
 ### Status
@@ -2360,7 +1688,7 @@ The type of matching to apply to incoming URIs.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
+| `matchType` | Specifies how the load balancing service compares a PathRoute object's `path` string against the incoming URI. * **EXACT_MATCH** - Looks for a `path` string that exactly matches the incoming URI path. * **FORCE_LONGEST_PREFIX_MATCH** - Looks for the `path` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path. * **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path. For a full description of how the system handles `matchType` in a path route set containing multiple rules, see Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm). | `string` | Yes | - | - |
 
 <a id="kind-pathrouteset-status-status"></a>
 #### Status.status
@@ -2412,178 +1740,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to PathRouteSet status](#kind-pathrouteset-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-policy"></a>
-## Policy
-
-Policy is the Schema for the policies API.
-
-- `Plural`: `policies`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/policy.md) (`config/samples/loadbalancer_v1beta1_policy.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-policy-spec"></a>
-### Spec
-
-PolicySpec defines the desired state of Policy.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-policy-status"></a>
-### Status
-
-PolicyStatus defines the observed state of Policy.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`status`](#kind-policy-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-policy-status-status"></a>
-#### Status.status
-
-[Back to Policy status](#kind-policy-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-policy-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-policy-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-policy-status-status-async"></a>
-##### Status.status.async
-
-[Back to Policy status](#kind-policy-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-policy-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-policy-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to Policy status](#kind-policy-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-policy-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to Policy status](#kind-policy-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-protocol"></a>
-## Protocol
-
-Protocol is the Schema for the protocols API.
-
-- `Plural`: `protocols`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/protocol.md) (`config/samples/loadbalancer_v1beta1_protocol.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-protocol-spec"></a>
-### Spec
-
-ProtocolSpec defines the desired state of Protocol.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-protocol-status"></a>
-### Status
-
-ProtocolStatus defines the observed state of Protocol.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`status`](#kind-protocol-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-protocol-status-status"></a>
-#### Status.status
-
-[Back to Protocol status](#kind-protocol-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-protocol-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-protocol-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-protocol-status-status-async"></a>
-##### Status.status.async
-
-[Back to Protocol status](#kind-protocol-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-protocol-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-protocol-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to Protocol status](#kind-protocol-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-protocol-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to Protocol status](#kind-protocol-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
@@ -2769,12 +1925,14 @@ RuleSetItem defines nested fields for RuleSet.Item.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `action` | - | `string` | No | - | - |
-| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
+| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
 | `areInvalidCharactersAllowed` | Indicates whether or not invalid characters in client header fields will be allowed. Valid names are composed of English letters, digits, hyphens and underscores. If "true", invalid characters are allowed in the HTTP header. If "false", invalid characters are not allowed in the HTTP header | `boolean` | No | - | - |
 | [`conditions`](#kind-ruleset-spec-items-conditions) | - | `list[object]` | No | - | - |
+| `defaultMaxConnections` | The maximum number of connections that the any IP can make to a listener unless the IP is mentioned in maxConnections. If no defaultMaxConnections is specified the default is unlimited. | `integer` | No | - | - |
 | `description` | A brief description of the access control rule. Avoid entering confidential information. example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.` | `string` | No | - | - |
 | `header` | A header name that conforms to RFC 7230. Example: `example_header_name` | `string` | No | - | - |
 | `httpLargeHeaderSizeInKB` | The maximum size of each buffer used for reading http client request header. This value indicates the maximum size allowed for each buffer. The allowed values for buffer size are 8, 16, 32 and 64. | `integer` | No | - | - |
+| [`ipMaxConnections`](#kind-ruleset-spec-items-ipmaxconnections) | An array of IPs that have a maxConnection setting different than the default and what that maxConnection setting is | `list[object]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `prefix` | A string to prepend to the header value. The resulting header value must conform to RFC 7230. With the following exceptions: * value cannot contain `$` * value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid. Example: `example_prefix_value` | `string` | No | - | - |
 | [`redirectUri`](#kind-ruleset-spec-items-redirecturi) | RuleSetItemRedirectUri defines nested fields for RuleSet.Item.RedirectUri. | `object` | No | - | - |
@@ -2793,9 +1951,21 @@ RuleSetItemCondition defines nested fields for RuleSet.Item.Condition.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `attributeName` | - | `string` | No | - | - |
-| `attributeValue` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
+| `attributeValue` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `operator` | A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the incoming URI. * **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string. * **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the `attributeValue` string. * **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue` string. | `string` | No | - | - |
+
+<a id="kind-ruleset-spec-items-ipmaxconnections"></a>
+##### Spec.items[].ipMaxConnections[]
+
+[Back to RuleSet spec](#kind-ruleset-spec)
+
+RuleSetItemIpMaxConnection defines nested fields for RuleSet.Item.IpMaxConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ipAddresses` | Each element in the list should be valid IPv4 or IPv6 CIDR Block address. Example: '["129.213.176.0/24", "150.136.187.0/24", "2002::1234:abcd:ffff:c0a8:101/64"]' | `list[string]` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections that the specified IPs can make to the Listener. IPs without a maxConnections setting can make either defaultMaxConnections simultaneous connections to a listener or, if no defaultMaxConnections is specified, an unlimited number of simultaneous connections to a listener. | `integer` | Yes | - | - |
 
 <a id="kind-ruleset-spec-items-redirecturi"></a>
 ##### Spec.items[].redirectUri
@@ -2833,12 +2003,14 @@ RuleSetItem defines nested fields for RuleSet.Item.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `action` | - | `string` | No | - | - |
-| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
+| `allowedMethods` | The list of HTTP methods allowed for this listener. By default, you can specify only the standard HTTP methods defined in the HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also see a list of supported standard HTTP methods in the Load Balancing service documentation at Managing Rule Sets (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrulesets.htm). Your backend application must be able to handle the methods specified in this list. The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy. Example: ["GET", "PUT", "POST", "PROPFIND"] | `list[string]` | No | - | - |
 | `areInvalidCharactersAllowed` | Indicates whether or not invalid characters in client header fields will be allowed. Valid names are composed of English letters, digits, hyphens and underscores. If "true", invalid characters are allowed in the HTTP header. If "false", invalid characters are not allowed in the HTTP header | `boolean` | No | - | - |
 | [`conditions`](#kind-ruleset-status-items-conditions) | - | `list[object]` | No | - | - |
+| `defaultMaxConnections` | The maximum number of connections that the any IP can make to a listener unless the IP is mentioned in maxConnections. If no defaultMaxConnections is specified the default is unlimited. | `integer` | No | - | - |
 | `description` | A brief description of the access control rule. Avoid entering confidential information. example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.` | `string` | No | - | - |
 | `header` | A header name that conforms to RFC 7230. Example: `example_header_name` | `string` | No | - | - |
 | `httpLargeHeaderSizeInKB` | The maximum size of each buffer used for reading http client request header. This value indicates the maximum size allowed for each buffer. The allowed values for buffer size are 8, 16, 32 and 64. | `integer` | No | - | - |
+| [`ipMaxConnections`](#kind-ruleset-status-items-ipmaxconnections) | An array of IPs that have a maxConnection setting different than the default and what that maxConnection setting is | `list[object]` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `prefix` | A string to prepend to the header value. The resulting header value must conform to RFC 7230. With the following exceptions: * value cannot contain `$` * value cannot contain patterns like `{variable_name}`. They are reserved for future extensions. Currently, such values are invalid. Example: `example_prefix_value` | `string` | No | - | - |
 | [`redirectUri`](#kind-ruleset-status-items-redirecturi) | RuleSetItemRedirectUri defines nested fields for RuleSet.Item.RedirectUri. | `object` | No | - | - |
@@ -2857,9 +2029,21 @@ RuleSetItemCondition defines nested fields for RuleSet.Item.Condition.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `attributeName` | - | `string` | No | - | - |
-| `attributeValue` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
+| `attributeValue` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet must match. You can use this condition in conjunction with `SourceVcnIpAddressCondition`. **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition matches all incoming traffic in the specified VCN. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `operator` | A string that specifies how to compare the PathMatchCondition object's `attributeValue` string to the incoming URI. * **EXACT_MATCH** - The incoming URI path must exactly and completely match the `attributeValue` string. * **FORCE_LONGEST_PREFIX_MATCH** - The system looks for the `attributeValue` string with the best, longest match of the beginning portion of the incoming URI path. * **PREFIX_MATCH** - The beginning portion of the incoming URI path must exactly match the `attributeValue` string. * **SUFFIX_MATCH** - The ending portion of the incoming URI path must exactly match the `attributeValue` string. | `string` | No | - | - |
+
+<a id="kind-ruleset-status-items-ipmaxconnections"></a>
+##### Status.items[].ipMaxConnections[]
+
+[Back to RuleSet status](#kind-ruleset-status)
+
+RuleSetItemIpMaxConnection defines nested fields for RuleSet.Item.IpMaxConnection.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `ipAddresses` | Each element in the list should be valid IPv4 or IPv6 CIDR Block address. Example: '["129.213.176.0/24", "150.136.187.0/24", "2002::1234:abcd:ffff:c0a8:101/64"]' | `list[string]` | Yes | - | - |
+| `maxConnections` | The maximum number of simultaneous connections that the specified IPs can make to the Listener. IPs without a maxConnections setting can make either defaultMaxConnections simultaneous connections to a listener or, if no defaultMaxConnections is specified, an unlimited number of simultaneous connections to a listener. | `integer` | Yes | - | - |
 
 <a id="kind-ruleset-status-items-redirecturi"></a>
 ##### Status.items[].redirectUri
@@ -2953,8 +2137,8 @@ SSLCipherSuiteSpec defines the desired state of SSLCipherSuite.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | Yes | - | - |
-| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite example: `example_cipher_suite` | `string` | Yes | - | - |
+| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.3 ciphers__ "TLS_AES_128_GCM_SHA256" "TLS_AES_256_GCM_SHA384" "TLS_CHACHA20_POLY1305_SHA256" "TLS_AES_128_CCM_SHA256" "TLS_AES_128_CCM_8_SHA256" * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | Yes | - | - |
+| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite * oci-default-http2-ssl-cipher-suite-v1 * oci-default-http2-tls-13-ssl-cipher-suite-v1 * oci-default-http2-tls-12-13-ssl-cipher-suite-v1 * oci-tls-13-recommended-ssl-cipher-suite-v1 * oci-tls-12-13-wider-ssl-cipher-suite-v1 * oci-tls-11-12-13-wider-ssl-cipher-suite-v1 example: `example_cipher_suite` | `string` | Yes | - | - |
 
 <a id="kind-sslciphersuite-status"></a>
 ### Status
@@ -2963,8 +2147,8 @@ SSLCipherSuiteStatus defines the observed state of SSLCipherSuite.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | No | - | - |
-| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite example: `example_cipher_suite` | `string` | No | - | - |
+| `ciphers` | A list of SSL ciphers the load balancer must support for HTTPS or SSL connections. The following ciphers are valid values for this property: * __TLSv1.3 ciphers__ "TLS_AES_128_GCM_SHA256" "TLS_AES_256_GCM_SHA384" "TLS_CHACHA20_POLY1305_SHA256" "TLS_AES_128_CCM_SHA256" "TLS_AES_128_CCM_8_SHA256" * __TLSv1.2 ciphers__ "AES128-GCM-SHA256" "AES128-SHA256" "AES256-GCM-SHA384" "AES256-SHA256" "DH-DSS-AES128-GCM-SHA256" "DH-DSS-AES128-SHA256" "DH-DSS-AES256-GCM-SHA384" "DH-DSS-AES256-SHA256" "DH-RSA-AES128-GCM-SHA256" "DH-RSA-AES128-SHA256" "DH-RSA-AES256-GCM-SHA384" "DH-RSA-AES256-SHA256" "DHE-DSS-AES128-GCM-SHA256" "DHE-DSS-AES128-SHA256" "DHE-DSS-AES256-GCM-SHA384" "DHE-DSS-AES256-SHA256" "DHE-RSA-AES128-GCM-SHA256" "DHE-RSA-AES128-SHA256" "DHE-RSA-AES256-GCM-SHA384" "DHE-RSA-AES256-SHA256" "ECDH-ECDSA-AES128-GCM-SHA256" "ECDH-ECDSA-AES128-SHA256" "ECDH-ECDSA-AES256-GCM-SHA384" "ECDH-ECDSA-AES256-SHA384" "ECDH-RSA-AES128-GCM-SHA256" "ECDH-RSA-AES128-SHA256" "ECDH-RSA-AES256-GCM-SHA384" "ECDH-RSA-AES256-SHA384" "ECDHE-ECDSA-AES128-GCM-SHA256" "ECDHE-ECDSA-AES128-SHA256" "ECDHE-ECDSA-AES256-GCM-SHA384" "ECDHE-ECDSA-AES256-SHA384" "ECDHE-RSA-AES128-GCM-SHA256" "ECDHE-RSA-AES128-SHA256" "ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES256-SHA384" * __TLSv1 ciphers also supported by TLSv1.2__ "AES128-SHA" "AES256-SHA" "CAMELLIA128-SHA" "CAMELLIA256-SHA" "DES-CBC3-SHA" "DH-DSS-AES128-SHA" "DH-DSS-AES256-SHA" "DH-DSS-CAMELLIA128-SHA" "DH-DSS-CAMELLIA256-SHA" "DH-DSS-DES-CBC3-SHAv" "DH-DSS-SEED-SHA" "DH-RSA-AES128-SHA" "DH-RSA-AES256-SHA" "DH-RSA-CAMELLIA128-SHA" "DH-RSA-CAMELLIA256-SHA" "DH-RSA-DES-CBC3-SHA" "DH-RSA-SEED-SHA" "DHE-DSS-AES128-SHA" "DHE-DSS-AES256-SHA" "DHE-DSS-CAMELLIA128-SHA" "DHE-DSS-CAMELLIA256-SHA" "DHE-DSS-DES-CBC3-SHA" "DHE-DSS-SEED-SHA" "DHE-RSA-AES128-SHA" "DHE-RSA-AES256-SHA" "DHE-RSA-CAMELLIA128-SHA" "DHE-RSA-CAMELLIA256-SHA" "DHE-RSA-DES-CBC3-SHA" "DHE-RSA-SEED-SHA" "ECDH-ECDSA-AES128-SHA" "ECDH-ECDSA-AES256-SHA" "ECDH-ECDSA-DES-CBC3-SHA" "ECDH-ECDSA-RC4-SHA" "ECDH-RSA-AES128-SHA" "ECDH-RSA-AES256-SHA" "ECDH-RSA-DES-CBC3-SHA" "ECDH-RSA-RC4-SHA" "ECDHE-ECDSA-AES128-SHA" "ECDHE-ECDSA-AES256-SHA" "ECDHE-ECDSA-DES-CBC3-SHA" "ECDHE-ECDSA-RC4-SHA" "ECDHE-RSA-AES128-SHA" "ECDHE-RSA-AES256-SHA" "ECDHE-RSA-DES-CBC3-SHA" "ECDHE-RSA-RC4-SHA" "IDEA-CBC-SHA" "KRB5-DES-CBC3-MD5" "KRB5-DES-CBC3-SHA" "KRB5-IDEA-CBC-MD5" "KRB5-IDEA-CBC-SHA" "KRB5-RC4-MD5" "KRB5-RC4-SHA" "PSK-3DES-EDE-CBC-SHA" "PSK-AES128-CBC-SHA" "PSK-AES256-CBC-SHA" "PSK-RC4-SHA" "RC4-MD5" "RC4-SHA" "SEED-SHA" example: `["ECDHE-RSA-AES256-GCM-SHA384","ECDHE-ECDSA-AES256-GCM-SHA384","ECDHE-RSA-AES128-GCM-SHA256"]` | `list[string]` | No | - | - |
+| `name` | A friendly name for the SSL cipher suite. It must be unique and it cannot be changed. **Note:** The name of your user-defined cipher suite must not be the same as any of Oracle's predefined or reserved SSL cipher suite names: * oci-default-ssl-cipher-suite-v1 * oci-modern-ssl-cipher-suite-v1 * oci-compatible-ssl-cipher-suite-v1 * oci-wider-compatible-ssl-cipher-suite-v1 * oci-customized-ssl-cipher-suite * oci-default-http2-ssl-cipher-suite-v1 * oci-default-http2-tls-13-ssl-cipher-suite-v1 * oci-default-http2-tls-12-13-ssl-cipher-suite-v1 * oci-tls-13-recommended-ssl-cipher-suite-v1 * oci-tls-12-13-wider-ssl-cipher-suite-v1 * oci-tls-11-12-13-wider-ssl-cipher-suite-v1 example: `example_cipher_suite` | `string` | No | - | - |
 | [`status`](#kind-sslciphersuite-status-status) | - | `object` | Yes | - | - |
 
 <a id="kind-sslciphersuite-status-status"></a>
@@ -3017,199 +2201,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to SSLCipherSuite status](#kind-sslciphersuite-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-shape"></a>
-## Shape
-
-Shape is the Schema for the shapes API.
-
-- `Plural`: `shapes`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/shape.md) (`config/samples/loadbalancer_v1beta1_shape.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-shape-spec"></a>
-### Spec
-
-ShapeSpec defines the desired state of Shape.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-shape-status"></a>
-### Status
-
-ShapeStatus defines the observed state of Shape.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`status`](#kind-shape-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-shape-status-status"></a>
-#### Status.status
-
-[Back to Shape status](#kind-shape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-shape-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-shape-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-shape-status-status-async"></a>
-##### Status.status.async
-
-[Back to Shape status](#kind-shape-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-shape-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-shape-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to Shape status](#kind-shape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-shape-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to Shape status](#kind-shape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequest"></a>
-## WorkRequest
-
-WorkRequest is the Schema for the workrequests API.
-
-- `Plural`: `workrequests`
-- `Scope`: `Namespaced`
-- `APIVersion`: `loadbalancer.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/loadbalancer/v1beta1/workrequest.md) (`config/samples/loadbalancer_v1beta1_workrequest.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequest-spec"></a>
-### Spec
-
-WorkRequestSpec defines the desired state of WorkRequest.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequest-status"></a>
-### Status
-
-WorkRequestStatus defines the observed state of WorkRequest.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the load balancer. | `string` | No | - | - |
-| [`errorDetails`](#kind-workrequest-status-errordetails) | - | `list[object]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the work request. | `string` | No | - | - |
-| `lifecycleState` | The current state of the work request. | `string` | No | - | - |
-| `loadBalancerId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer with which the work request is associated. | `string` | No | - | - |
-| `message` | A collection of data, related to the load balancer provisioning process, that helps with debugging in the event of failure. Possible data elements include: - workflow name - event ID - work request ID - load balancer ID - workflow completion message | `string` | No | - | - |
-| [`status`](#kind-workrequest-status-status) | - | `object` | Yes | - | - |
-| `timeAccepted` | The date and time the work request was created, in the format defined by RFC3339. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
-| `timeFinished` | The date and time the work request was completed, in the format defined by RFC3339. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
-| `type` | The type of action the work request represents. Example: `CreateListener` | `string` | No | - | - |
-
-<a id="kind-workrequest-status-errordetails"></a>
-#### Status.errorDetails[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-WorkRequestErrorDetail defines nested fields for WorkRequest.ErrorDetail.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `errorCode` | - | `string` | No | - | - |
-| `message` | A human-readable error string. | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status"></a>
-#### Status.status
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequest-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequest-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequest-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequest-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequest-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |

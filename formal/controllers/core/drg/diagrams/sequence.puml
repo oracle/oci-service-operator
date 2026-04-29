@@ -1,0 +1,150 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - core/Drg
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Drg reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Drg
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetDrg
+else tracked identity is missing
+ServiceManager -> OCI: ListDrgs(filters: compartmentId,\ndisplayName)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateDrg
+loop create pending PROVISIONING
+ServiceManager -> OCI: GetDrg
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetDrg
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteDrg
+ServiceManager -> OCI: confirm delete via GetDrg or\nListDrgs
+loop delete pending TERMINATING,\nTERMINATED
+ServiceManager -> OCI: GetDrg or ListDrgs
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nPROVISIONING, UPDATING, TERMINATING,\nTERMINATED
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface:
+defaultDrgRouteTables, definedTags,
+displayName, freeformTags
+Reject before mutate: force-new fields
+compartmentId
+Lookup filters: compartmentId,
+displayName
+Lookup matching: tracked OCI ID via
+GetDrg wins; otherwise exact
+compartmentId plus displayName unique
+match in AVAILABLE, PROVISIONING, or
+UPDATING; blank displayName skips reuse
+and duplicate matches fail
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateDrg only for mutable\nfields defaultDrgRouteTables,\ndefinedTags, displayName,\nfreeformTags
+loop update pending UPDATING
+ServiceManager -> OCI: GetDrg
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=template action=CREATED;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ndelete=confirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: core
+slug: drg
+kind: Drg
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete TERMINATING, TERMINATED
+follow-up: delete=confirm-delete
+supported drift: defaultDrgRouteTables,
+definedTags, displayName, freeformTags
+reject before mutate: force-new fields
+compartmentId
+create-only fields: none
+list lookup: oci_core_drgs filters
+compartmentId, displayName; tracked OCI ID via
+GetDrg wins; otherwise exact compartmentId plus
+displayName unique match in AVAILABLE,
+PROVISIONING, or UPDATING; blank displayName
+skips reuse and duplicate matches fail
+conflicts: none
+open gaps: none
+Ready state maps to OCI AVAILABLE.
+CreateDrgDetails does not expose
+defaultDrgRouteTables, so requested
+attachment-type defaults reconcile through
+UpdateDrg after the DRG exists.
+Delete completes only after GetDrg returns not
+found; TERMINATING and TERMINATED are accepted
+observed pre-delete states.
+The create-fallback wrapper only recovers
+first-create post-read failures when status
+already carries a created DRG OCID and a
+provisioning-like or AVAILABLE lifecycle state.
+end note
+@enduml

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -21,7 +21,7 @@ import (
 // policy. If you're not authorized, talk to an administrator. If you're an
 // administrator who needs to write policies to give users access, see
 // Getting Started with
-// Policies (https://docs.cloud.oracle.com/Content/Identity/Concepts/policygetstarted.htm).
+// Policies (https://docs.oracle.com/iaas/Content/Identity/Concepts/policygetstarted.htm).
 type Backup struct {
 
 	// OCID of the backup itself
@@ -57,6 +57,12 @@ type Backup struct {
 	// A user-supplied description for the backup.
 	Description *string `mandatory:"false" json:"description"`
 
+	// Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED
+	// state for 7 days before permanently deleting it.
+	SoftDelete SoftDeleteEnum `mandatory:"false" json:"softDelete,omitempty"`
+
+	BackupValidationDetails *BackupValidationDetails `mandatory:"false" json:"backupValidationDetails"`
+
 	DbSystemSnapshot *DbSystemSnapshot `mandatory:"false" json:"dbSystemSnapshot"`
 
 	// The size of the backup in base-2 (IEC) gibibytes. (GiB).
@@ -81,6 +87,21 @@ type Backup struct {
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
+
+	// The OCID of the immediate source DB system backup from which this DB system backup was copied.
+	ImmediateSourceBackupId *string `mandatory:"false" json:"immediateSourceBackupId"`
+
+	// The OCID of the original source DB system backup from which this DB system backup was copied.
+	OriginalSourceBackupId *string `mandatory:"false" json:"originalSourceBackupId"`
+
+	// The date and time the DB system backup copy was created, as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+	TimeCopyCreated *common.SDKTime `mandatory:"false" json:"timeCopyCreated"`
+
+	EncryptData *EncryptDataDetails `mandatory:"false" json:"encryptData"`
 }
 
 func (m Backup) String() string {
@@ -102,8 +123,11 @@ func (m Backup) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for CreationType: %s. Supported values are: %s.", m.CreationType, strings.Join(GetBackupCreationTypeEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingSoftDeleteEnum(string(m.SoftDelete)); !ok && m.SoftDelete != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SoftDelete: %s. Supported values are: %s.", m.SoftDelete, strings.Join(GetSoftDeleteEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -113,33 +137,36 @@ type BackupLifecycleStateEnum string
 
 // Set of constants representing the allowable values for BackupLifecycleStateEnum
 const (
-	BackupLifecycleStateCreating BackupLifecycleStateEnum = "CREATING"
-	BackupLifecycleStateActive   BackupLifecycleStateEnum = "ACTIVE"
-	BackupLifecycleStateInactive BackupLifecycleStateEnum = "INACTIVE"
-	BackupLifecycleStateUpdating BackupLifecycleStateEnum = "UPDATING"
-	BackupLifecycleStateDeleting BackupLifecycleStateEnum = "DELETING"
-	BackupLifecycleStateDeleted  BackupLifecycleStateEnum = "DELETED"
-	BackupLifecycleStateFailed   BackupLifecycleStateEnum = "FAILED"
+	BackupLifecycleStateCreating        BackupLifecycleStateEnum = "CREATING"
+	BackupLifecycleStateActive          BackupLifecycleStateEnum = "ACTIVE"
+	BackupLifecycleStateInactive        BackupLifecycleStateEnum = "INACTIVE"
+	BackupLifecycleStateUpdating        BackupLifecycleStateEnum = "UPDATING"
+	BackupLifecycleStateDeleting        BackupLifecycleStateEnum = "DELETING"
+	BackupLifecycleStateDeleted         BackupLifecycleStateEnum = "DELETED"
+	BackupLifecycleStateFailed          BackupLifecycleStateEnum = "FAILED"
+	BackupLifecycleStateDeleteScheduled BackupLifecycleStateEnum = "DELETE_SCHEDULED"
 )
 
 var mappingBackupLifecycleStateEnum = map[string]BackupLifecycleStateEnum{
-	"CREATING": BackupLifecycleStateCreating,
-	"ACTIVE":   BackupLifecycleStateActive,
-	"INACTIVE": BackupLifecycleStateInactive,
-	"UPDATING": BackupLifecycleStateUpdating,
-	"DELETING": BackupLifecycleStateDeleting,
-	"DELETED":  BackupLifecycleStateDeleted,
-	"FAILED":   BackupLifecycleStateFailed,
+	"CREATING":         BackupLifecycleStateCreating,
+	"ACTIVE":           BackupLifecycleStateActive,
+	"INACTIVE":         BackupLifecycleStateInactive,
+	"UPDATING":         BackupLifecycleStateUpdating,
+	"DELETING":         BackupLifecycleStateDeleting,
+	"DELETED":          BackupLifecycleStateDeleted,
+	"FAILED":           BackupLifecycleStateFailed,
+	"DELETE_SCHEDULED": BackupLifecycleStateDeleteScheduled,
 }
 
 var mappingBackupLifecycleStateEnumLowerCase = map[string]BackupLifecycleStateEnum{
-	"creating": BackupLifecycleStateCreating,
-	"active":   BackupLifecycleStateActive,
-	"inactive": BackupLifecycleStateInactive,
-	"updating": BackupLifecycleStateUpdating,
-	"deleting": BackupLifecycleStateDeleting,
-	"deleted":  BackupLifecycleStateDeleted,
-	"failed":   BackupLifecycleStateFailed,
+	"creating":         BackupLifecycleStateCreating,
+	"active":           BackupLifecycleStateActive,
+	"inactive":         BackupLifecycleStateInactive,
+	"updating":         BackupLifecycleStateUpdating,
+	"deleting":         BackupLifecycleStateDeleting,
+	"deleted":          BackupLifecycleStateDeleted,
+	"failed":           BackupLifecycleStateFailed,
+	"delete_scheduled": BackupLifecycleStateDeleteScheduled,
 }
 
 // GetBackupLifecycleStateEnumValues Enumerates the set of values for BackupLifecycleStateEnum
@@ -161,6 +188,7 @@ func GetBackupLifecycleStateEnumStringValues() []string {
 		"DELETING",
 		"DELETED",
 		"FAILED",
+		"DELETE_SCHEDULED",
 	}
 }
 

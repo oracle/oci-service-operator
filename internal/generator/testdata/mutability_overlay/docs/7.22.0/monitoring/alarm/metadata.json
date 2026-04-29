@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "monitoring",
+  "kind": "Alarm",
+  "formalSlug": "alarm",
+  "providerResource": "oci_monitoring_alarm",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/monitoring_alarm",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/monitoring_alarm",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/monitoring/alarm/page.html",
+  "bodySHA256": "95d55033e8cf43170e5e14f6c06001f7c50f772d248c32b9d49a58ec2dd6ed44",
+  "bodyBytes": 15906,
+  "fixtureBodyPath": "7.22.0/monitoring/alarm/page.html"
+}

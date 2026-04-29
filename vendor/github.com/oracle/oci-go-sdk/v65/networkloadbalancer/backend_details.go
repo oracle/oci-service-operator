@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -38,7 +38,7 @@ type BackendDetails struct {
 	// proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections
 	// as a server weighted '1'.
 	// For more information about load balancing policies, see
-	// How Network Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// Network Load Balancer Policies (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#Policies).
 	// Example: `3`
 	Weight *int `mandatory:"false" json:"weight"`
 
@@ -47,8 +47,8 @@ type BackendDetails struct {
 	// Example: `false`
 	IsBackup *bool `mandatory:"false" json:"isBackup"`
 
-	// Whether the network load balancer should drain this server. Servers marked "isDrain" receive no
-	// incoming traffic.
+	// Whether the network load balancer should drain this server.
+	// Servers marked "isDrain" stop receiving new connections but will continue to receive traffic on existing connections until the connection is terminated or times out.
 	// Example: `false`
 	IsDrain *bool `mandatory:"false" json:"isDrain"`
 
@@ -69,7 +69,7 @@ func (m BackendDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

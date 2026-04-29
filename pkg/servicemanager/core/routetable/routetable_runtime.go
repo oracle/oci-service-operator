@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -30,6 +31,11 @@ import (
 const (
 	routeTableRequeueDuration      = time.Minute
 	routeTableLifecycleStateUpdate = coresdk.RouteTableLifecycleStateEnum("UPDATING")
+)
+
+var (
+	routeTableSDKContractOnce sync.Once
+	routeTableSDKContractErr  error
 )
 
 type routeTableOCIClient interface {
@@ -56,24 +62,102 @@ type normalizedRouteRule struct {
 }
 
 func init() {
-	generatedFactory := newRouteTableServiceClient
-	newRouteTableServiceClient = func(manager *RouteTableServiceManager) RouteTableServiceClient {
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		runtimeClient := &routeTableRuntimeClient{
-			manager:  manager,
-			delegate: generatedFactory(manager),
-			client:   sdkClient,
+	registerRouteTableRuntimeHooksMutator(func(manager *RouteTableServiceManager, hooks *RouteTableRuntimeHooks) {
+		applyRouteTableRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applyRouteTableRuntimeHooks(
+	manager *RouteTableServiceManager,
+	hooks *RouteTableRuntimeHooks,
+	client routeTableOCIClient,
+) {
+	if hooks == nil {
+		return
+	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	runtimeClient := newRouteTableRuntimeClient(manager, nil, client)
+
+	hooks.BuildCreateBody = func(_ context.Context, resource *corev1beta1.RouteTable, _ string) (any, error) {
+		return buildCreateRouteTableDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = func(_ context.Context, resource *corev1beta1.RouteTable, _ string, currentResponse any) (any, bool, error) {
+		current, ok := routeTableFromResponse(currentResponse)
+		if !ok {
+			return nil, false, fmt.Errorf("unexpected RouteTable current response type %T", currentResponse)
 		}
+		request, updateNeeded, err := runtimeClient.buildUpdateRequest(resource, current)
 		if err != nil {
-			runtimeClient.initErr = fmt.Errorf("initialize RouteTable OCI client: %w", err)
+			return nil, false, err
 		}
+		return request.UpdateRouteTableDetails, updateNeeded, nil
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ProjectStatus = func(resource *corev1beta1.RouteTable, response any) error {
+		current, ok := routeTableFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected RouteTable status response type %T", response)
+		}
+		return runtimeClient.projectStatus(resource, current)
+	}
+	hooks.StatusHooks.ApplyLifecycle = func(resource *corev1beta1.RouteTable, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := routeTableFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected RouteTable lifecycle response type %T", response))
+		}
+		return runtimeClient.applyLifecycle(resource, current)
+	}
+	hooks.StatusHooks.MarkDeleted = runtimeClient.markDeleted
+	hooks.StatusHooks.MarkTerminating = func(resource *corev1beta1.RouteTable, response any) {
+		current, ok := routeTableFromResponse(response)
+		if !ok {
+			return
+		}
+		runtimeClient.markTerminating(resource, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate RouteTableServiceClient) RouteTableServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
+}
+
+func newRouteTableRuntimeClient(
+	manager *RouteTableServiceManager,
+	delegate RouteTableServiceClient,
+	client routeTableOCIClient,
+) *routeTableRuntimeClient {
+	runtimeClient := &routeTableRuntimeClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
 		return runtimeClient
 	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize RouteTable OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *routeTableRuntimeClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.RouteTable, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if c.delegate == nil {
 		return c.fail(resource, fmt.Errorf("route table parity delegate is not configured"))
+	}
+	if err := validateRouteTableSDKContract(); err != nil {
+		return c.fail(resource, err)
 	}
 
 	trackedID := currentRouteTableOCID(resource)
@@ -130,6 +214,9 @@ func (c *routeTableRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 }
 
 func (c *routeTableRuntimeClient) Delete(ctx context.Context, resource *corev1beta1.RouteTable) (bool, error) {
+	if err := validateRouteTableSDKContract(); err != nil {
+		return false, err
+	}
 	if c.initErr != nil {
 		return false, c.initErr
 	}
@@ -498,6 +585,21 @@ func (c *routeTableRuntimeClient) projectStatus(resource *corev1beta1.RouteTable
 	return nil
 }
 
+func routeTableFromResponse(response any) (coresdk.RouteTable, bool) {
+	switch typed := response.(type) {
+	case coresdk.RouteTable:
+		return typed, true
+	case coresdk.CreateRouteTableResponse:
+		return typed.RouteTable, true
+	case coresdk.GetRouteTableResponse:
+		return typed.RouteTable, true
+	case coresdk.UpdateRouteTableResponse:
+		return typed.RouteTable, true
+	default:
+		return coresdk.RouteTable{}, false
+	}
+}
+
 func routeTableLifecycleMessage(current coresdk.RouteTable) string {
 	name := ""
 	if current.DisplayName != nil {
@@ -510,6 +612,91 @@ func routeTableLifecycleMessage(current coresdk.RouteTable) string {
 		name = "RouteTable"
 	}
 	return fmt.Sprintf("RouteTable %s is %s", name, current.LifecycleState)
+}
+
+func validateRouteTableSDKContract() error {
+	routeTableSDKContractOnce.Do(func() {
+		updateFields := reflect.TypeOf(coresdk.UpdateRouteTableDetails{})
+		for _, fieldName := range []string{"DefinedTags", "DisplayName", "FreeformTags", "RouteRules"} {
+			if _, ok := updateFields.FieldByName(fieldName); !ok {
+				routeTableSDKContractErr = fmt.Errorf("formal/imports/core/routetable.json assumes RouteTable update field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+		if _, ok := updateFields.FieldByName("CompartmentId"); ok {
+			routeTableSDKContractErr = fmt.Errorf("formal/imports/core/routetable.json expects compartmentId to remain create-only, but vendored UpdateRouteTableDetails unexpectedly exposes CompartmentId")
+			return
+		}
+		if _, ok := updateFields.FieldByName("VcnId"); ok {
+			routeTableSDKContractErr = fmt.Errorf("formal/imports/core/routetable.json expects vcnId to remain create-only, but vendored UpdateRouteTableDetails unexpectedly exposes VcnId")
+			return
+		}
+
+		createFields := reflect.TypeOf(coresdk.CreateRouteTableDetails{})
+		for _, fieldName := range []string{"CompartmentId", "RouteRules", "VcnId"} {
+			if _, ok := createFields.FieldByName(fieldName); !ok {
+				routeTableSDKContractErr = fmt.Errorf("formal/imports/core/routetable.json assumes RouteTable create field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+
+		routeRuleFields := reflect.TypeOf(coresdk.RouteRule{})
+		for _, fieldName := range []string{"NetworkEntityId", "CidrBlock", "Destination", "DestinationType", "Description", "RouteType"} {
+			if _, ok := routeRuleFields.FieldByName(fieldName); !ok {
+				routeTableSDKContractErr = fmt.Errorf("formal/imports/core/routetable.json assumes RouteRule field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+
+		destinationTypeValues := make(map[string]struct{}, len(coresdk.GetRouteRuleDestinationTypeEnumStringValues()))
+		for _, value := range coresdk.GetRouteRuleDestinationTypeEnumStringValues() {
+			destinationTypeValues[value] = struct{}{}
+		}
+		for _, value := range []string{
+			string(coresdk.RouteRuleDestinationTypeCidrBlock),
+			string(coresdk.RouteRuleDestinationTypeServiceCidrBlock),
+		} {
+			if _, ok := destinationTypeValues[value]; !ok {
+				routeTableSDKContractErr = fmt.Errorf("vendored SDK no longer exposes RouteRule destination type %q", value)
+				return
+			}
+		}
+
+		routeTypeValues := make(map[string]struct{}, len(coresdk.GetRouteRuleRouteTypeEnumStringValues()))
+		for _, value := range coresdk.GetRouteRuleRouteTypeEnumStringValues() {
+			routeTypeValues[value] = struct{}{}
+		}
+		for _, value := range []string{
+			string(coresdk.RouteRuleRouteTypeStatic),
+			string(coresdk.RouteRuleRouteTypeLocal),
+		} {
+			if _, ok := routeTypeValues[value]; !ok {
+				routeTableSDKContractErr = fmt.Errorf("vendored SDK no longer exposes RouteRule route type %q", value)
+				return
+			}
+		}
+
+		lifecycleValues := make(map[string]struct{}, len(coresdk.GetRouteTableLifecycleStateEnumStringValues()))
+		for _, value := range coresdk.GetRouteTableLifecycleStateEnumStringValues() {
+			lifecycleValues[value] = struct{}{}
+		}
+		for _, value := range []string{
+			string(coresdk.RouteTableLifecycleStateAvailable),
+			string(coresdk.RouteTableLifecycleStateProvisioning),
+			string(coresdk.RouteTableLifecycleStateTerminating),
+			string(coresdk.RouteTableLifecycleStateTerminated),
+		} {
+			if _, ok := lifecycleValues[value]; !ok {
+				routeTableSDKContractErr = fmt.Errorf("vendored SDK no longer exposes RouteTable lifecycle %q", value)
+				return
+			}
+		}
+		if _, ok := lifecycleValues["ACTIVE"]; ok {
+			routeTableSDKContractErr = fmt.Errorf("formal/imports/core/routetable.json still assumes ACTIVE, but vendored SDK now needs reevaluation because ACTIVE unexpectedly exists")
+			return
+		}
+	})
+	return routeTableSDKContractErr
 }
 
 func normalizeRouteTableOCIError(err error) error {

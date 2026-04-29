@@ -43,14 +43,14 @@ type CustomTableSavedCustomTable struct {
 	// +kubebuilder:validation:Required
 	DisplayName string `json:"displayName"`
 	// The row groupBy key list.
-	// example:
+	// For example:
 	//   `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
 	//     "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
 	//     "resourceId", "tenantId", "tenantName"]`
 	// +kubebuilder:validation:Optional
 	RowGroupBy []string `json:"rowGroupBy,omitempty"`
 	// The column groupBy key list.
-	// example:
+	// For example:
 	//   `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
 	//     "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
 	//     "resourceId", "tenantId", "tenantName"]`

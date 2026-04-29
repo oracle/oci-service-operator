@@ -19,7 +19,7 @@ import (
 )
 
 // AuthenticationProviderServiceClient is the handwritten extension seam for AuthenticationProvider runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*AuthenticationProviderServiceManager).WithClient.
 type AuthenticationProviderServiceClient interface {
 	CreateOrUpdate(context.Context, *odav1beta1.AuthenticationProvider, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ AuthenticationProviderServiceClient = defaultAuthenticationProviderService
 
 var newAuthenticationProviderServiceClient = func(manager *AuthenticationProviderServiceManager) AuthenticationProviderServiceClient {
 	sdkClient, err := odasdk.NewManagementClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*odav1beta1.AuthenticationProvider]{
-		Kind:    "AuthenticationProvider",
-		SDKName: "AuthenticationProvider",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.CreateAuthenticationProviderRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateAuthenticationProvider(ctx, *request.(*odasdk.CreateAuthenticationProviderRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.GetAuthenticationProviderRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetAuthenticationProvider(ctx, *request.(*odasdk.GetAuthenticationProviderRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.ListAuthenticationProvidersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListAuthenticationProviders(ctx, *request.(*odasdk.ListAuthenticationProvidersRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.UpdateAuthenticationProviderRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateAuthenticationProvider(ctx, *request.(*odasdk.UpdateAuthenticationProviderRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &odasdk.DeleteAuthenticationProviderRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteAuthenticationProvider(ctx, *request.(*odasdk.DeleteAuthenticationProviderRequest))
-			},
-		},
-	}
+	hooks := newAuthenticationProviderRuntimeHooks(manager, sdkClient)
+	config := buildAuthenticationProviderGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize AuthenticationProvider OCI client: %w", err)
 	}
-	return defaultAuthenticationProviderServiceClient{
+	delegate := defaultAuthenticationProviderServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*odav1beta1.AuthenticationProvider](config),
 	}
+	return wrapAuthenticationProviderGeneratedClient(hooks, delegate)
 }

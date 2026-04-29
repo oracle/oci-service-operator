@@ -1,11 +1,11 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // PGSQL Control Plane API
 //
 // Use the OCI Database with PostgreSQL API to manage resources such as database systems, database nodes, backups, and configurations.
-// For information, see the user guide documentation for the service (https://docs.cloud.oracle.com/iaas/Content/postgresql/home.htm).
+// For information, see the user guide documentation for the service (https://docs.oracle.com/iaas/Content/postgresql/home.htm).
 //
 
 package psql
@@ -19,13 +19,13 @@ import (
 // ConfigurationSummary Summary of the configuration.
 type ConfigurationSummary struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the configuration. Immutable on creation.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration. Immutable on creation.
 	Id *string `mandatory:"true" json:"id"`
 
 	// A user-friendly display name for the configuration. Avoid entering confidential information.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the configuration.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the configuration.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The date and time the configuration was created, expressed in
@@ -36,21 +36,32 @@ type ConfigurationSummary struct {
 	// The current state of the configuration.
 	LifecycleState ConfigurationLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
-	// The name of the shape for the configuration.
-	// Example: `VM.Standard.E4.Flex`
-	Shape *string `mandatory:"true" json:"shape"`
-
 	// Version of the PostgreSQL database.
 	DbVersion *string `mandatory:"true" json:"dbVersion"`
 
+	// The name of the shape for the configuration.
+	// For multi-shape enabled configurations, it is set to PostgreSQL. Please use compatibleShapes property to get list of supported shapes for such configurations.
+	Shape *string `mandatory:"true" json:"shape"`
+
 	// CPU core count.
+	// It's value is set to 0 if configuration is for a flexible shape.
 	InstanceOcpuCount *int `mandatory:"true" json:"instanceOcpuCount"`
 
 	// Memory size in gigabytes with 1GB increment.
+	// It's value is set to 0 if configuration is for a flexible shape.
 	InstanceMemorySizeInGBs *int `mandatory:"true" json:"instanceMemorySizeInGBs"`
+
+	// Indicates the collection of compatible shapes for this configuration.
+	CompatibleShapes []string `mandatory:"true" json:"compatibleShapes"`
+
+	// The Default configuration used for this configuration.
+	DefaultConfigId *string `mandatory:"true" json:"defaultConfigId"`
 
 	// A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
+
+	// Whether the configuration supports flexible shapes.
+	IsFlexible *bool `mandatory:"false" json:"isFlexible"`
 
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
@@ -79,7 +90,7 @@ func (m ConfigurationSummary) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

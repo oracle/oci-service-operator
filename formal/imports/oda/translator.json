@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oda",
+  "slug": "translator",
+  "kind": "Translator",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_oda_translator",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateTranslator",
+        "requestType": "oda.CreateTranslatorRequest",
+        "responseType": "oda.CreateTranslatorResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetTranslator",
+        "requestType": "oda.GetTranslatorRequest",
+        "responseType": "oda.GetTranslatorResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListTranslator",
+        "requestType": "oda.ListTranslatorRequest",
+        "responseType": "oda.ListTranslatorResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateTranslator",
+        "requestType": "oda.UpdateTranslatorRequest",
+        "responseType": "oda.UpdateTranslatorResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteTranslator",
+        "requestType": "oda.DeleteTranslatorRequest",
+        "responseType": "oda.DeleteTranslatorResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_oda_translator",
+    "collectionField": "translator",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oda/translator/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oda/translator/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for oda/translator; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

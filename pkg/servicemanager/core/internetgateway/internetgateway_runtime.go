@@ -44,20 +44,107 @@ type internetGatewayGeneratedParityClient struct {
 }
 
 func init() {
-	generatedFactory := newInternetGatewayServiceClient
-	newInternetGatewayServiceClient = func(manager *InternetGatewayServiceManager) InternetGatewayServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		parityClient := &internetGatewayGeneratedParityClient{
-			manager:  manager,
-			delegate: delegate,
-			client:   sdkClient,
-		}
-		if err != nil {
-			parityClient.initErr = fmt.Errorf("initialize InternetGateway OCI client: %w", err)
-		}
-		return parityClient
+	registerInternetGatewayRuntimeHooksMutator(func(manager *InternetGatewayServiceManager, hooks *InternetGatewayRuntimeHooks) {
+		applyInternetGatewayRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applyInternetGatewayRuntimeHooks(
+	manager *InternetGatewayServiceManager,
+	hooks *InternetGatewayRuntimeHooks,
+	client internetGatewayOCIClient,
+) {
+	if hooks == nil {
+		return
 	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	runtimeClient := newInternetGatewayRuntimeClient(manager, nil, client)
+
+	hooks.BuildCreateBody = func(_ context.Context, resource *corev1beta1.InternetGateway, _ string) (any, error) {
+		return buildCreateInternetGatewayDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = func(_ context.Context, resource *corev1beta1.InternetGateway, _ string, currentResponse any) (any, bool, error) {
+		current, ok := internetGatewayFromResponse(currentResponse)
+		if !ok {
+			return nil, false, fmt.Errorf("unexpected InternetGateway current response type %T", currentResponse)
+		}
+		request, updateNeeded, err := runtimeClient.buildUpdateRequest(resource, current)
+		if err != nil {
+			return nil, false, err
+		}
+		return request.UpdateInternetGatewayDetails, updateNeeded, nil
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ProjectStatus = func(resource *corev1beta1.InternetGateway, response any) error {
+		current, ok := internetGatewayFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected InternetGateway status response type %T", response)
+		}
+		return runtimeClient.projectStatus(resource, current)
+	}
+	hooks.StatusHooks.ApplyLifecycle = func(resource *corev1beta1.InternetGateway, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := internetGatewayFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected InternetGateway lifecycle response type %T", response))
+		}
+		return runtimeClient.applyLifecycle(resource, current)
+	}
+	hooks.ParityHooks.ValidateCreateOnlyDrift = func(resource *corev1beta1.InternetGateway, response any) error {
+		current, ok := internetGatewayFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected InternetGateway current response type %T", response)
+		}
+		return validateInternetGatewayCreateOnlyDrift(resource.Spec, current)
+	}
+	hooks.ParityHooks.RequiresParityHandling = func(resource *corev1beta1.InternetGateway, response any) bool {
+		current, ok := internetGatewayFromResponse(response)
+		if !ok {
+			return false
+		}
+		return requiresManualInternetGatewayUpdate(resource.Spec, current)
+	}
+	hooks.ParityHooks.ApplyParityUpdate = func(ctx context.Context, resource *corev1beta1.InternetGateway, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := internetGatewayFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected InternetGateway parity response type %T", response))
+		}
+		return runtimeClient.update(ctx, resource, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate InternetGatewayServiceClient) InternetGatewayServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
+}
+
+func newInternetGatewayRuntimeClient(
+	manager *InternetGatewayServiceManager,
+	delegate InternetGatewayServiceClient,
+	client internetGatewayOCIClient,
+) *internetGatewayGeneratedParityClient {
+	runtimeClient := &internetGatewayGeneratedParityClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
+		return runtimeClient
+	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize InternetGateway OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *internetGatewayGeneratedParityClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.InternetGateway, req ctrl.Request) (servicemanager.OSOKResponse, error) {
@@ -72,7 +159,7 @@ func (c *internetGatewayGeneratedParityClient) CreateOrUpdate(ctx context.Contex
 			return c.fail(resource, c.initErr)
 		}
 
-		current, err := c.get(ctx, trackedID)
+		_, err := c.get(ctx, trackedID)
 		if err != nil {
 			if isInternetGatewayReadNotFoundOCI(err) {
 				c.clearTrackedIdentity(resource)
@@ -80,13 +167,6 @@ func (c *internetGatewayGeneratedParityClient) CreateOrUpdate(ctx context.Contex
 			} else {
 				return c.fail(resource, normalizeInternetGatewayOCIError(err))
 			}
-		} else if internetGatewayLifecycleIsRetryable(current.LifecycleState) {
-			if err := c.projectStatus(resource, current); err != nil {
-				return c.fail(resource, err)
-			}
-			return c.applyLifecycle(resource, current)
-		} else if requiresManualInternetGatewayUpdate(resource.Spec, current) {
-			return c.update(ctx, resource, current)
 		}
 	}
 
@@ -496,4 +576,19 @@ func convertOCIToStatusDefinedTags(input map[string]map[string]interface{}) map[
 		converted[namespace] = convertedValues
 	}
 	return converted
+}
+
+func internetGatewayFromResponse(response any) (coresdk.InternetGateway, bool) {
+	switch typed := response.(type) {
+	case coresdk.InternetGateway:
+		return typed, true
+	case coresdk.CreateInternetGatewayResponse:
+		return typed.InternetGateway, true
+	case coresdk.GetInternetGatewayResponse:
+		return typed.InternetGateway, true
+	case coresdk.UpdateInternetGatewayResponse:
+		return typed.InternetGateway, true
+	default:
+		return coresdk.InternetGateway{}, false
+	}
 }

@@ -1,38 +1,46 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"strings"
 )
 
-// AutonomousDatabaseSummary An Oracle Autonomous Database.
+// AutonomousDatabaseSummary An Oracle Autonomous AI Database.
+//
 // **Warning:** Oracle recommends that you avoid using any confidential information when you supply string values using the API.
 type AutonomousDatabaseSummary struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Autonomous AI Database.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
-	// The current state of the Autonomous Database.
+	// The current state of the Autonomous AI Database.
 	LifecycleState AutonomousDatabaseSummaryLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
 	// The database name.
 	DbName *string `mandatory:"true" json:"dbName"`
 
 	// The quantity of data in the database, in terabytes.
+	// The following points apply to Autonomous AI Databases on Serverless Infrastructure:
+	// - This is an integer field whose value remains null when the data size is in GBs and cannot be converted to TBs (by dividing the GB value by 1024) without rounding error.
+	// - To get the exact value of data storage size without rounding error, please see `dataStorageSizeInGBs` of Autonomous AI Database.
 	DataStorageSizeInTBs *int `mandatory:"true" json:"dataStorageSizeInTBs"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription with which resource needs to be associated with.
+	SubscriptionId *string `mandatory:"false" json:"subscriptionId"`
 
 	// Information about the current lifecycle state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
@@ -40,27 +48,31 @@ type AutonomousDatabaseSummary struct {
 	// The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.
 	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.cloud.oracle.com/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Oracle Cloud Infrastructure vault (https://docs.oracle.com/iaas/Content/KeyManagement/Concepts/keyoverview.htm#concepts). This parameter and `secretId` are required for Customer Managed Keys.
 	VaultId *string `mandatory:"false" json:"vaultId"`
 
 	// KMS key lifecycle details.
 	KmsKeyLifecycleDetails *string `mandatory:"false" json:"kmsKeyLifecycleDetails"`
 
-	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous Database Serverless does not use key versions, hence is not applicable for Autonomous Database Serverless instances.
+	EncryptionKey AutonomousDatabaseEncryptionKeyDetails `mandatory:"false" json:"encryptionKey"`
+
+	// The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions. If none is specified, the current key version (latest) of the Key Id is used for the operation. Autonomous AI Database Serverless does not use key versions, hence is not applicable for Autonomous AI Database Serverless instances.
 	KmsKeyVersionId *string `mandatory:"false" json:"kmsKeyVersionId"`
 
-	// The character set for the autonomous database.  The default is AL32UTF8. Allowed values are:
+	EncryptionKeyLocationDetails EncryptionKeyLocationDetails `mandatory:"false" json:"encryptionKeyLocationDetails"`
+
+	// The character set for the Autonomous AI Database.  The default is AL32UTF8. Allowed values are:
 	// AL32UTF8, AR8ADOS710, AR8ADOS720, AR8APTEC715, AR8ARABICMACS, AR8ASMO8X, AR8ISO8859P6, AR8MSWIN1256, AR8MUSSAD768, AR8NAFITHA711, AR8NAFITHA721, AR8SAKHR706, AR8SAKHR707, AZ8ISO8859P9E, BG8MSWIN, BG8PC437S, BLT8CP921, BLT8ISO8859P13, BLT8MSWIN1257, BLT8PC775, BN8BSCII, CDN8PC863, CEL8ISO8859P14, CL8ISO8859P5, CL8ISOIR111, CL8KOI8R, CL8KOI8U, CL8MACCYRILLICS, CL8MSWIN1251, EE8ISO8859P2, EE8MACCES, EE8MACCROATIANS, EE8MSWIN1250, EE8PC852, EL8DEC, EL8ISO8859P7, EL8MACGREEKS, EL8MSWIN1253, EL8PC437S, EL8PC851, EL8PC869, ET8MSWIN923, HU8ABMOD, HU8CWI2, IN8ISCII, IS8PC861, IW8ISO8859P8, IW8MACHEBREWS, IW8MSWIN1255, IW8PC1507, JA16EUC, JA16EUCTILDE, JA16SJIS, JA16SJISTILDE, JA16VMS, KO16KSC5601, KO16KSCCS, KO16MSWIN949, LA8ISO6937, LA8PASSPORT, LT8MSWIN921, LT8PC772, LT8PC774, LV8PC1117, LV8PC8LR, LV8RST104090, N8PC865, NE8ISO8859P10, NEE8ISO8859P4, RU8BESTA, RU8PC855, RU8PC866, SE8ISO8859P3, TH8MACTHAIS, TH8TISASCII, TR8DEC, TR8MACTURKISHS, TR8MSWIN1254, TR8PC857, US7ASCII, US8PC437, UTF8, VN8MSWIN1258, VN8VN3, WE8DEC, WE8DG, WE8ISO8859P1, WE8ISO8859P15, WE8ISO8859P9, WE8MACROMAN8S, WE8MSWIN1252, WE8NCR4970, WE8NEXTSTEP, WE8PC850, WE8PC858, WE8PC860, WE8ROMAN8, ZHS16CGB231280, ZHS16GBK, ZHT16BIG5, ZHT16CCDC, ZHT16DBT, ZHT16HKSCS, ZHT16MSWIN950, ZHT32EUC, ZHT32SOPS, ZHT32TRIS
 	CharacterSet *string `mandatory:"false" json:"characterSet"`
 
-	// The national character set for the autonomous database.  The default is AL16UTF16. Allowed values are:
+	// The national character set for the Autonomous AI Database.  The default is AL16UTF16. Allowed values are:
 	// AL16UTF16 or UTF8.
 	NcharacterSet *string `mandatory:"false" json:"ncharacterSet"`
 
-	// The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous Database. This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform.
+	// The percentage of the System Global Area(SGA) assigned to In-Memory tables in Autonomous AI Database. This property is applicable only to Autonomous AI Databases on the Exadata Cloud@Customer platform.
 	InMemoryPercentage *int `mandatory:"false" json:"inMemoryPercentage"`
 
-	// The area assigned to In-Memory tables in Autonomous Database.
+	// The area assigned to In-Memory tables in Autonomous AI Database.
 	InMemoryAreaInGBs *int `mandatory:"false" json:"inMemoryAreaInGBs"`
 
 	// The date and time when the next long-term backup would be created.
@@ -68,12 +80,12 @@ type AutonomousDatabaseSummary struct {
 
 	LongTermBackupSchedule *LongTermBackUpScheduleDetails `mandatory:"false" json:"longTermBackupSchedule"`
 
-	// Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.
+	// Indicates if this is an Always Free resource. The default value is false. Note that Always Free Autonomous AI Databases have 1 CPU and 20GB of memory. For Always Free databases, memory and CPU cannot be scaled.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isLocalDataGuardEnabled
 	IsFreeTier *bool `mandatory:"false" json:"isFreeTier"`
 
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
 
 	// The date and time the Always Free database will be stopped because of inactivity. If this time is reached without any database activity, the database will automatically be put into the STOPPED state.
@@ -87,18 +99,21 @@ type AutonomousDatabaseSummary struct {
 	// Key History Entry.
 	KeyHistoryEntry []AutonomousDatabaseKeyHistoryEntry `mandatory:"false" json:"keyHistoryEntry"`
 
-	// The number of CPU cores to be made available to the database. When the ECPU is selected, the value for cpuCoreCount is 0. For Autonomous Database on Dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://www.oracle.com/pls/topic/lookup?ctx=en/cloud/paas/autonomous-database&id=ATPFG-GUID-B0F033C1-CC5A-42F0-B2E7-3CECFEDA1FD1) for shape details.
+	// Key History Entry.
+	EncryptionKeyHistoryEntry []AutonomousDatabaseEncryptionKeyHistoryEntry `mandatory:"false" json:"encryptionKeyHistoryEntry"`
+
+	// The number of CPU cores to be made available to the database. When the ECPU is selected, the value for cpuCoreCount is 0. For Autonomous AI Database on Dedicated Exadata infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/) for shape details.
 	// **Note:** This parameter cannot be used with the `ocpuCount` parameter.
 	CpuCoreCount *int `mandatory:"false" json:"cpuCoreCount"`
 
 	// Parameter that allows users to select an acceptable maximum data loss limit in seconds, up to which Automatic Failover will be triggered when necessary for a Local Autonomous Data Guard
 	LocalAdgAutoFailoverMaxDataLossLimit *int `mandatory:"false" json:"localAdgAutoFailoverMaxDataLossLimit"`
 
-	// The compute model of the Autonomous Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy.
+	// The compute model of the Autonomous AI Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy.
 	ComputeModel AutonomousDatabaseSummaryComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
 
-	// The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous Database Serverless instance or an Autonomous Database on Dedicated Exadata Infrastructure.
-	// For an Autonomous Database Serverless instance, the 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU.
+	// The compute amount (CPUs) available to the database. Minimum and maximum values depend on the compute model and whether the database is an Autonomous AI Database Serverless instance or an Autonomous AI Database on Dedicated Exadata Infrastructure.
+	// The 'ECPU' compute model requires a minimum value of one, for databases in the elastic resource pool and minimum value of two, otherwise. Required when using the `computeModel` parameter. When using `cpuCoreCount` parameter, it is an error to specify computeCount to a non-null value. Providing `computeModel` and `computeCount` is the preferred method for both OCPU and ECPU.
 	ComputeCount *float32 `mandatory:"false" json:"computeCount"`
 
 	// Retention period, in days, for long-term backups
@@ -109,23 +124,27 @@ type AutonomousDatabaseSummary struct {
 
 	// The number of OCPU cores to be made available to the database.
 	// The following points apply:
-	// - For Autonomous Databases on Dedicated Exadata Infrastructure, to provision less than 1 core, enter a fractional value in an increment of 0.1. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. (Note that fractional OCPU values are not supported for Autonomous Database Serverless instances.)
-	// - To provision cores, enter an integer between 1 and the maximum number of cores available for the infrastructure shape. For example, you can provision 2 cores or 3 cores, but not 2.5 cores. This applies to Autonomous Databases on both serverless and dedicated Exadata infrastructure.
-	// - For Autonomous Database Serverless instances, this parameter is not used.
-	// For Autonomous Databases on Dedicated Exadata Infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/index.html) for shape details.
+	// - For Autonomous AI Databases on Dedicated Exadata Infrastructure, to provision less than 1 core, enter a fractional value in an increment of 0.1. For example, you can provision 0.3 or 0.4 cores, but not 0.35 cores. (Note that fractional OCPU values are not supported for Autonomous AI Database Serverless instances.)
+	// - To provision cores, enter an integer between 1 and the maximum number of cores available for the infrastructure shape. For example, you can provision 2 cores or 3 cores, but not 2.5 cores. This applies to Autonomous AI Databases on both serverless and dedicated Exadata infrastructure.
+	// - For Autonomous AI Database Serverless instances, this parameter is not used.
+	// For Autonomous AI Databases on Dedicated Exadata Infrastructure, the maximum number of cores is determined by the infrastructure shape. See Characteristics of Infrastructure Shapes (https://docs.oracle.com/en/cloud/paas/autonomous-database/dedicated/adbde/index.html) for shape details.
 	// **Note:** This parameter cannot be used with the `cpuCoreCount` parameter.
 	OcpuCount *float32 `mandatory:"false" json:"ocpuCount"`
 
-	// An array of CPU values that an Autonomous Database can be scaled to.
+	// An array of CPU values that an Autonomous AI Database can be scaled to.
 	ProvisionableCpus []float32 `mandatory:"false" json:"provisionableCpus"`
 
-	// The amount of memory (in GBs) enabled per ECPU or OCPU.
+	// The amount of memory (in GBs rounded off to nearest integer value) enabled per ECPU or OCPU. This is deprecated. Please refer to memoryPerComputeUnitInGBs for accurate value.
 	MemoryPerOracleComputeUnitInGBs *int `mandatory:"false" json:"memoryPerOracleComputeUnitInGBs"`
 
+	// The amount of memory (in GBs) to be enabled per OCPU or ECPU.
+	MemoryPerComputeUnitInGBs *float32 `mandatory:"false" json:"memoryPerComputeUnitInGBs"`
+
 	// The quantity of data in the database, in gigabytes.
+	// For Autonomous AI Transaction Processing databases using ECPUs on Serverless Infrastructure, this value is always populated. In all the other cases, this value will be null and `dataStorageSizeInTBs` will be populated instead.
 	DataStorageSizeInGBs *int `mandatory:"false" json:"dataStorageSizeInGBs"`
 
-	// The storage space consumed by Autonomous Database in GBs.
+	// The storage space consumed by Autonomous AI Database in GBs.
 	UsedDataStorageSizeInGBs *int `mandatory:"false" json:"usedDataStorageSizeInGBs"`
 
 	// The infrastructure type this resource belongs to.
@@ -134,59 +153,90 @@ type AutonomousDatabaseSummary struct {
 	// True if the database uses dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html).
 	IsDedicated *bool `mandatory:"false" json:"isDedicated"`
 
-	// The Autonomous Container Database OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm). Used only by Autonomous Database on Dedicated Exadata Infrastructure.
+	// The Autonomous Container Database OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm). Used only by Autonomous AI Database on Dedicated Exadata Infrastructure.
 	AutonomousContainerDatabaseId *string `mandatory:"false" json:"autonomousContainerDatabaseId"`
 
-	// The date and time the Autonomous Database was created.
+	// Indicates if the Autonomous AI Database is backup retention locked.
+	IsBackupRetentionLocked *bool `mandatory:"false" json:"isBackupRetentionLocked"`
+
+	// The date and time the Autonomous AI Database was most recently undeleted.
+	TimeUndeleted *common.SDKTime `mandatory:"false" json:"timeUndeleted"`
+
+	// The earliest(min) date and time the Autonomous AI Database can be scheduled to upgrade to 26ai.
+	TimeEarliestAvailableDbVersionUpgrade *common.SDKTime `mandatory:"false" json:"timeEarliestAvailableDbVersionUpgrade"`
+
+	// The max date and time the Autonomous AI Database can be scheduled to upgrade to 26ai.
+	TimeLatestAvailableDbVersionUpgrade *common.SDKTime `mandatory:"false" json:"timeLatestAvailableDbVersionUpgrade"`
+
+	// The date and time the Autonomous AI Database scheduled to upgrade to 26ai.
+	TimeScheduledDbVersionUpgrade *common.SDKTime `mandatory:"false" json:"timeScheduledDbVersionUpgrade"`
+
+	// The date and time the Autonomous AI Database was created.
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 
-	// The user-friendly name for the Autonomous Database. The name does not have to be unique.
+	// The user-friendly name for the Autonomous AI Database. The name does not have to be unique.
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
-	// The URL of the Service Console for the Autonomous Database.
+	// The URL of the Service Console for the Autonomous AI Database.
 	ServiceConsoleUrl *string `mandatory:"false" json:"serviceConsoleUrl"`
 
-	// The connection string used to connect to the Autonomous Database. The username for the Service Console is ADMIN. Use the password you entered when creating the Autonomous Database for the password value.
+	// The connection string used to connect to the Autonomous AI Database. The username for the Service Console is ADMIN. Use the password you entered when creating the Autonomous AI Database for the password value.
 	ConnectionStrings *AutonomousDatabaseConnectionStrings `mandatory:"false" json:"connectionStrings"`
 
 	ConnectionUrls *AutonomousDatabaseConnectionUrls `mandatory:"false" json:"connectionUrls"`
 
-	// The Oracle license model that applies to the Oracle Autonomous Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
-	// License Included allows you to subscribe to new Oracle Database software licenses and the Oracle Database service.
-	// Note that when provisioning an Autonomous Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
-	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
+	// The Public URLs of Private Endpoint database for accessing Oracle Application Express (APEX) and SQL Developer Web with a browser from a Compute instance within your VCN or that has a direct connection to your VCN.
+	PublicConnectionUrls *AutonomousDatabaseConnectionUrls `mandatory:"false" json:"publicConnectionUrls"`
+
+	VanityConnectionUrls *AutonomousDatabaseConnectionUrls `mandatory:"false" json:"vanityConnectionUrls"`
+
+	// The Oracle license model that applies to the Oracle Autonomous AI Database. Bring your own license (BYOL) allows you to apply your current on-premises Oracle software licenses to equivalent, highly automated Oracle services in the cloud.
+	// License Included allows you to subscribe to new Oracle AI Database software licenses and the Oracle AI Database service.
+	// Note that when provisioning an Autonomous AI Database on dedicated Exadata infrastructure (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html), this attribute must be null. It is already set at the
+	// Autonomous Exadata Infrastructure level. When provisioning an Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) database, if a value is not specified, the system defaults the value to `BRING_YOUR_OWN_LICENSE`. Bring your own license (BYOL) also allows you to select the DB edition using the optional parameter.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, dataStorageSizeInTBs, adminPassword, isMTLSConnectionRequired, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	LicenseModel AutonomousDatabaseSummaryLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
 
-	// The amount of storage that has been used, in terabytes.
+	// The maximum number of CPUs allowed with a Bring Your Own License (BYOL), including those used for auto-scaling, disaster recovery, tools, etc. Any CPU usage above this limit is considered as License Included and billed.
+	ByolComputeCountLimit *float32 `mandatory:"false" json:"byolComputeCountLimit"`
+
+	// The amount of storage that has been used for Autonomous AI Databases in dedicated infrastructure, in terabytes.
 	UsedDataStorageSizeInTBs *int `mandatory:"false" json:"usedDataStorageSizeInTBs"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet the resource is associated with.
 	// **Subnet Restrictions:**
 	// - For bare metal DB systems and for single node virtual machine DB systems, do not use a subnet that overlaps with 192.168.16.16/28.
 	// - For Exadata and virtual machine 2-node RAC systems, do not use a subnet that overlaps with 192.168.128.0/20.
-	// - For Autonomous Database, setting this will disable public secure access to the database.
+	// - For Autonomous AI Database, setting this will disable public secure access to the database.
 	// These subnets are used by the Oracle Clusterware private interconnect on the database instance.
 	// Specifying an overlapping subnet will cause the private interconnect to malfunction.
 	// This restriction applies to both the client subnet and the backup subnet.
 	SubnetId *string `mandatory:"false" json:"subnetId"`
 
-	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
 	// **NsgIds restrictions:**
-	// - A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty.
+	// - A network security group (NSG) is optional for Autonomous AI Databases with private access. The nsgIds list can be empty.
 	NsgIds []string `mandatory:"false" json:"nsgIds"`
 
 	// The private endpoint for the resource.
 	PrivateEndpoint *string `mandatory:"false" json:"privateEndpoint"`
+
+	// The public endpoint for the private endpoint enabled resource.
+	PublicEndpoint *string `mandatory:"false" json:"publicEndpoint"`
 
 	// The resource's private endpoint label.
 	// - Setting the endpoint label to a non-empty string creates a private endpoint database.
@@ -198,21 +248,28 @@ type AutonomousDatabaseSummary struct {
 	// The private endpoint Ip address for the resource.
 	PrivateEndpointIp *string `mandatory:"false" json:"privateEndpointIp"`
 
-	// A valid Oracle Database version for Autonomous Database.
+	// A valid Oracle AI Database version for Autonomous AI Database.
+	// When you specify 23ai for dbversion, the system will provision a 23ai database, but the UI will display it as 26ai.
+	// When you specify 26ai for dbversion, the system will provision and display a 26ai database as expected.
+	// For new databases, it is recommended to use either 19c or 26ai.
+	// **Note** Starting December 2026, 23ai will not be supported as a valid value for this parameter.
 	DbVersion *string `mandatory:"false" json:"dbVersion"`
 
-	// Indicates if the Autonomous Database version is a preview version.
+	// Indicates if the Autonomous AI Database version is a preview version.
 	IsPreview *bool `mandatory:"false" json:"isPreview"`
 
-	// The Autonomous Database workload type. The following values are valid:
-	// - OLTP - indicates an Autonomous Transaction Processing database
-	// - DW - indicates an Autonomous Data Warehouse database
-	// - AJD - indicates an Autonomous JSON Database
-	// - APEX - indicates an Autonomous Database with the Oracle APEX Application Development workload type.
+	// The Autonomous AI Database workload type. The following values are valid:
+	// - OLTP - indicates an Autonomous AI Transaction Processing database
+	// - DW - indicates an Autonomous AI Lakehouse database
+	// - AJD - indicates an Autonomous AI JSON Database
+	// - APEX - indicates an Autonomous AI Database with the Oracle APEX AI Application Development workload type.
+	// - LH - indicates an Oracle Autonomous AI Lakehouse database
+	// **Note** Starting December 2026, DW will not be supported as a valid value for this parameter.
+	//
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	DbWorkload AutonomousDatabaseSummaryDbWorkloadEnum `mandatory:"false" json:"dbWorkload,omitempty"`
 
-	// This project introduces Autonomous Database for Developers (ADB-Dev), a free tier on dedicated infrastructure, and Cloud@Customer for database development purposes. ADB-Dev enables ExaDB customers to experiment with ADB for free and incentivizes enterprises to use ADB for new development projects.Note that ADB-Dev have 4 CPU and 20GB of memory. For ADB-Dev , memory and CPU cannot be scaled
+	// Autonomous AI Database for Developers are fixed-shape Autonomous AI Databases that developers can use to build and test new applications. On Serverless, these are low-cost and billed per instance, on Dedicated and Cloud@Customer there is no additional cost to create Developer databases. Developer databases come with limited resources and is not intended for large-scale testing and production deployments. When you need more compute or storage resources, you may upgrade to a full paid production database.
 	IsDevTier *bool `mandatory:"false" json:"isDevTier"`
 
 	// Indicates if the database-level access control is enabled.
@@ -220,13 +277,13 @@ type AutonomousDatabaseSummary struct {
 	// If enabled, database access is restricted to the IP addresses defined by the rules specified with the `whitelistedIps` property. While specifying `whitelistedIps` rules is optional,
 	//  if database-level access control is enabled and no rules are specified, the database will become inaccessible. The rules can be added later using the `UpdateAutonomousDatabase` API operation or edit option in console.
 	// When creating a database clone, the desired access control setting should be specified. By default, database-level access control will be disabled for the clone.
-	// This property is applicable only to Autonomous Databases on the Exadata Cloud@Customer platform. For Autonomous Database Serverless instances, `whitelistedIps` is used.
+	// This property is applicable only to Autonomous AI Databases on the Exadata Cloud@Customer platform. For Autonomous AI Database Serverless instances, `whitelistedIps` is used.
 	IsAccessControlEnabled *bool `mandatory:"false" json:"isAccessControlEnabled"`
 
-	// The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
-	// Only clients connecting from an IP address included in the ACL may access the Autonomous Database instance.
-	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
-	// For Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
+	// The client IP access control list (ACL). This feature is available for Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
+	// Only clients connecting from an IP address included in the ACL may access the Autonomous AI Database instance.
+	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous AI Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
+	// For Autonomous AI Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
 	// Multiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.
 	// Example: `["1.1.1.1","1.1.1.0/24","ocid1.vcn.oc1.sea.<unique_id>","ocid1.vcn.oc1.sea.<unique_id1>;1.1.1.1","ocid1.vcn.oc1.sea.<unique_id2>;1.1.0.0/16"]`
 	// For Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.
@@ -235,15 +292,15 @@ type AutonomousDatabaseSummary struct {
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	WhitelistedIps []string `mandatory:"false" json:"whitelistedIps"`
 
-	// This field will be null if the Autonomous Database is not Data Guard enabled or Access Control is disabled.
-	// It's value would be `TRUE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses primary IP access control list (ACL) for standby.
-	// It's value would be `FALSE` if Autonomous Database is Data Guard enabled and Access Control is enabled and if the Autonomous Database uses different IP access control list (ACL) for standby compared to primary.
+	// This field will be null if the Autonomous AI Database is not Data Guard enabled or Access Control is disabled.
+	// It's value would be `TRUE` if Autonomous AI Database is Data Guard enabled and Access Control is enabled and if the Autonomous AI Database uses primary IP access control list (ACL) for standby.
+	// It's value would be `FALSE` if Autonomous AI Database is Data Guard enabled and Access Control is enabled and if the Autonomous AI Database uses different IP access control list (ACL) for standby compared to primary.
 	ArePrimaryWhitelistedIpsUsed *bool `mandatory:"false" json:"arePrimaryWhitelistedIpsUsed"`
 
-	// The client IP access control list (ACL). This feature is available for Autonomous Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
-	// Only clients connecting from an IP address included in the ACL may access the Autonomous Database instance.
-	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
-	// For Autonomous Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
+	// The client IP access control list (ACL). This feature is available for Autonomous AI Database Serverless  (https://docs.oracle.com/en/cloud/paas/autonomous-database/index.html) and on Exadata Cloud@Customer.
+	// Only clients connecting from an IP address included in the ACL may access the Autonomous AI Database instance.
+	// If `arePrimaryWhitelistedIpsUsed` is 'TRUE' then Autonomous AI Database uses this primary's IP access control list (ACL) for the disaster recovery peer called `standbywhitelistedips`.
+	// For Autonomous AI Database Serverless, this is an array of CIDR (classless inter-domain routing) notations for a subnet or VCN OCID (virtual cloud network Oracle Cloud ID).
 	// Multiple IPs and VCN OCIDs should be separate strings separated by commas, but if it’s other configurations that need multiple pieces of information then its each piece is connected with semicolon (;) as a delimiter.
 	// Example: `["1.1.1.1","1.1.1.0/24","ocid1.vcn.oc1.sea.<unique_id>","ocid1.vcn.oc1.sea.<unique_id1>;1.1.1.1","ocid1.vcn.oc1.sea.<unique_id2>;1.1.0.0/16"]`
 	// For Exadata Cloud@Customer, this is an array of IP addresses or CIDR notations.
@@ -252,19 +309,19 @@ type AutonomousDatabaseSummary struct {
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, adminPassword, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	StandbyWhitelistedIps []string `mandatory:"false" json:"standbyWhitelistedIps"`
 
-	// Information about Oracle APEX Application Development.
+	// Information about Oracle APEX AI Application Development.
 	ApexDetails *AutonomousDatabaseApex `mandatory:"false" json:"apexDetails"`
 
-	// Indicates if auto scaling is enabled for the Autonomous Database CPU core count. The default value is `TRUE`.
+	// Indicates if auto scaling is enabled for the Autonomous AI Database CPU core count. The default value is `TRUE`.
 	IsAutoScalingEnabled *bool `mandatory:"false" json:"isAutoScalingEnabled"`
 
-	// Status of the Data Safe registration for this Autonomous Database.
+	// Status of the Data Safe registration for this Autonomous AI Database.
 	DataSafeStatus AutonomousDatabaseSummaryDataSafeStatusEnum `mandatory:"false" json:"dataSafeStatus,omitempty"`
 
-	// Status of Operations Insights for this Autonomous Database.
+	// Status of Operations Insights for this Autonomous AI Database.
 	OperationsInsightsStatus AutonomousDatabaseSummaryOperationsInsightsStatusEnum `mandatory:"false" json:"operationsInsightsStatus,omitempty"`
 
-	// Status of Database Management for this Autonomous Database.
+	// Status of Database Management for this Autonomous AI Database.
 	DatabaseManagementStatus AutonomousDatabaseSummaryDatabaseManagementStatusEnum `mandatory:"false" json:"databaseManagementStatus,omitempty"`
 
 	// The date and time when maintenance will begin.
@@ -273,7 +330,10 @@ type AutonomousDatabaseSummary struct {
 	// The date and time when maintenance will end.
 	TimeMaintenanceEnd *common.SDKTime `mandatory:"false" json:"timeMaintenanceEnd"`
 
-	// Indicates if the Autonomous Database is a refreshable clone.
+	// The component chosen for maintenance.
+	MaintenanceTargetComponent *string `mandatory:"false" json:"maintenanceTargetComponent"`
+
+	// Indicates if the Autonomous AI Database is a refreshable clone.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, dbName, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	IsRefreshableClone *bool `mandatory:"false" json:"isRefreshableClone"`
 
@@ -286,30 +346,30 @@ type AutonomousDatabaseSummary struct {
 	// The date and time of next refresh.
 	TimeOfNextRefresh *common.SDKTime `mandatory:"false" json:"timeOfNextRefresh"`
 
-	// Indicates the Autonomous Database mode. The database can be opened in `READ_ONLY` or `READ_WRITE` mode.
+	// Indicates the Autonomous AI Database mode. The database can be opened in `READ_ONLY` or `READ_WRITE` mode.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	OpenMode AutonomousDatabaseSummaryOpenModeEnum `mandatory:"false" json:"openMode,omitempty"`
 
-	// The refresh status of the clone. REFRESHING indicates that the clone is currently being refreshed with data from the source Autonomous Database.
+	// The refresh status of the clone. REFRESHING indicates that the clone is currently being refreshed with data from the source Autonomous AI Database.
 	RefreshableStatus AutonomousDatabaseSummaryRefreshableStatusEnum `mandatory:"false" json:"refreshableStatus,omitempty"`
 
-	// The refresh mode of the clone. AUTOMATIC indicates that the clone is automatically being refreshed with data from the source Autonomous Database.
+	// The refresh mode of the clone. AUTOMATIC indicates that the clone is automatically being refreshed with data from the source Autonomous AI Database.
 	RefreshableMode AutonomousDatabaseSummaryRefreshableModeEnum `mandatory:"false" json:"refreshableMode,omitempty"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the source Autonomous Database that was cloned to create the current Autonomous Database.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the source Autonomous AI Database that was cloned to create the current Autonomous AI Database.
 	SourceId *string `mandatory:"false" json:"sourceId"`
 
-	// The Autonomous Database permission level. Restricted mode allows access only by admin users.
+	// The Autonomous AI Database permission level. Restricted mode allows access only by admin users.
 	// This cannot be updated in parallel with any of the following: cpuCoreCount, computeCount, computeModel, adminPassword, whitelistedIps, isMTLSConnectionRequired, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, dbToolsDetails, or isFreeTier.
 	PermissionLevel AutonomousDatabaseSummaryPermissionLevelEnum `mandatory:"false" json:"permissionLevel,omitempty"`
 
-	// The timestamp of the last switchover operation for the Autonomous Database.
+	// The timestamp of the last switchover operation for the Autonomous AI Database.
 	TimeOfLastSwitchover *common.SDKTime `mandatory:"false" json:"timeOfLastSwitchover"`
 
 	// The timestamp of the last failover operation.
 	TimeOfLastFailover *common.SDKTime `mandatory:"false" json:"timeOfLastFailover"`
 
-	// **Deprecated.** Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// **Deprecated.** Indicates whether the Autonomous AI Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	IsDataGuardEnabled *bool `mandatory:"false" json:"isDataGuardEnabled"`
 
 	// Indicates the number of seconds of data loss for a Data Guard failover.
@@ -318,51 +378,60 @@ type AutonomousDatabaseSummary struct {
 	// **Deprecated** Autonomous Data Guard standby database details.
 	StandbyDb *AutonomousDatabaseStandbySummary `mandatory:"false" json:"standbyDb"`
 
-	// Indicates whether the Autonomous Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// Indicates whether the Autonomous AI Database has local (in-region) Data Guard enabled. Not applicable to cross-region Autonomous Data Guard associations, or to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	IsLocalDataGuardEnabled *bool `mandatory:"false" json:"isLocalDataGuardEnabled"`
 
-	// Indicates whether the Autonomous Database has Cross Region Data Guard enabled. Not applicable to Autonomous Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
+	// Indicates whether the Autonomous AI Database has Cross Region Data Guard enabled. Not applicable to Autonomous AI Databases using dedicated Exadata infrastructure or Exadata Cloud@Customer infrastructure.
 	IsRemoteDataGuardEnabled *bool `mandatory:"false" json:"isRemoteDataGuardEnabled"`
 
 	LocalStandbyDb *AutonomousDatabaseStandbySummary `mandatory:"false" json:"localStandbyDb"`
 
-	// The Data Guard role of the Autonomous Container Database or Autonomous Database, if Autonomous Data Guard is enabled.
+	// The Data Guard role of the Autonomous Container Database or Autonomous AI Database, if Autonomous Data Guard is enabled.
 	Role AutonomousDatabaseSummaryRoleEnum `mandatory:"false" json:"role,omitempty"`
 
-	// List of Oracle Database versions available for a database upgrade. If there are no version upgrades available, this list is empty.
+	// List of Oracle AI Database versions available for a database upgrade. If there are no version upgrades available, this list is empty.
 	AvailableUpgradeVersions []string `mandatory:"false" json:"availableUpgradeVersions"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the key store of Oracle Vault.
 	KeyStoreId *string `mandatory:"false" json:"keyStoreId"`
 
 	// The wallet name for Oracle Key Vault.
 	KeyStoreWalletName *string `mandatory:"false" json:"keyStoreWalletName"`
 
-	// The list of regions that support the creation of an Autonomous Database clone or an Autonomous Data Guard standby database.
+	// The frequency a refreshable clone is refreshed after auto-refresh is enabled. The minimum is 1 hour. The maximum is 7 days. The date and time that auto-refresh is enabled is controlled by the `timeOfAutoRefreshStart` parameter.
+	AutoRefreshFrequencyInSeconds *int `mandatory:"false" json:"autoRefreshFrequencyInSeconds"`
+
+	// The time, in seconds, the data of the refreshable clone lags the primary database at the point of refresh. The minimum is 0 minutes (0 mins means refresh to the latest available timestamp). The maximum is 7 days. The lag time increases after refreshing until the next data refresh happens.
+	AutoRefreshPointLagInSeconds *int `mandatory:"false" json:"autoRefreshPointLagInSeconds"`
+
+	// The the date and time that auto-refreshing will begin for an Autonomous AI Database refreshable clone. This value controls only the start time for the first refresh operation. Subsequent (ongoing) refresh operations have start times controlled by the value of the `autoRefreshFrequencyInSeconds` parameter.
+	TimeOfAutoRefreshStart *common.SDKTime `mandatory:"false" json:"timeOfAutoRefreshStart"`
+
+	// The list of regions that support the creation of an Autonomous AI Database clone or an Autonomous Data Guard standby database.
 	SupportedRegionsToCloneTo []string `mandatory:"false" json:"supportedRegionsToCloneTo"`
 
 	// Customer Contacts.
 	CustomerContacts []CustomerContact `mandatory:"false" json:"customerContacts"`
 
-	// The date and time that Autonomous Data Guard was enabled for an Autonomous Database where the standby was provisioned in the same region as the primary database.
+	// The date and time that Autonomous Data Guard was enabled for an Autonomous AI Database where the standby was provisioned in the same region as the primary database.
 	TimeLocalDataGuardEnabled *common.SDKTime `mandatory:"false" json:"timeLocalDataGuardEnabled"`
 
-	// The Autonomous Data Guard region type of the Autonomous Database. For Autonomous Database Serverless, Autonomous Data Guard associations have designated primary and standby regions, and these region types do not change when the database changes roles. The standby regions in Autonomous Data Guard associations can be the same region designated as the primary region, or they can be remote regions. Certain database administrative operations may be available only in the primary region of the Autonomous Data Guard association, and cannot be performed when the database using the primary role is operating in a remote Autonomous Data Guard standby region.
+	// **Deprecated.** The Autonomous Data Guard region type of the Autonomous AI Database. For Autonomous AI Database Serverless, Autonomous Data Guard associations have designated primary and standby regions, and these region types do not change when the database changes roles. The standby regions in Autonomous Data Guard associations can be the same region designated as the primary region, or they can be remote regions. Certain database administrative operations may be available only in the primary region of the Autonomous Data Guard association, and cannot be performed when the database using the primary role is operating in a remote Autonomous Data Guard standby region.
 	DataguardRegionType AutonomousDatabaseSummaryDataguardRegionTypeEnum `mandatory:"false" json:"dataguardRegionType,omitempty"`
 
-	// The date and time the Autonomous Data Guard role was switched for the Autonomous Database. For databases that have standbys in both the primary Data Guard region and a remote Data Guard standby region, this is the latest timestamp of either the database using the "primary" role in the primary Data Guard region, or database located in the remote Data Guard standby region.
+	// The date and time the Autonomous Data Guard role was switched for the Autonomous AI Database. For databases that have standbys in both the primary Data Guard region and a remote Data Guard standby region, this is the latest timestamp of either the database using the "primary" role in the primary Data Guard region, or database located in the remote Data Guard standby region.
 	TimeDataGuardRoleChanged *common.SDKTime `mandatory:"false" json:"timeDataGuardRoleChanged"`
 
-	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of standby databases located in Autonomous Data Guard remote regions that are associated with the source database. Note that for Autonomous Database Serverless instances, standby databases located in the same region as the source primary database do not have OCIDs.
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of standby databases located in Autonomous Data Guard remote regions that are associated with the source database. Note that for Autonomous AI Database Serverless instances, standby databases located in the same region as the source primary database do not have OCIDs.
 	PeerDbIds []string `mandatory:"false" json:"peerDbIds"`
 
-	// Specifies if the Autonomous Database requires mTLS connections.
+	// Specifies if the Autonomous AI Database requires mTLS connections.
 	// This may not be updated in parallel with any of the following: licenseModel, databaseEdition, cpuCoreCount, computeCount, dataStorageSizeInTBs, whitelistedIps, openMode, permissionLevel, db-workload, privateEndpointLabel, nsgIds, customerContacts, dbVersion, scheduledOperations, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	// Service Change: The default value of the isMTLSConnectionRequired attribute will change from true to false on July 1, 2023 in the following APIs:
 	// - CreateAutonomousDatabase
 	// - GetAutonomousDatabase
 	// - UpdateAutonomousDatabase
-	// Details: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous Database Serverless.
+	// Details: Prior to the July 1, 2023 change, the isMTLSConnectionRequired attribute default value was true. This applies to Autonomous AI Database Serverless.
 	// Does this impact me? If you use or maintain custom scripts or Terraform scripts referencing the CreateAutonomousDatabase, GetAutonomousDatabase, or UpdateAutonomousDatabase APIs, you want to check, and possibly modify, the scripts for the changed default value of the attribute. Should you choose not to leave your scripts unchanged, the API calls containing this attribute will continue to work, but the default value will switch from true to false.
 	// How do I make this change? Using either OCI SDKs or command line tools, update your custom scripts to explicitly set the isMTLSConnectionRequired attribute to true.
 	IsMtlsConnectionRequired *bool `mandatory:"false" json:"isMtlsConnectionRequired"`
@@ -370,7 +439,7 @@ type AutonomousDatabaseSummary struct {
 	// The time the member joined the resource pool.
 	TimeOfJoiningResourcePool *common.SDKTime `mandatory:"false" json:"timeOfJoiningResourcePool"`
 
-	// The unique identifier for leader autonomous database OCID OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// The unique identifier for leader Autonomous AI Database OCID OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	ResourcePoolLeaderId *string `mandatory:"false" json:"resourcePoolLeaderId"`
 
 	ResourcePoolSummary *ResourcePoolSummary `mandatory:"false" json:"resourcePoolSummary"`
@@ -381,15 +450,20 @@ type AutonomousDatabaseSummary struct {
 	// The time and date as an RFC3339 formatted string, e.g., 2022-01-01T12:00:00.000Z, to set the limit for a refreshable clone to be reconnected to its source database.
 	TimeUntilReconnectCloneEnabled *common.SDKTime `mandatory:"false" json:"timeUntilReconnectCloneEnabled"`
 
-	// The maintenance schedule type of the Autonomous Database Serverless. An EARLY maintenance schedule
+	// The maintenance schedule type of the Autonomous AI Database Serverless. An EARLY maintenance schedule
 	// follows a schedule applying patches prior to the REGULAR schedule. A REGULAR maintenance schedule follows the normal cycle
 	AutonomousMaintenanceScheduleType AutonomousDatabaseSummaryAutonomousMaintenanceScheduleTypeEnum `mandatory:"false" json:"autonomousMaintenanceScheduleType,omitempty"`
+
+	AutonomousDatabaseMaintenanceWindow *AutonomousDatabaseMaintenanceWindowSummary `mandatory:"false" json:"autonomousDatabaseMaintenanceWindow"`
+
+	// The date until which Autonomous AI Database maintenance is temporarily paused.
+	TimeMaintenancePauseUntil *common.SDKTime `mandatory:"false" json:"timeMaintenancePauseUntil"`
 
 	// The list of scheduled operations. Consists of values such as dayOfWeek, scheduledStartTime, scheduledStopTime.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, dbToolsDetails, isLocalDataGuardEnabled, or isFreeTier.
 	ScheduledOperations []ScheduledOperationDetails `mandatory:"false" json:"scheduledOperations"`
 
-	// Indicates if auto scaling is enabled for the Autonomous Database storage. The default value is `FALSE`.
+	// Indicates if auto scaling is enabled for the Autonomous AI Database storage. The default value is `FALSE`.
 	IsAutoScalingForStorageEnabled *bool `mandatory:"false" json:"isAutoScalingForStorageEnabled"`
 
 	// The amount of storage currently allocated for the database tables and billed for, rounded up. When auto-scaling is not enabled, this value is equal to the `dataStorageSizeInTBs` value. You can compare this value to the `actualUsedDataStorageSizeInTBs` value to determine if a manual shrink operation is appropriate for your allocated storage.
@@ -399,28 +473,49 @@ type AutonomousDatabaseSummary struct {
 	// The current amount of storage in use for user and system data, in terabytes (TB).
 	ActualUsedDataStorageSizeInTBs *float64 `mandatory:"false" json:"actualUsedDataStorageSizeInTBs"`
 
-	// The Oracle Database Edition that applies to the Autonomous databases.
+	// The Oracle AI Database Edition that applies to the Autonomous AI Databases.
 	DatabaseEdition AutonomousDatabaseSummaryDatabaseEditionEnum `mandatory:"false" json:"databaseEdition,omitempty"`
 
 	// The list of database tools details.
 	// This cannot be updated in parallel with any of the following: licenseModel, dbEdition, cpuCoreCount, computeCount, computeModel, whitelistedIps, isMTLSConnectionRequired, openMode, permissionLevel, dbWorkload, privateEndpointLabel, nsgIds, dbVersion, isRefreshable, dbName, scheduledOperations, isLocalDataGuardEnabled, or isFreeTier.
 	DbToolsDetails []DatabaseTool `mandatory:"false" json:"dbToolsDetails"`
 
-	// Indicates the local disaster recovery (DR) type of the Autonomous Database Serverless instance.
+	VanityUrlDetails *VanityUrlDetails `mandatory:"false" json:"vanityUrlDetails"`
+
+	// Indicates the local disaster recovery (DR) type of the Autonomous AI Database Serverless instance.
 	// Autonomous Data Guard (ADG) DR type provides business critical DR with a faster recovery time objective (RTO) during failover or switchover.
 	// Backup-based DR type provides lower cost DR with a slower RTO during failover or switchover.
 	LocalDisasterRecoveryType DisasterRecoveryConfigurationDisasterRecoveryTypeEnum `mandatory:"false" json:"localDisasterRecoveryType,omitempty"`
 
-	// The disaster recovery (DR) region type of the Autonomous Database. For Autonomous Database Serverless instances, DR associations have designated primary and standby regions. These region types do not change when the database changes roles. The standby region in DR associations can be the same region as the primary region, or they can be in a remote regions. Some database administration operations may be available only in the primary region of the DR association, and cannot be performed when the database using the primary role is operating in a remote region.
+	// **Deprecated.** The disaster recovery (DR) region type of the Autonomous AI Database. For Autonomous AI Database Serverless instances, DR associations have designated primary and standby regions. These region types do not change when the database changes roles. The standby region in DR associations can be the same region as the primary region, or they can be in a remote regions. Some database administration operations may be available only in the primary region of the DR association, and cannot be performed when the database using the primary role is operating in a remote region.
 	DisasterRecoveryRegionType AutonomousDatabaseSummaryDisasterRecoveryRegionTypeEnum `mandatory:"false" json:"disasterRecoveryRegionType,omitempty"`
 
-	// The date and time the Disaster Recovery role was switched for the standby Autonomous Database.
+	// The date and time the Disaster Recovery role was switched for the standby Autonomous AI Database.
 	TimeDisasterRecoveryRoleChanged *common.SDKTime `mandatory:"false" json:"timeDisasterRecoveryRoleChanged"`
 
 	RemoteDisasterRecoveryConfiguration *DisasterRecoveryConfiguration `mandatory:"false" json:"remoteDisasterRecoveryConfiguration"`
 
 	// Enabling SHARED server architecture enables a database server to allow many client processes to share very few server processes, thereby increasing the number of supported users.
 	NetServicesArchitecture AutonomousDatabaseSummaryNetServicesArchitectureEnum `mandatory:"false" json:"netServicesArchitecture,omitempty"`
+
+	// The availability domain where the Autonomous AI Database Serverless instance is located.
+	AvailabilityDomain *string `mandatory:"false" json:"availabilityDomain"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cluster placement group of the Autonomous Serverless Database.
+	ClusterPlacementGroupId *string `mandatory:"false" json:"clusterPlacementGroupId"`
+
+	// A list of the source Autonomous AI Database's table space number(s) used to create this partial clone from the backup.
+	CloneTableSpaceList []int `mandatory:"false" json:"cloneTableSpaceList"`
+
+	// The Autonomous AI Database clone type.
+	CloneType AutonomousDatabaseSummaryCloneTypeEnum `mandatory:"false" json:"cloneType,omitempty"`
+
+	// Additional attributes for this resource. Each attribute is a simple key-value pair with no predefined name, type, or namespace.
+	// Example: `{ "gcpAccountName": "gcpName" }`
+	AdditionalAttributes map[string]string `mandatory:"false" json:"additionalAttributes"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated resource pool leader Autonomous AI Database in the same region, associated with local Autonomous Data Guard for a dedicated resource pool member.
+	LocalAdgResourcePoolLeaderId *string `mandatory:"false" json:"localAdgResourcePoolLeaderId"`
 }
 
 func (m AutonomousDatabaseSummary) String() string {
@@ -490,10 +585,456 @@ func (m AutonomousDatabaseSummary) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingAutonomousDatabaseSummaryNetServicesArchitectureEnum(string(m.NetServicesArchitecture)); !ok && m.NetServicesArchitecture != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for NetServicesArchitecture: %s. Supported values are: %s.", m.NetServicesArchitecture, strings.Join(GetAutonomousDatabaseSummaryNetServicesArchitectureEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingAutonomousDatabaseSummaryCloneTypeEnum(string(m.CloneType)); !ok && m.CloneType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for CloneType: %s. Supported values are: %s.", m.CloneType, strings.Join(GetAutonomousDatabaseSummaryCloneTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
+}
+
+// UnmarshalJSON unmarshals from json
+func (m *AutonomousDatabaseSummary) UnmarshalJSON(data []byte) (e error) {
+	model := struct {
+		SubscriptionId                          *string                                                        `json:"subscriptionId"`
+		LifecycleDetails                        *string                                                        `json:"lifecycleDetails"`
+		KmsKeyId                                *string                                                        `json:"kmsKeyId"`
+		VaultId                                 *string                                                        `json:"vaultId"`
+		KmsKeyLifecycleDetails                  *string                                                        `json:"kmsKeyLifecycleDetails"`
+		EncryptionKey                           autonomousdatabaseencryptionkeydetails                         `json:"encryptionKey"`
+		KmsKeyVersionId                         *string                                                        `json:"kmsKeyVersionId"`
+		EncryptionKeyLocationDetails            encryptionkeylocationdetails                                   `json:"encryptionKeyLocationDetails"`
+		CharacterSet                            *string                                                        `json:"characterSet"`
+		NcharacterSet                           *string                                                        `json:"ncharacterSet"`
+		InMemoryPercentage                      *int                                                           `json:"inMemoryPercentage"`
+		InMemoryAreaInGBs                       *int                                                           `json:"inMemoryAreaInGBs"`
+		NextLongTermBackupTimeStamp             *common.SDKTime                                                `json:"nextLongTermBackupTimeStamp"`
+		LongTermBackupSchedule                  *LongTermBackUpScheduleDetails                                 `json:"longTermBackupSchedule"`
+		IsFreeTier                              *bool                                                          `json:"isFreeTier"`
+		SystemTags                              map[string]map[string]interface{}                              `json:"systemTags"`
+		TimeReclamationOfFreeAutonomousDatabase *common.SDKTime                                                `json:"timeReclamationOfFreeAutonomousDatabase"`
+		TimeDeletionOfFreeAutonomousDatabase    *common.SDKTime                                                `json:"timeDeletionOfFreeAutonomousDatabase"`
+		BackupConfig                            *AutonomousDatabaseBackupConfig                                `json:"backupConfig"`
+		KeyHistoryEntry                         []AutonomousDatabaseKeyHistoryEntry                            `json:"keyHistoryEntry"`
+		EncryptionKeyHistoryEntry               []AutonomousDatabaseEncryptionKeyHistoryEntry                  `json:"encryptionKeyHistoryEntry"`
+		CpuCoreCount                            *int                                                           `json:"cpuCoreCount"`
+		LocalAdgAutoFailoverMaxDataLossLimit    *int                                                           `json:"localAdgAutoFailoverMaxDataLossLimit"`
+		ComputeModel                            AutonomousDatabaseSummaryComputeModelEnum                      `json:"computeModel"`
+		ComputeCount                            *float32                                                       `json:"computeCount"`
+		BackupRetentionPeriodInDays             *int                                                           `json:"backupRetentionPeriodInDays"`
+		TotalBackupStorageSizeInGBs             *float64                                                       `json:"totalBackupStorageSizeInGBs"`
+		OcpuCount                               *float32                                                       `json:"ocpuCount"`
+		ProvisionableCpus                       []float32                                                      `json:"provisionableCpus"`
+		MemoryPerOracleComputeUnitInGBs         *int                                                           `json:"memoryPerOracleComputeUnitInGBs"`
+		MemoryPerComputeUnitInGBs               *float32                                                       `json:"memoryPerComputeUnitInGBs"`
+		DataStorageSizeInGBs                    *int                                                           `json:"dataStorageSizeInGBs"`
+		UsedDataStorageSizeInGBs                *int                                                           `json:"usedDataStorageSizeInGBs"`
+		InfrastructureType                      AutonomousDatabaseSummaryInfrastructureTypeEnum                `json:"infrastructureType"`
+		IsDedicated                             *bool                                                          `json:"isDedicated"`
+		AutonomousContainerDatabaseId           *string                                                        `json:"autonomousContainerDatabaseId"`
+		IsBackupRetentionLocked                 *bool                                                          `json:"isBackupRetentionLocked"`
+		TimeUndeleted                           *common.SDKTime                                                `json:"timeUndeleted"`
+		TimeEarliestAvailableDbVersionUpgrade   *common.SDKTime                                                `json:"timeEarliestAvailableDbVersionUpgrade"`
+		TimeLatestAvailableDbVersionUpgrade     *common.SDKTime                                                `json:"timeLatestAvailableDbVersionUpgrade"`
+		TimeScheduledDbVersionUpgrade           *common.SDKTime                                                `json:"timeScheduledDbVersionUpgrade"`
+		TimeCreated                             *common.SDKTime                                                `json:"timeCreated"`
+		DisplayName                             *string                                                        `json:"displayName"`
+		ServiceConsoleUrl                       *string                                                        `json:"serviceConsoleUrl"`
+		ConnectionStrings                       *AutonomousDatabaseConnectionStrings                           `json:"connectionStrings"`
+		ConnectionUrls                          *AutonomousDatabaseConnectionUrls                              `json:"connectionUrls"`
+		PublicConnectionUrls                    *AutonomousDatabaseConnectionUrls                              `json:"publicConnectionUrls"`
+		VanityConnectionUrls                    *AutonomousDatabaseConnectionUrls                              `json:"vanityConnectionUrls"`
+		LicenseModel                            AutonomousDatabaseSummaryLicenseModelEnum                      `json:"licenseModel"`
+		ByolComputeCountLimit                   *float32                                                       `json:"byolComputeCountLimit"`
+		UsedDataStorageSizeInTBs                *int                                                           `json:"usedDataStorageSizeInTBs"`
+		FreeformTags                            map[string]string                                              `json:"freeformTags"`
+		DefinedTags                             map[string]map[string]interface{}                              `json:"definedTags"`
+		SecurityAttributes                      map[string]map[string]interface{}                              `json:"securityAttributes"`
+		SubnetId                                *string                                                        `json:"subnetId"`
+		NsgIds                                  []string                                                       `json:"nsgIds"`
+		PrivateEndpoint                         *string                                                        `json:"privateEndpoint"`
+		PublicEndpoint                          *string                                                        `json:"publicEndpoint"`
+		PrivateEndpointLabel                    *string                                                        `json:"privateEndpointLabel"`
+		PrivateEndpointIp                       *string                                                        `json:"privateEndpointIp"`
+		DbVersion                               *string                                                        `json:"dbVersion"`
+		IsPreview                               *bool                                                          `json:"isPreview"`
+		DbWorkload                              AutonomousDatabaseSummaryDbWorkloadEnum                        `json:"dbWorkload"`
+		IsDevTier                               *bool                                                          `json:"isDevTier"`
+		IsAccessControlEnabled                  *bool                                                          `json:"isAccessControlEnabled"`
+		WhitelistedIps                          []string                                                       `json:"whitelistedIps"`
+		ArePrimaryWhitelistedIpsUsed            *bool                                                          `json:"arePrimaryWhitelistedIpsUsed"`
+		StandbyWhitelistedIps                   []string                                                       `json:"standbyWhitelistedIps"`
+		ApexDetails                             *AutonomousDatabaseApex                                        `json:"apexDetails"`
+		IsAutoScalingEnabled                    *bool                                                          `json:"isAutoScalingEnabled"`
+		DataSafeStatus                          AutonomousDatabaseSummaryDataSafeStatusEnum                    `json:"dataSafeStatus"`
+		OperationsInsightsStatus                AutonomousDatabaseSummaryOperationsInsightsStatusEnum          `json:"operationsInsightsStatus"`
+		DatabaseManagementStatus                AutonomousDatabaseSummaryDatabaseManagementStatusEnum          `json:"databaseManagementStatus"`
+		TimeMaintenanceBegin                    *common.SDKTime                                                `json:"timeMaintenanceBegin"`
+		TimeMaintenanceEnd                      *common.SDKTime                                                `json:"timeMaintenanceEnd"`
+		MaintenanceTargetComponent              *string                                                        `json:"maintenanceTargetComponent"`
+		IsRefreshableClone                      *bool                                                          `json:"isRefreshableClone"`
+		TimeOfLastRefresh                       *common.SDKTime                                                `json:"timeOfLastRefresh"`
+		TimeOfLastRefreshPoint                  *common.SDKTime                                                `json:"timeOfLastRefreshPoint"`
+		TimeOfNextRefresh                       *common.SDKTime                                                `json:"timeOfNextRefresh"`
+		OpenMode                                AutonomousDatabaseSummaryOpenModeEnum                          `json:"openMode"`
+		RefreshableStatus                       AutonomousDatabaseSummaryRefreshableStatusEnum                 `json:"refreshableStatus"`
+		RefreshableMode                         AutonomousDatabaseSummaryRefreshableModeEnum                   `json:"refreshableMode"`
+		SourceId                                *string                                                        `json:"sourceId"`
+		PermissionLevel                         AutonomousDatabaseSummaryPermissionLevelEnum                   `json:"permissionLevel"`
+		TimeOfLastSwitchover                    *common.SDKTime                                                `json:"timeOfLastSwitchover"`
+		TimeOfLastFailover                      *common.SDKTime                                                `json:"timeOfLastFailover"`
+		IsDataGuardEnabled                      *bool                                                          `json:"isDataGuardEnabled"`
+		FailedDataRecoveryInSeconds             *int                                                           `json:"failedDataRecoveryInSeconds"`
+		StandbyDb                               *AutonomousDatabaseStandbySummary                              `json:"standbyDb"`
+		IsLocalDataGuardEnabled                 *bool                                                          `json:"isLocalDataGuardEnabled"`
+		IsRemoteDataGuardEnabled                *bool                                                          `json:"isRemoteDataGuardEnabled"`
+		LocalStandbyDb                          *AutonomousDatabaseStandbySummary                              `json:"localStandbyDb"`
+		Role                                    AutonomousDatabaseSummaryRoleEnum                              `json:"role"`
+		AvailableUpgradeVersions                []string                                                       `json:"availableUpgradeVersions"`
+		KeyStoreId                              *string                                                        `json:"keyStoreId"`
+		KeyStoreWalletName                      *string                                                        `json:"keyStoreWalletName"`
+		AutoRefreshFrequencyInSeconds           *int                                                           `json:"autoRefreshFrequencyInSeconds"`
+		AutoRefreshPointLagInSeconds            *int                                                           `json:"autoRefreshPointLagInSeconds"`
+		TimeOfAutoRefreshStart                  *common.SDKTime                                                `json:"timeOfAutoRefreshStart"`
+		SupportedRegionsToCloneTo               []string                                                       `json:"supportedRegionsToCloneTo"`
+		CustomerContacts                        []CustomerContact                                              `json:"customerContacts"`
+		TimeLocalDataGuardEnabled               *common.SDKTime                                                `json:"timeLocalDataGuardEnabled"`
+		DataguardRegionType                     AutonomousDatabaseSummaryDataguardRegionTypeEnum               `json:"dataguardRegionType"`
+		TimeDataGuardRoleChanged                *common.SDKTime                                                `json:"timeDataGuardRoleChanged"`
+		PeerDbIds                               []string                                                       `json:"peerDbIds"`
+		IsMtlsConnectionRequired                *bool                                                          `json:"isMtlsConnectionRequired"`
+		TimeOfJoiningResourcePool               *common.SDKTime                                                `json:"timeOfJoiningResourcePool"`
+		ResourcePoolLeaderId                    *string                                                        `json:"resourcePoolLeaderId"`
+		ResourcePoolSummary                     *ResourcePoolSummary                                           `json:"resourcePoolSummary"`
+		IsReconnectCloneEnabled                 *bool                                                          `json:"isReconnectCloneEnabled"`
+		TimeUntilReconnectCloneEnabled          *common.SDKTime                                                `json:"timeUntilReconnectCloneEnabled"`
+		AutonomousMaintenanceScheduleType       AutonomousDatabaseSummaryAutonomousMaintenanceScheduleTypeEnum `json:"autonomousMaintenanceScheduleType"`
+		AutonomousDatabaseMaintenanceWindow     *AutonomousDatabaseMaintenanceWindowSummary                    `json:"autonomousDatabaseMaintenanceWindow"`
+		TimeMaintenancePauseUntil               *common.SDKTime                                                `json:"timeMaintenancePauseUntil"`
+		ScheduledOperations                     []ScheduledOperationDetails                                    `json:"scheduledOperations"`
+		IsAutoScalingForStorageEnabled          *bool                                                          `json:"isAutoScalingForStorageEnabled"`
+		AllocatedStorageSizeInTBs               *float64                                                       `json:"allocatedStorageSizeInTBs"`
+		ActualUsedDataStorageSizeInTBs          *float64                                                       `json:"actualUsedDataStorageSizeInTBs"`
+		DatabaseEdition                         AutonomousDatabaseSummaryDatabaseEditionEnum                   `json:"databaseEdition"`
+		DbToolsDetails                          []DatabaseTool                                                 `json:"dbToolsDetails"`
+		VanityUrlDetails                        *VanityUrlDetails                                              `json:"vanityUrlDetails"`
+		LocalDisasterRecoveryType               DisasterRecoveryConfigurationDisasterRecoveryTypeEnum          `json:"localDisasterRecoveryType"`
+		DisasterRecoveryRegionType              AutonomousDatabaseSummaryDisasterRecoveryRegionTypeEnum        `json:"disasterRecoveryRegionType"`
+		TimeDisasterRecoveryRoleChanged         *common.SDKTime                                                `json:"timeDisasterRecoveryRoleChanged"`
+		RemoteDisasterRecoveryConfiguration     *DisasterRecoveryConfiguration                                 `json:"remoteDisasterRecoveryConfiguration"`
+		NetServicesArchitecture                 AutonomousDatabaseSummaryNetServicesArchitectureEnum           `json:"netServicesArchitecture"`
+		AvailabilityDomain                      *string                                                        `json:"availabilityDomain"`
+		ClusterPlacementGroupId                 *string                                                        `json:"clusterPlacementGroupId"`
+		CloneTableSpaceList                     []int                                                          `json:"cloneTableSpaceList"`
+		CloneType                               AutonomousDatabaseSummaryCloneTypeEnum                         `json:"cloneType"`
+		AdditionalAttributes                    map[string]string                                              `json:"additionalAttributes"`
+		LocalAdgResourcePoolLeaderId            *string                                                        `json:"localAdgResourcePoolLeaderId"`
+		Id                                      *string                                                        `json:"id"`
+		CompartmentId                           *string                                                        `json:"compartmentId"`
+		LifecycleState                          AutonomousDatabaseSummaryLifecycleStateEnum                    `json:"lifecycleState"`
+		DbName                                  *string                                                        `json:"dbName"`
+		DataStorageSizeInTBs                    *int                                                           `json:"dataStorageSizeInTBs"`
+	}{}
+
+	e = json.Unmarshal(data, &model)
+	if e != nil {
+		return
+	}
+	var nn interface{}
+	m.SubscriptionId = model.SubscriptionId
+
+	m.LifecycleDetails = model.LifecycleDetails
+
+	m.KmsKeyId = model.KmsKeyId
+
+	m.VaultId = model.VaultId
+
+	m.KmsKeyLifecycleDetails = model.KmsKeyLifecycleDetails
+
+	nn, e = model.EncryptionKey.UnmarshalPolymorphicJSON(model.EncryptionKey.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.EncryptionKey = nn.(AutonomousDatabaseEncryptionKeyDetails)
+	} else {
+		m.EncryptionKey = nil
+	}
+
+	m.KmsKeyVersionId = model.KmsKeyVersionId
+
+	nn, e = model.EncryptionKeyLocationDetails.UnmarshalPolymorphicJSON(model.EncryptionKeyLocationDetails.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.EncryptionKeyLocationDetails = nn.(EncryptionKeyLocationDetails)
+	} else {
+		m.EncryptionKeyLocationDetails = nil
+	}
+
+	m.CharacterSet = model.CharacterSet
+
+	m.NcharacterSet = model.NcharacterSet
+
+	m.InMemoryPercentage = model.InMemoryPercentage
+
+	m.InMemoryAreaInGBs = model.InMemoryAreaInGBs
+
+	m.NextLongTermBackupTimeStamp = model.NextLongTermBackupTimeStamp
+
+	m.LongTermBackupSchedule = model.LongTermBackupSchedule
+
+	m.IsFreeTier = model.IsFreeTier
+
+	m.SystemTags = model.SystemTags
+
+	m.TimeReclamationOfFreeAutonomousDatabase = model.TimeReclamationOfFreeAutonomousDatabase
+
+	m.TimeDeletionOfFreeAutonomousDatabase = model.TimeDeletionOfFreeAutonomousDatabase
+
+	m.BackupConfig = model.BackupConfig
+
+	m.KeyHistoryEntry = make([]AutonomousDatabaseKeyHistoryEntry, len(model.KeyHistoryEntry))
+	copy(m.KeyHistoryEntry, model.KeyHistoryEntry)
+	m.EncryptionKeyHistoryEntry = make([]AutonomousDatabaseEncryptionKeyHistoryEntry, len(model.EncryptionKeyHistoryEntry))
+	copy(m.EncryptionKeyHistoryEntry, model.EncryptionKeyHistoryEntry)
+	m.CpuCoreCount = model.CpuCoreCount
+
+	m.LocalAdgAutoFailoverMaxDataLossLimit = model.LocalAdgAutoFailoverMaxDataLossLimit
+
+	m.ComputeModel = model.ComputeModel
+
+	m.ComputeCount = model.ComputeCount
+
+	m.BackupRetentionPeriodInDays = model.BackupRetentionPeriodInDays
+
+	m.TotalBackupStorageSizeInGBs = model.TotalBackupStorageSizeInGBs
+
+	m.OcpuCount = model.OcpuCount
+
+	m.ProvisionableCpus = make([]float32, len(model.ProvisionableCpus))
+	copy(m.ProvisionableCpus, model.ProvisionableCpus)
+	m.MemoryPerOracleComputeUnitInGBs = model.MemoryPerOracleComputeUnitInGBs
+
+	m.MemoryPerComputeUnitInGBs = model.MemoryPerComputeUnitInGBs
+
+	m.DataStorageSizeInGBs = model.DataStorageSizeInGBs
+
+	m.UsedDataStorageSizeInGBs = model.UsedDataStorageSizeInGBs
+
+	m.InfrastructureType = model.InfrastructureType
+
+	m.IsDedicated = model.IsDedicated
+
+	m.AutonomousContainerDatabaseId = model.AutonomousContainerDatabaseId
+
+	m.IsBackupRetentionLocked = model.IsBackupRetentionLocked
+
+	m.TimeUndeleted = model.TimeUndeleted
+
+	m.TimeEarliestAvailableDbVersionUpgrade = model.TimeEarliestAvailableDbVersionUpgrade
+
+	m.TimeLatestAvailableDbVersionUpgrade = model.TimeLatestAvailableDbVersionUpgrade
+
+	m.TimeScheduledDbVersionUpgrade = model.TimeScheduledDbVersionUpgrade
+
+	m.TimeCreated = model.TimeCreated
+
+	m.DisplayName = model.DisplayName
+
+	m.ServiceConsoleUrl = model.ServiceConsoleUrl
+
+	m.ConnectionStrings = model.ConnectionStrings
+
+	m.ConnectionUrls = model.ConnectionUrls
+
+	m.PublicConnectionUrls = model.PublicConnectionUrls
+
+	m.VanityConnectionUrls = model.VanityConnectionUrls
+
+	m.LicenseModel = model.LicenseModel
+
+	m.ByolComputeCountLimit = model.ByolComputeCountLimit
+
+	m.UsedDataStorageSizeInTBs = model.UsedDataStorageSizeInTBs
+
+	m.FreeformTags = model.FreeformTags
+
+	m.DefinedTags = model.DefinedTags
+
+	m.SecurityAttributes = model.SecurityAttributes
+
+	m.SubnetId = model.SubnetId
+
+	m.NsgIds = make([]string, len(model.NsgIds))
+	copy(m.NsgIds, model.NsgIds)
+	m.PrivateEndpoint = model.PrivateEndpoint
+
+	m.PublicEndpoint = model.PublicEndpoint
+
+	m.PrivateEndpointLabel = model.PrivateEndpointLabel
+
+	m.PrivateEndpointIp = model.PrivateEndpointIp
+
+	m.DbVersion = model.DbVersion
+
+	m.IsPreview = model.IsPreview
+
+	m.DbWorkload = model.DbWorkload
+
+	m.IsDevTier = model.IsDevTier
+
+	m.IsAccessControlEnabled = model.IsAccessControlEnabled
+
+	m.WhitelistedIps = make([]string, len(model.WhitelistedIps))
+	copy(m.WhitelistedIps, model.WhitelistedIps)
+	m.ArePrimaryWhitelistedIpsUsed = model.ArePrimaryWhitelistedIpsUsed
+
+	m.StandbyWhitelistedIps = make([]string, len(model.StandbyWhitelistedIps))
+	copy(m.StandbyWhitelistedIps, model.StandbyWhitelistedIps)
+	m.ApexDetails = model.ApexDetails
+
+	m.IsAutoScalingEnabled = model.IsAutoScalingEnabled
+
+	m.DataSafeStatus = model.DataSafeStatus
+
+	m.OperationsInsightsStatus = model.OperationsInsightsStatus
+
+	m.DatabaseManagementStatus = model.DatabaseManagementStatus
+
+	m.TimeMaintenanceBegin = model.TimeMaintenanceBegin
+
+	m.TimeMaintenanceEnd = model.TimeMaintenanceEnd
+
+	m.MaintenanceTargetComponent = model.MaintenanceTargetComponent
+
+	m.IsRefreshableClone = model.IsRefreshableClone
+
+	m.TimeOfLastRefresh = model.TimeOfLastRefresh
+
+	m.TimeOfLastRefreshPoint = model.TimeOfLastRefreshPoint
+
+	m.TimeOfNextRefresh = model.TimeOfNextRefresh
+
+	m.OpenMode = model.OpenMode
+
+	m.RefreshableStatus = model.RefreshableStatus
+
+	m.RefreshableMode = model.RefreshableMode
+
+	m.SourceId = model.SourceId
+
+	m.PermissionLevel = model.PermissionLevel
+
+	m.TimeOfLastSwitchover = model.TimeOfLastSwitchover
+
+	m.TimeOfLastFailover = model.TimeOfLastFailover
+
+	m.IsDataGuardEnabled = model.IsDataGuardEnabled
+
+	m.FailedDataRecoveryInSeconds = model.FailedDataRecoveryInSeconds
+
+	m.StandbyDb = model.StandbyDb
+
+	m.IsLocalDataGuardEnabled = model.IsLocalDataGuardEnabled
+
+	m.IsRemoteDataGuardEnabled = model.IsRemoteDataGuardEnabled
+
+	m.LocalStandbyDb = model.LocalStandbyDb
+
+	m.Role = model.Role
+
+	m.AvailableUpgradeVersions = make([]string, len(model.AvailableUpgradeVersions))
+	copy(m.AvailableUpgradeVersions, model.AvailableUpgradeVersions)
+	m.KeyStoreId = model.KeyStoreId
+
+	m.KeyStoreWalletName = model.KeyStoreWalletName
+
+	m.AutoRefreshFrequencyInSeconds = model.AutoRefreshFrequencyInSeconds
+
+	m.AutoRefreshPointLagInSeconds = model.AutoRefreshPointLagInSeconds
+
+	m.TimeOfAutoRefreshStart = model.TimeOfAutoRefreshStart
+
+	m.SupportedRegionsToCloneTo = make([]string, len(model.SupportedRegionsToCloneTo))
+	copy(m.SupportedRegionsToCloneTo, model.SupportedRegionsToCloneTo)
+	m.CustomerContacts = make([]CustomerContact, len(model.CustomerContacts))
+	copy(m.CustomerContacts, model.CustomerContacts)
+	m.TimeLocalDataGuardEnabled = model.TimeLocalDataGuardEnabled
+
+	m.DataguardRegionType = model.DataguardRegionType
+
+	m.TimeDataGuardRoleChanged = model.TimeDataGuardRoleChanged
+
+	m.PeerDbIds = make([]string, len(model.PeerDbIds))
+	copy(m.PeerDbIds, model.PeerDbIds)
+	m.IsMtlsConnectionRequired = model.IsMtlsConnectionRequired
+
+	m.TimeOfJoiningResourcePool = model.TimeOfJoiningResourcePool
+
+	m.ResourcePoolLeaderId = model.ResourcePoolLeaderId
+
+	m.ResourcePoolSummary = model.ResourcePoolSummary
+
+	m.IsReconnectCloneEnabled = model.IsReconnectCloneEnabled
+
+	m.TimeUntilReconnectCloneEnabled = model.TimeUntilReconnectCloneEnabled
+
+	m.AutonomousMaintenanceScheduleType = model.AutonomousMaintenanceScheduleType
+
+	m.AutonomousDatabaseMaintenanceWindow = model.AutonomousDatabaseMaintenanceWindow
+
+	m.TimeMaintenancePauseUntil = model.TimeMaintenancePauseUntil
+
+	m.ScheduledOperations = make([]ScheduledOperationDetails, len(model.ScheduledOperations))
+	copy(m.ScheduledOperations, model.ScheduledOperations)
+	m.IsAutoScalingForStorageEnabled = model.IsAutoScalingForStorageEnabled
+
+	m.AllocatedStorageSizeInTBs = model.AllocatedStorageSizeInTBs
+
+	m.ActualUsedDataStorageSizeInTBs = model.ActualUsedDataStorageSizeInTBs
+
+	m.DatabaseEdition = model.DatabaseEdition
+
+	m.DbToolsDetails = make([]DatabaseTool, len(model.DbToolsDetails))
+	copy(m.DbToolsDetails, model.DbToolsDetails)
+	m.VanityUrlDetails = model.VanityUrlDetails
+
+	m.LocalDisasterRecoveryType = model.LocalDisasterRecoveryType
+
+	m.DisasterRecoveryRegionType = model.DisasterRecoveryRegionType
+
+	m.TimeDisasterRecoveryRoleChanged = model.TimeDisasterRecoveryRoleChanged
+
+	m.RemoteDisasterRecoveryConfiguration = model.RemoteDisasterRecoveryConfiguration
+
+	m.NetServicesArchitecture = model.NetServicesArchitecture
+
+	m.AvailabilityDomain = model.AvailabilityDomain
+
+	m.ClusterPlacementGroupId = model.ClusterPlacementGroupId
+
+	m.CloneTableSpaceList = make([]int, len(model.CloneTableSpaceList))
+	copy(m.CloneTableSpaceList, model.CloneTableSpaceList)
+	m.CloneType = model.CloneType
+
+	m.AdditionalAttributes = model.AdditionalAttributes
+
+	m.LocalAdgResourcePoolLeaderId = model.LocalAdgResourcePoolLeaderId
+
+	m.Id = model.Id
+
+	m.CompartmentId = model.CompartmentId
+
+	m.LifecycleState = model.LifecycleState
+
+	m.DbName = model.DbName
+
+	m.DataStorageSizeInTBs = model.DataStorageSizeInTBs
+
+	return
 }
 
 // AutonomousDatabaseSummaryLifecycleStateEnum Enum with underlying type: string
@@ -522,6 +1063,7 @@ const (
 	AutonomousDatabaseSummaryLifecycleStateUpgrading               AutonomousDatabaseSummaryLifecycleStateEnum = "UPGRADING"
 	AutonomousDatabaseSummaryLifecycleStateInaccessible            AutonomousDatabaseSummaryLifecycleStateEnum = "INACCESSIBLE"
 	AutonomousDatabaseSummaryLifecycleStateStandby                 AutonomousDatabaseSummaryLifecycleStateEnum = "STANDBY"
+	AutonomousDatabaseSummaryLifecycleStateTransporting            AutonomousDatabaseSummaryLifecycleStateEnum = "TRANSPORTING"
 )
 
 var mappingAutonomousDatabaseSummaryLifecycleStateEnum = map[string]AutonomousDatabaseSummaryLifecycleStateEnum{
@@ -546,6 +1088,7 @@ var mappingAutonomousDatabaseSummaryLifecycleStateEnum = map[string]AutonomousDa
 	"UPGRADING":                 AutonomousDatabaseSummaryLifecycleStateUpgrading,
 	"INACCESSIBLE":              AutonomousDatabaseSummaryLifecycleStateInaccessible,
 	"STANDBY":                   AutonomousDatabaseSummaryLifecycleStateStandby,
+	"TRANSPORTING":              AutonomousDatabaseSummaryLifecycleStateTransporting,
 }
 
 var mappingAutonomousDatabaseSummaryLifecycleStateEnumLowerCase = map[string]AutonomousDatabaseSummaryLifecycleStateEnum{
@@ -570,6 +1113,7 @@ var mappingAutonomousDatabaseSummaryLifecycleStateEnumLowerCase = map[string]Aut
 	"upgrading":                 AutonomousDatabaseSummaryLifecycleStateUpgrading,
 	"inaccessible":              AutonomousDatabaseSummaryLifecycleStateInaccessible,
 	"standby":                   AutonomousDatabaseSummaryLifecycleStateStandby,
+	"transporting":              AutonomousDatabaseSummaryLifecycleStateTransporting,
 }
 
 // GetAutonomousDatabaseSummaryLifecycleStateEnumValues Enumerates the set of values for AutonomousDatabaseSummaryLifecycleStateEnum
@@ -605,6 +1149,7 @@ func GetAutonomousDatabaseSummaryLifecycleStateEnumStringValues() []string {
 		"UPGRADING",
 		"INACCESSIBLE",
 		"STANDBY",
+		"TRANSPORTING",
 	}
 }
 
@@ -749,6 +1294,7 @@ const (
 	AutonomousDatabaseSummaryDbWorkloadDw   AutonomousDatabaseSummaryDbWorkloadEnum = "DW"
 	AutonomousDatabaseSummaryDbWorkloadAjd  AutonomousDatabaseSummaryDbWorkloadEnum = "AJD"
 	AutonomousDatabaseSummaryDbWorkloadApex AutonomousDatabaseSummaryDbWorkloadEnum = "APEX"
+	AutonomousDatabaseSummaryDbWorkloadLh   AutonomousDatabaseSummaryDbWorkloadEnum = "LH"
 )
 
 var mappingAutonomousDatabaseSummaryDbWorkloadEnum = map[string]AutonomousDatabaseSummaryDbWorkloadEnum{
@@ -756,6 +1302,7 @@ var mappingAutonomousDatabaseSummaryDbWorkloadEnum = map[string]AutonomousDataba
 	"DW":   AutonomousDatabaseSummaryDbWorkloadDw,
 	"AJD":  AutonomousDatabaseSummaryDbWorkloadAjd,
 	"APEX": AutonomousDatabaseSummaryDbWorkloadApex,
+	"LH":   AutonomousDatabaseSummaryDbWorkloadLh,
 }
 
 var mappingAutonomousDatabaseSummaryDbWorkloadEnumLowerCase = map[string]AutonomousDatabaseSummaryDbWorkloadEnum{
@@ -763,6 +1310,7 @@ var mappingAutonomousDatabaseSummaryDbWorkloadEnumLowerCase = map[string]Autonom
 	"dw":   AutonomousDatabaseSummaryDbWorkloadDw,
 	"ajd":  AutonomousDatabaseSummaryDbWorkloadAjd,
 	"apex": AutonomousDatabaseSummaryDbWorkloadApex,
+	"lh":   AutonomousDatabaseSummaryDbWorkloadLh,
 }
 
 // GetAutonomousDatabaseSummaryDbWorkloadEnumValues Enumerates the set of values for AutonomousDatabaseSummaryDbWorkloadEnum
@@ -781,6 +1329,7 @@ func GetAutonomousDatabaseSummaryDbWorkloadEnumStringValues() []string {
 		"DW",
 		"AJD",
 		"APEX",
+		"LH",
 	}
 }
 
@@ -1389,5 +1938,51 @@ func GetAutonomousDatabaseSummaryNetServicesArchitectureEnumStringValues() []str
 // GetMappingAutonomousDatabaseSummaryNetServicesArchitectureEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingAutonomousDatabaseSummaryNetServicesArchitectureEnum(val string) (AutonomousDatabaseSummaryNetServicesArchitectureEnum, bool) {
 	enum, ok := mappingAutonomousDatabaseSummaryNetServicesArchitectureEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// AutonomousDatabaseSummaryCloneTypeEnum Enum with underlying type: string
+type AutonomousDatabaseSummaryCloneTypeEnum string
+
+// Set of constants representing the allowable values for AutonomousDatabaseSummaryCloneTypeEnum
+const (
+	AutonomousDatabaseSummaryCloneTypeFull     AutonomousDatabaseSummaryCloneTypeEnum = "FULL"
+	AutonomousDatabaseSummaryCloneTypeMetadata AutonomousDatabaseSummaryCloneTypeEnum = "METADATA"
+	AutonomousDatabaseSummaryCloneTypePartial  AutonomousDatabaseSummaryCloneTypeEnum = "PARTIAL"
+)
+
+var mappingAutonomousDatabaseSummaryCloneTypeEnum = map[string]AutonomousDatabaseSummaryCloneTypeEnum{
+	"FULL":     AutonomousDatabaseSummaryCloneTypeFull,
+	"METADATA": AutonomousDatabaseSummaryCloneTypeMetadata,
+	"PARTIAL":  AutonomousDatabaseSummaryCloneTypePartial,
+}
+
+var mappingAutonomousDatabaseSummaryCloneTypeEnumLowerCase = map[string]AutonomousDatabaseSummaryCloneTypeEnum{
+	"full":     AutonomousDatabaseSummaryCloneTypeFull,
+	"metadata": AutonomousDatabaseSummaryCloneTypeMetadata,
+	"partial":  AutonomousDatabaseSummaryCloneTypePartial,
+}
+
+// GetAutonomousDatabaseSummaryCloneTypeEnumValues Enumerates the set of values for AutonomousDatabaseSummaryCloneTypeEnum
+func GetAutonomousDatabaseSummaryCloneTypeEnumValues() []AutonomousDatabaseSummaryCloneTypeEnum {
+	values := make([]AutonomousDatabaseSummaryCloneTypeEnum, 0)
+	for _, v := range mappingAutonomousDatabaseSummaryCloneTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetAutonomousDatabaseSummaryCloneTypeEnumStringValues Enumerates the set of values in String for AutonomousDatabaseSummaryCloneTypeEnum
+func GetAutonomousDatabaseSummaryCloneTypeEnumStringValues() []string {
+	return []string{
+		"FULL",
+		"METADATA",
+		"PARTIAL",
+	}
+}
+
+// GetMappingAutonomousDatabaseSummaryCloneTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingAutonomousDatabaseSummaryCloneTypeEnum(val string) (AutonomousDatabaseSummaryCloneTypeEnum, bool) {
+	enum, ok := mappingAutonomousDatabaseSummaryCloneTypeEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

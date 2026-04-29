@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -20,14 +20,18 @@ import (
 type OcirModelDeploymentEnvironmentConfigurationDetails struct {
 
 	// The full path to the Oracle Container Repository (OCIR) registry, image, and tag in a canonical format.
+	// The container image is optional while using service managed open source foundation model.
 	// Acceptable format:
 	// `<region>.ocir.io/<registry>/<image>:<tag>`
 	// `<region>.ocir.io/<registry>/<image>:<tag>@digest`
-	Image *string `mandatory:"true" json:"image"`
+	Image *string `mandatory:"false" json:"image"`
 
 	// The digest of the container image. For example,
 	// `sha256:881303a6b2738834d795a32b4a98eb0e5e3d1cad590a712d1e04f9b2fa90a030`
 	ImageDigest *string `mandatory:"false" json:"imageDigest"`
+
+	// OCID of the container image signature
+	ImageSignatureId *string `mandatory:"false" json:"imageSignatureId"`
 
 	// The container image run CMD (https://docs.docker.com/engine/reference/builder/#cmd) as a list of strings.
 	// Use `CMD` as arguments to the `ENTRYPOINT` or the only command to run in the absence of an `ENTRYPOINT`.
@@ -59,6 +63,9 @@ type OcirModelDeploymentEnvironmentConfigurationDetails struct {
 	// No specific size limits on individual Values. But overall environment variables is limited to 2048 bytes.
 	// Key can't be reserved Model Deployment environment variables.
 	EnvironmentVariables map[string]string `mandatory:"false" json:"environmentVariables"`
+
+	// Service injected Environment variables set for the web server container and can not be set or modified by user.
+	DefaultEnvironmentVariables map[string]string `mandatory:"false" json:"defaultEnvironmentVariables"`
 }
 
 func (m OcirModelDeploymentEnvironmentConfigurationDetails) String() string {
@@ -72,7 +79,7 @@ func (m OcirModelDeploymentEnvironmentConfigurationDetails) ValidateEnumValue() 
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

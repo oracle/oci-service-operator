@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "core",
+  "kind": "ServiceGateway",
+  "formalSlug": "servicegateway",
+  "providerResource": "oci_core_service_gateway",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/core_service_gateway",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/core_service_gateway",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/core/servicegateway/page.html",
+  "bodySHA256": "bc5dc3523aedb4f668d1769ed0eb1f1953ce83edcdf553706c1d921ba474653f",
+  "bodyBytes": 3449,
+  "fixtureBodyPath": "7.22.0/core/servicegateway/page.html"
+}

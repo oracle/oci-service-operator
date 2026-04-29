@@ -61,6 +61,7 @@ This summary shows the top-level `spec` fields. Use [the full API reference](ref
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| `accessMode` | The access mode indicating if the database access will be restricted only to administrators or not: - UNRESTRICTED (default): the access to the database is not restricted; - RESTRICTED: the access will be allowed only to users with specific privileges; RESTRICTED will correspond to setting the MySQL system variable offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON. | `string` | No |
 | [`adminPassword`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-adminpassword) | The password for the administrative user sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `password` key. | `object` | No |
 | [`adminUsername`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-adminusername) | The username for the administrative user sourced from a Kubernetes Secret in the same namespace. The referenced Secret must contain a `username` key. | `object` | No |
 | `availabilityDomain` | The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other availability domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the availability domain in which the DB System is placed. | `string` | No |
@@ -68,12 +69,17 @@ This summary shows the top-level `spec` fields. Use [the full API reference](ref
 | `compartmentId` | The OCID of the compartment. | `string` | Yes |
 | `configurationId` | The OCID of the Configuration to be used for this DB System. | `string` | No |
 | `crashRecovery` | Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled, and whether to enable or disable syncing of the Binary Logs. | `string` | No |
+| [`customerContacts`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-customercontacts) | The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource. Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators. Up to 10 email addresses can be added to the customer contacts for a DB System. | `list[object]` | No |
+| [`dataStorage`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-datastorage) | DbSystemDataStorage defines nested fields for DbSystem.DataStorage. | `object` | No |
 | `dataStorageSizeInGBs` | Initial size of the data volume in GBs that will be created and attached. Keep in mind that this only specifies the size of the database data volume, the log volume for the database will be scaled appropriately with its shape. | `integer` | No |
+| [`databaseConsole`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-databaseconsole) | DbSystemDatabaseConsole defines nested fields for DbSystem.DatabaseConsole. | `object` | No |
 | `databaseManagement` | Whether to enable monitoring via the Database Management service. | `string` | No |
+| `databaseMode` | The database mode indicating the types of statements that will be allowed to run in the DB system. This mode will apply only to statements run by user connections. Replicated write statements will continue to be allowed regardless of the DatabaseMode. - READ_WRITE (default): allow running read and write statements on the DB system; - READ_ONLY: only allow running read statements on the DB system. | `string` | No |
 | `definedTags` | Usage of predefined tag keys. These predefined keys are scoped to namespaces. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
 | [`deletionPolicy`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-deletionpolicy) | DbSystemDeletionPolicy defines nested fields for DbSystem.DeletionPolicy. | `object` | No |
 | `description` | User-provided data about the DB System. | `string` | No |
 | `displayName` | The user-friendly name for the DB System. It does not have to be unique. | `string` | No |
+| [`encryptData`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-encryptdata) | DbSystemEncryptData defines nested fields for DbSystem.EncryptData. | `object` | No |
 | `faultDomain` | The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other fault domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the fault domain in which the DB System is placed. | `string` | No |
 | `freeformTags` | Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No |
 | `hostnameLabel` | The hostname for the primary endpoint of the DB System. Used for DNS. The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN) (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com"). Must be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123. | `string` | No |
@@ -81,12 +87,17 @@ This summary shows the top-level `spec` fields. Use [the full API reference](ref
 | `isHighlyAvailable` | Specifies if the DB System is highly available. When creating a DB System with High Availability, three instances are created and placed according to your region- and subnet-type. The secondaries are placed automatically in the other two availability or fault domains. You can choose the preferred location of your primary instance, only. | `boolean` | No |
 | [`maintenance`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-maintenance) | DbSystemMaintenance defines nested fields for DbSystem.Maintenance. | `object` | No |
 | `mysqlVersion` | The specific MySQL version identifier. | `string` | No |
+| `nsgIds` | Network Security Group OCIDs used for the VNIC attachment. | `list[string]` | No |
 | `port` | The port for primary endpoint of the DB System to listen on. | `integer` | No |
 | `portX` | The TCP network port on which X Plugin listens for connections. This is the X Plugin equivalent of port. | `integer` | No |
+| [`readEndpoint`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-readendpoint) | DbSystemReadEndpoint defines nested fields for DbSystem.ReadEndpoint. | `object` | No |
+| [`rest`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-rest) | DbSystemRest defines nested fields for DbSystem.Rest. | `object` | No |
 | [`secureConnections`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-secureconnections) | DbSystemSecureConnections defines nested fields for DbSystem.SecureConnections. | `object` | No |
+| `securityAttributes` | Security Attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}` | `map[string, map[string, string]]` | No |
 | `shapeName` | The name of the shape. The shape determines the resources allocated - CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes. To get a list of shapes, use the ListShapes operation. | `string` | Yes |
 | [`source`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-source) | DbSystemSource defines nested fields for DbSystem.Source. | `object` | No |
 | `subnetId` | The OCID of the subnet the DB System is associated with. | `string` | Yes |
+| [`telemetryConfiguration`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-spec-telemetryconfiguration) | DbSystemTelemetryConfiguration defines nested fields for DbSystem.TelemetryConfiguration. | `object` | No |
 
 
 ## Status Fields
@@ -95,21 +106,28 @@ This summary shows the top-level `status` fields. Use [the full API reference](r
 
 | Field | Description | Type | Required |
 | --- | --- | --- | --- |
+| `accessMode` | The access mode indicating if the database access is unrestricted (to all MySQL user accounts), or restricted (to only certain users with specific privileges): - UNRESTRICTED: the access to the database is not restricted; - RESTRICTED: access allowed only to users with specific privileges; RESTRICTED will correspond to setting the MySQL system variable offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON. | `string` | No |
 | [`adminPassword`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-adminpassword) | The last applied secret reference for the administrative password. | `object` | No |
 | [`adminUsername`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-adminusername) | The last applied secret reference for the administrative username. | `object` | No |
 | `availabilityDomain` | The availability domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other availability domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the availability domain in which the DB System is placed. | `string` | No |
-| [`backupPolicy`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-backuppolicy) | DbSystemBackupPolicy defines nested fields for DbSystem.BackupPolicy. | `object` | No |
+| [`backupPolicy`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-backuppolicy) | DbSystemBackupPolicyObservedState defines nested fields for DbSystem.BackupPolicy. | `object` | No |
 | [`channels`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-channels) | A list with a summary of all the Channels attached to the DB System. | `list[object]` | No |
 | `compartmentId` | The OCID of the compartment the DB System belongs in. | `string` | No |
 | `configurationId` | The OCID of the Configuration to be used for Instances in this DB System. | `string` | No |
+| [`controlledUpdate`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-controlledupdate) | DbSystemControlledUpdate defines nested fields for DbSystem.ControlledUpdate. | `object` | No |
 | `crashRecovery` | Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled, and whether to enable or disable syncing of the Binary Logs. | `string` | No |
 | [`currentPlacement`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-currentplacement) | DbSystemCurrentPlacement defines nested fields for DbSystem.CurrentPlacement. | `object` | No |
-| `dataStorageSizeInGBs` | Initial size of the data volume in GiBs that will be created and attached. | `integer` | No |
+| [`customerContacts`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-customercontacts) | The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource. Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators. Up to 10 email addresses can be added to the customer contacts for a DB System. | `list[object]` | No |
+| [`dataStorage`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-datastorage) | DbSystemDataStorageObservedState defines nested fields for DbSystem.DataStorage. | `object` | No |
+| `dataStorageSizeInGBs` | DEPRECATED: User specified size of the data volume. May be less than current allocatedStorageSizeInGBs. Replaced by dataStorage.dataStorageSizeInGBs. | `integer` | No |
+| [`databaseConsole`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-databaseconsole) | DbSystemDatabaseConsole defines nested fields for DbSystem.DatabaseConsole. | `object` | No |
 | `databaseManagement` | Whether to enable monitoring via the Database Management service. | `string` | No |
+| `databaseMode` | The database mode indicating the types of statements that are allowed to run in the the DB system. This mode applies only to statements run by user connections. Replicated write statements continue to be allowed regardless of the DatabaseMode. - READ_WRITE: allow running read and write statements on the DB system; - READ_ONLY: only allow running read statements on the DB system. | `string` | No |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No |
 | [`deletionPolicy`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-deletionpolicy) | DbSystemDeletionPolicy defines nested fields for DbSystem.DeletionPolicy. | `object` | No |
 | `description` | User-provided data about the DB System. | `string` | No |
 | `displayName` | The user-friendly name for the DB System. It does not have to be unique. | `string` | No |
+| [`encryptData`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-encryptdata) | DbSystemEncryptData defines nested fields for DbSystem.EncryptData. | `object` | No |
 | [`endpoints`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-endpoints) | The network endpoints available for this DB System. | `list[object]` | No |
 | `faultDomain` | The fault domain on which to deploy the Read/Write endpoint. This defines the preferred primary instance. In a failover scenario, the Read/Write endpoint is redirected to one of the other fault domains and the MySQL instance in that domain is promoted to the primary instance. This redirection does not affect the IP address of the DB System in any way. For a standalone DB System, this defines the fault domain in which the DB System is placed. | `string` | No |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No |
@@ -121,16 +139,22 @@ This summary shows the top-level `status` fields. Use [the full API reference](r
 | `isHighlyAvailable` | Specifies if the DB System is highly available. | `boolean` | No |
 | `lifecycleDetails` | Additional information about the current lifecycleState. | `string` | No |
 | `lifecycleState` | The current state of the DB System. | `string` | No |
-| [`maintenance`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-maintenance) | DbSystemMaintenance defines nested fields for DbSystem.Maintenance. | `object` | No |
+| [`maintenance`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-maintenance) | DbSystemMaintenanceObservedState defines nested fields for DbSystem.Maintenance. | `object` | No |
 | `mysqlVersion` | Name of the MySQL Version in use for the DB System. | `string` | No |
+| `nsgIds` | Network Security Group OCIDs used for the VNIC attachment. | `list[string]` | No |
 | [`pointInTimeRecoveryDetails`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-pointintimerecoverydetails) | DbSystemPointInTimeRecoveryDetails defines nested fields for DbSystem.PointInTimeRecoveryDetails. | `object` | No |
 | `port` | The port for primary endpoint of the DB System to listen on. | `integer` | No |
 | `portX` | The network port on which X Plugin listens for TCP/IP connections. This is the X Plugin equivalent of port. | `integer` | No |
+| [`readEndpoint`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-readendpoint) | DbSystemReadEndpoint defines nested fields for DbSystem.ReadEndpoint. | `object` | No |
+| [`rest`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-rest) | DbSystemRest defines nested fields for DbSystem.Rest. | `object` | No |
 | [`secureConnections`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-secureconnections) | DbSystemSecureConnections defines nested fields for DbSystem.SecureConnections. | `object` | No |
+| `securityAttributes` | Security Attributes for this resource. Each key is predefined and scoped to a namespace. For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm). Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}` | `map[string, map[string, string]]` | No |
 | `shapeName` | The shape of the primary instances of the DB System. The shape determines resources allocated to a DB System - CPU cores and memory for VM shapes; CPU cores, memory and storage for non-VM (or bare metal) shapes. To get a list of shapes, use (the ListShapes operation. | `string` | No |
 | [`source`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-source) | DbSystemSourceObservedState defines nested fields for DbSystem.Source. | `object` | No |
 | [`status`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-status) | - | `object` | Yes |
 | `subnetId` | The OCID of the subnet the DB System is associated with. | `string` | No |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No |
+| [`telemetryConfiguration`](reference/api/mysql/v1beta1/index.md#kind-dbsystem-status-telemetryconfiguration) | DbSystemTelemetryConfiguration defines nested fields for DbSystem.TelemetryConfiguration. | `object` | No |
 | `timeCreated` | The date and time the DB System was created. | `string` | No |
 | `timeUpdated` | The time the DB System was last updated. | `string` | No |
 

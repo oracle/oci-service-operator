@@ -1,11 +1,11 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Load Balancing API
 //
 // API for the Load Balancing service. Use this API to manage load balancers, backend sets, and related items. For more
-// information, see Overview of Load Balancing (https://docs.cloud.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm).
+// information, see Overview of Load Balancing (https://docs.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm).
 //
 
 package loadbalancer
@@ -79,6 +79,10 @@ func (m *rule) UnmarshalPolymorphicJSON(data []byte) (interface{}, error) {
 		mm := AllowRule{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
+	case "IP_BASED_MAX_CONNECTIONS":
+		mm := IpBasedMaxConnectionsRule{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "HTTP_HEADER":
 		mm := HttpHeaderRule{}
 		err = json.Unmarshal(data, &mm)
@@ -92,7 +96,7 @@ func (m *rule) UnmarshalPolymorphicJSON(data []byte) (interface{}, error) {
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for Rule: %s.", m.Action)
+		common.Logf("Received unsupported enum value for Rule: %s.", m.Action)
 		return *m, nil
 	}
 }
@@ -108,7 +112,7 @@ func (m rule) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -128,6 +132,7 @@ const (
 	RuleActionControlAccessUsingHttpMethods RuleActionEnum = "CONTROL_ACCESS_USING_HTTP_METHODS"
 	RuleActionRedirect                      RuleActionEnum = "REDIRECT"
 	RuleActionHttpHeader                    RuleActionEnum = "HTTP_HEADER"
+	RuleActionIpBasedMaxConnections         RuleActionEnum = "IP_BASED_MAX_CONNECTIONS"
 )
 
 var mappingRuleActionEnum = map[string]RuleActionEnum{
@@ -141,6 +146,7 @@ var mappingRuleActionEnum = map[string]RuleActionEnum{
 	"CONTROL_ACCESS_USING_HTTP_METHODS": RuleActionControlAccessUsingHttpMethods,
 	"REDIRECT":                          RuleActionRedirect,
 	"HTTP_HEADER":                       RuleActionHttpHeader,
+	"IP_BASED_MAX_CONNECTIONS":          RuleActionIpBasedMaxConnections,
 }
 
 var mappingRuleActionEnumLowerCase = map[string]RuleActionEnum{
@@ -154,6 +160,7 @@ var mappingRuleActionEnumLowerCase = map[string]RuleActionEnum{
 	"control_access_using_http_methods": RuleActionControlAccessUsingHttpMethods,
 	"redirect":                          RuleActionRedirect,
 	"http_header":                       RuleActionHttpHeader,
+	"ip_based_max_connections":          RuleActionIpBasedMaxConnections,
 }
 
 // GetRuleActionEnumValues Enumerates the set of values for RuleActionEnum
@@ -178,6 +185,7 @@ func GetRuleActionEnumStringValues() []string {
 		"CONTROL_ACCESS_USING_HTTP_METHODS",
 		"REDIRECT",
 		"HTTP_HEADER",
+		"IP_BASED_MAX_CONNECTIONS",
 	}
 }
 

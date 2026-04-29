@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -22,6 +22,7 @@ const (
 	NetworkLoadBalancersProtocolSummaryTcp       NetworkLoadBalancersProtocolSummaryEnum = "TCP"
 	NetworkLoadBalancersProtocolSummaryUdp       NetworkLoadBalancersProtocolSummaryEnum = "UDP"
 	NetworkLoadBalancersProtocolSummaryTcpAndUdp NetworkLoadBalancersProtocolSummaryEnum = "TCP_AND_UDP"
+	NetworkLoadBalancersProtocolSummaryL3Ip      NetworkLoadBalancersProtocolSummaryEnum = "L3IP"
 )
 
 var mappingNetworkLoadBalancersProtocolSummaryEnum = map[string]NetworkLoadBalancersProtocolSummaryEnum{
@@ -29,6 +30,7 @@ var mappingNetworkLoadBalancersProtocolSummaryEnum = map[string]NetworkLoadBalan
 	"TCP":         NetworkLoadBalancersProtocolSummaryTcp,
 	"UDP":         NetworkLoadBalancersProtocolSummaryUdp,
 	"TCP_AND_UDP": NetworkLoadBalancersProtocolSummaryTcpAndUdp,
+	"L3IP":        NetworkLoadBalancersProtocolSummaryL3Ip,
 }
 
 var mappingNetworkLoadBalancersProtocolSummaryEnumLowerCase = map[string]NetworkLoadBalancersProtocolSummaryEnum{
@@ -36,6 +38,7 @@ var mappingNetworkLoadBalancersProtocolSummaryEnumLowerCase = map[string]Network
 	"tcp":         NetworkLoadBalancersProtocolSummaryTcp,
 	"udp":         NetworkLoadBalancersProtocolSummaryUdp,
 	"tcp_and_udp": NetworkLoadBalancersProtocolSummaryTcpAndUdp,
+	"l3ip":        NetworkLoadBalancersProtocolSummaryL3Ip,
 }
 
 // GetNetworkLoadBalancersProtocolSummaryEnumValues Enumerates the set of values for NetworkLoadBalancersProtocolSummaryEnum
@@ -54,6 +57,7 @@ func GetNetworkLoadBalancersProtocolSummaryEnumStringValues() []string {
 		"TCP",
 		"UDP",
 		"TCP_AND_UDP",
+		"L3IP",
 	}
 }
 

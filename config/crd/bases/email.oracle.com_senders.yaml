@@ -62,18 +62,22 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               emailAddress:
                 description: The email address of the sender.
+                type: string
+              emailIpPoolId:
+                description: An optional field. The IpPool OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  used to submit an email by Email Delivery when sent from this sender.
                 type: string
               freeformTags:
                 additionalProperties:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
             required:
@@ -93,7 +97,7 @@ spec:
                   type: object
                 description: |-
                   Defined tags for this resource. Each key is predefined and scoped to a namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Operations": {"CostCenter": "42"}}`
                 type: object
               emailAddress:
@@ -103,12 +107,16 @@ spec:
                 description: The email domain used to assert responsibility for emails
                   sent from this sender.
                 type: string
+              emailIpPoolId:
+                description: The IpPool OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  used to submit an email by Email Delivery when sent from this sender.
+                type: string
               freeformTags:
                 additionalProperties:
                   type: string
                 description: |-
                   Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-                  For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
                   Example: `{"Department": "Finance"}`
                 type: object
               id:
@@ -117,11 +125,37 @@ spec:
               isSpf:
                 description: |-
                   Value of the SPF field. For more information about SPF, please see
-                  SPF Authentication (https://docs.cloud.oracle.com/Content/Email/Concepts/overview.htm#components).
+                  SPF Authentication (https://docs.oracle.com/iaas/Content/Email/Concepts/overview.htm#components).
                 type: boolean
               lifecycleState:
                 description: The sender's current lifecycle state.
                 type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: SenderLock defines nested fields for Sender.Lock.
+                  properties:
+                    compartmentId:
+                      description: The lock compartment ID.
+                      type: string
+                    message:
+                      description: |-
+                        A message added by the lock creator. The message typically gives an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The resource ID that is locking this resource.
+                        Indicates that deleting this resource removes the lock.
+                      type: string
+                    timeCreated:
+                      description: Indicates when the lock was created, in the format
+                        defined by RFC 3339.
+                      type: string
+                    type:
+                      description: Lock type.
+                      type: string
+                  type: object
+                type: array
               status:
                 properties:
                   async:
@@ -222,10 +256,19 @@ spec:
                     format: date-time
                     type: string
                 type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
               timeCreated:
                 description: |-
                   The date and time the approved sender was added in "YYYY-MM-ddThh:mmZ"
-                  format with a Z offset, as defined by RFC 3339.
+                  format with a Z offset, as defined by RFC 3339 (https://tools.ietf.org/html/rfc3339).
                 type: string
             required:
             - status

@@ -17,9 +17,6 @@ import (
 	emailemaildomainservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/email/emaildomain"
 	emailsenderservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/email/sender"
 	emailsuppressionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/email/suppression"
-	emailworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/email/workrequest"
-	emailworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/email/workrequesterror"
-	emailworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/email/workrequestlog"
 )
 
 func init() {
@@ -70,39 +67,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Suppression controller: %w", err)
-			}
-			if err := (&emailcontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return emailworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&emailcontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return emailworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&emailcontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return emailworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

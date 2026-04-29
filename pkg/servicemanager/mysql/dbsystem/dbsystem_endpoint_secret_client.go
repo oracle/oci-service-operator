@@ -23,6 +23,12 @@ import (
 
 const dbSystemEndpointSecretOwnerUIDLabel = "mysql.oracle.com/dbsystem-uid"
 
+func init() {
+	registerDbSystemRuntimeHooksMutator(func(manager *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+		appendDbSystemEndpointSecretRuntimeWrapper(manager, hooks)
+	})
+}
+
 type dbSystemEndpointSecretRecordReader interface {
 	GetSecretRecord(context.Context, string, string) (credhelper.SecretRecord, error)
 }
@@ -35,6 +41,16 @@ type dbSystemEndpointSecretClient struct {
 }
 
 var _ DbSystemServiceClient = dbSystemEndpointSecretClient{}
+
+func appendDbSystemEndpointSecretRuntimeWrapper(manager *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate DbSystemServiceClient) DbSystemServiceClient {
+		return newDbSystemEndpointSecretClient(manager, delegate)
+	})
+}
 
 func newDbSystemEndpointSecretClient(manager *DbSystemServiceManager, delegate DbSystemServiceClient) DbSystemServiceClient {
 	client := dbSystemEndpointSecretClient{

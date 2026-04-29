@@ -65,7 +65,9 @@
     "mutable": [
       "defined_tags",
       "display_name",
-      "freeform_tags"
+      "freeform_tags",
+      "security_attributes",
+      "is_zpr_only"
     ],
     "forceNew": [
       "byoipv6_cidr_details",
@@ -138,7 +140,8 @@
     ]
   },
   "notes": [
-    "Pinned OCI SDK contract: UpdateVcnDetails only exposes defined_tags, display_name, and freeform_tags as in-place updates.",
+    "Pinned OCI SDK contract: UpdateVcnDetails exposes defined_tags, display_name, freeform_tags, security_attributes, and is_zpr_only as in-place updates.",
+    "Repo-authored mutation policy keeps explicit empty display_name and explicit empty tag-map updates intact so retained OCI values can be cleared through UpdateVcnDetails instead of being pruned as no-op drift.",
     "Repo-authored delete confirmation requires GetVcn to return not found; observed TERMINATED remains an accepted intermediate state."
   ]
 }

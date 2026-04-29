@@ -456,18 +456,6 @@ func buildMutabilityOverlayField(
 	sourceRef string,
 	repoAuthoredSpecPath string,
 ) (mutabilityOverlayField, error) {
-	astResolution := resolver.Resolve(astField.FieldPath)
-	if astResolution.Status != mutabilityOverlayJoinMatched || len(astResolution.Candidates) != 1 {
-		return mutabilityOverlayField{}, &mutabilityOverlayGenerationError{
-			Reason:           mutabilityOverlayGenerationErrorASTJoinFailed,
-			Service:          service,
-			Kind:             resource.Kind,
-			FormalSlug:       resource.Formal.Reference.Slug,
-			ProviderResource: target.ProviderResource,
-			Detail:           strings.Join(append([]string{fmt.Sprintf("AST field path %q did not resolve to exactly one canonical join key", astField.FieldPath)}, astResolution.Diagnostics...), "; "),
-		}
-	}
-
 	docsSection := mutabilityOverlayDocsSectionArgumentReference
 	docsAnchor := ""
 	if parsedDocs != nil {
@@ -475,6 +463,33 @@ func buildMutabilityOverlayField(
 			docsSection = title
 		}
 		docsAnchor = strings.TrimSpace(parsedDocs.SectionAnchor)
+	}
+
+	astResolution := resolver.Resolve(astField.FieldPath)
+	if astResolution.Status != mutabilityOverlayJoinMatched || len(astResolution.Candidates) != 1 {
+		notes := append([]string{fmt.Sprintf("AST field path %q did not resolve to exactly one canonical join key", astField.FieldPath)}, astResolution.Diagnostics...)
+		field := mutabilityOverlayField{
+			ASTFieldPath:       astField.FieldPath,
+			TerraformFieldPath: astField.FieldPath,
+			CanonicalJoinKey:   astField.FieldPath,
+			PathShape:          fallbackMutabilityOverlayPathShape(astField.FieldPath),
+			AST: mutabilityOverlayASTState{
+				UpdateCandidateState: astField.UpdateCandidateState,
+				ForceNew:             astField.ForceNew,
+				ConflictsWith:        append([]string(nil), astField.ConflictsWith...),
+			},
+			Docs: defaultMutabilityOverlayDocsEvidence(astField),
+			Provenance: mutabilityOverlayProvenance{
+				FormalImportPath:     resource.Formal.Binding.Manifest.ImportPath,
+				FormalSourceRef:      sourceRef,
+				ASTSourceBucket:      astField.ASTSourceBucket,
+				TerraformDocsPage:    mutabilityOverlayDocsPageRef(target, docsAnchor),
+				TerraformDocsSection: docsSection,
+				Notes:                uniqueSortedStrings(notes),
+			},
+		}
+		field.Merge = resolveMutabilityOverlayDecision(field.AST.UpdateCandidateState, field.AST.ForceNew, field.Docs.EvidenceState, astResolution.Status)
+		return field, nil
 	}
 
 	field := mutabilityOverlayField{
@@ -526,6 +541,25 @@ func defaultMutabilityOverlayDocsEvidence(astField mutabilityOverlayASTFieldInpu
 		EvidenceState: mutabilityOverlayDocsStateNotDocumented,
 		Detail:        "No explicit Terraform docs update signal was found for this AST updateCandidate field.",
 	}
+}
+
+func fallbackMutabilityOverlayPathShape(fieldPath string) string {
+	tokens, err := parseMutabilityOverlayPathTokens(fieldPath)
+	if err != nil || len(tokens) == 0 {
+		return mutabilityOverlayPathShapeScalar
+	}
+	for _, token := range tokens {
+		if token.wildcard {
+			return mutabilityOverlayPathShapeMapEntry
+		}
+		if token.listItem {
+			return mutabilityOverlayPathShapeListItem
+		}
+	}
+	if len(tokens) > 1 {
+		return mutabilityOverlayPathShapeObject
+	}
+	return mutabilityOverlayPathShapeScalar
 }
 
 func collapseMutabilityOverlayDocsEvidence(

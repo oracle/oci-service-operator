@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Vault Secret Management API
 //
-// Use the Secret Management API to manage secrets and secret versions. For more information, see Managing Secrets (https://docs.cloud.oracle.com/Content/KeyManagement/Tasks/managingsecrets.htm).
+// Use the Secret Management API to manage secrets and secret versions. For more information, see Managing Secrets (https://docs.oracle.com/iaas/Content/KeyManagement/Tasks/managingsecrets.htm).
 //
 
 package vault
@@ -32,7 +32,7 @@ type CreateSecretDetails struct {
 	VaultId *string `mandatory:"true" json:"vaultId"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -40,7 +40,7 @@ type CreateSecretDetails struct {
 	Description *string `mandatory:"false" json:"description"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
@@ -50,6 +50,8 @@ type CreateSecretDetails struct {
 	Metadata map[string]interface{} `mandatory:"false" json:"metadata"`
 
 	SecretContent SecretContentDetails `mandatory:"false" json:"secretContent"`
+
+	ReplicationConfig *ReplicationConfig `mandatory:"false" json:"replicationConfig"`
 
 	RotationConfig *RotationConfig `mandatory:"false" json:"rotationConfig"`
 
@@ -73,7 +75,7 @@ func (m CreateSecretDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -86,6 +88,7 @@ func (m *CreateSecretDetails) UnmarshalJSON(data []byte) (e error) {
 		FreeformTags            map[string]string                 `json:"freeformTags"`
 		Metadata                map[string]interface{}            `json:"metadata"`
 		SecretContent           secretcontentdetails              `json:"secretContent"`
+		ReplicationConfig       *ReplicationConfig                `json:"replicationConfig"`
 		RotationConfig          *RotationConfig                   `json:"rotationConfig"`
 		SecretRules             []secretrule                      `json:"secretRules"`
 		SecretGenerationContext secretgenerationcontext           `json:"secretGenerationContext"`
@@ -118,6 +121,8 @@ func (m *CreateSecretDetails) UnmarshalJSON(data []byte) (e error) {
 	} else {
 		m.SecretContent = nil
 	}
+
+	m.ReplicationConfig = model.ReplicationConfig
 
 	m.RotationConfig = model.RotationConfig
 

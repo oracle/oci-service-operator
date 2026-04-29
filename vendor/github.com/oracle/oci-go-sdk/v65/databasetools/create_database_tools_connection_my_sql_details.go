@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -22,13 +22,13 @@ type CreateDatabaseToolsConnectionMySqlDetails struct {
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The connection string used to connect to the MySQL Server.
 	ConnectionString *string `mandatory:"true" json:"connectionString"`
 
-	// The user name.
+	// The database user name.
 	UserName *string `mandatory:"true" json:"userName"`
 
 	UserPassword DatabaseToolsUserPasswordDetails `mandatory:"true" json:"userPassword"`
@@ -53,11 +53,14 @@ type CreateDatabaseToolsConnectionMySqlDetails struct {
 	// the client private key and associated certificate required for client authentication.
 	KeyStores []DatabaseToolsKeyStoreMySqlDetails `mandatory:"false" json:"keyStores"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
 	PrivateEndpointId *string `mandatory:"false" json:"privateEndpointId"`
 
 	// Specifies whether this connection is supported by the Database Tools Runtime.
 	RuntimeSupport RuntimeSupportEnum `mandatory:"false" json:"runtimeSupport,omitempty"`
+
+	// Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault).
+	RuntimeIdentity RuntimeIdentityEnum `mandatory:"false" json:"runtimeIdentity,omitempty"`
 }
 
 // GetDisplayName returns DisplayName
@@ -90,6 +93,11 @@ func (m CreateDatabaseToolsConnectionMySqlDetails) GetRuntimeSupport() RuntimeSu
 	return m.RuntimeSupport
 }
 
+// GetRuntimeIdentity returns RuntimeIdentity
+func (m CreateDatabaseToolsConnectionMySqlDetails) GetRuntimeIdentity() RuntimeIdentityEnum {
+	return m.RuntimeIdentity
+}
+
 func (m CreateDatabaseToolsConnectionMySqlDetails) String() string {
 	return common.PointerString(m)
 }
@@ -103,8 +111,11 @@ func (m CreateDatabaseToolsConnectionMySqlDetails) ValidateEnumValue() (bool, er
 	if _, ok := GetMappingRuntimeSupportEnum(string(m.RuntimeSupport)); !ok && m.RuntimeSupport != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeSupport: %s. Supported values are: %s.", m.RuntimeSupport, strings.Join(GetRuntimeSupportEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingRuntimeIdentityEnum(string(m.RuntimeIdentity)); !ok && m.RuntimeIdentity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeIdentity: %s. Supported values are: %s.", m.RuntimeIdentity, strings.Join(GetRuntimeIdentityEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -130,6 +141,7 @@ func (m *CreateDatabaseToolsConnectionMySqlDetails) UnmarshalJSON(data []byte) (
 		FreeformTags       map[string]string                               `json:"freeformTags"`
 		Locks              []ResourceLock                                  `json:"locks"`
 		RuntimeSupport     RuntimeSupportEnum                              `json:"runtimeSupport"`
+		RuntimeIdentity    RuntimeIdentityEnum                             `json:"runtimeIdentity"`
 		RelatedResource    *CreateDatabaseToolsRelatedResourceMySqlDetails `json:"relatedResource"`
 		AdvancedProperties map[string]string                               `json:"advancedProperties"`
 		KeyStores          []DatabaseToolsKeyStoreMySqlDetails             `json:"keyStores"`
@@ -153,6 +165,8 @@ func (m *CreateDatabaseToolsConnectionMySqlDetails) UnmarshalJSON(data []byte) (
 	m.Locks = make([]ResourceLock, len(model.Locks))
 	copy(m.Locks, model.Locks)
 	m.RuntimeSupport = model.RuntimeSupport
+
+	m.RuntimeIdentity = model.RuntimeIdentity
 
 	m.RelatedResource = model.RelatedResource
 

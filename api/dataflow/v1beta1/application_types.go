@@ -36,7 +36,7 @@ type ApplicationSpec struct {
 	// +kubebuilder:validation:Required
 	SparkVersion string `json:"sparkVersion"`
 	// A comma separated list of one or more archive files as Oracle Cloud Infrastructure URIs. For example, ``oci://path/to/a.zip,oci://path/to/b.zip``. An Oracle Cloud Infrastructure URI of an archive.zip file containing custom dependencies that may be used to support the execution of a Python, Java, or Scala application.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	// +kubebuilder:validation:Optional
 	ArchiveUri string `json:"archiveUri,omitempty"`
 	// The arguments passed to the running application as command line arguments.  An argument is
@@ -61,7 +61,7 @@ type ApplicationSpec struct {
 	// not allowed to be overwritten will cause a 400 status to be returned.
 	// +kubebuilder:validation:Optional
 	Configuration map[string]string `json:"configuration,omitempty"`
-	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -80,16 +80,16 @@ type ApplicationSpec struct {
 	// +kubebuilder:validation:Optional
 	ExecutorShapeConfig ApplicationExecutorShapeConfig `json:"executorShapeConfig,omitempty"`
 	// An Oracle Cloud Infrastructure URI of the file containing the application to execute.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	// +kubebuilder:validation:Optional
 	FileUri string `json:"fileUri,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// An Oracle Cloud Infrastructure URI of the bucket where the Spark job logs are to be uploaded.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	// +kubebuilder:validation:Optional
 	LogsBucketUri string `json:"logsBucketUri,omitempty"`
 	// The OCID of OCI Hive Metastore.
@@ -112,7 +112,7 @@ type ApplicationSpec struct {
 	Type string `json:"type,omitempty"`
 	// An Oracle Cloud Infrastructure URI of the bucket to be used as default warehouse directory
 	// for BATCH SQL runs.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	// +kubebuilder:validation:Optional
 	WarehouseBucketUri string `json:"warehouseBucketUri,omitempty"`
 	// The maximum duration in minutes for which an Application should run. Data Flow Run would be terminated
@@ -138,7 +138,7 @@ type ApplicationLogConfig struct {
 // ApplicationDriverShapeConfig defines nested fields for Application.DriverShapeConfig.
 type ApplicationDriverShapeConfig struct {
 	// The total number of OCPUs used for the driver or executors.
-	// See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
+	// See here (https://docs.oracle.com/iaas/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
 	// +kubebuilder:validation:Optional
 	Ocpus float32 `json:"ocpus,omitempty"`
 	// The amount of memory used for the driver or executors.
@@ -149,7 +149,7 @@ type ApplicationDriverShapeConfig struct {
 // ApplicationExecutorShapeConfig defines nested fields for Application.ExecutorShapeConfig.
 type ApplicationExecutorShapeConfig struct {
 	// The total number of OCPUs used for the driver or executors.
-	// See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
+	// See here (https://docs.oracle.com/iaas/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details.
 	// +kubebuilder:validation:Optional
 	Ocpus float32 `json:"ocpus,omitempty"`
 	// The amount of memory used for the driver or executors.
@@ -182,7 +182,7 @@ type ApplicationStatus struct {
 	// The VM shape for the executors. Sets the executor cores and memory.
 	ExecutorShape string `json:"executorShape,omitempty"`
 	// An Oracle Cloud Infrastructure URI of the file containing the application to execute.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	FileUri string `json:"fileUri,omitempty"`
 	// The application ID.
 	Id string `json:"id,omitempty"`
@@ -204,7 +204,7 @@ type ApplicationStatus struct {
 	TimeUpdated          string               `json:"timeUpdated,omitempty"`
 	ApplicationLogConfig ApplicationLogConfig `json:"applicationLogConfig,omitempty"`
 	// A comma separated list of one or more archive files as Oracle Cloud Infrastructure URIs. For example, ``oci://path/to/a.zip,oci://path/to/b.zip``. An Oracle Cloud Infrastructure URI of an archive.zip file containing custom dependencies that may be used to support the execution of a Python, Java, or Scala application.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	ArchiveUri string `json:"archiveUri,omitempty"`
 	// The arguments passed to the running application as command line arguments.  An argument is
 	// either a plain text or a placeholder. Placeholders are replaced using values from the parameters
@@ -223,7 +223,7 @@ type ApplicationStatus struct {
 	// Note: Not all Spark properties are permitted to be set.  Attempting to set a property that is
 	// not allowed to be overwritten will cause a 400 status to be returned.
 	Configuration map[string]string `json:"configuration,omitempty"`
-	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// A user-friendly description.
@@ -237,11 +237,11 @@ type ApplicationStatus struct {
 	Execute             string                         `json:"execute,omitempty"`
 	ExecutorShapeConfig ApplicationExecutorShapeConfig `json:"executorShapeConfig,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// An Oracle Cloud Infrastructure URI of the bucket where the Spark job logs are to be uploaded.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	LogsBucketUri string `json:"logsBucketUri,omitempty"`
 	// The OCID of OCI Hive Metastore.
 	MetastoreId string `json:"metastoreId,omitempty"`
@@ -261,7 +261,7 @@ type ApplicationStatus struct {
 	Type string `json:"type,omitempty"`
 	// An Oracle Cloud Infrastructure URI of the bucket to be used as default warehouse directory
 	// for BATCH SQL runs.
-	// See https://docs.cloud.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
+	// See https://docs.oracle.com/iaas/Content/API/SDKDocs/hdfsconnector.htm#uriformat.
 	WarehouseBucketUri string `json:"warehouseBucketUri,omitempty"`
 	// The maximum duration in minutes for which an Application should run. Data Flow Run would be terminated
 	// once it reaches this duration from the time it transitions to `IN_PROGRESS` state.

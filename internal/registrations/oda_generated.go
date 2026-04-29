@@ -16,20 +16,15 @@ import (
 	odaauthenticationproviderservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/authenticationprovider"
 	odachannelservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/channel"
 	odadigitalassistantservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/digitalassistant"
-	odadigitalassistantparameterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/digitalassistantparameter"
 	odaimportedpackageservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/importedpackage"
 	odaodainstanceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/odainstance"
 	odaodainstanceattachmentservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/odainstanceattachment"
 	odaodaprivateendpointservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/odaprivateendpoint"
 	odaodaprivateendpointattachmentservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/odaprivateendpointattachment"
 	odaodaprivateendpointscanproxyservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/odaprivateendpointscanproxy"
-	odapackageservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/package"
 	odaskillservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/skill"
 	odaskillparameterservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/skillparameter"
 	odatranslatorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/translator"
-	odaworkrequestservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/workrequest"
-	odaworkrequesterrorservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/workrequesterror"
-	odaworkrequestlogservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/oda/workrequestlog"
 )
 
 func init() {
@@ -69,17 +64,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup DigitalAssistant controller: %w", err)
-			}
-			if err := (&odacontrollers.DigitalAssistantParameterReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"DigitalAssistantParameter",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return odadigitalassistantparameterservicemanager.NewDigitalAssistantParameterServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup DigitalAssistantParameter controller: %w", err)
 			}
 			if err := (&odacontrollers.ImportedPackageReconciler{
 				Reconciler: NewBaseReconciler(
@@ -147,17 +131,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup OdaPrivateEndpointScanProxy controller: %w", err)
 			}
-			if err := (&odacontrollers.PackageReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Package",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return odapackageservicemanager.NewPackageServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Package controller: %w", err)
-			}
 			if err := (&odacontrollers.SkillReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -190,39 +163,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Translator controller: %w", err)
-			}
-			if err := (&odacontrollers.WorkRequestReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequest",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return odaworkrequestservicemanager.NewWorkRequestServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequest controller: %w", err)
-			}
-			if err := (&odacontrollers.WorkRequestErrorReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestError",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return odaworkrequesterrorservicemanager.NewWorkRequestErrorServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestError controller: %w", err)
-			}
-			if err := (&odacontrollers.WorkRequestLogReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"WorkRequestLog",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return odaworkrequestlogservicemanager.NewWorkRequestLogServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup WorkRequestLog controller: %w", err)
 			}
 			return nil
 		},

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,11 +6,11 @@
 //
 // Use the Core Services API to manage resources such as virtual cloud networks (VCNs),
 // compute instances, and block storage volumes. For more information, see the console
-// documentation for the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
-// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
-// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services.
+// documentation for the Networking (https://docs.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.oracle.com/iaas/Content/Block/Concepts/overview.htm) services.
 // The required permissions are documented in the
-// Details for the Core Services (https://docs.cloud.oracle.com/iaas/Content/Identity/Reference/corepolicyreference.htm) article.
+// Details for the Core Services (https://docs.oracle.com/iaas/Content/Identity/Reference/corepolicyreference.htm) article.
 //
 
 package core
@@ -22,7 +22,7 @@ import (
 )
 
 // InstanceConfigurationCreateVnicDetails Contains the properties of the VNIC for an instance configuration. See CreateVnicDetails
-// and Instance Configurations (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/instancemanagement.htm#config) for more information.
+// and Instance Configurations (https://docs.oracle.com/iaas/Content/Compute/Concepts/instancemanagement.htm#config) for more information.
 type InstanceConfigurationCreateVnicDetails struct {
 
 	// Whether to allocate an IPv6 address at instance and VNIC creation from an IPv6 enabled
@@ -41,7 +41,7 @@ type InstanceConfigurationCreateVnicDetails struct {
 	AssignPrivateDnsRecord *bool `mandatory:"false" json:"assignPrivateDnsRecord"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -50,9 +50,15 @@ type InstanceConfigurationCreateVnicDetails struct {
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
+	// Security attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm#security-attributes) are labels
+	// for a resource that can be referenced in a Zero Trust Packet Routing (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/overview.htm)
+	// (ZPR) policy to control access to ZPR-supported resources.
+	// Example: `{"Oracle-DataSecurity-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
 
 	// A list of IPv6 prefixes from which the VNIC should be assigned an IPv6 address.
 	// You can provide only the prefix and OCI selects an available
@@ -69,9 +75,22 @@ type InstanceConfigurationCreateVnicDetails struct {
 	// NetworkSecurityGroup.
 	NsgIds []string `mandatory:"false" json:"nsgIds"`
 
+	// One of the IPv4 CIDR blocks allocated to the subnet. Represents the IP range
+	// from which the VNIC's private IP address will be assigned if `privateIp` or
+	// `privateIpId` is not specified.
+	// Either this field or the `privateIp` (or `privateIpId`, if applicable) field
+	// must be provided, but not both simultaneously.
+	// Example: `192.168.1.0/28`
+	// See the `subnetCidr` attribute of CreateVnicDetails for more information.
+	SubnetCidr *string `mandatory:"false" json:"subnetCidr"`
+
 	// A private IP address of your choice to assign to the VNIC.
 	// See the `privateIp` attribute of CreateVnicDetails for more information.
 	PrivateIp *string `mandatory:"false" json:"privateIp"`
+
+	// An OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that specifies a previously-reserved IP address to use for this VNIC.
+	// See the `privateIpId` attribute of CreateVnicDetails for more information.
+	PrivateIpId *string `mandatory:"false" json:"privateIpId"`
 
 	// Whether the source/destination check is disabled on the VNIC.
 	// See the `skipSourceDestCheck` attribute of CreateVnicDetails for more information.
@@ -93,7 +112,7 @@ func (m InstanceConfigurationCreateVnicDetails) ValidateEnumValue() (bool, error
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

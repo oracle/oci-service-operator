@@ -14,11 +14,11 @@ import (
 
 // EsxiHostSpec defines the desired state of EsxiHost.
 type EsxiHostSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster to add the ESXi host to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cluster to add the ESXi host to.
 	// +kubebuilder:validation:Required
 	ClusterId string `json:"clusterId"`
 	// A descriptive name for the ESXi host. It's changeable.
-	// Esxi Host name requirements are 1-16 character length limit, Must start with a letter,
+	// Esxi Host name requirements are 1-25 character length limit, Must start with a letter,
 	// Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the Cluster.
 	// If this attribute is not specified, the Cluster's `instanceDisplayNamePrefix` attribute is used
 	// to name and incrementally number the ESXi host. For example, if you're creating the fourth
@@ -27,7 +27,7 @@ type EsxiHostSpec struct {
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle.
 	// +kubebuilder:validation:Optional
 	BillingDonorHostId string `json:"billingDonorHostId,omitempty"`
 	// The billing option currently used by the ESXi host.
@@ -51,7 +51,7 @@ type EsxiHostSpec struct {
 	// The OCPU count of the ESXi host.
 	// +kubebuilder:validation:Optional
 	HostOcpuCount float32 `json:"hostOcpuCount,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
 	// +kubebuilder:validation:Optional
 	CapacityReservationId string `json:"capacityReservationId,omitempty"`
 	// The ESXi software bundle to install on the ESXi host.
@@ -60,30 +60,50 @@ type EsxiHostSpec struct {
 	// ListSupportedVmwareSoftwareVersions.
 	// +kubebuilder:validation:Optional
 	EsxiSoftwareVersion string `json:"esxiSoftwareVersion,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Byol Allocation for VCF (VMware Cloud Foundation) deployment.
+	// +kubebuilder:validation:Optional
+	VcfByolAllocationId string `json:"vcfByolAllocationId,omitempty"`
+	// Indicates whether this host embedded VMware vSAN with BYOL Allocation.
+	// +kubebuilder:validation:Optional
+	IsVsanByolEnabled bool `json:"isVsanByolEnabled,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
+// EsxiHostDatastoreAttachment defines nested fields for EsxiHost.DatastoreAttachment.
+type EsxiHostDatastoreAttachment struct {
+	// An IQN of the Block Storage Volume.
+	VolumeIqn string `json:"volumeIqn,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Block Volume that belongs to the datastore.
+	BlockVolumeId string `json:"blockVolumeId,omitempty"`
+	// The OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Datastore that ESXi host is attached to.
+	DatastoreId string `json:"datastoreId,omitempty"`
+	// The IP address of datastore attachment.
+	IpAddress string `json:"ipAddress,omitempty"`
+	// The port of datastore attachment.
+	Port int `json:"port,omitempty"`
+}
+
 // EsxiHostStatus defines the observed state of EsxiHost.
 type EsxiHostStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host.
 	Id string `json:"id,omitempty"`
 	// A descriptive name for the ESXi host. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC that the
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC that the
 	// ESXi host belongs to.
 	SddcId string `json:"sddcId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster that the
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cluster that the
 	// ESXi host belongs to.
 	ClusterId string `json:"clusterId,omitempty"`
 	// The billing option currently used by the ESXi host.
@@ -105,19 +125,19 @@ type EsxiHostStatus struct {
 	// ListSupportedHostShapes.
 	HostShapeName string `json:"hostShapeName,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
 	// contains the Cluster.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// In terms of implementation, an ESXi host is a Compute instance that
 	// is configured with the chosen bundle of VMware software. The `computeInstanceId`
-	// is the OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of that Compute instance.
+	// is the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of that Compute instance.
 	ComputeInstanceId string `json:"computeInstanceId,omitempty"`
 	// The date and time the ESXi host was created, in the format defined by
 	// RFC3339 (https://tools.ietf.org/html/rfc3339).
@@ -128,17 +148,17 @@ type EsxiHostStatus struct {
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// The current state of the ESXi host.
 	LifecycleState string `json:"lifecycleState,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle.
 	BillingDonorHostId string `json:"billingDonorHostId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the active ESXi Host to swap billing with current host.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the active ESXi Host to swap billing with current host.
 	SwapBillingHostId string `json:"swapBillingHostId,omitempty"`
 	// Indicates whether this host is in the progress of billing continuation.
 	IsBillingContinuationInProgress bool `json:"isBillingContinuationInProgress,omitempty"`
 	// Indicates whether this host is in the progress of swapping billing.
 	IsBillingSwappingInProgress bool `json:"isBillingSwappingInProgress,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that failed.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that failed.
 	FailedEsxiHostId string `json:"failedEsxiHostId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that
 	// is created to replace the failed host.
 	ReplacementEsxiHostId string `json:"replacementEsxiHostId,omitempty"`
 	// The date and time when the new esxi host should start billing cycle.
@@ -147,16 +167,29 @@ type EsxiHostStatus struct {
 	GracePeriodEndDate string `json:"gracePeriodEndDate,omitempty"`
 	// The version of ESXi software that Oracle Cloud VMware Solution installed on the ESXi hosts.
 	EsxiSoftwareVersion string `json:"esxiSoftwareVersion,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that
 	// will be upgraded.
 	NonUpgradedEsxiHostId string `json:"nonUpgradedEsxiHostId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that
 	// is newly created to upgrade the original host.
 	UpgradedReplacementEsxiHostId string `json:"upgradedReplacementEsxiHostId,omitempty"`
 	// The OCPU count of the ESXi host.
 	HostOcpuCount float32 `json:"hostOcpuCount,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
 	CapacityReservationId string `json:"capacityReservationId,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{orcl-cloud: {free-tier-retain: true}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
+	// A list of datastore clusters.
+	DatastoreClusterIds []string `json:"datastoreClusterIds,omitempty"`
+	// List of DatastoreAttachment objects containing information about attachment details
+	DatastoreAttachments []EsxiHostDatastoreAttachment `json:"datastoreAttachments,omitempty"`
+	// MAC address of ESXi host's compute instance primary VNIC.
+	PrimaryVnicMacAddress string `json:"primaryVnicMacAddress,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Byol Allocation for VCF (VMware Cloud Foundation) deployment.
+	VcfByolAllocationId string `json:"vcfByolAllocationId,omitempty"`
+	// Indicates whether this host embedded VMware vSAN with BYOL Allocation.
+	IsVsanByolEnabled bool `json:"isVsanByolEnabled,omitempty"`
 }
 
 // +kubebuilder:object:root=true

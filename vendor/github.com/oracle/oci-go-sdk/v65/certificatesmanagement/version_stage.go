@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -18,30 +18,33 @@ type VersionStageEnum string
 
 // Set of constants representing the allowable values for VersionStageEnum
 const (
-	VersionStageCurrent    VersionStageEnum = "CURRENT"
-	VersionStagePending    VersionStageEnum = "PENDING"
-	VersionStageLatest     VersionStageEnum = "LATEST"
-	VersionStagePrevious   VersionStageEnum = "PREVIOUS"
-	VersionStageDeprecated VersionStageEnum = "DEPRECATED"
-	VersionStageFailed     VersionStageEnum = "FAILED"
+	VersionStageCurrent           VersionStageEnum = "CURRENT"
+	VersionStagePending           VersionStageEnum = "PENDING"
+	VersionStageLatest            VersionStageEnum = "LATEST"
+	VersionStagePrevious          VersionStageEnum = "PREVIOUS"
+	VersionStageDeprecated        VersionStageEnum = "DEPRECATED"
+	VersionStageFailed            VersionStageEnum = "FAILED"
+	VersionStagePendingActivation VersionStageEnum = "PENDING_ACTIVATION"
 )
 
 var mappingVersionStageEnum = map[string]VersionStageEnum{
-	"CURRENT":    VersionStageCurrent,
-	"PENDING":    VersionStagePending,
-	"LATEST":     VersionStageLatest,
-	"PREVIOUS":   VersionStagePrevious,
-	"DEPRECATED": VersionStageDeprecated,
-	"FAILED":     VersionStageFailed,
+	"CURRENT":            VersionStageCurrent,
+	"PENDING":            VersionStagePending,
+	"LATEST":             VersionStageLatest,
+	"PREVIOUS":           VersionStagePrevious,
+	"DEPRECATED":         VersionStageDeprecated,
+	"FAILED":             VersionStageFailed,
+	"PENDING_ACTIVATION": VersionStagePendingActivation,
 }
 
 var mappingVersionStageEnumLowerCase = map[string]VersionStageEnum{
-	"current":    VersionStageCurrent,
-	"pending":    VersionStagePending,
-	"latest":     VersionStageLatest,
-	"previous":   VersionStagePrevious,
-	"deprecated": VersionStageDeprecated,
-	"failed":     VersionStageFailed,
+	"current":            VersionStageCurrent,
+	"pending":            VersionStagePending,
+	"latest":             VersionStageLatest,
+	"previous":           VersionStagePrevious,
+	"deprecated":         VersionStageDeprecated,
+	"failed":             VersionStageFailed,
+	"pending_activation": VersionStagePendingActivation,
 }
 
 // GetVersionStageEnumValues Enumerates the set of values for VersionStageEnum
@@ -62,6 +65,7 @@ func GetVersionStageEnumStringValues() []string {
 		"PREVIOUS",
 		"DEPRECATED",
 		"FAILED",
+		"PENDING_ACTIVATION",
 	}
 }
 

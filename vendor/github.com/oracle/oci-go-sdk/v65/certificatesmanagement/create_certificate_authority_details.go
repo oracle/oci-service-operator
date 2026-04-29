@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -27,9 +27,6 @@ type CreateCertificateAuthorityDetails struct {
 
 	CertificateAuthorityConfig CreateCertificateAuthorityConfigDetails `mandatory:"true" json:"certificateAuthorityConfig"`
 
-	// The OCID of the Oracle Cloud Infrastructure Vault key used to encrypt the CA.
-	KmsKeyId *string `mandatory:"true" json:"kmsKeyId"`
-
 	// A brief description of the CA.
 	Description *string `mandatory:"false" json:"description"`
 
@@ -37,6 +34,12 @@ type CreateCertificateAuthorityDetails struct {
 	CertificateAuthorityRules []CertificateAuthorityRule `mandatory:"false" json:"certificateAuthorityRules"`
 
 	CertificateRevocationListDetails *CertificateRevocationListDetails `mandatory:"false" json:"certificateRevocationListDetails"`
+
+	// The OCID of the Oracle Cloud Infrastructure Vault key used to encrypt the CA.
+	KmsKeyId *string `mandatory:"false" json:"kmsKeyId"`
+
+	// For externally managed CAs, a description of the externally managed private key. Avoid entering confidential information.
+	ExternalKeyDescription *string `mandatory:"false" json:"externalKeyDescription"`
 
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
@@ -58,7 +61,7 @@ func (m CreateCertificateAuthorityDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -69,12 +72,13 @@ func (m *CreateCertificateAuthorityDetails) UnmarshalJSON(data []byte) (e error)
 		Description                      *string                                 `json:"description"`
 		CertificateAuthorityRules        []certificateauthorityrule              `json:"certificateAuthorityRules"`
 		CertificateRevocationListDetails *CertificateRevocationListDetails       `json:"certificateRevocationListDetails"`
+		KmsKeyId                         *string                                 `json:"kmsKeyId"`
+		ExternalKeyDescription           *string                                 `json:"externalKeyDescription"`
 		FreeformTags                     map[string]string                       `json:"freeformTags"`
 		DefinedTags                      map[string]map[string]interface{}       `json:"definedTags"`
 		Name                             *string                                 `json:"name"`
 		CompartmentId                    *string                                 `json:"compartmentId"`
 		CertificateAuthorityConfig       createcertificateauthorityconfigdetails `json:"certificateAuthorityConfig"`
-		KmsKeyId                         *string                                 `json:"kmsKeyId"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -98,6 +102,10 @@ func (m *CreateCertificateAuthorityDetails) UnmarshalJSON(data []byte) (e error)
 	}
 	m.CertificateRevocationListDetails = model.CertificateRevocationListDetails
 
+	m.KmsKeyId = model.KmsKeyId
+
+	m.ExternalKeyDescription = model.ExternalKeyDescription
+
 	m.FreeformTags = model.FreeformTags
 
 	m.DefinedTags = model.DefinedTags
@@ -115,8 +123,6 @@ func (m *CreateCertificateAuthorityDetails) UnmarshalJSON(data []byte) (e error)
 	} else {
 		m.CertificateAuthorityConfig = nil
 	}
-
-	m.KmsKeyId = model.KmsKeyId
 
 	return
 }

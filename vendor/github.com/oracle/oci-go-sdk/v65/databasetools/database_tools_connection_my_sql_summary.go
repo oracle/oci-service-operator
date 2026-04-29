@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -16,16 +16,16 @@ import (
 	"strings"
 )
 
-// DatabaseToolsConnectionMySqlSummary DatabaseToolsConnectionSummary of a MySQL Server.
+// DatabaseToolsConnectionMySqlSummary Database Tools connection summary of a MySQL Server.
 type DatabaseToolsConnectionMySqlSummary struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `DatabaseToolsConnection`.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools connection.
 	Id *string `mandatory:"true" json:"id"`
 
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The time the Database Tools connection was created. An RFC3339 formatted datetime string.
@@ -33,6 +33,9 @@ type DatabaseToolsConnectionMySqlSummary struct {
 
 	// The time the Database Tools connection was updated. An RFC3339 formatted datetime string.
 	TimeUpdated *common.SDKTime `mandatory:"true" json:"timeUpdated"`
+
+	// Specifies the Database Tools Runtime endpoint.
+	RuntimeEndpoint *string `mandatory:"true" json:"runtimeEndpoint"`
 
 	// The connection string used to connect to the MySQL Server.
 	ConnectionString *string `mandatory:"true" json:"connectionString"`
@@ -57,7 +60,7 @@ type DatabaseToolsConnectionMySqlSummary struct {
 
 	RelatedResource *DatabaseToolsRelatedResourceMySql `mandatory:"false" json:"relatedResource"`
 
-	// The user name.
+	// The database user name.
 	UserName *string `mandatory:"false" json:"userName"`
 
 	UserPassword DatabaseToolsUserPasswordSummary `mandatory:"false" json:"userPassword"`
@@ -69,7 +72,7 @@ type DatabaseToolsConnectionMySqlSummary struct {
 	// the client private key and associated certificate required for client authentication.
 	KeyStores []DatabaseToolsKeyStoreMySqlSummary `mandatory:"false" json:"keyStores"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `DatabaseToolsPrivateEndpoint` used to access the database in the customer VCN.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN.
 	PrivateEndpointId *string `mandatory:"false" json:"privateEndpointId"`
 
 	// The current state of the Database Tools connection.
@@ -77,6 +80,9 @@ type DatabaseToolsConnectionMySqlSummary struct {
 
 	// Specifies whether this connection is supported by the Database Tools Runtime.
 	RuntimeSupport RuntimeSupportEnum `mandatory:"true" json:"runtimeSupport"`
+
+	// Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault).
+	RuntimeIdentity RuntimeIdentityEnum `mandatory:"true" json:"runtimeIdentity"`
 }
 
 // GetId returns Id
@@ -139,6 +145,16 @@ func (m DatabaseToolsConnectionMySqlSummary) GetRuntimeSupport() RuntimeSupportE
 	return m.RuntimeSupport
 }
 
+// GetRuntimeEndpoint returns RuntimeEndpoint
+func (m DatabaseToolsConnectionMySqlSummary) GetRuntimeEndpoint() *string {
+	return m.RuntimeEndpoint
+}
+
+// GetRuntimeIdentity returns RuntimeIdentity
+func (m DatabaseToolsConnectionMySqlSummary) GetRuntimeIdentity() RuntimeIdentityEnum {
+	return m.RuntimeIdentity
+}
+
 func (m DatabaseToolsConnectionMySqlSummary) String() string {
 	return common.PointerString(m)
 }
@@ -155,8 +171,11 @@ func (m DatabaseToolsConnectionMySqlSummary) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingRuntimeSupportEnum(string(m.RuntimeSupport)); !ok && m.RuntimeSupport != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeSupport: %s. Supported values are: %s.", m.RuntimeSupport, strings.Join(GetRuntimeSupportEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingRuntimeIdentityEnum(string(m.RuntimeIdentity)); !ok && m.RuntimeIdentity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeIdentity: %s. Supported values are: %s.", m.RuntimeIdentity, strings.Join(GetRuntimeIdentityEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -196,6 +215,8 @@ func (m *DatabaseToolsConnectionMySqlSummary) UnmarshalJSON(data []byte) (e erro
 		TimeCreated        *common.SDKTime                     `json:"timeCreated"`
 		TimeUpdated        *common.SDKTime                     `json:"timeUpdated"`
 		RuntimeSupport     RuntimeSupportEnum                  `json:"runtimeSupport"`
+		RuntimeEndpoint    *string                             `json:"runtimeEndpoint"`
+		RuntimeIdentity    RuntimeIdentityEnum                 `json:"runtimeIdentity"`
 		ConnectionString   *string                             `json:"connectionString"`
 	}{}
 
@@ -247,6 +268,10 @@ func (m *DatabaseToolsConnectionMySqlSummary) UnmarshalJSON(data []byte) (e erro
 	m.TimeUpdated = model.TimeUpdated
 
 	m.RuntimeSupport = model.RuntimeSupport
+
+	m.RuntimeEndpoint = model.RuntimeEndpoint
+
+	m.RuntimeIdentity = model.RuntimeIdentity
 
 	m.ConnectionString = model.ConnectionString
 

@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -48,15 +48,23 @@ type UpdateVmClusterDetails struct {
 	UpdateDetails *VmClusterUpdateDetails `mandatory:"false" json:"updateDetails"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	DataCollectionOptions *DataCollectionOptions `mandatory:"false" json:"dataCollectionOptions"`
+
+	// Details of the file system configuration of the VM cluster.
+	FileSystemConfigurationDetails []FileSystemConfigurationDetail `mandatory:"false" json:"fileSystemConfigurationDetails"`
+
+	CloudAutomationUpdateDetails *CloudAutomationUpdateDetails `mandatory:"false" json:"cloudAutomationUpdateDetails"`
+
+	// Specifies the type of VM Backups Storage and supported values are LOCAL and EXASCALE. Storage Type can only be changed once from LOCAL to EXASCALE. EXASCALE to LOCAL is not permitted.
+	VmBackupStorageType UpdateVmClusterDetailsVmBackupStorageTypeEnum `mandatory:"false" json:"vmBackupStorageType,omitempty"`
 }
 
 func (m UpdateVmClusterDetails) String() string {
@@ -72,8 +80,11 @@ func (m UpdateVmClusterDetails) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingUpdateVmClusterDetailsLicenseModelEnum(string(m.LicenseModel)); !ok && m.LicenseModel != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LicenseModel: %s. Supported values are: %s.", m.LicenseModel, strings.Join(GetUpdateVmClusterDetailsLicenseModelEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingUpdateVmClusterDetailsVmBackupStorageTypeEnum(string(m.VmBackupStorageType)); !ok && m.VmBackupStorageType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for VmBackupStorageType: %s. Supported values are: %s.", m.VmBackupStorageType, strings.Join(GetUpdateVmClusterDetailsVmBackupStorageTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -117,5 +128,47 @@ func GetUpdateVmClusterDetailsLicenseModelEnumStringValues() []string {
 // GetMappingUpdateVmClusterDetailsLicenseModelEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingUpdateVmClusterDetailsLicenseModelEnum(val string) (UpdateVmClusterDetailsLicenseModelEnum, bool) {
 	enum, ok := mappingUpdateVmClusterDetailsLicenseModelEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// UpdateVmClusterDetailsVmBackupStorageTypeEnum Enum with underlying type: string
+type UpdateVmClusterDetailsVmBackupStorageTypeEnum string
+
+// Set of constants representing the allowable values for UpdateVmClusterDetailsVmBackupStorageTypeEnum
+const (
+	UpdateVmClusterDetailsVmBackupStorageTypeLocal    UpdateVmClusterDetailsVmBackupStorageTypeEnum = "LOCAL"
+	UpdateVmClusterDetailsVmBackupStorageTypeExascale UpdateVmClusterDetailsVmBackupStorageTypeEnum = "EXASCALE"
+)
+
+var mappingUpdateVmClusterDetailsVmBackupStorageTypeEnum = map[string]UpdateVmClusterDetailsVmBackupStorageTypeEnum{
+	"LOCAL":    UpdateVmClusterDetailsVmBackupStorageTypeLocal,
+	"EXASCALE": UpdateVmClusterDetailsVmBackupStorageTypeExascale,
+}
+
+var mappingUpdateVmClusterDetailsVmBackupStorageTypeEnumLowerCase = map[string]UpdateVmClusterDetailsVmBackupStorageTypeEnum{
+	"local":    UpdateVmClusterDetailsVmBackupStorageTypeLocal,
+	"exascale": UpdateVmClusterDetailsVmBackupStorageTypeExascale,
+}
+
+// GetUpdateVmClusterDetailsVmBackupStorageTypeEnumValues Enumerates the set of values for UpdateVmClusterDetailsVmBackupStorageTypeEnum
+func GetUpdateVmClusterDetailsVmBackupStorageTypeEnumValues() []UpdateVmClusterDetailsVmBackupStorageTypeEnum {
+	values := make([]UpdateVmClusterDetailsVmBackupStorageTypeEnum, 0)
+	for _, v := range mappingUpdateVmClusterDetailsVmBackupStorageTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetUpdateVmClusterDetailsVmBackupStorageTypeEnumStringValues Enumerates the set of values in String for UpdateVmClusterDetailsVmBackupStorageTypeEnum
+func GetUpdateVmClusterDetailsVmBackupStorageTypeEnumStringValues() []string {
+	return []string{
+		"LOCAL",
+		"EXASCALE",
+	}
+}
+
+// GetMappingUpdateVmClusterDetailsVmBackupStorageTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingUpdateVmClusterDetailsVmBackupStorageTypeEnum(val string) (UpdateVmClusterDetailsVmBackupStorageTypeEnum, bool) {
+	enum, ok := mappingUpdateVmClusterDetailsVmBackupStorageTypeEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

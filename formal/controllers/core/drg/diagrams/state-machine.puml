@@ -1,0 +1,106 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title State Machine - core/Drg
+skinparam state {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+}
+left to right direction
+hide empty description
+state "Observe" as observe
+state "EvaluateReady" as evaluate_ready
+state "Ready" as ready
+state "Retryable" as retryable
+state "Failed" as failed
+observe : read spec, tracked status, delete intent,\nand current OCI lifecycle
+state "ResolveByLookup" as resolve_by_lookup
+state "RejectUnsupportedDrift" as reject_unsupported_drift
+state "ApplyUpdate" as apply_update
+state "DeletePending" as delete_pending
+state "Deleted" as deleted
+state "DeleteCleanupBlocked" as delete_cleanup_blocked
+[*] --> observe : CreateDrg
+observe --> resolve_by_lookup : tracked identity missing
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nAVAILABLE
+resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, TERMINATING,\nTERMINATED
+resolve_by_lookup --> failed : unresolved OCI error or non-success state
+observe --> evaluate_ready : OCI state in AVAILABLE
+observe --> retryable : OCI state in PROVISIONING,\nUPDATING, TERMINATING,\nTERMINATED
+observe --> failed : unresolved OCI error or non-success state
+evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
+reject_unsupported_drift --> ready : wait for spec or live state change
+evaluate_ready --> apply_update : supported mutable drift for\ndefaultDrgRouteTables,\ndefinedTags, displayName (+1\nmore)
+apply_update --> ready : update path completes
+evaluate_ready --> ready : no supported drift remains
+ready --> ready : no supported drift remains
+retryable --> retryable : OCI remains retryable
+failed --> failed : OCI remains terminal
+ready --> delete_pending : delete requested
+retryable --> delete_pending : delete requested
+failed --> delete_pending : delete requested
+delete_pending --> delete_cleanup_blocked : cleanup or finalizer release remains blocked
+delete_cleanup_blocked --> deleted : retry delete completion until allowed
+deleted --> deleted : terminal stutter
+note right of ready
+shared diagram:
+shared/diagrams/shared-controller-state-machine.svg
+Start from the shared controller phase model and
+specialize imported provider states, delete
+targets, and failure exits here.
+archetype batch: Generated service-manager
+controllers map provider states into the shared
+controller phases with explicit finalizer and
+requeue policies.
+service: core
+slug: drg
+kind: Drg
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create PROVISIONING; update
+UPDATING; delete TERMINATING, TERMINATED
+follow-up: delete=confirm-delete
+supported drift: defaultDrgRouteTables,
+definedTags, displayName, freeformTags
+reject before mutate: force-new fields
+compartmentId
+create-only fields: none
+list lookup: oci_core_drgs filters
+compartmentId, displayName; tracked OCI ID via
+GetDrg wins; otherwise exact compartmentId plus
+displayName unique match in AVAILABLE,
+PROVISIONING, or UPDATING; blank displayName
+skips reuse and duplicate matches fail
+conflicts: none
+open gaps: none
+Ready state maps to OCI AVAILABLE.
+CreateDrgDetails does not expose
+defaultDrgRouteTables, so requested
+attachment-type defaults reconcile through
+UpdateDrg after the DRG exists.
+Delete completes only after GetDrg returns not
+found; TERMINATING and TERMINATED are accepted
+observed pre-delete states.
+The create-fallback wrapper only recovers
+first-create post-read failures when status
+already carries a created DRG OCID and a
+provisioning-like or AVAILABLE lifecycle state.
+end note
+note right of delete_pending
+delete policy: required
+delete observe: GetDrg or ListDrgs
+delete targets: NOT_FOUND
+end note
+@enduml

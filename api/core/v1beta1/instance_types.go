@@ -14,22 +14,31 @@ import (
 
 // InstanceSpec defines the desired state of Instance.
 type InstanceSpec struct {
+	// Whether to enable AI enterprise on the instance.
+	// +kubebuilder:validation:Optional
+	IsAIEnterpriseEnabled bool `json:"isAIEnterpriseEnabled,omitempty"`
 	// The OCID of the compute capacity reservation this instance is launched under.
 	// You can remove the instance from a reservation by specifying an empty string as input for this field.
-	// For more information, see Capacity Reservations (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
+	// For more information, see Capacity Reservations (https://docs.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
 	// +kubebuilder:validation:Optional
 	CapacityReservationId string `json:"capacityReservationId,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Security attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm#security-attributes) are labels
+	// for a resource that can be referenced in a Zero Trust Packet Routing (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/overview.htm)
+	// (ZPR) policy to control access to ZPR-supported resources.
+	// Example: `{"Oracle-DataSecurity-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
@@ -61,9 +70,9 @@ type InstanceSpec struct {
 	// The shape of the instance. The shape determines the number of CPUs and the amount of memory
 	// allocated to the instance. For more information about how to change shapes, and a list of
 	// shapes that are supported, see
-	// Editing an Instance (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/resizinginstances.htm).
+	// Editing an Instance (https://docs.oracle.com/iaas/Content/Compute/Tasks/resizinginstances.htm).
 	// For details about the CPUs, memory, and other properties of each shape, see
-	// Compute Shapes (https://docs.cloud.oracle.com/iaas/Content/Compute/References/computeshapes.htm).
+	// Compute Shapes (https://docs.oracle.com/iaas/Content/Compute/References/computeshapes.htm).
 	// The new shape must be compatible with the image that was used to launch the instance. You
 	// can enumerate all available shapes and determine image compatibility by calling
 	// ListShapes.
@@ -76,6 +85,8 @@ type InstanceSpec struct {
 	Shape string `json:"shape,omitempty"`
 	// +kubebuilder:validation:Optional
 	ShapeConfig InstanceShapeConfig `json:"shapeConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceDetails InstanceSourceDetails `json:"sourceDetails,omitempty"`
 	// The parameter acts as a fail-safe to prevent unwanted downtime when updating a running instance.
 	// The default is ALLOW_DOWNTIME.
 	// * `ALLOW_DOWNTIME` - Compute might reboot the instance while updating the instance if a reboot is required.
@@ -111,7 +122,7 @@ type InstanceSpec struct {
 	// Stopped state.
 	// To reboot migrate a bare metal instance, use the InstanceAction operation.
 	// For more information, see
-	// Infrastructure Maintenance (https://docs.cloud.oracle.com/iaas/Content/Compute/References/infrastructure-maintenance.htm).
+	// Infrastructure Maintenance (https://docs.oracle.com/iaas/Content/Compute/References/infrastructure-maintenance.htm).
 	// Example: `2018-05-25T21:10:29.600Z`
 	// +kubebuilder:validation:Optional
 	TimeMaintenanceRebootDue string `json:"timeMaintenanceRebootDue,omitempty"`
@@ -123,6 +134,9 @@ type InstanceSpec struct {
 	DedicatedVmHostId string `json:"dedicatedVmHostId,omitempty"`
 	// +kubebuilder:validation:Optional
 	PlatformConfig InstancePlatformConfig `json:"platformConfig,omitempty"`
+	// The list of liscensing configurations with target update values.
+	// +kubebuilder:validation:Optional
+	LicensingConfigs []InstanceLicensingConfig `json:"licensingConfigs,omitempty"`
 	// The availability domain of the instance.
 	// Example: `Uocm:PHX-AD-1`
 	// +kubebuilder:validation:Required
@@ -132,8 +146,11 @@ type InstanceSpec struct {
 	CompartmentId string `json:"compartmentId"`
 	// +kubebuilder:validation:Optional
 	CreateVnicDetails InstanceCreateVnicDetails `json:"createVnicDetails,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
-	// compute cluster (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/compute-clusters.htm) that the instance will be created in.
+	// The OCID of the cluster placement group of the instance.
+	// +kubebuilder:validation:Optional
+	ClusterPlacementGroupId string `json:"clusterPlacementGroupId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the
+	// compute cluster (https://docs.oracle.com/iaas/Content/Compute/Tasks/compute-clusters.htm) that the instance will be created in.
 	// +kubebuilder:validation:Optional
 	ComputeClusterId string `json:"computeClusterId,omitempty"`
 	// Deprecated. Instead use `hostnameLabel` in
@@ -167,14 +184,12 @@ type InstanceSpec struct {
 	// the primary boot volume is attached as a data volume through virtio-scsi drive.
 	// For more information about the Bring Your Own Image feature of
 	// Oracle Cloud Infrastructure, see
-	// Bring Your Own Image (https://docs.cloud.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
+	// Bring Your Own Image (https://docs.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
 	// For more information about iPXE, see http://ipxe.org.
 	// +kubebuilder:validation:Optional
 	IpxeScript string `json:"ipxeScript,omitempty"`
 	// +kubebuilder:validation:Optional
 	PreemptibleInstanceConfig InstancePreemptibleInstanceConfig `json:"preemptibleInstanceConfig,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourceDetails InstanceSourceDetails `json:"sourceDetails,omitempty"`
 	// Deprecated. Instead use `subnetId` in
 	// CreateVnicDetails.
 	// At least one of them is required; if you provide both, the values must match.
@@ -186,6 +201,8 @@ type InstanceSpec struct {
 	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. This field applies to both block volumes and boot volumes. The default value is false.
 	// +kubebuilder:validation:Optional
 	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
+	// +kubebuilder:validation:Optional
+	PlacementConstraintDetails InstancePlacementConstraintDetails `json:"placementConstraintDetails,omitempty"`
 	// The OCID of the Instance Configuration containing instance launch details. Any other fields supplied in this instance launch request will override the details stored in the Instance Configuration for this instance launch.
 	// +kubebuilder:validation:Optional
 	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
@@ -196,7 +213,7 @@ type InstanceAgentConfigPluginsConfig struct {
 	// The plugin name. To get a list of available plugins, use the
 	// ListInstanceagentAvailablePlugins
 	// operation in the Oracle Cloud Agent API. For more information about the available plugins, see
-	// Managing Plugins with Oracle Cloud Agent (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/manage-plugins.htm).
+	// Managing Plugins with Oracle Cloud Agent (https://docs.oracle.com/iaas/Content/Compute/Tasks/manage-plugins.htm).
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// Whether the plugin should be enabled or disabled.
@@ -238,7 +255,7 @@ type InstanceAgentConfig struct {
 	// To get a list of available plugins, use the
 	// ListInstanceagentAvailablePlugins
 	// operation in the Oracle Cloud Agent API. For more information about the available plugins, see
-	// Managing Plugins with Oracle Cloud Agent (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/manage-plugins.htm).
+	// Managing Plugins with Oracle Cloud Agent (https://docs.oracle.com/iaas/Content/Compute/Tasks/manage-plugins.htm).
 	// +kubebuilder:validation:Optional
 	AreAllPluginsDisabled bool `json:"areAllPluginsDisabled,omitempty"`
 	// The configuration of plugins associated with this instance.
@@ -270,6 +287,32 @@ type InstanceShapeConfig struct {
 	// The number of NVMe drives to be used for storage. A single drive has 6.8 TB available.
 	// +kubebuilder:validation:Optional
 	Nvmes int `json:"nvmes,omitempty"`
+	// This field is reserved for internal use.
+	// +kubebuilder:validation:Optional
+	ResourceManagement string `json:"resourceManagement,omitempty"`
+}
+
+// InstanceSourceDetails defines nested fields for Instance.SourceDetails.
+type InstanceSourceDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// Whether to preserve the boot volume that was previously attached to the instance after a successful replacement of that boot volume.
+	// +kubebuilder:validation:Optional
+	IsPreserveBootVolumeEnabled bool `json:"isPreserveBootVolumeEnabled,omitempty"`
+	// +kubebuilder:validation:Optional
+	SourceType string `json:"sourceType,omitempty"`
+	// The OCID of the boot volume used to boot the instance.
+	// +kubebuilder:validation:Optional
+	BootVolumeId string `json:"bootVolumeId,omitempty"`
+	// The OCID of the image used to boot the instance.
+	// +kubebuilder:validation:Optional
+	ImageId string `json:"imageId,omitempty"`
+	// The size of the boot volume in GBs. Minimum value is 50 GB and maximum value is 32,768 GB (32 TB).
+	// +kubebuilder:validation:Optional
+	BootVolumeSizeInGBs int64 `json:"bootVolumeSizeInGBs,omitempty"`
+	// The OCID of the Vault service key to assign as the master encryption key for the boot volume.
+	// +kubebuilder:validation:Optional
+	KmsKeyId string `json:"kmsKeyId,omitempty"`
 }
 
 // InstanceOptions defines nested fields for Instance.InstanceOptions.
@@ -302,7 +345,7 @@ type InstanceLaunchOptions struct {
 	// Before you change the networking type, detach all VNICs and block volumes except for the primary
 	// VNIC and the boot volume.
 	// The image must have paravirtualized drivers installed. For more information, see
-	// Editing an Instance (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/resizinginstances.htm).
+	// Editing an Instance (https://docs.oracle.com/iaas/Content/Compute/Tasks/resizinginstances.htm).
 	// If the instance is running when you change the network type, it will be rebooted.
 	// **Note:** Some instances might not function properly if you change the networking type. After
 	// the instance reboots and is running, connect to it. If the connection fails or the OS doesn't behave
@@ -316,7 +359,7 @@ type InstanceLaunchOptions struct {
 	// instance and the boot volume or the block volume, you can enable in-transit encryption.
 	// In-transit encryption is not enabled by default.
 	// All boot volumes and block volumes are encrypted at rest.
-	// For more information, see Block Volume Encryption (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm#Encrypti).
+	// For more information, see Block Volume Encryption (https://docs.oracle.com/iaas/Content/Block/Concepts/overview.htm#Encrypti).
 	// +kubebuilder:validation:Optional
 	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
 }
@@ -352,8 +395,24 @@ type InstancePlatformConfig struct {
 	IsSymmetricMultiThreadingEnabled bool `json:"isSymmetricMultiThreadingEnabled,omitempty"`
 }
 
+// InstanceLicensingConfig defines nested fields for Instance.LicensingConfig.
+type InstanceLicensingConfig struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// License Type for the OS license.
+	// * `OCI_PROVIDED` - OCI provided license (e.g. metered $/OCPU-hour).
+	// * `BRING_YOUR_OWN_LICENSE` - Bring your own license.
+	// +kubebuilder:validation:Optional
+	LicenseType string `json:"licenseType,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+}
+
 // InstanceCreateVnicDetailsIpv6AddressIpv6SubnetCidrPairDetail defines nested fields for Instance.CreateVnicDetails.Ipv6AddressIpv6SubnetCidrPairDetail.
 type InstanceCreateVnicDetailsIpv6AddressIpv6SubnetCidrPairDetail struct {
+	// An OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that specifies a previously-reserved ipv6 to use.
+	// +kubebuilder:validation:Optional
+	Ipv6Id string `json:"ipv6Id,omitempty"`
 	// The IPv6 prefix allocated to the subnet.
 	// +kubebuilder:validation:Optional
 	Ipv6SubnetCidr string `json:"ipv6SubnetCidr,omitempty"`
@@ -383,13 +442,13 @@ type InstanceCreateVnicDetails struct {
 	// `prohibitPublicIpOnVnic` = true, an error is returned.
 	// **Note:** This public IP address is associated with the primary private IP
 	// on the VNIC. For more information, see
-	// IP Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingIPaddresses.htm).
+	// IP Addresses (https://docs.oracle.com/iaas/Content/Network/Tasks/managingIPaddresses.htm).
 	// **Note:** There's a limit to the number of PublicIp
 	// a VNIC or instance can have. If you try to create a secondary VNIC
 	// with an assigned public IP for an instance that has already
 	// reached its public IP limit, an error is returned. For information
 	// about the public IP limits, see
-	// Public IP Addresses (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingpublicIPs.htm).
+	// Public IP Addresses (https://docs.oracle.com/iaas/Content/Network/Tasks/managingpublicIPs.htm).
 	// Example: `false`
 	// If you specify a `vlanId`, then `assignPublicIp` must be set to false. See
 	// Vlan.
@@ -402,7 +461,7 @@ type InstanceCreateVnicDetails struct {
 	// +kubebuilder:validation:Optional
 	AssignPrivateDnsRecord bool `json:"assignPrivateDnsRecord,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -411,10 +470,16 @@ type InstanceCreateVnicDetails struct {
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Security attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm#security-attributes) are labels
+	// for a resource that can be referenced in a Zero Trust Packet Routing (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/overview.htm)
+	// (ZPR) policy to control access to ZPR-supported resources.
+	// Example: `{"Oracle-DataSecurity-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// The hostname for the VNIC's primary private IP. Used for DNS. The value is the hostname
 	// portion of the primary private IP's fully qualified domain name (FQDN)
 	// (for example, `bminstance1` in FQDN `bminstance1.subnet123.vcn1.oraclevcn.com`).
@@ -426,7 +491,7 @@ type InstanceCreateVnicDetails struct {
 	// ListPrivateIps and
 	// GetPrivateIp.
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.oracle.com/iaas/Content/Network/Concepts/dns.htm).
 	// When launching an instance, use this `hostnameLabel` instead
 	// of the deprecated `hostnameLabel` in
 	// LaunchInstanceDetails.
@@ -442,6 +507,14 @@ type InstanceCreateVnicDetails struct {
 	// and instead provide the specific IPv6 address within that range to use.
 	// +kubebuilder:validation:Optional
 	Ipv6AddressIpv6SubnetCidrPairDetails []InstanceCreateVnicDetailsIpv6AddressIpv6SubnetCidrPairDetail `json:"ipv6AddressIpv6SubnetCidrPairDetails,omitempty"`
+	// One of the IPv4 CIDR blocks allocated to the subnet. Represents the IP range
+	// from which the VNIC's private IP address will be assigned if `privateIp` or
+	// `privateIpId` is not specified.
+	// Either this field or the `privateIp` (or `privateIpId`, if applicable) field
+	// must be provided, but not both simultaneously.
+	// Example: `192.168.1.0/28`
+	// +kubebuilder:validation:Optional
+	SubnetCidr string `json:"subnetCidr,omitempty"`
 	// A list of the OCIDs of the network security groups (NSGs) to add the VNIC to. For more
 	// information about NSGs, see
 	// NetworkSecurityGroup.
@@ -462,13 +535,17 @@ type InstanceCreateVnicDetails struct {
 	//
 	// If you specify a `vlanId`, the `privateIp` cannot be specified.
 	// See Vlan.
+	// If you specify a 'privateIpId', the 'privateIp' cannot be specified.
 	// Example: `10.0.3.3`
 	// +kubebuilder:validation:Optional
 	PrivateIp string `json:"privateIp,omitempty"`
+	// An OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that specifies a previously-reserved IP address to use for this VNIC.
+	// +kubebuilder:validation:Optional
+	PrivateIpId string `json:"privateIpId,omitempty"`
 	// Whether the source/destination check is disabled on the VNIC.
 	// Defaults to `false`, which means the check is performed. For information
 	// about why you would skip the source/destination check, see
-	// Using a Private IP as a Route Target (https://docs.cloud.oracle.com/iaas/Content/Network/Tasks/managingroutetables.htm#privateip).
+	// Using a Private IP as a Route Target (https://docs.oracle.com/iaas/Content/Network/Tasks/managingroutetables.htm#privateip).
 	//
 	// If you specify a `vlanId`, the `skipSourceDestCheck` cannot be specified because the
 	// source/destination check is always disabled for VNICs in a VLAN. See
@@ -476,7 +553,7 @@ type InstanceCreateVnicDetails struct {
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	SkipSourceDestCheck bool `json:"skipSourceDestCheck,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet to create the VNIC in. When launching an instance,
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet to create the VNIC in. When launching an instance,
 	// use this `subnetId` instead of the deprecated `subnetId` in
 	// LaunchInstanceDetails.
 	// At least one of them is required; if you provide both, the values must match.
@@ -486,7 +563,7 @@ type InstanceCreateVnicDetails struct {
 	// +kubebuilder:validation:Optional
 	SubnetId string `json:"subnetId,omitempty"`
 	// Provide this attribute only if you are an Oracle Cloud VMware Solution
-	// customer and creating a secondary VNIC in a VLAN. The value is the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN.
+	// customer and creating a secondary VNIC in a VLAN. The value is the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN.
 	// See Vlan.
 	// Provide a `vlanId` instead of a `subnetId`. If you provide both a
 	// `vlanId` and `subnetId`, the request fails.
@@ -517,7 +594,7 @@ type InstanceSourceDetailsInstanceSourceImageFilterDetails struct {
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// Filter based on these defined tags. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// +kubebuilder:validation:Optional
 	DefinedTagsFilter map[string]shared.MapValue `json:"definedTagsFilter,omitempty"`
 	// The image's operating system.
@@ -528,38 +605,6 @@ type InstanceSourceDetailsInstanceSourceImageFilterDetails struct {
 	// Example: `7.2`
 	// +kubebuilder:validation:Optional
 	OperatingSystemVersion string `json:"operatingSystemVersion,omitempty"`
-}
-
-// InstanceSourceDetails defines nested fields for Instance.SourceDetails.
-type InstanceSourceDetails struct {
-	// +kubebuilder:validation:Optional
-	JsonData string `json:"jsonData,omitempty"`
-	// +kubebuilder:validation:Optional
-	SourceType string `json:"sourceType,omitempty"`
-	// The size of the boot volume in GBs. Minimum value is 50 GB and maximum value is 32,768 GB (32 TB).
-	// +kubebuilder:validation:Optional
-	BootVolumeSizeInGBs int64 `json:"bootVolumeSizeInGBs,omitempty"`
-	// The OCID of the image used to boot the instance.
-	// +kubebuilder:validation:Optional
-	ImageId string `json:"imageId,omitempty"`
-	// The OCID of the Vault service key to assign as the master encryption key for the boot volume.
-	// +kubebuilder:validation:Optional
-	KmsKeyId string `json:"kmsKeyId,omitempty"`
-	// The number of volume performance units (VPUs) that will be applied to this volume per GB,
-	// representing the Block Volume service's elastic performance options.
-	// See Block Volume Performance Levels (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/blockvolumeperformance.htm#perf_levels) for more information.
-	// Allowed values:
-	//   * `10`: Represents Balanced option.
-	//   * `20`: Represents Higher Performance option.
-	//   * `30`-`120`: Represents the Ultra High Performance option.
-	// For volumes with the auto-tuned performance feature enabled, this is set to the default (minimum) VPUs/GB.
-	// +kubebuilder:validation:Optional
-	BootVolumeVpusPerGB int64 `json:"bootVolumeVpusPerGB,omitempty"`
-	// +kubebuilder:validation:Optional
-	InstanceSourceImageFilterDetails InstanceSourceDetailsInstanceSourceImageFilterDetails `json:"instanceSourceImageFilterDetails,omitempty"`
-	// The OCID of the boot volume used to boot the instance.
-	// +kubebuilder:validation:Optional
-	BootVolumeId string `json:"bootVolumeId,omitempty"`
 }
 
 // InstanceLaunchVolumeAttachmentLaunchCreateVolumeDetails defines nested fields for Instance.LaunchVolumeAttachment.LaunchCreateVolumeDetails.
@@ -596,6 +641,9 @@ type InstanceLaunchVolumeAttachment struct {
 	LaunchCreateVolumeDetails InstanceLaunchVolumeAttachmentLaunchCreateVolumeDetails `json:"launchCreateVolumeDetails,omitempty"`
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
+	// Whether to enable in-transit encryption for the data volume's paravirtualized attachment. The default value is false.
+	// +kubebuilder:validation:Optional
+	IsPvEncryptionInTransitEnabled bool `json:"isPvEncryptionInTransitEnabled,omitempty"`
 	// Whether to use CHAP authentication for the volume attachment. Defaults to false.
 	// +kubebuilder:validation:Optional
 	UseChap bool `json:"useChap,omitempty"`
@@ -606,6 +654,20 @@ type InstanceLaunchVolumeAttachment struct {
 	// The default value is NONE.
 	// +kubebuilder:validation:Optional
 	EncryptionInTransitType string `json:"encryptionInTransitType,omitempty"`
+}
+
+// InstancePlacementConstraintDetails defines nested fields for Instance.PlacementConstraintDetails.
+type InstancePlacementConstraintDetails struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// The OCID of the compute host group. This is only available for dedicated capacity customers.
+	// +kubebuilder:validation:Optional
+	ComputeHostGroupId string `json:"computeHostGroupId,omitempty"`
+	// The OCID of the compute bare metal host. This is only available for dedicated capacity customers.
+	// +kubebuilder:validation:Optional
+	ComputeBareMetalHostId string `json:"computeBareMetalHostId,omitempty"`
 }
 
 // InstanceLoadBalancerBackend defines nested fields for Instance.LoadBalancerBackend.
@@ -646,14 +708,26 @@ type InstanceStatus struct {
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The OCID of the compute capacity reservation this instance is launched under.
 	// When this field contains an empty string or is null, the instance is not currently in a capacity reservation.
-	// For more information, see Capacity Reservations (https://docs.cloud.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
-	CapacityReservationId string `json:"capacityReservationId,omitempty"`
+	// For more information, see Capacity Reservations (https://docs.oracle.com/iaas/Content/Compute/Tasks/reserve-capacity.htm#default).
+	CapacityReservationId      string                             `json:"capacityReservationId,omitempty"`
+	PlacementConstraintDetails InstancePlacementConstraintDetails `json:"placementConstraintDetails,omitempty"`
+	// Whether AI enterprise is enabled on the instance.
+	IsAIEnterpriseEnabled bool `json:"isAIEnterpriseEnabled,omitempty"`
+	// The OCID of the cluster placement group of the instance.
+	ClusterPlacementGroupId string `json:"clusterPlacementGroupId,omitempty"`
 	// The OCID of the dedicated virtual machine host that the instance is placed on.
 	DedicatedVmHostId string `json:"dedicatedVmHostId,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Security attributes (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm#security-attributes) are labels
+	// for a resource that can be referenced in a Zero Trust Packet Routing (https://docs.oracle.com/iaas/Content/zero-trust-packet-routing/overview.htm)
+	// (ZPR) policy to control access to ZPR-supported resources.
+	// Example: `{"Oracle-DataSecurity-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit"}}}`
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
+	// The lifecycle state of the `securityAttributes`
+	SecurityAttributesState string `json:"securityAttributesState,omitempty"`
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	DisplayName string `json:"displayName,omitempty"`
@@ -672,7 +746,7 @@ type InstanceStatus struct {
 	// Example: `FAULT-DOMAIN-1`
 	FaultDomain string `json:"faultDomain,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Deprecated. Use `sourceDetails` instead.
@@ -698,7 +772,7 @@ type InstanceStatus struct {
 	// the primary boot volume is attached as a data volume through virtio-scsi drive.
 	// For more information about the Bring Your Own Image feature of
 	// Oracle Cloud Infrastructure, see
-	// Bring Your Own Image (https://docs.cloud.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
+	// Bring Your Own Image (https://docs.oracle.com/iaas/Content/Compute/References/bringyourownimage.htm).
 	// For more information about iPXE, see http://ipxe.org.
 	IpxeScript string `json:"ipxeScript,omitempty"`
 	// Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
@@ -729,6 +803,8 @@ type InstanceStatus struct {
 	PlatformConfig           InstancePlatformConfig `json:"platformConfig,omitempty"`
 	// The OCID of the Instance Configuration used to source launch details for this instance. Any other fields supplied in the instance launch request override the details stored in the Instance Configuration for this instance launch.
 	InstanceConfigurationId string `json:"instanceConfigurationId,omitempty"`
+	// List of licensing configurations associated with the instance.
+	LicensingConfigs []InstanceLicensingConfig `json:"licensingConfigs,omitempty"`
 	// The current state of the instance pool instance.
 	State string `json:"state,omitempty"`
 	// The load balancer backends that are configured for the instance pool instance.

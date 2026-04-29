@@ -41,9 +41,9 @@ ClusterSpec defines the desired state of Cluster.
 | --- | --- | --- | --- | --- | --- |
 | [`clusterPodNetworkOptions`](#kind-cluster-spec-clusterpodnetworkoptions) | Available CNIs and network options for existing and new node pools of the cluster | `list[object]` | No | - | - |
 | `compartmentId` | The OCID of the compartment in which to create the cluster. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | [`endpointConfig`](#kind-cluster-spec-endpointconfig) | The network configuration for access to the Cluster control plane. | `object` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`imagePolicyConfig`](#kind-cluster-spec-imagepolicyconfig) | The image verification policy for signature validation. Once a policy is created and enabled with one or more kms keys, the policy will ensure all images deployed has been signed with the key(s) attached to the policy. | `object` | No | - | - |
 | `kmsKeyId` | The OCID of the KMS key to be used as the master encryption key for Kubernetes secret encryption. When used, `kubernetesVersion` must be at least `v1.13.0`. | `string` | No | - | - |
 | `kubernetesVersion` | The version of Kubernetes to install into the cluster masters. | `string` | Yes | - | - |
@@ -111,7 +111,10 @@ Optional attributes for the cluster.
 | --- | --- | --- | --- | --- | --- |
 | [`addOns`](#kind-cluster-spec-options-addons) | Configurable cluster add-ons | `object` | No | - | - |
 | [`admissionControllerOptions`](#kind-cluster-spec-options-admissioncontrolleroptions) | Configurable cluster admission controllers | `object` | No | - | - |
+| `ipFamilies` | IP family to use for single stack or define the order of IP families for dual-stack | `list[string]` | No | - | - |
 | [`kubernetesNetworkConfig`](#kind-cluster-spec-options-kubernetesnetworkconfig) | Network configuration for Kubernetes. | `object` | No | - | - |
+| [`openIdConnectDiscovery`](#kind-cluster-spec-options-openidconnectdiscovery) | ClusterOptionsOpenIdConnectDiscovery defines nested fields for Cluster.Options.OpenIdConnectDiscovery. | `object` | No | - | - |
+| [`openIdConnectTokenAuthenticationConfig`](#kind-cluster-spec-options-openidconnecttokenauthenticationconfig) | ClusterOptionsOpenIdConnectTokenAuthenticationConfig defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig. | `object` | No | - | - |
 | [`persistentVolumeConfig`](#kind-cluster-spec-options-persistentvolumeconfig) | ClusterOptionsPersistentVolumeConfig defines nested fields for Cluster.Options.PersistentVolumeConfig. | `object` | No | - | - |
 | [`serviceLbConfig`](#kind-cluster-spec-options-servicelbconfig) | ClusterOptionsServiceLbConfig defines nested fields for Cluster.Options.ServiceLbConfig. | `object` | No | - | - |
 | `serviceLbSubnetIds` | The OCIDs of the subnets used for Kubernetes services load balancers. | `list[string]` | No | - | - |
@@ -151,6 +154,50 @@ Network configuration for Kubernetes.
 | `podsCidr` | The CIDR block for Kubernetes pods. Optional, defaults to 10.244.0.0/16. | `string` | No | - | - |
 | `servicesCidr` | The CIDR block for Kubernetes services. Optional, defaults to 10.96.0.0/16. | `string` | No | - | - |
 
+<a id="kind-cluster-spec-options-openidconnectdiscovery"></a>
+##### Spec.options.openIdConnectDiscovery
+
+[Back to Cluster spec](#kind-cluster-spec)
+
+ClusterOptionsOpenIdConnectDiscovery defines nested fields for Cluster.Options.OpenIdConnectDiscovery.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isOpenIdConnectDiscoveryEnabled` | Whether the cluster has OIDC Discovery enabled. Defaults to false. If set to true, the cluster will be assigned a public OIDC Discovery endpoint. | `boolean` | No | - | - |
+
+<a id="kind-cluster-spec-options-openidconnecttokenauthenticationconfig"></a>
+##### Spec.options.openIdConnectTokenAuthenticationConfig
+
+[Back to Cluster spec](#kind-cluster-spec)
+
+ClusterOptionsOpenIdConnectTokenAuthenticationConfig defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `caCertificate` | A Base64 encoded public RSA or ECDSA certificates used to signed your identity provider's web certificate. | `string` | No | - | - |
+| `clientId` | A client id that all tokens must be issued for. | `string` | No | - | - |
+| `configurationFile` | A Base64 encoded string of a Kubernetes OIDC Auth Config file. More info here (https://kubernetes.io/docs/reference/access-authn-authz/authentication/#using-authentication-configuration) | `string` | No | - | - |
+| `groupsClaim` | JWT claim to use as the user's group. If the claim is present it must be an array of strings. | `string` | No | - | - |
+| `groupsPrefix` | Prefix prepended to group claims to prevent clashes with existing names (such as system:groups). | `string` | No | - | - |
+| `isOpenIdConnectAuthEnabled` | Whether the cluster has OIDC Auth Config enabled. Defaults to false. | `boolean` | Yes | - | - |
+| `issuerUrl` | URL of the provider that allows the API server to discover public signing keys. Only URLs that use the https:// scheme are accepted. This is typically the provider's discovery URL, changed to have an empty path. | `string` | No | - | - |
+| [`requiredClaims`](#kind-cluster-spec-options-openidconnecttokenauthenticationconfig-requiredclaims) | A key=value pair that describes a required claim in the ID Token. If set, the claim is verified to be present in the ID Token with a matching value. Repeat this flag to specify multiple claims. | `list[object]` | No | - | - |
+| `signingAlgorithms` | The signing algorithms accepted. Default is ["RS256"]. | `list[string]` | No | - | - |
+| `usernameClaim` | JWT claim to use as the user name. By default sub, which is expected to be a unique identifier of the end user. Admins can choose other claims, such as email or name, depending on their provider. However, claims other than email will be prefixed with the issuer URL to prevent naming clashes with other plugins. | `string` | No | - | - |
+| `usernamePrefix` | Prefix prepended to username claims to prevent clashes with existing names (such as system:users). For example, the value oidc: will create usernames like oidc:jane.doe. If this flag isn't provided and --oidc-username-claim is a value other than email the prefix defaults to ( Issuer URL )# where ( Issuer URL ) is the value of --oidc-issuer-url. The value - can be used to disable all prefixing. | `string` | No | - | - |
+
+<a id="kind-cluster-spec-options-openidconnecttokenauthenticationconfig-requiredclaims"></a>
+###### Spec.options.openIdConnectTokenAuthenticationConfig.requiredClaims[]
+
+[Back to Cluster spec](#kind-cluster-spec)
+
+ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The key of the pair. | `string` | No | - | - |
+| `value` | The value of the pair. | `string` | No | - | - |
+
 <a id="kind-cluster-spec-options-persistentvolumeconfig"></a>
 ##### Spec.options.persistentVolumeConfig
 
@@ -160,8 +207,8 @@ ClusterOptionsPersistentVolumeConfig defines nested fields for Cluster.Options.P
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 
 <a id="kind-cluster-spec-options-servicelbconfig"></a>
 ##### Spec.options.serviceLbConfig
@@ -172,8 +219,9 @@ ClusterOptionsServiceLbConfig defines nested fields for Cluster.Options.ServiceL
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `backendNsgIds` | A list of the OCIDs of the network security groups (NSGs) associated to backends to LBs (pods/nodes/virtual pods, etc.). Rules necessary for LB to backend communication would be added when rule management mode is set to NSG via annotations. see NetworkSecurityGroup. | `list[string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 
 <a id="kind-cluster-status"></a>
 ### Status
@@ -185,18 +233,20 @@ ClusterStatus defines the observed state of Cluster.
 | `availableKubernetesUpgrades` | Available Kubernetes versions to which the clusters masters may be upgraded. | `list[string]` | No | - | - |
 | [`clusterPodNetworkOptions`](#kind-cluster-status-clusterpodnetworkoptions) | Available CNIs and network options for existing and new node pools of the cluster | `list[object]` | No | - | - |
 | `compartmentId` | The OCID of the compartment in which the cluster exists. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | [`endpointConfig`](#kind-cluster-status-endpointconfig) | The network configuration for access to the Cluster control plane. | `object` | No | - | - |
 | [`endpoints`](#kind-cluster-status-endpoints) | Endpoints served up by the cluster masters. | `object` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the cluster. | `string` | No | - | - |
 | [`imagePolicyConfig`](#kind-cluster-status-imagepolicyconfig) | The image verification policy for signature validation. | `object` | No | - | - |
 | `kmsKeyId` | The OCID of the KMS key to be used as the master encryption key for Kubernetes secret encryption. | `string` | No | - | - |
 | `kubernetesVersion` | The version of Kubernetes running on the cluster masters. | `string` | No | - | - |
 | `lifecycleDetails` | Details about the state of the cluster masters. | `string` | No | - | - |
-| `lifecycleState` | The state of the cluster masters. | `string` | No | - | - |
+| `lifecycleState` | The state of the cluster masters. For more information, see Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm) | `string` | No | - | - |
 | [`metadata`](#kind-cluster-status-metadata) | Metadata about the cluster. | `object` | No | - | - |
 | `name` | The name of the cluster. | `string` | No | - | - |
+| `openIdConnectDiscoveryEndpoint` | The cluster-specific OpenID Connect Discovery endpoint | `string` | No | - | - |
+| `openIdConnectDiscoveryKey` | The cluster-specific OpenID Connect Discovery Key to derive the DiscoveryEndpoint | `string` | No | - | - |
 | [`options`](#kind-cluster-status-options) | Optional attributes for the cluster. | `object` | No | - | - |
 | [`status`](#kind-cluster-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
@@ -237,6 +287,7 @@ Endpoints served up by the cluster masters.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `ipv6Endpoint` | The IPv6 networking Kubernetes API server endpoint. | `string` | No | - | - |
 | `kubernetes` | The non-native networking Kubernetes API server endpoint. | `string` | No | - | - |
 | `privateEndpoint` | The private native networking Kubernetes API server endpoint. | `string` | No | - | - |
 | `publicEndpoint` | The public native networking Kubernetes API server endpoint, if one was requested. | `string` | No | - | - |
@@ -296,7 +347,10 @@ Optional attributes for the cluster.
 | --- | --- | --- | --- | --- | --- |
 | [`addOns`](#kind-cluster-status-options-addons) | Configurable cluster add-ons | `object` | No | - | - |
 | [`admissionControllerOptions`](#kind-cluster-status-options-admissioncontrolleroptions) | Configurable cluster admission controllers | `object` | No | - | - |
+| `ipFamilies` | IP family to use for single stack or define the order of IP families for dual-stack | `list[string]` | No | - | - |
 | [`kubernetesNetworkConfig`](#kind-cluster-status-options-kubernetesnetworkconfig) | Network configuration for Kubernetes. | `object` | No | - | - |
+| [`openIdConnectDiscovery`](#kind-cluster-status-options-openidconnectdiscovery) | ClusterOptionsOpenIdConnectDiscovery defines nested fields for Cluster.Options.OpenIdConnectDiscovery. | `object` | No | - | - |
+| [`openIdConnectTokenAuthenticationConfig`](#kind-cluster-status-options-openidconnecttokenauthenticationconfig) | ClusterOptionsOpenIdConnectTokenAuthenticationConfig defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig. | `object` | No | - | - |
 | [`persistentVolumeConfig`](#kind-cluster-status-options-persistentvolumeconfig) | ClusterOptionsPersistentVolumeConfig defines nested fields for Cluster.Options.PersistentVolumeConfig. | `object` | No | - | - |
 | [`serviceLbConfig`](#kind-cluster-status-options-servicelbconfig) | ClusterOptionsServiceLbConfig defines nested fields for Cluster.Options.ServiceLbConfig. | `object` | No | - | - |
 | `serviceLbSubnetIds` | The OCIDs of the subnets used for Kubernetes services load balancers. | `list[string]` | No | - | - |
@@ -336,6 +390,50 @@ Network configuration for Kubernetes.
 | `podsCidr` | The CIDR block for Kubernetes pods. Optional, defaults to 10.244.0.0/16. | `string` | No | - | - |
 | `servicesCidr` | The CIDR block for Kubernetes services. Optional, defaults to 10.96.0.0/16. | `string` | No | - | - |
 
+<a id="kind-cluster-status-options-openidconnectdiscovery"></a>
+##### Status.options.openIdConnectDiscovery
+
+[Back to Cluster status](#kind-cluster-status)
+
+ClusterOptionsOpenIdConnectDiscovery defines nested fields for Cluster.Options.OpenIdConnectDiscovery.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `isOpenIdConnectDiscoveryEnabled` | Whether the cluster has OIDC Discovery enabled. Defaults to false. If set to true, the cluster will be assigned a public OIDC Discovery endpoint. | `boolean` | No | - | - |
+
+<a id="kind-cluster-status-options-openidconnecttokenauthenticationconfig"></a>
+##### Status.options.openIdConnectTokenAuthenticationConfig
+
+[Back to Cluster status](#kind-cluster-status)
+
+ClusterOptionsOpenIdConnectTokenAuthenticationConfig defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `caCertificate` | A Base64 encoded public RSA or ECDSA certificates used to signed your identity provider's web certificate. | `string` | No | - | - |
+| `clientId` | A client id that all tokens must be issued for. | `string` | No | - | - |
+| `configurationFile` | A Base64 encoded string of a Kubernetes OIDC Auth Config file. More info here (https://kubernetes.io/docs/reference/access-authn-authz/authentication/#using-authentication-configuration) | `string` | No | - | - |
+| `groupsClaim` | JWT claim to use as the user's group. If the claim is present it must be an array of strings. | `string` | No | - | - |
+| `groupsPrefix` | Prefix prepended to group claims to prevent clashes with existing names (such as system:groups). | `string` | No | - | - |
+| `isOpenIdConnectAuthEnabled` | Whether the cluster has OIDC Auth Config enabled. Defaults to false. | `boolean` | Yes | - | - |
+| `issuerUrl` | URL of the provider that allows the API server to discover public signing keys. Only URLs that use the https:// scheme are accepted. This is typically the provider's discovery URL, changed to have an empty path. | `string` | No | - | - |
+| [`requiredClaims`](#kind-cluster-status-options-openidconnecttokenauthenticationconfig-requiredclaims) | A key=value pair that describes a required claim in the ID Token. If set, the claim is verified to be present in the ID Token with a matching value. Repeat this flag to specify multiple claims. | `list[object]` | No | - | - |
+| `signingAlgorithms` | The signing algorithms accepted. Default is ["RS256"]. | `list[string]` | No | - | - |
+| `usernameClaim` | JWT claim to use as the user name. By default sub, which is expected to be a unique identifier of the end user. Admins can choose other claims, such as email or name, depending on their provider. However, claims other than email will be prefixed with the issuer URL to prevent naming clashes with other plugins. | `string` | No | - | - |
+| `usernamePrefix` | Prefix prepended to username claims to prevent clashes with existing names (such as system:users). For example, the value oidc: will create usernames like oidc:jane.doe. If this flag isn't provided and --oidc-username-claim is a value other than email the prefix defaults to ( Issuer URL )# where ( Issuer URL ) is the value of --oidc-issuer-url. The value - can be used to disable all prefixing. | `string` | No | - | - |
+
+<a id="kind-cluster-status-options-openidconnecttokenauthenticationconfig-requiredclaims"></a>
+###### Status.options.openIdConnectTokenAuthenticationConfig.requiredClaims[]
+
+[Back to Cluster status](#kind-cluster-status)
+
+ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim defines nested fields for Cluster.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaim.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `key` | The key of the pair. | `string` | No | - | - |
+| `value` | The value of the pair. | `string` | No | - | - |
+
 <a id="kind-cluster-status-options-persistentvolumeconfig"></a>
 ##### Status.options.persistentVolumeConfig
 
@@ -345,8 +443,8 @@ ClusterOptionsPersistentVolumeConfig defines nested fields for Cluster.Options.P
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 
 <a id="kind-cluster-status-options-servicelbconfig"></a>
 ##### Status.options.serviceLbConfig
@@ -357,8 +455,9 @@ ClusterOptionsServiceLbConfig defines nested fields for Cluster.Options.ServiceL
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `backendNsgIds` | A list of the OCIDs of the network security groups (NSGs) associated to backends to LBs (pods/nodes/virtual pods, etc.). Rules necessary for LB to backend communication would be added when rule management mode is set to NSG via annotations. see NetworkSecurityGroup. | `list[string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 
 <a id="kind-cluster-status-status"></a>
 #### Status.status
@@ -439,8 +538,8 @@ NodePoolSpec defines the desired state of NodePool.
 | --- | --- | --- | --- | --- | --- |
 | `clusterId` | The OCID of the cluster to which this node pool is attached. | `string` | Yes | - | - |
 | `compartmentId` | The OCID of the compartment in which the node pool exists. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | [`initialNodeLabels`](#kind-nodepool-spec-initialnodelabels) | A list of key/value pairs to add to nodes after they join the Kubernetes cluster. | `list[object]` | No | - | - |
 | `kubernetesVersion` | The version of Kubernetes to install on the nodes in the node pool. | `string` | No | - | - |
 | `name` | The name of the node pool. Avoid entering confidential information. | `string` | Yes | - | - |
@@ -477,8 +576,8 @@ The configuration of nodes in the node pool. Exactly one of the subnetIds or nod
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `isPvEncryptionInTransitEnabled` | Whether to enable in-transit encryption for the data volume's paravirtualized attachment. This field applies to both block volumes and boot volumes. The default value is false. | `boolean` | No | - | - |
 | `kmsKeyId` | The OCID of the Key Management Service key assigned to the boot volume. | `string` | No | - | - |
 | [`nodePoolPodNetworkOptionDetails`](#kind-nodepool-spec-nodeconfigdetails-nodepoolpodnetworkoptiondetails) | The CNI related configuration of pods in the node pool. | `object` | No | - | - |
@@ -550,6 +649,7 @@ NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvic
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `evictionGraceDuration` | Duration after which OKE will give up eviction of the pods on the node. PT0M will indicate you want to delete the node without cordon and drain. Default PT60M, Min PT0M, Max: PT60M. Format ISO 8601 e.g PT30M | `string` | No | - | - |
+| `isForceActionAfterGraceDuration` | If the node action should be performed if not all the pods can be evicted in the grace period | `boolean` | No | - | - |
 | `isForceDeleteAfterGraceDuration` | If the underlying compute instance should be deleted if you cannot evict all the pods in grace period | `boolean` | No | - | - |
 
 <a id="kind-nodepool-spec-nodepoolcyclingdetails"></a>
@@ -561,7 +661,8 @@ NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `isNodeCyclingEnabled` | If nodes in the nodepool will be cycled to have new changes. | `boolean` | No | - | - |
+| `cycleModes` | An ordered list of cycle modes that should be performed on the OKE nodes. | `list[string]` | No | - | - |
+| `isNodeCyclingEnabled` | If cycling operation should be performed on the nodes in the node pool. | `boolean` | No | - | - |
 | `maximumSurge` | Maximum additional new compute instances that would be temporarily created and added to nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 1, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
 | `maximumUnavailable` | Maximum active nodes that would be terminated from nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 0, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
 
@@ -575,7 +676,7 @@ Specify the configuration of the shape to launch nodes in the node pool.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `memoryInGBs` | The total amount of memory available to each node, in gigabytes. | `number` | No | - | - |
-| `ocpus` | The total number of OCPUs available to each node in the node pool. See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details. | `number` | No | - | - |
+| `ocpus` | The total number of OCPUs available to each node in the node pool. See here (https://docs.oracle.com/iaas/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details. | `number` | No | - | - |
 
 <a id="kind-nodepool-spec-nodesourcedetails"></a>
 #### Spec.nodeSourceDetails
@@ -586,7 +687,7 @@ Specify the source to use to launch nodes in the node pool. Currently, image is 
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `bootVolumeSizeInGBs` | The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements. | `integer (int64)` | No | - | - |
+| `bootVolumeSizeInGBs` | The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.oracle.com/iaas/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements. | `integer (int64)` | No | - | - |
 | `imageId` | The OCID of the image used to boot the node. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |
@@ -600,13 +701,13 @@ NodePoolStatus defines the observed state of NodePool.
 | --- | --- | --- | --- | --- | --- |
 | `clusterId` | The OCID of the cluster to which this node pool is attached. | `string` | No | - | - |
 | `compartmentId` | The OCID of the compartment in which the node pool exists. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the node pool. | `string` | No | - | - |
 | [`initialNodeLabels`](#kind-nodepool-status-initialnodelabels) | A list of key/value pairs to add to nodes after they join the Kubernetes cluster. | `list[object]` | No | - | - |
 | `kubernetesVersion` | The version of Kubernetes running on the nodes in the node pool. | `string` | No | - | - |
 | `lifecycleDetails` | Details about the state of the nodepool. | `string` | No | - | - |
-| `lifecycleState` | The state of the nodepool. | `string` | No | - | - |
+| `lifecycleState` | The state of the nodepool. For more information, see Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm) | `string` | No | - | - |
 | `name` | The name of the node pool. | `string` | No | - | - |
 | [`nodeConfigDetails`](#kind-nodepool-status-nodeconfigdetails) | The configuration of nodes in the node pool. | `object` | No | - | - |
 | [`nodeEvictionNodePoolSettings`](#kind-nodepool-status-nodeevictionnodepoolsettings) | NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvictionNodePoolSettings. | `object` | No | - | - |
@@ -646,8 +747,8 @@ The configuration of nodes in the node pool.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `isPvEncryptionInTransitEnabled` | Whether to enable in-transit encryption for the data volume's paravirtualized attachment. This field applies to both block volumes and boot volumes. The default value is false. | `boolean` | No | - | - |
 | `kmsKeyId` | The OCID of the Key Management Service key assigned to the boot volume. | `string` | No | - | - |
 | [`nodePoolPodNetworkOptionDetails`](#kind-nodepool-status-nodeconfigdetails-nodepoolpodnetworkoptiondetails) | The CNI related configuration of pods in the node pool. | `object` | No | - | - |
@@ -719,6 +820,7 @@ NodePoolNodeEvictionNodePoolSettings defines nested fields for NodePool.NodeEvic
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `evictionGraceDuration` | Duration after which OKE will give up eviction of the pods on the node. PT0M will indicate you want to delete the node without cordon and drain. Default PT60M, Min PT0M, Max: PT60M. Format ISO 8601 e.g PT30M | `string` | No | - | - |
+| `isForceActionAfterGraceDuration` | If the node action should be performed if not all the pods can be evicted in the grace period | `boolean` | No | - | - |
 | `isForceDeleteAfterGraceDuration` | If the underlying compute instance should be deleted if you cannot evict all the pods in grace period | `boolean` | No | - | - |
 
 <a id="kind-nodepool-status-nodepoolcyclingdetails"></a>
@@ -730,7 +832,8 @@ NodePoolCyclingDetails defines nested fields for NodePool.NodePoolCyclingDetails
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `isNodeCyclingEnabled` | If nodes in the nodepool will be cycled to have new changes. | `boolean` | No | - | - |
+| `cycleModes` | An ordered list of cycle modes that should be performed on the OKE nodes. | `list[string]` | No | - | - |
+| `isNodeCyclingEnabled` | If cycling operation should be performed on the nodes in the node pool. | `boolean` | No | - | - |
 | `maximumSurge` | Maximum additional new compute instances that would be temporarily created and added to nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 1, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
 | `maximumUnavailable` | Maximum active nodes that would be terminated from nodepool during the cycling nodepool process. OKE supports both integer and percentage input. Defaults to 0, Ranges from 0 to Nodepool size or 0% to 100% | `string` | No | - | - |
 
@@ -744,7 +847,7 @@ The shape configuration of the nodes.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `memoryInGBs` | The total amount of memory available to each node, in gigabytes. | `number` | No | - | - |
-| `ocpus` | The total number of OCPUs available to each node in the node pool. See here (https://docs.cloud.oracle.com/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details. | `number` | No | - | - |
+| `ocpus` | The total number of OCPUs available to each node in the node pool. See here (https://docs.oracle.com/iaas/en-us/iaas/api/#/en/iaas/20160918/Shape/) for details. | `number` | No | - | - |
 
 <a id="kind-nodepool-status-nodesource"></a>
 #### Status.nodeSource
@@ -769,7 +872,7 @@ Source running on the nodes in the node pool.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `bootVolumeSizeInGBs` | The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.cloud.oracle.com/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements. | `integer (int64)` | No | - | - |
+| `bootVolumeSizeInGBs` | The size of the boot volume in GBs. Minimum value is 50 GB. See here (https://docs.oracle.com/iaas/en-us/iaas/Content/Block/Concepts/bootvolumes.htm) for max custom boot volume sizing and OS-specific requirements. | `integer (int64)` | No | - | - |
 | `imageId` | The OCID of the image used to boot the node. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | `sourceType` | - | `string` | No | - | - |
@@ -784,13 +887,13 @@ NodePoolNode defines nested fields for NodePool.Node.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `availabilityDomain` | The name of the availability domain in which this node is placed. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `faultDomain` | The fault domain of this node. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID of the compute instance backing this node. | `string` | No | - | - |
 | `kubernetesVersion` | The version of Kubernetes this node is running. | `string` | No | - | - |
 | `lifecycleDetails` | Details about the state of the node. | `string` | No | - | - |
-| `lifecycleState` | The state of the node. | `string` | No | - | - |
+| `lifecycleState` | The state of the node. For more information, see Monitoring Clusters (https://docs.oracle.com/iaas/Content/ContEng/Tasks/contengmonitoringclusters.htm) | `string` | No | - | - |
 | `name` | The name of the node. | `string` | No | - | - |
 | [`nodeError`](#kind-nodepool-status-nodes-nodeerror) | An error that may be associated with the node. | `object` | No | - | - |
 | `nodePoolId` | The OCID of the node pool to which this node belongs. | `string` | No | - | - |
@@ -808,7 +911,7 @@ An error that may be associated with the node.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `code` | A short error code that defines the upstream error, meant for programmatic parsing. See API Errors (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm). | `string` | No | - | - |
+| `code` | A short error code that defines the upstream error, meant for programmatic parsing. See API Errors (https://docs.oracle.com/iaas/Content/API/References/apierrors.htm). | `string` | No | - | - |
 | `message` | A human-readable error string of the upstream error. | `string` | No | - | - |
 | `opc-request-id` | Unique Oracle-assigned identifier for the upstream request. If you need to contact Oracle about a particular upstream request, please provide the request ID. | `string` | No | - | - |
 | `status` | The status of the HTTP response encountered in the upstream error. | `string` | No | - | - |

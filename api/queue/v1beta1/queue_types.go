@@ -17,7 +17,7 @@ type QueueSpec struct {
 	// The user-friendly name of the queue.
 	// +kubebuilder:validation:Required
 	DisplayName string `json:"displayName"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// The retention period of messages in the queue, in seconds.
@@ -35,9 +35,12 @@ type QueueSpec struct {
 	// The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used.
 	// +kubebuilder:validation:Optional
 	DeadLetterQueueDeliveryCount int `json:"deadLetterQueueDeliveryCount,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
 	// +kubebuilder:validation:Optional
 	CustomEncryptionKeyId string `json:"customEncryptionKeyId,omitempty"`
+	// The capability to add on the queue
+	// +kubebuilder:validation:Optional
+	Capabilities []QueueCapability `json:"capabilities,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
 	// +kubebuilder:validation:Optional
@@ -48,12 +51,35 @@ type QueueSpec struct {
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 }
 
+// QueueCapability defines nested fields for Queue.Capability.
+type QueueCapability struct {
+	// +kubebuilder:validation:Optional
+	JsonData string `json:"jsonData,omitempty"`
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
+	// Specifies if the primary consumer group should be automatically enabled after adding the capability.
+	// +kubebuilder:validation:Optional
+	IsPrimaryConsumerGroupEnabled bool `json:"isPrimaryConsumerGroupEnabled,omitempty"`
+	// Name of the primary consumer group. If omitted, it will be named "Primary Consumer Group".
+	// +kubebuilder:validation:Optional
+	PrimaryConsumerGroupDisplayName string `json:"primaryConsumerGroupDisplayName,omitempty"`
+	// The filter used by the primary consumer group. Only messages matching the filter will be available by consumers of the group.
+	// An empty value means that all messages will be available in the group.
+	// +kubebuilder:validation:Optional
+	PrimaryConsumerGroupFilter string `json:"primaryConsumerGroupFilter,omitempty"`
+	// The number of times a message can be delivered to a consumer before being moved to the dead letter queue.
+	// A value of 0 indicates that the DLQ is not used.
+	// If the value isn't set, it will be using the value defined at the queue level.
+	// +kubebuilder:validation:Optional
+	PrimaryConsumerGroupDeadLetterQueueDeliveryCount int `json:"primaryConsumerGroupDeadLetterQueueDeliveryCount,omitempty"`
+}
+
 // QueueStatus defines the observed state of Queue.
 type QueueStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
 	// A unique identifier for the queue that is immutable on creation.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The time that the queue was created, expressed in RFC 3339 (https://tools.ietf.org/rfc/rfc3339) timestamp format.
 	// Example: `2018-04-20T00:00:07.405Z`
@@ -77,7 +103,7 @@ type QueueStatus struct {
 	DisplayName string `json:"displayName,omitempty"`
 	// Any additional details about the current state of the queue.
 	LifecycleDetails string `json:"lifecycleDetails,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
 	CustomEncryptionKeyId string `json:"customEncryptionKeyId,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
 	// Example: `{"bar-key": "value"}`
@@ -90,6 +116,8 @@ type QueueStatus struct {
 	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 	// The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
 	ChannelConsumptionLimit int `json:"channelConsumptionLimit,omitempty"`
+	// The list of capabilities enabled on the queue
+	Capabilities []QueueCapability `json:"capabilities,omitempty"`
 	// The work request OCID tracking the in-flight create operation.
 	CreateWorkRequestId string `json:"createWorkRequestId,omitempty"`
 	// The work request OCID tracking the in-flight update operation.

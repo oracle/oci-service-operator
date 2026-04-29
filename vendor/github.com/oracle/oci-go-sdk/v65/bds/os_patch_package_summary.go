@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -29,6 +29,9 @@ type OsPatchPackageSummary struct {
 
 	// The target version of the package.
 	TargetVersion *string `mandatory:"false" json:"targetVersion"`
+
+	// Package type based on package installation manager.
+	PackageType OsPatchPackageSummaryPackageTypeEnum `mandatory:"false" json:"packageType,omitempty"`
 }
 
 func (m OsPatchPackageSummary) String() string {
@@ -44,8 +47,11 @@ func (m OsPatchPackageSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for UpdateType: %s. Supported values are: %s.", m.UpdateType, strings.Join(GetOsPatchPackageSummaryUpdateTypeEnumStringValues(), ",")))
 	}
 
+	if _, ok := GetMappingOsPatchPackageSummaryPackageTypeEnum(string(m.PackageType)); !ok && m.PackageType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for PackageType: %s. Supported values are: %s.", m.PackageType, strings.Join(GetOsPatchPackageSummaryPackageTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -93,5 +99,55 @@ func GetOsPatchPackageSummaryUpdateTypeEnumStringValues() []string {
 // GetMappingOsPatchPackageSummaryUpdateTypeEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingOsPatchPackageSummaryUpdateTypeEnum(val string) (OsPatchPackageSummaryUpdateTypeEnum, bool) {
 	enum, ok := mappingOsPatchPackageSummaryUpdateTypeEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// OsPatchPackageSummaryPackageTypeEnum Enum with underlying type: string
+type OsPatchPackageSummaryPackageTypeEnum string
+
+// Set of constants representing the allowable values for OsPatchPackageSummaryPackageTypeEnum
+const (
+	OsPatchPackageSummaryPackageTypeRpm   OsPatchPackageSummaryPackageTypeEnum = "RPM"
+	OsPatchPackageSummaryPackageTypePip   OsPatchPackageSummaryPackageTypeEnum = "PIP"
+	OsPatchPackageSummaryPackageTypePip3  OsPatchPackageSummaryPackageTypeEnum = "PIP3"
+	OsPatchPackageSummaryPackageTypePip38 OsPatchPackageSummaryPackageTypeEnum = "PIP3_8"
+)
+
+var mappingOsPatchPackageSummaryPackageTypeEnum = map[string]OsPatchPackageSummaryPackageTypeEnum{
+	"RPM":    OsPatchPackageSummaryPackageTypeRpm,
+	"PIP":    OsPatchPackageSummaryPackageTypePip,
+	"PIP3":   OsPatchPackageSummaryPackageTypePip3,
+	"PIP3_8": OsPatchPackageSummaryPackageTypePip38,
+}
+
+var mappingOsPatchPackageSummaryPackageTypeEnumLowerCase = map[string]OsPatchPackageSummaryPackageTypeEnum{
+	"rpm":    OsPatchPackageSummaryPackageTypeRpm,
+	"pip":    OsPatchPackageSummaryPackageTypePip,
+	"pip3":   OsPatchPackageSummaryPackageTypePip3,
+	"pip3_8": OsPatchPackageSummaryPackageTypePip38,
+}
+
+// GetOsPatchPackageSummaryPackageTypeEnumValues Enumerates the set of values for OsPatchPackageSummaryPackageTypeEnum
+func GetOsPatchPackageSummaryPackageTypeEnumValues() []OsPatchPackageSummaryPackageTypeEnum {
+	values := make([]OsPatchPackageSummaryPackageTypeEnum, 0)
+	for _, v := range mappingOsPatchPackageSummaryPackageTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetOsPatchPackageSummaryPackageTypeEnumStringValues Enumerates the set of values in String for OsPatchPackageSummaryPackageTypeEnum
+func GetOsPatchPackageSummaryPackageTypeEnumStringValues() []string {
+	return []string{
+		"RPM",
+		"PIP",
+		"PIP3",
+		"PIP3_8",
+	}
+}
+
+// GetMappingOsPatchPackageSummaryPackageTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingOsPatchPackageSummaryPackageTypeEnum(val string) (OsPatchPackageSummaryPackageTypeEnum, bool) {
+	enum, ok := mappingOsPatchPackageSummaryPackageTypeEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,29 +15,30 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/monitoring/GetAlarmHistory.go.html to see an example of how to use GetAlarmHistoryRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/monitoring/GetAlarmHistory.go.html to see an example of how to use GetAlarmHistoryRequest.
 type GetAlarmHistoryRequest struct {
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of an alarm.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of an alarm.
 	AlarmId *string `mandatory:"true" contributesTo:"path" name:"alarmId"`
 
 	// Customer part of the request identifier token. If you need to contact Oracle about a particular
 	// request, please provide the complete request ID.
 	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
 
-	// The type of history entries to retrieve. State history (STATE_HISTORY) or state transition history (STATE_TRANSITION_HISTORY).
-	// If not specified, entries of both types are retrieved.
+	// The type of history entries to retrieve.
+	// State history (STATE_HISTORY), state transition history (STATE_TRANSITION_HISTORY), rule history (RULE_HISTORY) or rule transition history (RULE_TRANSITION_HISTORY).
+	// If not specified, entries of all types are retrieved.
 	// Example: `STATE_HISTORY`
 	AlarmHistorytype GetAlarmHistoryAlarmHistorytypeEnum `mandatory:"false" contributesTo:"query" name:"alarmHistorytype" omitEmpty:"true"`
 
 	// For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
 	// For important details about how pagination works, see
-	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
 
 	// For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
 	// For important details about how pagination works, see
-	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	// Default: 1000
 	// Example: 500
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
@@ -90,7 +91,7 @@ func (request GetAlarmHistoryRequest) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for AlarmHistorytype: %s. Supported values are: %s.", request.AlarmHistorytype, strings.Join(GetGetAlarmHistoryAlarmHistorytypeEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -110,7 +111,7 @@ type GetAlarmHistoryResponse struct {
 
 	// For list pagination. When this header appears in the response, additional pages of results remain.
 	// For important details about how pagination works, see
-	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 }
 
@@ -128,18 +129,24 @@ type GetAlarmHistoryAlarmHistorytypeEnum string
 
 // Set of constants representing the allowable values for GetAlarmHistoryAlarmHistorytypeEnum
 const (
-	GetAlarmHistoryAlarmHistorytypeHistory           GetAlarmHistoryAlarmHistorytypeEnum = "STATE_HISTORY"
-	GetAlarmHistoryAlarmHistorytypeTransitionHistory GetAlarmHistoryAlarmHistorytypeEnum = "STATE_TRANSITION_HISTORY"
+	GetAlarmHistoryAlarmHistorytypeStateHistory           GetAlarmHistoryAlarmHistorytypeEnum = "STATE_HISTORY"
+	GetAlarmHistoryAlarmHistorytypeStateTransitionHistory GetAlarmHistoryAlarmHistorytypeEnum = "STATE_TRANSITION_HISTORY"
+	GetAlarmHistoryAlarmHistorytypeRuleHistory            GetAlarmHistoryAlarmHistorytypeEnum = "RULE_HISTORY"
+	GetAlarmHistoryAlarmHistorytypeRuleTransitionHistory  GetAlarmHistoryAlarmHistorytypeEnum = "RULE_TRANSITION_HISTORY"
 )
 
 var mappingGetAlarmHistoryAlarmHistorytypeEnum = map[string]GetAlarmHistoryAlarmHistorytypeEnum{
-	"STATE_HISTORY":            GetAlarmHistoryAlarmHistorytypeHistory,
-	"STATE_TRANSITION_HISTORY": GetAlarmHistoryAlarmHistorytypeTransitionHistory,
+	"STATE_HISTORY":            GetAlarmHistoryAlarmHistorytypeStateHistory,
+	"STATE_TRANSITION_HISTORY": GetAlarmHistoryAlarmHistorytypeStateTransitionHistory,
+	"RULE_HISTORY":             GetAlarmHistoryAlarmHistorytypeRuleHistory,
+	"RULE_TRANSITION_HISTORY":  GetAlarmHistoryAlarmHistorytypeRuleTransitionHistory,
 }
 
 var mappingGetAlarmHistoryAlarmHistorytypeEnumLowerCase = map[string]GetAlarmHistoryAlarmHistorytypeEnum{
-	"state_history":            GetAlarmHistoryAlarmHistorytypeHistory,
-	"state_transition_history": GetAlarmHistoryAlarmHistorytypeTransitionHistory,
+	"state_history":            GetAlarmHistoryAlarmHistorytypeStateHistory,
+	"state_transition_history": GetAlarmHistoryAlarmHistorytypeStateTransitionHistory,
+	"rule_history":             GetAlarmHistoryAlarmHistorytypeRuleHistory,
+	"rule_transition_history":  GetAlarmHistoryAlarmHistorytypeRuleTransitionHistory,
 }
 
 // GetGetAlarmHistoryAlarmHistorytypeEnumValues Enumerates the set of values for GetAlarmHistoryAlarmHistorytypeEnum
@@ -156,6 +163,8 @@ func GetGetAlarmHistoryAlarmHistorytypeEnumStringValues() []string {
 	return []string{
 		"STATE_HISTORY",
 		"STATE_TRANSITION_HISTORY",
+		"RULE_HISTORY",
+		"RULE_TRANSITION_HISTORY",
 	}
 }
 

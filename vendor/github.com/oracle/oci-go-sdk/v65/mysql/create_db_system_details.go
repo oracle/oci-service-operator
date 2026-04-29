@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -37,6 +37,10 @@ type CreateDbSystemDetails struct {
 	// User-provided data about the DB System.
 	Description *string `mandatory:"false" json:"description"`
 
+	Rest *CreateRestDetails `mandatory:"false" json:"rest"`
+
+	DatabaseConsole *CreateDatabaseConsoleDetails `mandatory:"false" json:"databaseConsole"`
+
 	// Specifies if the DB System is highly available.
 	// When creating a DB System with High Availability, three instances
 	// are created and placed according to your region- and
@@ -65,6 +69,14 @@ type CreateDbSystemDetails struct {
 	// The specific MySQL version identifier.
 	MysqlVersion *string `mandatory:"false" json:"mysqlVersion"`
 
+	// Network Security Group OCIDs used for the VNIC attachment.
+	NsgIds []string `mandatory:"false" json:"nsgIds"`
+
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
+
 	// The username for the administrative user.
 	AdminUsername *string `mandatory:"false" json:"adminUsername"`
 
@@ -78,6 +90,8 @@ type CreateDbSystemDetails struct {
 	// Keep in mind that this only specifies the size of the database data volume,
 	// the log volume for the database will be scaled appropriately with its shape.
 	DataStorageSizeInGBs *int `mandatory:"false" json:"dataStorageSizeInGBs"`
+
+	DataStorage *DataStorageDetails `mandatory:"false" json:"dataStorage"`
 
 	// The hostname for the primary endpoint of the DB System. Used for DNS.
 	// The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN)
@@ -122,6 +136,31 @@ type CreateDbSystemDetails struct {
 	DatabaseManagement DatabaseManagementStatusEnum `mandatory:"false" json:"databaseManagement,omitempty"`
 
 	SecureConnections *SecureConnectionDetails `mandatory:"false" json:"secureConnections"`
+
+	EncryptData *EncryptDataDetails `mandatory:"false" json:"encryptData"`
+
+	// The database mode indicating the types of statements that will be allowed to run in the DB system.
+	// This mode will apply only to statements run by user connections. Replicated write statements will continue
+	// to be allowed regardless of the DatabaseMode.
+	//   - READ_WRITE (default): allow running read and write statements on the DB system;
+	//   - READ_ONLY: only allow running read statements on the DB system.
+	DatabaseMode DbSystemDatabaseModeEnum `mandatory:"false" json:"databaseMode,omitempty"`
+
+	// The access mode indicating if the database access will be restricted only to administrators or not:
+	//  - UNRESTRICTED (default): the access to the database is not restricted;
+	//  - RESTRICTED: the access will be allowed only to users with specific privileges;
+	//    RESTRICTED will correspond to setting the MySQL system variable
+	//    offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON.
+	AccessMode DbSystemAccessModeEnum `mandatory:"false" json:"accessMode,omitempty"`
+
+	// The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource.
+	// Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators.
+	// Up to 10 email addresses can be added to the customer contacts for a DB System.
+	CustomerContacts []CustomerContact `mandatory:"false" json:"customerContacts"`
+
+	ReadEndpoint *CreateReadEndpointDetails `mandatory:"false" json:"readEndpoint"`
+
+	TelemetryConfiguration *CreateTelemetryConfigurationDetails `mandatory:"false" json:"telemetryConfiguration"`
 }
 
 func (m CreateDbSystemDetails) String() string {
@@ -140,8 +179,14 @@ func (m CreateDbSystemDetails) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingDatabaseManagementStatusEnum(string(m.DatabaseManagement)); !ok && m.DatabaseManagement != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DatabaseManagement: %s. Supported values are: %s.", m.DatabaseManagement, strings.Join(GetDatabaseManagementStatusEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingDbSystemDatabaseModeEnum(string(m.DatabaseMode)); !ok && m.DatabaseMode != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DatabaseMode: %s. Supported values are: %s.", m.DatabaseMode, strings.Join(GetDbSystemDatabaseModeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingDbSystemAccessModeEnum(string(m.AccessMode)); !ok && m.AccessMode != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for AccessMode: %s. Supported values are: %s.", m.AccessMode, strings.Join(GetDbSystemAccessModeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -149,32 +194,43 @@ func (m CreateDbSystemDetails) ValidateEnumValue() (bool, error) {
 // UnmarshalJSON unmarshals from json
 func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		DisplayName          *string                           `json:"displayName"`
-		Description          *string                           `json:"description"`
-		IsHighlyAvailable    *bool                             `json:"isHighlyAvailable"`
-		AvailabilityDomain   *string                           `json:"availabilityDomain"`
-		FaultDomain          *string                           `json:"faultDomain"`
-		ConfigurationId      *string                           `json:"configurationId"`
-		MysqlVersion         *string                           `json:"mysqlVersion"`
-		AdminUsername        *string                           `json:"adminUsername"`
-		AdminPassword        *string                           `json:"adminPassword"`
-		DataStorageSizeInGBs *int                              `json:"dataStorageSizeInGBs"`
-		HostnameLabel        *string                           `json:"hostnameLabel"`
-		IpAddress            *string                           `json:"ipAddress"`
-		Port                 *int                              `json:"port"`
-		PortX                *int                              `json:"portX"`
-		BackupPolicy         *CreateBackupPolicyDetails        `json:"backupPolicy"`
-		Source               createdbsystemsourcedetails       `json:"source"`
-		Maintenance          *CreateMaintenanceDetails         `json:"maintenance"`
-		FreeformTags         map[string]string                 `json:"freeformTags"`
-		DefinedTags          map[string]map[string]interface{} `json:"definedTags"`
-		DeletionPolicy       *CreateDeletionPolicyDetails      `json:"deletionPolicy"`
-		CrashRecovery        CrashRecoveryStatusEnum           `json:"crashRecovery"`
-		DatabaseManagement   DatabaseManagementStatusEnum      `json:"databaseManagement"`
-		SecureConnections    *SecureConnectionDetails          `json:"secureConnections"`
-		CompartmentId        *string                           `json:"compartmentId"`
-		ShapeName            *string                           `json:"shapeName"`
-		SubnetId             *string                           `json:"subnetId"`
+		DisplayName            *string                              `json:"displayName"`
+		Description            *string                              `json:"description"`
+		Rest                   *CreateRestDetails                   `json:"rest"`
+		DatabaseConsole        *CreateDatabaseConsoleDetails        `json:"databaseConsole"`
+		IsHighlyAvailable      *bool                                `json:"isHighlyAvailable"`
+		AvailabilityDomain     *string                              `json:"availabilityDomain"`
+		FaultDomain            *string                              `json:"faultDomain"`
+		ConfigurationId        *string                              `json:"configurationId"`
+		MysqlVersion           *string                              `json:"mysqlVersion"`
+		NsgIds                 []string                             `json:"nsgIds"`
+		SecurityAttributes     map[string]map[string]interface{}    `json:"securityAttributes"`
+		AdminUsername          *string                              `json:"adminUsername"`
+		AdminPassword          *string                              `json:"adminPassword"`
+		DataStorageSizeInGBs   *int                                 `json:"dataStorageSizeInGBs"`
+		DataStorage            *DataStorageDetails                  `json:"dataStorage"`
+		HostnameLabel          *string                              `json:"hostnameLabel"`
+		IpAddress              *string                              `json:"ipAddress"`
+		Port                   *int                                 `json:"port"`
+		PortX                  *int                                 `json:"portX"`
+		BackupPolicy           *CreateBackupPolicyDetails           `json:"backupPolicy"`
+		Source                 createdbsystemsourcedetails          `json:"source"`
+		Maintenance            *CreateMaintenanceDetails            `json:"maintenance"`
+		FreeformTags           map[string]string                    `json:"freeformTags"`
+		DefinedTags            map[string]map[string]interface{}    `json:"definedTags"`
+		DeletionPolicy         *CreateDeletionPolicyDetails         `json:"deletionPolicy"`
+		CrashRecovery          CrashRecoveryStatusEnum              `json:"crashRecovery"`
+		DatabaseManagement     DatabaseManagementStatusEnum         `json:"databaseManagement"`
+		SecureConnections      *SecureConnectionDetails             `json:"secureConnections"`
+		EncryptData            *EncryptDataDetails                  `json:"encryptData"`
+		DatabaseMode           DbSystemDatabaseModeEnum             `json:"databaseMode"`
+		AccessMode             DbSystemAccessModeEnum               `json:"accessMode"`
+		CustomerContacts       []CustomerContact                    `json:"customerContacts"`
+		ReadEndpoint           *CreateReadEndpointDetails           `json:"readEndpoint"`
+		TelemetryConfiguration *CreateTelemetryConfigurationDetails `json:"telemetryConfiguration"`
+		CompartmentId          *string                              `json:"compartmentId"`
+		ShapeName              *string                              `json:"shapeName"`
+		SubnetId               *string                              `json:"subnetId"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -186,6 +242,10 @@ func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.Description = model.Description
 
+	m.Rest = model.Rest
+
+	m.DatabaseConsole = model.DatabaseConsole
+
 	m.IsHighlyAvailable = model.IsHighlyAvailable
 
 	m.AvailabilityDomain = model.AvailabilityDomain
@@ -196,11 +256,17 @@ func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.MysqlVersion = model.MysqlVersion
 
+	m.NsgIds = make([]string, len(model.NsgIds))
+	copy(m.NsgIds, model.NsgIds)
+	m.SecurityAttributes = model.SecurityAttributes
+
 	m.AdminUsername = model.AdminUsername
 
 	m.AdminPassword = model.AdminPassword
 
 	m.DataStorageSizeInGBs = model.DataStorageSizeInGBs
+
+	m.DataStorage = model.DataStorage
 
 	m.HostnameLabel = model.HostnameLabel
 
@@ -235,6 +301,18 @@ func (m *CreateDbSystemDetails) UnmarshalJSON(data []byte) (e error) {
 	m.DatabaseManagement = model.DatabaseManagement
 
 	m.SecureConnections = model.SecureConnections
+
+	m.EncryptData = model.EncryptData
+
+	m.DatabaseMode = model.DatabaseMode
+
+	m.AccessMode = model.AccessMode
+
+	m.CustomerContacts = make([]CustomerContact, len(model.CustomerContacts))
+	copy(m.CustomerContacts, model.CustomerContacts)
+	m.ReadEndpoint = model.ReadEndpoint
+
+	m.TelemetryConfiguration = model.TelemetryConfiguration
 
 	m.CompartmentId = model.CompartmentId
 

@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -42,7 +43,8 @@ func TestManualDbSystemServiceClientCreatesWhenNoExistingDbSystemMatches(t *test
 			createDbSystem: func(_ context.Context, request psqlsdk.CreateDbSystemRequest) (psqlsdk.CreateDbSystemResponse, error) {
 				createRequest = request
 				return psqlsdk.CreateDbSystemResponse{
-					DbSystem: sdkDbSystem("ocid1.dbsystem.oc1..create", "sample-db", psqlsdk.DbSystemLifecycleStateCreating),
+					OpcRequestId: common.String("opc-create-1"),
+					DbSystem:     sdkDbSystem("ocid1.dbsystem.oc1..create", "sample-db", psqlsdk.DbSystemLifecycleStateCreating),
 				}, nil
 			},
 		},
@@ -72,6 +74,9 @@ func TestManualDbSystemServiceClientCreatesWhenNoExistingDbSystemMatches(t *test
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Provisioning {
 		t.Fatalf("status conditions = %#v, want trailing Provisioning condition", resource.Status.OsokStatus.Conditions)
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-create-1" {
+		t.Fatalf("status.status.opcRequestId = %q, want opc-create-1", got)
 	}
 	if resource.Status.AdminUsernameSource != (shared.UsernameSource{}) {
 		t.Fatalf("status.adminUsernameSource = %#v, want zero value", resource.Status.AdminUsernameSource)
@@ -227,6 +232,57 @@ func TestManualDbSystemServiceClientRejectsImmutableShapeDrift(t *testing.T) {
 	}
 }
 
+func TestValidateImmutableDriftAcceptsPostCreateReadbackNormalization(t *testing.T) {
+	t.Parallel()
+
+	resource := testDbSystemResource()
+	resource.Spec.Shape = "PostgreSQL.VM.Standard.E5.Flex"
+	observed := psqlv1beta1.DbSystemStatus{
+		CompartmentId:           resource.Spec.CompartmentId,
+		DbVersion:               "14.17",
+		Shape:                   "VM.Standard.E5.Flex",
+		InstanceOcpuCount:       2,
+		InstanceMemorySizeInGBs: 16,
+		InstanceCount:           1,
+		StorageDetails: psqlv1beta1.DbSystemStorageDetails{
+			SystemType:          resource.Spec.StorageDetails.SystemType,
+			IsRegionallyDurable: resource.Spec.StorageDetails.IsRegionallyDurable,
+			Iops:                resource.Spec.StorageDetails.Iops,
+		},
+		NetworkDetails: psqlv1beta1.DbSystemNetworkDetails{
+			SubnetId:                   resource.Spec.NetworkDetails.SubnetId,
+			PrimaryDbEndpointPrivateIp: "10.0.10.110",
+		},
+		AdminUsername: resource.Spec.Credentials.Username,
+	}
+
+	if err := validateImmutableDrift(resource.Spec, observed); err != nil {
+		t.Fatalf("validateImmutableDrift() error = %v, want nil", err)
+	}
+}
+
+func TestValidateImmutableDriftRejectsDbVersionMajorChange(t *testing.T) {
+	t.Parallel()
+
+	resource := testDbSystemResource()
+	observed := psqlv1beta1.DbSystemStatus{
+		CompartmentId: resource.Spec.CompartmentId,
+		DbVersion:     "15.1",
+		Shape:         resource.Spec.Shape,
+		StorageDetails: psqlv1beta1.DbSystemStorageDetails{
+			SystemType:          resource.Spec.StorageDetails.SystemType,
+			IsRegionallyDurable: resource.Spec.StorageDetails.IsRegionallyDurable,
+		},
+		NetworkDetails: resource.Spec.NetworkDetails,
+		AdminUsername:  resource.Spec.Credentials.Username,
+	}
+
+	err := validateImmutableDrift(resource.Spec, observed)
+	if err == nil || !strings.Contains(err.Error(), "dbVersion") {
+		t.Fatalf("validateImmutableDrift() error = %v, want dbVersion drift", err)
+	}
+}
+
 func TestManualDbSystemServiceClientUpdatesMutableDescriptionAndRequeues(t *testing.T) {
 	t.Parallel()
 
@@ -258,7 +314,7 @@ func TestManualDbSystemServiceClientUpdatesMutableDescriptionAndRequeues(t *test
 			},
 			updateDbSystem: func(_ context.Context, request psqlsdk.UpdateDbSystemRequest) (psqlsdk.UpdateDbSystemResponse, error) {
 				updateRequest = request
-				return psqlsdk.UpdateDbSystemResponse{}, nil
+				return psqlsdk.UpdateDbSystemResponse{OpcRequestId: common.String("opc-update-1")}, nil
 			},
 		},
 		log: discardDbSystemLogger(),
@@ -282,6 +338,9 @@ func TestManualDbSystemServiceClientUpdatesMutableDescriptionAndRequeues(t *test
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Updating {
 		t.Fatalf("status conditions = %#v, want trailing Updating condition", resource.Status.OsokStatus.Conditions)
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-update-1" {
+		t.Fatalf("status.status.opcRequestId = %q, want opc-update-1", got)
 	}
 }
 
@@ -310,7 +369,7 @@ func TestManualDbSystemServiceClientDeleteRetainsFinalizerUntilDeleteConfirmed(t
 			},
 			deleteDbSystem: func(_ context.Context, request psqlsdk.DeleteDbSystemRequest) (psqlsdk.DeleteDbSystemResponse, error) {
 				deleteRequest = request
-				return psqlsdk.DeleteDbSystemResponse{}, nil
+				return psqlsdk.DeleteDbSystemResponse{OpcRequestId: common.String("opc-delete-1")}, nil
 			},
 		},
 		log: discardDbSystemLogger(),
@@ -332,6 +391,9 @@ func TestManualDbSystemServiceClientDeleteRetainsFinalizerUntilDeleteConfirmed(t
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
 		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
+	}
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-delete-1" {
+		t.Fatalf("status.status.opcRequestId = %q, want opc-delete-1", got)
 	}
 }
 
@@ -443,6 +505,118 @@ func TestManualDbSystemServiceClientDeleteSkipsRedundantDeleteWhileDeleting(t *t
 	}
 	if len(resource.Status.OsokStatus.Conditions) == 0 || resource.Status.OsokStatus.Conditions[len(resource.Status.OsokStatus.Conditions)-1].Type != shared.Terminating {
 		t.Fatalf("status conditions = %#v, want trailing Terminating condition", resource.Status.OsokStatus.Conditions)
+	}
+}
+
+func TestDbSystemRuntimeHooksWrapGeneratedClientWithManualAdapter(t *testing.T) {
+	t.Parallel()
+
+	hooks := DbSystemRuntimeHooks{Semantics: newDbSystemRuntimeSemantics()}
+	manager := &DbSystemServiceManager{
+		Provider: common.NewRawConfigurationProvider("", "", "", "", "", nil),
+		Log:      discardDbSystemLogger(),
+	}
+
+	applyDbSystemRuntimeHooks(manager, &hooks)
+	if got, want := hooks.Semantics.Lifecycle.UpdatingStates, []string{"UPDATING"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("Semantics.Lifecycle.UpdatingStates = %#v, want %#v", got, want)
+	}
+	if got, want := hooks.Semantics.Lifecycle.ActiveStates, []string{"ACTIVE", "INACTIVE", "NEEDS_ATTENTION"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("Semantics.Lifecycle.ActiveStates = %#v, want %#v", got, want)
+	}
+	if len(hooks.WrapGeneratedClient) != 1 {
+		t.Fatalf("WrapGeneratedClient count = %d, want 1", len(hooks.WrapGeneratedClient))
+	}
+
+	wrapped := hooks.WrapGeneratedClient[0](manualDbSystemServiceClient{})
+	if _, ok := wrapped.(manualDbSystemServiceClient); !ok {
+		t.Fatalf("wrapped client type = %T, want manualDbSystemServiceClient", wrapped)
+	}
+}
+
+func TestClassifyDbSystemLifecycleMapsFormalStates(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		state          psqlsdk.DbSystemLifecycleStateEnum
+		fallback       shared.OSOKConditionType
+		wantCondition  shared.OSOKConditionType
+		wantRequeue    bool
+		wantSuccessful bool
+	}{
+		{name: "creating", state: psqlsdk.DbSystemLifecycleStateCreating, fallback: shared.Active, wantCondition: shared.Provisioning, wantRequeue: true, wantSuccessful: true},
+		{name: "updating", state: psqlsdk.DbSystemLifecycleStateUpdating, fallback: shared.Active, wantCondition: shared.Updating, wantRequeue: true, wantSuccessful: true},
+		{name: "deleting", state: psqlsdk.DbSystemLifecycleStateDeleting, fallback: shared.Active, wantCondition: shared.Terminating, wantRequeue: true, wantSuccessful: true},
+		{name: "active", state: psqlsdk.DbSystemLifecycleStateActive, fallback: shared.Active, wantCondition: shared.Active, wantRequeue: false, wantSuccessful: true},
+		{name: "inactive", state: psqlsdk.DbSystemLifecycleStateInactive, fallback: shared.Active, wantCondition: shared.Active, wantRequeue: false, wantSuccessful: true},
+		{name: "needs attention", state: psqlsdk.DbSystemLifecycleStateNeedsAttention, fallback: shared.Active, wantCondition: shared.Active, wantRequeue: false, wantSuccessful: true},
+		{name: "active update follow-up", state: psqlsdk.DbSystemLifecycleStateActive, fallback: shared.Updating, wantCondition: shared.Updating, wantRequeue: true, wantSuccessful: true},
+		{name: "failed", state: psqlsdk.DbSystemLifecycleStateFailed, fallback: shared.Active, wantCondition: shared.Failed, wantRequeue: false, wantSuccessful: false},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			condition, shouldRequeue, _ := classifyDbSystemLifecycle(
+				sdkDbSystem("ocid1.dbsystem.oc1..lifecycle", "sample-db", test.state),
+				test.fallback,
+			)
+			if condition != test.wantCondition {
+				t.Fatalf("condition = %s, want %s", condition, test.wantCondition)
+			}
+			if shouldRequeue != test.wantRequeue {
+				t.Fatalf("shouldRequeue = %t, want %t", shouldRequeue, test.wantRequeue)
+			}
+			if successful := condition != shared.Failed; successful != test.wantSuccessful {
+				t.Fatalf("successful = %t, want %t", successful, test.wantSuccessful)
+			}
+		})
+	}
+}
+
+func TestDropDbSystemStaleConditionsOnSuccessfulProjection(t *testing.T) {
+	t.Parallel()
+
+	status := shared.OSOKStatus{
+		Conditions: []shared.OSOKCondition{
+			{Type: shared.Provisioning},
+			{Type: shared.Active},
+			{Type: shared.Failed},
+			{Type: shared.Updating},
+			{Type: shared.Terminating},
+			{Type: shared.Failed},
+		},
+	}
+
+	got := dropDbSystemStaleConditions(status, shared.Active)
+	if len(got.Conditions) != 1 {
+		t.Fatalf("conditions = %#v, want only active condition", got.Conditions)
+	}
+	if got.Conditions[0].Type != shared.Active {
+		t.Fatalf("conditions = %#v, want Active", got.Conditions)
+	}
+}
+
+func TestDropDbSystemStaleConditionsPreservesCurrentTransientCondition(t *testing.T) {
+	t.Parallel()
+
+	status := shared.OSOKStatus{
+		Conditions: []shared.OSOKCondition{
+			{Type: shared.Active},
+			{Type: shared.Failed},
+			{Type: shared.Updating},
+		},
+	}
+
+	got := dropDbSystemStaleConditions(status, shared.Updating)
+	if len(got.Conditions) != 2 {
+		t.Fatalf("conditions = %#v, want active and updating conditions", got.Conditions)
+	}
+	if got.Conditions[0].Type != shared.Active || got.Conditions[1].Type != shared.Updating {
+		t.Fatalf("conditions = %#v, want Active then Updating", got.Conditions)
 	}
 }
 

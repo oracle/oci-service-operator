@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -91,11 +91,11 @@ func (client *CertificatesClient) ConfigurationProvider() *common.ConfigurationP
 	return client.config
 }
 
-// GetCaBundle Gets a ca-bundle bundle.
+// GetCaBundle Gets the bundle for the specified CA bundle.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCaBundle.go.html to see an example of how to use GetCaBundle API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCaBundle.go.html to see an example of how to use GetCaBundle API.
 func (client CertificatesClient) GetCaBundle(ctx context.Context, request GetCaBundleRequest) (response GetCaBundleResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -148,12 +148,12 @@ func (client CertificatesClient) getCaBundle(ctx context.Context, request common
 	return response, err
 }
 
-// GetCertificateAuthorityBundle Gets a certificate authority bundle that matches either the specified `stage`, `name`, or `versionNumber` parameter.
-// If none of these parameters are provided, the bundle for the certificate authority version marked as `CURRENT` will be returned.
+// GetCertificateAuthorityBundle Gets a bundle for a certificate authority (CA) that matches either the specified `stage`, `name`, or `versionNumber` parameter.
+// If none of these parameters are provided, the bundle for the CA version marked as `CURRENT` is returned.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCertificateAuthorityBundle.go.html to see an example of how to use GetCertificateAuthorityBundle API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCertificateAuthorityBundle.go.html to see an example of how to use GetCertificateAuthorityBundle API.
 func (client CertificatesClient) GetCertificateAuthorityBundle(ctx context.Context, request GetCertificateAuthorityBundleRequest) (response GetCertificateAuthorityBundleResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -207,13 +207,13 @@ func (client CertificatesClient) getCertificateAuthorityBundle(ctx context.Conte
 }
 
 // GetCertificateBundle Gets a certificate bundle that matches either the specified `stage`, `versionName`, or `versionNumber` parameter.
-// If none of these parameters are provided, the bundle for the certificate version marked as `CURRENT` will be returned.
-// By default, the private key is not included in the query result, and a CertificateBundlePublicOnly is returned.
-// If the private key is needed, use the CertificateBundleTypeQueryParam parameter to get a CertificateBundleWithPrivateKey response.
+// If none of these parameters are provided, the bundle for the certificate version marked as `CURRENT` is returned.
+// By default, the private key is not included in the query result, and only the certificate bundle is returned.
+// If you also need the private key, you can use the parameter `CertificateBundleTypeQueryParam` to indicate that you want a certificate bundle along with its private key as a response to your request.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCertificateBundle.go.html to see an example of how to use GetCertificateBundle API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/GetCertificateBundle.go.html to see an example of how to use GetCertificateBundle API.
 func (client CertificatesClient) GetCertificateBundle(ctx context.Context, request GetCertificateBundleRequest) (response GetCertificateBundleResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -266,11 +266,11 @@ func (client CertificatesClient) getCertificateBundle(ctx context.Context, reque
 	return response, err
 }
 
-// ListCertificateAuthorityBundleVersions Lists all certificate authority bundle versions for the specified certificate authority.
+// ListCertificateAuthorityBundleVersions Lists all versions of bundles for a given certificate authority (CA).
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/ListCertificateAuthorityBundleVersions.go.html to see an example of how to use ListCertificateAuthorityBundleVersions API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/ListCertificateAuthorityBundleVersions.go.html to see an example of how to use ListCertificateAuthorityBundleVersions API.
 func (client CertificatesClient) ListCertificateAuthorityBundleVersions(ctx context.Context, request ListCertificateAuthorityBundleVersionsRequest) (response ListCertificateAuthorityBundleVersionsResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -327,7 +327,7 @@ func (client CertificatesClient) listCertificateAuthorityBundleVersions(ctx cont
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/ListCertificateBundleVersions.go.html to see an example of how to use ListCertificateBundleVersions API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/certificates/ListCertificateBundleVersions.go.html to see an example of how to use ListCertificateBundleVersions API.
 func (client CertificatesClient) ListCertificateBundleVersions(ctx context.Context, request ListCertificateBundleVersionsRequest) (response ListCertificateBundleVersionsResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()

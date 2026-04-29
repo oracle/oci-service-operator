@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -31,6 +32,11 @@ const (
 	networkSecurityGroupLifecycleStateUpdate = coresdk.NetworkSecurityGroupLifecycleStateEnum("UPDATING")
 )
 
+var (
+	networkSecurityGroupSDKContractOnce sync.Once
+	networkSecurityGroupSDKContractErr  error
+)
+
 type networkSecurityGroupOCIClient interface {
 	CreateNetworkSecurityGroup(ctx context.Context, request coresdk.CreateNetworkSecurityGroupRequest) (coresdk.CreateNetworkSecurityGroupResponse, error)
 	GetNetworkSecurityGroup(ctx context.Context, request coresdk.GetNetworkSecurityGroupRequest) (coresdk.GetNetworkSecurityGroupResponse, error)
@@ -47,25 +53,115 @@ type networkSecurityGroupGeneratedParityClient struct {
 }
 
 func init() {
-	generatedFactory := newNetworkSecurityGroupServiceClient
-	newNetworkSecurityGroupServiceClient = func(manager *NetworkSecurityGroupServiceManager) NetworkSecurityGroupServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		parityClient := &networkSecurityGroupGeneratedParityClient{
-			manager:  manager,
-			delegate: delegate,
-			client:   sdkClient,
-		}
-		if err != nil {
-			parityClient.initErr = fmt.Errorf("initialize NetworkSecurityGroup OCI client: %w", err)
-		}
-		return parityClient
+	registerNetworkSecurityGroupRuntimeHooksMutator(func(manager *NetworkSecurityGroupServiceManager, hooks *NetworkSecurityGroupRuntimeHooks) {
+		applyNetworkSecurityGroupRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applyNetworkSecurityGroupRuntimeHooks(
+	manager *NetworkSecurityGroupServiceManager,
+	hooks *NetworkSecurityGroupRuntimeHooks,
+	client networkSecurityGroupOCIClient,
+) {
+	if hooks == nil {
+		return
 	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	runtimeClient := newNetworkSecurityGroupRuntimeClient(manager, nil, client)
+
+	hooks.BuildCreateBody = func(_ context.Context, resource *corev1beta1.NetworkSecurityGroup, _ string) (any, error) {
+		return buildCreateNetworkSecurityGroupDetails(resource.Spec), nil
+	}
+	hooks.BuildUpdateBody = func(_ context.Context, resource *corev1beta1.NetworkSecurityGroup, _ string, currentResponse any) (any, bool, error) {
+		current, ok := networkSecurityGroupFromResponse(currentResponse)
+		if !ok {
+			return nil, false, fmt.Errorf("unexpected NetworkSecurityGroup current response type %T", currentResponse)
+		}
+		request, updateNeeded, err := runtimeClient.buildUpdateRequest(resource, current)
+		if err != nil {
+			return nil, false, err
+		}
+		return request.UpdateNetworkSecurityGroupDetails, updateNeeded, nil
+	}
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ProjectStatus = func(resource *corev1beta1.NetworkSecurityGroup, response any) error {
+		current, ok := networkSecurityGroupFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected NetworkSecurityGroup status response type %T", response)
+		}
+		return runtimeClient.projectStatus(resource, current)
+	}
+	hooks.StatusHooks.ApplyLifecycle = func(resource *corev1beta1.NetworkSecurityGroup, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := networkSecurityGroupFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected NetworkSecurityGroup lifecycle response type %T", response))
+		}
+		return runtimeClient.applyLifecycle(resource, current)
+	}
+	hooks.ParityHooks.ValidateCreateOnlyDrift = func(resource *corev1beta1.NetworkSecurityGroup, response any) error {
+		current, ok := networkSecurityGroupFromResponse(response)
+		if !ok {
+			return fmt.Errorf("unexpected NetworkSecurityGroup current response type %T", response)
+		}
+		return validateNetworkSecurityGroupCreateOnlyDrift(resource.Spec, current)
+	}
+	hooks.ParityHooks.RequiresParityHandling = func(resource *corev1beta1.NetworkSecurityGroup, response any) bool {
+		current, ok := networkSecurityGroupFromResponse(response)
+		if !ok {
+			return false
+		}
+		return requiresManualNetworkSecurityGroupUpdate(resource.Spec, current)
+	}
+	hooks.ParityHooks.ApplyParityUpdate = func(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup, response any) (servicemanager.OSOKResponse, error) {
+		current, ok := networkSecurityGroupFromResponse(response)
+		if !ok {
+			return runtimeClient.fail(resource, fmt.Errorf("unexpected NetworkSecurityGroup parity response type %T", response))
+		}
+		return runtimeClient.update(ctx, resource, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate NetworkSecurityGroupServiceClient) NetworkSecurityGroupServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
+}
+
+func newNetworkSecurityGroupRuntimeClient(
+	manager *NetworkSecurityGroupServiceManager,
+	delegate NetworkSecurityGroupServiceClient,
+	client networkSecurityGroupOCIClient,
+) *networkSecurityGroupGeneratedParityClient {
+	runtimeClient := &networkSecurityGroupGeneratedParityClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
+		return runtimeClient
+	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize NetworkSecurityGroup OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup, req ctrl.Request) (servicemanager.OSOKResponse, error) {
 	if c.delegate == nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("network security group parity delegate is not configured")
+	}
+	if err := validateNetworkSecurityGroupSDKContract(); err != nil {
+		return c.fail(resource, err)
 	}
 
 	trackedID := currentNetworkSecurityGroupID(resource)
@@ -75,7 +171,7 @@ func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.C
 			return c.fail(resource, c.initErr)
 		}
 
-		current, err := c.get(ctx, trackedID)
+		_, err := c.get(ctx, trackedID)
 		if err != nil {
 			if isNetworkSecurityGroupReadNotFoundOCI(err) {
 				c.clearTrackedIdentity(resource)
@@ -83,13 +179,6 @@ func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.C
 			} else {
 				return c.fail(resource, normalizeNetworkSecurityGroupOCIError(err))
 			}
-		} else if networkSecurityGroupLifecycleIsRetryable(current.LifecycleState) {
-			if err := c.projectStatus(resource, current); err != nil {
-				return c.fail(resource, err)
-			}
-			return c.applyLifecycle(resource, current)
-		} else if requiresManualNetworkSecurityGroupUpdate(resource.Spec, current) {
-			return c.update(ctx, resource, current)
 		}
 	}
 
@@ -111,6 +200,9 @@ func (c *networkSecurityGroupGeneratedParityClient) CreateOrUpdate(ctx context.C
 func (c *networkSecurityGroupGeneratedParityClient) Delete(ctx context.Context, resource *corev1beta1.NetworkSecurityGroup) (bool, error) {
 	if c.delegate == nil {
 		return false, fmt.Errorf("network security group parity delegate is not configured")
+	}
+	if err := validateNetworkSecurityGroupSDKContract(); err != nil {
+		return false, err
 	}
 	return c.delegate.Delete(ctx, resource)
 }
@@ -375,6 +467,55 @@ func networkSecurityGroupLifecycleMessage(current coresdk.NetworkSecurityGroup) 
 	return fmt.Sprintf("NetworkSecurityGroup %s is %s", name, current.LifecycleState)
 }
 
+func validateNetworkSecurityGroupSDKContract() error {
+	networkSecurityGroupSDKContractOnce.Do(func() {
+		updateFields := reflect.TypeOf(coresdk.UpdateNetworkSecurityGroupDetails{})
+		for _, fieldName := range []string{"DefinedTags", "DisplayName", "FreeformTags"} {
+			if _, ok := updateFields.FieldByName(fieldName); !ok {
+				networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json assumes NetworkSecurityGroup update field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+		if _, ok := updateFields.FieldByName("CompartmentId"); ok {
+			networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json expects compartmentId to remain create-only, but vendored UpdateNetworkSecurityGroupDetails unexpectedly exposes CompartmentId")
+			return
+		}
+		if _, ok := updateFields.FieldByName("VcnId"); ok {
+			networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json expects vcnId to remain create-only, but vendored UpdateNetworkSecurityGroupDetails unexpectedly exposes VcnId")
+			return
+		}
+
+		createFields := reflect.TypeOf(coresdk.CreateNetworkSecurityGroupDetails{})
+		for _, fieldName := range []string{"CompartmentId", "VcnId"} {
+			if _, ok := createFields.FieldByName(fieldName); !ok {
+				networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json assumes NetworkSecurityGroup create field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+
+		lifecycleValues := make(map[string]struct{}, len(coresdk.GetNetworkSecurityGroupLifecycleStateEnumStringValues()))
+		for _, value := range coresdk.GetNetworkSecurityGroupLifecycleStateEnumStringValues() {
+			lifecycleValues[value] = struct{}{}
+		}
+		for _, value := range []string{
+			string(coresdk.NetworkSecurityGroupLifecycleStateAvailable),
+			string(coresdk.NetworkSecurityGroupLifecycleStateProvisioning),
+			string(coresdk.NetworkSecurityGroupLifecycleStateTerminating),
+			string(coresdk.NetworkSecurityGroupLifecycleStateTerminated),
+		} {
+			if _, ok := lifecycleValues[value]; !ok {
+				networkSecurityGroupSDKContractErr = fmt.Errorf("vendored SDK no longer exposes NetworkSecurityGroup lifecycle %q", value)
+				return
+			}
+		}
+		if _, ok := lifecycleValues["ACTIVE"]; ok {
+			networkSecurityGroupSDKContractErr = fmt.Errorf("formal/imports/core/networksecuritygroup.json still assumes ACTIVE, but vendored SDK now needs reevaluation because ACTIVE unexpectedly exists")
+			return
+		}
+	})
+	return networkSecurityGroupSDKContractErr
+}
+
 func normalizeNetworkSecurityGroupOCIError(err error) error {
 	var serviceErr common.ServiceError
 	if !errors.As(err, &serviceErr) {
@@ -499,4 +640,19 @@ func convertOCIToStatusDefinedTags(input map[string]map[string]interface{}) map[
 		converted[namespace] = convertedValues
 	}
 	return converted
+}
+
+func networkSecurityGroupFromResponse(response any) (coresdk.NetworkSecurityGroup, bool) {
+	switch typed := response.(type) {
+	case coresdk.NetworkSecurityGroup:
+		return typed, true
+	case coresdk.CreateNetworkSecurityGroupResponse:
+		return typed.NetworkSecurityGroup, true
+	case coresdk.GetNetworkSecurityGroupResponse:
+		return typed.NetworkSecurityGroup, true
+	case coresdk.UpdateNetworkSecurityGroupResponse:
+		return typed.NetworkSecurityGroup, true
+	default:
+		return coresdk.NetworkSecurityGroup{}, false
+	}
 }

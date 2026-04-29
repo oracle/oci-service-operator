@@ -21,7 +21,6 @@ No customer-visible package currently exposes `usageapi.oracle.com/v1beta1`.
 | [CustomTable](#kind-customtable) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/customtable.md) | - |
 | [Query](#kind-query) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/query.md) | - |
 | [Schedule](#kind-schedule) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/schedule.md) | - |
-| [ScheduledRun](#kind-scheduledrun) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/scheduledrun.md) | - |
 | [UsageCarbonEmissionsQuery](#kind-usagecarbonemissionsquery) | Namespaced | [Sample](../../../samples/usageapi/v1beta1/usagecarbonemissionsquery.md) | - |
 
 <a id="kind-customtable"></a>
@@ -55,11 +54,11 @@ CustomTableSavedCustomTable defines nested fields for CustomTable.SavedCustomTab
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `columnGroupBy` | The column groupBy key list. example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
+| `columnGroupBy` | The column groupBy key list. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | `compartmentDepth` | The compartment depth level. | `number` | No | - | - |
 | `displayName` | The name of the custom table. | `string` | Yes | - | - |
 | [`groupByTag`](#kind-customtable-spec-savedcustomtable-groupbytag) | GroupBy a specific tagKey. Provide the tagNamespace and tagKey in the tag object. Only one tag in the list is supported. For example: `[{"namespace":"oracle", "key":"createdBy"]` | `list[object]` | No | - | - |
-| `rowGroupBy` | The row groupBy key list. example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
+| `rowGroupBy` | The row groupBy key list. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | `version` | The version of the custom table. | `number` | No | - | - |
 
 <a id="kind-customtable-spec-savedcustomtable-groupbytag"></a>
@@ -97,11 +96,11 @@ CustomTableSavedCustomTable defines nested fields for CustomTable.SavedCustomTab
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `columnGroupBy` | The column groupBy key list. example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
+| `columnGroupBy` | The column groupBy key list. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | `compartmentDepth` | The compartment depth level. | `number` | No | - | - |
 | `displayName` | The name of the custom table. | `string` | Yes | - | - |
 | [`groupByTag`](#kind-customtable-status-savedcustomtable-groupbytag) | GroupBy a specific tagKey. Provide the tagNamespace and tagKey in the tag object. Only one tag in the list is supported. For example: `[{"namespace":"oracle", "key":"createdBy"]` | `list[object]` | No | - | - |
-| `rowGroupBy` | The row groupBy key list. example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
+| `rowGroupBy` | The row groupBy key list. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | `version` | The version of the custom table. | `number` | No | - | - |
 
 <a id="kind-customtable-status-savedcustomtable-groupbytag"></a>
@@ -237,10 +236,10 @@ QueryDefinitionReportQuery defines nested fields for Query.QueryDefinition.Repor
 | [`filter`](#kind-query-spec-querydefinition-reportquery-filter) | QueryDefinitionReportQueryFilter defines nested fields for Query.QueryDefinition.ReportQuery.Filter. | `object` | No | - | - |
 | [`forecast`](#kind-query-spec-querydefinition-reportquery-forecast) | QueryDefinitionReportQueryForecast defines nested fields for Query.QueryDefinition.ReportQuery.Forecast. | `object` | No | - | - |
 | `granularity` | The usage granularity. HOURLY - Hourly data aggregation. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation. TOTAL - Not yet supported. | `string` | Yes | - | - |
-| `groupBy` | Aggregate the result by. example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
+| `groupBy` | Specifies what to aggregate the result by. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | [`groupByTag`](#kind-query-spec-querydefinition-reportquery-groupbytag) | GroupBy a specific tagKey. Provide the tagNamespace and tagKey in the tag object. Only supports one tag in the list. For example: `[{"namespace":"oracle", "key":"createdBy"]` | `list[object]` | No | - | - |
-| `isAggregateByTime` | Whether aggregated by time. If isAggregateByTime is true, all usage/cost over the query time period will be added up. | `boolean` | No | - | - |
-| `queryType` | The query usage type. COST by default if it is missing. Usage - Query the usage data. Cost - Query the cost/billing data. Credit - Query the credit adjustments data. ExpiredCredit - Query the expired credits data AllCredit - Query the credit adjustments and expired credit | `string` | No | - | - |
+| `isAggregateByTime` | Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up. | `boolean` | No | - | - |
+| `queryType` | The query usage type. COST by default if it is missing. * Usage: Query the usage data. * Cost: Query the cost/billing data. * Credit: Query the credit adjustments data. * ExpiredCredit: Query the expired credits data. * AllCredit: Query the credit adjustments and expired credit. | `string` | No | - | - |
 | `tenantId` | Tenant ID. | `string` | Yes | - | - |
 | `timeUsageEnded` | The usage end time. | `string` | No | - | - |
 | `timeUsageStarted` | The usage start time. | `string` | No | - | - |
@@ -292,7 +291,7 @@ QueryDefinitionReportQueryForecast defines nested fields for Query.QueryDefiniti
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `forecastType` | BASIC uses the exponential smoothing (ETS) model to project future usage/costs based on history data. The basis for projections is a periodic set of equivalent historical days for which the projection is being made. | `string` | No | - | - |
+| `forecastType` | BASIC uses the exponential smoothing (ETS) model to project future usage or costs based on history data. The basis for projections is a periodic set of equivalent historical days for which the projection is being made. | `string` | No | - | - |
 | `timeForecastEnded` | The forecast end time. | `string` | Yes | - | - |
 | `timeForecastStarted` | The forecast start time. Defaults to UTC-1 if not specified. | `string` | No | - | - |
 
@@ -361,10 +360,10 @@ QueryDefinitionReportQuery defines nested fields for Query.QueryDefinition.Repor
 | [`filter`](#kind-query-status-querydefinition-reportquery-filter) | QueryDefinitionReportQueryFilter defines nested fields for Query.QueryDefinition.ReportQuery.Filter. | `object` | No | - | - |
 | [`forecast`](#kind-query-status-querydefinition-reportquery-forecast) | QueryDefinitionReportQueryForecast defines nested fields for Query.QueryDefinition.ReportQuery.Forecast. | `object` | No | - | - |
 | `granularity` | The usage granularity. HOURLY - Hourly data aggregation. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation. TOTAL - Not yet supported. | `string` | Yes | - | - |
-| `groupBy` | Aggregate the result by. example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
+| `groupBy` | Specifies what to aggregate the result by. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | [`groupByTag`](#kind-query-status-querydefinition-reportquery-groupbytag) | GroupBy a specific tagKey. Provide the tagNamespace and tagKey in the tag object. Only supports one tag in the list. For example: `[{"namespace":"oracle", "key":"createdBy"]` | `list[object]` | No | - | - |
-| `isAggregateByTime` | Whether aggregated by time. If isAggregateByTime is true, all usage/cost over the query time period will be added up. | `boolean` | No | - | - |
-| `queryType` | The query usage type. COST by default if it is missing. Usage - Query the usage data. Cost - Query the cost/billing data. Credit - Query the credit adjustments data. ExpiredCredit - Query the expired credits data AllCredit - Query the credit adjustments and expired credit | `string` | No | - | - |
+| `isAggregateByTime` | Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up. | `boolean` | No | - | - |
+| `queryType` | The query usage type. COST by default if it is missing. * Usage: Query the usage data. * Cost: Query the cost/billing data. * Credit: Query the credit adjustments data. * ExpiredCredit: Query the expired credits data. * AllCredit: Query the credit adjustments and expired credit. | `string` | No | - | - |
 | `tenantId` | Tenant ID. | `string` | Yes | - | - |
 | `timeUsageEnded` | The usage end time. | `string` | No | - | - |
 | `timeUsageStarted` | The usage start time. | `string` | No | - | - |
@@ -416,7 +415,7 @@ QueryDefinitionReportQueryForecast defines nested fields for Query.QueryDefiniti
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `forecastType` | BASIC uses the exponential smoothing (ETS) model to project future usage/costs based on history data. The basis for projections is a periodic set of equivalent historical days for which the projection is being made. | `string` | No | - | - |
+| `forecastType` | BASIC uses the exponential smoothing (ETS) model to project future usage or costs based on history data. The basis for projections is a periodic set of equivalent historical days for which the projection is being made. | `string` | No | - | - |
 | `timeForecastEnded` | The forecast end time. | `string` | Yes | - | - |
 | `timeForecastStarted` | The forecast start time. Defaults to UTC-1 if not specified. | `string` | No | - | - |
 
@@ -511,9 +510,9 @@ ScheduleSpec defines the desired state of Schedule.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The customer tenancy. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | The description of the schedule. | `string` | No | - | - |
-| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
 | `name` | The unique name of the user-created schedule. | `string` | Yes | - | - |
 | `outputFileFormat` | Specifies the supported output file format. | `string` | No | - | - |
 | [`queryProperties`](#kind-schedule-spec-queryproperties) | ScheduleQueryProperties defines nested fields for Schedule.QueryProperties. | `object` | No | - | - |
@@ -629,9 +628,9 @@ ScheduleStatus defines the observed state of Schedule.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentId` | The customer tenancy. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `description` | The description of the schedule. | `string` | No | - | - |
-| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
 | `id` | The OCID representing a unique shedule. | `string` | No | - | - |
 | `lifecycleState` | The schedule lifecycle state. | `string` | No | - | - |
 | `name` | The unique name of the schedule created by the user. | `string` | No | - | - |
@@ -641,7 +640,7 @@ ScheduleStatus defines the observed state of Schedule.
 | `savedReportId` | The saved report ID which can also be used to generate a query. | `string` | No | - | - |
 | `scheduleRecurrences` | Specifies the frequency according to when the schedule will be run, in the x-obmcs-recurring-time format described in RFC 5545 section 3.3.10 (https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10). Supported values are : ONE_TIME, DAILY, WEEKLY and MONTHLY. | `string` | No | - | - |
 | [`status`](#kind-schedule-status-status) | - | `object` | Yes | - | - |
-| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. See Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. See Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time the schedule was created. | `string` | No | - | - |
 | `timeNextRun` | The date and time of the next job execution. | `string` | No | - | - |
 | `timeScheduled` | The date and time of the first time job execution. | `string` | No | - | - |
@@ -804,98 +803,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 | `status` | - | `string` | Yes | - | - |
 | `type` | - | `string` | Yes | - | - |
 
-<a id="kind-scheduledrun"></a>
-## ScheduledRun
-
-ScheduledRun is the Schema for the scheduledruns API.
-
-- `Plural`: `scheduledruns`
-- `Scope`: `Namespaced`
-- `APIVersion`: `usageapi.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/usageapi/v1beta1/scheduledrun.md) (`config/samples/usageapi_v1beta1_scheduledrun.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-scheduledrun-spec"></a>
-### Spec
-
-ScheduledRunSpec defines the desired state of ScheduledRun.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-scheduledrun-status"></a>
-### Status
-
-ScheduledRunStatus defines the observed state of ScheduledRun.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `id` | The ocid representing unique shedule run | `string` | No | - | - |
-| `lifecycleDetails` | Additional details about scheduled run failure | `string` | No | - | - |
-| `lifecycleState` | Specifies if the schedule job was run successfully or not. | `string` | No | - | - |
-| `scheduleId` | The ocid representing unique shedule | `string` | No | - | - |
-| [`status`](#kind-scheduledrun-status-status) | - | `object` | Yes | - | - |
-| `timeCreated` | The time when schedule started executing | `string` | No | - | - |
-| `timeFinished` | The time when schedule finished executing | `string` | No | - | - |
-
-<a id="kind-scheduledrun-status-status"></a>
-#### Status.status
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-scheduledrun-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-scheduledrun-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-scheduledrun-status-status-async"></a>
-##### Status.status.async
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-scheduledrun-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-scheduledrun-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-scheduledrun-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to ScheduledRun status](#kind-scheduledrun-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
 <a id="kind-usagecarbonemissionsquery"></a>
 ## UsageCarbonEmissionsQuery
 
@@ -953,11 +860,14 @@ UsageCarbonEmissionsQueryQueryDefinitionReportQuery defines nested fields for Us
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentDepth` | The compartment depth level. | `integer` | No | - | - |
-| `dateRangeName` | The UI date range, for example, LAST_THREE_MONTHS. It will override timeUsageStarted and timeUsageEnded properties. | `string` | No | - | - |
+| `dateRangeName` | The user interface date range, for example, LAST_THREE_MONTHS. Overrides the timeUsageStarted and timeUsageEnded properties. | `string` | No | - | - |
+| `emissionCalculationMethod` | Specifies the method used for emission calculation, such as POWER_BASED or SPEND_BASED | `string` | No | - | - |
+| `emissionType` | Specifies the type of emission, such as MARKET_BASED or LOCATION_BASED. | `string` | No | - | - |
 | [`filter`](#kind-usagecarbonemissionsquery-spec-querydefinition-reportquery-filter) | UsageCarbonEmissionsQueryQueryDefinitionReportQueryFilter defines nested fields for UsageCarbonEmissionsQuery.QueryDefinition.ReportQuery.Filter. | `object` | No | - | - |
+| `granularity` | The carbon emission granularity. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation. | `string` | No | - | - |
 | `groupBy` | Specifies what to aggregate the result by. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | [`groupByTag`](#kind-usagecarbonemissionsquery-spec-querydefinition-reportquery-groupbytag) | GroupBy a specific tagKey. Provide the tagNamespace and tagKey in the tag object. Only supports one tag in the list. For example: `[{"namespace":"oracle", "key":"createdBy"]` | `list[object]` | No | - | - |
-| `isAggregateByTime` | Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up. | `boolean` | No | - | - |
+| `isAggregateByTime` | Specifies whether aggregated by time. If isAggregateByTime is true, all usage or costs over the query time period are summed. | `boolean` | No | - | - |
 | `tenantId` | Tenant ID. | `string` | Yes | - | - |
 | `timeUsageEnded` | The usage end time. | `string` | No | - | - |
 | `timeUsageStarted` | The usage start time. | `string` | No | - | - |
@@ -1061,11 +971,14 @@ UsageCarbonEmissionsQueryQueryDefinitionReportQuery defines nested fields for Us
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `compartmentDepth` | The compartment depth level. | `integer` | No | - | - |
-| `dateRangeName` | The UI date range, for example, LAST_THREE_MONTHS. It will override timeUsageStarted and timeUsageEnded properties. | `string` | No | - | - |
+| `dateRangeName` | The user interface date range, for example, LAST_THREE_MONTHS. Overrides the timeUsageStarted and timeUsageEnded properties. | `string` | No | - | - |
+| `emissionCalculationMethod` | Specifies the method used for emission calculation, such as POWER_BASED or SPEND_BASED | `string` | No | - | - |
+| `emissionType` | Specifies the type of emission, such as MARKET_BASED or LOCATION_BASED. | `string` | No | - | - |
 | [`filter`](#kind-usagecarbonemissionsquery-status-querydefinition-reportquery-filter) | UsageCarbonEmissionsQueryQueryDefinitionReportQueryFilter defines nested fields for UsageCarbonEmissionsQuery.QueryDefinition.ReportQuery.Filter. | `object` | No | - | - |
+| `granularity` | The carbon emission granularity. DAILY - Daily data aggregation. MONTHLY - Monthly data aggregation. | `string` | No | - | - |
 | `groupBy` | Specifies what to aggregate the result by. For example: `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit", "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd", "resourceId", "tenantId", "tenantName"]` | `list[string]` | No | - | - |
 | [`groupByTag`](#kind-usagecarbonemissionsquery-status-querydefinition-reportquery-groupbytag) | GroupBy a specific tagKey. Provide the tagNamespace and tagKey in the tag object. Only supports one tag in the list. For example: `[{"namespace":"oracle", "key":"createdBy"]` | `list[object]` | No | - | - |
-| `isAggregateByTime` | Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up. | `boolean` | No | - | - |
+| `isAggregateByTime` | Specifies whether aggregated by time. If isAggregateByTime is true, all usage or costs over the query time period are summed. | `boolean` | No | - | - |
 | `tenantId` | Tenant ID. | `string` | Yes | - | - |
 | `timeUsageEnded` | The usage end time. | `string` | No | - | - |
 | `timeUsageStarted` | The usage start time. | `string` | No | - | - |

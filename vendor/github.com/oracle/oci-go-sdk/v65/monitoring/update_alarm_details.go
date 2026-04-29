@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -7,7 +7,7 @@
 // Use the Monitoring API to manage metric queries and alarms for assessing the health, capacity, and performance of your cloud resources.
 // Endpoints vary by operation. For PostMetricData, use the `telemetry-ingestion` endpoints; for all other operations, use the `telemetry` endpoints.
 // For more information, see
-// the Monitoring documentation (https://docs.cloud.oracle.com/iaas/Content/Monitoring/home.htm).
+// the Monitoring documentation (https://docs.oracle.com/iaas/Content/Monitoring/home.htm).
 //
 
 package monitoring
@@ -27,10 +27,10 @@ type UpdateAlarmDetails struct {
 	// Example: `High CPU Utilization`
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the alarm.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the metric
 	// being evaluated by the alarm.
 	MetricCompartmentId *string `mandatory:"false" json:"metricCompartmentId"`
 
@@ -58,13 +58,16 @@ type UpdateAlarmDetails struct {
 	// rule condition has been met. The query must specify a metric, statistic, interval, and trigger
 	// rule (threshold or absence). Supported values for interval depend on the specified time range. More
 	// interval values are supported for smaller time ranges. You can optionally
-	// specify dimensions and grouping functions. Supported grouping functions: `grouping()`, `groupBy()`.
+	// specify dimensions and grouping functions.
+	// Also, you can customize the
+	// absence detection period (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/create-edit-alarm-query-absence-detection-period.htm).
+	// Supported grouping functions: `grouping()`, `groupBy()`.
 	// For information about writing MQL expressions, see
-	// Editing the MQL Expression for a Query (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
+	// Editing the MQL Expression for a Query (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/query-metric-mql.htm).
 	// For details about MQL, see
-	// Monitoring Query Language (MQL) Reference (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
+	// Monitoring Query Language (MQL) Reference (https://docs.oracle.com/iaas/Content/Monitoring/Reference/mql.htm).
 	// For available dimensions, review the metric definition for the supported service. See
-	// Supported Services (https://docs.cloud.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
+	// Supported Services (https://docs.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#SupportedServices).
 	// Example of threshold alarm:
 	//   -----
 	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.groupBy(availabilityDomain).percentile(0.9) > 85
@@ -72,6 +75,12 @@ type UpdateAlarmDetails struct {
 	// Example of absence alarm:
 	//   -----
 	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent()
+	//   -----
+	// Example of absence alarm with custom absence detection period of 20 hours:
+	//   -----
+	//
+	//     CpuUtilization[1m]{availabilityDomain="cumS:PHX-AD-1"}.absent(20h)
+	//
 	//   -----
 	Query *string `mandatory:"false" json:"query"`
 
@@ -95,7 +104,9 @@ type UpdateAlarmDetails struct {
 	// Example: `CRITICAL`
 	Severity AlarmSeverityEnum `mandatory:"false" json:"severity,omitempty"`
 
-	// The human-readable content of the delivered alarm notification. Oracle recommends providing guidance
+	// The human-readable content of the delivered alarm notification.
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// Oracle recommends providing guidance
 	// to operators for resolving the alarm condition. Consider adding links to standard runbook
 	// practices. Avoid entering confidential information.
 	// Example: `High CPU usage alert. Follow runbook instructions for resolution.`
@@ -112,7 +123,7 @@ type UpdateAlarmDetails struct {
 	MessageFormat UpdateAlarmDetailsMessageFormatEnum `mandatory:"false" json:"messageFormat,omitempty"`
 
 	// A list of destinations for alarm notifications.
-	// Each destination is represented by the OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+	// Each destination is represented by the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
 	// of a related resource, such as a NotificationTopic.
 	// Supported destination services: Notifications, Streaming.
 	// Limit: One destination per supported destination service.
@@ -139,6 +150,40 @@ type UpdateAlarmDetails struct {
 	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// A set of overrides that control evaluations of the alarm.
+	// Each override can specify values for query, severity, body, and pending duration.
+	// When an alarm contains overrides, the Monitoring service evaluates each override in order, beginning with the first override in the array (index position `0`),
+	// and then evaluates the alarm's base values (`ruleName` value of `BASE`).
+	Overrides []AlarmOverride `mandatory:"false" json:"overrides"`
+
+	// Identifier of the alarm's base values for alarm evaluation, for use when the alarm contains overrides.
+	// Default value is `BASE`. For information about alarm overrides, see AlarmOverride.
+	RuleName *string `mandatory:"false" json:"ruleName"`
+
+	// The version of the alarm notification to be delivered. Allowed value: `1.X`
+	// The value must start with a number (up to four digits), followed by a period and an uppercase X.
+	NotificationVersion *string `mandatory:"false" json:"notificationVersion"`
+
+	// Customizable notification title (`title` alarm message parameter (https://docs.oracle.com/iaas/Content/Monitoring/alarm-message-format.htm)).
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// The notification title appears as the subject line in a formatted email message and as the title in a Slack message.
+	NotificationTitle *string `mandatory:"false" json:"notificationTitle"`
+
+	// Customizable slack period to wait for metric ingestion before evaluating the alarm.
+	// Specify a string in ISO 8601 format (`PT10M` for ten minutes or `PT1H`
+	// for one hour). Minimum: PT3M. Maximum: PT2H. Default: PT3M.
+	// For more information about the slack period, see
+	// About the Internal Reset Period (https://docs.oracle.com/iaas/Content/Monitoring/Concepts/monitoringoverview.htm#reset).
+	EvaluationSlackDuration *string `mandatory:"false" json:"evaluationSlackDuration"`
+
+	// Customizable alarm summary (`alarmSummary` alarm message parameter (https://docs.oracle.com/iaas/Content/Monitoring/alarm-message-format.htm)).
+	// Optionally include dynamic variables (https://docs.oracle.com/iaas/Content/Monitoring/Tasks/update-alarm-dynamic-variables.htm).
+	// The alarm summary appears within the body of the alarm message and in responses to
+	// ListAlarmsStatus
+	// GetAlarmHistory and
+	// RetrieveDimensionStates.
+	AlarmSummary *string `mandatory:"false" json:"alarmSummary"`
 }
 
 func (m UpdateAlarmDetails) String() string {
@@ -158,7 +203,7 @@ func (m UpdateAlarmDetails) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for MessageFormat: %s. Supported values are: %s.", m.MessageFormat, strings.Join(GetUpdateAlarmDetailsMessageFormatEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

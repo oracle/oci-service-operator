@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -18,19 +18,23 @@ import (
 // AddWorkerNodesDetails The information about added nodes.
 type AddWorkerNodesDetails struct {
 
-	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user.
-	ClusterAdminPassword *string `mandatory:"true" json:"clusterAdminPassword"`
-
 	// Number of additional worker nodes for the cluster.
 	NumberOfWorkerNodes *int `mandatory:"true" json:"numberOfWorkerNodes"`
 
 	// Worker node types, can either be Worker Data node or Compute only worker node.
 	NodeType AddWorkerNodesDetailsNodeTypeEnum `mandatory:"true" json:"nodeType"`
 
+	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user.
+	ClusterAdminPassword *string `mandatory:"false" json:"clusterAdminPassword"`
+
+	// The secretId for the clusterAdminPassword.
+	SecretId *string `mandatory:"false" json:"secretId"`
+
 	// Shape of the node. This has to be specified when adding compute only worker node at the first time. Otherwise, it's a read-only property.
 	Shape *string `mandatory:"false" json:"shape"`
 
-	// The size of block volume in GB to be attached to the given node. This has to be specified when adding compute only worker node at the first time. Otherwise, it's a read-only property.
+	// The size of block volume in GB to be attached to the given node. This has to be specified when adding compute only worker or edge node at the first time.
+	// For EDGE nodes. Each node can have a different block storage size within the valid range (50GB-10TB) and the value must be specified.
 	BlockVolumeSizeInGBs *int64 `mandatory:"false" json:"blockVolumeSizeInGBs"`
 
 	ShapeConfig *ShapeConfigDetails `mandatory:"false" json:"shapeConfig"`
@@ -50,7 +54,7 @@ func (m AddWorkerNodesDetails) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

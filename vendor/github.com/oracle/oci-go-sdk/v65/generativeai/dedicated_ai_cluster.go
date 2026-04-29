@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,8 +6,8 @@
 //
 // OCI Generative AI is a fully managed service that provides a set of state-of-the-art, customizable large language models (LLMs) that cover a wide range of use cases for text generation, summarization, and text embeddings.
 // Use the Generative AI service management API to create and manage DedicatedAiCluster, Endpoint, Model, and WorkRequest in the Generative AI service. For example, create a custom model by fine-tuning an out-of-the-box model using your own data, on a fine-tuning dedicated AI cluster. Then, create a hosting dedicated AI cluster with an endpoint to host your custom model.
-// To access your custom model endpoints, or to try the out-of-the-box models to generate text, summarize, and create text embeddings see the Generative AI Inference API (https://docs.cloud.oracle.com/#/en/generative-ai-inference/latest/).
-// To learn more about the service, see the Generative AI documentation (https://docs.cloud.oracle.com/iaas/Content/generative-ai/home.htm).
+// To access your custom model endpoints, or to try the out-of-the-box models to generate text, summarize, and create text embeddings see the Generative AI Inference API (https://docs.oracle.com/iaas/api/#/en/generative-ai-inference/latest/).
+// To learn more about the service, see the Generative AI documentation (https://docs.oracle.com/iaas/Content/generative-ai/home.htm).
 //
 
 package generativeai
@@ -21,10 +21,10 @@ import (
 
 // DedicatedAiCluster Dedicated AI clusters are compute resources that you can use for fine-tuning custom models or for hosting endpoints for custom models. The clusters are dedicated to your models and not shared with users in other tenancies.
 // To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized, talk to an administrator who gives OCI resource access to users. See
-// Getting Started with Policies (https://docs.cloud.oracle.com/iaas/Content/Identity/policiesgs/get-started-with-policies.htm) and Getting Access to Generative AI Resouces (https://docs.cloud.oracle.com/iaas/Content/generative-ai/iam-policies.htm).
+// Getting Started with Policies (https://docs.oracle.com/iaas/Content/Identity/policiesgs/get-started-with-policies.htm) and Getting Access to Generative AI Resources (https://docs.oracle.com/iaas/Content/generative-ai/iam-policies.htm).
 type DedicatedAiCluster struct {
 
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the dedicated AI cluster.
 	Id *string `mandatory:"true" json:"id"`
 
 	// The dedicated AI cluster type indicating whether this is a fine-tuning/training processor or hosting/inference processor.
@@ -59,13 +59,15 @@ type DedicatedAiCluster struct {
 
 	Capacity DedicatedAiClusterCapacity `mandatory:"false" json:"capacity"`
 
+	PreviousState *DedicatedAiCluster `mandatory:"false" json:"previousState"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -94,7 +96,7 @@ func (m DedicatedAiCluster) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -107,6 +109,7 @@ func (m *DedicatedAiCluster) UnmarshalJSON(data []byte) (e error) {
 		TimeUpdated      *common.SDKTime                      `json:"timeUpdated"`
 		LifecycleDetails *string                              `json:"lifecycleDetails"`
 		Capacity         dedicatedaiclustercapacity           `json:"capacity"`
+		PreviousState    *DedicatedAiCluster                  `json:"previousState"`
 		FreeformTags     map[string]string                    `json:"freeformTags"`
 		DefinedTags      map[string]map[string]interface{}    `json:"definedTags"`
 		SystemTags       map[string]map[string]interface{}    `json:"systemTags"`
@@ -141,6 +144,8 @@ func (m *DedicatedAiCluster) UnmarshalJSON(data []byte) (e error) {
 	} else {
 		m.Capacity = nil
 	}
+
+	m.PreviousState = model.PreviousState
 
 	m.FreeformTags = model.FreeformTags
 
@@ -274,24 +279,150 @@ type DedicatedAiClusterUnitShapeEnum string
 
 // Set of constants representing the allowable values for DedicatedAiClusterUnitShapeEnum
 const (
-	DedicatedAiClusterUnitShapeLargeCohere DedicatedAiClusterUnitShapeEnum = "LARGE_COHERE"
-	DedicatedAiClusterUnitShapeSmallCohere DedicatedAiClusterUnitShapeEnum = "SMALL_COHERE"
-	DedicatedAiClusterUnitShapeEmbedCohere DedicatedAiClusterUnitShapeEnum = "EMBED_COHERE"
-	DedicatedAiClusterUnitShapeLlama270    DedicatedAiClusterUnitShapeEnum = "LLAMA2_70"
+	DedicatedAiClusterUnitShapeLargeCohere     DedicatedAiClusterUnitShapeEnum = "LARGE_COHERE"
+	DedicatedAiClusterUnitShapeLargeCohereV2   DedicatedAiClusterUnitShapeEnum = "LARGE_COHERE_V2"
+	DedicatedAiClusterUnitShapeSmallCohere     DedicatedAiClusterUnitShapeEnum = "SMALL_COHERE"
+	DedicatedAiClusterUnitShapeSmallCohereV2   DedicatedAiClusterUnitShapeEnum = "SMALL_COHERE_V2"
+	DedicatedAiClusterUnitShapeSmallCohere4    DedicatedAiClusterUnitShapeEnum = "SMALL_COHERE_4"
+	DedicatedAiClusterUnitShapeEmbedCohere     DedicatedAiClusterUnitShapeEnum = "EMBED_COHERE"
+	DedicatedAiClusterUnitShapeLlama270        DedicatedAiClusterUnitShapeEnum = "LLAMA2_70"
+	DedicatedAiClusterUnitShapeLargeGeneric    DedicatedAiClusterUnitShapeEnum = "LARGE_GENERIC"
+	DedicatedAiClusterUnitShapeLargeCohereV22  DedicatedAiClusterUnitShapeEnum = "LARGE_COHERE_V2_2"
+	DedicatedAiClusterUnitShapeLargeGeneric4   DedicatedAiClusterUnitShapeEnum = "LARGE_GENERIC_4"
+	DedicatedAiClusterUnitShapeSmallGenericV2  DedicatedAiClusterUnitShapeEnum = "SMALL_GENERIC_V2"
+	DedicatedAiClusterUnitShapeLargeGeneric2   DedicatedAiClusterUnitShapeEnum = "LARGE_GENERIC_2"
+	DedicatedAiClusterUnitShapeLargeGenericV2  DedicatedAiClusterUnitShapeEnum = "LARGE_GENERIC_V2"
+	DedicatedAiClusterUnitShapeLargeGenericV3  DedicatedAiClusterUnitShapeEnum = "LARGE_GENERIC_V3"
+	DedicatedAiClusterUnitShapeLargeCohereV3   DedicatedAiClusterUnitShapeEnum = "LARGE_COHERE_V3"
+	DedicatedAiClusterUnitShapeRerankCohere    DedicatedAiClusterUnitShapeEnum = "RERANK_COHERE"
+	DedicatedAiClusterUnitShapeSmallGenericV1  DedicatedAiClusterUnitShapeEnum = "SMALL_GENERIC_V1"
+	DedicatedAiClusterUnitShapeMediumGenericV1 DedicatedAiClusterUnitShapeEnum = "MEDIUM_GENERIC_V1"
+	DedicatedAiClusterUnitShapeLargeGenericV1  DedicatedAiClusterUnitShapeEnum = "LARGE_GENERIC_V1"
+	DedicatedAiClusterUnitShapeA10X1           DedicatedAiClusterUnitShapeEnum = "A10_X1"
+	DedicatedAiClusterUnitShapeA10X2           DedicatedAiClusterUnitShapeEnum = "A10_X2"
+	DedicatedAiClusterUnitShapeA10X4           DedicatedAiClusterUnitShapeEnum = "A10_X4"
+	DedicatedAiClusterUnitShapeA10040gX1       DedicatedAiClusterUnitShapeEnum = "A100_40G_X1"
+	DedicatedAiClusterUnitShapeA10040gX2       DedicatedAiClusterUnitShapeEnum = "A100_40G_X2"
+	DedicatedAiClusterUnitShapeA10040gX4       DedicatedAiClusterUnitShapeEnum = "A100_40G_X4"
+	DedicatedAiClusterUnitShapeA10040gX8       DedicatedAiClusterUnitShapeEnum = "A100_40G_X8"
+	DedicatedAiClusterUnitShapeA10080gX1       DedicatedAiClusterUnitShapeEnum = "A100_80G_X1"
+	DedicatedAiClusterUnitShapeA10080gX2       DedicatedAiClusterUnitShapeEnum = "A100_80G_X2"
+	DedicatedAiClusterUnitShapeA10080gX4       DedicatedAiClusterUnitShapeEnum = "A100_80G_X4"
+	DedicatedAiClusterUnitShapeA10080gX8       DedicatedAiClusterUnitShapeEnum = "A100_80G_X8"
+	DedicatedAiClusterUnitShapeH100X1          DedicatedAiClusterUnitShapeEnum = "H100_X1"
+	DedicatedAiClusterUnitShapeH100X2          DedicatedAiClusterUnitShapeEnum = "H100_X2"
+	DedicatedAiClusterUnitShapeH100X4          DedicatedAiClusterUnitShapeEnum = "H100_X4"
+	DedicatedAiClusterUnitShapeH100X8          DedicatedAiClusterUnitShapeEnum = "H100_X8"
+	DedicatedAiClusterUnitShapeH200X1          DedicatedAiClusterUnitShapeEnum = "H200_X1"
+	DedicatedAiClusterUnitShapeH200X2          DedicatedAiClusterUnitShapeEnum = "H200_X2"
+	DedicatedAiClusterUnitShapeH200X4          DedicatedAiClusterUnitShapeEnum = "H200_X4"
+	DedicatedAiClusterUnitShapeH200X8          DedicatedAiClusterUnitShapeEnum = "H200_X8"
+	DedicatedAiClusterUnitShapeOaiA10X2        DedicatedAiClusterUnitShapeEnum = "OAI_A10_X2"
+	DedicatedAiClusterUnitShapeOaiH100X1       DedicatedAiClusterUnitShapeEnum = "OAI_H100_X1"
+	DedicatedAiClusterUnitShapeOaiH100X2       DedicatedAiClusterUnitShapeEnum = "OAI_H100_X2"
+	DedicatedAiClusterUnitShapeOaiH200X1       DedicatedAiClusterUnitShapeEnum = "OAI_H200_X1"
+	DedicatedAiClusterUnitShapeOaiA10080gX1    DedicatedAiClusterUnitShapeEnum = "OAI_A100_80G_X1"
+	DedicatedAiClusterUnitShapeOaiA10080gX2    DedicatedAiClusterUnitShapeEnum = "OAI_A100_80G_X2"
+	DedicatedAiClusterUnitShapeOaiA10040gX1    DedicatedAiClusterUnitShapeEnum = "OAI_A100_40G_X1"
+	DedicatedAiClusterUnitShapeOaiA10040gX4    DedicatedAiClusterUnitShapeEnum = "OAI_A100_40G_X4"
 )
 
 var mappingDedicatedAiClusterUnitShapeEnum = map[string]DedicatedAiClusterUnitShapeEnum{
-	"LARGE_COHERE": DedicatedAiClusterUnitShapeLargeCohere,
-	"SMALL_COHERE": DedicatedAiClusterUnitShapeSmallCohere,
-	"EMBED_COHERE": DedicatedAiClusterUnitShapeEmbedCohere,
-	"LLAMA2_70":    DedicatedAiClusterUnitShapeLlama270,
+	"LARGE_COHERE":      DedicatedAiClusterUnitShapeLargeCohere,
+	"LARGE_COHERE_V2":   DedicatedAiClusterUnitShapeLargeCohereV2,
+	"SMALL_COHERE":      DedicatedAiClusterUnitShapeSmallCohere,
+	"SMALL_COHERE_V2":   DedicatedAiClusterUnitShapeSmallCohereV2,
+	"SMALL_COHERE_4":    DedicatedAiClusterUnitShapeSmallCohere4,
+	"EMBED_COHERE":      DedicatedAiClusterUnitShapeEmbedCohere,
+	"LLAMA2_70":         DedicatedAiClusterUnitShapeLlama270,
+	"LARGE_GENERIC":     DedicatedAiClusterUnitShapeLargeGeneric,
+	"LARGE_COHERE_V2_2": DedicatedAiClusterUnitShapeLargeCohereV22,
+	"LARGE_GENERIC_4":   DedicatedAiClusterUnitShapeLargeGeneric4,
+	"SMALL_GENERIC_V2":  DedicatedAiClusterUnitShapeSmallGenericV2,
+	"LARGE_GENERIC_2":   DedicatedAiClusterUnitShapeLargeGeneric2,
+	"LARGE_GENERIC_V2":  DedicatedAiClusterUnitShapeLargeGenericV2,
+	"LARGE_GENERIC_V3":  DedicatedAiClusterUnitShapeLargeGenericV3,
+	"LARGE_COHERE_V3":   DedicatedAiClusterUnitShapeLargeCohereV3,
+	"RERANK_COHERE":     DedicatedAiClusterUnitShapeRerankCohere,
+	"SMALL_GENERIC_V1":  DedicatedAiClusterUnitShapeSmallGenericV1,
+	"MEDIUM_GENERIC_V1": DedicatedAiClusterUnitShapeMediumGenericV1,
+	"LARGE_GENERIC_V1":  DedicatedAiClusterUnitShapeLargeGenericV1,
+	"A10_X1":            DedicatedAiClusterUnitShapeA10X1,
+	"A10_X2":            DedicatedAiClusterUnitShapeA10X2,
+	"A10_X4":            DedicatedAiClusterUnitShapeA10X4,
+	"A100_40G_X1":       DedicatedAiClusterUnitShapeA10040gX1,
+	"A100_40G_X2":       DedicatedAiClusterUnitShapeA10040gX2,
+	"A100_40G_X4":       DedicatedAiClusterUnitShapeA10040gX4,
+	"A100_40G_X8":       DedicatedAiClusterUnitShapeA10040gX8,
+	"A100_80G_X1":       DedicatedAiClusterUnitShapeA10080gX1,
+	"A100_80G_X2":       DedicatedAiClusterUnitShapeA10080gX2,
+	"A100_80G_X4":       DedicatedAiClusterUnitShapeA10080gX4,
+	"A100_80G_X8":       DedicatedAiClusterUnitShapeA10080gX8,
+	"H100_X1":           DedicatedAiClusterUnitShapeH100X1,
+	"H100_X2":           DedicatedAiClusterUnitShapeH100X2,
+	"H100_X4":           DedicatedAiClusterUnitShapeH100X4,
+	"H100_X8":           DedicatedAiClusterUnitShapeH100X8,
+	"H200_X1":           DedicatedAiClusterUnitShapeH200X1,
+	"H200_X2":           DedicatedAiClusterUnitShapeH200X2,
+	"H200_X4":           DedicatedAiClusterUnitShapeH200X4,
+	"H200_X8":           DedicatedAiClusterUnitShapeH200X8,
+	"OAI_A10_X2":        DedicatedAiClusterUnitShapeOaiA10X2,
+	"OAI_H100_X1":       DedicatedAiClusterUnitShapeOaiH100X1,
+	"OAI_H100_X2":       DedicatedAiClusterUnitShapeOaiH100X2,
+	"OAI_H200_X1":       DedicatedAiClusterUnitShapeOaiH200X1,
+	"OAI_A100_80G_X1":   DedicatedAiClusterUnitShapeOaiA10080gX1,
+	"OAI_A100_80G_X2":   DedicatedAiClusterUnitShapeOaiA10080gX2,
+	"OAI_A100_40G_X1":   DedicatedAiClusterUnitShapeOaiA10040gX1,
+	"OAI_A100_40G_X4":   DedicatedAiClusterUnitShapeOaiA10040gX4,
 }
 
 var mappingDedicatedAiClusterUnitShapeEnumLowerCase = map[string]DedicatedAiClusterUnitShapeEnum{
-	"large_cohere": DedicatedAiClusterUnitShapeLargeCohere,
-	"small_cohere": DedicatedAiClusterUnitShapeSmallCohere,
-	"embed_cohere": DedicatedAiClusterUnitShapeEmbedCohere,
-	"llama2_70":    DedicatedAiClusterUnitShapeLlama270,
+	"large_cohere":      DedicatedAiClusterUnitShapeLargeCohere,
+	"large_cohere_v2":   DedicatedAiClusterUnitShapeLargeCohereV2,
+	"small_cohere":      DedicatedAiClusterUnitShapeSmallCohere,
+	"small_cohere_v2":   DedicatedAiClusterUnitShapeSmallCohereV2,
+	"small_cohere_4":    DedicatedAiClusterUnitShapeSmallCohere4,
+	"embed_cohere":      DedicatedAiClusterUnitShapeEmbedCohere,
+	"llama2_70":         DedicatedAiClusterUnitShapeLlama270,
+	"large_generic":     DedicatedAiClusterUnitShapeLargeGeneric,
+	"large_cohere_v2_2": DedicatedAiClusterUnitShapeLargeCohereV22,
+	"large_generic_4":   DedicatedAiClusterUnitShapeLargeGeneric4,
+	"small_generic_v2":  DedicatedAiClusterUnitShapeSmallGenericV2,
+	"large_generic_2":   DedicatedAiClusterUnitShapeLargeGeneric2,
+	"large_generic_v2":  DedicatedAiClusterUnitShapeLargeGenericV2,
+	"large_generic_v3":  DedicatedAiClusterUnitShapeLargeGenericV3,
+	"large_cohere_v3":   DedicatedAiClusterUnitShapeLargeCohereV3,
+	"rerank_cohere":     DedicatedAiClusterUnitShapeRerankCohere,
+	"small_generic_v1":  DedicatedAiClusterUnitShapeSmallGenericV1,
+	"medium_generic_v1": DedicatedAiClusterUnitShapeMediumGenericV1,
+	"large_generic_v1":  DedicatedAiClusterUnitShapeLargeGenericV1,
+	"a10_x1":            DedicatedAiClusterUnitShapeA10X1,
+	"a10_x2":            DedicatedAiClusterUnitShapeA10X2,
+	"a10_x4":            DedicatedAiClusterUnitShapeA10X4,
+	"a100_40g_x1":       DedicatedAiClusterUnitShapeA10040gX1,
+	"a100_40g_x2":       DedicatedAiClusterUnitShapeA10040gX2,
+	"a100_40g_x4":       DedicatedAiClusterUnitShapeA10040gX4,
+	"a100_40g_x8":       DedicatedAiClusterUnitShapeA10040gX8,
+	"a100_80g_x1":       DedicatedAiClusterUnitShapeA10080gX1,
+	"a100_80g_x2":       DedicatedAiClusterUnitShapeA10080gX2,
+	"a100_80g_x4":       DedicatedAiClusterUnitShapeA10080gX4,
+	"a100_80g_x8":       DedicatedAiClusterUnitShapeA10080gX8,
+	"h100_x1":           DedicatedAiClusterUnitShapeH100X1,
+	"h100_x2":           DedicatedAiClusterUnitShapeH100X2,
+	"h100_x4":           DedicatedAiClusterUnitShapeH100X4,
+	"h100_x8":           DedicatedAiClusterUnitShapeH100X8,
+	"h200_x1":           DedicatedAiClusterUnitShapeH200X1,
+	"h200_x2":           DedicatedAiClusterUnitShapeH200X2,
+	"h200_x4":           DedicatedAiClusterUnitShapeH200X4,
+	"h200_x8":           DedicatedAiClusterUnitShapeH200X8,
+	"oai_a10_x2":        DedicatedAiClusterUnitShapeOaiA10X2,
+	"oai_h100_x1":       DedicatedAiClusterUnitShapeOaiH100X1,
+	"oai_h100_x2":       DedicatedAiClusterUnitShapeOaiH100X2,
+	"oai_h200_x1":       DedicatedAiClusterUnitShapeOaiH200X1,
+	"oai_a100_80g_x1":   DedicatedAiClusterUnitShapeOaiA10080gX1,
+	"oai_a100_80g_x2":   DedicatedAiClusterUnitShapeOaiA10080gX2,
+	"oai_a100_40g_x1":   DedicatedAiClusterUnitShapeOaiA10040gX1,
+	"oai_a100_40g_x4":   DedicatedAiClusterUnitShapeOaiA10040gX4,
 }
 
 // GetDedicatedAiClusterUnitShapeEnumValues Enumerates the set of values for DedicatedAiClusterUnitShapeEnum
@@ -307,9 +438,51 @@ func GetDedicatedAiClusterUnitShapeEnumValues() []DedicatedAiClusterUnitShapeEnu
 func GetDedicatedAiClusterUnitShapeEnumStringValues() []string {
 	return []string{
 		"LARGE_COHERE",
+		"LARGE_COHERE_V2",
 		"SMALL_COHERE",
+		"SMALL_COHERE_V2",
+		"SMALL_COHERE_4",
 		"EMBED_COHERE",
 		"LLAMA2_70",
+		"LARGE_GENERIC",
+		"LARGE_COHERE_V2_2",
+		"LARGE_GENERIC_4",
+		"SMALL_GENERIC_V2",
+		"LARGE_GENERIC_2",
+		"LARGE_GENERIC_V2",
+		"LARGE_GENERIC_V3",
+		"LARGE_COHERE_V3",
+		"RERANK_COHERE",
+		"SMALL_GENERIC_V1",
+		"MEDIUM_GENERIC_V1",
+		"LARGE_GENERIC_V1",
+		"A10_X1",
+		"A10_X2",
+		"A10_X4",
+		"A100_40G_X1",
+		"A100_40G_X2",
+		"A100_40G_X4",
+		"A100_40G_X8",
+		"A100_80G_X1",
+		"A100_80G_X2",
+		"A100_80G_X4",
+		"A100_80G_X8",
+		"H100_X1",
+		"H100_X2",
+		"H100_X4",
+		"H100_X8",
+		"H200_X1",
+		"H200_X2",
+		"H200_X4",
+		"H200_X8",
+		"OAI_A10_X2",
+		"OAI_H100_X1",
+		"OAI_H100_X2",
+		"OAI_H200_X1",
+		"OAI_A100_80G_X1",
+		"OAI_A100_80G_X2",
+		"OAI_A100_40G_X1",
+		"OAI_A100_40G_X4",
 	}
 }
 

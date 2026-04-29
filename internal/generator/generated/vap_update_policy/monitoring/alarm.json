@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "monitoring",
+    "apiVersion": "monitoring.oracle.com/v1beta1",
+    "kind": "Alarm",
+    "formalSlug": "alarm",
+    "providerResource": "oci_monitoring_alarm",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "body",
+      "definedTags",
+      "destinations",
+      "displayName",
+      "freeformTags",
+      "isEnabled",
+      "isNotificationsPerMetricDimensionEnabled",
+      "messageFormat",
+      "metricCompartmentId",
+      "metricCompartmentIdInSubtree",
+      "namespace",
+      "pendingDuration",
+      "query",
+      "repeatNotificationDuration",
+      "resolution",
+      "resourceGroup",
+      "severity",
+      "suppression"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "compartmentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

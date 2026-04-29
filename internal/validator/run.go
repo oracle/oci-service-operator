@@ -56,7 +56,14 @@ func Run(options config.Options) (diff.Report, string, error) {
 		return diff.Report{}, "", err
 	}
 
-	if options.HasServiceFilter() {
+	if options.WantsConfigSelection() {
+		selectedSurface, err := loadSelectedValidatorSurface(options)
+		if err != nil {
+			return diff.Report{}, "", err
+		}
+		result = filterControllerReportByStructs(result, selectedSurface.structs)
+		apiReport = filterAPIReportBySelectedServices(apiReport, selectedSurface.services)
+	} else if options.HasServiceFilter() {
 		service := strings.ToLower(strings.TrimSpace(options.Service))
 		result = filterControllerReportByService(result, service)
 		apiReport = filterAPIReportByService(apiReport, service)

@@ -19,7 +19,7 @@ import (
 )
 
 // CompartmentServiceClient is the handwritten extension seam for Compartment runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*CompartmentServiceManager).WithClient.
 type CompartmentServiceClient interface {
 	CreateOrUpdate(context.Context, *identityv1beta1.Compartment, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultCompartmentServiceClient struct {
 	generatedruntime.ServiceClient[*identityv1beta1.Compartment]
 }
 
-func newCompartmentRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "identity",
-		FormalSlug:    "compartment",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "none",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{},
-			ActiveStates:       []string{"ACTIVE", "INACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "best-effort",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "description", "freeformTags", "name"},
-			ForceNew:      []string{"compartmentId"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ CompartmentServiceClient = defaultCompartmentServiceClient{}
 
 var newCompartmentServiceClient = func(manager *CompartmentServiceManager) CompartmentServiceClient {
 	sdkClient, err := identitysdk.NewIdentityClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*identityv1beta1.Compartment]{
-		Kind:      "Compartment",
-		SDKName:   "Compartment",
-		Log:       manager.Log,
-		Semantics: newCompartmentRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &identitysdk.CreateCompartmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateCompartment(ctx, *request.(*identitysdk.CreateCompartmentRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateCompartmentDetails", RequestName: "CreateCompartmentDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &identitysdk.GetCompartmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetCompartment(ctx, *request.(*identitysdk.GetCompartmentRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &identitysdk.ListCompartmentsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListCompartments(ctx, *request.(*identitysdk.ListCompartmentsRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "AccessLevel", RequestName: "accessLevel", Contribution: "query", PreferResourceID: false}, {FieldName: "CompartmentIdInSubtree", RequestName: "compartmentIdInSubtree", Contribution: "query", PreferResourceID: false}, {FieldName: "Name", RequestName: "name", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &identitysdk.UpdateCompartmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateCompartment(ctx, *request.(*identitysdk.UpdateCompartmentRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateCompartmentDetails", RequestName: "UpdateCompartmentDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &identitysdk.DeleteCompartmentRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteCompartment(ctx, *request.(*identitysdk.DeleteCompartmentRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newCompartmentRuntimeHooks(manager, sdkClient)
+	config := buildCompartmentGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Compartment OCI client: %w", err)
 	}
-	return defaultCompartmentServiceClient{
+	delegate := defaultCompartmentServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*identityv1beta1.Compartment](config),
 	}
+	return wrapCompartmentGeneratedClient(hooks, delegate)
 }

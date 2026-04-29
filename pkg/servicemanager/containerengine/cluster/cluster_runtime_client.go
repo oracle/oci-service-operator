@@ -20,83 +20,118 @@ import (
 )
 
 func init() {
-	newClusterServiceClient = func(manager *ClusterServiceManager) ClusterServiceClient {
-		sdkClient, err := containerenginesdk.NewContainerEngineClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*containerenginev1beta1.Cluster]{
-			Kind:             "Cluster",
-			SDKName:          "Cluster",
-			Log:              manager.Log,
-			CredentialClient: manager.CredentialClient,
-			BuildCreateBody: func(_ context.Context, resource *containerenginev1beta1.Cluster, _ string) (any, error) {
-				return buildClusterCreateDetails(resource)
-			},
-			BuildUpdateBody: func(
-				ctx context.Context,
-				resource *containerenginev1beta1.Cluster,
-				namespace string,
-				currentResponse any,
-			) (any, bool, error) {
-				return buildClusterUpdateBody(ctx, manager.CredentialClient, resource, namespace, currentResponse)
-			},
-			Semantics: newClusterRuntimeSemantics(),
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.CreateClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateCluster(ctx, *request.(*containerenginesdk.CreateClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "CreateClusterDetails", RequestName: "CreateClusterDetails", Contribution: "body"},
-				},
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.GetClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetCluster(ctx, *request.(*containerenginesdk.GetClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
-				},
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.ListClustersRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListClusters(ctx, *request.(*containerenginesdk.ListClustersRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-					{FieldName: "Name", RequestName: "name", Contribution: "query"},
-					{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
-					{FieldName: "Page", RequestName: "page", Contribution: "query"},
-					{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
-					{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
-				},
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.UpdateClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateCluster(ctx, *request.(*containerenginesdk.UpdateClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
-					{FieldName: "UpdateClusterDetails", RequestName: "UpdateClusterDetails", Contribution: "body"},
-				},
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.DeleteClusterRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteCluster(ctx, *request.(*containerenginesdk.DeleteClusterRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
-				},
-			},
+	registerClusterRuntimeHooksMutator(func(manager *ClusterServiceManager, hooks *ClusterRuntimeHooks) {
+		applyClusterRuntimeHooks(manager, hooks)
+	})
+}
+
+func applyClusterRuntimeHooks(manager *ClusterServiceManager, hooks *ClusterRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	var credentialClient credhelper.CredentialClient
+	if manager != nil {
+		credentialClient = manager.CredentialClient
+	}
+
+	hooks.Semantics = reviewedClusterRuntimeSemantics()
+	hooks.BuildCreateBody = func(_ context.Context, resource *containerenginev1beta1.Cluster, _ string) (any, error) {
+		return buildClusterCreateDetails(resource)
+	}
+	hooks.Get.Fields = reviewedClusterGetFields()
+	if hooks.Get.Call != nil {
+		originalGet := hooks.Get.Call
+		hooks.Get.Call = func(ctx context.Context, request containerenginesdk.GetClusterRequest) (containerenginesdk.GetClusterResponse, error) {
+			request.ShouldIncludeOidcConfigFile = common.Bool(true)
+			return originalGet(ctx, request)
 		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize Cluster OCI client: %w", err)
-		}
-		return defaultClusterServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*containerenginev1beta1.Cluster](config),
-		}
+	}
+	hooks.List.Fields = reviewedClusterListFields()
+	hooks.BuildUpdateBody = func(
+		ctx context.Context,
+		resource *containerenginev1beta1.Cluster,
+		namespace string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildClusterUpdateBody(ctx, credentialClient, resource, namespace, currentResponse)
+	}
+}
+
+func reviewedClusterRuntimeSemantics() *generatedruntime.Semantics {
+	semantics := newClusterRuntimeSemantics()
+	semantics.Mutation = generatedruntime.MutationSemantics{
+		Mutable:       reviewedClusterMutableFields(),
+		ForceNew:      reviewedClusterForceNewFields(),
+		ConflictsWith: map[string][]string{},
+	}
+	return semantics
+}
+
+func reviewedClusterMutableFields() []string {
+	return []string{
+		"definedTags",
+		"freeformTags",
+		"imagePolicyConfig.isPolicyEnabled",
+		"imagePolicyConfig.keyDetails.kmsKeyId",
+		"kubernetesVersion",
+		"name",
+		"options.admissionControllerOptions.isPodSecurityPolicyEnabled",
+		"options.openIdConnectDiscovery.isOpenIdConnectDiscoveryEnabled",
+		"options.openIdConnectTokenAuthenticationConfig.caCertificate",
+		"options.openIdConnectTokenAuthenticationConfig.clientId",
+		"options.openIdConnectTokenAuthenticationConfig.configurationFile",
+		"options.openIdConnectTokenAuthenticationConfig.groupsClaim",
+		"options.openIdConnectTokenAuthenticationConfig.groupsPrefix",
+		"options.openIdConnectTokenAuthenticationConfig.isOpenIdConnectAuthEnabled",
+		"options.openIdConnectTokenAuthenticationConfig.issuerUrl",
+		"options.openIdConnectTokenAuthenticationConfig.requiredClaims.key",
+		"options.openIdConnectTokenAuthenticationConfig.requiredClaims.value",
+		"options.openIdConnectTokenAuthenticationConfig.signingAlgorithms",
+		"options.openIdConnectTokenAuthenticationConfig.usernameClaim",
+		"options.openIdConnectTokenAuthenticationConfig.usernamePrefix",
+		"options.persistentVolumeConfig.definedTags",
+		"options.persistentVolumeConfig.freeformTags",
+		"options.serviceLbConfig.backendNsgIds",
+		"options.serviceLbConfig.definedTags",
+		"options.serviceLbConfig.freeformTags",
+		"type",
+	}
+}
+
+func reviewedClusterForceNewFields() []string {
+	return []string{
+		"clusterPodNetworkOptions.cniType",
+		"clusterPodNetworkOptions.jsonData",
+		"compartmentId",
+		"endpointConfig.isPublicIpEnabled",
+		"endpointConfig.nsgIds",
+		"endpointConfig.subnetId",
+		"kmsKeyId",
+		"options.addOns.isKubernetesDashboardEnabled",
+		"options.addOns.isTillerEnabled",
+		"options.kubernetesNetworkConfig.podsCidr",
+		"options.kubernetesNetworkConfig.servicesCidr",
+		"options.serviceLbSubnetIds",
+		"vcnId",
+	}
+}
+
+func reviewedClusterGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "ShouldIncludeOidcConfigFile", RequestName: "shouldIncludeOidcConfigFile", Contribution: "query"},
+	}
+}
+
+func reviewedClusterListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "Name", RequestName: "name", Contribution: "query"},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
 	}
 }
 
@@ -160,29 +195,30 @@ func buildClusterUpdateBody(
 	namespace string,
 	currentResponse any,
 ) (containerenginesdk.UpdateClusterDetails, bool, error) {
-	details, err := buildClusterUpdateDetails(ctx, credentialClient, resource, namespace)
+	resolvedValues, details, err := buildClusterResolvedUpdateDetails(ctx, credentialClient, resource, namespace)
 	if err != nil {
 		return containerenginesdk.UpdateClusterDetails{}, false, err
-	}
-
-	desiredValues, err := clusterJSONMap(details)
-	if err != nil {
-		return containerenginesdk.UpdateClusterDetails{}, false, fmt.Errorf("project desired cluster update body: %w", err)
-	}
-	if len(desiredValues) == 0 {
-		return details, false, nil
 	}
 
 	currentDetails, err := buildCurrentClusterUpdateDetails(currentResponse)
 	if err != nil {
 		return containerenginesdk.UpdateClusterDetails{}, false, err
 	}
+	explicitClearDrift := applyClusterExplicitMutableClears(resolvedValues, resource.Spec, currentDetails, &details)
+
+	desiredValues, err := clusterJSONMap(details)
+	if err != nil {
+		return containerenginesdk.UpdateClusterDetails{}, false, fmt.Errorf("project desired cluster update body: %w", err)
+	}
+	if len(desiredValues) == 0 && !explicitClearDrift {
+		return details, false, nil
+	}
 	currentValues, err := clusterJSONMap(currentDetails)
 	if err != nil {
 		return containerenginesdk.UpdateClusterDetails{}, false, fmt.Errorf("project current cluster update body: %w", err)
 	}
 
-	return details, !clusterMapSubsetEqual(desiredValues, currentValues), nil
+	return details, explicitClearDrift || !clusterMapSubsetEqual(desiredValues, currentValues), nil
 }
 
 func buildClusterUpdateDetails(
@@ -191,26 +227,38 @@ func buildClusterUpdateDetails(
 	resource *containerenginev1beta1.Cluster,
 	namespace string,
 ) (containerenginesdk.UpdateClusterDetails, error) {
+	_, details, err := buildClusterResolvedUpdateDetails(ctx, credentialClient, resource, namespace)
+	return details, err
+}
+
+func buildClusterResolvedUpdateDetails(
+	ctx context.Context,
+	credentialClient credhelper.CredentialClient,
+	resource *containerenginev1beta1.Cluster,
+	namespace string,
+) (map[string]any, containerenginesdk.UpdateClusterDetails, error) {
 	if resource == nil {
-		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("cluster resource is nil")
+		return nil, containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("cluster resource is nil")
 	}
 
 	resolvedSpec, err := generatedruntime.ResolveSpecValueWithBoolFields(resource, ctx, credentialClient, namespace)
 	if err != nil {
-		return containerenginesdk.UpdateClusterDetails{}, err
+		return nil, containerenginesdk.UpdateClusterDetails{}, err
 	}
 
 	payload, err := json.Marshal(resolvedSpec)
 	if err != nil {
-		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("marshal resolved cluster spec: %w", err)
+		return nil, containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("marshal resolved cluster spec: %w", err)
 	}
 
 	var details containerenginesdk.UpdateClusterDetails
 	if err := json.Unmarshal(payload, &details); err != nil {
-		return containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("decode cluster update request body: %w", err)
+		return nil, containerenginesdk.UpdateClusterDetails{}, fmt.Errorf("decode cluster update request body: %w", err)
 	}
+	resolvedValues, _ := resolvedSpec.(map[string]any)
+	applyClusterExplicitEmptySliceValues(resource.Spec, &details)
 
-	return details, nil
+	return resolvedValues, details, nil
 }
 
 func buildCurrentClusterUpdateDetails(currentResponse any) (containerenginesdk.UpdateClusterDetails, error) {
@@ -289,22 +337,28 @@ func buildClusterCreateOptions(spec containerenginev1beta1.ClusterOptions) (*con
 	if err != nil {
 		return nil, fmt.Errorf("build cluster serviceLbConfig: %w", err)
 	}
+	openIDConnectTokenAuth := buildClusterOpenIDConnectTokenAuthenticationConfig(spec.OpenIdConnectTokenAuthenticationConfig)
+	openIDConnectDiscovery := buildClusterOpenIDConnectDiscovery(spec.OpenIdConnectDiscovery)
 
 	if len(spec.ServiceLbSubnetIds) == 0 &&
 		kubernetesNetworkConfig == nil &&
 		addOns == nil &&
 		admissionControllerOptions == nil &&
 		persistentVolumeConfig == nil &&
-		serviceLBConfig == nil {
+		serviceLBConfig == nil &&
+		openIDConnectTokenAuth == nil &&
+		openIDConnectDiscovery == nil {
 		return nil, nil
 	}
 
 	details := &containerenginesdk.ClusterCreateOptions{
-		KubernetesNetworkConfig:    kubernetesNetworkConfig,
-		AddOns:                     addOns,
-		AdmissionControllerOptions: admissionControllerOptions,
-		PersistentVolumeConfig:     persistentVolumeConfig,
-		ServiceLbConfig:            serviceLBConfig,
+		KubernetesNetworkConfig:                kubernetesNetworkConfig,
+		AddOns:                                 addOns,
+		AdmissionControllerOptions:             admissionControllerOptions,
+		PersistentVolumeConfig:                 persistentVolumeConfig,
+		ServiceLbConfig:                        serviceLBConfig,
+		OpenIdConnectTokenAuthenticationConfig: openIDConnectTokenAuth,
+		OpenIdConnectDiscovery:                 openIDConnectDiscovery,
 	}
 	if len(spec.ServiceLbSubnetIds) > 0 {
 		details.ServiceLbSubnetIds = append([]string(nil), spec.ServiceLbSubnetIds...)
@@ -373,7 +427,7 @@ func buildClusterPersistentVolumeConfigDetails(
 func buildClusterServiceLBConfigDetails(
 	spec containerenginev1beta1.ClusterOptionsServiceLbConfig,
 ) (*containerenginesdk.ServiceLbConfigDetails, error) {
-	if len(spec.FreeformTags) == 0 && len(spec.DefinedTags) == 0 {
+	if len(spec.FreeformTags) == 0 && len(spec.DefinedTags) == 0 && len(spec.BackendNsgIds) == 0 {
 		return nil, nil
 	}
 
@@ -383,9 +437,284 @@ func buildClusterServiceLBConfigDetails(
 	}
 
 	return &containerenginesdk.ServiceLbConfigDetails{
-		FreeformTags: copyClusterStringMap(spec.FreeformTags),
-		DefinedTags:  definedTags,
+		FreeformTags:  copyClusterStringMap(spec.FreeformTags),
+		DefinedTags:   definedTags,
+		BackendNsgIds: append([]string(nil), spec.BackendNsgIds...),
 	}, nil
+}
+
+func buildClusterOpenIDConnectTokenAuthenticationConfig(
+	spec containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfig,
+) *containerenginesdk.OpenIdConnectTokenAuthenticationConfig {
+	if !spec.IsOpenIdConnectAuthEnabled &&
+		spec.IssuerUrl == "" &&
+		spec.ClientId == "" &&
+		spec.UsernameClaim == "" &&
+		spec.UsernamePrefix == "" &&
+		spec.GroupsClaim == "" &&
+		spec.GroupsPrefix == "" &&
+		len(spec.RequiredClaims) == 0 &&
+		spec.CaCertificate == "" &&
+		len(spec.SigningAlgorithms) == 0 &&
+		spec.ConfigurationFile == "" {
+		return nil
+	}
+
+	details := &containerenginesdk.OpenIdConnectTokenAuthenticationConfig{
+		IsOpenIdConnectAuthEnabled: common.Bool(spec.IsOpenIdConnectAuthEnabled),
+	}
+	if spec.IssuerUrl != "" {
+		details.IssuerUrl = common.String(spec.IssuerUrl)
+	}
+	if spec.ClientId != "" {
+		details.ClientId = common.String(spec.ClientId)
+	}
+	if spec.UsernameClaim != "" {
+		details.UsernameClaim = common.String(spec.UsernameClaim)
+	}
+	if spec.UsernamePrefix != "" {
+		details.UsernamePrefix = common.String(spec.UsernamePrefix)
+	}
+	if spec.GroupsClaim != "" {
+		details.GroupsClaim = common.String(spec.GroupsClaim)
+	}
+	if spec.GroupsPrefix != "" {
+		details.GroupsPrefix = common.String(spec.GroupsPrefix)
+	}
+	requiredClaims := buildClusterOIDCRequiredClaims(spec.RequiredClaims)
+	if len(requiredClaims) > 0 {
+		details.RequiredClaims = requiredClaims
+	}
+	if spec.CaCertificate != "" {
+		details.CaCertificate = common.String(spec.CaCertificate)
+	}
+	if len(spec.SigningAlgorithms) > 0 {
+		details.SigningAlgorithms = append([]string(nil), spec.SigningAlgorithms...)
+	}
+	if spec.ConfigurationFile != "" {
+		details.ConfigurationFile = common.String(spec.ConfigurationFile)
+	}
+	return details
+}
+
+func buildClusterOIDCRequiredClaims(
+	spec []containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim,
+) []containerenginesdk.KeyValue {
+	if len(spec) == 0 {
+		return nil
+	}
+
+	claims := make([]containerenginesdk.KeyValue, 0, len(spec))
+	for _, claim := range spec {
+		if claim.Key == "" && claim.Value == "" {
+			continue
+		}
+		claims = append(claims, containerenginesdk.KeyValue{
+			Key:   common.String(claim.Key),
+			Value: common.String(claim.Value),
+		})
+	}
+	if len(claims) == 0 {
+		return nil
+	}
+	return claims
+}
+
+func buildClusterOpenIDConnectDiscovery(
+	spec containerenginev1beta1.ClusterOptionsOpenIdConnectDiscovery,
+) *containerenginesdk.OpenIdConnectDiscovery {
+	if !spec.IsOpenIdConnectDiscoveryEnabled {
+		return nil
+	}
+
+	return &containerenginesdk.OpenIdConnectDiscovery{
+		IsOpenIdConnectDiscoveryEnabled: common.Bool(spec.IsOpenIdConnectDiscoveryEnabled),
+	}
+}
+
+func applyClusterExplicitEmptySliceValues(
+	spec containerenginev1beta1.ClusterSpec,
+	details *containerenginesdk.UpdateClusterDetails,
+) {
+	if details == nil {
+		return
+	}
+
+	if spec.Options.ServiceLbConfig.BackendNsgIds != nil && len(spec.Options.ServiceLbConfig.BackendNsgIds) == 0 {
+		ensureClusterUpdateServiceLBConfig(details).BackendNsgIds = []string{}
+	}
+
+	if spec.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims != nil &&
+		len(spec.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims) == 0 {
+		ensureClusterUpdateOIDCTokenAuthenticationConfig(details).RequiredClaims = []containerenginesdk.KeyValue{}
+	}
+
+	if spec.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms != nil &&
+		len(spec.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms) == 0 {
+		ensureClusterUpdateOIDCTokenAuthenticationConfig(details).SigningAlgorithms = []string{}
+	}
+}
+
+func applyClusterExplicitMutableClears(
+	resolvedValues map[string]any,
+	spec containerenginev1beta1.ClusterSpec,
+	current containerenginesdk.UpdateClusterDetails,
+	details *containerenginesdk.UpdateClusterDetails,
+) bool {
+	if details == nil {
+		return false
+	}
+
+	updateNeeded := false
+
+	if spec.Options.ServiceLbConfig.BackendNsgIds != nil &&
+		len(spec.Options.ServiceLbConfig.BackendNsgIds) == 0 &&
+		len(clusterCurrentServiceLBBackendNsgIDs(current)) != 0 {
+		ensureClusterUpdateServiceLBConfig(details).BackendNsgIds = []string{}
+		updateNeeded = true
+	}
+
+	if spec.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims != nil &&
+		len(spec.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims) == 0 &&
+		len(clusterCurrentOIDCRequiredClaims(current)) != 0 {
+		ensureClusterUpdateOIDCTokenAuthenticationConfig(details).RequiredClaims = []containerenginesdk.KeyValue{}
+		updateNeeded = true
+	}
+
+	if spec.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms != nil &&
+		len(spec.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms) == 0 &&
+		len(clusterCurrentOIDCSigningAlgorithms(current)) != 0 {
+		ensureClusterUpdateOIDCTokenAuthenticationConfig(details).SigningAlgorithms = []string{}
+		updateNeeded = true
+	}
+
+	if !clusterResolvedSpecHasPath(resolvedValues, "options.openIdConnectTokenAuthenticationConfig") {
+		return updateNeeded
+	}
+
+	currentOIDC := clusterCurrentOIDCTokenAuthenticationConfig(current)
+	if currentOIDC == nil {
+		return updateNeeded
+	}
+
+	desiredOIDC := spec.Options.OpenIdConnectTokenAuthenticationConfig
+	typedOIDC := ensureClusterUpdateOIDCTokenAuthenticationConfig(details)
+
+	if desiredOIDC.IssuerUrl == "" && clusterStringPtrHasValue(currentOIDC.IssuerUrl) {
+		typedOIDC.IssuerUrl = common.String("")
+		updateNeeded = true
+	}
+	if desiredOIDC.ClientId == "" && clusterStringPtrHasValue(currentOIDC.ClientId) {
+		typedOIDC.ClientId = common.String("")
+		updateNeeded = true
+	}
+	if desiredOIDC.UsernameClaim == "" && clusterStringPtrHasValue(currentOIDC.UsernameClaim) {
+		typedOIDC.UsernameClaim = common.String("")
+		updateNeeded = true
+	}
+	if desiredOIDC.UsernamePrefix == "" && clusterStringPtrHasValue(currentOIDC.UsernamePrefix) {
+		typedOIDC.UsernamePrefix = common.String("")
+		updateNeeded = true
+	}
+	if desiredOIDC.GroupsClaim == "" && clusterStringPtrHasValue(currentOIDC.GroupsClaim) {
+		typedOIDC.GroupsClaim = common.String("")
+		updateNeeded = true
+	}
+	if desiredOIDC.GroupsPrefix == "" && clusterStringPtrHasValue(currentOIDC.GroupsPrefix) {
+		typedOIDC.GroupsPrefix = common.String("")
+		updateNeeded = true
+	}
+	if desiredOIDC.CaCertificate == "" && clusterStringPtrHasValue(currentOIDC.CaCertificate) {
+		typedOIDC.CaCertificate = common.String("")
+		updateNeeded = true
+	}
+	if desiredOIDC.ConfigurationFile == "" && clusterStringPtrHasValue(currentOIDC.ConfigurationFile) {
+		typedOIDC.ConfigurationFile = common.String("")
+		updateNeeded = true
+	}
+
+	return updateNeeded
+}
+
+func ensureClusterUpdateOptions(details *containerenginesdk.UpdateClusterDetails) *containerenginesdk.UpdateClusterOptionsDetails {
+	if details.Options == nil {
+		details.Options = &containerenginesdk.UpdateClusterOptionsDetails{}
+	}
+	return details.Options
+}
+
+func ensureClusterUpdateServiceLBConfig(details *containerenginesdk.UpdateClusterDetails) *containerenginesdk.ServiceLbConfigDetails {
+	options := ensureClusterUpdateOptions(details)
+	if options.ServiceLbConfig == nil {
+		options.ServiceLbConfig = &containerenginesdk.ServiceLbConfigDetails{}
+	}
+	return options.ServiceLbConfig
+}
+
+func ensureClusterUpdateOIDCTokenAuthenticationConfig(
+	details *containerenginesdk.UpdateClusterDetails,
+) *containerenginesdk.OpenIdConnectTokenAuthenticationConfig {
+	options := ensureClusterUpdateOptions(details)
+	if options.OpenIdConnectTokenAuthenticationConfig == nil {
+		options.OpenIdConnectTokenAuthenticationConfig = &containerenginesdk.OpenIdConnectTokenAuthenticationConfig{}
+	}
+	return options.OpenIdConnectTokenAuthenticationConfig
+}
+
+func clusterCurrentServiceLBBackendNsgIDs(current containerenginesdk.UpdateClusterDetails) []string {
+	if current.Options == nil || current.Options.ServiceLbConfig == nil {
+		return nil
+	}
+	return current.Options.ServiceLbConfig.BackendNsgIds
+}
+
+func clusterCurrentOIDCTokenAuthenticationConfig(
+	current containerenginesdk.UpdateClusterDetails,
+) *containerenginesdk.OpenIdConnectTokenAuthenticationConfig {
+	if current.Options == nil {
+		return nil
+	}
+	return current.Options.OpenIdConnectTokenAuthenticationConfig
+}
+
+func clusterCurrentOIDCRequiredClaims(current containerenginesdk.UpdateClusterDetails) []containerenginesdk.KeyValue {
+	currentOIDC := clusterCurrentOIDCTokenAuthenticationConfig(current)
+	if currentOIDC == nil {
+		return nil
+	}
+	return currentOIDC.RequiredClaims
+}
+
+func clusterCurrentOIDCSigningAlgorithms(current containerenginesdk.UpdateClusterDetails) []string {
+	currentOIDC := clusterCurrentOIDCTokenAuthenticationConfig(current)
+	if currentOIDC == nil {
+		return nil
+	}
+	return currentOIDC.SigningAlgorithms
+}
+
+func clusterStringPtrHasValue(value *string) bool {
+	return value != nil && *value != ""
+}
+
+func clusterResolvedSpecHasPath(values map[string]any, path string) bool {
+	path = strings.TrimSpace(path)
+	if len(values) == 0 || path == "" {
+		return false
+	}
+
+	current := any(values)
+	for _, segment := range strings.Split(path, ".") {
+		next, ok := current.(map[string]any)
+		if !ok {
+			return false
+		}
+		current, ok = next[strings.TrimSpace(segment)]
+		if !ok {
+			return false
+		}
+	}
+	return true
 }
 
 func buildClusterImagePolicyConfig(

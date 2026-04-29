@@ -59,6 +59,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - aispeech.oracle.com
+  resources:
+  - transcriptionjobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - analytics.oracle.com
   resources:
   - analyticsinstances
@@ -332,9 +358,6 @@ rules:
   - emaildomains
   - senders
   - suppressions
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -350,9 +373,6 @@ rules:
   - emaildomains/finalizers
   - senders/finalizers
   - suppressions/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
@@ -362,9 +382,6 @@ rules:
   - emaildomains/status
   - senders/status
   - suppressions/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -404,9 +421,6 @@ rules:
   - dedicatedaiclusters
   - endpoints
   - models
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -421,9 +435,6 @@ rules:
   - dedicatedaiclusters/finalizers
   - endpoints/finalizers
   - models/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
@@ -432,9 +443,6 @@ rules:
   - dedicatedaiclusters/status
   - endpoints/status
   - models/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -494,27 +502,16 @@ rules:
 - apiGroups:
   - loadbalancer.oracle.com
   resources:
-  - backendhealths
   - backends
-  - backendsethealths
   - backendsets
   - certificates
-  - healthcheckers
   - hostnames
-  - listenerrules
   - listeners
-  - loadbalancerhealths
   - loadbalancers
-  - loadbalancershapes
-  - networksecuritygroups
   - pathroutesets
-  - policies
-  - protocols
   - routingpolicies
   - rulesets
-  - shapes
   - sslciphersuites
-  - workrequests
   verbs:
   - create
   - delete
@@ -526,53 +523,31 @@ rules:
 - apiGroups:
   - loadbalancer.oracle.com
   resources:
-  - backendhealths/finalizers
   - backends/finalizers
-  - backendsethealths/finalizers
   - backendsets/finalizers
   - certificates/finalizers
-  - healthcheckers/finalizers
   - hostnames/finalizers
-  - listenerrules/finalizers
   - listeners/finalizers
-  - loadbalancerhealths/finalizers
   - loadbalancers/finalizers
-  - loadbalancershapes/finalizers
-  - networksecuritygroups/finalizers
   - pathroutesets/finalizers
-  - policies/finalizers
-  - protocols/finalizers
   - routingpolicies/finalizers
   - rulesets/finalizers
-  - shapes/finalizers
   - sslciphersuites/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - loadbalancer.oracle.com
   resources:
-  - backendhealths/status
   - backends/status
-  - backendsethealths/status
   - backendsets/status
   - certificates/status
-  - healthcheckers/status
   - hostnames/status
-  - listenerrules/status
   - listeners/status
-  - loadbalancerhealths/status
   - loadbalancers/status
-  - loadbalancershapes/status
-  - networksecuritygroups/status
   - pathroutesets/status
-  - policies/status
-  - protocols/status
   - routingpolicies/status
   - rulesets/status
-  - shapes/status
   - sslciphersuites/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -583,11 +558,7 @@ rules:
   - loggroups
   - logs
   - logsavedsearches
-  - services
   - unifiedagentconfigurations
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -602,11 +573,7 @@ rules:
   - loggroups/finalizers
   - logs/finalizers
   - logsavedsearches/finalizers
-  - services/finalizers
   - unifiedagentconfigurations/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
@@ -615,11 +582,7 @@ rules:
   - loggroups/status
   - logs/status
   - logsavedsearches/status
-  - services/status
   - unifiedagentconfigurations/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -628,21 +591,7 @@ rules:
   - marketplace.oracle.com
   resources:
   - acceptedagreements
-  - agreements
-  - categories
-  - launcheligibilities
-  - listings
-  - packages
-  - publicationpackages
   - publications
-  - publishers
-  - reports
-  - reporttypes
-  - taxes
-  - thirdpartypaidlistingeligibilities
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -655,42 +604,14 @@ rules:
   - marketplace.oracle.com
   resources:
   - acceptedagreements/finalizers
-  - agreements/finalizers
-  - categories/finalizers
-  - launcheligibilities/finalizers
-  - listings/finalizers
-  - packages/finalizers
-  - publicationpackages/finalizers
   - publications/finalizers
-  - publishers/finalizers
-  - reports/finalizers
-  - reporttypes/finalizers
-  - taxes/finalizers
-  - thirdpartypaidlistingeligibilities/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
   - marketplace.oracle.com
   resources:
   - acceptedagreements/status
-  - agreements/status
-  - categories/status
-  - launcheligibilities/status
-  - listings/status
-  - packages/status
-  - publicationpackages/status
   - publications/status
-  - publishers/status
-  - reports/status
-  - reporttypes/status
-  - taxes/status
-  - thirdpartypaidlistingeligibilities/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -698,11 +619,8 @@ rules:
 - apiGroups:
   - monitoring.oracle.com
   resources:
-  - alarmhistories
   - alarms
-  - alarmstatuses
   - alarmsuppressions
-  - metrics
   verbs:
   - create
   - delete
@@ -714,21 +632,15 @@ rules:
 - apiGroups:
   - monitoring.oracle.com
   resources:
-  - alarmhistories/finalizers
   - alarms/finalizers
-  - alarmstatuses/finalizers
   - alarmsuppressions/finalizers
-  - metrics/finalizers
   verbs:
   - update
 - apiGroups:
   - monitoring.oracle.com
   resources:
-  - alarmhistories/status
   - alarms/status
-  - alarmstatuses/status
   - alarmsuppressions/status
-  - metrics/status
   verbs:
   - get
   - patch
@@ -820,12 +732,6 @@ rules:
   - clusters
   - esxihosts
   - sddcs
-  - supportedcommitments
-  - supportedhostshapes
-  - supportedvmwaresoftwareversions
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -840,12 +746,6 @@ rules:
   - clusters/finalizers
   - esxihosts/finalizers
   - sddcs/finalizers
-  - supportedcommitments/finalizers
-  - supportedhostshapes/finalizers
-  - supportedvmwaresoftwareversions/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
@@ -854,12 +754,6 @@ rules:
   - clusters/status
   - esxihosts/status
   - sddcs/status
-  - supportedcommitments/status
-  - supportedhostshapes/status
-  - supportedvmwaresoftwareversions/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -869,7 +763,6 @@ rules:
   resources:
   - authenticationproviders
   - channels
-  - digitalassistantparameters
   - digitalassistants
   - importedpackages
   - odainstanceattachments
@@ -877,13 +770,9 @@ rules:
   - odaprivateendpointattachments
   - odaprivateendpoints
   - odaprivateendpointscanproxies
-  - packages
   - skillparameters
   - skills
   - translators
-  - workrequesterrors
-  - workrequestlogs
-  - workrequests
   verbs:
   - create
   - delete
@@ -897,7 +786,6 @@ rules:
   resources:
   - authenticationproviders/finalizers
   - channels/finalizers
-  - digitalassistantparameters/finalizers
   - digitalassistants/finalizers
   - importedpackages/finalizers
   - odainstanceattachments/finalizers
@@ -905,13 +793,9 @@ rules:
   - odaprivateendpointattachments/finalizers
   - odaprivateendpoints/finalizers
   - odaprivateendpointscanproxies/finalizers
-  - packages/finalizers
   - skillparameters/finalizers
   - skills/finalizers
   - translators/finalizers
-  - workrequesterrors/finalizers
-  - workrequestlogs/finalizers
-  - workrequests/finalizers
   verbs:
   - update
 - apiGroups:
@@ -919,7 +803,6 @@ rules:
   resources:
   - authenticationproviders/status
   - channels/status
-  - digitalassistantparameters/status
   - digitalassistants/status
   - importedpackages/status
   - odainstanceattachments/status
@@ -927,13 +810,9 @@ rules:
   - odaprivateendpointattachments/status
   - odaprivateendpoints/status
   - odaprivateendpointscanproxies/status
-  - packages/status
   - skillparameters/status
   - skills/status
   - translators/status
-  - workrequesterrors/status
-  - workrequestlogs/status
-  - workrequests/status
   verbs:
   - get
   - patch
@@ -1047,7 +926,6 @@ rules:
   resources:
   - customtables
   - queries
-  - scheduledruns
   - schedules
   - usagecarbonemissionsqueries
   verbs:
@@ -1063,7 +941,6 @@ rules:
   resources:
   - customtables/finalizers
   - queries/finalizers
-  - scheduledruns/finalizers
   - schedules/finalizers
   - usagecarbonemissionsqueries/finalizers
   verbs:
@@ -1073,7 +950,6 @@ rules:
   resources:
   - customtables/status
   - queries/status
-  - scheduledruns/status
   - schedules/status
   - usagecarbonemissionsqueries/status
   verbs:

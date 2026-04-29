@@ -41,7 +41,7 @@ type OdaPrivateEndpointScanProxyScanListenerInfo struct {
 // OdaPrivateEndpointScanProxyStatus defines the observed state of OdaPrivateEndpointScanProxy.
 type OdaPrivateEndpointScanProxyStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Scan Proxy.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ODA Private Endpoint Scan Proxy.
 	Id string `json:"id,omitempty"`
 	// Type indicating whether Scan listener is specified by its FQDN or list of IPs
 	ScanListenerType string `json:"scanListenerType,omitempty"`

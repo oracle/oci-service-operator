@@ -14,10 +14,10 @@ import (
 
 // OdaPrivateEndpointSpec defines the desired state of OdaPrivateEndpoint.
 type OdaPrivateEndpointSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to.
 	// +kubebuilder:validation:Required
 	SubnetId string `json:"subnetId"`
 	// User-defined name for the ODA private endpoint. Avoid entering confidential information.
@@ -27,7 +27,7 @@ type OdaPrivateEndpointSpec struct {
 	// Description of the ODA private endpoint.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
-	// List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
+	// List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
 	// +kubebuilder:validation:Optional
 	NsgIds []string `json:"nsgIds,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type, or scope.
@@ -43,14 +43,14 @@ type OdaPrivateEndpointSpec struct {
 // OdaPrivateEndpointStatus defines the observed state of OdaPrivateEndpoint.
 type OdaPrivateEndpointStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that was assigned when the ODA private endpoint was created.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) that was assigned when the ODA private endpoint was created.
 	Id string `json:"id,omitempty"`
 	// User-defined name for the ODA private endpoint. Avoid entering confidential information.
 	// You can change this value.
 	DisplayName string `json:"displayName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that the ODA private endpoint belongs to.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet that the private endpoint belongs to.
 	SubnetId string `json:"subnetId,omitempty"`
 	// Description of the ODA private endpoint.
 	Description string `json:"description,omitempty"`
@@ -60,7 +60,7 @@ type OdaPrivateEndpointStatus struct {
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// The current state of the ODA private endpoint.
 	LifecycleState string `json:"lifecycleState,omitempty"`
-	// List of OCIDs (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
+	// List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of network security groups (https://docs.oracle.com/iaas/Content/Network/Concepts/networksecuritygroups.htm)
 	NsgIds []string `json:"nsgIds,omitempty"`
 	// Simple key-value pair that is applied without any predefined name, type, or scope.
 	// Example: `{"bar-key": "value"}`

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -54,8 +54,12 @@ func (m *certificateauthorityrule) UnmarshalPolymorphicJSON(data []byte) (interf
 		mm := CertificateAuthorityIssuanceExpiryRule{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
+	case "CERTIFICATE_AUTHORITY_ISSUANCE_RULE":
+		mm := CertificateAuthorityIssuanceRule{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for CertificateAuthorityRule: %s.", m.RuleType)
+		common.Logf("Received unsupported enum value for CertificateAuthorityRule: %s.", m.RuleType)
 		return *m, nil
 	}
 }
@@ -71,7 +75,7 @@ func (m certificateauthorityrule) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -81,15 +85,18 @@ type CertificateAuthorityRuleRuleTypeEnum string
 
 // Set of constants representing the allowable values for CertificateAuthorityRuleRuleTypeEnum
 const (
-	CertificateAuthorityRuleRuleTypeCertificateAuthorityIssuanceExpiryRule CertificateAuthorityRuleRuleTypeEnum = "CERTIFICATE_AUTHORITY_ISSUANCE_EXPIRY_RULE"
+	CertificateAuthorityRuleRuleTypeExpiryRule CertificateAuthorityRuleRuleTypeEnum = "CERTIFICATE_AUTHORITY_ISSUANCE_EXPIRY_RULE"
+	CertificateAuthorityRuleRuleTypeRule       CertificateAuthorityRuleRuleTypeEnum = "CERTIFICATE_AUTHORITY_ISSUANCE_RULE"
 )
 
 var mappingCertificateAuthorityRuleRuleTypeEnum = map[string]CertificateAuthorityRuleRuleTypeEnum{
-	"CERTIFICATE_AUTHORITY_ISSUANCE_EXPIRY_RULE": CertificateAuthorityRuleRuleTypeCertificateAuthorityIssuanceExpiryRule,
+	"CERTIFICATE_AUTHORITY_ISSUANCE_EXPIRY_RULE": CertificateAuthorityRuleRuleTypeExpiryRule,
+	"CERTIFICATE_AUTHORITY_ISSUANCE_RULE":        CertificateAuthorityRuleRuleTypeRule,
 }
 
 var mappingCertificateAuthorityRuleRuleTypeEnumLowerCase = map[string]CertificateAuthorityRuleRuleTypeEnum{
-	"certificate_authority_issuance_expiry_rule": CertificateAuthorityRuleRuleTypeCertificateAuthorityIssuanceExpiryRule,
+	"certificate_authority_issuance_expiry_rule": CertificateAuthorityRuleRuleTypeExpiryRule,
+	"certificate_authority_issuance_rule":        CertificateAuthorityRuleRuleTypeRule,
 }
 
 // GetCertificateAuthorityRuleRuleTypeEnumValues Enumerates the set of values for CertificateAuthorityRuleRuleTypeEnum
@@ -105,6 +112,7 @@ func GetCertificateAuthorityRuleRuleTypeEnumValues() []CertificateAuthorityRuleR
 func GetCertificateAuthorityRuleRuleTypeEnumStringValues() []string {
 	return []string{
 		"CERTIFICATE_AUTHORITY_ISSUANCE_EXPIRY_RULE",
+		"CERTIFICATE_AUTHORITY_ISSUANCE_RULE",
 	}
 }
 

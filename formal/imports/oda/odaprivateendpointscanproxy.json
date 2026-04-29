@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oda",
+  "slug": "odaprivateendpointscanproxy",
+  "kind": "OdaPrivateEndpointScanProxy",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_oda_odaprivateendpointscanproxy",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOdaPrivateEndpointScanProxy",
+        "requestType": "oda.CreateOdaPrivateEndpointScanProxyRequest",
+        "responseType": "oda.CreateOdaPrivateEndpointScanProxyResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOdaPrivateEndpointScanProxy",
+        "requestType": "oda.GetOdaPrivateEndpointScanProxyRequest",
+        "responseType": "oda.GetOdaPrivateEndpointScanProxyResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOdaPrivateEndpointScanProxy",
+        "requestType": "oda.ListOdaPrivateEndpointScanProxyRequest",
+        "responseType": "oda.ListOdaPrivateEndpointScanProxyResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOdaPrivateEndpointScanProxy",
+        "requestType": "oda.UpdateOdaPrivateEndpointScanProxyRequest",
+        "responseType": "oda.UpdateOdaPrivateEndpointScanProxyResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOdaPrivateEndpointScanProxy",
+        "requestType": "oda.DeleteOdaPrivateEndpointScanProxyRequest",
+        "responseType": "oda.DeleteOdaPrivateEndpointScanProxyResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_oda_odaprivateendpointscanproxy",
+    "collectionField": "odaprivateendpointscanproxy",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oda/odaprivateendpointscanproxy/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oda/odaprivateendpointscanproxy/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for oda/odaprivateendpointscanproxy; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

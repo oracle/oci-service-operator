@@ -91,82 +91,26 @@ func (f fakeNatGatewayServiceError) GetOpcRequestID() string {
 	return ""
 }
 
-func newTestNatGatewayDelegate(manager *NatGatewayServiceManager, client natGatewayOCIClient) NatGatewayServiceClient {
+func newTestNatGatewayRuntimeHooks(manager *NatGatewayServiceManager, client natGatewayOCIClient) NatGatewayRuntimeHooks {
 	if client == nil {
 		client = &fakeNatGatewayOCIClient{}
 	}
 
-	config := generatedruntime.Config[*corev1beta1.NatGateway]{
-		Kind:    "NatGateway",
-		SDKName: "NatGateway",
-		Log:     manager.Log,
-		Semantics: &generatedruntime.Semantics{
-			FormalService: "core",
-			FormalSlug:    "natgateway",
-			Async: &generatedruntime.AsyncSemantics{
-				Strategy:             "lifecycle",
-				Runtime:              "generatedruntime",
-				FormalClassification: "lifecycle",
-			},
-			StatusProjection:  "required",
-			SecretSideEffects: "none",
-			FinalizerPolicy:   "retain-until-confirmed-delete",
-			Lifecycle: generatedruntime.LifecycleSemantics{
-				ProvisioningStates: []string{"PROVISIONING"},
-				UpdatingStates:     []string{},
-				ActiveStates:       []string{"AVAILABLE"},
-			},
-			Delete: generatedruntime.DeleteSemantics{
-				Policy:         "required",
-				PendingStates:  []string{"TERMINATED", "TERMINATING"},
-				TerminalStates: []string{"NOT_FOUND"},
-			},
-			List: &generatedruntime.ListSemantics{
-				ResponseItemsField: "Items",
-				MatchFields:        []string{"compartmentId", "displayName", "id", "state", "vcnId"},
-			},
-			Mutation: generatedruntime.MutationSemantics{
-				Mutable:       []string{"blockTraffic", "definedTags", "displayName", "freeformTags", "routeTableId"},
-				ForceNew:      []string{"compartmentId", "publicIpId", "vcnId"},
-				ConflictsWith: map[string][]string{},
-			},
-			Hooks: generatedruntime.HookSet{
-				Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-				Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-				Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-			CreateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
-			},
-			UpdateFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "read-after-write",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource"}},
-			},
-			DeleteFollowUp: generatedruntime.FollowUpSemantics{
-				Strategy: "confirm-delete",
-				Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource"}},
-			},
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateNatGateway(ctx, *request.(*coresdk.CreateNatGatewayRequest))
-			},
+	hooks := NatGatewayRuntimeHooks{
+		Semantics: newNatGatewayRuntimeSemantics(),
+		Create: runtimeOperationHooks[coresdk.CreateNatGatewayRequest, coresdk.CreateNatGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "CreateNatGatewayDetails", RequestName: "CreateNatGatewayDetails", Contribution: "body"}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetNatGateway(ctx, *request.(*coresdk.GetNatGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.CreateNatGatewayRequest) (coresdk.CreateNatGatewayResponse, error) {
+				return client.CreateNatGateway(ctx, request)
 			},
+		},
+		Get: runtimeOperationHooks[coresdk.GetNatGatewayRequest, coresdk.GetNatGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListNatGatewaysRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListNatGateways(ctx, *request.(*coresdk.ListNatGatewaysRequest))
+			Call: func(ctx context.Context, request coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
+				return client.GetNatGateway(ctx, request)
 			},
+		},
+		List: runtimeOperationHooks[coresdk.ListNatGatewaysRequest, coresdk.ListNatGatewaysResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
 				{FieldName: "VcnId", RequestName: "vcnId", Contribution: "query"},
@@ -177,40 +121,43 @@ func newTestNatGatewayDelegate(manager *NatGatewayServiceManager, client natGate
 				{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
 				{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
 			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateNatGateway(ctx, *request.(*coresdk.UpdateNatGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.ListNatGatewaysRequest) (coresdk.ListNatGatewaysResponse, error) {
+				return client.ListNatGateways(ctx, request)
 			},
+		},
+		Update: runtimeOperationHooks[coresdk.UpdateNatGatewayRequest, coresdk.UpdateNatGatewayResponse]{
 			Fields: []generatedruntime.RequestField{
 				{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true},
 				{FieldName: "UpdateNatGatewayDetails", RequestName: "UpdateNatGatewayDetails", Contribution: "body"},
 			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteNatGatewayRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteNatGateway(ctx, *request.(*coresdk.DeleteNatGatewayRequest))
+			Call: func(ctx context.Context, request coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error) {
+				return client.UpdateNatGateway(ctx, request)
 			},
+		},
+		Delete: runtimeOperationHooks[coresdk.DeleteNatGatewayRequest, coresdk.DeleteNatGatewayResponse]{
 			Fields: []generatedruntime.RequestField{{FieldName: "NatGatewayId", RequestName: "natGatewayId", Contribution: "path", PreferResourceID: true}},
+			Call: func(ctx context.Context, request coresdk.DeleteNatGatewayRequest) (coresdk.DeleteNatGatewayResponse, error) {
+				return client.DeleteNatGateway(ctx, request)
+			},
 		},
 	}
+	applyNatGatewayRuntimeHooks(manager, &hooks, client)
+	return hooks
+}
 
-	return defaultNatGatewayServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.NatGateway](config),
+func newTestNatGatewayDelegate(manager *NatGatewayServiceManager, client natGatewayOCIClient) NatGatewayServiceClient {
+	hooks := newTestNatGatewayRuntimeHooks(manager, client)
+	delegate := defaultNatGatewayServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.NatGateway](buildNatGatewayGeneratedRuntimeConfig(manager, hooks)),
 	}
+	return wrapNatGatewayGeneratedClient(hooks, delegate)
 }
 
 func newNatGatewayTestManager(client natGatewayOCIClient) *NatGatewayServiceManager {
 	log := loggerutil.OSOKLogger{Logger: ctrl.Log.WithName("test")}
 	manager := NewNatGatewayServiceManager(common.NewRawConfigurationProvider("", "", "", "", "", nil), nil, nil, log, nil)
 	if client != nil {
-		manager.WithClient(&natGatewayRuntimeClient{
-			manager:  manager,
-			delegate: newTestNatGatewayDelegate(manager, client),
-			client:   client,
-		})
+		manager.WithClient(newTestNatGatewayDelegate(manager, client))
 	}
 	return manager
 }
@@ -482,6 +429,38 @@ func TestCreateOrUpdate_OmittedPublicIPIDAllowsObservedAssignedValue(t *testing.
 	assert.Equal(t, assignedPublicIPID, resource.Status.PublicIpId)
 	assert.Equal(t, natGatewayPublicIPIDCreateIntentOmitted, resource.Status.PublicIpIdCreateIntent)
 	assert.Equal(t, 0, updateCalls)
+}
+
+func TestCreateOrUpdate_StatusIDFallbackPreservesUnknownPublicIPIntent(t *testing.T) {
+	assignedPublicIPID := "ocid1.publicip.oc1..assigned"
+	getCalls := 0
+	updateCalls := 0
+	manager := newNatGatewayTestManager(&fakeNatGatewayOCIClient{
+		getFn: func(_ context.Context, req coresdk.GetNatGatewayRequest) (coresdk.GetNatGatewayResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.natgateway.oc1..existing", *req.NatGatewayId)
+			current := makeSDKNatGateway("ocid1.natgateway.oc1..existing", "test-nat-gateway", coresdk.NatGatewayLifecycleStateAvailable)
+			current.PublicIpId = common.String(assignedPublicIPID)
+			return coresdk.GetNatGatewayResponse{NatGateway: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateNatGatewayRequest) (coresdk.UpdateNatGatewayResponse, error) {
+			updateCalls++
+			return coresdk.UpdateNatGatewayResponse{}, nil
+		},
+	})
+
+	resource := makeSpecNatGateway()
+	resource.Spec.PublicIpId = ""
+	resource.Status.Id = "ocid1.natgateway.oc1..existing"
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.GreaterOrEqual(t, getCalls, 1)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, assignedPublicIPID, resource.Status.PublicIpId)
+	assert.Equal(t, "", resource.Status.PublicIpIdCreateIntent)
 }
 
 func TestCreateOrUpdate_ExplicitPublicIPIDStillRejectsWhenLaterCleared(t *testing.T) {

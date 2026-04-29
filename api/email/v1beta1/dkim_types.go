@@ -14,14 +14,14 @@ import (
 
 // DkimSpec defines the desired state of Dkim.
 type DkimSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain for this DKIM.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain for this DKIM.
 	// +kubebuilder:validation:Required
 	EmailDomainId string `json:"emailDomainId"`
 	// The DKIM selector. This selector is required to be globally unique for this email domain.
 	// If you do not provide the selector, we will generate one for you.
 	// If you do provide the selector, we suggest adding a short region indicator
-	// to differentiate from your signing of emails in other regions you may be subscribed to.
-	// Selectors limited to ASCII characters may use alphanumeric, dash ("-"), and dot (".") characters.
+	// to differentiate from your signing of emails in other regions you might be subscribed to.
+	// Selectors limited to ASCII characters can use alphanumeric, dash ("-"), and dot (".") characters.
 	// Non-ASCII selector names should adopt IDNA2008 normalization (RFC 5891-5892).
 	// Avoid entering confidential information.
 	// Example: `mydomain-phx-20210228`
@@ -31,13 +31,16 @@ type DkimSpec struct {
 	// and you can change it. Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// The DKIM RSA Private Key in Privacy-Enhanced Mail (PEM) format. It is a text-based representation of the private key used for signing email messages.
+	// +kubebuilder:validation:Optional
+	PrivateKey string `json:"privateKey,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -49,12 +52,12 @@ type DkimStatus struct {
 	// The DKIM selector.
 	// If the same domain is managed in more than one region, each region must use different selectors.
 	Name string `json:"name,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the email domain
 	// that this DKIM belongs to.
 	EmailDomainId string `json:"emailDomainId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The current state of the DKIM.
 	LifecycleState string `json:"lifecycleState,omitempty"`
@@ -74,21 +77,25 @@ type DkimStatus struct {
 	// timestamp format, "YYYY-MM-ddThh:mmZ".
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// The name of the DNS subdomain that must be provisioned to enable email recipients to verify DKIM signatures.
-	// It is usually created with a CNAME record set to the cnameRecordValue
+	// It is usually created with a CNAME record set to the cnameRecordValue.
 	DnsSubdomainName string `json:"dnsSubdomainName,omitempty"`
 	// The DNS CNAME record value to provision to the DKIM DNS subdomain, when using the CNAME method for DKIM setup (preferred).
 	CnameRecordValue string `json:"cnameRecordValue,omitempty"`
 	// The DNS TXT record value to provision to the DKIM DNS subdomain in place of using a CNAME record.
-	// This is used in cases where a CNAME can not be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry.
-	// This can also be used by customers who have an existing procedure to directly provision TXT records for DKIM.
-	// Be aware that many DNS APIs will require you to break this string into segments of less than 255 characters.
+	// This is used in cases where a CNAME cannot be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry.
+	// You can also use this if you have an existing procedure to directly provision TXT records for DKIM.
+	// Many DNS APIs require you to break this string into segments of fewer than 255 characters.
 	TxtRecordValue string `json:"txtRecordValue,omitempty"`
+	// Indicates whether the DKIM was imported.
+	IsImported bool `json:"isImported,omitempty"`
+	// Length of the RSA key used in the DKIM.
+	KeyLength int `json:"keyLength,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Usage of system tag keys. These predefined keys are scoped to namespaces.

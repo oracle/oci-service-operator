@@ -34,6 +34,7 @@ func TestGenerateDefaultActiveSurfaceFiltersKindsBeforeRendering(t *testing.T) {
 	assertGeneratedServiceCounts(t, result.Generated, map[string]int{"mysql": 1})
 	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_runtimehooks_generated.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_servicemanager.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"))
@@ -43,6 +44,7 @@ func TestGenerateDefaultActiveSurfaceFiltersKindsBeforeRendering(t *testing.T) {
 	assertPathNotExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "report_types.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "dbsystem_types.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "controllers", "mysql", "report_controller.go"))
+	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_runtimehooks_generated.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_serviceclient.go"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_report.yaml"))
 	assertPathNotExists(t, filepath.Join(outputRoot, "api", "identity", "v1beta1", "widget_types.go"))
@@ -79,6 +81,7 @@ func TestGenerateExplicitServiceOverrideIncludesDisabledServiceSurface(t *testin
 		"api/identity/v1beta1/reportbyname_types.go",
 		"api/identity/v1beta1/dbsystem_types.go",
 		"controllers/identity/widget_controller.go",
+		"pkg/servicemanager/identity/widget/widget_runtimehooks_generated.go",
 		"pkg/servicemanager/identity/widget/widget_serviceclient.go",
 		"internal/registrations/identity_generated.go",
 		"config/samples/identity_v1beta1_widget.yaml",
@@ -124,11 +127,13 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	assertPathsNotExist(t, []string{
 		filepath.Join(outputRoot, "api", "mysql", "v1beta1", "report_types.go"),
 		filepath.Join(outputRoot, "controllers", "mysql", "report_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "report", "report_servicemanager.go"),
 		filepath.Join(outputRoot, "config", "samples", "mysql_v1beta1_report.yaml"),
 		filepath.Join(outputRoot, "api", "identity", "v1beta1", "widget_types.go"),
 		filepath.Join(outputRoot, "controllers", "identity", "widget_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_serviceclient.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "identity", "widget", "widget_servicemanager.go"),
 		filepath.Join(outputRoot, "internal", "registrations", "identity_generated.go"),
@@ -148,6 +153,7 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForInactiveServicesAndE
 	assertPathsExist(t, []string{
 		filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"),
 		filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"),
+		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_runtimehooks_generated.go"),
 		filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"),
 		filepath.Join(outputRoot, "packages", "mysql", "metadata.env"),
 		filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"),
@@ -204,6 +210,7 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForServicesRemovedFromC
 	for _, relativePath := range []string{
 		"api/identity/v1beta1/widget_types.go",
 		"controllers/identity/widget_controller.go",
+		"pkg/servicemanager/identity/widget/widget_runtimehooks_generated.go",
 		"pkg/servicemanager/identity/widget/widget_serviceclient.go",
 		"pkg/servicemanager/identity/widget/widget_servicemanager.go",
 		"internal/registrations/identity_generated.go",
@@ -222,6 +229,7 @@ func TestGenerateFullSyncCleansStaleGeneratorOwnedOutputsForServicesRemovedFromC
 
 	assertPathExists(t, filepath.Join(outputRoot, "api", "mysql", "v1beta1", "widget_types.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "controllers", "mysql", "widget_controller.go"))
+	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_runtimehooks_generated.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "pkg", "servicemanager", "mysql", "widget", "widget_serviceclient.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "internal", "registrations", "mysql_generated.go"))
 	assertPathExists(t, filepath.Join(outputRoot, "packages", "mysql", "metadata.env"))

@@ -19,7 +19,7 @@ import (
 )
 
 // DedicatedAiClusterServiceClient is the handwritten extension seam for DedicatedAiCluster runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*DedicatedAiClusterServiceManager).WithClient.
 type DedicatedAiClusterServiceClient interface {
 	CreateOrUpdate(context.Context, *generativeaiv1beta1.DedicatedAiCluster, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,108 +30,17 @@ type defaultDedicatedAiClusterServiceClient struct {
 	generatedruntime.ServiceClient[*generativeaiv1beta1.DedicatedAiCluster]
 }
 
-func newDedicatedAiClusterRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "generativeai",
-		FormalSlug:    "dedicatedaicluster",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "lifecycle",
-			Runtime:              "generatedruntime",
-			FormalClassification: "lifecycle",
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "none",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "state"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "unitCount"},
-			ForceNew:      []string{"compartmentId", "type", "unitShape"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ DedicatedAiClusterServiceClient = defaultDedicatedAiClusterServiceClient{}
 
 var newDedicatedAiClusterServiceClient = func(manager *DedicatedAiClusterServiceManager) DedicatedAiClusterServiceClient {
 	sdkClient, err := generativeaisdk.NewGenerativeAiClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*generativeaiv1beta1.DedicatedAiCluster]{
-		Kind:      "DedicatedAiCluster",
-		SDKName:   "DedicatedAiCluster",
-		Log:       manager.Log,
-		Semantics: newDedicatedAiClusterRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.CreateDedicatedAiClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateDedicatedAiCluster(ctx, *request.(*generativeaisdk.CreateDedicatedAiClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateDedicatedAiClusterDetails", RequestName: "CreateDedicatedAiClusterDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.GetDedicatedAiClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetDedicatedAiCluster(ctx, *request.(*generativeaisdk.GetDedicatedAiClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DedicatedAiClusterId", RequestName: "dedicatedAiClusterId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.ListDedicatedAiClustersRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListDedicatedAiClusters(ctx, *request.(*generativeaisdk.ListDedicatedAiClustersRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.UpdateDedicatedAiClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateDedicatedAiCluster(ctx, *request.(*generativeaisdk.UpdateDedicatedAiClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DedicatedAiClusterId", RequestName: "dedicatedAiClusterId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDedicatedAiClusterDetails", RequestName: "UpdateDedicatedAiClusterDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &generativeaisdk.DeleteDedicatedAiClusterRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteDedicatedAiCluster(ctx, *request.(*generativeaisdk.DeleteDedicatedAiClusterRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "DedicatedAiClusterId", RequestName: "dedicatedAiClusterId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newDedicatedAiClusterRuntimeHooks(manager, sdkClient)
+	config := buildDedicatedAiClusterGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize DedicatedAiCluster OCI client: %w", err)
 	}
-	return defaultDedicatedAiClusterServiceClient{
+	delegate := defaultDedicatedAiClusterServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*generativeaiv1beta1.DedicatedAiCluster](config),
 	}
+	return wrapDedicatedAiClusterGeneratedClient(hooks, delegate)
 }

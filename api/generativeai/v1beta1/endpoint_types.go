@@ -17,7 +17,7 @@ type EndpointSpec struct {
 	// The compartment OCID to create the endpoint in.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
-	// The ID of the model that's used to create this endpoint.
+	// The OCID of the model that's used to create this endpoint.
 	// +kubebuilder:validation:Required
 	ModelId string `json:"modelId"`
 	// The OCID of the dedicated AI cluster on which a model will be deployed to.
@@ -29,15 +29,22 @@ type EndpointSpec struct {
 	// An optional description of the endpoint.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// The OCID of the Generative AI private endpoint to which this endpoint is attached to.
+	// +kubebuilder:validation:Optional
+	GenerativeAiPrivateEndpointId string `json:"generativeAiPrivateEndpointId,omitempty"`
 	// +kubebuilder:validation:Optional
 	ContentModerationConfig EndpointContentModerationConfig `json:"contentModerationConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	PromptInjectionConfig EndpointPromptInjectionConfig `json:"promptInjectionConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	PiiDetectionConfig EndpointPiiDetectionConfig `json:"piiDetectionConfig,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -48,6 +55,38 @@ type EndpointContentModerationConfig struct {
 	// Whether to enable the content moderation feature.
 	// +kubebuilder:validation:Required
 	IsEnabled bool `json:"isEnabled"`
+	// Enum for the modes of operation for inference protection.
+	// +kubebuilder:validation:Optional
+	Mode string `json:"mode,omitempty"`
+	// The OCID of the model used for the feature.
+	// +kubebuilder:validation:Optional
+	ModelId string `json:"modelId,omitempty"`
+}
+
+// EndpointPromptInjectionConfig defines nested fields for Endpoint.PromptInjectionConfig.
+type EndpointPromptInjectionConfig struct {
+	// Whether to enable the prompt injection feature.
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// The mode of operation for prompt injection detection.
+	// +kubebuilder:validation:Optional
+	Mode string `json:"mode,omitempty"`
+	// The OCID of the model used for the feature.
+	// +kubebuilder:validation:Optional
+	ModelId string `json:"modelId,omitempty"`
+}
+
+// EndpointPiiDetectionConfig defines nested fields for Endpoint.PiiDetectionConfig.
+type EndpointPiiDetectionConfig struct {
+	// Whether to enable the PII detection feature.
+	// +kubebuilder:validation:Required
+	IsEnabled bool `json:"isEnabled"`
+	// The mode of operation for PII detection.
+	// +kubebuilder:validation:Optional
+	Mode string `json:"mode,omitempty"`
+	// The OCID of the model used for the feature.
+	// +kubebuilder:validation:Optional
+	ModelId string `json:"modelId,omitempty"`
 }
 
 // EndpointStatus defines the observed state of Endpoint.
@@ -69,17 +108,21 @@ type EndpointStatus struct {
 	DisplayName string `json:"displayName,omitempty"`
 	// An optional description of the endpoint.
 	Description string `json:"description,omitempty"`
+	// The OCID of the Generative AI private endpoint to which this endpoint is attached to.
+	GenerativeAiPrivateEndpointId string `json:"generativeAiPrivateEndpointId,omitempty"`
 	// The date and time that the endpoint was updated in the format of an RFC3339 datetime string.
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// A message describing the current state of the endpoint in more detail that can provide actionable information.
 	LifecycleDetails        string                          `json:"lifecycleDetails,omitempty"`
 	ContentModerationConfig EndpointContentModerationConfig `json:"contentModerationConfig,omitempty"`
+	PromptInjectionConfig   EndpointPromptInjectionConfig   `json:"promptInjectionConfig,omitempty"`
+	PiiDetectionConfig      EndpointPiiDetectionConfig      `json:"piiDetectionConfig,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.

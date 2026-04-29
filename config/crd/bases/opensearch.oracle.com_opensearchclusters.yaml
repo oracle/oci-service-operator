@@ -56,6 +56,42 @@ spec:
           spec:
             description: OpensearchClusterSpec defines the desired state of OpensearchCluster.
             properties:
+              backupPolicy:
+                description: OpensearchClusterBackupPolicy defines nested fields for
+                  OpensearchCluster.BackupPolicy.
+                properties:
+                  frequencyInHours:
+                    description: Specifies how often backup should be performed
+                    type: integer
+                  isEnabled:
+                    description: Specifies if automatic backups are enabled.
+                    type: boolean
+                  retentionInDays:
+                    description: Specifies how long backup copy should remain on Storage
+                      in days
+                    type: integer
+                type: object
+              certificateConfig:
+                description: OpensearchClusterCertificateConfig defines nested fields
+                  for OpensearchCluster.CertificateConfig.
+                properties:
+                  clusterCertificateMode:
+                    description: Specifies whether the certificate to be used in cluster
+                      is managed by OpenSearch or OCI Certificates service.
+                    type: string
+                  dashboardCertificateMode:
+                    description: Specifies whether the certificate to be used in dashboard
+                      is managed by OpenSearch or OCI Certificates service.
+                    type: string
+                  openSearchApiCertificateId:
+                    description: certificate to be used for OpenSearch cluster api
+                      communication
+                    type: string
+                  openSearchDashboardCertificateId:
+                    description: certificate to be used for OpenSearch dashboard api
+                      communication
+                    type: string
+                type: object
               compartmentId:
                 description: The OCID of the compartment to create the cluster in.
                 type: string
@@ -73,6 +109,9 @@ spec:
                 description: The number of OCPUs to configure for the cluster's data
                   nodes.
                 type: integer
+              dataNodeHostShape:
+                description: The node shape for the cluster's data nodes.
+                type: string
               dataNodeHostType:
                 description: TThe instance type for the cluster's data nodes.
                 type: string
@@ -100,6 +139,42 @@ spec:
                   Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
                   Example: `{"bar-key": "value"}`
                 type: object
+              inboundClusterIds:
+                description: List of inbound clusters that will be queried using cross
+                  cluster search
+                items:
+                  type: string
+                type: array
+              loadBalancerConfig:
+                description: OpensearchClusterLoadBalancerConfig defines nested fields
+                  for OpensearchCluster.LoadBalancerConfig.
+                properties:
+                  loadBalancerMaxBandwidthInMbps:
+                    description: Maximum bandwidth (Mbps) of OpenSearch load balancer.
+                      Not applicable for network load balancer service.
+                    type: integer
+                  loadBalancerMinBandwidthInMbps:
+                    description: Minimum bandwidth (Mbps) of OpenSearch load balancer.
+                      Not applicable for network load balancer service.
+                    type: integer
+                  loadBalancerServiceType:
+                    description: Load balancer service for OpenSearch and OpenDashboard
+                      load balancer. Default value is LOAD_BALANCER.
+                    type: string
+                required:
+                - loadBalancerServiceType
+                type: object
+              maintenanceDetails:
+                description: OpensearchClusterMaintenanceDetails defines nested fields
+                  for OpensearchCluster.MaintenanceDetails.
+                properties:
+                  notificationEmailIds:
+                    description: The Email IDs given by the customer to get notified
+                      about maintenance activities
+                    items:
+                      type: string
+                    type: array
+                type: object
               masterNodeCount:
                 description: The number of master nodes to configure for the cluster.
                 type: integer
@@ -114,8 +189,34 @@ spec:
                 description: The number of OCPUs to configure for the cluser's master
                   nodes.
                 type: integer
+              masterNodeHostShape:
+                description: The node shape for the cluster's master nodes.
+                type: string
               masterNodeHostType:
                 description: The instance type for the cluster's master nodes.
+                type: string
+              mlNodeCount:
+                description: The number of ML nodes configured for the cluster.
+                type: integer
+              mlNodeHostMemoryGB:
+                description: The amount of memory in GB, for the cluster's ML nodes.
+                type: integer
+              mlNodeHostOcpuCount:
+                description: The number of OCPUs configured for the cluster's ML nodes.
+                type: integer
+              mlNodeHostShape:
+                description: The node shape for the cluster's ML nodes.
+                type: string
+              mlNodeHostType:
+                description: The instance type for the cluster's ML nodes.
+                type: string
+              mlNodeStorageGB:
+                description: The amount of storage in GB, to configure per node for
+                  the cluster's ML nodes.
+                type: integer
+              nsgId:
+                description: The OCID of the NSG where the private endpoint vnic will
+                  be attached.
                 type: string
               opendashboardNodeCount:
                 description: The number of OpenSearch Dashboard nodes to configure
@@ -129,6 +230,94 @@ spec:
                 description: The number of OCPUs to configure for the cluster's OpenSearch
                   Dashboard nodes.
                 type: integer
+              opendashboardNodeHostShape:
+                description: The node shape for the cluster's OpenSearch Dashboard
+                  nodes.
+                type: string
+              outboundClusterConfig:
+                description: OpensearchClusterOutboundClusterConfig defines nested
+                  fields for OpensearchCluster.OutboundClusterConfig.
+                properties:
+                  isEnabled:
+                    description: Flag to indicate whether outbound cluster configuration
+                      is enabled
+                    type: boolean
+                  outboundClusters:
+                    description: List of outbound clusters to be connected to the
+                      inbound cluster
+                    items:
+                      description: OpensearchClusterOutboundClusterConfigOutboundCluster
+                        defines nested fields for OpensearchCluster.OutboundClusterConfig.OutboundCluster.
+                      properties:
+                        displayName:
+                          description: Name of the Outbound cluster. Avoid entering
+                            confidential information.
+                          type: string
+                        isSkipUnavailable:
+                          description: Flag to indicate whether to skip the Outbound
+                            cluster during cross cluster search, if it is unavailable
+                          type: boolean
+                        mode:
+                          description: Mode for the cross cluster connection
+                          type: string
+                        pingSchedule:
+                          description: Sets the time interval between regular application-level
+                            ping messages that are sent to try and keep outbound cluster
+                            connections alive. If set to -1, application-level ping
+                            messages to this outbound cluster are not sent. If unset,
+                            application-level ping messages are sent according to
+                            the global transport.ping_schedule setting, which defaults
+                            to -1 meaning that pings are not sent.
+                          type: string
+                        seedClusterId:
+                          description: OCID of the Outbound cluster
+                          type: string
+                      required:
+                      - displayName
+                      - seedClusterId
+                      type: object
+                    type: array
+                required:
+                - isEnabled
+                - outboundClusters
+                type: object
+              reverseConnectionEndpointCustomerIps:
+                description: The customer IP addresses of the endpoint in customer
+                  VCN
+                items:
+                  type: string
+                type: array
+              searchNodeCount:
+                description: The number of search nodes configured for the cluster.
+                type: integer
+              searchNodeHostMemoryGB:
+                description: The amount of memory in GB, for the cluster's search
+                  nodes.
+                type: integer
+              searchNodeHostOcpuCount:
+                description: The number of OCPUs configured for the cluster's search
+                  nodes.
+                type: integer
+              searchNodeHostShape:
+                description: The node shape for the cluster's search nodes.
+                type: string
+              searchNodeHostType:
+                description: The instance type for the cluster's search nodes.
+                type: string
+              searchNodeStorageGB:
+                description: The amount of storage in GB, to configure per node for
+                  the cluster's search nodes.
+                type: integer
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
               securityMasterUserName:
                 description: The name of the master user that are used to manage security
                   config
@@ -140,6 +329,39 @@ spec:
               securityMode:
                 description: The security mode of the cluster.
                 type: string
+              securitySamlConfig:
+                description: OpensearchClusterSecuritySamlConfig defines nested fields
+                  for OpensearchCluster.SecuritySamlConfig.
+                properties:
+                  adminBackendRole:
+                    description: The backend role of admins who have all permissions
+                      like local master user
+                    type: string
+                  idpEntityId:
+                    description: The unique name for a identity provider entity
+                    type: string
+                  idpMetadataContent:
+                    description: The content of identity provider metadata
+                    type: string
+                  isEnabled:
+                    description: A flag determine whether SAML is enabled
+                    type: boolean
+                  opendashboardUrl:
+                    description: The endpoint of opendashboard
+                    type: string
+                  rolesKey:
+                    description: The roles key is sued to get backend roles from SAML
+                      assertion
+                    type: string
+                  subjectKey:
+                    description: The subject key is used to get username from SAML
+                      assertion. By default, it is NameID
+                    type: string
+                required:
+                - idpEntityId
+                - idpMetadataContent
+                - isEnabled
+                type: object
               softwareVersion:
                 description: The version of the software the cluster is running.
                 type: string
@@ -196,6 +418,42 @@ spec:
                 items:
                   type: string
                 type: array
+              backupPolicy:
+                description: OpensearchClusterBackupPolicy defines nested fields for
+                  OpensearchCluster.BackupPolicy.
+                properties:
+                  frequencyInHours:
+                    description: Specifies how often backup should be performed
+                    type: integer
+                  isEnabled:
+                    description: Specifies if automatic backups are enabled.
+                    type: boolean
+                  retentionInDays:
+                    description: Specifies how long backup copy should remain on Storage
+                      in days
+                    type: integer
+                type: object
+              certificateConfig:
+                description: OpensearchClusterCertificateConfig defines nested fields
+                  for OpensearchCluster.CertificateConfig.
+                properties:
+                  clusterCertificateMode:
+                    description: Specifies whether the certificate to be used in cluster
+                      is managed by OpenSearch or OCI Certificates service.
+                    type: string
+                  dashboardCertificateMode:
+                    description: Specifies whether the certificate to be used in dashboard
+                      is managed by OpenSearch or OCI Certificates service.
+                    type: string
+                  openSearchApiCertificateId:
+                    description: certificate to be used for OpenSearch cluster api
+                      communication
+                    type: string
+                  openSearchDashboardCertificateId:
+                    description: certificate to be used for OpenSearch dashboard api
+                      communication
+                    type: string
+                type: object
               compartmentId:
                 description: The OCID of the compartment where the cluster is located.
                 type: string
@@ -212,6 +470,9 @@ spec:
                 description: The number of OCPUs configured for the cluster's data
                   nodes.
                 type: integer
+              dataNodeHostShape:
+                description: The node shape for the cluster's data nodes.
+                type: string
               dataNodeHostType:
                 description: The instance type for the cluster's data nodes.
                 type: string
@@ -246,6 +507,12 @@ spec:
               id:
                 description: The OCID of the cluster.
                 type: string
+              inboundClusterIds:
+                description: List of inbound clusters for which this cluster is an
+                  outbound cluster
+                items:
+                  type: string
+                type: array
               lifecycleDetails:
                 description: Additional information about the current lifecycle state
                   of the cluster.
@@ -253,6 +520,36 @@ spec:
               lifecycleState:
                 description: The current state of the cluster.
                 type: string
+              loadBalancerConfig:
+                description: OpensearchClusterLoadBalancerConfig defines nested fields
+                  for OpensearchCluster.LoadBalancerConfig.
+                properties:
+                  loadBalancerMaxBandwidthInMbps:
+                    description: Maximum bandwidth (Mbps) of OpenSearch load balancer.
+                      Not applicable for network load balancer service.
+                    type: integer
+                  loadBalancerMinBandwidthInMbps:
+                    description: Minimum bandwidth (Mbps) of OpenSearch load balancer.
+                      Not applicable for network load balancer service.
+                    type: integer
+                  loadBalancerServiceType:
+                    description: Load balancer service for OpenSearch and OpenDashboard
+                      load balancer. Default value is LOAD_BALANCER.
+                    type: string
+                required:
+                - loadBalancerServiceType
+                type: object
+              maintenanceDetails:
+                description: OpensearchClusterMaintenanceDetails defines nested fields
+                  for OpensearchCluster.MaintenanceDetails.
+                properties:
+                  notificationEmailIds:
+                    description: The Email IDs given by the customer to get notified
+                      about maintenance activities
+                    items:
+                      type: string
+                    type: array
+                type: object
               masterNodeCount:
                 description: The number of master nodes configured for the cluster.
                 type: integer
@@ -266,8 +563,34 @@ spec:
               masterNodeHostOcpuCount:
                 description: The number of OCPUs configured for cluster's master nodes.
                 type: integer
+              masterNodeHostShape:
+                description: The node shape for the cluster's master nodes.
+                type: string
               masterNodeHostType:
                 description: The instance type for the cluster's master nodes.
+                type: string
+              mlNodeCount:
+                description: The number of ML nodes configured for the cluster.
+                type: integer
+              mlNodeHostMemoryGB:
+                description: The amount of memory in GB, for the cluster's ML nodes.
+                type: integer
+              mlNodeHostOcpuCount:
+                description: The number of OCPUs configured for the cluster's ML nodes.
+                type: integer
+              mlNodeHostShape:
+                description: The node shape for the cluster's ML nodes.
+                type: string
+              mlNodeHostType:
+                description: The instance type for the cluster's ML nodes.
+                type: string
+              mlNodeStorageGB:
+                description: The amount of storage in GB, to configure per node for
+                  the cluster's ML nodes.
+                type: integer
+              nsgId:
+                description: The OCID of the NSG where the private endpoint vnic will
+                  be attached.
                 type: string
               opendashboardFqdn:
                 description: The fully qualified domain name (FQDN) for the cluster's
@@ -285,6 +608,10 @@ spec:
                 description: The amount of memory in GB, for the cluster's OpenSearch
                   Dashboard nodes.
                 type: integer
+              opendashboardNodeHostShape:
+                description: The node shape for the cluster's OpenSearch Dashboard
+                  nodes.
+                type: string
               opendashboardPrivateIp:
                 description: The private IP address for the cluster's OpenSearch Dashboard.
                 type: string
@@ -295,6 +622,105 @@ spec:
               opensearchPrivateIp:
                 description: The cluster's private IP address.
                 type: string
+              outboundClusterConfig:
+                description: OpensearchClusterOutboundClusterConfig defines nested
+                  fields for OpensearchCluster.OutboundClusterConfig.
+                properties:
+                  isEnabled:
+                    description: Flag to indicate whether outbound cluster configuration
+                      is enabled
+                    type: boolean
+                  outboundClusters:
+                    description: List of outbound clusters to be connected to the
+                      inbound cluster
+                    items:
+                      description: OpensearchClusterOutboundClusterConfigOutboundCluster
+                        defines nested fields for OpensearchCluster.OutboundClusterConfig.OutboundCluster.
+                      properties:
+                        displayName:
+                          description: Name of the Outbound cluster. Avoid entering
+                            confidential information.
+                          type: string
+                        isSkipUnavailable:
+                          description: Flag to indicate whether to skip the Outbound
+                            cluster during cross cluster search, if it is unavailable
+                          type: boolean
+                        mode:
+                          description: Mode for the cross cluster connection
+                          type: string
+                        pingSchedule:
+                          description: Sets the time interval between regular application-level
+                            ping messages that are sent to try and keep outbound cluster
+                            connections alive. If set to -1, application-level ping
+                            messages to this outbound cluster are not sent. If unset,
+                            application-level ping messages are sent according to
+                            the global transport.ping_schedule setting, which defaults
+                            to -1 meaning that pings are not sent.
+                          type: string
+                        seedClusterId:
+                          description: OCID of the Outbound cluster
+                          type: string
+                      required:
+                      - displayName
+                      - seedClusterId
+                      type: object
+                    type: array
+                required:
+                - isEnabled
+                - outboundClusters
+                type: object
+              reverseConnectionEndpointCustomerIps:
+                description: The customer IP addresses of the endpoint in customer
+                  VCN
+                items:
+                  type: string
+                type: array
+              reverseConnectionEndpoints:
+                description: The list of reverse connection endpoints.
+                items:
+                  description: OpensearchClusterReverseConnectionEndpoint defines
+                    nested fields for OpensearchCluster.ReverseConnectionEndpoint.
+                  properties:
+                    customerIp:
+                      description: The IP addresses of the endpoint in customer VCN
+                      type: string
+                    natIp:
+                      description: The NAT IP addresses of the endpoint in service
+                        VCN
+                      type: string
+                  type: object
+                type: array
+              searchNodeCount:
+                description: The number of search nodes configured for the cluster.
+                type: integer
+              searchNodeHostMemoryGB:
+                description: The amount of memory in GB, for the cluster's search
+                  nodes.
+                type: integer
+              searchNodeHostOcpuCount:
+                description: The number of OCPUs configured for the cluster's search
+                  nodes.
+                type: integer
+              searchNodeHostShape:
+                description: The node shape for the cluster's search nodes.
+                type: string
+              searchNodeHostType:
+                description: The instance type for the cluster's search nodes.
+                type: string
+              searchNodeStorageGB:
+                description: The amount of storage in GB, to configure per node for
+                  the cluster's search nodes.
+                type: integer
+              securityAttributes:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Security attributes for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+                type: object
               securityMasterUserName:
                 description: The name of the master user that are used to manage security
                   config
@@ -306,6 +732,39 @@ spec:
               securityMode:
                 description: The security mode of the cluster.
                 type: string
+              securitySamlConfig:
+                description: OpensearchClusterSecuritySamlConfig defines nested fields
+                  for OpensearchCluster.SecuritySamlConfig.
+                properties:
+                  adminBackendRole:
+                    description: The backend role of admins who have all permissions
+                      like local master user
+                    type: string
+                  idpEntityId:
+                    description: The unique name for a identity provider entity
+                    type: string
+                  idpMetadataContent:
+                    description: The content of identity provider metadata
+                    type: string
+                  isEnabled:
+                    description: A flag determine whether SAML is enabled
+                    type: boolean
+                  opendashboardUrl:
+                    description: The endpoint of opendashboard
+                    type: string
+                  rolesKey:
+                    description: The roles key is sued to get backend roles from SAML
+                      assertion
+                    type: string
+                  subjectKey:
+                    description: The subject key is used to get username from SAML
+                      assertion. By default, it is NameID
+                    type: string
+                required:
+                - idpEntityId
+                - idpMetadataContent
+                - isEnabled
+                type: object
               softwareVersion:
                 description: The software version the cluster is running.
                 type: string

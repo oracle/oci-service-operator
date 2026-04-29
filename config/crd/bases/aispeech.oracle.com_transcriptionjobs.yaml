@@ -1,0 +1,711 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: transcriptionjobs.aispeech.oracle.com
+spec:
+  group: aispeech.oracle.com
+  names:
+    kind: TranscriptionJob
+    listKind: TranscriptionJobList
+    plural: transcriptionjobs
+    singular: transcriptionjob
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the TranscriptionJob
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the TranscriptionJob
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: TranscriptionJob is the Schema for the transcriptionjobs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TranscriptionJobSpec defines the desired state of TranscriptionJob.
+            properties:
+              additionalTranscriptionFormats:
+                description: Transcription Format. By default, the JSON format is
+                  used.
+                items:
+                  type: string
+                type: array
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment where you want to create the job.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace-1": {"bar-key-1": "value-1", "bar-key-2": "value-2"}, "foo-namespace-2": {"bar-key-1": "value-1", "bar-key-2": "value-2"}}`.
+                type: object
+              description:
+                description: A short description of the job.
+                type: string
+              displayName:
+                description: A user-friendly display name for the job.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`.
+                type: object
+              inputLocation:
+                description: TranscriptionJobInputLocation defines nested fields for
+                  TranscriptionJob.InputLocation.
+                properties:
+                  jsonData:
+                    type: string
+                  locationType:
+                    type: string
+                  objectLocation:
+                    description: TranscriptionJobInputLocationObjectLocation defines
+                      nested fields for TranscriptionJob.InputLocation.ObjectLocation.
+                    properties:
+                      bucketName:
+                        description: Object Storage bucket name.
+                        type: string
+                      namespaceName:
+                        description: Object Storage namespace name.
+                        type: string
+                      objectNames:
+                        description: Object Storage object names.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - bucketName
+                    - namespaceName
+                    - objectNames
+                    type: object
+                  objectLocations:
+                    description: A list of ObjectLocations.
+                    items:
+                      description: TranscriptionJobInputLocationObjectLocation defines
+                        nested fields for TranscriptionJob.InputLocation.ObjectLocation.
+                      properties:
+                        bucketName:
+                          description: Object Storage bucket name.
+                          type: string
+                        namespaceName:
+                          description: Object Storage namespace name.
+                          type: string
+                        objectNames:
+                          description: Object Storage object names.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - bucketName
+                      - namespaceName
+                      - objectNames
+                      type: object
+                    type: array
+                type: object
+              modelDetails:
+                description: TranscriptionJobModelDetails defines nested fields for
+                  TranscriptionJob.ModelDetails.
+                properties:
+                  domain:
+                    description: Domain for input files.
+                    type: string
+                  languageCode:
+                    description: |-
+                      Oracle supported language codes are (Oracle models are locale specific).
+                      - en-US: English - United States (default)
+                      - es-ES: Spanish - Spain
+                      - pt-BR: Portuguese - Brazil
+                      - en-GB: English - Great Britain
+                      - en-AU: English - Australia
+                      - en-IN: English - India
+                      - hi-IN: Hindi - India
+                      - fr-FR: French - France
+                      - de-DE: German - Germany
+                      - it-IT: Italian - Italy
+                      Whisper supported language codes are (Whisper models are locale agnostic).
+                      - auto: Auto-detect language
+                      - af: Afrikaans
+                      - ar: Arabic
+                      - az: Azerbaijani
+                      - be: Belarusian
+                      - bg: Bulgarian
+                      - bs: Bosnian
+                      - ca: Catalan
+                      - cs: Czech
+                      - cy: Welsh
+                      - da: Danish
+                      - de: German
+                      - el: Greek
+                      - en: English (default)
+                      - es: Spanish
+                      - et: Estonian
+                      - fa: Persian
+                      - fi: Finnish
+                      - fr: French
+                      - gl: Galician
+                      - he: Hebrew
+                      - hi: Hindi
+                      - hr: Croatian
+                      - hu: Hungarian
+                      - hy: Armenian
+                      - id: Indonesian
+                      - is: Icelandic
+                      - it: Italian
+                      - ja: Japanese
+                      - kk: Kazakh
+                      - kn: Kannada
+                      - ko: Korean
+                      - lt: Lithuanian
+                      - lv: Latvian
+                      - mi: Maori
+                      - mk: Macedonian
+                      - mr: Marathi
+                      - ms: Malay
+                      - ne: Nepali
+                      - nl: Dutch
+                      - no: Norwegian
+                      - pl: Polish
+                      - pt: Portuguese
+                      - ro: Romanian
+                      - ru: Russian
+                      - sk: Slovak
+                      - sl: Slovenian
+                      - sr: Serbian
+                      - sv: Swedish
+                      - sw: Swahili
+                      - ta: Tamil
+                      - th: Thai
+                      - tl: Tagalog
+                      - tr: Turkish
+                      - uk: Ukrainian
+                      - ur: Urdu
+                      - vi: Vietnamese
+                      - zh: Chinese
+                    type: string
+                  modelType:
+                    description: |-
+                      Select a model to use for generating transcriptions. Currently supported models are:
+                      - ORACLE
+                      - WHISPER_MEDIUM
+                      - WHISPER_LARGE_V2 (upon service request)
+                    type: string
+                  transcriptionSettings:
+                    description: TranscriptionJobModelDetailsTranscriptionSettings
+                      defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.
+                    properties:
+                      additionalSettings:
+                        additionalProperties:
+                          type: string
+                        description: Simple key-value pair for setting model specific
+                          properties. For more details, refer the documentation.
+                        type: object
+                      diarization:
+                        description: TranscriptionJobModelDetailsTranscriptionSettingsDiarization
+                          defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.Diarization.
+                        properties:
+                          isDiarizationEnabled:
+                            description: Set true to enable Speaker diarization and
+                              tag transcription with speaker tags. By default this
+                              is disabled.
+                            type: boolean
+                          numberOfSpeakers:
+                            description: Number of speakers in the audio provided.
+                              By default service will auto detect all speakers in
+                              audio file
+                            type: integer
+                        type: object
+                    type: object
+                type: object
+              normalization:
+                description: TranscriptionJobNormalization defines nested fields for
+                  TranscriptionJob.Normalization.
+                properties:
+                  filters:
+                    description: List of filters.
+                    items:
+                      description: TranscriptionJobNormalizationFilter defines nested
+                        fields for TranscriptionJob.Normalization.Filter.
+                      properties:
+                        jsonData:
+                          type: string
+                        mode:
+                          description: |-
+                            - `MASK`: Will mask detected profanity in transcription.
+                            - `REMOVE`: Will replace profane word with * in transcription.
+                            - `TAG`: Will tag profane word as profanity but will show actual word.
+                          type: string
+                        type:
+                          type: string
+                      type: object
+                    type: array
+                  isPunctuationEnabled:
+                    description: Whether to add punctuation in the generated transcription.
+                      Enabled by default.
+                    type: boolean
+                type: object
+              outputLocation:
+                description: TranscriptionJobOutputLocation defines nested fields
+                  for TranscriptionJob.OutputLocation.
+                properties:
+                  bucketName:
+                    description: Object Storage bucket name.
+                    type: string
+                  namespaceName:
+                    description: Object Storage namespace.
+                    type: string
+                  prefix:
+                    description: Object Storage folder name.
+                    type: string
+                required:
+                - bucketName
+                - namespaceName
+                - prefix
+                type: object
+            required:
+            - compartmentId
+            - inputLocation
+            - outputLocation
+            type: object
+          status:
+            description: TranscriptionJobStatus defines the observed state of TranscriptionJob.
+            properties:
+              additionalTranscriptionFormats:
+                description: Transcription format. JSON format will always be provided
+                  in addition to any formats in this list.
+                items:
+                  type: string
+                type: array
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment where you want to create the job.
+                type: string
+              createdBy:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the user who created the job.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace-1": {"bar-key-1": "value-1", "bar-key-2": "value-2"}, "foo-namespace-2": {"bar-key-1": "value-1", "bar-key-2": "value-2"}}`.
+                type: object
+              description:
+                description: A short description of the job.
+                type: string
+              displayName:
+                description: A user-friendly display name for the job.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`.
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the job.
+                type: string
+              inputLocation:
+                description: TranscriptionJobInputLocation defines nested fields for
+                  TranscriptionJob.InputLocation.
+                properties:
+                  jsonData:
+                    type: string
+                  locationType:
+                    type: string
+                  objectLocation:
+                    description: TranscriptionJobInputLocationObjectLocation defines
+                      nested fields for TranscriptionJob.InputLocation.ObjectLocation.
+                    properties:
+                      bucketName:
+                        description: Object Storage bucket name.
+                        type: string
+                      namespaceName:
+                        description: Object Storage namespace name.
+                        type: string
+                      objectNames:
+                        description: Object Storage object names.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - bucketName
+                    - namespaceName
+                    - objectNames
+                    type: object
+                  objectLocations:
+                    description: A list of ObjectLocations.
+                    items:
+                      description: TranscriptionJobInputLocationObjectLocation defines
+                        nested fields for TranscriptionJob.InputLocation.ObjectLocation.
+                      properties:
+                        bucketName:
+                          description: Object Storage bucket name.
+                          type: string
+                        namespaceName:
+                          description: Object Storage namespace name.
+                          type: string
+                        objectNames:
+                          description: Object Storage object names.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - bucketName
+                      - namespaceName
+                      - objectNames
+                      type: object
+                    type: array
+                type: object
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Job.
+                type: string
+              modelDetails:
+                description: TranscriptionJobModelDetails defines nested fields for
+                  TranscriptionJob.ModelDetails.
+                properties:
+                  domain:
+                    description: Domain for input files.
+                    type: string
+                  languageCode:
+                    description: |-
+                      Oracle supported language codes are (Oracle models are locale specific).
+                      - en-US: English - United States (default)
+                      - es-ES: Spanish - Spain
+                      - pt-BR: Portuguese - Brazil
+                      - en-GB: English - Great Britain
+                      - en-AU: English - Australia
+                      - en-IN: English - India
+                      - hi-IN: Hindi - India
+                      - fr-FR: French - France
+                      - de-DE: German - Germany
+                      - it-IT: Italian - Italy
+                      Whisper supported language codes are (Whisper models are locale agnostic).
+                      - auto: Auto-detect language
+                      - af: Afrikaans
+                      - ar: Arabic
+                      - az: Azerbaijani
+                      - be: Belarusian
+                      - bg: Bulgarian
+                      - bs: Bosnian
+                      - ca: Catalan
+                      - cs: Czech
+                      - cy: Welsh
+                      - da: Danish
+                      - de: German
+                      - el: Greek
+                      - en: English (default)
+                      - es: Spanish
+                      - et: Estonian
+                      - fa: Persian
+                      - fi: Finnish
+                      - fr: French
+                      - gl: Galician
+                      - he: Hebrew
+                      - hi: Hindi
+                      - hr: Croatian
+                      - hu: Hungarian
+                      - hy: Armenian
+                      - id: Indonesian
+                      - is: Icelandic
+                      - it: Italian
+                      - ja: Japanese
+                      - kk: Kazakh
+                      - kn: Kannada
+                      - ko: Korean
+                      - lt: Lithuanian
+                      - lv: Latvian
+                      - mi: Maori
+                      - mk: Macedonian
+                      - mr: Marathi
+                      - ms: Malay
+                      - ne: Nepali
+                      - nl: Dutch
+                      - no: Norwegian
+                      - pl: Polish
+                      - pt: Portuguese
+                      - ro: Romanian
+                      - ru: Russian
+                      - sk: Slovak
+                      - sl: Slovenian
+                      - sr: Serbian
+                      - sv: Swedish
+                      - sw: Swahili
+                      - ta: Tamil
+                      - th: Thai
+                      - tl: Tagalog
+                      - tr: Turkish
+                      - uk: Ukrainian
+                      - ur: Urdu
+                      - vi: Vietnamese
+                      - zh: Chinese
+                    type: string
+                  modelType:
+                    description: |-
+                      Select a model to use for generating transcriptions. Currently supported models are:
+                      - ORACLE
+                      - WHISPER_MEDIUM
+                      - WHISPER_LARGE_V2 (upon service request)
+                    type: string
+                  transcriptionSettings:
+                    description: TranscriptionJobModelDetailsTranscriptionSettings
+                      defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.
+                    properties:
+                      additionalSettings:
+                        additionalProperties:
+                          type: string
+                        description: Simple key-value pair for setting model specific
+                          properties. For more details, refer the documentation.
+                        type: object
+                      diarization:
+                        description: TranscriptionJobModelDetailsTranscriptionSettingsDiarization
+                          defines nested fields for TranscriptionJob.ModelDetails.TranscriptionSettings.Diarization.
+                        properties:
+                          isDiarizationEnabled:
+                            description: Set true to enable Speaker diarization and
+                              tag transcription with speaker tags. By default this
+                              is disabled.
+                            type: boolean
+                          numberOfSpeakers:
+                            description: Number of speakers in the audio provided.
+                              By default service will auto detect all speakers in
+                              audio file
+                            type: integer
+                        type: object
+                    type: object
+                type: object
+              normalization:
+                description: TranscriptionJobNormalization defines nested fields for
+                  TranscriptionJob.Normalization.
+                properties:
+                  filters:
+                    description: List of filters.
+                    items:
+                      description: TranscriptionJobNormalizationFilter defines nested
+                        fields for TranscriptionJob.Normalization.Filter.
+                      properties:
+                        jsonData:
+                          type: string
+                        mode:
+                          description: |-
+                            - `MASK`: Will mask detected profanity in transcription.
+                            - `REMOVE`: Will replace profane word with * in transcription.
+                            - `TAG`: Will tag profane word as profanity but will show actual word.
+                          type: string
+                        type:
+                          type: string
+                      type: object
+                    type: array
+                  isPunctuationEnabled:
+                    description: Whether to add punctuation in the generated transcription.
+                      Enabled by default.
+                    type: boolean
+                type: object
+              outputLocation:
+                description: TranscriptionJobOutputLocation defines nested fields
+                  for TranscriptionJob.OutputLocation.
+                properties:
+                  bucketName:
+                    description: Object Storage bucket name.
+                    type: string
+                  namespaceName:
+                    description: Object Storage namespace.
+                    type: string
+                  prefix:
+                    description: Object Storage folder name.
+                    type: string
+                required:
+                - bucketName
+                - namespaceName
+                - prefix
+                type: object
+              outstandingTasks:
+                description: Total outstanding tasks in a job.
+                type: integer
+              percentComplete:
+                description: How much progress the operation has made, vs the total
+                  amount of work that must be performed.
+                type: integer
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              successfulTasks:
+                description: Total successful tasks in a job.
+                type: integer
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`.
+                type: object
+              timeAccepted:
+                description: Job accepted time.
+                type: string
+              timeFinished:
+                description: Job finished time.
+                type: string
+              timeStarted:
+                description: Job started time.
+                type: string
+              totalTasks:
+                description: Total tasks in a job.
+                type: integer
+              ttlInDays:
+                description: Time to live duration in days for Job. Job will be available
+                  till max 90 days.
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

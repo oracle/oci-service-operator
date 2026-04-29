@@ -17,6 +17,7 @@ import (
 	dataflowsdk "github.com/oracle/oci-go-sdk/v65/dataflow"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil"
+	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
@@ -26,187 +27,287 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const applicationRequeueDuration = time.Minute
-
 type applicationOCIClient interface {
 	CreateApplication(ctx context.Context, request dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error)
 	GetApplication(ctx context.Context, request dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error)
+	ListApplications(ctx context.Context, request dataflowsdk.ListApplicationsRequest) (dataflowsdk.ListApplicationsResponse, error)
 	UpdateApplication(ctx context.Context, request dataflowsdk.UpdateApplicationRequest) (dataflowsdk.UpdateApplicationResponse, error)
 	DeleteApplication(ctx context.Context, request dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error)
 }
 
 type applicationRuntimeClient struct {
-	manager   *ApplicationServiceManager
-	client    applicationOCIClient
-	generated generatedruntime.ServiceClient[*dataflowv1beta1.Application]
-	initErr   error
+	manager  *ApplicationServiceManager
+	delegate ApplicationServiceClient
+	client   applicationOCIClient
+	initErr  error
 }
 
+var _ ApplicationServiceClient = (*applicationRuntimeClient)(nil)
+
 func init() {
-	newApplicationServiceClient = func(manager *ApplicationServiceManager) ApplicationServiceClient {
-		sdkClient, err := dataflowsdk.NewDataFlowClientWithConfigurationProvider(manager.Provider)
-		initErr := error(nil)
-		if err != nil {
-			initErr = fmt.Errorf("initialize Application OCI client: %w", err)
-		}
-		return newApplicationRuntimeClient(manager, sdkClient, initErr)
+	registerApplicationRuntimeHooksMutator(func(manager *ApplicationServiceManager, hooks *ApplicationRuntimeHooks) {
+		runtimeClient, initErr := newApplicationSDKClient(manager)
+		applyApplicationRuntimeHooks(manager, hooks, runtimeClient, initErr)
+	})
+}
+
+func newApplicationSDKClient(manager *ApplicationServiceManager) (applicationOCIClient, error) {
+	if manager == nil {
+		return nil, fmt.Errorf("Application service manager is nil")
 	}
+	client, err := dataflowsdk.NewDataFlowClientWithConfigurationProvider(manager.Provider)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func applyApplicationRuntimeHooks(
+	manager *ApplicationServiceManager,
+	hooks *ApplicationRuntimeHooks,
+	client applicationOCIClient,
+	initErr error,
+) {
+	if hooks == nil {
+		return
+	}
+
+	runtimeClient := newApplicationRuntimeClient(manager, nil, client, initErr)
+
+	hooks.Semantics = reviewedApplicationRuntimeSemantics()
+	hooks.BuildCreateBody = func(_ context.Context, resource *dataflowv1beta1.Application, _ string) (any, error) {
+		if resource == nil {
+			return nil, fmt.Errorf("Application resource is nil")
+		}
+		return buildCreateApplicationDetails(resource.Spec)
+	}
+	hooks.BuildUpdateBody = runtimeClient.buildGeneratedUpdateBody
+	hooks.TrackedRecreate.ClearTrackedIdentity = runtimeClient.clearTrackedIdentity
+	hooks.StatusHooks.ProjectStatus = runtimeClient.projectStatusFromResponse
+	hooks.DeleteHooks.ConfirmRead = runtimeClient.confirmDeleteRead
+	hooks.DeleteHooks.HandleError = runtimeClient.handleDeleteError
+	hooks.DeleteHooks.ApplyOutcome = runtimeClient.applyDeleteOutcome
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate ApplicationServiceClient) ApplicationServiceClient {
+		wrapped := *runtimeClient
+		wrapped.delegate = delegate
+		return &wrapped
+	})
 }
 
 func newApplicationRuntimeClient(
 	manager *ApplicationServiceManager,
+	delegate ApplicationServiceClient,
 	client applicationOCIClient,
 	initErr error,
 ) *applicationRuntimeClient {
-	runtimeClient := &applicationRuntimeClient{
-		manager: manager,
-		client:  client,
-		initErr: initErr,
+	return &applicationRuntimeClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+		initErr:  initErr,
 	}
-	runtimeClient.generated = generatedruntime.NewServiceClient[*dataflowv1beta1.Application](generatedruntime.Config[*dataflowv1beta1.Application]{
-		Kind:      "Application",
-		SDKName:   "Application",
-		Log:       manager.Log,
-		InitError: initErr,
-		BuildCreateBody: func(_ context.Context, resource *dataflowv1beta1.Application, _ string) (any, error) {
-			return buildCreateApplicationDetails(resource.Spec)
-		},
-		BuildUpdateBody: runtimeClient.buildGeneratedUpdateBody,
-		Semantics:       applicationGeneratedSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.CreateApplicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateApplication(ctx, *request.(*dataflowsdk.CreateApplicationRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "CreateApplicationDetails", RequestName: "CreateApplicationDetails", Contribution: "body"},
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.GetApplicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetApplication(ctx, *request.(*dataflowsdk.GetApplicationRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true},
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &dataflowsdk.UpdateApplicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateApplication(ctx, *request.(*dataflowsdk.UpdateApplicationRequest))
-			},
-			Fields: []generatedruntime.RequestField{
-				{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true},
-				{FieldName: "UpdateApplicationDetails", RequestName: "UpdateApplicationDetails", Contribution: "body"},
-			},
-		},
-	})
-	return runtimeClient
 }
 
-func applicationGeneratedSemantics() *generatedruntime.Semantics {
+func newApplicationServiceClientWithOCIClient(
+	log loggerutil.OSOKLogger,
+	client applicationOCIClient,
+) ApplicationServiceClient {
+	manager := &ApplicationServiceManager{Log: log}
+	hooks := newApplicationRuntimeHooksWithOCIClient(client)
+	applyApplicationRuntimeHooks(manager, &hooks, client, nil)
+	delegate := defaultApplicationServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*dataflowv1beta1.Application](
+			buildApplicationGeneratedRuntimeConfig(manager, hooks),
+		),
+	}
+	return wrapApplicationGeneratedClient(hooks, delegate)
+}
+
+func newApplicationRuntimeHooksWithOCIClient(client applicationOCIClient) ApplicationRuntimeHooks {
+	return ApplicationRuntimeHooks{
+		Semantics: newApplicationRuntimeSemantics(),
+		Create: runtimeOperationHooks[dataflowsdk.CreateApplicationRequest, dataflowsdk.CreateApplicationResponse]{
+			Fields: applicationCreateFields(),
+			Call: func(ctx context.Context, request dataflowsdk.CreateApplicationRequest) (dataflowsdk.CreateApplicationResponse, error) {
+				return client.CreateApplication(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[dataflowsdk.GetApplicationRequest, dataflowsdk.GetApplicationResponse]{
+			Fields: applicationGetFields(),
+			Call: func(ctx context.Context, request dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+				return client.GetApplication(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[dataflowsdk.ListApplicationsRequest, dataflowsdk.ListApplicationsResponse]{
+			Fields: applicationListFields(),
+			Call: func(ctx context.Context, request dataflowsdk.ListApplicationsRequest) (dataflowsdk.ListApplicationsResponse, error) {
+				return client.ListApplications(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[dataflowsdk.UpdateApplicationRequest, dataflowsdk.UpdateApplicationResponse]{
+			Fields: applicationUpdateFields(),
+			Call: func(ctx context.Context, request dataflowsdk.UpdateApplicationRequest) (dataflowsdk.UpdateApplicationResponse, error) {
+				return client.UpdateApplication(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[dataflowsdk.DeleteApplicationRequest, dataflowsdk.DeleteApplicationResponse]{
+			Fields: applicationDeleteFields(),
+			Call: func(ctx context.Context, request dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error) {
+				return client.DeleteApplication(ctx, request)
+			},
+		},
+	}
+}
+
+func reviewedApplicationRuntimeSemantics() *generatedruntime.Semantics {
 	semantics := newApplicationRuntimeSemantics()
 
-	// The package-local wrapper is the checked-in runtime owner, but the embedded
-	// generated delegate still validates its own semantics as a generatedruntime
-	// client before it can be used for create/update/observe execution.
+	// The checked-in runtime now uses the generatedruntime seam, but the
+	// update-body builder still owns the explicit create-only drift failure path.
 	if semantics.Async != nil {
 		semantics.Async.Runtime = "generatedruntime"
 	}
-
-	// The package-local update builder still owns create-only drift checks for
-	// compartmentId and type. Including them here suppresses generic unsupported
-	// drift failures so the wrapper can preserve the existing explicit error path.
 	semantics.Mutation.Mutable = append(
 		append([]string(nil), semantics.Mutation.Mutable...),
 		semantics.Mutation.ForceNew...,
 	)
 	semantics.Mutation.ForceNew = nil
 
-	// The handwritten runtime still projects status from the write responses and
-	// intentionally bypasses list-based reuse.
+	// Dataflow preserves its write-response status projection and intentionally
+	// avoids list-based reuse on create.
 	semantics.CreateFollowUp = generatedruntime.FollowUpSemantics{}
 	semantics.UpdateFollowUp = generatedruntime.FollowUpSemantics{}
 	semantics.List = nil
+	semantics.Delete.PendingStates = []string{"DELETING"}
 
 	return semantics
 }
 
-func (c *applicationRuntimeClient) CreateOrUpdate(ctx context.Context, resource *dataflowv1beta1.Application, req ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if c.initErr != nil {
-		return c.generated.CreateOrUpdate(ctx, resource, req)
+func applicationCreateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CreateApplicationDetails", RequestName: "CreateApplicationDetails", Contribution: "body"},
+	}
+}
+
+func applicationGetFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func applicationListFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
+		{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
+		{FieldName: "Page", RequestName: "page", Contribution: "query"},
+		{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
+		{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
+		{FieldName: "DisplayName", RequestName: "displayName", Contribution: "query"},
+		{FieldName: "OwnerPrincipalId", RequestName: "ownerPrincipalId", Contribution: "query"},
+		{FieldName: "DisplayNameStartsWith", RequestName: "displayNameStartsWith", Contribution: "query"},
+		{FieldName: "SparkVersion", RequestName: "sparkVersion", Contribution: "query"},
+	}
+}
+
+func applicationUpdateFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true},
+		{FieldName: "UpdateApplicationDetails", RequestName: "UpdateApplicationDetails", Contribution: "body"},
+	}
+}
+
+func applicationDeleteFields() []generatedruntime.RequestField {
+	return []generatedruntime.RequestField{
+		{FieldName: "ApplicationId", RequestName: "applicationId", Contribution: "path", PreferResourceID: true},
+	}
+}
+
+func (c *applicationRuntimeClient) CreateOrUpdate(
+	ctx context.Context,
+	resource *dataflowv1beta1.Application,
+	req ctrl.Request,
+) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("Application generated runtime delegate is not configured")
 	}
 
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" && strings.TrimSpace(resource.Status.Id) != "" {
-		resource.Status.Id = ""
+	if response, err, handled := c.handleStaleTrackedIdentity(ctx, resource, req); handled {
+		return response, err
 	}
-	if trackedID != "" {
-		current, err := c.get(ctx, trackedID)
-		if err != nil {
-			if isApplicationReadNotFoundOCI(err) {
-				c.clearTrackedIdentity(resource)
-				return c.generated.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-			}
-			return c.fail(resource, normalizeApplicationOCIError(err))
-		}
-		if current.LifecycleState == dataflowsdk.ApplicationLifecycleStateDeleted {
-			c.clearTrackedIdentity(resource)
-			return c.generated.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
-		}
-	}
-	return c.generated.CreateOrUpdate(ctx, resource, req)
+
+	return c.delegate.CreateOrUpdate(ctx, resource, req)
 }
 
 func (c *applicationRuntimeClient) Delete(ctx context.Context, resource *dataflowv1beta1.Application) (bool, error) {
-	if c.initErr != nil {
-		return false, c.initErr
-	}
-
-	trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
-	if trackedID == "" {
+	if resource != nil && currentApplicationID(resource) == "" {
 		c.markDeleted(resource, "OCI resource identifier is not recorded")
 		return true, nil
 	}
 
-	deleteRequest := dataflowsdk.DeleteApplicationRequest{
-		ApplicationId: common.String(trackedID),
+	if c.delegate == nil {
+		return false, fmt.Errorf("Application generated runtime delegate is not configured")
 	}
-	if _, err := c.client.DeleteApplication(ctx, deleteRequest); err != nil {
-		if isApplicationDeleteNotFoundOCI(err) {
-			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource no longer exists")
-			return true, nil
-		}
-		err = normalizeApplicationOCIError(err)
-		c.recordErrorRequestID(resource, err)
-		return false, err
+
+	return c.delegate.Delete(ctx, resource)
+}
+
+func (c *applicationRuntimeClient) handleStaleTrackedIdentity(
+	ctx context.Context,
+	resource *dataflowv1beta1.Application,
+	req ctrl.Request,
+) (servicemanager.OSOKResponse, error, bool) {
+	if resource == nil || c.client == nil || c.initErr != nil {
+		return servicemanager.OSOKResponse{}, nil, false
+	}
+
+	trackedID := currentApplicationID(resource)
+	if trackedID == "" {
+		return servicemanager.OSOKResponse{}, nil, false
 	}
 
 	current, err := c.get(ctx, trackedID)
 	if err != nil {
-		if isApplicationDeleteNotFoundOCI(err) {
-			c.recordErrorRequestID(resource, err)
-			c.markDeleted(resource, "OCI resource deleted")
-			return true, nil
+		if !isApplicationReadNotFoundOCI(err) {
+			return servicemanager.OSOKResponse{}, nil, false
 		}
-		err = normalizeApplicationOCIError(err)
-		c.recordErrorRequestID(resource, err)
-		return false, err
+		c.clearTrackedIdentity(resource)
+		response, err := c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
+		return response, err, true
+	}
+	if current.LifecycleState != dataflowsdk.ApplicationLifecycleStateDeleted {
+		return servicemanager.OSOKResponse{}, nil, false
 	}
 
-	if err := c.projectStatus(resource, current); err != nil {
-		return false, err
+	c.clearTrackedIdentity(resource)
+	response, err := c.delegate.CreateOrUpdate(generatedruntime.WithSkipExistingBeforeCreate(ctx), resource, req)
+	return response, err, true
+}
+
+func currentApplicationID(resource *dataflowv1beta1.Application) string {
+	if resource == nil {
+		return ""
 	}
-	c.markTerminating(resource, current)
-	return false, nil
+
+	if trackedID := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); trackedID != "" {
+		return trackedID
+	}
+	return strings.TrimSpace(resource.Status.Id)
+}
+
+func (c *applicationRuntimeClient) getResponse(ctx context.Context, ocid string) (dataflowsdk.GetApplicationResponse, error) {
+	if c.initErr != nil {
+		return dataflowsdk.GetApplicationResponse{}, c.initErr
+	}
+	if c.client == nil {
+		return dataflowsdk.GetApplicationResponse{}, fmt.Errorf("Application OCI client is not configured")
+	}
+	return c.client.GetApplication(ctx, dataflowsdk.GetApplicationRequest{
+		ApplicationId: common.String(ocid),
+	})
 }
 
 func (c *applicationRuntimeClient) get(ctx context.Context, ocid string) (dataflowsdk.Application, error) {
-	response, err := c.client.GetApplication(ctx, dataflowsdk.GetApplicationRequest{
-		ApplicationId: common.String(ocid),
-	})
+	response, err := c.getResponse(ctx, ocid)
 	if err != nil {
 		return dataflowsdk.Application{}, err
 	}
@@ -232,6 +333,66 @@ func (c *applicationRuntimeClient) buildGeneratedUpdateBody(
 		return nil, false, nil
 	}
 	return updateRequest.UpdateApplicationDetails, true, nil
+}
+
+func (c *applicationRuntimeClient) confirmDeleteRead(
+	ctx context.Context,
+	_ *dataflowv1beta1.Application,
+	currentID string,
+) (any, error) {
+	if strings.TrimSpace(currentID) == "" {
+		return nil, fmt.Errorf("Application delete confirmation requires a tracked OCI identifier")
+	}
+
+	response, err := c.getResponse(ctx, currentID)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (c *applicationRuntimeClient) handleDeleteError(
+	resource *dataflowv1beta1.Application,
+	err error,
+) error {
+	if err == nil {
+		return nil
+	}
+	if resource != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+	}
+	return normalizeApplicationOCIError(err)
+}
+
+func (c *applicationRuntimeClient) applyDeleteOutcome(
+	resource *dataflowv1beta1.Application,
+	response any,
+	stage generatedruntime.DeleteConfirmStage,
+) (generatedruntime.DeleteOutcome, error) {
+	current, err := applicationFromResponse(response)
+	if err != nil {
+		return generatedruntime.DeleteOutcome{}, err
+	}
+
+	if stage == generatedruntime.DeleteConfirmStageAlreadyPending {
+		switch current.LifecycleState {
+		case dataflowsdk.ApplicationLifecycleStateDeleting:
+			c.markDeleteProgress(resource, current)
+			return generatedruntime.DeleteOutcome{Handled: true, Deleted: false}, nil
+		default:
+			return generatedruntime.DeleteOutcome{}, nil
+		}
+	}
+
+	switch current.LifecycleState {
+	case dataflowsdk.ApplicationLifecycleStateActive,
+		dataflowsdk.ApplicationLifecycleStateInactive,
+		dataflowsdk.ApplicationLifecycleStateDeleting:
+		c.markDeleteProgress(resource, current)
+		return generatedruntime.DeleteOutcome{Handled: true, Deleted: false}, nil
+	default:
+		return generatedruntime.DeleteOutcome{}, nil
+	}
 }
 
 func (c *applicationRuntimeClient) buildUpdateRequest(resource *dataflowv1beta1.Application, current dataflowsdk.Application) (dataflowsdk.UpdateApplicationRequest, bool, error) {
@@ -520,52 +681,56 @@ func validateApplicationCreateOnlyDrift(spec dataflowv1beta1.ApplicationSpec, cu
 	return fmt.Errorf("Application create-only field drift is not supported: %s", strings.Join(unsupported, ", "))
 }
 
-func (c *applicationRuntimeClient) fail(resource *dataflowv1beta1.Application, err error) (servicemanager.OSOKResponse, error) {
-	status := &resource.Status.OsokStatus
-	servicemanager.RecordErrorOpcRequestID(status, err)
-	status.Message = err.Error()
-	status.Reason = string(shared.Failed)
-	updatedAt := metav1Time(time.Now())
-	status.UpdatedAt = &updatedAt
-	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
-	return servicemanager.OSOKResponse{IsSuccessful: false}, err
-}
-
-func (c *applicationRuntimeClient) recordResponseRequestID(resource *dataflowv1beta1.Application, response any) {
-	if resource == nil {
-		return
-	}
-	servicemanager.RecordResponseOpcRequestID(&resource.Status.OsokStatus, response)
-}
-
-func (c *applicationRuntimeClient) recordErrorRequestID(resource *dataflowv1beta1.Application, err error) {
-	if resource == nil {
-		return
-	}
-	servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
-}
-
 func (c *applicationRuntimeClient) markDeleted(resource *dataflowv1beta1.Application, message string) {
+	if resource == nil {
+		return
+	}
+
 	status := &resource.Status.OsokStatus
 	now := metav1Time(time.Now())
 	status.DeletedAt = &now
 	status.UpdatedAt = &now
 	status.Message = message
 	status.Reason = string(shared.Terminating)
-	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.manager.Log)
+	status.Async.Current = nil
+	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.log())
 }
 
 func (c *applicationRuntimeClient) clearTrackedIdentity(resource *dataflowv1beta1.Application) {
+	if resource == nil {
+		return
+	}
 	resource.Status = dataflowv1beta1.ApplicationStatus{}
 }
 
-func (c *applicationRuntimeClient) markTerminating(resource *dataflowv1beta1.Application, current dataflowsdk.Application) {
+func (c *applicationRuntimeClient) markDeleteProgress(resource *dataflowv1beta1.Application, current dataflowsdk.Application) {
+	if resource == nil {
+		return
+	}
+
 	status := &resource.Status.OsokStatus
+	message := applicationLifecycleMessage(current)
 	now := metav1Time(time.Now())
-	status.UpdatedAt = &now
-	status.Message = applicationLifecycleMessage(current)
+	status.Message = message
 	status.Reason = string(shared.Terminating)
-	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", status.Message, c.manager.Log)
+	status.UpdatedAt = &now
+	status.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceLifecycle,
+		Phase:           shared.OSOKAsyncPhaseDelete,
+		RawStatus:       string(current.LifecycleState),
+		NormalizedClass: shared.OSOKAsyncClassPending,
+		Message:         message,
+		UpdatedAt:       &now,
+	}
+	resource.Status.OsokStatus = util.UpdateOSOKStatusCondition(resource.Status.OsokStatus, shared.Terminating, v1.ConditionTrue, "", message, c.log())
+}
+
+func (c *applicationRuntimeClient) projectStatusFromResponse(resource *dataflowv1beta1.Application, response any) error {
+	current, err := applicationFromResponse(response)
+	if err != nil {
+		return err
+	}
+	return c.projectStatus(resource, current)
 }
 
 func (c *applicationRuntimeClient) projectStatus(resource *dataflowv1beta1.Application, current dataflowsdk.Application) error {
@@ -607,6 +772,13 @@ func (c *applicationRuntimeClient) projectStatus(resource *dataflowv1beta1.Appli
 		IdleTimeoutInMinutes: int64Value(current.IdleTimeoutInMinutes),
 	}
 	return nil
+}
+
+func (c *applicationRuntimeClient) log() loggerutil.OSOKLogger {
+	if c.manager == nil {
+		return loggerutil.OSOKLogger{}
+	}
+	return c.manager.Log
 }
 
 func applicationLanguageFromSpec(value string) (dataflowsdk.ApplicationLanguageEnum, error) {

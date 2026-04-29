@@ -25,12 +25,12 @@ type VaultSpec struct {
 	// +kubebuilder:validation:Required
 	VaultType string `json:"vaultType"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
@@ -100,8 +100,8 @@ type VaultStatus struct {
 	// The OCID of the compartment that contains this vault.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// The service endpoint to perform cryptographic operations against. Cryptographic operations include
-	// Encrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/EncryptedData/Encrypt), Decrypt (https://docs.cloud.oracle.com/api/#/en/key/latest/DecryptedData/Decrypt),
-	// and GenerateDataEncryptionKey (https://docs.cloud.oracle.com/api/#/en/key/latest/GeneratedKey/GenerateDataEncryptionKey) operations.
+	// Encrypt (https://docs.oracle.com/iaas/api/#/en/key/latest/EncryptedData/Encrypt), Decrypt (https://docs.oracle.com/iaas/api/#/en/key/latest/DecryptedData/Decrypt),
+	// and GenerateDataEncryptionKey (https://docs.oracle.com/iaas/api/#/en/key/latest/GeneratedKey/GenerateDataEncryptionKey) operations.
 	CryptoEndpoint string `json:"cryptoEndpoint,omitempty"`
 	// A user-friendly name for the vault. It does not have to be unique, and it is changeable.
 	// Avoid entering confidential information.
@@ -122,11 +122,11 @@ type VaultStatus struct {
 	// The OCID of the vault's wrapping key.
 	WrappingkeyId string `json:"wrappingkeyId,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// An optional property to indicate when to delete the vault, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
@@ -138,7 +138,9 @@ type VaultStatus struct {
 	RestoredFromVaultId string              `json:"restoredFromVaultId,omitempty"`
 	ReplicaDetails      VaultReplicaDetails `json:"replicaDetails,omitempty"`
 	// A Boolean value that indicates whether the Vault is primary Vault or replica Vault.
-	IsPrimary                         bool                                   `json:"isPrimary,omitempty"`
+	IsPrimary bool `json:"isPrimary,omitempty"`
+	// A Boolean value that indicates whether the Vault has cross region replication capability. Always true for Virtual Private Vaults.
+	IsVaultReplicable                 bool                                   `json:"isVaultReplicable,omitempty"`
 	ExternalKeyManagerMetadataSummary VaultExternalKeyManagerMetadataSummary `json:"externalKeyManagerMetadataSummary,omitempty"`
 	// The retention period in days last applied when Vault deletion was scheduled.
 	RequestedDeletionScheduleDays int32 `json:"requestedDeletionScheduleDays,omitempty,omitzero"`

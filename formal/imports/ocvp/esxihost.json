@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "ocvp",
+  "slug": "esxihost",
+  "kind": "EsxiHost",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_ocvp_esxihost",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateEsxiHost",
+        "requestType": "ocvp.CreateEsxiHostRequest",
+        "responseType": "ocvp.CreateEsxiHostResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetEsxiHost",
+        "requestType": "ocvp.GetEsxiHostRequest",
+        "responseType": "ocvp.GetEsxiHostResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListEsxiHost",
+        "requestType": "ocvp.ListEsxiHostRequest",
+        "responseType": "ocvp.ListEsxiHostResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateEsxiHost",
+        "requestType": "ocvp.UpdateEsxiHostRequest",
+        "responseType": "ocvp.UpdateEsxiHostResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteEsxiHost",
+        "requestType": "ocvp.DeleteEsxiHostRequest",
+        "responseType": "ocvp.DeleteEsxiHostResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_ocvp_esxihost",
+    "collectionField": "esxihost",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/ocvp/esxihost/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/ocvp/esxihost/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for ocvp/esxihost; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

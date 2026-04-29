@@ -19,7 +19,7 @@ import (
 )
 
 // PublicationServiceClient is the handwritten extension seam for Publication runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*PublicationServiceManager).WithClient.
 type PublicationServiceClient interface {
 	CreateOrUpdate(context.Context, *marketplacev1beta1.Publication, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ PublicationServiceClient = defaultPublicationServiceClient{}
 
 var newPublicationServiceClient = func(manager *PublicationServiceManager) PublicationServiceClient {
 	sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*marketplacev1beta1.Publication]{
-		Kind:    "Publication",
-		SDKName: "Publication",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.CreatePublicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreatePublication(ctx, *request.(*marketplacesdk.CreatePublicationRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.GetPublicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetPublication(ctx, *request.(*marketplacesdk.GetPublicationRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.ListPublicationsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListPublications(ctx, *request.(*marketplacesdk.ListPublicationsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.UpdatePublicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdatePublication(ctx, *request.(*marketplacesdk.UpdatePublicationRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &marketplacesdk.DeletePublicationRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeletePublication(ctx, *request.(*marketplacesdk.DeletePublicationRequest))
-			},
-		},
-	}
+	hooks := newPublicationRuntimeHooks(manager, sdkClient)
+	config := buildPublicationGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Publication OCI client: %w", err)
 	}
-	return defaultPublicationServiceClient{
+	delegate := defaultPublicationServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.Publication](config),
 	}
+	return wrapPublicationGeneratedClient(hooks, delegate)
 }

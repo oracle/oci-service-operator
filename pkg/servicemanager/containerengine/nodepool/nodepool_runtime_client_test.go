@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -55,6 +56,51 @@ func TestBuildNodePoolCreateDetailsPreservesPolymorphicDetailsAndFalseBooleans(t
 
 	if strings.Contains(got, `"jsonData"`) {
 		t.Fatalf("request body unexpectedly exposes jsonData helper fields: %s", got)
+	}
+}
+
+func TestBuildNodePoolCreateDetailsPreservesRefreshedEvictionAndCyclingFields(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodeEvictionNodePoolSettings.IsForceActionAfterGraceDuration = false
+	resource.Spec.NodePoolCyclingDetails.CycleModes = []string{"INSTANCE_REPLACE", "BOOT_VOLUME_REPLACE"}
+
+	details, err := buildNodePoolCreateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolCreateDetails() error = %v", err)
+	}
+	if details.NodeEvictionNodePoolSettings == nil {
+		t.Fatal("buildNodePoolCreateDetails() NodeEvictionNodePoolSettings = nil, want refreshed eviction settings")
+	}
+	if details.NodeEvictionNodePoolSettings.IsForceActionAfterGraceDuration == nil || *details.NodeEvictionNodePoolSettings.IsForceActionAfterGraceDuration {
+		t.Fatalf(
+			"buildNodePoolCreateDetails() IsForceActionAfterGraceDuration = %#v, want explicit false",
+			details.NodeEvictionNodePoolSettings.IsForceActionAfterGraceDuration,
+		)
+	}
+	if details.NodePoolCyclingDetails == nil {
+		t.Fatal("buildNodePoolCreateDetails() NodePoolCyclingDetails = nil, want refreshed cycling details")
+	}
+	wantCycleModes := []containerenginesdk.CycleModeEnum{
+		containerenginesdk.CycleModeInstanceReplace,
+		containerenginesdk.CycleModeBootVolumeReplace,
+	}
+	if !reflect.DeepEqual(details.NodePoolCyclingDetails.CycleModes, wantCycleModes) {
+		t.Fatalf("buildNodePoolCreateDetails() CycleModes = %#v, want %#v", details.NodePoolCyclingDetails.CycleModes, wantCycleModes)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.CreateNodePoolRequest{
+		CreateNodePoolDetails: details,
+	}, http.MethodPost, "/nodePools")
+
+	for _, want := range []string{
+		`"isForceActionAfterGraceDuration":false`,
+		`"cycleModes":["INSTANCE_REPLACE","BOOT_VOLUME_REPLACE"]`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("request body %s does not contain %s", body, want)
+		}
 	}
 }
 
@@ -252,6 +298,58 @@ func TestBuildNodePoolCreateDetailsRejectsUnsupportedNodeSourceType(t *testing.T
 	}
 }
 
+func TestApplyNodePoolRuntimeHooksSanitizesTypedCalls(t *testing.T) {
+	t.Parallel()
+
+	hooks := newNodePoolDefaultRuntimeHooks(containerenginesdk.ContainerEngineClient{})
+
+	var createRequest containerenginesdk.CreateNodePoolRequest
+	var updateRequest containerenginesdk.UpdateNodePoolRequest
+
+	hooks.Create.Call = func(_ context.Context, request containerenginesdk.CreateNodePoolRequest) (containerenginesdk.CreateNodePoolResponse, error) {
+		createRequest = request
+		return containerenginesdk.CreateNodePoolResponse{}, nil
+	}
+	hooks.Update.Call = func(_ context.Context, request containerenginesdk.UpdateNodePoolRequest) (containerenginesdk.UpdateNodePoolResponse, error) {
+		updateRequest = request
+		return containerenginesdk.UpdateNodePoolResponse{}, nil
+	}
+
+	applyNodePoolRuntimeHooks(&hooks)
+
+	if _, err := hooks.Create.Call(context.Background(), containerenginesdk.CreateNodePoolRequest{
+		CreateNodePoolDetails: containerenginesdk.CreateNodePoolDetails{
+			SubnetIds:         []string{"ocid1.subnet.oc1..worker"},
+			QuantityPerSubnet: common.Int(1),
+			NodeConfigDetails: &containerenginesdk.CreateNodePoolNodeConfigDetails{Size: common.Int(1)},
+		},
+	}); err != nil {
+		t.Fatalf("hooks.Create.Call() error = %v", err)
+	}
+	if createRequest.CreateNodePoolDetails.SubnetIds != nil {
+		t.Fatalf("hooks.Create.Call() subnetIds = %#v, want nil after sanitation", createRequest.CreateNodePoolDetails.SubnetIds)
+	}
+	if createRequest.CreateNodePoolDetails.QuantityPerSubnet == nil || *createRequest.CreateNodePoolDetails.QuantityPerSubnet != 1 {
+		t.Fatalf("hooks.Create.Call() quantityPerSubnet = %#v, want preserved 1", createRequest.CreateNodePoolDetails.QuantityPerSubnet)
+	}
+
+	if _, err := hooks.Update.Call(context.Background(), containerenginesdk.UpdateNodePoolRequest{
+		UpdateNodePoolDetails: containerenginesdk.UpdateNodePoolDetails{
+			SubnetIds:         []string{"ocid1.subnet.oc1..worker"},
+			QuantityPerSubnet: common.Int(2),
+			NodeConfigDetails: &containerenginesdk.UpdateNodePoolNodeConfigDetails{Size: common.Int(2)},
+		},
+	}); err != nil {
+		t.Fatalf("hooks.Update.Call() error = %v", err)
+	}
+	if updateRequest.UpdateNodePoolDetails.SubnetIds != nil {
+		t.Fatalf("hooks.Update.Call() subnetIds = %#v, want nil after sanitation", updateRequest.UpdateNodePoolDetails.SubnetIds)
+	}
+	if updateRequest.UpdateNodePoolDetails.QuantityPerSubnet == nil || *updateRequest.UpdateNodePoolDetails.QuantityPerSubnet != 2 {
+		t.Fatalf("hooks.Update.Call() quantityPerSubnet = %#v, want preserved 2", updateRequest.UpdateNodePoolDetails.QuantityPerSubnet)
+	}
+}
+
 func TestBuildNodePoolUpdateBodyDetectsMutableDrift(t *testing.T) {
 	t.Parallel()
 
@@ -419,6 +517,38 @@ func TestBuildNodePoolUpdateDetailsPreservesExplicitEmptyNsgIDs(t *testing.T) {
 	}
 }
 
+func TestBuildNodePoolUpdateDetailsPreservesExplicitEmptyCycleModes(t *testing.T) {
+	t.Parallel()
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodePoolCyclingDetails = containerenginev1beta1.NodePoolCyclingDetails{
+		CycleModes: []string{},
+	}
+
+	details, err := buildNodePoolUpdateDetails(context.Background(), resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() error = %v", err)
+	}
+	if details.NodePoolCyclingDetails == nil {
+		t.Fatal("buildNodePoolUpdateDetails() NodePoolCyclingDetails = nil, want explicit empty cycleModes preserved")
+	}
+	if details.NodePoolCyclingDetails.CycleModes == nil {
+		t.Fatal("buildNodePoolUpdateDetails() NodePoolCyclingDetails.CycleModes = nil, want explicit empty slice preserved")
+	}
+	if len(details.NodePoolCyclingDetails.CycleModes) != 0 {
+		t.Fatalf("buildNodePoolUpdateDetails() NodePoolCyclingDetails.CycleModes = %#v, want empty slice", details.NodePoolCyclingDetails.CycleModes)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.UpdateNodePoolRequest{
+		NodePoolId:            common.String("ocid1.nodepool.oc1..example"),
+		UpdateNodePoolDetails: details,
+	}, http.MethodPut, "/nodePools/ocid1.nodepool.oc1..example")
+
+	if !strings.Contains(body, `"cycleModes":[]`) {
+		t.Fatalf("request body %s does not preserve explicit empty cycleModes intent", body)
+	}
+}
+
 func TestBuildNodePoolUpdateDetailsRejectsNonEmptyUnsupportedPreemptibleNodeConfig(t *testing.T) {
 	t.Parallel()
 
@@ -436,6 +566,47 @@ func TestBuildNodePoolUpdateDetailsRejectsNonEmptyUnsupportedPreemptibleNodeConf
 	}
 	if !strings.Contains(err.Error(), "unsupported nodeConfigDetails.placementConfigs[0].preemptibleNodeConfig.preemptionAction type") {
 		t.Fatalf("buildNodePoolUpdateDetails() error = %v, want unsupported preemptible action context", err)
+	}
+}
+
+func TestBuildNodePoolUpdateBodyDetectsExplicitEmptyCycleModesDrift(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.nodepool.oc1..existing"
+
+	resource := newNodePoolTestResource()
+	resource.Spec.NodePoolCyclingDetails.CycleModes = []string{}
+
+	currentResource := newNodePoolTestResource()
+	currentResource.Spec.NodePoolCyclingDetails.CycleModes = []string{"INSTANCE_REPLACE"}
+
+	currentDetails, err := buildNodePoolUpdateDetails(context.Background(), currentResource, currentResource.Namespace)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateDetails() error = %v", err)
+	}
+	current := observedNodePoolFromUpdateDetails(t, existingID, currentResource.Spec, currentDetails, "ACTIVE")
+
+	details, updateNeeded, err := buildNodePoolUpdateBody(context.Background(), resource, resource.Namespace, current)
+	if err != nil {
+		t.Fatalf("buildNodePoolUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildNodePoolUpdateBody() updateNeeded = false, want true for explicit empty cycleModes drift")
+	}
+	if details.NodePoolCyclingDetails == nil {
+		t.Fatal("buildNodePoolUpdateBody() NodePoolCyclingDetails = nil, want explicit empty cycleModes preserved")
+	}
+	if details.NodePoolCyclingDetails.CycleModes == nil || len(details.NodePoolCyclingDetails.CycleModes) != 0 {
+		t.Fatalf("buildNodePoolUpdateBody() NodePoolCyclingDetails.CycleModes = %#v, want explicit empty slice", details.NodePoolCyclingDetails.CycleModes)
+	}
+
+	body := nodePoolSerializedRequestBody(t, containerenginesdk.UpdateNodePoolRequest{
+		NodePoolId:            common.String(existingID),
+		UpdateNodePoolDetails: details,
+	}, http.MethodPut, "/nodePools/"+existingID)
+
+	if !strings.Contains(body, `"cycleModes":[]`) {
+		t.Fatalf("request body %s does not preserve explicit empty cycleModes intent", body)
 	}
 }
 
@@ -822,6 +993,24 @@ func TestNodePoolDeletePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
 	requireNodePoolAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, "", shared.OSOKAsyncClassPending, "wr-delete-1")
 }
 
+func TestApplyNodePoolRuntimeHooksKeepsOverrideEvictionQueriesDistinctFromBodyFields(t *testing.T) {
+	t.Parallel()
+
+	hooks := newNodePoolDefaultRuntimeHooks(containerenginesdk.ContainerEngineClient{})
+	applyNodePoolRuntimeHooks(&hooks)
+
+	wantQueries := []string{
+		"overrideEvictionGraceDuration",
+		"isForceDeletionAfterOverrideGraceDuration",
+	}
+	if got := nodePoolRequestNamesByContribution(hooks.Update.Fields, "query"); !reflect.DeepEqual(got, wantQueries) {
+		t.Fatalf("hooks.Update query fields = %#v, want %#v", got, wantQueries)
+	}
+	if got := nodePoolRequestNamesByContribution(hooks.Delete.Fields, "query"); !reflect.DeepEqual(got, wantQueries) {
+		t.Fatalf("hooks.Delete query fields = %#v, want %#v", got, wantQueries)
+	}
+}
+
 func TestNewNodePoolServiceClientAllowsPrimaryListSemantics(t *testing.T) {
 	t.Parallel()
 
@@ -1132,6 +1321,17 @@ func nodePoolDeleteFields() []generatedruntime.RequestField {
 		{FieldName: "OverrideEvictionGraceDuration", RequestName: "overrideEvictionGraceDuration", Contribution: "query"},
 		{FieldName: "IsForceDeletionAfterOverrideGraceDuration", RequestName: "isForceDeletionAfterOverrideGraceDuration", Contribution: "query"},
 	}
+}
+
+func nodePoolRequestNamesByContribution(fields []generatedruntime.RequestField, contribution string) []string {
+	names := make([]string, 0, len(fields))
+	for _, field := range fields {
+		if field.Contribution != contribution {
+			continue
+		}
+		names = append(names, field.RequestName)
+	}
+	return names
 }
 
 func requireNodePoolOpcRequestID(t *testing.T, resource *containerenginev1beta1.NodePool, want string) {

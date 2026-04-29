@@ -2127,7 +2127,7 @@ func renderSDKRegistryPreamble(b *strings.Builder, sdkGroups []string) {
 		fmt.Fprintf(b, "\t\"github.com/oracle/oci-go-sdk/v65/%s\"\n", g)
 	}
 	b.WriteString(")\n\n")
-	b.WriteString("const (\n\tmodulePath    = \"github.com/oracle/oci-go-sdk/v65\"\n\tmoduleVersion = \"v65.61.1\"\n)\n\n")
+	b.WriteString("const (\n\tmodulePath    = \"github.com/oracle/oci-go-sdk/v65\"\n\tmoduleVersion = \"v65.110.0\"\n)\n\n")
 	b.WriteString("var seedTargets = []Target{\n")
 }
 

@@ -19,7 +19,7 @@ import (
 )
 
 // QueueServiceClient is the handwritten extension seam for Queue runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*QueueServiceManager).WithClient.
 type QueueServiceClient interface {
 	CreateOrUpdate(context.Context, *queuev1beta1.Queue, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -30,117 +30,17 @@ type defaultQueueServiceClient struct {
 	generatedruntime.ServiceClient[*queuev1beta1.Queue]
 }
 
-func newQueueRuntimeSemantics() *generatedruntime.Semantics {
-	return &generatedruntime.Semantics{
-		FormalService: "queue",
-		FormalSlug:    "queue",
-		Async: &generatedruntime.AsyncSemantics{
-			Strategy:             "workrequest",
-			Runtime:              "handwritten",
-			FormalClassification: "workrequest",
-			WorkRequest: &generatedruntime.WorkRequestSemantics{
-				Source: "service-sdk",
-				Phases: []string{"create", "update", "delete"},
-				LegacyFieldBridge: &generatedruntime.WorkRequestLegacyFieldBridge{
-					Create: "CreateWorkRequestId",
-					Update: "UpdateWorkRequestId",
-					Delete: "DeleteWorkRequestId",
-				},
-			},
-		},
-		StatusProjection:  "required",
-		SecretSideEffects: "ready-only",
-		FinalizerPolicy:   "retain-until-confirmed-delete",
-		Lifecycle: generatedruntime.LifecycleSemantics{
-			ProvisioningStates: []string{"CREATING", "UPDATING"},
-			UpdatingStates:     []string{"UPDATING"},
-			ActiveStates:       []string{"ACTIVE"},
-		},
-		Delete: generatedruntime.DeleteSemantics{
-			Policy:         "required",
-			PendingStates:  []string{"DELETING"},
-			TerminalStates: []string{"DELETED"},
-		},
-		List: &generatedruntime.ListSemantics{
-			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "displayName", "id", "lifecycleState"},
-		},
-		Mutation: generatedruntime.MutationSemantics{
-			Mutable:       []string{"channelConsumptionLimit", "customEncryptionKeyId", "deadLetterQueueDeliveryCount", "definedTags", "displayName", "freeformTags", "timeoutInSeconds", "visibilityInSeconds"},
-			ForceNew:      []string{"compartmentId", "retentionInSeconds"},
-			ConflictsWith: map[string][]string{},
-		},
-		Hooks: generatedruntime.HookSet{
-			Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"}},
-			Update: []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "UPDATED"}},
-			Delete: []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "DELETED"}},
-		},
-		CreateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.CreateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "CREATED"}},
-		},
-		UpdateFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "read-after-write",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.UpdateResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "UPDATED"}},
-		},
-		DeleteFollowUp: generatedruntime.FollowUpSemantics{
-			Strategy: "confirm-delete",
-			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}, {Helper: "tfresource.WaitForWorkRequestWithErrorHandling", EntityType: "queue", Action: "DELETED"}},
-		},
-		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
-	}
-}
-
 var _ QueueServiceClient = defaultQueueServiceClient{}
 
 var newQueueServiceClient = func(manager *QueueServiceManager) QueueServiceClient {
 	sdkClient, err := queuesdk.NewQueueAdminClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*queuev1beta1.Queue]{
-		Kind:      "Queue",
-		SDKName:   "Queue",
-		Log:       manager.Log,
-		Semantics: newQueueRuntimeSemantics(),
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &queuesdk.CreateQueueRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateQueue(ctx, *request.(*queuesdk.CreateQueueRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CreateQueueDetails", RequestName: "CreateQueueDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &queuesdk.GetQueueRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetQueue(ctx, *request.(*queuesdk.GetQueueRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true}},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &queuesdk.ListQueuesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListQueues(ctx, *request.(*queuesdk.ListQueuesRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "Id", RequestName: "id", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &queuesdk.UpdateQueueRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateQueue(ctx, *request.(*queuesdk.UpdateQueueRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateQueueDetails", RequestName: "UpdateQueueDetails", Contribution: "body", PreferResourceID: false}},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &queuesdk.DeleteQueueRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteQueue(ctx, *request.(*queuesdk.DeleteQueueRequest))
-			},
-			Fields: []generatedruntime.RequestField{{FieldName: "QueueId", RequestName: "queueId", Contribution: "path", PreferResourceID: true}},
-		},
-	}
+	hooks := newQueueRuntimeHooks(manager, sdkClient)
+	config := buildQueueGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Queue OCI client: %w", err)
 	}
-	return defaultQueueServiceClient{
+	delegate := defaultQueueServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*queuev1beta1.Queue](config),
 	}
+	return wrapQueueGeneratedClient(hooks, delegate)
 }

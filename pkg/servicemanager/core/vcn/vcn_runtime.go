@@ -45,20 +45,70 @@ type vcnGeneratedParityClient struct {
 }
 
 func init() {
-	generatedFactory := newVcnServiceClient
-	newVcnServiceClient = func(manager *VcnServiceManager) VcnServiceClient {
-		delegate := generatedFactory(manager)
-		sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-		parityClient := &vcnGeneratedParityClient{
-			manager:  manager,
-			delegate: delegate,
-			client:   sdkClient,
-		}
-		if err != nil {
-			parityClient.initErr = fmt.Errorf("initialize Vcn OCI client: %w", err)
-		}
-		return parityClient
+	registerVcnRuntimeHooksMutator(func(manager *VcnServiceManager, hooks *VcnRuntimeHooks) {
+		applyVcnRuntimeHooks(manager, hooks, nil)
+	})
+}
+
+func applyVcnRuntimeHooks(
+	manager *VcnServiceManager,
+	hooks *VcnRuntimeHooks,
+	client vcnOCIClient,
+) {
+	if hooks == nil {
+		return
 	}
+
+	if hooks.Semantics != nil {
+		semantics := *hooks.Semantics
+		mutation := semantics.Mutation
+		mutation.ForceNew = nil
+		mutation.Mutable = appendUniqueVcnMutationPaths(mutation.Mutable, "securityAttributes", "isZprOnly")
+		semantics.Mutation = mutation
+		hooks.Semantics = &semantics
+	}
+
+	hooks.BuildUpdateBody = buildVcnUpdateBody
+	hooks.TrackedRecreate.ClearTrackedIdentity = clearTrackedVcnIdentity
+	hooks.ParityHooks.NormalizeDesiredState = func(resource *corev1beta1.Vcn, currentResponse any) {
+		current, ok := vcnFromResponse(currentResponse)
+		if !ok {
+			return
+		}
+		normalizeEquivalentVcnCreateOnlyLists(resource, current)
+	}
+	hooks.ParityHooks.ValidateCreateOnlyDrift = func(resource *corev1beta1.Vcn, currentResponse any) error {
+		current, ok := vcnFromResponse(currentResponse)
+		if !ok {
+			return fmt.Errorf("unexpected Vcn current response type %T", currentResponse)
+		}
+		return validateCreateOnlyDrift(resource.Spec, current)
+	}
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate VcnServiceClient) VcnServiceClient {
+		return newVcnTrackedRecreateClient(manager, delegate, client)
+	})
+}
+
+func newVcnTrackedRecreateClient(
+	manager *VcnServiceManager,
+	delegate VcnServiceClient,
+	client vcnOCIClient,
+) VcnServiceClient {
+	runtimeClient := &vcnGeneratedParityClient{
+		manager:  manager,
+		delegate: delegate,
+		client:   client,
+	}
+	if runtimeClient.client != nil {
+		return runtimeClient
+	}
+
+	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
+	runtimeClient.client = sdkClient
+	if err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize Vcn OCI client: %w", err)
+	}
+	return runtimeClient
 }
 
 func (c *vcnGeneratedParityClient) CreateOrUpdate(
@@ -80,26 +130,19 @@ func (c *vcnGeneratedParityClient) CreateOrUpdate(
 		current, err := c.get(ctx, trackedID)
 		if err != nil {
 			if isReadNotFoundOCI(err) {
-				c.clearTrackedIdentity(resource)
+				clearTrackedVcnIdentity(resource)
 				explicitRecreate = true
 			} else {
 				return c.fail(resource, normalizeOCIError(err))
 			}
 		} else if current.LifecycleState == coresdk.VcnLifecycleStateTerminated {
-			c.clearTrackedIdentity(resource)
+			clearTrackedVcnIdentity(resource)
 			explicitRecreate = true
-		} else {
-			c.normalizeEquivalentCreateOnlyLists(resource, current)
-			if !vcnLifecycleIsRetryable(current.LifecycleState) {
-				if err := validateCreateOnlyDrift(resource.Spec, current); err != nil {
-					return c.fail(resource, err)
-				}
-			}
 		}
 	}
 
 	previousStatus := resource.Status
-	c.clearProjectedStatus(resource)
+	clearVcnProjectedStatus(resource)
 
 	delegateCtx := ctx
 	if explicitRecreate {
@@ -108,7 +151,7 @@ func (c *vcnGeneratedParityClient) CreateOrUpdate(
 
 	response, err := c.delegate.CreateOrUpdate(delegateCtx, resource, req)
 	if err != nil {
-		c.restoreStatus(resource, previousStatus)
+		restoreVcnStatus(resource, previousStatus)
 	}
 	return response, err
 }
@@ -130,7 +173,7 @@ func (c *vcnGeneratedParityClient) get(ctx context.Context, ocid string) (coresd
 	return response.Vcn, nil
 }
 
-func (c *vcnGeneratedParityClient) normalizeEquivalentCreateOnlyLists(resource *corev1beta1.Vcn, current coresdk.Vcn) {
+func normalizeEquivalentVcnCreateOnlyLists(resource *corev1beta1.Vcn, current coresdk.Vcn) {
 	if resource == nil {
 		return
 	}
@@ -148,7 +191,61 @@ func (c *vcnGeneratedParityClient) normalizeEquivalentCreateOnlyLists(resource *
 	}
 }
 
-func (c *vcnGeneratedParityClient) clearProjectedStatus(resource *corev1beta1.Vcn) {
+func buildVcnUpdateBody(
+	_ context.Context,
+	resource *corev1beta1.Vcn,
+	_ string,
+	currentResponse any,
+) (any, bool, error) {
+	current, ok := vcnFromResponse(currentResponse)
+	if !ok {
+		return nil, false, fmt.Errorf("unexpected Vcn current response type %T", currentResponse)
+	}
+
+	details := coresdk.UpdateVcnDetails{}
+	updateNeeded := false
+
+	if !stringPtrEqual(current.DisplayName, resource.Spec.DisplayName) {
+		details.DisplayName = common.String(resource.Spec.DisplayName)
+		updateNeeded = true
+	}
+
+	if resource.Spec.DefinedTags != nil {
+		desiredDefinedTags := convertSharedMapValuesToOCI(resource.Spec.DefinedTags)
+		if !nestedMapEqual(current.DefinedTags, desiredDefinedTags) {
+			details.DefinedTags = desiredDefinedTags
+			updateNeeded = true
+		}
+	}
+
+	if resource.Spec.FreeformTags != nil {
+		desiredFreeformTags := copyStringMap(resource.Spec.FreeformTags)
+		if !stringMapEqual(current.FreeformTags, desiredFreeformTags) {
+			details.FreeformTags = desiredFreeformTags
+			updateNeeded = true
+		}
+	}
+
+	if resource.Spec.SecurityAttributes != nil {
+		desiredSecurityAttributes := convertSharedMapValuesToOCI(resource.Spec.SecurityAttributes)
+		if !nestedMapEqual(current.SecurityAttributes, desiredSecurityAttributes) {
+			details.SecurityAttributes = desiredSecurityAttributes
+			updateNeeded = true
+		}
+	}
+
+	if boolPtrValue(current.IsZprOnly) != resource.Spec.IsZprOnly {
+		details.IsZprOnly = common.Bool(resource.Spec.IsZprOnly)
+		updateNeeded = true
+	}
+
+	if !updateNeeded {
+		return nil, false, nil
+	}
+	return details, true, nil
+}
+
+func clearVcnProjectedStatus(resource *corev1beta1.Vcn) {
 	if resource == nil {
 		return
 	}
@@ -159,7 +256,7 @@ func (c *vcnGeneratedParityClient) clearProjectedStatus(resource *corev1beta1.Vc
 	}
 }
 
-func (c *vcnGeneratedParityClient) restoreStatus(resource *corev1beta1.Vcn, previous corev1beta1.VcnStatus) {
+func restoreVcnStatus(resource *corev1beta1.Vcn, previous corev1beta1.VcnStatus) {
 	if resource == nil {
 		return
 	}
@@ -179,9 +276,24 @@ func (c *vcnGeneratedParityClient) fail(resource *corev1beta1.Vcn, err error) (s
 	return servicemanager.OSOKResponse{IsSuccessful: false}, err
 }
 
-func (c *vcnGeneratedParityClient) clearTrackedIdentity(resource *corev1beta1.Vcn) {
+func clearTrackedVcnIdentity(resource *corev1beta1.Vcn) {
 	resource.Status.Id = ""
 	resource.Status.OsokStatus = shared.OSOKStatus{}
+}
+
+func vcnFromResponse(response any) (coresdk.Vcn, bool) {
+	switch typed := response.(type) {
+	case coresdk.Vcn:
+		return typed, true
+	case coresdk.CreateVcnResponse:
+		return typed.Vcn, true
+	case coresdk.GetVcnResponse:
+		return typed.Vcn, true
+	case coresdk.UpdateVcnResponse:
+		return typed.Vcn, true
+	default:
+		return coresdk.Vcn{}, false
+	}
 }
 
 func currentVcnID(resource *corev1beta1.Vcn) string {
@@ -319,4 +431,68 @@ func stringPtrEqual(actual *string, expected string) bool {
 		return strings.TrimSpace(expected) == ""
 	}
 	return *actual == expected
+}
+
+func boolPtrValue(value *bool) bool {
+	return value != nil && *value
+}
+
+func convertSharedMapValuesToOCI(values map[string]shared.MapValue) map[string]map[string]interface{} {
+	if values == nil {
+		return nil
+	}
+
+	converted := make(map[string]map[string]interface{}, len(values))
+	for outerKey, outerValue := range values {
+		innerMap := make(map[string]interface{}, len(outerValue))
+		for innerKey, innerValue := range outerValue {
+			innerMap[innerKey] = innerValue
+		}
+		converted[outerKey] = innerMap
+	}
+	return converted
+}
+
+func copyStringMap(values map[string]string) map[string]string {
+	if values == nil {
+		return nil
+	}
+
+	copied := make(map[string]string, len(values))
+	for key, value := range values {
+		copied[key] = value
+	}
+	return copied
+}
+
+func stringMapEqual(left map[string]string, right map[string]string) bool {
+	if len(left) == 0 && len(right) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(left, right)
+}
+
+func nestedMapEqual(left map[string]map[string]interface{}, right map[string]map[string]interface{}) bool {
+	if len(left) == 0 && len(right) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(left, right)
+}
+
+func appendUniqueVcnMutationPaths(existing []string, extras ...string) []string {
+	seen := make(map[string]struct{}, len(existing)+len(extras))
+	for _, value := range existing {
+		seen[value] = struct{}{}
+	}
+	for _, value := range extras {
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		existing = append(existing, value)
+	}
+	return existing
 }

@@ -7,6 +7,7 @@ package servicemanager
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
@@ -43,6 +44,14 @@ type WorkRequestAsyncInput struct {
 	PercentComplete  *float32
 	Message          string
 	FallbackPhase    shared.OSOKAsyncPhase
+}
+
+// WorkRequestLegacyBridge mirrors the optional compatibility fields that some
+// resources still expose alongside status.async.current.
+type WorkRequestLegacyBridge struct {
+	Create string
+	Update string
+	Delete string
 }
 
 func (a WorkRequestAsyncAdapter) Normalize(rawStatus string) (shared.OSOKAsyncNormalizedClass, error) {
@@ -234,6 +243,50 @@ func ClearAsyncOperation(status *shared.OSOKStatus) {
 	status.Async.Current = nil
 }
 
+func ApplyAsyncOperationWithLegacyBridge(
+	status *shared.OSOKStatus,
+	resource any,
+	bridge WorkRequestLegacyBridge,
+	current *shared.OSOKAsyncOperation,
+	log loggerutil.OSOKLogger,
+) AsyncProjection {
+	projection := ApplyAsyncOperation(status, current, log)
+	phase, workRequestID := currentWorkRequestTracking(status)
+	syncLegacyWorkRequestBridge(resource, bridge, phase, workRequestID)
+	return projection
+}
+
+func ClearAsyncOperationWithLegacyBridge(status *shared.OSOKStatus, resource any, bridge WorkRequestLegacyBridge) {
+	ClearAsyncOperation(status)
+	clearLegacyWorkRequestBridge(resource, bridge)
+}
+
+func ResolveTrackedWorkRequest(
+	status *shared.OSOKStatus,
+	resource any,
+	bridge WorkRequestLegacyBridge,
+	fallback shared.OSOKAsyncPhase,
+) (string, shared.OSOKAsyncPhase) {
+	if status != nil && status.Async.Current != nil {
+		current := status.Async.Current
+		if current.Source != "" && current.Source != shared.OSOKAsyncSourceWorkRequest {
+			return "", ""
+		}
+		if current.Source == shared.OSOKAsyncSourceWorkRequest {
+			phase := ResolveAsyncPhase(status, fallback)
+			if workRequestID := strings.TrimSpace(current.WorkRequestID); workRequestID != "" {
+				return workRequestID, phase
+			}
+			if phase != "" {
+				if workRequestID := legacyWorkRequestIDForPhase(resource, bridge, phase); workRequestID != "" {
+					return workRequestID, phase
+				}
+			}
+		}
+	}
+	return firstLegacyWorkRequest(resource, bridge)
+}
+
 func ResolveAsyncPhase(status *shared.OSOKStatus, explicit shared.OSOKAsyncPhase) shared.OSOKAsyncPhase {
 	if explicit != "" {
 		return explicit
@@ -348,4 +401,134 @@ func newLifecycleAsyncOperation(status *shared.OSOKStatus, lifecycleState string
 		NormalizedClass: class,
 		Message:         strings.TrimSpace(message),
 	}
+}
+
+func currentWorkRequestTracking(status *shared.OSOKStatus) (shared.OSOKAsyncPhase, string) {
+	if status == nil || status.Async.Current == nil {
+		return "", ""
+	}
+	current := status.Async.Current
+	return current.Phase, strings.TrimSpace(current.WorkRequestID)
+}
+
+func syncLegacyWorkRequestBridge(resource any, bridge WorkRequestLegacyBridge, phase shared.OSOKAsyncPhase, workRequestID string) {
+	clearLegacyWorkRequestBridge(resource, bridge)
+	if phase == "" || strings.TrimSpace(workRequestID) == "" {
+		return
+	}
+	setLegacyWorkRequestField(resource, legacyBridgeFieldForPhase(bridge, phase), workRequestID)
+}
+
+func clearLegacyWorkRequestBridge(resource any, bridge WorkRequestLegacyBridge) {
+	for _, fieldName := range []string{bridge.Create, bridge.Update, bridge.Delete} {
+		setLegacyWorkRequestField(resource, fieldName, "")
+	}
+}
+
+func firstLegacyWorkRequest(resource any, bridge WorkRequestLegacyBridge) (string, shared.OSOKAsyncPhase) {
+	for _, candidate := range []struct {
+		phase shared.OSOKAsyncPhase
+		field string
+	}{
+		{phase: shared.OSOKAsyncPhaseDelete, field: bridge.Delete},
+		{phase: shared.OSOKAsyncPhaseUpdate, field: bridge.Update},
+		{phase: shared.OSOKAsyncPhaseCreate, field: bridge.Create},
+	} {
+		if workRequestID := legacyWorkRequestIDForField(resource, candidate.field); workRequestID != "" {
+			return workRequestID, candidate.phase
+		}
+	}
+	return "", ""
+}
+
+func legacyWorkRequestIDForPhase(resource any, bridge WorkRequestLegacyBridge, phase shared.OSOKAsyncPhase) string {
+	return legacyWorkRequestIDForField(resource, legacyBridgeFieldForPhase(bridge, phase))
+}
+
+func legacyBridgeFieldForPhase(bridge WorkRequestLegacyBridge, phase shared.OSOKAsyncPhase) string {
+	switch phase {
+	case shared.OSOKAsyncPhaseCreate:
+		return bridge.Create
+	case shared.OSOKAsyncPhaseUpdate:
+		return bridge.Update
+	case shared.OSOKAsyncPhaseDelete:
+		return bridge.Delete
+	default:
+		return ""
+	}
+}
+
+func legacyWorkRequestIDForField(resource any, fieldName string) string {
+	field := resourceStatusFieldByName(resource, fieldName)
+	if !field.IsValid() {
+		return ""
+	}
+	return legacyWorkRequestFieldString(field)
+}
+
+func setLegacyWorkRequestField(resource any, fieldName string, value string) {
+	field := resourceStatusFieldByName(resource, fieldName)
+	if !field.IsValid() || !field.CanSet() {
+		return
+	}
+
+	value = strings.TrimSpace(value)
+	switch field.Kind() {
+	case reflect.String:
+		field.SetString(value)
+	case reflect.Pointer:
+		if field.Type().Elem().Kind() != reflect.String {
+			return
+		}
+		if value == "" {
+			field.Set(reflect.Zero(field.Type()))
+			return
+		}
+		next := reflect.New(field.Type().Elem())
+		next.Elem().SetString(value)
+		field.Set(next)
+	}
+}
+
+func resourceStatusFieldByName(resource any, fieldName string) reflect.Value {
+	if strings.TrimSpace(fieldName) == "" {
+		return reflect.Value{}
+	}
+
+	value := reflect.ValueOf(resource)
+	for value.IsValid() && (value.Kind() == reflect.Pointer || value.Kind() == reflect.Interface) {
+		if value.IsNil() {
+			return reflect.Value{}
+		}
+		value = value.Elem()
+	}
+	if !value.IsValid() || value.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+
+	statusField := value.FieldByName("Status")
+	for statusField.IsValid() && (statusField.Kind() == reflect.Pointer || statusField.Kind() == reflect.Interface) {
+		if statusField.IsNil() {
+			return reflect.Value{}
+		}
+		statusField = statusField.Elem()
+	}
+	if !statusField.IsValid() || statusField.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+
+	return statusField.FieldByName(fieldName)
+}
+
+func legacyWorkRequestFieldString(field reflect.Value) string {
+	for field.IsValid() && (field.Kind() == reflect.Pointer || field.Kind() == reflect.Interface) {
+		if field.IsNil() {
+			return ""
+		}
+		field = field.Elem()
+	}
+	if !field.IsValid() || field.Kind() != reflect.String {
+		return ""
+	}
+	return strings.TrimSpace(field.String())
 }

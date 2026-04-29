@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -18,11 +18,15 @@ import (
 
 // ModelDeploymentSystemData Model deployment system data.
 type ModelDeploymentSystemData interface {
+
+	// The type of the deployed model.
+	GetModelType() ModelDeploymentModelTypeEnum
 }
 
 type modeldeploymentsystemdata struct {
 	JsonData        []byte
-	SystemInfraType string `json:"systemInfraType"`
+	ModelType       ModelDeploymentModelTypeEnum `mandatory:"false" json:"modelType,omitempty"`
+	SystemInfraType string                       `json:"systemInfraType"`
 }
 
 // UnmarshalJSON unmarshals json
@@ -36,6 +40,7 @@ func (m *modeldeploymentsystemdata) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+	m.ModelType = s.Model.ModelType
 	m.SystemInfraType = s.Model.SystemInfraType
 
 	return err
@@ -55,9 +60,14 @@ func (m *modeldeploymentsystemdata) UnmarshalPolymorphicJSON(data []byte) (inter
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for ModelDeploymentSystemData: %s.", m.SystemInfraType)
+		common.Logf("Received unsupported enum value for ModelDeploymentSystemData: %s.", m.SystemInfraType)
 		return *m, nil
 	}
+}
+
+// GetModelType returns ModelType
+func (m modeldeploymentsystemdata) GetModelType() ModelDeploymentModelTypeEnum {
+	return m.ModelType
 }
 
 func (m modeldeploymentsystemdata) String() string {
@@ -70,8 +80,11 @@ func (m modeldeploymentsystemdata) String() string {
 func (m modeldeploymentsystemdata) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
+	if _, ok := GetMappingModelDeploymentModelTypeEnum(string(m.ModelType)); !ok && m.ModelType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ModelType: %s. Supported values are: %s.", m.ModelType, strings.Join(GetModelDeploymentModelTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

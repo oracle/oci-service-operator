@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Vault Secret Management API
 //
-// Use the Secret Management API to manage secrets and secret versions. For more information, see Managing Secrets (https://docs.cloud.oracle.com/Content/KeyManagement/Tasks/managingsecrets.htm).
+// Use the Secret Management API to manage secrets and secret versions. For more information, see Managing Secrets (https://docs.oracle.com/iaas/Content/KeyManagement/Tasks/managingsecrets.htm).
 //
 
 package vault
@@ -39,7 +39,7 @@ type SecretSummary struct {
 	VaultId *string `mandatory:"true" json:"vaultId"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -47,7 +47,7 @@ type SecretSummary struct {
 	Description *string `mandatory:"false" json:"description"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
@@ -60,6 +60,13 @@ type SecretSummary struct {
 
 	// Additional information about the secret's current lifecycle state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
+
+	ReplicationConfig *ReplicationConfig `mandatory:"false" json:"replicationConfig"`
+
+	// A Boolean value that indicates whether the secret is a source or replica secret.
+	IsReplica *bool `mandatory:"false" json:"isReplica"`
+
+	SourceRegionInformation *SourceRegionInformation `mandatory:"false" json:"sourceRegionInformation"`
 
 	RotationConfig *RotationConfig `mandatory:"false" json:"rotationConfig"`
 
@@ -105,7 +112,7 @@ func (m SecretSummary) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RotationStatus: %s. Supported values are: %s.", m.RotationStatus, strings.Join(GetSecretRotationStatusEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -119,6 +126,9 @@ func (m *SecretSummary) UnmarshalJSON(data []byte) (e error) {
 		SystemTags                 map[string]map[string]interface{} `json:"systemTags"`
 		KeyId                      *string                           `json:"keyId"`
 		LifecycleDetails           *string                           `json:"lifecycleDetails"`
+		ReplicationConfig          *ReplicationConfig                `json:"replicationConfig"`
+		IsReplica                  *bool                             `json:"isReplica"`
+		SourceRegionInformation    *SourceRegionInformation          `json:"sourceRegionInformation"`
 		RotationConfig             *RotationConfig                   `json:"rotationConfig"`
 		RotationStatus             SecretRotationStatusEnum          `json:"rotationStatus"`
 		LastRotationTime           *common.SDKTime                   `json:"lastRotationTime"`
@@ -151,6 +161,12 @@ func (m *SecretSummary) UnmarshalJSON(data []byte) (e error) {
 	m.KeyId = model.KeyId
 
 	m.LifecycleDetails = model.LifecycleDetails
+
+	m.ReplicationConfig = model.ReplicationConfig
+
+	m.IsReplica = model.IsReplica
+
+	m.SourceRegionInformation = model.SourceRegionInformation
 
 	m.RotationConfig = model.RotationConfig
 

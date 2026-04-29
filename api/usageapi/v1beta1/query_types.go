@@ -26,7 +26,8 @@ type QueryDefinitionReportQueryForecast struct {
 	// The forecast end time.
 	// +kubebuilder:validation:Required
 	TimeForecastEnded string `json:"timeForecastEnded"`
-	// BASIC uses the exponential smoothing (ETS) model to project future usage/costs based on history data. The basis for projections is a periodic set of equivalent historical days for which the projection is being made.
+	// BASIC uses the exponential smoothing (ETS) model to project future usage or costs based on history data.
+	// The basis for projections is a periodic set of equivalent historical days for which the projection is being made.
 	// +kubebuilder:validation:Optional
 	ForecastType string `json:"forecastType,omitempty"`
 	// The forecast start time. Defaults to UTC-1 if not specified.
@@ -101,21 +102,21 @@ type QueryDefinitionReportQuery struct {
 	// The usage end time.
 	// +kubebuilder:validation:Optional
 	TimeUsageEnded string `json:"timeUsageEnded,omitempty"`
-	// Whether aggregated by time. If isAggregateByTime is true, all usage/cost over the query time period will be added up.
+	// Specifies whether aggregated by time. If isAggregateByTime is true, all usage or cost over the query time period will be added up.
 	// +kubebuilder:validation:Optional
 	IsAggregateByTime bool `json:"isAggregateByTime,omitempty"`
 	// +kubebuilder:validation:Optional
 	Forecast QueryDefinitionReportQueryForecast `json:"forecast,omitempty"`
 	// The query usage type. COST by default if it is missing.
-	// Usage - Query the usage data.
-	// Cost - Query the cost/billing data.
-	// Credit - Query the credit adjustments data.
-	// ExpiredCredit - Query the expired credits data
-	// AllCredit - Query the credit adjustments and expired credit
+	// * Usage: Query the usage data.
+	// * Cost: Query the cost/billing data.
+	// * Credit: Query the credit adjustments data.
+	// * ExpiredCredit: Query the expired credits data.
+	// * AllCredit: Query the credit adjustments and expired credit.
 	// +kubebuilder:validation:Optional
 	QueryType string `json:"queryType,omitempty"`
-	// Aggregate the result by.
-	// example:
+	// Specifies what to aggregate the result by.
+	// For example:
 	//   `["tagNamespace", "tagKey", "tagValue", "service", "skuName", "skuPartNumber", "unit",
 	//     "compartmentName", "compartmentPath", "compartmentId", "platform", "region", "logicalAd",
 	//     "resourceId", "tenantId", "tenantName"]`

@@ -29,60 +29,18 @@ var newDbSystemAvailabilityDomainClient = func(provider common.ConfigurationProv
 }
 
 func init() {
-	newDbSystemServiceClient = func(manager *DbSystemServiceManager) DbSystemServiceClient {
-		sdkClient, err := mysqlsdk.NewDbSystemClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*mysqlv1beta1.DbSystem]{
-			Kind:             "DbSystem",
-			SDKName:          "DbSystem",
-			Log:              manager.Log,
-			CredentialClient: manager.CredentialClient,
-			BuildCreateBody: func(ctx context.Context, resource *mysqlv1beta1.DbSystem, namespace string) (any, error) {
-				return buildDbSystemCreateDetails(ctx, manager.Provider, manager.CredentialClient, resource, namespace)
-			},
-			Semantics: newDbSystemRuntimeSemantics(),
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &mysqlsdk.CreateDbSystemRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.CreateDbSystem(ctx, *request.(*mysqlsdk.CreateDbSystemRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "CreateDbSystemDetails", RequestName: "CreateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &mysqlsdk.GetDbSystemRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetDbSystem(ctx, *request.(*mysqlsdk.GetDbSystemRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &mysqlsdk.ListDbSystemsRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListDbSystems(ctx, *request.(*mysqlsdk.ListDbSystemsRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsHeatWaveClusterAttached", RequestName: "isHeatWaveClusterAttached", Contribution: "query", PreferResourceID: false}, {FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "query", PreferResourceID: false}, {FieldName: "DisplayName", RequestName: "displayName", Contribution: "query", PreferResourceID: false}, {FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query", PreferResourceID: false}, {FieldName: "ConfigurationId", RequestName: "configurationId", Contribution: "query", PreferResourceID: false}, {FieldName: "IsUpToDate", RequestName: "isUpToDate", Contribution: "query", PreferResourceID: false}, {FieldName: "DatabaseManagement", RequestName: "databaseManagement", Contribution: "query", PreferResourceID: false}, {FieldName: "SortBy", RequestName: "sortBy", Contribution: "query", PreferResourceID: false}, {FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query", PreferResourceID: false}, {FieldName: "Limit", RequestName: "limit", Contribution: "query", PreferResourceID: false}, {FieldName: "Page", RequestName: "page", Contribution: "query", PreferResourceID: false}},
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &mysqlsdk.UpdateDbSystemRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.UpdateDbSystem(ctx, *request.(*mysqlsdk.UpdateDbSystemRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}, {FieldName: "UpdateDbSystemDetails", RequestName: "UpdateDbSystemDetails", Contribution: "body", PreferResourceID: false}},
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &mysqlsdk.DeleteDbSystemRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteDbSystem(ctx, *request.(*mysqlsdk.DeleteDbSystemRequest))
-				},
-				Fields: []generatedruntime.RequestField{{FieldName: "DbSystemId", RequestName: "dbSystemId", Contribution: "path", PreferResourceID: true}},
-			},
-		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize DbSystem OCI client: %w", err)
-		}
-		runtimeClient := defaultDbSystemServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*mysqlv1beta1.DbSystem](config),
-		}
-		return newDbSystemEndpointSecretClient(manager, runtimeClient)
+	registerDbSystemRuntimeHooksMutator(func(manager *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+		applyDbSystemRuntimeHooks(manager, hooks)
+	})
+}
+
+func applyDbSystemRuntimeHooks(manager *DbSystemServiceManager, hooks *DbSystemRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.BuildCreateBody = func(ctx context.Context, resource *mysqlv1beta1.DbSystem, namespace string) (any, error) {
+		return buildDbSystemCreateDetails(ctx, manager.Provider, manager.CredentialClient, resource, namespace)
 	}
 }
 

@@ -18,92 +18,45 @@ import (
 )
 
 func init() {
-	newNodePoolServiceClient = func(manager *NodePoolServiceManager) NodePoolServiceClient {
-		sdkClient, err := containerenginesdk.NewContainerEngineClientWithConfigurationProvider(manager.Provider)
-		config := generatedruntime.Config[*containerenginev1beta1.NodePool]{
-			Kind:    "NodePool",
-			SDKName: "NodePool",
-			Log:     manager.Log,
-			BuildCreateBody: func(ctx context.Context, resource *containerenginev1beta1.NodePool, namespace string) (any, error) {
-				return buildNodePoolCreateDetails(ctx, resource, namespace)
-			},
-			BuildUpdateBody: func(
-				ctx context.Context,
-				resource *containerenginev1beta1.NodePool,
-				namespace string,
-				currentResponse any,
-			) (any, bool, error) {
-				return buildNodePoolUpdateBody(ctx, resource, namespace, currentResponse)
-			},
-			Semantics: newNodePoolRuntimeSemantics(),
-			Create: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.CreateNodePoolRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					req := request.(*containerenginesdk.CreateNodePoolRequest)
-					sanitizeCreateNodePoolRequest(req)
-					return sdkClient.CreateNodePool(ctx, *req)
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "CreateNodePoolDetails", RequestName: "CreateNodePoolDetails", Contribution: "body"},
-				},
-			},
-			Get: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.GetNodePoolRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.GetNodePool(ctx, *request.(*containerenginesdk.GetNodePoolRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "NodePoolId", RequestName: "nodePoolId", Contribution: "path", PreferResourceID: true},
-				},
-			},
-			List: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.ListNodePoolsRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.ListNodePools(ctx, *request.(*containerenginesdk.ListNodePoolsRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "CompartmentId", RequestName: "compartmentId", Contribution: "query"},
-					{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "query"},
-					{FieldName: "Name", RequestName: "name", Contribution: "query"},
-					{FieldName: "Limit", RequestName: "limit", Contribution: "query"},
-					{FieldName: "Page", RequestName: "page", Contribution: "query"},
-					{FieldName: "SortOrder", RequestName: "sortOrder", Contribution: "query"},
-					{FieldName: "SortBy", RequestName: "sortBy", Contribution: "query"},
-					{FieldName: "LifecycleState", RequestName: "lifecycleState", Contribution: "query"},
-				},
-			},
-			Update: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.UpdateNodePoolRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					req := request.(*containerenginesdk.UpdateNodePoolRequest)
-					sanitizeUpdateNodePoolRequest(req)
-					return sdkClient.UpdateNodePool(ctx, *req)
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "NodePoolId", RequestName: "nodePoolId", Contribution: "path", PreferResourceID: true},
-					{FieldName: "OverrideEvictionGraceDuration", RequestName: "overrideEvictionGraceDuration", Contribution: "query"},
-					{FieldName: "IsForceDeletionAfterOverrideGraceDuration", RequestName: "isForceDeletionAfterOverrideGraceDuration", Contribution: "query"},
-					{FieldName: "UpdateNodePoolDetails", RequestName: "UpdateNodePoolDetails", Contribution: "body"},
-				},
-			},
-			Delete: &generatedruntime.Operation{
-				NewRequest: func() any { return &containerenginesdk.DeleteNodePoolRequest{} },
-				Call: func(ctx context.Context, request any) (any, error) {
-					return sdkClient.DeleteNodePool(ctx, *request.(*containerenginesdk.DeleteNodePoolRequest))
-				},
-				Fields: []generatedruntime.RequestField{
-					{FieldName: "NodePoolId", RequestName: "nodePoolId", Contribution: "path", PreferResourceID: true},
-					{FieldName: "OverrideEvictionGraceDuration", RequestName: "overrideEvictionGraceDuration", Contribution: "query"},
-					{FieldName: "IsForceDeletionAfterOverrideGraceDuration", RequestName: "isForceDeletionAfterOverrideGraceDuration", Contribution: "query"},
-				},
-			},
+	registerNodePoolRuntimeHooksMutator(func(_ *NodePoolServiceManager, hooks *NodePoolRuntimeHooks) {
+		applyNodePoolRuntimeHooks(hooks)
+	})
+}
+
+func applyNodePoolRuntimeHooks(hooks *NodePoolRuntimeHooks) {
+	if hooks == nil {
+		return
+	}
+
+	hooks.Semantics = newNodePoolRuntimeSemantics()
+	hooks.BuildCreateBody = func(ctx context.Context, resource *containerenginev1beta1.NodePool, namespace string) (any, error) {
+		return buildNodePoolCreateDetails(ctx, resource, namespace)
+	}
+	hooks.BuildUpdateBody = func(
+		ctx context.Context,
+		resource *containerenginev1beta1.NodePool,
+		namespace string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildNodePoolUpdateBody(ctx, resource, namespace, currentResponse)
+	}
+	hooks.Create.Call = wrapNodePoolOperationCall(hooks.Create.Call, sanitizeCreateNodePoolRequest)
+	hooks.Update.Call = wrapNodePoolOperationCall(hooks.Update.Call, sanitizeUpdateNodePoolRequest)
+}
+
+func wrapNodePoolOperationCall[Req any, Resp any](
+	call func(context.Context, Req) (Resp, error),
+	mutate func(*Req),
+) func(context.Context, Req) (Resp, error) {
+	if call == nil {
+		return nil
+	}
+
+	return func(ctx context.Context, request Req) (Resp, error) {
+		if mutate != nil {
+			mutate(&request)
 		}
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize NodePool OCI client: %w", err)
-		}
-		return defaultNodePoolServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*containerenginev1beta1.NodePool](config),
-		}
+		return call(ctx, request)
 	}
 }
 
@@ -260,6 +213,7 @@ func normalizeNodePoolCreateDetails(
 		func() { details.NodeConfigDetails = nil },
 	)
 	normalizeNodePoolCreateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
+	normalizeNodePoolCyclingDetails(spec.NodePoolCyclingDetails, &details.NodePoolCyclingDetails)
 }
 
 func normalizeNodePoolUpdateDetails(
@@ -278,6 +232,7 @@ func normalizeNodePoolUpdateDetails(
 		func() { details.NodeConfigDetails = nil },
 	)
 	normalizeNodePoolUpdateNodeConfigDetails(spec.NodeConfigDetails, details.NodeConfigDetails)
+	normalizeNodePoolCyclingDetails(spec.NodePoolCyclingDetails, &details.NodePoolCyclingDetails)
 }
 
 func normalizeObservedNodePoolUpdateDetails(details *containerenginesdk.UpdateNodePoolDetails) {
@@ -326,6 +281,21 @@ func normalizeNodePoolNodeConfigDetails(
 			continue
 		}
 		details[i].PreemptibleNodeConfig = nil
+	}
+}
+
+func normalizeNodePoolCyclingDetails(
+	spec containerenginev1beta1.NodePoolCyclingDetails,
+	details **containerenginesdk.NodePoolCyclingDetails,
+) {
+	if details == nil || spec.CycleModes == nil || len(spec.CycleModes) != 0 {
+		return
+	}
+	if *details == nil {
+		*details = &containerenginesdk.NodePoolCyclingDetails{}
+	}
+	if (*details).CycleModes == nil {
+		(*details).CycleModes = []containerenginesdk.CycleModeEnum{}
 	}
 }
 
@@ -568,13 +538,23 @@ func nodePoolJSONMap(value any, preservedEmptyArrays map[string]struct{}) (map[s
 }
 
 func nodePoolPreservedEmptyArrayPaths(spec containerenginev1beta1.NodePoolSpec) map[string]struct{} {
-	if spec.NodeConfigDetails.NsgIds == nil || len(spec.NodeConfigDetails.NsgIds) != 0 {
-		return nil
+	var preserved map[string]struct{}
+
+	if spec.NodeConfigDetails.NsgIds != nil && len(spec.NodeConfigDetails.NsgIds) == 0 {
+		if preserved == nil {
+			preserved = map[string]struct{}{}
+		}
+		preserved["nodeConfigDetails.nsgIds"] = struct{}{}
 	}
 
-	return map[string]struct{}{
-		"nodeConfigDetails.nsgIds": {},
+	if spec.NodePoolCyclingDetails.CycleModes != nil && len(spec.NodePoolCyclingDetails.CycleModes) == 0 {
+		if preserved == nil {
+			preserved = map[string]struct{}{}
+		}
+		preserved["nodePoolCyclingDetails.cycleModes"] = struct{}{}
 	}
+
+	return preserved
 }
 
 func pruneNodePoolJSONValue(value any, path string, preservedEmptyArrays map[string]struct{}) (any, bool) {

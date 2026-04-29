@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -20,6 +20,16 @@ type UpdateBackupPolicyDetails struct {
 
 	// Specifies if automatic backups are enabled.
 	IsEnabled *bool `mandatory:"false" json:"isEnabled"`
+
+	// Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED
+	// state for 7 days before permanently deleting it.
+	SoftDelete SoftDeleteEnum `mandatory:"false" json:"softDelete,omitempty"`
+
+	// List of policies of a DB system to schedule cross-region DB system backup copy.
+	// The policy includes the name of the destination region to which the DB system backup will be copied, and
+	// an optional parameter which specifies the retention period of the copied DB system backup in days.
+	// **Note:** Currently, only one policy can be specified in the list.
+	CopyPolicies []CopyPolicy `mandatory:"false" json:"copyPolicies"`
 
 	// The start of a 30-minute window of time in which daily, automated backups occur.
 	// This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
@@ -52,8 +62,11 @@ func (m UpdateBackupPolicyDetails) String() string {
 func (m UpdateBackupPolicyDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
+	if _, ok := GetMappingSoftDeleteEnum(string(m.SoftDelete)); !ok && m.SoftDelete != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for SoftDelete: %s. Supported values are: %s.", m.SoftDelete, strings.Join(GetSoftDeleteEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

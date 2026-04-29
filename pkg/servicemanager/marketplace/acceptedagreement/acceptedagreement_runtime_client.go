@@ -31,20 +31,39 @@ type acceptedAgreementOCIClient interface {
 }
 
 type acceptedAgreementRuntimeClient struct {
-	manager   *AcceptedAgreementServiceManager
-	generated generatedruntime.ServiceClient[*marketplacev1beta1.AcceptedAgreement]
-	initErr   error
+	delegate AcceptedAgreementServiceClient
+	log      loggerutil.OSOKLogger
+	initErr  error
 }
 
 func init() {
-	newAcceptedAgreementServiceClient = func(manager *AcceptedAgreementServiceManager) AcceptedAgreementServiceClient {
-		sdkClient, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider)
-		initErr := error(nil)
-		if err != nil {
-			initErr = fmt.Errorf("initialize AcceptedAgreement OCI client: %w", err)
-		}
-		return newAcceptedAgreementRuntimeClient(manager, sdkClient, initErr)
+	registerAcceptedAgreementRuntimeHooksMutator(func(manager *AcceptedAgreementServiceManager, hooks *AcceptedAgreementRuntimeHooks) {
+		applyAcceptedAgreementRuntimeHooks(hooks)
+		appendAcceptedAgreementRuntimeWrapper(manager, hooks)
+	})
+}
+
+func applyAcceptedAgreementRuntimeHooks(hooks *AcceptedAgreementRuntimeHooks) {
+	if hooks == nil {
+		return
 	}
+
+	hooks.Semantics = newAcceptedAgreementRuntimeSemanticsOverride()
+	hooks.Create.Fields = acceptedAgreementCreateFields()
+	hooks.Get.Fields = acceptedAgreementGetFields()
+	hooks.List.Fields = acceptedAgreementListFields()
+	hooks.Update.Fields = acceptedAgreementUpdateFields()
+	hooks.Delete.Fields = acceptedAgreementDeleteFields()
+}
+
+func appendAcceptedAgreementRuntimeWrapper(manager *AcceptedAgreementServiceManager, hooks *AcceptedAgreementRuntimeHooks) {
+	if manager == nil || hooks == nil {
+		return
+	}
+
+	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate AcceptedAgreementServiceClient) AcceptedAgreementServiceClient {
+		return newAcceptedAgreementRuntimeWrapper(manager, delegate)
+	})
 }
 
 func newAcceptedAgreementRuntimeClient(
@@ -52,14 +71,48 @@ func newAcceptedAgreementRuntimeClient(
 	client acceptedAgreementOCIClient,
 	initErr error,
 ) *acceptedAgreementRuntimeClient {
-	runtimeClient := &acceptedAgreementRuntimeClient{
-		manager: manager,
-		initErr: initErr,
+	log := loggerutil.OSOKLogger{}
+	if manager != nil {
+		log = manager.Log
 	}
-	runtimeClient.generated = generatedruntime.NewServiceClient[*marketplacev1beta1.AcceptedAgreement](generatedruntime.Config[*marketplacev1beta1.AcceptedAgreement]{
+	delegate := defaultAcceptedAgreementServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*marketplacev1beta1.AcceptedAgreement](
+			newAcceptedAgreementRuntimeConfig(log, client, initErr),
+		),
+	}
+	runtimeClient := newAcceptedAgreementRuntimeWrapper(manager, delegate)
+	runtimeClient.initErr = initErr
+	return runtimeClient
+}
+
+func newAcceptedAgreementRuntimeWrapper(
+	manager *AcceptedAgreementServiceManager,
+	delegate AcceptedAgreementServiceClient,
+) *acceptedAgreementRuntimeClient {
+	runtimeClient := &acceptedAgreementRuntimeClient{delegate: delegate}
+	if manager == nil {
+		return runtimeClient
+	}
+
+	runtimeClient.log = manager.Log
+	if manager.Provider == nil {
+		return runtimeClient
+	}
+	if _, err := marketplacesdk.NewMarketplaceClientWithConfigurationProvider(manager.Provider); err != nil {
+		runtimeClient.initErr = fmt.Errorf("initialize AcceptedAgreement OCI client: %w", err)
+	}
+	return runtimeClient
+}
+
+func newAcceptedAgreementRuntimeConfig(
+	log loggerutil.OSOKLogger,
+	client acceptedAgreementOCIClient,
+	initErr error,
+) generatedruntime.Config[*marketplacev1beta1.AcceptedAgreement] {
+	return generatedruntime.Config[*marketplacev1beta1.AcceptedAgreement]{
 		Kind:      "AcceptedAgreement",
 		SDKName:   "AcceptedAgreement",
-		Log:       manager.Log,
+		Log:       log,
 		InitError: initErr,
 		Semantics: newAcceptedAgreementRuntimeSemanticsOverride(),
 		Create: &generatedruntime.Operation{
@@ -97,8 +150,7 @@ func newAcceptedAgreementRuntimeClient(
 			},
 			Fields: acceptedAgreementDeleteFields(),
 		},
-	})
-	return runtimeClient
+	}
 }
 
 func newAcceptedAgreementRuntimeSemanticsOverride() *generatedruntime.Semantics {
@@ -263,28 +315,35 @@ func (c *acceptedAgreementRuntimeClient) CreateOrUpdate(
 	resource *marketplacev1beta1.AcceptedAgreement,
 	req ctrl.Request,
 ) (servicemanager.OSOKResponse, error) {
+	if c.delegate == nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, fmt.Errorf("AcceptedAgreement delegate is not configured")
+	}
 	if c.initErr != nil {
-		return c.generated.CreateOrUpdate(ctx, resource, req)
+		return c.delegate.CreateOrUpdate(ctx, resource, req)
 	}
 
 	if err := validateAcceptedAgreementSignature(resource); err != nil {
 		return servicemanager.OSOKResponse{IsSuccessful: false}, c.fail(resource, err)
 	}
 
-	response, err := c.generated.CreateOrUpdate(ctx, resource, req)
+	response, err := c.delegate.CreateOrUpdate(ctx, resource, req)
 	if err != nil {
 		return response, err
 	}
 
 	stampAcceptedAgreementSignature(resource)
-	markAcceptedAgreementActive(resource, c.manager.Log)
+	markAcceptedAgreementActive(resource, c.log)
 	response.ShouldRequeue = false
 	response.RequeueDuration = 0
 	return response, nil
 }
 
 func (c *acceptedAgreementRuntimeClient) Delete(ctx context.Context, resource *marketplacev1beta1.AcceptedAgreement) (bool, error) {
-	deleted, err := c.generated.Delete(ctx, resource)
+	if c.delegate == nil {
+		return false, fmt.Errorf("AcceptedAgreement delegate is not configured")
+	}
+
+	deleted, err := c.delegate.Delete(ctx, resource)
 	if deleted {
 		resource.Status.AppliedSignature = ""
 	}
@@ -336,7 +395,7 @@ func (c *acceptedAgreementRuntimeClient) fail(resource *marketplacev1beta1.Accep
 	status.Reason = string(shared.Failed)
 	now := metav1.Now()
 	status.UpdatedAt = &now
-	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.manager.Log)
+	*status = util.UpdateOSOKStatusCondition(*status, shared.Failed, v1.ConditionFalse, "", err.Error(), c.log)
 	return err
 }
 

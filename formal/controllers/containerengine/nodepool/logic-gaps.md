@@ -28,13 +28,23 @@ and list-lookup semantics.
   `nodeShapeConfig`, `definedTags`, `freeformTags`,
   `nodeEvictionNodePoolSettings`, and `nodePoolCyclingDetails`. Fields omitted
   from `UpdateNodePoolDetails` remain create-only drift and never open implicit
-  replacement.
+  replacement. Within those nested mutable bodies, the runtime intentionally
+  preserves `nodeEvictionNodePoolSettings.isForceActionAfterGraceDuration`
+  false values and `nodePoolCyclingDetails.cycleModes` ordering, including
+  explicit empty clears, so request shaping and drift detection do not erase
+  the refreshed SDK contract.
 - Deprecated placement inputs stay explicit: `nodeConfigDetails` conflicts with
   `subnetIds` and `quantityPerSubnet`, while `nodeImageName` remains create-only
   drift beside the preferred `nodeSourceDetails` path. When
   `nodeConfigDetails` is the active create or update path, the runtime strips
   deprecated placement fields from the serialized SDK body instead of sending
   empty placeholder values such as `subnetIds: []`.
+- Update and delete query handling stays explicit: only the override query pair
+  `overrideEvictionGraceDuration` and
+  `isForceDeletionAfterOverrideGraceDuration` lives outside the request body.
+  The refreshed `isForceActionAfterGraceDuration` input remains body-owned
+  state under `nodeEvictionNodePoolSettings` and never becomes an implicit
+  query parameter.
 - Pre-create lookup semantics are explicit: `ListNodePools` searches by
   `compartmentId`, `clusterId`, `name`, and reusable lifecycle state, and only
   a single exact-name match in `ACTIVE`, `CREATING`, `UPDATING`, `INACTIVE`, or

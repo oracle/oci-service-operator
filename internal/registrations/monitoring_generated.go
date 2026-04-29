@@ -14,10 +14,7 @@ import (
 	monitoringcontrollers "github.com/oracle/oci-service-operator/controllers/monitoring"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	monitoringalarmservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/monitoring/alarm"
-	monitoringalarmhistoryservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/monitoring/alarmhistory"
-	monitoringalarmstatusservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/monitoring/alarmstatus"
 	monitoringalarmsuppressionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/monitoring/alarmsuppression"
-	monitoringmetricservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/monitoring/metric"
 )
 
 func init() {
@@ -36,28 +33,6 @@ func init() {
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Alarm controller: %w", err)
 			}
-			if err := (&monitoringcontrollers.AlarmHistoryReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"AlarmHistory",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return monitoringalarmhistoryservicemanager.NewAlarmHistoryServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup AlarmHistory controller: %w", err)
-			}
-			if err := (&monitoringcontrollers.AlarmStatusReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"AlarmStatus",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return monitoringalarmstatusservicemanager.NewAlarmStatusServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup AlarmStatus controller: %w", err)
-			}
 			if err := (&monitoringcontrollers.AlarmSuppressionReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,
@@ -68,17 +43,6 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup AlarmSuppression controller: %w", err)
-			}
-			if err := (&monitoringcontrollers.MetricReconciler{
-				Reconciler: NewBaseReconciler(
-					ctx,
-					"Metric",
-					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
-						return monitoringmetricservicemanager.NewMetricServiceManagerWithDeps(deps)
-					},
-				),
-			}).SetupWithManager(ctx.Manager); err != nil {
-				return fmt.Errorf("setup Metric controller: %w", err)
 			}
 			return nil
 		},

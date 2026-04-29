@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,8 +6,8 @@
 //
 // OCI Generative AI is a fully managed service that provides a set of state-of-the-art, customizable large language models (LLMs) that cover a wide range of use cases for text generation, summarization, and text embeddings.
 // Use the Generative AI service management API to create and manage DedicatedAiCluster, Endpoint, Model, and WorkRequest in the Generative AI service. For example, create a custom model by fine-tuning an out-of-the-box model using your own data, on a fine-tuning dedicated AI cluster. Then, create a hosting dedicated AI cluster with an endpoint to host your custom model.
-// To access your custom model endpoints, or to try the out-of-the-box models to generate text, summarize, and create text embeddings see the Generative AI Inference API (https://docs.cloud.oracle.com/#/en/generative-ai-inference/latest/).
-// To learn more about the service, see the Generative AI documentation (https://docs.cloud.oracle.com/iaas/Content/generative-ai/home.htm).
+// To access your custom model endpoints, or to try the out-of-the-box models to generate text, summarize, and create text embeddings see the Generative AI Inference API (https://docs.oracle.com/iaas/api/#/en/generative-ai-inference/latest/).
+// To learn more about the service, see the Generative AI documentation (https://docs.oracle.com/iaas/Content/generative-ai/home.htm).
 //
 
 package generativeai
@@ -25,6 +25,9 @@ const (
 	ModelCapabilityTextSummarization ModelCapabilityEnum = "TEXT_SUMMARIZATION"
 	ModelCapabilityTextEmbeddings    ModelCapabilityEnum = "TEXT_EMBEDDINGS"
 	ModelCapabilityFineTune          ModelCapabilityEnum = "FINE_TUNE"
+	ModelCapabilityChat              ModelCapabilityEnum = "CHAT"
+	ModelCapabilityTextRerank        ModelCapabilityEnum = "TEXT_RERANK"
+	ModelCapabilityTextToImage       ModelCapabilityEnum = "TEXT_TO_IMAGE"
 )
 
 var mappingModelCapabilityEnum = map[string]ModelCapabilityEnum{
@@ -32,6 +35,9 @@ var mappingModelCapabilityEnum = map[string]ModelCapabilityEnum{
 	"TEXT_SUMMARIZATION": ModelCapabilityTextSummarization,
 	"TEXT_EMBEDDINGS":    ModelCapabilityTextEmbeddings,
 	"FINE_TUNE":          ModelCapabilityFineTune,
+	"CHAT":               ModelCapabilityChat,
+	"TEXT_RERANK":        ModelCapabilityTextRerank,
+	"TEXT_TO_IMAGE":      ModelCapabilityTextToImage,
 }
 
 var mappingModelCapabilityEnumLowerCase = map[string]ModelCapabilityEnum{
@@ -39,6 +45,9 @@ var mappingModelCapabilityEnumLowerCase = map[string]ModelCapabilityEnum{
 	"text_summarization": ModelCapabilityTextSummarization,
 	"text_embeddings":    ModelCapabilityTextEmbeddings,
 	"fine_tune":          ModelCapabilityFineTune,
+	"chat":               ModelCapabilityChat,
+	"text_rerank":        ModelCapabilityTextRerank,
+	"text_to_image":      ModelCapabilityTextToImage,
 }
 
 // GetModelCapabilityEnumValues Enumerates the set of values for ModelCapabilityEnum
@@ -57,6 +66,9 @@ func GetModelCapabilityEnumStringValues() []string {
 		"TEXT_SUMMARIZATION",
 		"TEXT_EMBEDDINGS",
 		"FINE_TUNE",
+		"CHAT",
+		"TEXT_RERANK",
+		"TEXT_TO_IMAGE",
 	}
 }
 

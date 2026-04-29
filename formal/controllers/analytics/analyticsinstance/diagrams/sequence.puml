@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetAnalyticsInstance
 else tracked identity is missing
-ServiceManager -> OCI: ListAnalyticsInstances(filters:\ncapacity_type, compartment_id,\nfeature_set, name (+1 more))
+ServiceManager -> OCI: ListAnalyticsInstances(filters:\ncapacityType, compartmentId,\nfeatureSet, name)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateAnalyticsInstance
 loop create pending CREATING
@@ -63,26 +63,34 @@ ServiceManager --> BaseReconciler: release finalizer after delete completion
 end
 end
 else OCI state is retryable
-ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, DELETING
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
 else live state requires field-aware\ndrift evaluation
 group Drift handling
 note over ServiceManager,OCI
-Supported update surface:
-capacity.capacity_value, compartment_id,
-defined_tags, description (+12 more)
+Supported update surface: definedTags,
+description, emailNotification,
+freeformTags (+2 more)
 Reject before mutate: force-new fields
-capacity.capacity_type, feature_set,
-name,
-network_endpoint_details.network_endpoint_type
-Lookup filters: capacity_type,
-compartment_id, feature_set, name (+1
-more)
+capacity.capacityType, featureSet, name,
+networkEndpointDetails.networkEndpointType
+Create-only fields: adminUser, domainId,
+idcsAccessToken
+Lookup filters: capacityType,
+compartmentId, featureSet, name
+Lookup matching: exact compartmentId
+plus name plus featureSet plus
+capacityType unique match in ACTIVE,
+CREATING, UPDATING, or INACTIVE;
+duplicate matches fail
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
 end
 opt supported mutable drift is detected
-ServiceManager -> OCI: Apply\nChangeAnalyticsInstanceCompartment,\nChangeAnalyticsInstanceNetworkEndpoint,\nScaleAnalyticsInstance (+1 more)\nonly for mutable fields\ncapacity.capacity_value,\ncompartment_id, defined_tags,\ndescription (+12 more)
+ServiceManager -> OCI: Apply\nChangeAnalyticsInstanceCompartment,\nChangeAnalyticsInstanceNetworkEndpoint,\nScaleAnalyticsInstance (+3 more)\nonly for mutable fields definedTags,\ndescription, emailNotification,\nfreeformTags (+2 more)
+loop update pending UPDATING
+ServiceManager -> OCI: GetAnalyticsInstance
+end
 end
 ServiceManager -> OCI: run helper hooks\ndelete=tfresource.DeleteResource
 end
@@ -111,40 +119,49 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create CREATING; update none;
-delete DELETING
-supported drift: capacity.capacity_value,
-compartment_id, defined_tags, description (+12
-more)
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: definedTags, description,
+emailNotification, freeformTags (+2 more)
 reject before mutate: force-new fields
-capacity.capacity_type, feature_set, name,
-network_endpoint_details.network_endpoint_type
-create-only fields: none
+capacity.capacityType, featureSet, name,
+networkEndpointDetails.networkEndpointType
+create-only fields: adminUser, domainId,
+idcsAccessToken
 list lookup: oci_analytics_analytics_instances
-filters capacity_type, compartment_id,
-feature_set, name (+1 more)
+filters capacityType, compartmentId, featureSet,
+name; exact compartmentId plus name plus
+featureSet plus capacityType unique match in
+ACTIVE, CREATING, UPDATING, or INACTIVE;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Seeded AnalyticsInstance row covers the
-published API-first surface only; controller,
-service-manager, and registration rollout remain
-disabled until the controller-backed promotion
-story binds formalSpec.
-The provisional lifecycle mapping treats
-CREATING as provisioning, ACTIVE as success,
-UPDATING as updating, and DELETING as
-terminating; FAILED, INACTIVE, and DELETED stay
-explicit runtime states for the later
-controller-backed audit to classify.
+Reviewed lifecycle mapping treats CREATING as
+provisioning, UPDATING as updating, ACTIVE and
+INACTIVE as success, and DELETING as
+terminating; FAILED is terminal and DELETED is
+only a delete-confirmation target.
 Create and delete responses expose work-request
-headers while the pinned provider implementation
-waits on GetWorkRequest; later runtime stories
-must decide whether that remains a lifecycle
-contract with breadcrumbs or becomes an explicit
-work-request adapter.
-PrivateAccessChannel, VanityUrl, and
-WorkRequest* stay out of the initial published
-surface even though the SDK and provider expose
-those auxiliary families.
+headers, while UpdateAnalyticsInstance returns
+only opc-request-id plus the resource body. The
+runtime records shared async breadcrumbs from
+lifecycle projection rather than polling
+GetWorkRequest directly.
+Only description, emailNotification,
+licenseType, freeformTags, definedTags, and
+updateChannel reconcile in place. FeatureBundle
+and KmsKeyId stay in required status projection,
+but supporting SetFeatureBundle or SetKmsKey
+remains out of scope for the published runtime.
+DomainId remains a create-time input that is
+read back into status. AdminUser and
+IdcsAccessToken are create-time inputs OCI does
+not echo back, so they are normalized out of
+post-create parity checks.
+Required status projection keeps
+NetworkEndpointDetails, PrivateAccessChannels,
+VanityUrlDetails, updateChannel, featureBundle,
+domainId, and systemTags on the published kind,
+and the runtime has no secret side effects.
 end note
 @enduml

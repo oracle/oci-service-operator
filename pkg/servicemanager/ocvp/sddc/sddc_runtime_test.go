@@ -7,65 +7,47 @@ package sddc
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	ocvpsdk "github.com/oracle/oci-go-sdk/v65/ocvp"
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-type stubSddcClient struct {
-	createOrUpdateFn  func(context.Context, *ocvpv1beta1.Sddc, ctrl.Request) (servicemanager.OSOKResponse, error)
-	deleteFn          func(context.Context, *ocvpv1beta1.Sddc) (bool, error)
-	resolveExistingFn func(context.Context, *ocvpv1beta1.Sddc) (string, error)
-}
-
-func (s stubSddcClient) CreateOrUpdate(ctx context.Context, resource *ocvpv1beta1.Sddc, req ctrl.Request) (servicemanager.OSOKResponse, error) {
-	if s.createOrUpdateFn != nil {
-		return s.createOrUpdateFn(ctx, resource, req)
-	}
-	return servicemanager.OSOKResponse{IsSuccessful: true}, nil
-}
-
-func (s stubSddcClient) Delete(ctx context.Context, resource *ocvpv1beta1.Sddc) (bool, error) {
-	if s.deleteFn != nil {
-		return s.deleteFn(ctx, resource)
-	}
-	return true, nil
-}
-
-func (s stubSddcClient) ResolveExisting(ctx context.Context, resource *ocvpv1beta1.Sddc) (string, error) {
-	if s.resolveExistingFn != nil {
-		return s.resolveExistingFn(ctx, resource)
-	}
-	return "", nil
-}
-
 func TestSddcCreateOrUpdateRejectsCreateWithoutDisplayNameWhenUntracked(t *testing.T) {
 	t.Parallel()
 
 	resource := newSddcTestResource()
 	resource.Spec.DisplayName = ""
-	delegateCalled := false
+	createCalled := false
+	listCalled := false
 
-	manager := &SddcServiceManager{
-		client: &sddcGeneratedParityClient{
-			manager: &SddcServiceManager{},
-			delegate: stubSddcClient{
-				createOrUpdateFn: func(context.Context, *ocvpv1beta1.Sddc, ctrl.Request) (servicemanager.OSOKResponse, error) {
-					delegateCalled = true
-					t.Fatal("delegate CreateOrUpdate() should not be called when displayName is missing")
-					return servicemanager.OSOKResponse{}, nil
-				},
+	manager := newSddcRuntimeTestManager(generatedruntime.Config[*ocvpv1beta1.Sddc]{
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &ocvpsdk.CreateSddcRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				createCalled = true
+				t.Fatal("Create() should not be called when displayName is missing")
+				return nil, nil
 			},
+			Fields: sddcCreateFields(),
 		},
-	}
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &ocvpsdk.ListSddcsRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				listCalled = true
+				t.Fatal("List() should not be called when displayName is missing")
+				return nil, nil
+			},
+			Fields: sddcListFields(),
+		},
+	})
 
 	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	if err == nil {
@@ -77,8 +59,11 @@ func TestSddcCreateOrUpdateRejectsCreateWithoutDisplayNameWhenUntracked(t *testi
 	if response.IsSuccessful {
 		t.Fatal("CreateOrUpdate() should report failure when displayName is missing")
 	}
-	if delegateCalled {
-		t.Fatal("delegate CreateOrUpdate() should not be called when displayName is missing")
+	if createCalled {
+		t.Fatal("Create() should not be called when displayName is missing")
+	}
+	if listCalled {
+		t.Fatal("List() should not be called when displayName is missing")
 	}
 	requireSddcCondition(t, resource, shared.Failed)
 }
@@ -112,7 +97,7 @@ func TestSddcCreateOrUpdateCreatesAndRequeuesFromLifecycleFollowUp(t *testing.T)
 				calls = append(calls, "list")
 				listRequest = *request.(*ocvpsdk.ListSddcsRequest)
 				listCalls++
-				if listCalls == 1 {
+				if listCalls < 3 {
 					return ocvpsdk.ListSddcsResponse{
 						SddcCollection: ocvpsdk.SddcCollection{
 							Items: nil,
@@ -141,8 +126,8 @@ func TestSddcCreateOrUpdateCreatesAndRequeuesFromLifecycleFollowUp(t *testing.T)
 	if !response.ShouldRequeue {
 		t.Fatal("CreateOrUpdate() should requeue while lifecycle remains CREATING")
 	}
-	if len(calls) != 3 || calls[0] != "list" || calls[1] != "create" || calls[2] != "list" {
-		t.Fatalf("call order = %v, want [list create list]", calls)
+	if len(calls) != 4 || calls[0] != "list" || calls[1] != "list" || calls[2] != "create" || calls[3] != "list" {
+		t.Fatalf("call order = %v, want [list list create list]", calls)
 	}
 	requireSddcStringPointer(t, "create request displayName", createRequest.DisplayName, resource.Spec.DisplayName)
 	requireSddcStringPointer(t, "create request compartmentId", createRequest.CompartmentId, resource.Spec.CompartmentId)
@@ -171,8 +156,9 @@ func TestSddcCreateOrUpdateReusesMatchingListEntryWhenDisplayNamePresent(t *test
 	resource := newSddcTestResource()
 	createCalled := false
 	getCalled := false
+	var listRequest ocvpsdk.ListSddcsRequest
 
-	config := generatedruntime.Config[*ocvpv1beta1.Sddc]{
+	manager := newSddcRuntimeTestManager(generatedruntime.Config[*ocvpv1beta1.Sddc]{
 		Create: &generatedruntime.Operation{
 			NewRequest: func() any { return &ocvpsdk.CreateSddcRequest{} },
 			Call: func(_ context.Context, _ any) (any, error) {
@@ -182,30 +168,32 @@ func TestSddcCreateOrUpdateReusesMatchingListEntryWhenDisplayNamePresent(t *test
 			},
 			Fields: sddcCreateFields(),
 		},
+		List: &generatedruntime.Operation{
+			NewRequest: func() any { return &ocvpsdk.ListSddcsRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				listRequest = *request.(*ocvpsdk.ListSddcsRequest)
+				return ocvpsdk.ListSddcsResponse{
+					SddcCollection: ocvpsdk.SddcCollection{
+						Items: []ocvpsdk.SddcSummary{
+							observedSddcSummaryFromSpec(existingID, resource.Spec, "ACTIVE"),
+						},
+					},
+				}, nil
+			},
+			Fields: sddcListFields(),
+		},
 		Get: &generatedruntime.Operation{
 			NewRequest: func() any { return &ocvpsdk.GetSddcRequest{} },
 			Call: func(_ context.Context, request any) (any, error) {
 				getCalled = true
 				requireSddcStringPointer(t, "get request sddcId", request.(*ocvpsdk.GetSddcRequest).SddcId, existingID)
-				response, err := sanitizeSddcResponse(observedSddcFromSpec(existingID, resource.Spec, "ACTIVE"))
-				if err != nil {
-					t.Fatalf("sanitizeSddcResponse() error = %v", err)
-				}
-				return response, nil
+				return ocvpsdk.GetSddcResponse{
+					Sddc: observedSddcFromSpec(existingID, resource.Spec, "ACTIVE"),
+				}, nil
 			},
 			Fields: sddcGetFields(),
 		},
-	}
-	manager := &SddcServiceManager{}
-	manager.client = &sddcGeneratedParityClient{
-		manager: manager,
-		delegate: sddcRuntimeTestClient{
-			ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.Sddc](config),
-			resolveExistingFn: func(context.Context, *ocvpv1beta1.Sddc) (string, error) {
-				return existingID, nil
-			},
-		},
-	}
+	})
 
 	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
 	if err != nil {
@@ -221,8 +209,10 @@ func TestSddcCreateOrUpdateReusesMatchingListEntryWhenDisplayNamePresent(t *test
 		t.Fatal("Create() should not be called when list lookup finds a reusable sddc")
 	}
 	if !getCalled {
-		t.Fatal("Get() should be called after the wrapper resolves an existing sddc ID")
+		t.Fatal("Get() should be called after the identity lookup resolves an existing sddc ID")
 	}
+	requireSddcStringPointer(t, "list request displayName", listRequest.DisplayName, resource.Spec.DisplayName)
+	requireSddcStringPointer(t, "list request compartmentId", listRequest.CompartmentId, resource.Spec.CompartmentId)
 	requireSddcOCID(t, resource, existingID)
 	if resource.Status.Id != existingID {
 		t.Fatalf("status.id = %q, want %q", resource.Status.Id, existingID)
@@ -251,11 +241,7 @@ func TestSddcCreateOrUpdateUpdatesMutableFields(t *testing.T) {
 				if getCalls > 1 {
 					live.DisplayName = common.String(resource.Spec.DisplayName)
 				}
-				response, err := sanitizeSddcResponse(live)
-				if err != nil {
-					t.Fatalf("sanitizeSddcResponse() error = %v", err)
-				}
-				return response, nil
+				return ocvpsdk.GetSddcResponse{Sddc: live}, nil
 			},
 			Fields: sddcGetFields(),
 		},
@@ -309,11 +295,7 @@ func TestSddcCreateOrUpdateRejectsCreateOnlyDrift(t *testing.T) {
 				requireSddcStringPointer(t, "get request sddcId", request.(*ocvpsdk.GetSddcRequest).SddcId, existingID)
 				live := observedSddcFromSpec(existingID, newSddcTestResource().Spec, "ACTIVE")
 				live.CompartmentId = common.String("ocid1.compartment.oc1..live")
-				response, err := sanitizeSddcResponse(live)
-				if err != nil {
-					t.Fatalf("sanitizeSddcResponse() error = %v", err)
-				}
-				return response, nil
+				return ocvpsdk.GetSddcResponse{Sddc: live}, nil
 			},
 			Fields: sddcGetFields(),
 		},
@@ -391,11 +373,9 @@ func TestSddcDeleteConfirmsDeleteOutcomes(t *testing.T) {
 						if getCalls > 1 {
 							state = tc.confirmedState
 						}
-						response, err := sanitizeSddcResponse(observedSddcFromSpec(existingID, resource.Spec, state))
-						if err != nil {
-							t.Fatalf("sanitizeSddcResponse() error = %v", err)
-						}
-						return response, nil
+						return ocvpsdk.GetSddcResponse{
+							Sddc: observedSddcFromSpec(existingID, resource.Spec, state),
+						}, nil
 					},
 					Fields: sddcGetFields(),
 				},
@@ -442,36 +422,101 @@ func TestSddcDeleteConfirmsDeleteOutcomes(t *testing.T) {
 
 func newSddcRuntimeTestManager(cfg generatedruntime.Config[*ocvpv1beta1.Sddc]) *SddcServiceManager {
 	manager := &SddcServiceManager{}
-	if cfg.Kind == "" {
-		cfg.Kind = "Sddc"
+	hooks := SddcRuntimeHooks{
+		Semantics:       newSddcRuntimeSemantics(),
+		Identity:        generatedruntime.IdentityHooks[*ocvpv1beta1.Sddc]{},
+		Read:            generatedruntime.ReadHooks{},
+		TrackedRecreate: generatedruntime.TrackedRecreateHooks[*ocvpv1beta1.Sddc]{},
+		StatusHooks:     generatedruntime.StatusHooks[*ocvpv1beta1.Sddc]{},
+		ParityHooks:     generatedruntime.ParityHooks[*ocvpv1beta1.Sddc]{},
+		Create: sddcRuntimeTestOperation[ocvpsdk.CreateSddcRequest, ocvpsdk.CreateSddcResponse](
+			sddcCreateFields(),
+			cfg.Create,
+		),
+		Get: sddcRuntimeTestOperation[ocvpsdk.GetSddcRequest, ocvpsdk.GetSddcResponse](
+			sddcGetFields(),
+			cfg.Get,
+		),
+		List: sddcRuntimeTestOperation[ocvpsdk.ListSddcsRequest, ocvpsdk.ListSddcsResponse](
+			sddcListFields(),
+			cfg.List,
+		),
+		Update: sddcRuntimeTestOperation[ocvpsdk.UpdateSddcRequest, ocvpsdk.UpdateSddcResponse](
+			sddcUpdateFields(),
+			cfg.Update,
+		),
+		Delete: sddcRuntimeTestOperation[ocvpsdk.DeleteSddcRequest, ocvpsdk.DeleteSddcResponse](
+			sddcDeleteFields(),
+			cfg.Delete,
+		),
+		WrapGeneratedClient: []func(SddcServiceClient) SddcServiceClient{},
 	}
-	if cfg.SDKName == "" {
-		cfg.SDKName = "Sddc"
+	if cfg.Semantics != nil {
+		hooks.Semantics = cfg.Semantics
 	}
-	if cfg.Semantics == nil {
-		cfg.Semantics = newSddcRuntimeSemantics()
+	applySddcRuntimeHooks(&hooks)
+	config := buildSddcGeneratedRuntimeConfig(manager, hooks)
+	config.InitError = cfg.InitError
+	if cfg.Create == nil {
+		config.Create = nil
 	}
-	delegate := sddcRuntimeTestClient{
-		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.Sddc](cfg),
+	if cfg.Get == nil {
+		config.Get = nil
+		config.Read.Get = nil
 	}
-	manager.client = &sddcGeneratedParityClient{
-		manager:  manager,
-		delegate: delegate,
+	if cfg.List == nil {
+		config.List = nil
+		config.Read.List = nil
 	}
+	if cfg.Update == nil {
+		config.Update = nil
+	}
+	if cfg.Delete == nil {
+		config.Delete = nil
+	}
+	delegate := defaultSddcServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*ocvpv1beta1.Sddc](config),
+	}
+	manager.client = wrapSddcGeneratedClient(hooks, delegate)
 	return manager
 }
 
-type sddcRuntimeTestClient struct {
-	generatedruntime.ServiceClient[*ocvpv1beta1.Sddc]
-
-	resolveExistingFn func(context.Context, *ocvpv1beta1.Sddc) (string, error)
-}
-
-func (c sddcRuntimeTestClient) ResolveExisting(ctx context.Context, resource *ocvpv1beta1.Sddc) (string, error) {
-	if c.resolveExistingFn != nil {
-		return c.resolveExistingFn(ctx, resource)
+func sddcRuntimeTestOperation[Req any, Resp any](
+	defaultFields []generatedruntime.RequestField,
+	override *generatedruntime.Operation,
+) runtimeOperationHooks[Req, Resp] {
+	op := runtimeOperationHooks[Req, Resp]{
+		Fields: append([]generatedruntime.RequestField(nil), defaultFields...),
+		Call: func(context.Context, Req) (Resp, error) {
+			var zero Resp
+			return zero, nil
+		},
 	}
-	return "", nil
+	if override == nil {
+		return op
+	}
+	if len(override.Fields) != 0 {
+		op.Fields = append([]generatedruntime.RequestField(nil), override.Fields...)
+	}
+	op.Call = func(ctx context.Context, request Req) (Resp, error) {
+		var zero Resp
+		if override.Call == nil {
+			return zero, nil
+		}
+		response, err := override.Call(ctx, &request)
+		if err != nil {
+			return zero, err
+		}
+		if response == nil {
+			return zero, nil
+		}
+		typed, ok := response.(Resp)
+		if !ok {
+			return zero, fmt.Errorf("sddc test operation returned %T, want %T", response, zero)
+		}
+		return typed, nil
+	}
+	return op
 }
 
 func newSddcTestResource() *ocvpv1beta1.Sddc {
@@ -617,6 +662,14 @@ func sdkInitialClusterConfigurationFromSpec(spec ocvpv1beta1.SddcInitialConfigur
 			})
 		}
 	}
+	cluster.DatastoreClusterIds = append([]string(nil), spec.DatastoreClusterIds...)
+	cluster.ClusterByolAllocationDetails = &ocvpsdk.ClusterByolAllocationDetails{
+		VsanByolAllocationId:     stringPtrOrNil(spec.ClusterByolAllocationDetails.VsanByolAllocationId),
+		FirewallByolAllocationId: stringPtrOrNil(spec.ClusterByolAllocationDetails.FirewallByolAllocationId),
+	}
+	if spec.InitialVcfByolAllocationId != "" {
+		cluster.InitialVcfByolAllocationId = common.String(spec.InitialVcfByolAllocationId)
+	}
 	return cluster
 }
 
@@ -710,6 +763,13 @@ func requireSddcStringPointer(t *testing.T, label string, got *string, want stri
 	if got == nil || *got != want {
 		t.Fatalf("%s = %v, want %q", label, got, want)
 	}
+}
+
+func stringPtrOrNil(v string) *string {
+	if v == "" {
+		return nil
+	}
+	return common.String(v)
 }
 
 func float32Ptr(v float32) *float32 {

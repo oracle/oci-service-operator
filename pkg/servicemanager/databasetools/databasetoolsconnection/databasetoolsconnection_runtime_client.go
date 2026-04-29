@@ -28,16 +28,48 @@ type databaseToolsConnectionOCIClient interface {
 }
 
 func init() {
-	newDatabaseToolsConnectionServiceClient = func(manager *DatabaseToolsConnectionServiceManager) DatabaseToolsConnectionServiceClient {
-		sdkClient, err := databasetoolssdk.NewDatabaseToolsClientWithConfigurationProvider(manager.Provider)
-		config := newDatabaseToolsConnectionRuntimeConfig(manager.Log, manager.CredentialClient, sdkClient)
-		if err != nil {
-			config.InitError = fmt.Errorf("initialize DatabaseToolsConnection OCI client: %w", err)
-		}
-		return defaultDatabaseToolsConnectionServiceClient{
-			ServiceClient: generatedruntime.NewServiceClient[*databasetoolsv1beta1.DatabaseToolsConnection](config),
-		}
+	registerDatabaseToolsConnectionRuntimeHooksMutator(func(
+		manager *DatabaseToolsConnectionServiceManager,
+		hooks *DatabaseToolsConnectionRuntimeHooks,
+	) {
+		applyDatabaseToolsConnectionRuntimeHooks(manager, hooks)
+	})
+}
+
+func applyDatabaseToolsConnectionRuntimeHooks(
+	manager *DatabaseToolsConnectionServiceManager,
+	hooks *DatabaseToolsConnectionRuntimeHooks,
+) {
+	if hooks == nil {
+		return
 	}
+
+	var credentialClient credhelper.CredentialClient
+	if manager != nil {
+		credentialClient = manager.CredentialClient
+	}
+
+	hooks.Semantics = databaseToolsConnectionRuntimeSemantics()
+	hooks.BuildCreateBody = func(
+		ctx context.Context,
+		resource *databasetoolsv1beta1.DatabaseToolsConnection,
+		namespace string,
+	) (any, error) {
+		return buildDatabaseToolsConnectionCreateDetails(ctx, credentialClient, resource, namespace)
+	}
+	hooks.BuildUpdateBody = func(
+		ctx context.Context,
+		resource *databasetoolsv1beta1.DatabaseToolsConnection,
+		namespace string,
+		currentResponse any,
+	) (any, bool, error) {
+		return buildDatabaseToolsConnectionUpdateDetails(ctx, credentialClient, resource, namespace, currentResponse)
+	}
+	hooks.Create.Fields = databaseToolsConnectionCreateFields()
+	hooks.Get.Fields = databaseToolsConnectionGetFields()
+	hooks.List.Fields = databaseToolsConnectionListFields()
+	hooks.Update.Fields = databaseToolsConnectionUpdateFields()
+	hooks.Delete.Fields = databaseToolsConnectionDeleteFields()
 }
 
 func newDatabaseToolsConnectionServiceClientWithOCIClient(
@@ -45,75 +77,59 @@ func newDatabaseToolsConnectionServiceClientWithOCIClient(
 	credentialClient credhelper.CredentialClient,
 	client databaseToolsConnectionOCIClient,
 ) DatabaseToolsConnectionServiceClient {
-	return defaultDatabaseToolsConnectionServiceClient{
-		ServiceClient: generatedruntime.NewServiceClient[*databasetoolsv1beta1.DatabaseToolsConnection](
-			newDatabaseToolsConnectionRuntimeConfig(log, credentialClient, client),
-		),
-	}
-}
-
-func newDatabaseToolsConnectionRuntimeConfig(
-	log loggerutil.OSOKLogger,
-	credentialClient credhelper.CredentialClient,
-	client databaseToolsConnectionOCIClient,
-) generatedruntime.Config[*databasetoolsv1beta1.DatabaseToolsConnection] {
-	return generatedruntime.Config[*databasetoolsv1beta1.DatabaseToolsConnection]{
-		Kind:             "DatabaseToolsConnection",
-		SDKName:          "DatabaseToolsConnection",
+	manager := &DatabaseToolsConnectionServiceManager{
 		Log:              log,
 		CredentialClient: credentialClient,
-		Semantics:        databaseToolsConnectionRuntimeSemantics(),
-		BuildCreateBody: func(
-			ctx context.Context,
-			resource *databasetoolsv1beta1.DatabaseToolsConnection,
-			namespace string,
-		) (any, error) {
-			return buildDatabaseToolsConnectionCreateDetails(ctx, credentialClient, resource, namespace)
-		},
-		BuildUpdateBody: func(
-			ctx context.Context,
-			resource *databasetoolsv1beta1.DatabaseToolsConnection,
-			namespace string,
-			currentResponse any,
-		) (any, bool, error) {
-			return buildDatabaseToolsConnectionUpdateDetails(ctx, credentialClient, resource, namespace, currentResponse)
-		},
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &databasetoolssdk.CreateDatabaseToolsConnectionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.CreateDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.CreateDatabaseToolsConnectionRequest))
-			},
-			Fields: databaseToolsConnectionCreateFields(),
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &databasetoolssdk.GetDatabaseToolsConnectionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.GetDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.GetDatabaseToolsConnectionRequest))
-			},
-			Fields: databaseToolsConnectionGetFields(),
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &databasetoolssdk.ListDatabaseToolsConnectionsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.ListDatabaseToolsConnections(ctx, *request.(*databasetoolssdk.ListDatabaseToolsConnectionsRequest))
-			},
-			Fields: databaseToolsConnectionListFields(),
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &databasetoolssdk.UpdateDatabaseToolsConnectionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.UpdateDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.UpdateDatabaseToolsConnectionRequest))
-			},
-			Fields: databaseToolsConnectionUpdateFields(),
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &databasetoolssdk.DeleteDatabaseToolsConnectionRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return client.DeleteDatabaseToolsConnection(ctx, *request.(*databasetoolssdk.DeleteDatabaseToolsConnectionRequest))
-			},
-			Fields: databaseToolsConnectionDeleteFields(),
-		},
 	}
+	hooks := newDatabaseToolsConnectionRuntimeHooksWithOCIClient(manager, client)
+	delegate := defaultDatabaseToolsConnectionServiceClient{
+		ServiceClient: generatedruntime.NewServiceClient[*databasetoolsv1beta1.DatabaseToolsConnection](
+			buildDatabaseToolsConnectionGeneratedRuntimeConfig(manager, hooks),
+		),
+	}
+	return wrapDatabaseToolsConnectionGeneratedClient(hooks, delegate)
+}
+
+func newDatabaseToolsConnectionRuntimeHooksWithOCIClient(
+	manager *DatabaseToolsConnectionServiceManager,
+	client databaseToolsConnectionOCIClient,
+) DatabaseToolsConnectionRuntimeHooks {
+	hooks := DatabaseToolsConnectionRuntimeHooks{
+		Semantics: newDatabaseToolsConnectionRuntimeSemantics(),
+		Create: runtimeOperationHooks[databasetoolssdk.CreateDatabaseToolsConnectionRequest, databasetoolssdk.CreateDatabaseToolsConnectionResponse]{
+			Fields: databaseToolsConnectionCreateFields(),
+			Call: func(ctx context.Context, request databasetoolssdk.CreateDatabaseToolsConnectionRequest) (databasetoolssdk.CreateDatabaseToolsConnectionResponse, error) {
+				return client.CreateDatabaseToolsConnection(ctx, request)
+			},
+		},
+		Get: runtimeOperationHooks[databasetoolssdk.GetDatabaseToolsConnectionRequest, databasetoolssdk.GetDatabaseToolsConnectionResponse]{
+			Fields: databaseToolsConnectionGetFields(),
+			Call: func(ctx context.Context, request databasetoolssdk.GetDatabaseToolsConnectionRequest) (databasetoolssdk.GetDatabaseToolsConnectionResponse, error) {
+				return client.GetDatabaseToolsConnection(ctx, request)
+			},
+		},
+		List: runtimeOperationHooks[databasetoolssdk.ListDatabaseToolsConnectionsRequest, databasetoolssdk.ListDatabaseToolsConnectionsResponse]{
+			Fields: databaseToolsConnectionListFields(),
+			Call: func(ctx context.Context, request databasetoolssdk.ListDatabaseToolsConnectionsRequest) (databasetoolssdk.ListDatabaseToolsConnectionsResponse, error) {
+				return client.ListDatabaseToolsConnections(ctx, request)
+			},
+		},
+		Update: runtimeOperationHooks[databasetoolssdk.UpdateDatabaseToolsConnectionRequest, databasetoolssdk.UpdateDatabaseToolsConnectionResponse]{
+			Fields: databaseToolsConnectionUpdateFields(),
+			Call: func(ctx context.Context, request databasetoolssdk.UpdateDatabaseToolsConnectionRequest) (databasetoolssdk.UpdateDatabaseToolsConnectionResponse, error) {
+				return client.UpdateDatabaseToolsConnection(ctx, request)
+			},
+		},
+		Delete: runtimeOperationHooks[databasetoolssdk.DeleteDatabaseToolsConnectionRequest, databasetoolssdk.DeleteDatabaseToolsConnectionResponse]{
+			Fields: databaseToolsConnectionDeleteFields(),
+			Call: func(ctx context.Context, request databasetoolssdk.DeleteDatabaseToolsConnectionRequest) (databasetoolssdk.DeleteDatabaseToolsConnectionResponse, error) {
+				return client.DeleteDatabaseToolsConnection(ctx, request)
+			},
+		},
+		WrapGeneratedClient: []func(DatabaseToolsConnectionServiceClient) DatabaseToolsConnectionServiceClient{},
+	}
+	applyDatabaseToolsConnectionRuntimeHooks(manager, &hooks)
+	return hooks
 }
 
 func databaseToolsConnectionRuntimeSemantics() *generatedruntime.Semantics {

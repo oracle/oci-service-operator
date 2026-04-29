@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oda",
+  "slug": "digitalassistant",
+  "kind": "DigitalAssistant",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_oda_digitalassistant",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDigitalAssistant",
+        "requestType": "oda.CreateDigitalAssistantRequest",
+        "responseType": "oda.CreateDigitalAssistantResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDigitalAssistant",
+        "requestType": "oda.GetDigitalAssistantRequest",
+        "responseType": "oda.GetDigitalAssistantResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDigitalAssistant",
+        "requestType": "oda.ListDigitalAssistantRequest",
+        "responseType": "oda.ListDigitalAssistantResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateDigitalAssistant",
+        "requestType": "oda.UpdateDigitalAssistantRequest",
+        "responseType": "oda.UpdateDigitalAssistantResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDigitalAssistant",
+        "requestType": "oda.DeleteDigitalAssistantRequest",
+        "responseType": "oda.DeleteDigitalAssistantResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_oda_digitalassistant",
+    "collectionField": "digitalassistant",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oda/digitalassistant/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oda/digitalassistant/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for oda/digitalassistant; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

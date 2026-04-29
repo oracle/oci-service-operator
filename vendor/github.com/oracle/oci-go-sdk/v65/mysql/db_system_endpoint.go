@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -70,7 +70,7 @@ func (m DbSystemEndpoint) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ResourceType: %s. Supported values are: %s.", m.ResourceType, strings.Join(GetDbSystemEndpointResourceTypeEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -171,18 +171,21 @@ const (
 	DbSystemEndpointResourceTypeDbsystem     DbSystemEndpointResourceTypeEnum = "DBSYSTEM"
 	DbSystemEndpointResourceTypeReadReplica  DbSystemEndpointResourceTypeEnum = "READ_REPLICA"
 	DbSystemEndpointResourceTypeLoadBalancer DbSystemEndpointResourceTypeEnum = "LOAD_BALANCER"
+	DbSystemEndpointResourceTypeReadEndpoint DbSystemEndpointResourceTypeEnum = "READ_ENDPOINT"
 )
 
 var mappingDbSystemEndpointResourceTypeEnum = map[string]DbSystemEndpointResourceTypeEnum{
 	"DBSYSTEM":      DbSystemEndpointResourceTypeDbsystem,
 	"READ_REPLICA":  DbSystemEndpointResourceTypeReadReplica,
 	"LOAD_BALANCER": DbSystemEndpointResourceTypeLoadBalancer,
+	"READ_ENDPOINT": DbSystemEndpointResourceTypeReadEndpoint,
 }
 
 var mappingDbSystemEndpointResourceTypeEnumLowerCase = map[string]DbSystemEndpointResourceTypeEnum{
 	"dbsystem":      DbSystemEndpointResourceTypeDbsystem,
 	"read_replica":  DbSystemEndpointResourceTypeReadReplica,
 	"load_balancer": DbSystemEndpointResourceTypeLoadBalancer,
+	"read_endpoint": DbSystemEndpointResourceTypeReadEndpoint,
 }
 
 // GetDbSystemEndpointResourceTypeEnumValues Enumerates the set of values for DbSystemEndpointResourceTypeEnum
@@ -200,6 +203,7 @@ func GetDbSystemEndpointResourceTypeEnumStringValues() []string {
 		"DBSYSTEM",
 		"READ_REPLICA",
 		"LOAD_BALANCER",
+		"READ_ENDPOINT",
 	}
 }
 

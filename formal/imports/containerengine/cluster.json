@@ -71,8 +71,22 @@
       "kubernetes_version",
       "name",
       "options.admission_controller_options.is_pod_security_policy_enabled",
+      "options.open_id_connect_discovery.is_open_id_connect_discovery_enabled",
+      "options.open_id_connect_token_authentication_config.ca_certificate",
+      "options.open_id_connect_token_authentication_config.client_id",
+      "options.open_id_connect_token_authentication_config.configuration_file",
+      "options.open_id_connect_token_authentication_config.groups_claim",
+      "options.open_id_connect_token_authentication_config.groups_prefix",
+      "options.open_id_connect_token_authentication_config.is_open_id_connect_auth_enabled",
+      "options.open_id_connect_token_authentication_config.issuer_url",
+      "options.open_id_connect_token_authentication_config.required_claims.key",
+      "options.open_id_connect_token_authentication_config.required_claims.value",
+      "options.open_id_connect_token_authentication_config.signing_algorithms",
+      "options.open_id_connect_token_authentication_config.username_claim",
+      "options.open_id_connect_token_authentication_config.username_prefix",
       "options.persistent_volume_config.defined_tags",
       "options.persistent_volume_config.freeform_tags",
+      "options.service_lb_config.backend_nsg_ids",
       "options.service_lb_config.defined_tags",
       "options.service_lb_config.freeform_tags",
       "type"
@@ -155,8 +169,9 @@
   },
   "notes": [
     "Pinned OCI SDK contract: Cluster lifecycle exposes CREATING, ACTIVE, FAILED, DELETING, DELETED, and UPDATING. Repo-authored controller success is ACTIVE, requeue covers CREATING and UPDATING, FAILED is terminal without requeue, and delete confirmation follows DELETING to DELETED.",
-    "Pinned OCI SDK contract: UpdateClusterDetails exposes name, kubernetes_version, options.admission_controller_options, options.persistent_volume_config, options.service_lb_config, defined_tags, freeform_tags, image_policy_config, and type as in-place update fields. Fields absent from UpdateClusterDetails remain create-only drift and must not open implicit replacement.",
+    "Pinned OCI SDK contract: UpdateClusterDetails exposes name, kubernetes_version, options.admission_controller_options, options.persistent_volume_config, options.service_lb_config (including backend_nsg_ids), options.open_id_connect_token_authentication_config, options.open_id_connect_discovery, defined_tags, freeform_tags, image_policy_config, and type as in-place update fields. Fields absent from UpdateClusterDetails remain create-only drift and must not open implicit replacement.",
     "CreateCluster, UpdateCluster, and DeleteCluster each return opc-work-request-id headers, so provider wait hooks are work-request-backed even though steady-state readiness is still classified from observed Cluster lifecycle states.",
-    "ListClustersRequest filters by compartmentId, lifecycleState, and name and returns Items []ClusterSummary. Safe reusable matching is exact compartment_id plus name, restricted to reusable ACTIVE, CREATING, or UPDATING candidates; duplicate exact-name matches must fail instead of guessing."
+    "ListClustersRequest filters by compartmentId, lifecycleState, and name and returns Items []ClusterSummary. Safe reusable matching is exact compartment_id plus name, restricted to reusable ACTIVE, CREATING, or UPDATING candidates; duplicate exact-name matches must fail instead of guessing.",
+    "GetClusterRequest exposes shouldIncludeOidcConfigFile. Repo-authored runtime reads set that query to true so update parity and follow-up observation compare against the full mutable OIDC token-authentication surface, including configuration_file."
   ]
 }

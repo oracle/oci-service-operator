@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,7 +6,7 @@
 //
 // Use the Logging Management API to create, read, list, update, move and delete
 // log groups, log objects, log saved searches, and agent configurations.
-// For more information, see Logging Overview (https://docs.cloud.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
+// For more information, see Logging Overview (https://docs.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
 //
 
 package logging
@@ -21,6 +21,10 @@ import (
 // CreateUnifiedAgentConfigurationDetails Unified Agent configuration creation object.
 type CreateUnifiedAgentConfigurationDetails struct {
 
+	// The user-friendly display name. This must be unique within the enclosing resource,
+	// and it's changeable. Avoid entering confidential information.
+	DisplayName *string `mandatory:"true" json:"displayName"`
+
 	// Whether or not this resource is currently enabled.
 	IsEnabled *bool `mandatory:"true" json:"isEnabled"`
 
@@ -29,22 +33,18 @@ type CreateUnifiedAgentConfigurationDetails struct {
 	// The OCID of the compartment that the resource belongs to.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
-	// The user-friendly display name. This must be unique within the enclosing resource,
-	// and it's changeable. Avoid entering confidential information.
-	DisplayName *string `mandatory:"false" json:"displayName"`
+	// Description for this resource.
+	Description *string `mandatory:"true" json:"description"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
-
-	// Description for this resource.
-	Description *string `mandatory:"false" json:"description"`
 
 	GroupAssociation *GroupAssociationDetails `mandatory:"false" json:"groupAssociation"`
 }
@@ -60,7 +60,7 @@ func (m CreateUnifiedAgentConfigurationDetails) ValidateEnumValue() (bool, error
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -68,14 +68,14 @@ func (m CreateUnifiedAgentConfigurationDetails) ValidateEnumValue() (bool, error
 // UnmarshalJSON unmarshals from json
 func (m *CreateUnifiedAgentConfigurationDetails) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		DisplayName          *string                                 `json:"displayName"`
 		DefinedTags          map[string]map[string]interface{}       `json:"definedTags"`
 		FreeformTags         map[string]string                       `json:"freeformTags"`
-		Description          *string                                 `json:"description"`
 		GroupAssociation     *GroupAssociationDetails                `json:"groupAssociation"`
+		DisplayName          *string                                 `json:"displayName"`
 		IsEnabled            *bool                                   `json:"isEnabled"`
 		ServiceConfiguration unifiedagentserviceconfigurationdetails `json:"serviceConfiguration"`
 		CompartmentId        *string                                 `json:"compartmentId"`
+		Description          *string                                 `json:"description"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -83,15 +83,13 @@ func (m *CreateUnifiedAgentConfigurationDetails) UnmarshalJSON(data []byte) (e e
 		return
 	}
 	var nn interface{}
-	m.DisplayName = model.DisplayName
-
 	m.DefinedTags = model.DefinedTags
 
 	m.FreeformTags = model.FreeformTags
 
-	m.Description = model.Description
-
 	m.GroupAssociation = model.GroupAssociation
+
+	m.DisplayName = model.DisplayName
 
 	m.IsEnabled = model.IsEnabled
 
@@ -106,6 +104,8 @@ func (m *CreateUnifiedAgentConfigurationDetails) UnmarshalJSON(data []byte) (e e
 	}
 
 	m.CompartmentId = model.CompartmentId
+
+	m.Description = model.Description
 
 	return
 }

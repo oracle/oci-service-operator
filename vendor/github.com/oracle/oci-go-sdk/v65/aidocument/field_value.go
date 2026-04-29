@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -29,15 +29,23 @@ type FieldValue interface {
 
 	// The detected text of a field.
 	GetText() *string
+
+	// The normalized value.
+	GetNormalizedValue() *string
+
+	// The normalized value confidence score between 0 and 1.
+	GetNormalizedConfidence() *float32
 }
 
 type fieldvalue struct {
-	JsonData        []byte
-	Text            *string          `mandatory:"false" json:"text"`
-	Confidence      *float32         `mandatory:"true" json:"confidence"`
-	BoundingPolygon *BoundingPolygon `mandatory:"true" json:"boundingPolygon"`
-	WordIndexes     []int            `mandatory:"true" json:"wordIndexes"`
-	ValueType       string           `json:"valueType"`
+	JsonData             []byte
+	Text                 *string          `mandatory:"false" json:"text"`
+	NormalizedValue      *string          `mandatory:"false" json:"normalizedValue"`
+	NormalizedConfidence *float32         `mandatory:"false" json:"normalizedConfidence"`
+	Confidence           *float32         `mandatory:"true" json:"confidence"`
+	BoundingPolygon      *BoundingPolygon `mandatory:"true" json:"boundingPolygon"`
+	WordIndexes          []int            `mandatory:"true" json:"wordIndexes"`
+	ValueType            string           `json:"valueType"`
 }
 
 // UnmarshalJSON unmarshals json
@@ -55,6 +63,8 @@ func (m *fieldvalue) UnmarshalJSON(data []byte) error {
 	m.BoundingPolygon = s.Model.BoundingPolygon
 	m.WordIndexes = s.Model.WordIndexes
 	m.Text = s.Model.Text
+	m.NormalizedValue = s.Model.NormalizedValue
+	m.NormalizedConfidence = s.Model.NormalizedConfidence
 	m.ValueType = s.Model.ValueType
 
 	return err
@@ -98,7 +108,7 @@ func (m *fieldvalue) UnmarshalPolymorphicJSON(data []byte) (interface{}, error) 
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for FieldValue: %s.", m.ValueType)
+		common.Logf("Received unsupported enum value for FieldValue: %s.", m.ValueType)
 		return *m, nil
 	}
 }
@@ -106,6 +116,16 @@ func (m *fieldvalue) UnmarshalPolymorphicJSON(data []byte) (interface{}, error) 
 // GetText returns Text
 func (m fieldvalue) GetText() *string {
 	return m.Text
+}
+
+// GetNormalizedValue returns NormalizedValue
+func (m fieldvalue) GetNormalizedValue() *string {
+	return m.NormalizedValue
+}
+
+// GetNormalizedConfidence returns NormalizedConfidence
+func (m fieldvalue) GetNormalizedConfidence() *float32 {
+	return m.NormalizedConfidence
 }
 
 // GetConfidence returns Confidence
@@ -134,7 +154,7 @@ func (m fieldvalue) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

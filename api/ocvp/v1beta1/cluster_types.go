@@ -14,7 +14,7 @@ import (
 
 // ClusterSpec defines the desired state of Cluster.
 type ClusterSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC that the
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC that the
 	// Cluster belongs to.
 	// +kubebuilder:validation:Required
 	SddcId string `json:"sddcId"`
@@ -32,7 +32,7 @@ type ClusterSpec struct {
 	// +kubebuilder:validation:Required
 	NetworkConfiguration ClusterNetworkConfiguration `json:"networkConfiguration"`
 	// A descriptive name for the Cluster.
-	// Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
+	// Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region.
 	// Avoid entering confidential information.
 	// +kubebuilder:validation:Optional
 	DisplayName string `json:"displayName,omitempty"`
@@ -60,13 +60,16 @@ type ClusterSpec struct {
 	// Indicates whether shielded instance is enabled for this Cluster.
 	// +kubebuilder:validation:Optional
 	IsShieldedInstanceEnabled bool `json:"isShieldedInstanceEnabled,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
 	// +kubebuilder:validation:Optional
 	CapacityReservationId string `json:"capacityReservationId,omitempty"`
 	// A list of datastore info for the Cluster.
 	// This value is required only when `initialHostShapeName` is a standard shape.
 	// +kubebuilder:validation:Optional
 	Datastores []ClusterDatastore `json:"datastores,omitempty"`
+	// A list of datastore clusters.
+	// +kubebuilder:validation:Optional
+	DatastoreClusterIds []string `json:"datastoreClusterIds,omitempty"`
 	// The VMware software bundle to install on the ESXi hosts in the Cluster. To get a list of the available versions, use
 	// ListSupportedVmwareSoftwareVersions.
 	// +kubebuilder:validation:Optional
@@ -77,13 +80,18 @@ type ClusterSpec struct {
 	// ListSupportedVmwareSoftwareVersions.
 	// +kubebuilder:validation:Optional
 	EsxiSoftwareVersion string `json:"esxiSoftwareVersion,omitempty"`
+	// +kubebuilder:validation:Optional
+	ClusterByolAllocationDetails ClusterByolAllocationDetails `json:"clusterByolAllocationDetails,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation.
+	// +kubebuilder:validation:Optional
+	InitialVcfByolAllocationId string `json:"initialVcfByolAllocationId,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
@@ -91,11 +99,11 @@ type ClusterSpec struct {
 
 // ClusterNetworkConfiguration defines nested fields for Cluster.NetworkConfiguration.
 type ClusterNetworkConfiguration struct {
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used
 	// to provision the Cluster.
 	// +kubebuilder:validation:Required
 	ProvisioningSubnetId string `json:"provisioningSubnetId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the vMotion component of the VMware environment.
 	// This attribute is not guaranteed to reflect the vMotion VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -108,7 +116,7 @@ type ClusterNetworkConfiguration struct {
 	// `vmotionVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	VmotionVlanId string `json:"vmotionVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the vSAN component of the VMware environment.
 	// This attribute is not guaranteed to reflect the vSAN VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -121,7 +129,7 @@ type ClusterNetworkConfiguration struct {
 	// `vsanVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	VsanVlanId string `json:"vsanVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the NSX VTEP component of the VMware environment.
 	// This attribute is not guaranteed to reflect the NSX VTEP VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -134,7 +142,7 @@ type ClusterNetworkConfiguration struct {
 	// `nsxVTepVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	NsxVTepVlanId string `json:"nsxVTepVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the NSX Edge VTEP component of the VMware environment.
 	// This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN
 	// currently used by the ESXi hosts in the Cluster. The purpose
@@ -147,7 +155,7 @@ type ClusterNetworkConfiguration struct {
 	// `nsxEdgeVTepVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Required
 	NsxEdgeVTepVlanId string `json:"nsxEdgeVTepVlanId"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the vSphere component of the VMware environment. This VLAN is a mandatory attribute
 	// for Management Cluster.
 	// This attribute is not guaranteed to reflect the vSphere VLAN
@@ -161,7 +169,7 @@ type ClusterNetworkConfiguration struct {
 	// `vsphereVlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Optional
 	VsphereVlanId string `json:"vsphereVlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory
 	// attribute for Management Cluster.
 	// This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN
@@ -175,7 +183,7 @@ type ClusterNetworkConfiguration struct {
 	// `nsxEdgeUplink1VlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Optional
 	NsxEdgeUplink1VlanId string `json:"nsxEdgeUplink1VlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory
 	// attribute for Management Cluster.
 	// This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN
@@ -189,15 +197,15 @@ type ClusterNetworkConfiguration struct {
 	// `nsxEdgeUplink2VlanId` with that new VLAN's OCID.
 	// +kubebuilder:validation:Optional
 	NsxEdgeUplink2VlanId string `json:"nsxEdgeUplink2VlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the vSphere Replication component of the VMware environment.
 	// +kubebuilder:validation:Optional
 	ReplicationVlanId string `json:"replicationVlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster
 	// for the Provisioning component of the VMware environment.
 	// +kubebuilder:validation:Optional
 	ProvisioningVlanId string `json:"provisioningVlanId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC
 	// for the HCX component of the VMware environment. This VLAN is a mandatory attribute
 	// for Management Cluster when HCX is enabled.
 	// This attribute is not guaranteed to reflect the HCX VLAN
@@ -215,12 +223,22 @@ type ClusterNetworkConfiguration struct {
 
 // ClusterDatastore defines nested fields for Cluster.Datastore.
 type ClusterDatastore struct {
-	// A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes.
+	// A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes.
 	// +kubebuilder:validation:Required
 	BlockVolumeIds []string `json:"blockVolumeIds"`
 	// Type of the datastore.
 	// +kubebuilder:validation:Required
 	DatastoreType string `json:"datastoreType"`
+}
+
+// ClusterByolAllocationDetails defines nested fields for Cluster.ClusterByolAllocationDetails.
+type ClusterByolAllocationDetails struct {
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vSAN.
+	// +kubebuilder:validation:Optional
+	VsanByolAllocationId string `json:"vsanByolAllocationId,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vDefend Firewall.
+	// +kubebuilder:validation:Optional
+	FirewallByolAllocationId string `json:"firewallByolAllocationId,omitempty"`
 }
 
 // ClusterUpgradeLicense defines nested fields for Cluster.UpgradeLicense.
@@ -242,7 +260,7 @@ type ClusterVsphereUpgradeObject struct {
 // ClusterStatus defines the observed state of Cluster.
 type ClusterStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cluster.
 	Id string `json:"id,omitempty"`
 	// The availability domain the ESXi hosts are running in. For Multi-AD Cluster, it is `multi-AD`.
 	// Example: `Uocm:PHX-AD-1`, `multi-AD`
@@ -264,10 +282,10 @@ type ClusterStatus struct {
 	// should use UpdateCluster to update the Cluster's
 	// `vmwareSoftwareVersion` with that new version.
 	VmwareSoftwareVersion string `json:"vmwareSoftwareVersion,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
 	// contains the Cluster.
 	CompartmentId string `json:"compartmentId,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC that the
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC that the
 	// Cluster belongs to.
 	SddcId string `json:"sddcId,omitempty"`
 	// The number of ESXi hosts in the Cluster.
@@ -283,11 +301,11 @@ type ClusterStatus struct {
 	// vSphere Cluster types.
 	VsphereType string `json:"vsphereType,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a
-	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
 	// A prefix used in the name of each ESXi host and Compute instance in the Cluster.
@@ -328,10 +346,18 @@ type ClusterStatus struct {
 	InitialHostOcpuCount float32 `json:"initialHostOcpuCount,omitempty"`
 	// Indicates whether shielded instance is enabled at the Cluster level.
 	IsShieldedInstanceEnabled bool `json:"isShieldedInstanceEnabled,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation.
 	CapacityReservationId string `json:"capacityReservationId,omitempty"`
 	// Datastores used for the Cluster.
 	Datastores []ClusterDatastore `json:"datastores,omitempty"`
+	// A list of datastore clusters.
+	DatastoreClusterIds          []string                     `json:"datastoreClusterIds,omitempty"`
+	ClusterByolAllocationDetails ClusterByolAllocationDetails `json:"clusterByolAllocationDetails,omitempty"`
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation.
+	InitialVcfByolAllocationId string `json:"initialVcfByolAllocationId,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{orcl-cloud: {free-tier-retain: true}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // +kubebuilder:object:root=true

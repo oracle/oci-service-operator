@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -15,7 +15,7 @@ import (
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/objectstorage/ListObjectVersions.go.html to see an example of how to use ListObjectVersionsRequest.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/objectstorage/ListObjectVersions.go.html to see an example of how to use ListObjectVersionsRequest.
 type ListObjectVersionsRequest struct {
 
 	// The Object Storage namespace used for the request.
@@ -28,15 +28,15 @@ type ListObjectVersionsRequest struct {
 	// The string to use for matching against the start of object names in a list query.
 	Prefix *string `mandatory:"false" contributesTo:"query" name:"prefix"`
 
-	// Object names returned by a list query must be greater or equal to this parameter.
+	// Returns object names which are lexicographically greater than or equal to this parameter.
 	Start *string `mandatory:"false" contributesTo:"query" name:"start"`
 
-	// Object names returned by a list query must be strictly less than this parameter.
+	// Returns object names which are lexicographically strictly less than this parameter.
 	End *string `mandatory:"false" contributesTo:"query" name:"end"`
 
 	// For list pagination. The maximum number of results per page, or items to return in a paginated
 	// "List" call. For important details about how pagination works, see
-	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
 
 	// When this parameter is set, only objects whose names do not contain the delimiter character
@@ -56,11 +56,11 @@ type ListObjectVersionsRequest struct {
 	// The client request ID for tracing.
 	OpcClientRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-client-request-id"`
 
-	// Object names returned by a list query must be greater than this parameter.
+	// Returns object names which are lexicographically strictly greater than this parameter.
 	StartAfter *string `mandatory:"false" contributesTo:"query" name:"startAfter"`
 
 	// For list pagination. The value of the `opc-next-page` response header from the previous "List" call. For important
-	// details about how pagination works, see List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// details about how pagination works, see List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
 
 	// Metadata about the request. This information will not be transmitted to the service, but
@@ -128,7 +128,7 @@ func (request ListObjectVersionsRequest) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for Fields: %s. Supported values are: %s.", request.Fields, strings.Join(GetListObjectVersionsFieldsEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -155,7 +155,7 @@ type ListObjectVersionsResponse struct {
 	// additional object versions to get. Include the header's value as the `page` parameter in the subsequent
 	// GET request to get the next batch of object versions and prefixes. Repeat this process to retrieve the entire list of
 	// object versions and prefixes.
-	// For more details about how pagination works, see List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// For more details about how pagination works, see List Pagination (https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 }
 

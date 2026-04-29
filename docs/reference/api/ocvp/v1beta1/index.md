@@ -21,12 +21,6 @@ No customer-visible package currently exposes `ocvp.oracle.com/v1beta1`.
 | [Cluster](#kind-cluster) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/cluster.md) | - |
 | [EsxiHost](#kind-esxihost) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/esxihost.md) | - |
 | [Sddc](#kind-sddc) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/sddc.md) | - |
-| [SupportedCommitment](#kind-supportedcommitment) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/supportedcommitment.md) | - |
-| [SupportedHostShape](#kind-supportedhostshape) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/supportedhostshape.md) | - |
-| [SupportedVmwareSoftwareVersion](#kind-supportedvmwaresoftwareversion) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/supportedvmwaresoftwareversion.md) | - |
-| [WorkRequest](#kind-workrequest) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/workrequest.md) | - |
-| [WorkRequestError](#kind-workrequesterror) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/workrequesterror.md) | - |
-| [WorkRequestLog](#kind-workrequestlog) | Namespaced | [Sample](../../../samples/ocvp/v1beta1/workrequestlog.md) | - |
 
 <a id="kind-cluster"></a>
 ## Cluster
@@ -46,23 +40,38 @@ ClusterSpec defines the desired state of Cluster.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `capacityReservationId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| `capacityReservationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| [`clusterByolAllocationDetails`](#kind-cluster-spec-clusterbyolallocationdetails) | ClusterByolAllocationDetails defines nested fields for Cluster.ClusterByolAllocationDetails. | `object` | No | - | - |
 | `computeAvailabilityDomain` | The availability domain to create the Cluster's ESXi hosts in. For multi-AD Cluster deployment, set to `multi-AD`. | `string` | Yes | - | - |
+| `datastoreClusterIds` | A list of datastore clusters. | `list[string]` | No | - | - |
 | [`datastores`](#kind-cluster-spec-datastores) | A list of datastore info for the Cluster. This value is required only when `initialHostShapeName` is a standard shape. | `list[object]` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `displayName` | A descriptive name for the Cluster. Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region. Avoid entering confidential information. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A descriptive name for the Cluster. Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiHostsCount` | The number of ESXi hosts to create in the Cluster. You can add more hosts later (see CreateEsxiHost). **Note:** If you later delete EXSi hosts from a production Cluster to make SDDC total host count less than 3, you are still billed for the 3 minimum recommended ESXi hosts. Also, you cannot add more VMware workloads to the Cluster until the SDDC again has at least 3 ESXi hosts. | `integer` | Yes | - | - |
 | `esxiSoftwareVersion` | The ESXi software bundle to install on the ESXi hosts in the Cluster. Only versions under the same vmwareSoftwareVersion and have been validate by Oracle Cloud VMware Solution will be accepted. To get a list of the available versions, use ListSupportedVmwareSoftwareVersions. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `initialCommitment` | The billing option selected during Cluster creation. ListSupportedCommitments. | `string` | No | - | - |
 | `initialHostOcpuCount` | The initial OCPU count of the Cluster's ESXi hosts. | `number` | No | - | - |
 | `initialHostShapeName` | The initial compute shape of the Cluster's ESXi hosts. ListSupportedHostShapes. | `string` | No | - | - |
+| `initialVcfByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation. | `string` | No | - | - |
 | `instanceDisplayNamePrefix` | A prefix used in the name of each ESXi host and Compute instance in the Cluster. If this isn't set, the Cluster's `displayName` is used as the prefix. For example, if the value is `myCluster`, the ESXi hosts are named `myCluster-1`, `myCluster-2`, and so on. | `string` | No | - | - |
 | `isShieldedInstanceEnabled` | Indicates whether shielded instance is enabled for this Cluster. | `boolean` | No | - | - |
 | [`networkConfiguration`](#kind-cluster-spec-networkconfiguration) | ClusterNetworkConfiguration defines nested fields for Cluster.NetworkConfiguration. | `object` | Yes | - | - |
-| `sddcId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC that the Cluster belongs to. | `string` | Yes | - | - |
+| `sddcId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC that the Cluster belongs to. | `string` | Yes | - | - |
 | `vmwareSoftwareVersion` | The VMware software bundle to install on the ESXi hosts in the Cluster. To get a list of the available versions, use ListSupportedVmwareSoftwareVersions. | `string` | No | - | - |
 | `workloadNetworkCidr` | The CIDR block for the IP addresses that VMware VMs in the Cluster use to run application workloads. | `string` | No | - | - |
+
+<a id="kind-cluster-spec-clusterbyolallocationdetails"></a>
+#### Spec.clusterByolAllocationDetails
+
+[Back to Cluster spec](#kind-cluster-spec)
+
+ClusterByolAllocationDetails defines nested fields for Cluster.ClusterByolAllocationDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `firewallByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vDefend Firewall. | `string` | No | - | - |
+| `vsanByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vSAN. | `string` | No | - | - |
 
 <a id="kind-cluster-spec-datastores"></a>
 #### Spec.datastores[]
@@ -73,7 +82,7 @@ ClusterDatastore defines nested fields for Cluster.Datastore.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `blockVolumeIds` | A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
+| `blockVolumeIds` | A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
 | `datastoreType` | Type of the datastore. | `string` | Yes | - | - |
 
 <a id="kind-cluster-spec-networkconfiguration"></a>
@@ -85,17 +94,17 @@ ClusterNetworkConfiguration defines nested fields for Cluster.NetworkConfigurati
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hcxVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink1VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink2VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `nsxVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `provisioningSubnetId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
-| `provisioningVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
-| `replicationVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
-| `vmotionVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsanVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsphereVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `hcxVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink1VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink2VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `nsxVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `provisioningSubnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
+| `provisioningVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
+| `replicationVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
+| `vmotionVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsanVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsphereVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
 
 <a id="kind-cluster-status"></a>
 ### Status
@@ -104,25 +113,29 @@ ClusterStatus defines the observed state of Cluster.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `capacityReservationId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the Cluster. | `string` | No | - | - |
+| `capacityReservationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| [`clusterByolAllocationDetails`](#kind-cluster-status-clusterbyolallocationdetails) | ClusterByolAllocationDetails defines nested fields for Cluster.ClusterByolAllocationDetails. | `object` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the Cluster. | `string` | No | - | - |
 | `computeAvailabilityDomain` | The availability domain the ESXi hosts are running in. For Multi-AD Cluster, it is `multi-AD`. Example: `Uocm:PHX-AD-1`, `multi-AD` | `string` | No | - | - |
+| `datastoreClusterIds` | A list of datastore clusters. | `list[string]` | No | - | - |
 | [`datastores`](#kind-cluster-status-datastores) | Datastores used for the Cluster. | `list[object]` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A descriptive name for the Cluster. It must be unique, start with a letter, and contain only letters, digits, whitespaces, dashes and underscores. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiHostsCount` | The number of ESXi hosts in the Cluster. | `integer` | No | - | - |
 | `esxiSoftwareVersion` | In general, this is a specific version of bundled ESXi software supported by Oracle Cloud VMware Solution (see ListSupportedVmwareSoftwareVersions). This attribute is not guaranteed to reflect the version of software currently installed on the ESXi hosts in the SDDC. The purpose of this attribute is to show the version of software that the Oracle Cloud VMware Solution will install on any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost unless a different version is configured on the ESXi host level. Therefore, if you upgrade the existing ESXi hosts in the Cluster to use a newer version of bundled ESXi software supported by the Oracle Cloud VMware Solution, you should use UpdateCluster to update the Cluster's `esxiSoftwareVersion` with that new version. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cluster. | `string` | No | - | - |
 | `initialCommitment` | The billing option selected during Cluster creation. ListSupportedCommitments. | `string` | No | - | - |
 | `initialHostOcpuCount` | The initial OCPU count of the Cluster's ESXi hosts. | `number` | No | - | - |
 | `initialHostShapeName` | The initial compute shape of the Cluster's ESXi hosts. ListSupportedHostShapes. | `string` | No | - | - |
+| `initialVcfByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation. | `string` | No | - | - |
 | `instanceDisplayNamePrefix` | A prefix used in the name of each ESXi host and Compute instance in the Cluster. If this isn't set, the Cluster's `displayName` is used as the prefix. For example, if the value is `MyCluster`, the ESXi hosts are named `MyCluster-1`, `MyCluster-2`, and so on. | `string` | No | - | - |
 | `isShieldedInstanceEnabled` | Indicates whether shielded instance is enabled at the Cluster level. | `boolean` | No | - | - |
 | `lifecycleState` | The current state of the Cluster. | `string` | No | - | - |
 | [`networkConfiguration`](#kind-cluster-status-networkconfiguration) | ClusterNetworkConfiguration defines nested fields for Cluster.NetworkConfiguration. | `object` | No | - | - |
-| `sddcId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC that the Cluster belongs to. | `string` | No | - | - |
+| `sddcId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC that the Cluster belongs to. | `string` | No | - | - |
 | [`status`](#kind-cluster-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{orcl-cloud: {free-tier-retain: true}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time the Cluster was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 | `timeUpdated` | The date and time the Cluster was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
 | [`upgradeLicenses`](#kind-cluster-status-upgradelicenses) | The vSphere licenses to use when upgrading the Cluster. | `list[object]` | No | - | - |
@@ -130,6 +143,18 @@ ClusterStatus defines the observed state of Cluster.
 | `vsphereType` | vSphere Cluster types. | `string` | No | - | - |
 | [`vsphereUpgradeObjects`](#kind-cluster-status-vsphereupgradeobjects) | The links to binary objects needed to upgrade vSphere. | `list[object]` | No | - | - |
 | `workloadNetworkCidr` | The CIDR block for the IP addresses that VMware VMs in the SDDC use to run application workloads. | `string` | No | - | - |
+
+<a id="kind-cluster-status-clusterbyolallocationdetails"></a>
+#### Status.clusterByolAllocationDetails
+
+[Back to Cluster status](#kind-cluster-status)
+
+ClusterByolAllocationDetails defines nested fields for Cluster.ClusterByolAllocationDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `firewallByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vDefend Firewall. | `string` | No | - | - |
+| `vsanByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vSAN. | `string` | No | - | - |
 
 <a id="kind-cluster-status-datastores"></a>
 #### Status.datastores[]
@@ -140,7 +165,7 @@ ClusterDatastore defines nested fields for Cluster.Datastore.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `blockVolumeIds` | A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
+| `blockVolumeIds` | A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
 | `datastoreType` | Type of the datastore. | `string` | Yes | - | - |
 
 <a id="kind-cluster-status-networkconfiguration"></a>
@@ -152,17 +177,17 @@ ClusterNetworkConfiguration defines nested fields for Cluster.NetworkConfigurati
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hcxVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink1VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink2VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `nsxVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `provisioningSubnetId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
-| `provisioningVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
-| `replicationVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
-| `vmotionVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsanVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsphereVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `hcxVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink1VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink2VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `nsxVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `provisioningSubnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
+| `provisioningVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
+| `replicationVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
+| `vmotionVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsanVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsphereVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
 
 <a id="kind-cluster-status-status"></a>
 #### Status.status
@@ -265,18 +290,20 @@ EsxiHostSpec defines the desired state of EsxiHost.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `billingDonorHostId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle. | `string` | No | - | - |
-| `capacityReservationId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
-| `clusterId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster to add the ESXi host to. | `string` | Yes | - | - |
+| `billingDonorHostId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle. | `string` | No | - | - |
+| `capacityReservationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| `clusterId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cluster to add the ESXi host to. | `string` | Yes | - | - |
 | `computeAvailabilityDomain` | The availability domain to create the ESXi host in. If keep empty, for AD-specific Cluster, new ESXi host will be created in the same availability domain; for multi-AD Cluster, new ESXi host will be auto assigned to the next availability domain following evenly distribution strategy. | `string` | No | - | - |
 | `currentCommitment` | The billing option currently used by the ESXi host. ListSupportedCommitments. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
-| `displayName` | A descriptive name for the ESXi host. It's changeable. Esxi Host name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the Cluster. If this attribute is not specified, the Cluster's `instanceDisplayNamePrefix` attribute is used to name and incrementally number the ESXi host. For example, if you're creating the fourth ESXi host in the Cluster, and `instanceDisplayNamePrefix` is `MyCluster`, the host's display name is `MyCluster-4`. Avoid entering confidential information. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | A descriptive name for the ESXi host. It's changeable. Esxi Host name requirements are 1-25 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the Cluster. If this attribute is not specified, the Cluster's `instanceDisplayNamePrefix` attribute is used to name and incrementally number the ESXi host. For example, if you're creating the fourth ESXi host in the Cluster, and `instanceDisplayNamePrefix` is `MyCluster`, the host's display name is `MyCluster-4`. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiSoftwareVersion` | The ESXi software bundle to install on the ESXi host. Only versions under the same vmwareSoftwareVersion and have been validate by Oracle Cloud VMware Solution will be accepted. To get a list of the available versions, use ListSupportedVmwareSoftwareVersions. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `hostOcpuCount` | The OCPU count of the ESXi host. | `number` | No | - | - |
 | `hostShapeName` | The compute shape name of the ESXi host. ListSupportedHostShapes. | `string` | No | - | - |
+| `isVsanByolEnabled` | Indicates whether this host embedded VMware vSAN with BYOL Allocation. | `boolean` | No | - | - |
 | `nextCommitment` | The billing option to switch to after the existing billing cycle ends. If `nextCommitment` is null or empty, `currentCommitment` continues to the next billing cycle. ListSupportedCommitments. | `string` | No | - | - |
+| `vcfByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Byol Allocation for VCF (VMware Cloud Foundation) deployment. | `string` | No | - | - |
 
 <a id="kind-esxihost-status"></a>
 ### Status
@@ -286,35 +313,56 @@ EsxiHostStatus defines the observed state of EsxiHost.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `billingContractEndDate` | Current billing cycle end date. If the value in `currentCommitment` and `nextCommitment` are different, the value specified in `nextCommitment` becomes the new `currentCommitment` when the `contractEndDate` is reached. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
-| `billingDonorHostId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle. | `string` | No | - | - |
-| `capacityReservationId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
-| `clusterId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Cluster that the ESXi host belongs to. | `string` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the Cluster. | `string` | No | - | - |
+| `billingDonorHostId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the deleted ESXi Host with LeftOver billing cycle. | `string` | No | - | - |
+| `capacityReservationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| `clusterId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Cluster that the ESXi host belongs to. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the Cluster. | `string` | No | - | - |
 | `computeAvailabilityDomain` | The availability domain of the ESXi host. | `string` | No | - | - |
-| `computeInstanceId` | In terms of implementation, an ESXi host is a Compute instance that is configured with the chosen bundle of VMware software. The `computeInstanceId` is the OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of that Compute instance. | `string` | No | - | - |
+| `computeInstanceId` | In terms of implementation, an ESXi host is a Compute instance that is configured with the chosen bundle of VMware software. The `computeInstanceId` is the OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of that Compute instance. | `string` | No | - | - |
 | `currentCommitment` | The billing option currently used by the ESXi host. ListSupportedCommitments. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| [`datastoreAttachments`](#kind-esxihost-status-datastoreattachments) | List of DatastoreAttachment objects containing information about attachment details | `list[object]` | No | - | - |
+| `datastoreClusterIds` | A list of datastore clusters. | `list[string]` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A descriptive name for the ESXi host. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiSoftwareVersion` | The version of ESXi software that Oracle Cloud VMware Solution installed on the ESXi hosts. | `string` | No | - | - |
-| `failedEsxiHostId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that failed. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `failedEsxiHostId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that failed. | `string` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `gracePeriodEndDate` | The date and time when the new esxi host should start billing cycle. RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2021-07-25T21:10:29.600Z` | `string` | No | - | - |
 | `hostOcpuCount` | The OCPU count of the ESXi host. | `number` | No | - | - |
 | `hostShapeName` | The compute shape name of the ESXi host. ListSupportedHostShapes. | `string` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host. | `string` | No | - | - |
 | `isBillingContinuationInProgress` | Indicates whether this host is in the progress of billing continuation. | `boolean` | No | - | - |
 | `isBillingSwappingInProgress` | Indicates whether this host is in the progress of swapping billing. | `boolean` | No | - | - |
+| `isVsanByolEnabled` | Indicates whether this host embedded VMware vSAN with BYOL Allocation. | `boolean` | No | - | - |
 | `lifecycleState` | The current state of the ESXi host. | `string` | No | - | - |
 | `nextCommitment` | The billing option to switch to after the current billing cycle ends. If `nextCommitment` is null or empty, `currentCommitment` continues to the next billing cycle. ListSupportedCommitments. | `string` | No | - | - |
-| `nonUpgradedEsxiHostId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that will be upgraded. | `string` | No | - | - |
-| `replacementEsxiHostId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that is created to replace the failed host. | `string` | No | - | - |
-| `sddcId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC that the ESXi host belongs to. | `string` | No | - | - |
+| `nonUpgradedEsxiHostId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that will be upgraded. | `string` | No | - | - |
+| `primaryVnicMacAddress` | MAC address of ESXi host's compute instance primary VNIC. | `string` | No | - | - |
+| `replacementEsxiHostId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that is created to replace the failed host. | `string` | No | - | - |
+| `sddcId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC that the ESXi host belongs to. | `string` | No | - | - |
 | [`status`](#kind-esxihost-status-status) | - | `object` | Yes | - | - |
-| `swapBillingHostId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the active ESXi Host to swap billing with current host. | `string` | No | - | - |
+| `swapBillingHostId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the active ESXi Host to swap billing with current host. | `string` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{orcl-cloud: {free-tier-retain: true}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time the ESXi host was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 | `timeUpdated` | The date and time the ESXi host was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
-| `upgradedReplacementEsxiHostId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the ESXi host that is newly created to upgrade the original host. | `string` | No | - | - |
+| `upgradedReplacementEsxiHostId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ESXi host that is newly created to upgrade the original host. | `string` | No | - | - |
+| `vcfByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Byol Allocation for VCF (VMware Cloud Foundation) deployment. | `string` | No | - | - |
 | `vmwareSoftwareVersion` | The version of VMware software that Oracle Cloud VMware Solution installed on the ESXi hosts. | `string` | No | - | - |
+
+<a id="kind-esxihost-status-datastoreattachments"></a>
+#### Status.datastoreAttachments[]
+
+[Back to EsxiHost status](#kind-esxihost-status)
+
+EsxiHostDatastoreAttachment defines nested fields for EsxiHost.DatastoreAttachment.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `blockVolumeId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Block Volume that belongs to the datastore. | `string` | No | - | - |
+| `datastoreId` | The OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Datastore that ESXi host is attached to. | `string` | No | - | - |
+| `ipAddress` | The IP address of datastore attachment. | `string` | No | - | - |
+| `port` | The port of datastore attachment. | `integer` | No | - | - |
+| `volumeIqn` | An IQN of the Block Storage Volume. | `string` | No | - | - |
 
 <a id="kind-esxihost-status-status"></a>
 #### Status.status
@@ -393,14 +441,15 @@ SddcSpec defines the desired state of Sddc.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment to contain the SDDC. | `string` | Yes | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment to contain the SDDC. | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A descriptive name for the SDDC. SDDC name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiSoftwareVersion` | The ESXi software bundle to install on the ESXi hosts in the SDDC. Only versions under the same vmwareSoftwareVersion and have been validate by Oracle Cloud VMware Solution will be accepted. To get a list of the available versions, use ListSupportedVmwareSoftwareVersions. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `hcxMode` | HCX configuration of the SDDC. | `string` | Yes | - | - |
 | [`initialConfiguration`](#kind-sddc-spec-initialconfiguration) | SddcInitialConfiguration defines nested fields for Sddc.InitialConfiguration. | `object` | Yes | - | - |
 | `isSingleHostSddc` | Indicates whether this SDDC is designated for only single ESXi host. | `boolean` | No | - | - |
+| [`sddcByolAllocationDetails`](#kind-sddc-spec-sddcbyolallocationdetails) | SddcByolAllocationDetails defines nested fields for Sddc.SddcByolAllocationDetails. | `object` | No | - | - |
 | `sshAuthorizedKeys` | One or more public SSH keys to be included in the `~/.ssh/authorized_keys` file for the default user on each ESXi host. Use a newline character to separate multiple keys. The SSH keys must be in the format required for the `authorized_keys` file | `string` | Yes | - | - |
 | `vmwareSoftwareVersion` | The VMware software bundle to install on the ESXi hosts in the SDDC. To get a list of the available versions, use ListSupportedVmwareSoftwareVersions. | `string` | Yes | - | - |
 
@@ -424,19 +473,34 @@ SddcInitialConfigurationInitialClusterConfiguration defines nested fields for Sd
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `capacityReservationId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| `capacityReservationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| [`clusterByolAllocationDetails`](#kind-sddc-spec-initialconfiguration-initialclusterconfigurations-clusterbyolallocationdetails) | SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.ClusterByolAllocationDetails. | `object` | No | - | - |
 | `computeAvailabilityDomain` | The availability domain to create the Cluster's ESXi hosts in. For multi-AD Cluster deployment, set to `multi-AD`. | `string` | Yes | - | - |
+| `datastoreClusterIds` | A list of datastore clusters. | `list[string]` | No | - | - |
 | [`datastores`](#kind-sddc-spec-initialconfiguration-initialclusterconfigurations-datastores) | A list of datastore info for the Cluster. This value is required only when `initialHostShapeName` is a standard shape. | `list[object]` | No | - | - |
-| `displayName` | A descriptive name for the Cluster. Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region. Avoid entering confidential information. | `string` | No | - | - |
+| `displayName` | A descriptive name for the Cluster. Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiHostsCount` | The number of ESXi hosts to create in the Cluster. You can add more hosts later (see CreateEsxiHost). Creating a Cluster with a ESXi host count of 1 will be considered a single ESXi host Cluster. **Note:** If you later delete EXSi hosts from a production Cluster to total less than 3, you are still billed for the 3 minimum recommended ESXi hosts. Also, you cannot add more VMware workloads to the Cluster until it again has at least 3 ESXi hosts. | `integer` | Yes | - | - |
 | `initialCommitment` | The billing option selected during Cluster creation. ListSupportedCommitments. | `string` | No | - | - |
 | `initialHostOcpuCount` | The initial OCPU count of the Cluster's ESXi hosts. | `number` | No | - | - |
 | `initialHostShapeName` | The initial compute shape of the Cluster's ESXi hosts. ListSupportedHostShapes. | `string` | No | - | - |
+| `initialVcfByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation. | `string` | No | - | - |
 | `instanceDisplayNamePrefix` | A prefix used in the name of each ESXi host and Compute instance in the Cluster. If this isn't set, the Cluster's `displayName` is used as the prefix. For example, if the value is `myCluster`, the ESXi hosts are named `myCluster-1`, `myCluster-2`, and so on. | `string` | No | - | - |
 | `isShieldedInstanceEnabled` | Indicates whether shielded instance is enabled for this Cluster. | `boolean` | No | - | - |
 | [`networkConfiguration`](#kind-sddc-spec-initialconfiguration-initialclusterconfigurations-networkconfiguration) | SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.NetworkConfiguration. | `object` | Yes | - | - |
 | `vsphereType` | vSphere Cluster types. | `string` | Yes | - | - |
 | `workloadNetworkCidr` | The CIDR block for the IP addresses that VMware VMs in the Cluster use to run application workloads. | `string` | No | - | - |
+
+<a id="kind-sddc-spec-initialconfiguration-initialclusterconfigurations-clusterbyolallocationdetails"></a>
+###### Spec.initialConfiguration.initialClusterConfigurations[].clusterByolAllocationDetails
+
+[Back to Sddc spec](#kind-sddc-spec)
+
+SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.ClusterByolAllocationDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `firewallByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vDefend Firewall. | `string` | No | - | - |
+| `vsanByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vSAN. | `string` | No | - | - |
 
 <a id="kind-sddc-spec-initialconfiguration-initialclusterconfigurations-datastores"></a>
 ###### Spec.initialConfiguration.initialClusterConfigurations[].datastores[]
@@ -447,7 +511,7 @@ SddcInitialConfigurationInitialClusterConfigurationDatastore defines nested fiel
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `blockVolumeIds` | A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
+| `blockVolumeIds` | A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
 | `datastoreType` | Type of the datastore. | `string` | Yes | - | - |
 
 <a id="kind-sddc-spec-initialconfiguration-initialclusterconfigurations-networkconfiguration"></a>
@@ -459,17 +523,29 @@ SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration defines 
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hcxVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink1VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink2VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `nsxVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `provisioningSubnetId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
-| `provisioningVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
-| `replicationVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
-| `vmotionVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsanVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsphereVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `hcxVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink1VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink2VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `nsxVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `provisioningSubnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
+| `provisioningVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
+| `replicationVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
+| `vmotionVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsanVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsphereVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+
+<a id="kind-sddc-spec-sddcbyolallocationdetails"></a>
+#### Spec.sddcByolAllocationDetails
+
+[Back to Sddc spec](#kind-sddc-spec)
+
+SddcByolAllocationDetails defines nested fields for Sddc.SddcByolAllocationDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `loadBalancerByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware Avi Load Balancer. | `string` | No | - | - |
+| `loadBalancerInstanceCount` | The number of VMware Avi Load Balancer instances to be deployed on VMware SDDC. | `integer` | No | - | - |
 
 <a id="kind-sddc-status"></a>
 ### Status
@@ -479,32 +555,34 @@ SddcStatus defines the observed state of Sddc.
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `clustersCount` | The number of Clusters in the SDDC. | `integer` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the SDDC. | `string` | No | - | - |
-| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the SDDC. | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Operations": {"CostCenter": "42"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A descriptive name for the SDDC. It must be unique, start with a letter, and contain only letters, digits, whitespaces, dashes and underscores. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiSoftwareVersion` | In general, this is a specific version of bundled ESXi software supported by Oracle Cloud VMware Solution (see ListSupportedVmwareSoftwareVersions). This attribute is not guaranteed to reflect the version of software currently installed on the ESXi hosts in the SDDC. The purpose of this attribute is to show the version of software that the Oracle Cloud VMware Solution will install on any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost unless a different version is configured on the Cluster or ESXi host level. Therefore, if you upgrade the existing ESXi hosts in the SDDC to use a newer version of bundled ESXi software supported by the Oracle Cloud VMware Solution, you should use UpdateSddc to update the SDDC's `vmwareSoftwareVersion` with that new version. | `string` | No | - | - |
-| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
+| `freeformTags` | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Example: `{"Department": "Finance"}` | `map[string, string]` | No | - | - |
 | `hcxFqdn` | The FQDN for HCX Manager. Example: `hcx-my-sddc.sddc.us-phoenix-1.oraclecloud.com` | `string` | No | - | - |
 | `hcxMode` | HCX configuration of the SDDC. | `string` | No | - | - |
 | [`hcxOnPremLicenses`](#kind-sddc-status-hcxonpremlicenses) | The activation licenses to use on the on-premises HCX Enterprise appliance you site pair with HCX Manager in your VMware Solution. | `list[object]` | No | - | - |
-| `hcxPrivateIpId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for HCX Manager. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the SDDC. | `string` | No | - | - |
+| `hcxPrivateIpId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for HCX Manager. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the SDDC. | `string` | No | - | - |
 | [`initialConfiguration`](#kind-sddc-status-initialconfiguration) | SddcInitialConfiguration defines nested fields for Sddc.InitialConfiguration. | `object` | No | - | - |
 | `isHcxPendingDowngrade` | Indicates whether SDDC is pending downgrade from HCX Enterprise to HCX Advanced. | `boolean` | No | - | - |
 | `isSingleHostSddc` | Indicates whether this SDDC is designated for only single ESXi host. | `boolean` | No | - | - |
 | `lifecycleState` | The current state of the SDDC. | `string` | No | - | - |
-| `nsxEdgeUplinkIpId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for the NSX Edge Uplink. Use this OCID as the route target for route table rules when setting up connectivity between the SDDC and other networks. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
+| `nsxEdgeUplinkIpId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for the NSX Edge Uplink. Use this OCID as the route target for route table rules when setting up connectivity between the SDDC and other networks. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
 | `nsxManagerFqdn` | The FQDN for NSX Manager. Example: `nsx-my-sddc.sddc.us-phoenix-1.oraclecloud.com` | `string` | No | - | - |
-| `nsxManagerPrivateIpId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for NSX Manager. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
+| `nsxManagerPrivateIpId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for NSX Manager. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
 | `nsxManagerUsername` | The SDDC includes an administrator username and initial password for NSX Manager. You can change this initial username to a different value in NSX Manager. | `string` | No | - | - |
+| [`sddcByolAllocationDetails`](#kind-sddc-status-sddcbyolallocationdetails) | SddcByolAllocationDetails defines nested fields for Sddc.SddcByolAllocationDetails. | `object` | No | - | - |
 | `sshAuthorizedKeys` | One or more public SSH keys to be included in the `~/.ssh/authorized_keys` file for the default user on each ESXi host. Use a newline character to separate multiple keys. The SSH keys must be in the format required for the `authorized_keys` file. This attribute is not guaranteed to reflect the public SSH keys currently installed on the ESXi hosts in the SDDC. The purpose of this attribute is to show the public SSH keys that Oracle Cloud VMware Solution will install on any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you upgrade the existing ESXi hosts in the SDDC to use different SSH keys, you should use UpdateSddc to update the SDDC's `sshAuthorizedKeys` with the new public keys. | `string` | No | - | - |
 | [`status`](#kind-sddc-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{orcl-cloud: {free-tier-retain: true}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The date and time the SDDC was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 | `timeHcxBillingCycleEnd` | The date and time current HCX Enterprise billing cycle ends, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 | `timeHcxLicenseStatusUpdated` | The date and time the SDDC's HCX on-premise license status was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
 | `timeUpdated` | The date and time the SDDC was updated, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
 | `vcenterFqdn` | The FQDN for vCenter. Example: `vcenter-my-sddc.sddc.us-phoenix-1.oraclecloud.com` | `string` | No | - | - |
-| `vcenterPrivateIpId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for vCenter. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
+| `vcenterPrivateIpId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the `PrivateIp` object that is the virtual IP (VIP) for vCenter. For information about `PrivateIp` objects, see the Core Services API. | `string` | No | - | - |
 | `vcenterUsername` | The SDDC includes an administrator username and password for vCenter. You can change this initial username to a different value in vCenter. | `string` | No | - | - |
 | `vmwareSoftwareVersion` | In general, this is a specific version of bundled VMware software supported by Oracle Cloud VMware Solution (see ListSupportedVmwareSoftwareVersions). This attribute is not guaranteed to reflect the version of software currently installed on the ESXi hosts in the SDDC. The purpose of this attribute is to show the version of software that the Oracle Cloud VMware Solution will install on any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you upgrade the existing ESXi hosts in the SDDC to use a newer version of bundled VMware software supported by the Oracle Cloud VMware Solution, you should use UpdateSddc to update the SDDC's `vmwareSoftwareVersion` with that new version. | `string` | No | - | - |
 
@@ -541,19 +619,34 @@ SddcInitialConfigurationInitialClusterConfiguration defines nested fields for Sd
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `capacityReservationId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| `capacityReservationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Capacity Reservation. | `string` | No | - | - |
+| [`clusterByolAllocationDetails`](#kind-sddc-status-initialconfiguration-initialclusterconfigurations-clusterbyolallocationdetails) | SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.ClusterByolAllocationDetails. | `object` | No | - | - |
 | `computeAvailabilityDomain` | The availability domain to create the Cluster's ESXi hosts in. For multi-AD Cluster deployment, set to `multi-AD`. | `string` | Yes | - | - |
+| `datastoreClusterIds` | A list of datastore clusters. | `list[string]` | No | - | - |
 | [`datastores`](#kind-sddc-status-initialconfiguration-initialclusterconfigurations-datastores) | A list of datastore info for the Cluster. This value is required only when `initialHostShapeName` is a standard shape. | `list[object]` | No | - | - |
-| `displayName` | A descriptive name for the Cluster. Cluster name requirements are 1-16 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region. Avoid entering confidential information. | `string` | No | - | - |
+| `displayName` | A descriptive name for the Cluster. Cluster name requirements are 1-22 character length limit, Must start with a letter, Must be English letters, numbers, - only, No repeating hyphens, Must be unique within the region. Avoid entering confidential information. | `string` | No | - | - |
 | `esxiHostsCount` | The number of ESXi hosts to create in the Cluster. You can add more hosts later (see CreateEsxiHost). Creating a Cluster with a ESXi host count of 1 will be considered a single ESXi host Cluster. **Note:** If you later delete EXSi hosts from a production Cluster to total less than 3, you are still billed for the 3 minimum recommended ESXi hosts. Also, you cannot add more VMware workloads to the Cluster until it again has at least 3 ESXi hosts. | `integer` | Yes | - | - |
 | `initialCommitment` | The billing option selected during Cluster creation. ListSupportedCommitments. | `string` | No | - | - |
 | `initialHostOcpuCount` | The initial OCPU count of the Cluster's ESXi hosts. | `number` | No | - | - |
 | `initialHostShapeName` | The initial compute shape of the Cluster's ESXi hosts. ListSupportedHostShapes. | `string` | No | - | - |
+| `initialVcfByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the initial VMware BYOL Allocation used to deploy VMware Cloud Foundation. | `string` | No | - | - |
 | `instanceDisplayNamePrefix` | A prefix used in the name of each ESXi host and Compute instance in the Cluster. If this isn't set, the Cluster's `displayName` is used as the prefix. For example, if the value is `myCluster`, the ESXi hosts are named `myCluster-1`, `myCluster-2`, and so on. | `string` | No | - | - |
 | `isShieldedInstanceEnabled` | Indicates whether shielded instance is enabled for this Cluster. | `boolean` | No | - | - |
 | [`networkConfiguration`](#kind-sddc-status-initialconfiguration-initialclusterconfigurations-networkconfiguration) | SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.NetworkConfiguration. | `object` | Yes | - | - |
 | `vsphereType` | vSphere Cluster types. | `string` | Yes | - | - |
 | `workloadNetworkCidr` | The CIDR block for the IP addresses that VMware VMs in the Cluster use to run application workloads. | `string` | No | - | - |
+
+<a id="kind-sddc-status-initialconfiguration-initialclusterconfigurations-clusterbyolallocationdetails"></a>
+###### Status.initialConfiguration.initialClusterConfigurations[].clusterByolAllocationDetails
+
+[Back to Sddc status](#kind-sddc-status)
+
+SddcInitialConfigurationInitialClusterConfigurationClusterByolAllocationDetails defines nested fields for Sddc.InitialConfiguration.InitialClusterConfiguration.ClusterByolAllocationDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `firewallByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vDefend Firewall. | `string` | No | - | - |
+| `vsanByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware vSAN. | `string` | No | - | - |
 
 <a id="kind-sddc-status-initialconfiguration-initialclusterconfigurations-datastores"></a>
 ###### Status.initialConfiguration.initialClusterConfigurations[].datastores[]
@@ -564,7 +657,7 @@ SddcInitialConfigurationInitialClusterConfigurationDatastore defines nested fiel
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `blockVolumeIds` | A list of OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
+| `blockVolumeIds` | A list of OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)s of Block Storage Volumes. | `list[string]` | Yes | - | - |
 | `datastoreType` | Type of the datastore. | `string` | Yes | - | - |
 
 <a id="kind-sddc-status-initialconfiguration-initialclusterconfigurations-networkconfiguration"></a>
@@ -576,17 +669,29 @@ SddcInitialConfigurationInitialClusterConfigurationNetworkConfiguration defines 
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
-| `hcxVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink1VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeUplink2VlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
-| `nsxEdgeVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `nsxVTepVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `provisioningSubnetId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
-| `provisioningVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
-| `replicationVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
-| `vmotionVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsanVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
-| `vsphereVlanId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `hcxVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the HCX component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster when HCX is enabled. This attribute is not guaranteed to reflect the HCX VLAN currently used by the ESXi hosts in the SDDC. The purpose of this attribute is to show the HCX VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this SDDC in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the SDDC to use a different VLAN for the HCX component of the VMware environment, you should use UpdateSddc to update the SDDC's `hcxVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink1VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 1 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 1 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 1 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 1 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink1VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeUplink2VlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the NSX Edge Uplink 2 component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the NSX Edge Uplink 2 VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge Uplink 2 VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge Uplink 2 component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeUplink2VlanId` with that new VLAN's OCID. | `string` | No | - | - |
+| `nsxEdgeVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX Edge VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX Edge VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX Edge VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX Edge VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxEdgeVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `nsxVTepVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the NSX VTEP component of the VMware environment. This attribute is not guaranteed to reflect the NSX VTEP VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the NSX VTEP VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the NSX VTEP component of the VMware environment, you should use UpdateCluster to update the Cluster's `nsxVTepVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `provisioningSubnetId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management subnet used to provision the Cluster. | `string` | Yes | - | - |
+| `provisioningVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the Provisioning component of the VMware environment. | `string` | No | - | - |
+| `replicationVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSphere Replication component of the VMware environment. | `string` | No | - | - |
+| `vmotionVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vMotion component of the VMware environment. This attribute is not guaranteed to reflect the vMotion VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vMotion VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vMotion component of the VMware environment, you should use UpdateCluster to update the Cluster's `vmotionVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsanVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the Cluster for the vSAN component of the VMware environment. This attribute is not guaranteed to reflect the vSAN VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSAN VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSAN component of the VMware environment, you should use UpdateCluster to update the Cluster's `vsanVlanId` with that new VLAN's OCID. | `string` | Yes | - | - |
+| `vsphereVlanId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VLAN used by the SDDC for the vSphere component of the VMware environment. This VLAN is a mandatory attribute for Management Cluster. This attribute is not guaranteed to reflect the vSphere VLAN currently used by the ESXi hosts in the Cluster. The purpose of this attribute is to show the vSphere VLAN that the Oracle Cloud VMware Solution will use for any new ESXi hosts that you *add to this Cluster in the future* with CreateEsxiHost. Therefore, if you change the existing ESXi hosts in the Cluster to use a different VLAN for the vSphere component of the VMware environment, you should use UpdateSddc to update the Cluster's `vsphereVlanId` with that new VLAN's OCID. | `string` | No | - | - |
+
+<a id="kind-sddc-status-sddcbyolallocationdetails"></a>
+#### Status.sddcByolAllocationDetails
+
+[Back to Sddc status](#kind-sddc-status)
+
+SddcByolAllocationDetails defines nested fields for Sddc.SddcByolAllocationDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `loadBalancerByolAllocationId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the VMware BYOL Allocation used to deploy VMware Avi Load Balancer. | `string` | No | - | - |
+| `loadBalancerInstanceCount` | The number of VMware Avi Load Balancer instances to be deployed on VMware SDDC. | `integer` | No | - | - |
 
 <a id="kind-sddc-status-status"></a>
 #### Status.status
@@ -638,575 +743,6 @@ Async is the canonical controller-owned async contract. Resource-local legacy wo
 ##### Status.status.conditions[]
 
 [Back to Sddc status](#kind-sddc-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-supportedcommitment"></a>
-## SupportedCommitment
-
-SupportedCommitment is the Schema for the supportedcommitments API.
-
-- `Plural`: `supportedcommitments`
-- `Scope`: `Namespaced`
-- `APIVersion`: `ocvp.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/ocvp/v1beta1/supportedcommitment.md) (`config/samples/ocvp_v1beta1_supportedcommitment.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-supportedcommitment-spec"></a>
-### Spec
-
-SupportedCommitmentSpec defines the desired state of SupportedCommitment.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-supportedcommitment-status"></a>
-### Status
-
-SupportedCommitmentStatus defines the observed state of SupportedCommitment.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `name` | name of Commitment | `string` | No | - | - |
-| [`status`](#kind-supportedcommitment-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-supportedcommitment-status-status"></a>
-#### Status.status
-
-[Back to SupportedCommitment status](#kind-supportedcommitment-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-supportedcommitment-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-supportedcommitment-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-supportedcommitment-status-status-async"></a>
-##### Status.status.async
-
-[Back to SupportedCommitment status](#kind-supportedcommitment-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-supportedcommitment-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-supportedcommitment-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to SupportedCommitment status](#kind-supportedcommitment-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-supportedcommitment-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to SupportedCommitment status](#kind-supportedcommitment-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-supportedhostshape"></a>
-## SupportedHostShape
-
-SupportedHostShape is the Schema for the supportedhostshapes API.
-
-- `Plural`: `supportedhostshapes`
-- `Scope`: `Namespaced`
-- `APIVersion`: `ocvp.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/ocvp/v1beta1/supportedhostshape.md) (`config/samples/ocvp_v1beta1_supportedhostshape.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-supportedhostshape-spec"></a>
-### Spec
-
-SupportedHostShapeSpec defines the desired state of SupportedHostShape.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-supportedhostshape-status"></a>
-### Status
-
-SupportedHostShapeStatus defines the observed state of SupportedHostShape.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `defaultOcpuCount` | The default OCPU count of the shape. | `number` | No | - | - |
-| `description` | Description of the shape. | `string` | No | - | - |
-| `isSingleHostSddcSupported` | Indicates whether the shape supports single host SDDCs. | `boolean` | No | - | - |
-| `isSupportMonthlyCommitment` | Whether the shape supports "MONTH" Commitment. | `boolean` | No | - | - |
-| `isSupportShieldedInstances` | Indicates whether the shape supports shielded instances. | `boolean` | No | - | - |
-| `name` | The name of the supported compute shape. | `string` | No | - | - |
-| `shapeFamily` | The family of the shape. ESXi hosts of one SDDC must have the same shape family. | `string` | No | - | - |
-| [`status`](#kind-supportedhostshape-status-status) | - | `object` | Yes | - | - |
-| `supportedOcpuCount` | Support OCPU count of the shape. | `list[number]` | No | - | - |
-| `supportedOperations` | The operations where you can use the shape. The operations can be CREATE_SDDC or CREATE_ESXI_HOST. | `list[string]` | No | - | - |
-| `supportedVmwareSoftwareVersions` | The VMware software versions supported by the shape. | `list[string]` | No | - | - |
-
-<a id="kind-supportedhostshape-status-status"></a>
-#### Status.status
-
-[Back to SupportedHostShape status](#kind-supportedhostshape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-supportedhostshape-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-supportedhostshape-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-supportedhostshape-status-status-async"></a>
-##### Status.status.async
-
-[Back to SupportedHostShape status](#kind-supportedhostshape-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-supportedhostshape-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-supportedhostshape-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to SupportedHostShape status](#kind-supportedhostshape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-supportedhostshape-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to SupportedHostShape status](#kind-supportedhostshape-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-supportedvmwaresoftwareversion"></a>
-## SupportedVmwareSoftwareVersion
-
-SupportedVmwareSoftwareVersion is the Schema for the supportedvmwaresoftwareversions API.
-
-- `Plural`: `supportedvmwaresoftwareversions`
-- `Scope`: `Namespaced`
-- `APIVersion`: `ocvp.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/ocvp/v1beta1/supportedvmwaresoftwareversion.md) (`config/samples/ocvp_v1beta1_supportedvmwaresoftwareversion.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-supportedvmwaresoftwareversion-spec"></a>
-### Spec
-
-SupportedVmwareSoftwareVersionSpec defines the desired state of SupportedVmwareSoftwareVersion.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-supportedvmwaresoftwareversion-status"></a>
-### Status
-
-SupportedVmwareSoftwareVersionStatus defines the observed state of SupportedVmwareSoftwareVersion.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `description` | A description of the software in the bundle. | `string` | No | - | - |
-| [`esxiSoftwareVersions`](#kind-supportedvmwaresoftwareversion-status-esxisoftwareversions) | A list of supported ESXi software versions. | `list[object]` | No | - | - |
-| [`status`](#kind-supportedvmwaresoftwareversion-status-status) | - | `object` | Yes | - | - |
-| `version` | A short, unique string that identifies the version of bundled software. | `string` | No | - | - |
-
-<a id="kind-supportedvmwaresoftwareversion-status-esxisoftwareversions"></a>
-#### Status.esxiSoftwareVersions[]
-
-[Back to SupportedVmwareSoftwareVersion status](#kind-supportedvmwaresoftwareversion-status)
-
-SupportedVmwareSoftwareVersionEsxiSoftwareVersion defines nested fields for SupportedVmwareSoftwareVersion.EsxiSoftwareVersion.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `description` | A description of the software in the bundle. | `string` | No | - | - |
-| `supportedHostShapeNames` | A list of ESXi host shapes supported by the version of bundled software. | `list[string]` | No | - | - |
-| `version` | A short, unique string that identifies the version of bundled software. | `string` | No | - | - |
-
-<a id="kind-supportedvmwaresoftwareversion-status-status"></a>
-#### Status.status
-
-[Back to SupportedVmwareSoftwareVersion status](#kind-supportedvmwaresoftwareversion-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-supportedvmwaresoftwareversion-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-supportedvmwaresoftwareversion-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-supportedvmwaresoftwareversion-status-status-async"></a>
-##### Status.status.async
-
-[Back to SupportedVmwareSoftwareVersion status](#kind-supportedvmwaresoftwareversion-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-supportedvmwaresoftwareversion-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-supportedvmwaresoftwareversion-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to SupportedVmwareSoftwareVersion status](#kind-supportedvmwaresoftwareversion-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-supportedvmwaresoftwareversion-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to SupportedVmwareSoftwareVersion status](#kind-supportedvmwaresoftwareversion-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequest"></a>
-## WorkRequest
-
-WorkRequest is the Schema for the workrequests API.
-
-- `Plural`: `workrequests`
-- `Scope`: `Namespaced`
-- `APIVersion`: `ocvp.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/ocvp/v1beta1/workrequest.md) (`config/samples/ocvp_v1beta1_workrequest.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequest-spec"></a>
-### Spec
-
-WorkRequestSpec defines the desired state of WorkRequest.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequest-status"></a>
-### Status
-
-WorkRequestStatus defines the observed state of WorkRequest.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. | `string` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the work request. | `string` | No | - | - |
-| `operationType` | The asynchronous operation tracked by this work request. | `string` | No | - | - |
-| `percentComplete` | The percentage complete of the operation tracked by this work request. | `number` | No | - | - |
-| [`resources`](#kind-workrequest-status-resources) | The resources that are affected by this work request. | `list[object]` | No | - | - |
-| `sdkStatus` | The status of the work request. This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
-| [`status`](#kind-workrequest-status-status) | - | `object` | Yes | - | - |
-| `timeAccepted` | The date and time the work request was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
-| `timeFinished` | The date and time the work request reached a terminal state, either `FAILED` OR `SUCCEEDED`. Format is defined by RFC3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
-| `timeStarted` | The date and time the work request transitioned from `ACCEPTED` to `IN_PROGRESS`, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
-
-<a id="kind-workrequest-status-resources"></a>
-#### Status.resources[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-WorkRequestResource defines nested fields for WorkRequest.Resource.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `actionType` | The way in which this resource was affected by the operation that spawned the work request. | `string` | No | - | - |
-| `entityType` | The resource type the work request affects. | `string` | No | - | - |
-| `entityUri` | The URI path that you can use for a GET request to access the resource metadata. | `string` | No | - | - |
-| `identifier` | An OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource. | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status"></a>
-#### Status.status
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequest-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequest-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequest-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequest-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequest-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequest-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequest status](#kind-workrequest-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequesterror"></a>
-## WorkRequestError
-
-WorkRequestError is the Schema for the workrequesterrors API.
-
-- `Plural`: `workrequesterrors`
-- `Scope`: `Namespaced`
-- `APIVersion`: `ocvp.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/ocvp/v1beta1/workrequesterror.md) (`config/samples/ocvp_v1beta1_workrequesterror.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequesterror-spec"></a>
-### Spec
-
-WorkRequestErrorSpec defines the desired state of WorkRequestError.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequesterror-status"></a>
-### Status
-
-WorkRequestErrorStatus defines the observed state of WorkRequestError.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `code` | A machine-usable code for the error that occurred. | `string` | No | - | - |
-| `message` | A human-readable error string. | `string` | No | - | - |
-| [`status`](#kind-workrequesterror-status-status) | - | `object` | Yes | - | - |
-| `timestamp` | The date and time the error occurred, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339). | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequesterror-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequesterror-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequesterror-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequesterror-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestError status](#kind-workrequesterror-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `status` | - | `string` | Yes | - | - |
-| `type` | - | `string` | Yes | - | - |
-
-<a id="kind-workrequestlog"></a>
-## WorkRequestLog
-
-WorkRequestLog is the Schema for the workrequestlogs API.
-
-- `Plural`: `workrequestlogs`
-- `Scope`: `Namespaced`
-- `APIVersion`: `ocvp.oracle.com/v1beta1`
-- `Sample`: [Sample](../../../samples/ocvp/v1beta1/workrequestlog.md) (`config/samples/ocvp_v1beta1_workrequestlog.yaml`)
-- `Packages`: Not currently exposed by a customer-visible package.
-
-<a id="kind-workrequestlog-spec"></a>
-### Spec
-
-WorkRequestLogSpec defines the desired state of WorkRequestLog.
-
-No documented fields in the checked-in CRD schema.
-
-<a id="kind-workrequestlog-status"></a>
-### Status
-
-WorkRequestLogStatus defines the observed state of WorkRequestLog.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`status`](#kind-workrequestlog-status-status) | - | `object` | Yes | - | - |
-
-<a id="kind-workrequestlog-status-status"></a>
-#### Status.status
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`async`](#kind-workrequestlog-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
-| [`conditions`](#kind-workrequestlog-status-status-conditions) | - | `list[object]` | No | - | - |
-| `createdAt` | - | `string (date-time)` | No | - | - |
-| `deletedAt` | - | `string (date-time)` | No | - | - |
-| `message` | - | `string` | No | - | - |
-| `ocid` | - | `string` | No | - | - |
-| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
-| `reason` | - | `string` | No | - | - |
-| `requestedAt` | - | `string (date-time)` | No | - | - |
-| `updatedAt` | - | `string (date-time)` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async"></a>
-##### Status.status.async
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| [`current`](#kind-workrequestlog-status-status-async-current) | - | `object` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-async-current"></a>
-###### Status.status.async.current
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
-
-| Field | Description | Type | Required | Default | Enum |
-| --- | --- | --- | --- | --- | --- |
-| `message` | - | `string` | No | - | - |
-| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
-| `percentComplete` | - | `number` | No | - | - |
-| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
-| `rawOperationType` | - | `string` | No | - | - |
-| `rawStatus` | - | `string` | No | - | - |
-| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
-| `updatedAt` | - | `string (date-time)` | Yes | - | - |
-| `workRequestId` | - | `string` | No | - | - |
-
-<a id="kind-workrequestlog-status-status-conditions"></a>
-##### Status.status.conditions[]
-
-[Back to WorkRequestLog status](#kind-workrequestlog-status)
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -31,6 +31,8 @@ const (
 	WorkRequestOperationTypeStopHeatwaveCluster                   WorkRequestOperationTypeEnum = "STOP_HEATWAVE_CLUSTER"
 	WorkRequestOperationTypeRestartHeatwaveCluster                WorkRequestOperationTypeEnum = "RESTART_HEATWAVE_CLUSTER"
 	WorkRequestOperationTypeGenerateHeatwaveClusterMemoryEstimate WorkRequestOperationTypeEnum = "GENERATE_HEATWAVE_CLUSTER_MEMORY_ESTIMATE"
+	WorkRequestOperationTypeGenerateDbsystemStatus                WorkRequestOperationTypeEnum = "GENERATE_DBSYSTEM_STATUS"
+	WorkRequestOperationTypeGenerateChannelStatus                 WorkRequestOperationTypeEnum = "GENERATE_CHANNEL_STATUS"
 	WorkRequestOperationTypeCreateReplica                         WorkRequestOperationTypeEnum = "CREATE_REPLICA"
 	WorkRequestOperationTypeUpdateReplica                         WorkRequestOperationTypeEnum = "UPDATE_REPLICA"
 	WorkRequestOperationTypeDeleteReplica                         WorkRequestOperationTypeEnum = "DELETE_REPLICA"
@@ -39,8 +41,11 @@ const (
 	WorkRequestOperationTypeResumeChannel                         WorkRequestOperationTypeEnum = "RESUME_CHANNEL"
 	WorkRequestOperationTypeResetChannel                          WorkRequestOperationTypeEnum = "RESET_CHANNEL"
 	WorkRequestOperationTypeDeleteChannel                         WorkRequestOperationTypeEnum = "DELETE_CHANNEL"
+	WorkRequestOperationTypeCopyBackup                            WorkRequestOperationTypeEnum = "COPY_BACKUP"
 	WorkRequestOperationTypeCreateBackup                          WorkRequestOperationTypeEnum = "CREATE_BACKUP"
 	WorkRequestOperationTypeDeleteBackup                          WorkRequestOperationTypeEnum = "DELETE_BACKUP"
+	WorkRequestOperationTypeUpdateBackup                          WorkRequestOperationTypeEnum = "UPDATE_BACKUP"
+	WorkRequestOperationTypeExportBackup                          WorkRequestOperationTypeEnum = "EXPORT_BACKUP"
 )
 
 var mappingWorkRequestOperationTypeEnum = map[string]WorkRequestOperationTypeEnum{
@@ -57,6 +62,8 @@ var mappingWorkRequestOperationTypeEnum = map[string]WorkRequestOperationTypeEnu
 	"STOP_HEATWAVE_CLUSTER":                     WorkRequestOperationTypeStopHeatwaveCluster,
 	"RESTART_HEATWAVE_CLUSTER":                  WorkRequestOperationTypeRestartHeatwaveCluster,
 	"GENERATE_HEATWAVE_CLUSTER_MEMORY_ESTIMATE": WorkRequestOperationTypeGenerateHeatwaveClusterMemoryEstimate,
+	"GENERATE_DBSYSTEM_STATUS":                  WorkRequestOperationTypeGenerateDbsystemStatus,
+	"GENERATE_CHANNEL_STATUS":                   WorkRequestOperationTypeGenerateChannelStatus,
 	"CREATE_REPLICA":                            WorkRequestOperationTypeCreateReplica,
 	"UPDATE_REPLICA":                            WorkRequestOperationTypeUpdateReplica,
 	"DELETE_REPLICA":                            WorkRequestOperationTypeDeleteReplica,
@@ -65,8 +72,11 @@ var mappingWorkRequestOperationTypeEnum = map[string]WorkRequestOperationTypeEnu
 	"RESUME_CHANNEL":                            WorkRequestOperationTypeResumeChannel,
 	"RESET_CHANNEL":                             WorkRequestOperationTypeResetChannel,
 	"DELETE_CHANNEL":                            WorkRequestOperationTypeDeleteChannel,
+	"COPY_BACKUP":                               WorkRequestOperationTypeCopyBackup,
 	"CREATE_BACKUP":                             WorkRequestOperationTypeCreateBackup,
 	"DELETE_BACKUP":                             WorkRequestOperationTypeDeleteBackup,
+	"UPDATE_BACKUP":                             WorkRequestOperationTypeUpdateBackup,
+	"EXPORT_BACKUP":                             WorkRequestOperationTypeExportBackup,
 }
 
 var mappingWorkRequestOperationTypeEnumLowerCase = map[string]WorkRequestOperationTypeEnum{
@@ -83,6 +93,8 @@ var mappingWorkRequestOperationTypeEnumLowerCase = map[string]WorkRequestOperati
 	"stop_heatwave_cluster":                     WorkRequestOperationTypeStopHeatwaveCluster,
 	"restart_heatwave_cluster":                  WorkRequestOperationTypeRestartHeatwaveCluster,
 	"generate_heatwave_cluster_memory_estimate": WorkRequestOperationTypeGenerateHeatwaveClusterMemoryEstimate,
+	"generate_dbsystem_status":                  WorkRequestOperationTypeGenerateDbsystemStatus,
+	"generate_channel_status":                   WorkRequestOperationTypeGenerateChannelStatus,
 	"create_replica":                            WorkRequestOperationTypeCreateReplica,
 	"update_replica":                            WorkRequestOperationTypeUpdateReplica,
 	"delete_replica":                            WorkRequestOperationTypeDeleteReplica,
@@ -91,8 +103,11 @@ var mappingWorkRequestOperationTypeEnumLowerCase = map[string]WorkRequestOperati
 	"resume_channel":                            WorkRequestOperationTypeResumeChannel,
 	"reset_channel":                             WorkRequestOperationTypeResetChannel,
 	"delete_channel":                            WorkRequestOperationTypeDeleteChannel,
+	"copy_backup":                               WorkRequestOperationTypeCopyBackup,
 	"create_backup":                             WorkRequestOperationTypeCreateBackup,
 	"delete_backup":                             WorkRequestOperationTypeDeleteBackup,
+	"update_backup":                             WorkRequestOperationTypeUpdateBackup,
+	"export_backup":                             WorkRequestOperationTypeExportBackup,
 }
 
 // GetWorkRequestOperationTypeEnumValues Enumerates the set of values for WorkRequestOperationTypeEnum
@@ -120,6 +135,8 @@ func GetWorkRequestOperationTypeEnumStringValues() []string {
 		"STOP_HEATWAVE_CLUSTER",
 		"RESTART_HEATWAVE_CLUSTER",
 		"GENERATE_HEATWAVE_CLUSTER_MEMORY_ESTIMATE",
+		"GENERATE_DBSYSTEM_STATUS",
+		"GENERATE_CHANNEL_STATUS",
 		"CREATE_REPLICA",
 		"UPDATE_REPLICA",
 		"DELETE_REPLICA",
@@ -128,8 +145,11 @@ func GetWorkRequestOperationTypeEnumStringValues() []string {
 		"RESUME_CHANNEL",
 		"RESET_CHANNEL",
 		"DELETE_CHANNEL",
+		"COPY_BACKUP",
 		"CREATE_BACKUP",
 		"DELETE_BACKUP",
+		"UPDATE_BACKUP",
+		"EXPORT_BACKUP",
 	}
 }
 

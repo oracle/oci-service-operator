@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -10,6 +10,7 @@
 package bds
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"strings"
@@ -22,7 +23,12 @@ type InstallPatchDetails struct {
 	Version *string `mandatory:"true" json:"version"`
 
 	// Base-64 encoded password for the cluster admin user.
-	ClusterAdminPassword *string `mandatory:"true" json:"clusterAdminPassword"`
+	ClusterAdminPassword *string `mandatory:"false" json:"clusterAdminPassword"`
+
+	// The secretId for the clusterAdminPassword.
+	SecretId *string `mandatory:"false" json:"secretId"`
+
+	PatchingConfig OdhPatchingConfig `mandatory:"false" json:"patchingConfig"`
 }
 
 func (m InstallPatchDetails) String() string {
@@ -36,7 +42,40 @@ func (m InstallPatchDetails) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
+}
+
+// UnmarshalJSON unmarshals from json
+func (m *InstallPatchDetails) UnmarshalJSON(data []byte) (e error) {
+	model := struct {
+		ClusterAdminPassword *string           `json:"clusterAdminPassword"`
+		SecretId             *string           `json:"secretId"`
+		PatchingConfig       odhpatchingconfig `json:"patchingConfig"`
+		Version              *string           `json:"version"`
+	}{}
+
+	e = json.Unmarshal(data, &model)
+	if e != nil {
+		return
+	}
+	var nn interface{}
+	m.ClusterAdminPassword = model.ClusterAdminPassword
+
+	m.SecretId = model.SecretId
+
+	nn, e = model.PatchingConfig.UnmarshalPolymorphicJSON(model.PatchingConfig.JsonData)
+	if e != nil {
+		return
+	}
+	if nn != nil {
+		m.PatchingConfig = nn.(OdhPatchingConfig)
+	} else {
+		m.PatchingConfig = nil
+	}
+
+	m.Version = model.Version
+
+	return
 }

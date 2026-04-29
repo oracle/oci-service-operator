@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,7 +6,7 @@
 //
 // Use the Logging Management API to create, read, list, update, move and delete
 // log groups, log objects, log saved searches, and agent configurations.
-// For more information, see Logging Overview (https://docs.cloud.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
+// For more information, see Logging Overview (https://docs.oracle.com/iaas/Content/Logging/Concepts/loggingoverview.htm).
 //
 
 package logging
@@ -124,6 +124,10 @@ func (m *unifiedagentparser) UnmarshalPolymorphicJSON(data []byte) (interface{},
 		mm := UnifiedAgentSyslogParser{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
+	case "OPENMETRICS":
+		mm := UnifiedAgentOpenmetricsParser{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "AUDITD":
 		mm := UnifiedAgentAuditdParser{}
 		err = json.Unmarshal(data, &mm)
@@ -161,7 +165,7 @@ func (m *unifiedagentparser) UnmarshalPolymorphicJSON(data []byte) (interface{},
 		err = json.Unmarshal(data, &mm)
 		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for UnifiedAgentParser: %s.", m.ParserType)
+		common.Logf("Received unsupported enum value for UnifiedAgentParser: %s.", m.ParserType)
 		return *m, nil
 	}
 }
@@ -212,7 +216,7 @@ func (m unifiedagentparser) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -236,6 +240,7 @@ const (
 	UnifiedAgentParserParserTypeMultiline     UnifiedAgentParserParserTypeEnum = "MULTILINE"
 	UnifiedAgentParserParserTypeGrok          UnifiedAgentParserParserTypeEnum = "GROK"
 	UnifiedAgentParserParserTypeMultilineGrok UnifiedAgentParserParserTypeEnum = "MULTILINE_GROK"
+	UnifiedAgentParserParserTypeOpenmetrics   UnifiedAgentParserParserTypeEnum = "OPENMETRICS"
 )
 
 var mappingUnifiedAgentParserParserTypeEnum = map[string]UnifiedAgentParserParserTypeEnum{
@@ -253,6 +258,7 @@ var mappingUnifiedAgentParserParserTypeEnum = map[string]UnifiedAgentParserParse
 	"MULTILINE":      UnifiedAgentParserParserTypeMultiline,
 	"GROK":           UnifiedAgentParserParserTypeGrok,
 	"MULTILINE_GROK": UnifiedAgentParserParserTypeMultilineGrok,
+	"OPENMETRICS":    UnifiedAgentParserParserTypeOpenmetrics,
 }
 
 var mappingUnifiedAgentParserParserTypeEnumLowerCase = map[string]UnifiedAgentParserParserTypeEnum{
@@ -270,6 +276,7 @@ var mappingUnifiedAgentParserParserTypeEnumLowerCase = map[string]UnifiedAgentPa
 	"multiline":      UnifiedAgentParserParserTypeMultiline,
 	"grok":           UnifiedAgentParserParserTypeGrok,
 	"multiline_grok": UnifiedAgentParserParserTypeMultilineGrok,
+	"openmetrics":    UnifiedAgentParserParserTypeOpenmetrics,
 }
 
 // GetUnifiedAgentParserParserTypeEnumValues Enumerates the set of values for UnifiedAgentParserParserTypeEnum
@@ -298,6 +305,7 @@ func GetUnifiedAgentParserParserTypeEnumStringValues() []string {
 		"MULTILINE",
 		"GROK",
 		"MULTILINE_GROK",
+		"OPENMETRICS",
 	}
 }
 

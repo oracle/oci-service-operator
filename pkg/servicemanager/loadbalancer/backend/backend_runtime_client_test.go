@@ -7,8 +7,6 @@ import (
 	loadbalancersdk "github.com/oracle/oci-go-sdk/v65/loadbalancer"
 	loadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/loadbalancer/v1beta1"
 	"github.com/oracle/oci-service-operator/pkg/errorutil/errortest"
-	"github.com/oracle/oci-service-operator/pkg/servicemanager"
-	shared "github.com/oracle/oci-service-operator/pkg/shared"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -26,45 +24,26 @@ func (f *fakeBackendLookupClient) GetBackend(_ context.Context, request loadbala
 	return f.response, nil
 }
 
-type fakeBackendDelegate struct {
-	createCalls            int
-	deleteCalls            int
-	receivedSyntheticOCID  shared.OCID
-	receivedLoadBalancerID string
-	receivedBackendSetName string
-	createResponse         servicemanager.OSOKResponse
-	createErr              error
-	deleteResponse         bool
-	deleteErr              error
-}
-
-func (f *fakeBackendDelegate) CreateOrUpdate(_ context.Context, resource *loadbalancerv1beta1.Backend, _ ctrl.Request) (servicemanager.OSOKResponse, error) {
-	f.createCalls++
-	f.receivedSyntheticOCID = resource.Status.OsokStatus.Ocid
-	f.receivedLoadBalancerID = resource.Status.LoadBalancerId
-	f.receivedBackendSetName = resource.Status.BackendSetName
-	return f.createResponse, f.createErr
-}
-
-func (f *fakeBackendDelegate) Delete(_ context.Context, resource *loadbalancerv1beta1.Backend) (bool, error) {
-	f.deleteCalls++
-	f.receivedSyntheticOCID = resource.Status.OsokStatus.Ocid
-	f.receivedLoadBalancerID = resource.Status.LoadBalancerId
-	f.receivedBackendSetName = resource.Status.BackendSetName
-	return f.deleteResponse, f.deleteErr
-}
-
 func TestCreateOrUpdateBindsExistingBackend(t *testing.T) {
 	t.Parallel()
 
-	lookup := &fakeBackendLookupClient{}
-	delegate := &fakeBackendDelegate{
-		createResponse: servicemanager.OSOKResponse{IsSuccessful: true},
+	lookup := &fakeBackendLookupClient{
+		response: loadbalancersdk.GetBackendResponse{
+			Backend: sdkBackend(1, false, false, false),
+		},
 	}
-	client := &backendRuntimeServiceClient{
-		delegate: delegate,
-		lookup:   lookup,
-	}
+	createCalled := false
+	updateCalled := false
+	client := newTestBackendRuntimeClientWithLookup(&fakeGeneratedBackendOCIClient{
+		createFn: func(context.Context, loadbalancersdk.CreateBackendRequest) (loadbalancersdk.CreateBackendResponse, error) {
+			createCalled = true
+			return loadbalancersdk.CreateBackendResponse{}, nil
+		},
+		updateFn: func(context.Context, loadbalancersdk.UpdateBackendRequest) (loadbalancersdk.UpdateBackendResponse, error) {
+			updateCalled = true
+			return loadbalancersdk.UpdateBackendResponse{}, nil
+		},
+	}, lookup)
 
 	resource := &loadbalancerv1beta1.Backend{
 		Spec: loadbalancerv1beta1.BackendSpec{
@@ -82,20 +61,23 @@ func TestCreateOrUpdateBindsExistingBackend(t *testing.T) {
 	if !response.IsSuccessful {
 		t.Fatalf("CreateOrUpdate() response = %+v, want successful response", response)
 	}
-	if delegate.createCalls != 1 {
-		t.Fatalf("delegate create calls = %d, want 1", delegate.createCalls)
+	if createCalled {
+		t.Fatal("CreateBackend() called, want bind/observe path")
 	}
-	if got := delegate.receivedSyntheticOCID; got != shared.OCID("10.0.0.3:8080") {
-		t.Fatalf("delegate synthetic OCID = %q, want %q", got, "10.0.0.3:8080")
+	if updateCalled {
+		t.Fatal("UpdateBackend() called, want observe-only bind path")
 	}
 	if got := resource.Status.OsokStatus.Ocid; got != "" {
-		t.Fatalf("status.status.ocid = %q, want empty after wrapper restore", got)
+		t.Fatalf("status.status.ocid = %q, want empty after synthetic ID restore", got)
 	}
 	if got := resource.Status.LoadBalancerId; got != resource.Spec.LoadBalancerId {
 		t.Fatalf("status.loadBalancerId = %q, want %q", got, resource.Spec.LoadBalancerId)
 	}
 	if got := resource.Status.BackendSetName; got != resource.Spec.BackendSetName {
 		t.Fatalf("status.backendSetName = %q, want %q", got, resource.Spec.BackendSetName)
+	}
+	if got := resource.Status.Name; got != "10.0.0.3:8080" {
+		t.Fatalf("status.name = %q, want %q", got, "10.0.0.3:8080")
 	}
 	if len(lookup.requests) != 1 {
 		t.Fatalf("lookup requests = %d, want 1", len(lookup.requests))
@@ -111,13 +93,19 @@ func TestCreateOrUpdateCreatesWhenBackendIsMissing(t *testing.T) {
 	lookup := &fakeBackendLookupClient{
 		err: errortest.NewServiceError(404, "NotFound", "missing backend"),
 	}
-	delegate := &fakeBackendDelegate{
-		createResponse: servicemanager.OSOKResponse{IsSuccessful: true},
-	}
-	client := &backendRuntimeServiceClient{
-		delegate: delegate,
-		lookup:   lookup,
-	}
+	createCalled := false
+	client := newTestBackendRuntimeClientWithLookup(&fakeGeneratedBackendOCIClient{
+		createFn: func(_ context.Context, req loadbalancersdk.CreateBackendRequest) (loadbalancersdk.CreateBackendResponse, error) {
+			createCalled = true
+			if got := stringValue(req.LoadBalancerId); got != "ocid1.loadbalancer.oc1..exampleuniqueID" {
+				t.Fatalf("create request loadBalancerId = %q, want %q", got, "ocid1.loadbalancer.oc1..exampleuniqueID")
+			}
+			if got := stringValue(req.BackendSetName); got != "example_backend_set" {
+				t.Fatalf("create request backendSetName = %q, want %q", got, "example_backend_set")
+			}
+			return loadbalancersdk.CreateBackendResponse{}, nil
+		},
+	}, lookup)
 
 	resource := &loadbalancerv1beta1.Backend{
 		Spec: loadbalancerv1beta1.BackendSpec{
@@ -135,8 +123,11 @@ func TestCreateOrUpdateCreatesWhenBackendIsMissing(t *testing.T) {
 	if !response.IsSuccessful {
 		t.Fatalf("CreateOrUpdate() response = %+v, want successful response", response)
 	}
-	if got := delegate.receivedSyntheticOCID; got != "" {
-		t.Fatalf("delegate synthetic OCID = %q, want empty for create path", got)
+	if !createCalled {
+		t.Fatal("CreateBackend() not called, want create path after missing lookup")
+	}
+	if got := resource.Status.OsokStatus.Ocid; got != "" {
+		t.Fatalf("status.status.ocid = %q, want empty for create path", got)
 	}
 	if got := resource.Status.LoadBalancerId; got != resource.Spec.LoadBalancerId {
 		t.Fatalf("status.loadBalancerId = %q, want %q", got, resource.Spec.LoadBalancerId)
@@ -149,8 +140,30 @@ func TestCreateOrUpdateCreatesWhenBackendIsMissing(t *testing.T) {
 func TestDeleteUsesBoundStatusIdentity(t *testing.T) {
 	t.Parallel()
 
-	delegate := &fakeBackendDelegate{deleteResponse: true}
-	client := &backendRuntimeServiceClient{delegate: delegate}
+	var deleteRequest loadbalancersdk.DeleteBackendRequest
+	getCalls := 0
+	client := newTestBackendRuntimeClient(&fakeGeneratedBackendOCIClient{
+		getFn: func(_ context.Context, req loadbalancersdk.GetBackendRequest) (loadbalancersdk.GetBackendResponse, error) {
+			getCalls++
+			if got := stringValue(req.LoadBalancerId); got != "ocid1.loadbalancer.oc1..old" {
+				t.Fatalf("get request loadBalancerId = %q, want %q", got, "ocid1.loadbalancer.oc1..old")
+			}
+			if got := stringValue(req.BackendSetName); got != "old_backend_set" {
+				t.Fatalf("get request backendSetName = %q, want %q", got, "old_backend_set")
+			}
+			if got := stringValue(req.BackendName); got != "10.0.0.3:8080" {
+				t.Fatalf("get request backendName = %q, want %q", got, "10.0.0.3:8080")
+			}
+			if getCalls == 1 {
+				return loadbalancersdk.GetBackendResponse{Backend: sdkBackend(1, false, false, false)}, nil
+			}
+			return loadbalancersdk.GetBackendResponse{}, errortest.NewServiceError(404, "NotFound", "missing backend")
+		},
+		deleteFn: func(_ context.Context, req loadbalancersdk.DeleteBackendRequest) (loadbalancersdk.DeleteBackendResponse, error) {
+			deleteRequest = req
+			return loadbalancersdk.DeleteBackendResponse{}, nil
+		},
+	})
 
 	resource := &loadbalancerv1beta1.Backend{
 		Spec: loadbalancerv1beta1.BackendSpec{
@@ -173,31 +186,30 @@ func TestDeleteUsesBoundStatusIdentity(t *testing.T) {
 	if !deleted {
 		t.Fatal("Delete() deleted = false, want true")
 	}
-	if delegate.deleteCalls != 1 {
-		t.Fatalf("delegate delete calls = %d, want 1", delegate.deleteCalls)
+	if got := stringValue(deleteRequest.LoadBalancerId); got != "ocid1.loadbalancer.oc1..old" {
+		t.Fatalf("delete request loadBalancerId = %q, want %q", got, "ocid1.loadbalancer.oc1..old")
 	}
-	if got := delegate.receivedSyntheticOCID; got != shared.OCID("10.0.0.3:8080") {
-		t.Fatalf("delegate synthetic OCID = %q, want %q", got, "10.0.0.3:8080")
+	if got := stringValue(deleteRequest.BackendSetName); got != "old_backend_set" {
+		t.Fatalf("delete request backendSetName = %q, want %q", got, "old_backend_set")
 	}
-	if got := delegate.receivedLoadBalancerID; got != "ocid1.loadbalancer.oc1..old" {
-		t.Fatalf("delegate status.loadBalancerId = %q, want %q", got, "ocid1.loadbalancer.oc1..old")
+	if got := stringValue(deleteRequest.BackendName); got != "10.0.0.3:8080" {
+		t.Fatalf("delete request backendName = %q, want %q", got, "10.0.0.3:8080")
 	}
-	if got := delegate.receivedBackendSetName; got != "old_backend_set" {
-		t.Fatalf("delegate status.backendSetName = %q, want %q", got, "old_backend_set")
+	if got := resource.Status.LoadBalancerId; got != "ocid1.loadbalancer.oc1..old" {
+		t.Fatalf("status.loadBalancerId = %q, want %q", got, "ocid1.loadbalancer.oc1..old")
+	}
+	if got := resource.Status.BackendSetName; got != "old_backend_set" {
+		t.Fatalf("status.backendSetName = %q, want %q", got, "old_backend_set")
 	}
 	if got := resource.Status.OsokStatus.Ocid; got != "" {
-		t.Fatalf("status.status.ocid = %q, want empty after wrapper restore", got)
+		t.Fatalf("status.status.ocid = %q, want empty after synthetic ID restore", got)
 	}
 }
 
 func TestCreateOrUpdateRejectsMissingPathIdentity(t *testing.T) {
 	t.Parallel()
 
-	client := &backendRuntimeServiceClient{
-		delegate: &fakeBackendDelegate{
-			createResponse: servicemanager.OSOKResponse{IsSuccessful: true},
-		},
-	}
+	client := newTestBackendRuntimeClient(&fakeGeneratedBackendOCIClient{})
 
 	resource := &loadbalancerv1beta1.Backend{
 		Spec: loadbalancerv1beta1.BackendSpec{

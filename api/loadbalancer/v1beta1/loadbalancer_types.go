@@ -14,7 +14,7 @@ import (
 
 // LoadBalancerSpec defines the desired state of LoadBalancer.
 type LoadBalancerSpec struct {
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment in which to create the load balancer.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to create the load balancer.
 	// +kubebuilder:validation:Required
 	CompartmentId string `json:"compartmentId"`
 	// A user-friendly name. It does not have to be unique, and it is changeable.
@@ -26,11 +26,11 @@ type LoadBalancerSpec struct {
 	// To get a list of available shapes, use the ListShapes
 	// operation.
 	// Example: `flexible`
-	// NOTE: Starting May 2023, Fixed shapes - 10Mbps, 100Mbps, 400Mbps, 8000Mbps would be deprecated and only shape
+	// NOTE: After May 2023, Fixed shapes - 10Mbps, 100Mbps, 400Mbps, 8000Mbps would be deprecated and only shape
 	//       allowed would be `Flexible`
 	// +kubebuilder:validation:Required
 	ShapeName string `json:"shapeName"`
-	// An array of subnet OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// An array of subnet OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	// +kubebuilder:validation:Required
 	SubnetIds []string `json:"subnetIds"`
 	// The configuration details to create load balancer using Flexible shape. This is required only if shapeName is `Flexible`.
@@ -40,17 +40,54 @@ type LoadBalancerSpec struct {
 	// If "true", the service assigns a private IP address to the load balancer.
 	// If "false", the service assigns a public IP address to the load balancer.
 	// A public load balancer is accessible from the internet, depending on your VCN's
-	// security list rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securitylists.htm). For more information about public and
-	// private load balancers, see How Load Balancing Works (https://docs.cloud.oracle.com/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works).
+	// security list rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securitylists.htm). For more information about public and
+	// private load balancers, see How Load Balancing Works (https://docs.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works).
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	IsPrivate bool `json:"isPrivate,omitempty"`
+	// Whether or not the load balancer has delete protection enabled.
+	// If "true", the loadbalancer will be protected against deletion if configured to accept traffic.
+	// If "false", the loadbalancer will not be protected against deletion.
+	// Delete protection will not be enabled unless a value of "true" is provided.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsDeleteProtectionEnabled bool `json:"isDeleteProtectionEnabled,omitempty"`
 	// Whether the load balancer has an IPv4 or IPv6 IP address.
 	// If "IPV4", the service assigns an IPv4 address and the load balancer supports IPv4 traffic.
 	// If "IPV6", the service assigns an IPv6 address and the load balancer supports IPv6 traffic.
 	// Example: "ipMode":"IPV6"
 	// +kubebuilder:validation:Optional
 	IpMode string `json:"ipMode,omitempty"`
+	// Applies to IPV6 LB creation only.
+	// Used to disambiguate which subnet prefix should be used to create an IPv6 LB.
+	// Example: "2002::1234:abcd:ffff:c0a8:101/64"
+	// +kubebuilder:validation:Optional
+	Ipv6SubnetCidr string `json:"ipv6SubnetCidr,omitempty"`
+	// Whether or not the load balancer has the Request Id feature enabled for HTTP listeners.
+	// If "true", the load balancer will attach a unique request id header to every request
+	// passed through from the load balancer to load balancer backends. This same request id
+	// header also will be added to the response the lb received from the backend handling
+	// the request before the load balancer returns the response to the requestor. The name
+	// of the unique request id header is set the by value of requestIdHeader.
+	// If "false", the loadbalancer not add this unique request id header to either the request
+	// passed through to the load balancer backends nor to the reponse returned to the user.
+	// New load balancers have the Request Id feature disabled unless isRequestIdEnabled is set to true.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	IsRequestIdEnabled bool `json:"isRequestIdEnabled,omitempty"`
+	// If isRequestIdEnabled is true then this field contains the name of the header field
+	// that contains the unique request id that is attached to every request from
+	// the load balancer to the load balancer backends and to every response from the load
+	// balancer.
+	// If a request to the load balancer already contains a header with same name as specified
+	// in requestIdHeader then the load balancer will not change the value of that field.
+	// If isRequestIdEnabled is false then this field is ignored.
+	// If this field is not set or is set to "" then this field defaults to X-Request-Id
+	// **Notes:**
+	// * Unless the header name is "" it must start with "X-" prefix.
+	// * Setting the header name to "" will set it to the default: X-Request-Id.
+	// +kubebuilder:validation:Optional
+	RequestIdHeader string `json:"requestIdHeader,omitempty"`
 	// An array of reserved Ips.
 	// +kubebuilder:validation:Optional
 	ReservedIps []LoadBalancerReservedIp `json:"reservedIps,omitempty"`
@@ -60,7 +97,7 @@ type LoadBalancerSpec struct {
 	Hostnames map[string]LoadBalancerHostnames `json:"hostnames,omitempty"`
 	// +kubebuilder:validation:Optional
 	BackendSets map[string]LoadBalancerBackendSets `json:"backendSets,omitempty"`
-	// An array of NSG OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with this load balancer.
+	// An array of NSG OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with this load balancer.
 	// During the load balancer's creation, the service adds the new load balancer to the specified NSGs.
 	// The benefits of using NSGs with the load balancer include:
 	// *  NSGs define network security rules to govern ingress and egress traffic for the load balancer.
@@ -76,15 +113,19 @@ type LoadBalancerSpec struct {
 	// +kubebuilder:validation:Optional
 	PathRouteSets map[string]LoadBalancerPathRouteSets `json:"pathRouteSets,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	// +kubebuilder:validation:Optional
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	// +kubebuilder:validation:Optional
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Extended Defined tags for ZPR for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit", "usagetype" : "zpr"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// +kubebuilder:validation:Optional
 	RuleSets map[string]LoadBalancerRuleSets `json:"ruleSets,omitempty"`
 }
@@ -107,6 +148,13 @@ type LoadBalancerShapeDetails struct {
 
 // LoadBalancerReservedIp defines nested fields for LoadBalancer.ReservedIp.
 type LoadBalancerReservedIp struct {
+	// Ocid of the Reserved IP/Public Ip created with VCN.
+	// Reserved IPs are IPs which already registered using VCN API.
+	// Create a reserved Public IP and then while creating the load balancer pass the ocid of the reserved IP in this
+	// field reservedIp to attach the Ip to Load balancer. Load balancer will be configured to listen to traffic on this IP.
+	// Reserved IPs will not be deleted when the Load balancer is deleted. They will be unattached from the Load balancer.
+	// Example: "ocid1.publicip.oc1.phx.unique_ID"
+	// IPV6 example: "ocid1.ipv6.oc1.phx.unique_ID"
 	// +kubebuilder:validation:Optional
 	Id string `json:"id,omitempty"`
 }
@@ -121,6 +169,13 @@ type LoadBalancerListenersSslConfiguration struct {
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	VerifyPeerCertificate bool `json:"verifyPeerCertificate,omitempty"`
+	// Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again.
+	// If "true", the service resumes the previous TLS encrypted session.
+	// If "false", the service starts a new TLS encrypted session.
+	// Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	HasSessionResumption bool `json:"hasSessionResumption,omitempty"`
 	// Ids for OCI certificates service CA or CA bundles for the load balancer to trust.
 	// Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]`
 	// +kubebuilder:validation:Optional
@@ -142,6 +197,7 @@ type LoadBalancerListenersSslConfiguration struct {
 	// *  TLSv1
 	// *  TLSv1.1
 	// *  TLSv1.2
+	// *  TLSv1.3
 	// If this field is not specified, TLSv1.2 is the default.
 	// **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
 	// **Notes:**
@@ -189,7 +245,7 @@ type LoadBalancerListenersConnectionConfiguration struct {
 	// The maximum idle time, in seconds, allowed between two successive receive or two successive send operations
 	// between the client and backend servers. A send operation does not reset the timer for receive operations. A
 	// receive operation does not reset the timer for send operations.
-	// For more information, see Connection Configuration (https://docs.cloud.oracle.com/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration).
+	// For more information, see Connection Configuration (https://docs.oracle.com/iaas/Content/Balance/Reference/connectionreuse.htm#ConnectionConfiguration).
 	// Example: `1200`
 	// +kubebuilder:validation:Required
 	IdleTimeout int64 `json:"idleTimeout"`
@@ -197,6 +253,10 @@ type LoadBalancerListenersConnectionConfiguration struct {
 	// Example: `1`
 	// +kubebuilder:validation:Optional
 	BackendTcpProxyProtocolVersion int `json:"backendTcpProxyProtocolVersion,omitempty"`
+	// An array that represents the PPV2 Options that can be enabled on TCP Listeners.
+	// Example: ["PP2_TYPE_AUTHORITY"]
+	// +kubebuilder:validation:Optional
+	BackendTcpProxyProtocolOptions []string `json:"backendTcpProxyProtocolOptions,omitempty"`
 }
 
 // LoadBalancerListeners defines nested fields for LoadBalancer.Listeners.
@@ -245,7 +305,7 @@ type LoadBalancerHostnames struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// A virtual hostname. For more information about virtual hostname string construction, see
-	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+	// Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing).
 	// Example: `app.example.com`
 	// +kubebuilder:validation:Required
 	Hostname string `json:"hostname"`
@@ -313,10 +373,18 @@ type LoadBalancerBackendSetsBackend struct {
 	// proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
 	// as a server weighted '1'.
 	// For more information on load balancing policies, see
-	// How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
 	// Example: `3`
 	// +kubebuilder:validation:Optional
 	Weight int `json:"weight,omitempty"`
+	// The maximum number of simultaneous connections the load balancer can make to the backend.
+	// If this is not set or set to 0 then the maximum number of simultaneous connections the
+	// load balancer can make to the backend is unlimited.
+	// If setting maxConnections to some value other than 0 then that value must be greater
+	// or equal to 256.
+	// Example: `300`
+	// +kubebuilder:validation:Optional
+	MaxConnections int `json:"maxConnections,omitempty"`
 	// Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
 	// traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy.
 	// **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy.
@@ -345,6 +413,13 @@ type LoadBalancerBackendSetsSslConfiguration struct {
 	// Example: `true`
 	// +kubebuilder:validation:Optional
 	VerifyPeerCertificate bool `json:"verifyPeerCertificate,omitempty"`
+	// Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again.
+	// If "true", the service resumes the previous TLS encrypted session.
+	// If "false", the service starts a new TLS encrypted session.
+	// Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance.
+	// Example: `true`
+	// +kubebuilder:validation:Optional
+	HasSessionResumption bool `json:"hasSessionResumption,omitempty"`
 	// Ids for OCI certificates service CA or CA bundles for the load balancer to trust.
 	// Example: `[ocid1.cabundle.oc1.us-ashburn-1.amaaaaaaav3bgsaagl4zzyqdop5i2vuwoqewdvauuw34llqa74otq2jdsfyq]`
 	// +kubebuilder:validation:Optional
@@ -366,6 +441,7 @@ type LoadBalancerBackendSetsSslConfiguration struct {
 	// *  TLSv1
 	// *  TLSv1.1
 	// *  TLSv1.2
+	// *  TLSv1.3
 	// If this field is not specified, TLSv1.2 is the default.
 	// **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
 	// **Notes:**
@@ -507,6 +583,16 @@ type LoadBalancerBackendSets struct {
 	HealthChecker LoadBalancerBackendSetsHealthChecker `json:"healthChecker"`
 	// +kubebuilder:validation:Optional
 	Backends []LoadBalancerBackendSetsBackend `json:"backends,omitempty"`
+	// The maximum number of simultaneous connections the load balancer can make to any backend
+	// in the backend set unless the backend has its own maxConnections setting. If this is not
+	// set or set to 0 then the number of simultaneous connections the load balancer can make
+	// to any backend in the backend set unless the backend has its own maxConnections setting
+	// is unlimited.
+	// If setting backendMaxConnections to some value other than 0 then that value must be greater
+	// or equal to 256.
+	// Example: `300`
+	// +kubebuilder:validation:Optional
+	BackendMaxConnections int `json:"backendMaxConnections,omitempty"`
 	// +kubebuilder:validation:Optional
 	SslConfiguration LoadBalancerBackendSetsSslConfiguration `json:"sslConfiguration,omitempty"`
 	// +kubebuilder:validation:Optional
@@ -571,11 +657,23 @@ type LoadBalancerSslCipherSuites struct {
 	// * oci-compatible-ssl-cipher-suite-v1
 	// * oci-wider-compatible-ssl-cipher-suite-v1
 	// * oci-customized-ssl-cipher-suite
+	// * oci-default-http2-ssl-cipher-suite-v1
+	// * oci-default-http2-tls-13-ssl-cipher-suite-v1
+	// * oci-default-http2-tls-12-13-ssl-cipher-suite-v1
+	// * oci-tls-13-recommended-ssl-cipher-suite-v1
+	// * oci-tls-12-13-wider-ssl-cipher-suite-v1
+	// * oci-tls-11-12-13-wider-ssl-cipher-suite-v1
 	// example: `example_cipher_suite`
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// A list of SSL ciphers the load balancer must support for HTTPS or SSL connections.
 	// The following ciphers are valid values for this property:
+	// *  __TLSv1.3 ciphers__
+	//         "TLS_AES_128_GCM_SHA256"
+	//         "TLS_AES_256_GCM_SHA384"
+	//         "TLS_CHACHA20_POLY1305_SHA256"
+	//         "TLS_AES_128_CCM_SHA256"
+	//         "TLS_AES_128_CCM_8_SHA256"
 	// *  __TLSv1.2 ciphers__
 	//         "AES128-GCM-SHA256"
 	//         "AES128-SHA256"
@@ -688,7 +786,7 @@ type LoadBalancerPathRouteSetsPathRoutePathMatchType struct {
 	// *  **PREFIX_MATCH** - Looks for a `path` string that matches the beginning portion of the incoming URI path.
 	// *  **SUFFIX_MATCH** - Looks for a `path` string that matches the ending portion of the incoming URI path.
 	// For a full description of how the system handles `matchType` in a path route set containing multiple rules, see
-	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm).
+	// Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm).
 	// +kubebuilder:validation:Required
 	MatchType string `json:"matchType"`
 }
@@ -724,7 +822,7 @@ type LoadBalancerRuleSetsItemCondition struct {
 	JsonData string `json:"jsonData,omitempty"`
 	// +kubebuilder:validation:Optional
 	AttributeName string `json:"attributeName,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the originating VCN that an incoming packet
 	// must match.
 	// You can use this condition in conjunction with `SourceVcnIpAddressCondition`.
 	// **NOTE:** If you define this condition for a rule without a `SourceVcnIpAddressCondition`, this condition
@@ -824,6 +922,20 @@ type LoadBalancerRuleSetsItemRedirectUri struct {
 	Query string `json:"query,omitempty"`
 }
 
+// LoadBalancerRuleSetsItemIpMaxConnection defines nested fields for LoadBalancer.RuleSets.Item.IpMaxConnection.
+type LoadBalancerRuleSetsItemIpMaxConnection struct {
+	// Each element in the list should be valid IPv4 or IPv6 CIDR Block address.
+	// Example: '["129.213.176.0/24", "150.136.187.0/24", "2002::1234:abcd:ffff:c0a8:101/64"]'
+	// +kubebuilder:validation:Required
+	IpAddresses []string `json:"ipAddresses"`
+	// The maximum number of simultaneous connections that the specified IPs can make to the
+	// Listener. IPs without a maxConnections setting can make either defaultMaxConnections
+	// simultaneous connections to a listener or, if no defaultMaxConnections is specified, an
+	// unlimited number of simultaneous connections to a listener.
+	// +kubebuilder:validation:Required
+	MaxConnections int `json:"maxConnections"`
+}
+
 // LoadBalancerRuleSetsItem defines nested fields for LoadBalancer.RuleSets.Item.
 type LoadBalancerRuleSetsItem struct {
 	// +kubebuilder:validation:Optional
@@ -874,7 +986,7 @@ type LoadBalancerRuleSetsItem struct {
 	// By default, you can specify only the standard HTTP methods defined in the
 	// HTTP Method Registry (http://www.iana.org/assignments/http-methods/http-methods.xhtml). You can also
 	// see a list of supported standard HTTP methods in the Load Balancing service documentation at
-	// Managing Rule Sets (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrulesets.htm).
+	// Managing Rule Sets (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrulesets.htm).
 	// Your backend application must be able to handle the methods specified in this list.
 	// The list of HTTP methods is extensible. If you need to configure custom HTTP methods, contact
 	// My Oracle Support (http://support.oracle.com/) to remove the restriction for your tenancy.
@@ -891,6 +1003,14 @@ type LoadBalancerRuleSetsItem struct {
 	// example: `192.168.0.0/16 and 2001:db8::/32 are trusted clients. Whitelist them.`
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// The maximum number of connections that the any IP can make to a listener unless the IP is mentioned
+	// in maxConnections. If no defaultMaxConnections is specified the default is unlimited.
+	// +kubebuilder:validation:Optional
+	DefaultMaxConnections int `json:"defaultMaxConnections,omitempty"`
+	// An array of IPs that have a maxConnection setting different than the default and what
+	// that maxConnection setting is
+	// +kubebuilder:validation:Optional
+	IpMaxConnections []LoadBalancerRuleSetsItemIpMaxConnection `json:"ipMaxConnections,omitempty"`
 	// Indicates whether or not invalid characters in client header fields will be allowed.
 	// Valid names are composed of English letters, digits, hyphens and underscores.
 	// If "true", invalid characters are allowed in the HTTP header.
@@ -913,6 +1033,13 @@ type LoadBalancerRuleSets struct {
 
 // LoadBalancerIpAddressReservedIp defines nested fields for LoadBalancer.IpAddress.ReservedIp.
 type LoadBalancerIpAddressReservedIp struct {
+	// Ocid of the Reserved IP/Public Ip created with VCN.
+	// Reserved IPs are IPs which already registered using VCN API.
+	// Create a reserved Public IP and then while creating the load balancer pass the ocid of the reserved IP in this
+	// field reservedIp to attach the Ip to Load balancer. Load balancer will be configured to listen to traffic on this IP.
+	// Reserved IPs will not be deleted when the Load balancer is deleted. They will be unattached from the Load balancer.
+	// Example: "ocid1.publicip.oc1.phx.unique_ID"
+	// IPV6 example: "ocid1.ipv6.oc1.phx.unique_ID"
 	Id string `json:"id,omitempty"`
 }
 
@@ -961,9 +1088,9 @@ type LoadBalancerRoutingPolicies struct {
 // LoadBalancerStatus defines the observed state of LoadBalancer.
 type LoadBalancerStatus struct {
 	OsokStatus shared.OSOKStatus `json:"status"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the load balancer.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the load balancer.
 	Id string `json:"id,omitempty"`
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the load balancer.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the load balancer.
 	CompartmentId string `json:"compartmentId,omitempty"`
 	// A user-friendly name. It does not have to be unique, and it is changeable.
 	// Example: `example_load_balancer`
@@ -985,13 +1112,37 @@ type LoadBalancerStatus struct {
 	// If "true", the service assigns a private IP address to the load balancer.
 	// If "false", the service assigns a public IP address to the load balancer.
 	// A public load balancer is accessible from the internet, depending on your VCN's
-	// security list rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securitylists.htm). For more information about public and
-	// private load balancers, see How Load Balancing Works (https://docs.cloud.oracle.com/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works).
+	// security list rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securitylists.htm). For more information about public and
+	// private load balancers, see How Load Balancing Works (https://docs.oracle.com/iaas/Content/Balance/Concepts/balanceoverview.htm#how-load-balancing-works).
 	// Example: `true`
 	IsPrivate bool `json:"isPrivate,omitempty"`
-	// An array of subnet OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
+	// Whether or not the load balancer has delete protection enabled.
+	// If "true", the loadbalancer will be protected against deletion if configured to accept traffic.
+	// If "false", the loadbalancer will not be protected against deletion.
+	// Delete protection is not be enabled unless this field is set to "true".
+	// Example: `true`
+	IsDeleteProtectionEnabled bool `json:"isDeleteProtectionEnabled,omitempty"`
+	// Whether or not the load balancer has the Request Id feature enabled for HTTP listeners.
+	// If "true", the load balancer will attach a unique request id header to every request
+	// passed through from the load balancer to load balancer backends. This same request id
+	// header also will be added to the response the lb received from the backend handling
+	// the request before the load balancer returns the response to the requestor. The name
+	// of the unique request id header is set the by value of requestIdHeader.
+	// If "false", the loadbalancer not add this unique request id header to either the request
+	// passed through to the load balancer backends nor to the reponse returned to the user.
+	// Example: `true`
+	IsRequestIdEnabled bool `json:"isRequestIdEnabled,omitempty"`
+	// If isRequestIdEnabled is true then this field contains the name of the header field
+	// that contains the unique request id that is attached to every request from
+	// the load balancer to the load balancer backends and to every response from the load
+	// balancer.
+	// If a request to the load balancer already contains a header with same name as specified
+	// in requestIdHeader then the load balancer will not change the value of that field.
+	// If this field is set to "" this field defaults to X-Request-Id.
+	RequestIdHeader string `json:"requestIdHeader,omitempty"`
+	// An array of subnet OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
 	SubnetIds []string `json:"subnetIds,omitempty"`
-	// An array of NSG OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) associated with the load
+	// An array of NSG OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with the load
 	// balancer.
 	// During the load balancer's creation, the service adds the new load balancer to the specified NSGs.
 	// The benefits of associating the load balancer with NSGs include:
@@ -1007,20 +1158,28 @@ type LoadBalancerStatus struct {
 	BackendSets             map[string]LoadBalancerBackendSets     `json:"backendSets,omitempty"`
 	PathRouteSets           map[string]LoadBalancerPathRouteSets   `json:"pathRouteSets,omitempty"`
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `json:"freeformTags,omitempty"`
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Extended Defined tags for ZPR for this resource. Each key is predefined and scoped to a namespace.
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value":"42","mode":"audit", "usagetype" : "zpr"}}}`
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// System tags can be viewed by users, but can only be created by the system.
 	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 	SystemTags      map[string]shared.MapValue             `json:"systemTags,omitempty"`
 	RuleSets        map[string]LoadBalancerRuleSets        `json:"ruleSets,omitempty"`
 	RoutingPolicies map[string]LoadBalancerRoutingPolicies `json:"routingPolicies,omitempty"`
+	// Whether the load balancer has an IPv4 or IPv6 IP address.
+	//   If "IPV4", the service assigns an IPv4 address and the load balancer supports IPv4 traffic.
+	//   If "IPV6", the service assigns an IPv6 address and the load balancer supports IPv6 traffic.
+	//   Example: "ipMode":"IPV6"
+	IpMode string `json:"ipMode,omitempty"`
 }
 
 // +kubebuilder:object:root=true

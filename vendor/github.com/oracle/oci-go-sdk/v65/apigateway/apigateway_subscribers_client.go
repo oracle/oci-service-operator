@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,7 +6,7 @@
 //
 // API for the API Gateway service. Use this API to manage gateways, deployments, and related items.
 // For more information, see
-// Overview of API Gateway (https://docs.cloud.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm).
+// Overview of API Gateway (https://docs.oracle.com/iaas/Content/APIGateway/Concepts/apigatewayoverview.htm).
 //
 
 package apigateway
@@ -93,11 +93,68 @@ func (client *SubscribersClient) ConfigurationProvider() *common.ConfigurationPr
 	return client.config
 }
 
+// AddSubscriberLock Adds a lock to a Subscriber resource.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/AddSubscriberLock.go.html to see an example of how to use AddSubscriberLock API.
+func (client SubscribersClient) AddSubscriberLock(ctx context.Context, request AddSubscriberLockRequest) (response AddSubscriberLockResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.addSubscriberLock, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = AddSubscriberLockResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = AddSubscriberLockResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(AddSubscriberLockResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into AddSubscriberLockResponse")
+	}
+	return
+}
+
+// addSubscriberLock implements the OCIOperation interface (enables retrying operations)
+func (client SubscribersClient) addSubscriberLock(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/subscribers/{subscriberId}/actions/addLock", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response AddSubscriberLockResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/api-gateway/20190501/Subscriber/AddSubscriberLock"
+		err = common.PostProcessServiceError(err, "Subscribers", "AddSubscriberLock", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // ChangeSubscriberCompartment Changes the subscriber compartment.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ChangeSubscriberCompartment.go.html to see an example of how to use ChangeSubscriberCompartment API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ChangeSubscriberCompartment.go.html to see an example of how to use ChangeSubscriberCompartment API.
 func (client SubscribersClient) ChangeSubscriberCompartment(ctx context.Context, request ChangeSubscriberCompartmentRequest) (response ChangeSubscriberCompartmentResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -159,7 +216,7 @@ func (client SubscribersClient) changeSubscriberCompartment(ctx context.Context,
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/CreateSubscriber.go.html to see an example of how to use CreateSubscriber API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/CreateSubscriber.go.html to see an example of how to use CreateSubscriber API.
 // A default retry strategy applies to this operation CreateSubscriber()
 func (client SubscribersClient) CreateSubscriber(ctx context.Context, request CreateSubscriberRequest) (response CreateSubscriberResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -222,7 +279,7 @@ func (client SubscribersClient) createSubscriber(ctx context.Context, request co
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/DeleteSubscriber.go.html to see an example of how to use DeleteSubscriber API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/DeleteSubscriber.go.html to see an example of how to use DeleteSubscriber API.
 func (client SubscribersClient) DeleteSubscriber(ctx context.Context, request DeleteSubscriberRequest) (response DeleteSubscriberResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()
@@ -279,7 +336,7 @@ func (client SubscribersClient) deleteSubscriber(ctx context.Context, request co
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/GetSubscriber.go.html to see an example of how to use GetSubscriber API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/GetSubscriber.go.html to see an example of how to use GetSubscriber API.
 // A default retry strategy applies to this operation GetSubscriber()
 func (client SubscribersClient) GetSubscriber(ctx context.Context, request GetSubscriberRequest) (response GetSubscriberResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -337,7 +394,7 @@ func (client SubscribersClient) getSubscriber(ctx context.Context, request commo
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ListSubscribers.go.html to see an example of how to use ListSubscribers API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/ListSubscribers.go.html to see an example of how to use ListSubscribers API.
 // A default retry strategy applies to this operation ListSubscribers()
 func (client SubscribersClient) ListSubscribers(ctx context.Context, request ListSubscribersRequest) (response ListSubscribersResponse, err error) {
 	var ociResponse common.OCIResponse
@@ -391,11 +448,68 @@ func (client SubscribersClient) listSubscribers(ctx context.Context, request com
 	return response, err
 }
 
+// RemoveSubscriberLock Removes a lock from a Subscriber resource.
+//
+// # See also
+//
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/RemoveSubscriberLock.go.html to see an example of how to use RemoveSubscriberLock API.
+func (client SubscribersClient) RemoveSubscriberLock(ctx context.Context, request RemoveSubscriberLockRequest) (response RemoveSubscriberLockResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if client.RetryPolicy() != nil {
+		policy = *client.RetryPolicy()
+	}
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.removeSubscriberLock, policy)
+	if err != nil {
+		if ociResponse != nil {
+			if httpResponse := ociResponse.HTTPResponse(); httpResponse != nil {
+				opcRequestId := httpResponse.Header.Get("opc-request-id")
+				response = RemoveSubscriberLockResponse{RawResponse: httpResponse, OpcRequestId: &opcRequestId}
+			} else {
+				response = RemoveSubscriberLockResponse{}
+			}
+		}
+		return
+	}
+	if convertedResponse, ok := ociResponse.(RemoveSubscriberLockResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RemoveSubscriberLockResponse")
+	}
+	return
+}
+
+// removeSubscriberLock implements the OCIOperation interface (enables retrying operations)
+func (client SubscribersClient) removeSubscriberLock(ctx context.Context, request common.OCIRequest, binaryReqBody *common.OCIReadSeekCloser, extraHeaders map[string]string) (common.OCIResponse, error) {
+
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/subscribers/{subscriberId}/actions/removeLock", binaryReqBody, extraHeaders)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RemoveSubscriberLockResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		apiReferenceLink := "https://docs.oracle.com/iaas/api/#/en/api-gateway/20190501/Subscriber/RemoveSubscriberLock"
+		err = common.PostProcessServiceError(err, "Subscribers", "RemoveSubscriberLock", apiReferenceLink)
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
 // UpdateSubscriber Updates the subscriber with the given identifier.
 //
 // # See also
 //
-// Click https://docs.cloud.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/UpdateSubscriber.go.html to see an example of how to use UpdateSubscriber API.
+// Click https://docs.oracle.com/en-us/iaas/tools/go-sdk-examples/latest/apigateway/UpdateSubscriber.go.html to see an example of how to use UpdateSubscriber API.
 func (client SubscribersClient) UpdateSubscriber(ctx context.Context, request UpdateSubscriberRequest) (response UpdateSubscriberResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()

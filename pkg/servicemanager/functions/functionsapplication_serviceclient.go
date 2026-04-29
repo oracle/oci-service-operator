@@ -144,6 +144,14 @@ func (m *FunctionsApplicationServiceManager) UpdateApplication(
 	resource *functionsv1beta1.Application,
 	existing *ocifunctions.Application,
 ) (*ocifunctions.Application, bool, error) {
+	if !functionsApplicationAllowsMutation(existing) {
+		return existing, false, nil
+	}
+	if err := validateFunctionsApplicationCreateOnlyDrift(resource.Spec, existing); err != nil {
+		markFunctionsFailure(&resource.Status.OsokStatus, err, m.Log)
+		return nil, false, err
+	}
+
 	client, err := m.getOCIClient()
 	if err != nil {
 		return nil, false, err

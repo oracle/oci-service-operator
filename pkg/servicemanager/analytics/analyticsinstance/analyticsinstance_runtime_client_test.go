@@ -89,6 +89,122 @@ func TestAnalyticsInstanceCreateRequestPreservesPolymorphicNetworkEndpointDetail
 	}
 }
 
+func TestApplyAnalyticsInstanceRuntimeHooksOverridesGeneratedDefaults(t *testing.T) {
+	t.Parallel()
+
+	hooks := newAnalyticsInstanceDefaultRuntimeHooks(analyticssdk.AnalyticsClient{})
+	applyAnalyticsInstanceRuntimeHooks(&hooks)
+
+	if hooks.Semantics == nil {
+		t.Fatal("hooks.Semantics = nil, want reviewed semantics")
+	}
+	if len(hooks.Semantics.AuxiliaryOperations) != 0 {
+		t.Fatalf("hooks.Semantics.AuxiliaryOperations = %#v, want cleared reviewed semantics", hooks.Semantics.AuxiliaryOperations)
+	}
+	if len(hooks.Semantics.Lifecycle.UpdatingStates) != 1 || hooks.Semantics.Lifecycle.UpdatingStates[0] != "UPDATING" {
+		t.Fatalf("hooks.Semantics.Lifecycle.UpdatingStates = %#v, want [\"UPDATING\"]", hooks.Semantics.Lifecycle.UpdatingStates)
+	}
+	if !containsStringSlice(hooks.Semantics.Mutation.Mutable, "updateChannel") {
+		t.Fatalf("hooks.Semantics.Mutation.Mutable = %#v, want updateChannel in reviewed mutable surface", hooks.Semantics.Mutation.Mutable)
+	}
+	if hooks.ParityHooks.NormalizeDesiredState == nil {
+		t.Fatal("hooks.ParityHooks.NormalizeDesiredState = nil, want create-only normalization hook")
+	}
+	if hooks.BuildUpdateBody == nil {
+		t.Fatal("hooks.BuildUpdateBody = nil, want reviewed update builder")
+	}
+
+	resource := newAnalyticsInstanceTestResource()
+	resource.Spec.Description = "updated analytics description"
+
+	body, updateNeeded, err := hooks.BuildUpdateBody(
+		context.Background(),
+		resource,
+		resource.Namespace,
+		observedAnalyticsInstanceFromSpec(
+			"ocid1.analyticsinstance.oc1..existing",
+			newAnalyticsInstanceTestResource().Spec,
+			"ACTIVE",
+		),
+	)
+	if err != nil {
+		t.Fatalf("hooks.BuildUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("hooks.BuildUpdateBody() updateNeeded = false, want true after reviewed drift")
+	}
+
+	details, ok := body.(analyticssdk.UpdateAnalyticsInstanceDetails)
+	if !ok {
+		t.Fatalf("hooks.BuildUpdateBody() body type = %T, want analytics.UpdateAnalyticsInstanceDetails", body)
+	}
+	if details.Description == nil || *details.Description != resource.Spec.Description {
+		t.Fatalf("hooks.BuildUpdateBody() description = %#v, want %q", details.Description, resource.Spec.Description)
+	}
+}
+
+func TestAnalyticsInstanceCreateRequestIncludesRefreshedContractFields(t *testing.T) {
+	t.Parallel()
+
+	resource := newAnalyticsInstanceTestResource()
+	resource.Spec.UpdateChannel = "EARLY"
+	resource.Spec.DomainId = "ocid1.domain.oc1..example"
+	resource.Spec.AdminUser = "analytics.admin@example.com"
+	resource.Spec.FeatureBundle = "FAW_FREE"
+
+	var createRequest analyticssdk.CreateAnalyticsInstanceRequest
+
+	manager := newAnalyticsInstanceRuntimeTestManager(generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
+		Create: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.CreateAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				createRequest = *request.(*analyticssdk.CreateAnalyticsInstanceRequest)
+				return analyticssdk.CreateAnalyticsInstanceResponse{
+					AnalyticsInstance: observedAnalyticsInstanceFromSpec(
+						"ocid1.analyticsinstance.oc1..created",
+						resource.Spec,
+						"ACTIVE",
+					),
+				}, nil
+			},
+			Fields: analyticsInstanceCreateFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+
+	if got := createRequest.CreateAnalyticsInstanceDetails.UpdateChannel; got != analyticssdk.UpdateChannelEarly {
+		t.Fatalf("CreateAnalyticsInstanceDetails.UpdateChannel = %q, want %q", got, analyticssdk.UpdateChannelEarly)
+	}
+	if createRequest.CreateAnalyticsInstanceDetails.DomainId == nil || *createRequest.CreateAnalyticsInstanceDetails.DomainId != resource.Spec.DomainId {
+		t.Fatalf("CreateAnalyticsInstanceDetails.DomainId = %#v, want %q", createRequest.CreateAnalyticsInstanceDetails.DomainId, resource.Spec.DomainId)
+	}
+	if createRequest.CreateAnalyticsInstanceDetails.AdminUser == nil || *createRequest.CreateAnalyticsInstanceDetails.AdminUser != resource.Spec.AdminUser {
+		t.Fatalf("CreateAnalyticsInstanceDetails.AdminUser = %#v, want %q", createRequest.CreateAnalyticsInstanceDetails.AdminUser, resource.Spec.AdminUser)
+	}
+	if got := createRequest.CreateAnalyticsInstanceDetails.FeatureBundle; got != analyticssdk.FeatureBundleFawFree {
+		t.Fatalf("CreateAnalyticsInstanceDetails.FeatureBundle = %q, want %q", got, analyticssdk.FeatureBundleFawFree)
+	}
+
+	body := analyticsInstanceSerializedRequestBody(t, createRequest, http.MethodPost, "/analyticsInstances")
+	for _, want := range []string{
+		`"updateChannel":"EARLY"`,
+		`"domainId":"ocid1.domain.oc1..example"`,
+		`"adminUser":"analytics.admin@example.com"`,
+		`"featureBundle":"FAW_FREE"`,
+	} {
+		if !contains(body, want) {
+			t.Fatalf("request body %s does not contain %s", body, want)
+		}
+	}
+}
+
 func TestBuildAnalyticsInstanceUpdateBodySupportsClearingOptionalFields(t *testing.T) {
 	t.Parallel()
 
@@ -134,6 +250,36 @@ func TestBuildAnalyticsInstanceUpdateBodySupportsClearingOptionalFields(t *testi
 		if !contains(body, want) {
 			t.Fatalf("request body %s does not contain %s", body, want)
 		}
+	}
+}
+
+func TestBuildAnalyticsInstanceUpdateBodyIncludesUpdateChannel(t *testing.T) {
+	t.Parallel()
+
+	resource := newAnalyticsInstanceTestResource()
+	resource.Spec.UpdateChannel = "EARLY"
+
+	currentSpec := newAnalyticsInstanceTestResource().Spec
+	currentSpec.UpdateChannel = "REGULAR"
+	current := observedAnalyticsInstanceFromSpec("ocid1.analyticsinstance.oc1..existing", currentSpec, "ACTIVE")
+
+	details, updateNeeded, err := buildAnalyticsInstanceUpdateBody(resource, current)
+	if err != nil {
+		t.Fatalf("buildAnalyticsInstanceUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildAnalyticsInstanceUpdateBody() updateNeeded = false, want updateChannel drift")
+	}
+	if details.UpdateChannel != analyticssdk.UpdateChannelEarly {
+		t.Fatalf("UpdateChannel = %q, want %q", details.UpdateChannel, analyticssdk.UpdateChannelEarly)
+	}
+
+	body := analyticsInstanceSerializedRequestBody(t, analyticssdk.UpdateAnalyticsInstanceRequest{
+		AnalyticsInstanceId:            common.String("ocid1.analyticsinstance.oc1..existing"),
+		UpdateAnalyticsInstanceDetails: details,
+	}, http.MethodPut, "/analyticsInstances/ocid1.analyticsinstance.oc1..existing")
+	if !contains(body, `"updateChannel":"EARLY"`) {
+		t.Fatalf("request body %s does not contain updateChannel update", body)
 	}
 }
 
@@ -422,6 +568,118 @@ func TestAnalyticsInstanceCreateOrUpdateReusesInactiveListMatch(t *testing.T) {
 	}
 }
 
+func TestAnalyticsInstanceCreateOrUpdateIgnoresUnobservedCreateOnlyFieldsAfterCreate(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.analyticsinstance.oc1..existing"
+
+	resource := newExistingAnalyticsInstanceTestResource(existingID)
+	resource.Spec.AdminUser = "analytics.admin@example.com"
+	resource.Spec.IdcsAccessToken = "opaque-access-token"
+	updateCalled := false
+
+	manager := newAnalyticsInstanceRuntimeTestManager(generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.GetAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				if request.(*analyticssdk.GetAnalyticsInstanceRequest).AnalyticsInstanceId == nil ||
+					*request.(*analyticssdk.GetAnalyticsInstanceRequest).AnalyticsInstanceId != existingID {
+					t.Fatalf("get request AnalyticsInstanceId = %v, want %s", request.(*analyticssdk.GetAnalyticsInstanceRequest).AnalyticsInstanceId, existingID)
+				}
+				return analyticssdk.GetAnalyticsInstanceResponse{
+					AnalyticsInstance: observedAnalyticsInstanceFromSpec(
+						existingID,
+						newAnalyticsInstanceTestResource().Spec,
+						"ACTIVE",
+					),
+				}, nil
+			},
+			Fields: analyticsInstanceGetFields(),
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.UpdateAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				updateCalled = true
+				t.Fatal("Update() should not be called for unobserved create-only fields")
+				return nil, nil
+			},
+			Fields: analyticsInstanceUpdateFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if response.ShouldRequeue {
+		t.Fatal("CreateOrUpdate() should not requeue for steady ACTIVE state")
+	}
+	if updateCalled {
+		t.Fatal("Update() was called unexpectedly")
+	}
+	if resource.Status.OsokStatus.Reason != string(shared.Active) {
+		t.Fatalf("status reason = %q, want %q", resource.Status.OsokStatus.Reason, shared.Active)
+	}
+}
+
+func TestAnalyticsInstanceCreateOrUpdateProjectsRefreshedStatusFields(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.analyticsinstance.oc1..existing"
+
+	resource := newExistingAnalyticsInstanceTestResource(existingID)
+	resource.Spec.UpdateChannel = "EARLY"
+	resource.Spec.DomainId = "ocid1.domain.oc1..example"
+	resource.Spec.FeatureBundle = "FAW_FREE"
+
+	manager := newAnalyticsInstanceRuntimeTestManager(generatedruntime.Config[*analyticsv1beta1.AnalyticsInstance]{
+		Get: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.GetAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, request any) (any, error) {
+				if request.(*analyticssdk.GetAnalyticsInstanceRequest).AnalyticsInstanceId == nil ||
+					*request.(*analyticssdk.GetAnalyticsInstanceRequest).AnalyticsInstanceId != existingID {
+					t.Fatalf("get request AnalyticsInstanceId = %v, want %s", request.(*analyticssdk.GetAnalyticsInstanceRequest).AnalyticsInstanceId, existingID)
+				}
+				return analyticssdk.GetAnalyticsInstanceResponse{
+					AnalyticsInstance: observedAnalyticsInstanceFromSpec(existingID, resource.Spec, "ACTIVE"),
+				}, nil
+			},
+			Fields: analyticsInstanceGetFields(),
+		},
+		Update: &generatedruntime.Operation{
+			NewRequest: func() any { return &analyticssdk.UpdateAnalyticsInstanceRequest{} },
+			Call: func(_ context.Context, _ any) (any, error) {
+				t.Fatal("Update() should not be called when refreshed status fields already match")
+				return nil, nil
+			},
+			Fields: analyticsInstanceUpdateFields(),
+		},
+	})
+
+	response, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful {
+		t.Fatal("CreateOrUpdate() should report success")
+	}
+	if resource.Status.UpdateChannel != resource.Spec.UpdateChannel {
+		t.Fatalf("status.updateChannel = %q, want %q", resource.Status.UpdateChannel, resource.Spec.UpdateChannel)
+	}
+	if resource.Status.DomainId != resource.Spec.DomainId {
+		t.Fatalf("status.domainId = %q, want %q", resource.Status.DomainId, resource.Spec.DomainId)
+	}
+	if resource.Status.FeatureBundle != resource.Spec.FeatureBundle {
+		t.Fatalf("status.featureBundle = %q, want %q", resource.Status.FeatureBundle, resource.Spec.FeatureBundle)
+	}
+	if resource.Status.SystemTags["orcl-cloud"]["key"] != "value" {
+		t.Fatalf("status.systemTags = %#v, want orcl-cloud.key=value", resource.Status.SystemTags)
+	}
+}
+
 func TestAnalyticsInstanceDeletePendingProjectsSharedAsyncBreadcrumbs(t *testing.T) {
 	t.Parallel()
 
@@ -597,10 +855,15 @@ func observedAnalyticsInstanceFromSpec(
 		Description:            pointerOrNil(spec.Description),
 		LicenseType:            analyticssdk.LicenseTypeEnum(spec.LicenseType),
 		EmailNotification:      pointerOrNil(spec.EmailNotification),
+		UpdateChannel:          analyticssdk.UpdateChannelEnum(spec.UpdateChannel),
 		DefinedTags:            analyticsDefinedTagsFromSpec(spec.DefinedTags),
 		FreeformTags:           cloneStringMap(spec.FreeformTags),
+		SystemTags:             analyticsSystemTagsForTest(),
+		KmsKeyId:               pointerOrNil(spec.KmsKeyId),
 		ServiceUrl:             common.String("https://analytics.example.com"),
 		TimeUpdated:            now,
+		FeatureBundle:          analyticssdk.FeatureBundleEnum(spec.FeatureBundle),
+		DomainId:               pointerOrNil(spec.DomainId),
 	}
 }
 
@@ -623,8 +886,19 @@ func observedAnalyticsInstanceSummaryFromSpec(
 		Description:            pointerOrNil(spec.Description),
 		LicenseType:            analyticssdk.LicenseTypeEnum(spec.LicenseType),
 		EmailNotification:      pointerOrNil(spec.EmailNotification),
+		DefinedTags:            analyticsDefinedTagsFromSpec(spec.DefinedTags),
+		FreeformTags:           cloneStringMap(spec.FreeformTags),
+		SystemTags:             analyticsSystemTagsForTest(),
 		ServiceUrl:             common.String("https://analytics.example.com"),
 		TimeUpdated:            now,
+	}
+}
+
+func analyticsSystemTagsForTest() map[string]map[string]interface{} {
+	return map[string]map[string]interface{}{
+		"orcl-cloud": {
+			"key": "value",
+		},
 	}
 }
 
@@ -730,6 +1004,15 @@ func cloneStringMap(values map[string]string) map[string]string {
 
 func contains(haystack string, needle string) bool {
 	return strings.Contains(haystack, needle)
+}
+
+func containsStringSlice(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }
 
 func ptr[T any](value T) *T {

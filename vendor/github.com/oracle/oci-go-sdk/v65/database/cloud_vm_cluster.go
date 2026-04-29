@@ -1,10 +1,10 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Database Service API
 //
-// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.cloud.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
+// The API for the Database Service. Use this API to manage resources such as databases and DB Systems. For more information, see Overview of the Database Service (https://docs.oracle.com/iaas/Content/Database/Concepts/databaseoverview.htm).
 //
 
 package database
@@ -18,16 +18,16 @@ import (
 // CloudVmCluster Details of the cloud VM cluster. Applies to Exadata Cloud Service instances only.
 type CloudVmCluster struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the cloud VM cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cloud VM cluster.
 	Id *string `mandatory:"true" json:"id"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The name of the availability domain that the cloud Exadata infrastructure resource is located in.
 	AvailabilityDomain *string `mandatory:"true" json:"availabilityDomain"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the subnet associated with the cloud VM cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet associated with the cloud VM cluster.
 	// **Subnet Restrictions:**
 	// - For Exadata and virtual machine 2-node RAC systems, do not use a subnet that overlaps with 192.168.128.0/20.
 	// These subnets are used by the Oracle Clusterware private interconnect on the database instance.
@@ -53,25 +53,28 @@ type CloudVmCluster struct {
 	// The number of CPU cores enabled on the cloud VM cluster.
 	CpuCoreCount *int `mandatory:"true" json:"cpuCoreCount"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the cloud Exadata infrastructure.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the cloud Exadata infrastructure.
 	CloudExadataInfrastructureId *string `mandatory:"true" json:"cloudExadataInfrastructureId"`
 
 	// The public key portion of one or more key pairs used for SSH access to the cloud VM cluster.
 	SshPublicKeys []string `mandatory:"true" json:"sshPublicKeys"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the backup network subnet associated with the cloud VM cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subscription with which resource needs to be associated with.
+	SubscriptionId *string `mandatory:"false" json:"subscriptionId"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the backup network subnet associated with the cloud VM cluster.
 	// **Subnet Restriction:** See the subnet restrictions information for **subnetId**.
 	BackupSubnetId *string `mandatory:"false" json:"backupSubnetId"`
 
-	// The list of OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm).
+	// The list of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the network security groups (NSGs) to which this resource belongs. Setting this to an empty list removes all resources from all NSGs. For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm).
 	// **NsgIds restrictions:**
-	// - A network security group (NSG) is optional for Autonomous Databases with private access. The nsgIds list can be empty.
+	// - A network security group (NSG) is optional for Autonomous AI Databases with private access. The nsgIds list can be empty.
 	NsgIds []string `mandatory:"false" json:"nsgIds"`
 
-	// A list of the OCIDs (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network security groups (NSGs) that the backup network of this DB system belongs to. Setting this to an empty array after the list is created removes the resource from all NSGs. For more information about NSGs, see Security Rules (https://docs.cloud.oracle.com/Content/Network/Concepts/securityrules.htm). Applicable only to Exadata systems.
+	// A list of the OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the network security groups (NSGs) that the backup network of this DB system belongs to. Setting this to an empty array after the list is created removes the resource from all NSGs. For more information about NSGs, see Security Rules (https://docs.oracle.com/iaas/Content/Network/Concepts/securityrules.htm). Applicable only to Exadata systems.
 	BackupNetworkNsgIds []string `mandatory:"false" json:"backupNetworkNsgIds"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the last maintenance update history entry. This value is updated when a maintenance update starts.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the last maintenance update history entry. This value is updated when a maintenance update starts.
 	LastUpdateHistoryEntryId *string `mandatory:"false" json:"lastUpdateHistoryEntryId"`
 
 	// The port number configured for the listener on the cloud VM cluster.
@@ -89,7 +92,7 @@ type CloudVmCluster struct {
 	// Additional information about the current lifecycle state.
 	LifecycleDetails *string `mandatory:"false" json:"lifecycleDetails"`
 
-	// The time zone of the cloud VM cluster. For details, see Exadata Infrastructure Time Zones (https://docs.cloud.oracle.com/Content/Database/References/timezones.htm).
+	// The time zone of the cloud VM cluster. For details, see Exadata Infrastructure Time Zones (https://docs.oracle.com/iaas/Content/Database/References/timezones.htm).
 	TimeZone *string `mandatory:"false" json:"timeZone"`
 
 	// The number of OCPU cores to enable on the cloud VM cluster. Only 1 decimal place is allowed for the fractional part.
@@ -111,7 +114,7 @@ type CloudVmCluster struct {
 	ClusterName *string `mandatory:"false" json:"clusterName"`
 
 	// The percentage assigned to DATA storage (user data and database files).
-	// The remaining percentage is assigned to RECO storage (database redo logs, archive logs, and recovery manager backups). Accepted values are 35, 40, 60 and 80. The default is 80 percent assigned to DATA storage. See Storage Configuration (https://docs.cloud.oracle.com/Content/Database/Concepts/exaoverview.htm#Exadata) in the Exadata documentation for details on the impact of the configuration settings on storage.
+	// The remaining percentage is assigned to RECO storage (database redo logs, archive logs, and recovery manager backups). Accepted values are 35, 40, 60 and 80. The default is 80 percent assigned to DATA storage. See Storage Configuration (https://docs.oracle.com/iaas/Content/Database/Concepts/exaoverview.htm#Exadata) in the Exadata documentation for details on the impact of the configuration settings on storage.
 	DataStoragePercentage *int `mandatory:"false" json:"dataStoragePercentage"`
 
 	// If true, database backup on local Exadata storage is configured for the cloud VM cluster. If false, database backup on local Exadata storage is not available in the cloud VM cluster.
@@ -134,32 +137,49 @@ type CloudVmCluster struct {
 	// HIGH is 3-way redundancy.
 	DiskRedundancy CloudVmClusterDiskRedundancyEnum `mandatory:"false" json:"diskRedundancy,omitempty"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Single Client Access Name (SCAN) IP addresses associated with the cloud VM cluster.
-	// SCAN IP addresses are typically used for load balancing and are not assigned to any interface.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Single Client Access Name (SCAN) IPv4 addresses associated with the cloud VM cluster.
+	// SCAN IPv4 addresses are typically used for load balancing and are not assigned to any interface.
 	// Oracle Clusterware directs the requests to the appropriate nodes in the cluster.
 	// **Note:** For a single-node DB system, this list is empty.
 	ScanIpIds []string `mandatory:"false" json:"scanIpIds"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the virtual IP (VIP) addresses associated with the cloud VM cluster.
-	// The Cluster Ready Services (CRS) creates and maintains one VIP address for each node in the Exadata Cloud Service instance to
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the virtual IP (VIP) IPv4 addresses associated with the cloud VM cluster.
+	// The Cluster Ready Services (CRS) creates and maintains one VIP IPv4 address for each node in the Exadata Cloud Service instance to
 	// enable failover. If one node fails, the VIP is reassigned to another active node in the cluster.
 	// **Note:** For a single-node DB system, this list is empty.
 	VipIds []string `mandatory:"false" json:"vipIds"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the DNS record for the SCAN IP addresses that are associated with the cloud VM cluster.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Single Client Access Name (SCAN) IPv6 addresses associated with the cloud VM cluster.
+	// SCAN IPv6 addresses are typically used for load balancing and are not assigned to any interface.
+	// Oracle Clusterware directs the requests to the appropriate nodes in the cluster.
+	// **Note:** For a single-node DB system, this list is empty.
+	ScanIpv6Ids []string `mandatory:"false" json:"scanIpv6Ids"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the virtual IP (VIP) IPv6 addresses associated with the cloud VM cluster.
+	// The Cluster Ready Services (CRS) creates and maintains one VIP IPv6 address for each node in the Exadata Cloud Service instance to
+	// enable failover. If one node fails, the VIP is reassigned to another active node in the cluster.
+	// **Note:** For a single-node DB system, this list is empty.
+	Vipv6Ids []string `mandatory:"false" json:"vipv6Ids"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the DNS record for the SCAN IP addresses that are associated with the cloud VM cluster.
 	ScanDnsRecordId *string `mandatory:"false" json:"scanDnsRecordId"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	SecurityAttributes map[string]map[string]interface{} `mandatory:"false" json:"securityAttributes"`
+
 	// System tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	SystemTags map[string]map[string]interface{} `mandatory:"false" json:"systemTags"`
 
 	// The FQDN of the DNS record for the SCAN IP addresses that are associated with the cloud VM cluster.
@@ -175,6 +195,38 @@ type CloudVmCluster struct {
 	ScanListenerPortTcpSsl *int `mandatory:"false" json:"scanListenerPortTcpSsl"`
 
 	DataCollectionOptions *DataCollectionOptions `mandatory:"false" json:"dataCollectionOptions"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a grid infrastructure software image. This is a database software image of the type `GRID_IMAGE`.
+	GiSoftwareImageId *string `mandatory:"false" json:"giSoftwareImageId"`
+
+	// Details of the file system configuration of the VM cluster.
+	FileSystemConfigurationDetails []FileSystemConfigurationDetail `mandatory:"false" json:"fileSystemConfigurationDetails"`
+
+	CloudAutomationUpdateDetails *CloudAutomationUpdateDetails `mandatory:"false" json:"cloudAutomationUpdateDetails"`
+
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Exadata Database Storage Vault.
+	ExascaleDbStorageVaultId *string `mandatory:"false" json:"exascaleDbStorageVaultId"`
+
+	// Specifies the type of storage management for the Cloud VM Cluster if its ASM or Exascale.
+	StorageManagementType CloudVmClusterStorageManagementTypeEnum `mandatory:"false" json:"storageManagementType,omitempty"`
+
+	// The vmcluster type for the VM cluster/Cloud VM cluster.
+	VmClusterType CloudVmClusterVmClusterTypeEnum `mandatory:"false" json:"vmClusterType,omitempty"`
+
+	// The compute model of the Autonomous AI Database. This is required if using the `computeCount` parameter. If using `cpuCoreCount` then it is an error to specify `computeModel` to a non-null value. ECPU compute model is the recommended model and OCPU compute model is legacy.
+	ComputeModel CloudVmClusterComputeModelEnum `mandatory:"false" json:"computeModel,omitempty"`
+
+	// Details of the multi cloud identity connectors of the VM cluster.
+	MultiCloudIdentityConnectorConfigs []IdentityConnectorDetails `mandatory:"false" json:"multiCloudIdentityConnectorConfigs"`
+
+	// TDE keystore type
+	TdeKeyStoreType CloudVmClusterTdeKeyStoreTypeEnum `mandatory:"false" json:"tdeKeyStoreType,omitempty"`
+
+	// Specifies the type of file system storage and supported values are LOCAL and EXASCALE. - LOCAL if selected then file system storage will be on DB Servers. - EXASCALE if selected then file system storage will be on Exascale Storage Servers. Default Value is LOCAL
+	VmFileSystemStorageType CloudVmClusterVmFileSystemStorageTypeEnum `mandatory:"false" json:"vmFileSystemStorageType,omitempty"`
+
+	// Specifies the type of VM Backups Storage and supported values are LOCAL and EXASCALE. - LOCAL if selected then VM Backups storage will be on DB Servers. - EXASCALE if selected then VM Backups storage will be on Exascale Storage Servers. Default Value is LOCAL
+	VmBackupStorageType CloudVmClusterVmBackupStorageTypeEnum `mandatory:"false" json:"vmBackupStorageType,omitempty"`
 
 	IormConfigCache *ExadataIormConfig `mandatory:"false" json:"iormConfigCache"`
 }
@@ -198,8 +250,26 @@ func (m CloudVmCluster) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingCloudVmClusterDiskRedundancyEnum(string(m.DiskRedundancy)); !ok && m.DiskRedundancy != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for DiskRedundancy: %s. Supported values are: %s.", m.DiskRedundancy, strings.Join(GetCloudVmClusterDiskRedundancyEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingCloudVmClusterStorageManagementTypeEnum(string(m.StorageManagementType)); !ok && m.StorageManagementType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for StorageManagementType: %s. Supported values are: %s.", m.StorageManagementType, strings.Join(GetCloudVmClusterStorageManagementTypeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCloudVmClusterVmClusterTypeEnum(string(m.VmClusterType)); !ok && m.VmClusterType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for VmClusterType: %s. Supported values are: %s.", m.VmClusterType, strings.Join(GetCloudVmClusterVmClusterTypeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCloudVmClusterComputeModelEnum(string(m.ComputeModel)); !ok && m.ComputeModel != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for ComputeModel: %s. Supported values are: %s.", m.ComputeModel, strings.Join(GetCloudVmClusterComputeModelEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCloudVmClusterTdeKeyStoreTypeEnum(string(m.TdeKeyStoreType)); !ok && m.TdeKeyStoreType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for TdeKeyStoreType: %s. Supported values are: %s.", m.TdeKeyStoreType, strings.Join(GetCloudVmClusterTdeKeyStoreTypeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCloudVmClusterVmFileSystemStorageTypeEnum(string(m.VmFileSystemStorageType)); !ok && m.VmFileSystemStorageType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for VmFileSystemStorageType: %s. Supported values are: %s.", m.VmFileSystemStorageType, strings.Join(GetCloudVmClusterVmFileSystemStorageTypeEnumStringValues(), ",")))
+	}
+	if _, ok := GetMappingCloudVmClusterVmBackupStorageTypeEnum(string(m.VmBackupStorageType)); !ok && m.VmBackupStorageType != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for VmBackupStorageType: %s. Supported values are: %s.", m.VmBackupStorageType, strings.Join(GetCloudVmClusterVmBackupStorageTypeEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -347,5 +417,265 @@ func GetCloudVmClusterDiskRedundancyEnumStringValues() []string {
 // GetMappingCloudVmClusterDiskRedundancyEnum performs case Insensitive comparison on enum value and return the desired enum
 func GetMappingCloudVmClusterDiskRedundancyEnum(val string) (CloudVmClusterDiskRedundancyEnum, bool) {
 	enum, ok := mappingCloudVmClusterDiskRedundancyEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudVmClusterStorageManagementTypeEnum Enum with underlying type: string
+type CloudVmClusterStorageManagementTypeEnum string
+
+// Set of constants representing the allowable values for CloudVmClusterStorageManagementTypeEnum
+const (
+	CloudVmClusterStorageManagementTypeAsm      CloudVmClusterStorageManagementTypeEnum = "ASM"
+	CloudVmClusterStorageManagementTypeExascale CloudVmClusterStorageManagementTypeEnum = "EXASCALE"
+)
+
+var mappingCloudVmClusterStorageManagementTypeEnum = map[string]CloudVmClusterStorageManagementTypeEnum{
+	"ASM":      CloudVmClusterStorageManagementTypeAsm,
+	"EXASCALE": CloudVmClusterStorageManagementTypeExascale,
+}
+
+var mappingCloudVmClusterStorageManagementTypeEnumLowerCase = map[string]CloudVmClusterStorageManagementTypeEnum{
+	"asm":      CloudVmClusterStorageManagementTypeAsm,
+	"exascale": CloudVmClusterStorageManagementTypeExascale,
+}
+
+// GetCloudVmClusterStorageManagementTypeEnumValues Enumerates the set of values for CloudVmClusterStorageManagementTypeEnum
+func GetCloudVmClusterStorageManagementTypeEnumValues() []CloudVmClusterStorageManagementTypeEnum {
+	values := make([]CloudVmClusterStorageManagementTypeEnum, 0)
+	for _, v := range mappingCloudVmClusterStorageManagementTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudVmClusterStorageManagementTypeEnumStringValues Enumerates the set of values in String for CloudVmClusterStorageManagementTypeEnum
+func GetCloudVmClusterStorageManagementTypeEnumStringValues() []string {
+	return []string{
+		"ASM",
+		"EXASCALE",
+	}
+}
+
+// GetMappingCloudVmClusterStorageManagementTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudVmClusterStorageManagementTypeEnum(val string) (CloudVmClusterStorageManagementTypeEnum, bool) {
+	enum, ok := mappingCloudVmClusterStorageManagementTypeEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudVmClusterVmClusterTypeEnum Enum with underlying type: string
+type CloudVmClusterVmClusterTypeEnum string
+
+// Set of constants representing the allowable values for CloudVmClusterVmClusterTypeEnum
+const (
+	CloudVmClusterVmClusterTypeRegular   CloudVmClusterVmClusterTypeEnum = "REGULAR"
+	CloudVmClusterVmClusterTypeDeveloper CloudVmClusterVmClusterTypeEnum = "DEVELOPER"
+)
+
+var mappingCloudVmClusterVmClusterTypeEnum = map[string]CloudVmClusterVmClusterTypeEnum{
+	"REGULAR":   CloudVmClusterVmClusterTypeRegular,
+	"DEVELOPER": CloudVmClusterVmClusterTypeDeveloper,
+}
+
+var mappingCloudVmClusterVmClusterTypeEnumLowerCase = map[string]CloudVmClusterVmClusterTypeEnum{
+	"regular":   CloudVmClusterVmClusterTypeRegular,
+	"developer": CloudVmClusterVmClusterTypeDeveloper,
+}
+
+// GetCloudVmClusterVmClusterTypeEnumValues Enumerates the set of values for CloudVmClusterVmClusterTypeEnum
+func GetCloudVmClusterVmClusterTypeEnumValues() []CloudVmClusterVmClusterTypeEnum {
+	values := make([]CloudVmClusterVmClusterTypeEnum, 0)
+	for _, v := range mappingCloudVmClusterVmClusterTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudVmClusterVmClusterTypeEnumStringValues Enumerates the set of values in String for CloudVmClusterVmClusterTypeEnum
+func GetCloudVmClusterVmClusterTypeEnumStringValues() []string {
+	return []string{
+		"REGULAR",
+		"DEVELOPER",
+	}
+}
+
+// GetMappingCloudVmClusterVmClusterTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudVmClusterVmClusterTypeEnum(val string) (CloudVmClusterVmClusterTypeEnum, bool) {
+	enum, ok := mappingCloudVmClusterVmClusterTypeEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudVmClusterComputeModelEnum Enum with underlying type: string
+type CloudVmClusterComputeModelEnum string
+
+// Set of constants representing the allowable values for CloudVmClusterComputeModelEnum
+const (
+	CloudVmClusterComputeModelEcpu CloudVmClusterComputeModelEnum = "ECPU"
+	CloudVmClusterComputeModelOcpu CloudVmClusterComputeModelEnum = "OCPU"
+)
+
+var mappingCloudVmClusterComputeModelEnum = map[string]CloudVmClusterComputeModelEnum{
+	"ECPU": CloudVmClusterComputeModelEcpu,
+	"OCPU": CloudVmClusterComputeModelOcpu,
+}
+
+var mappingCloudVmClusterComputeModelEnumLowerCase = map[string]CloudVmClusterComputeModelEnum{
+	"ecpu": CloudVmClusterComputeModelEcpu,
+	"ocpu": CloudVmClusterComputeModelOcpu,
+}
+
+// GetCloudVmClusterComputeModelEnumValues Enumerates the set of values for CloudVmClusterComputeModelEnum
+func GetCloudVmClusterComputeModelEnumValues() []CloudVmClusterComputeModelEnum {
+	values := make([]CloudVmClusterComputeModelEnum, 0)
+	for _, v := range mappingCloudVmClusterComputeModelEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudVmClusterComputeModelEnumStringValues Enumerates the set of values in String for CloudVmClusterComputeModelEnum
+func GetCloudVmClusterComputeModelEnumStringValues() []string {
+	return []string{
+		"ECPU",
+		"OCPU",
+	}
+}
+
+// GetMappingCloudVmClusterComputeModelEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudVmClusterComputeModelEnum(val string) (CloudVmClusterComputeModelEnum, bool) {
+	enum, ok := mappingCloudVmClusterComputeModelEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudVmClusterTdeKeyStoreTypeEnum Enum with underlying type: string
+type CloudVmClusterTdeKeyStoreTypeEnum string
+
+// Set of constants representing the allowable values for CloudVmClusterTdeKeyStoreTypeEnum
+const (
+	CloudVmClusterTdeKeyStoreTypeAzure CloudVmClusterTdeKeyStoreTypeEnum = "AZURE"
+	CloudVmClusterTdeKeyStoreTypeOci   CloudVmClusterTdeKeyStoreTypeEnum = "OCI"
+	CloudVmClusterTdeKeyStoreTypeGcp   CloudVmClusterTdeKeyStoreTypeEnum = "GCP"
+	CloudVmClusterTdeKeyStoreTypeAws   CloudVmClusterTdeKeyStoreTypeEnum = "AWS"
+)
+
+var mappingCloudVmClusterTdeKeyStoreTypeEnum = map[string]CloudVmClusterTdeKeyStoreTypeEnum{
+	"AZURE": CloudVmClusterTdeKeyStoreTypeAzure,
+	"OCI":   CloudVmClusterTdeKeyStoreTypeOci,
+	"GCP":   CloudVmClusterTdeKeyStoreTypeGcp,
+	"AWS":   CloudVmClusterTdeKeyStoreTypeAws,
+}
+
+var mappingCloudVmClusterTdeKeyStoreTypeEnumLowerCase = map[string]CloudVmClusterTdeKeyStoreTypeEnum{
+	"azure": CloudVmClusterTdeKeyStoreTypeAzure,
+	"oci":   CloudVmClusterTdeKeyStoreTypeOci,
+	"gcp":   CloudVmClusterTdeKeyStoreTypeGcp,
+	"aws":   CloudVmClusterTdeKeyStoreTypeAws,
+}
+
+// GetCloudVmClusterTdeKeyStoreTypeEnumValues Enumerates the set of values for CloudVmClusterTdeKeyStoreTypeEnum
+func GetCloudVmClusterTdeKeyStoreTypeEnumValues() []CloudVmClusterTdeKeyStoreTypeEnum {
+	values := make([]CloudVmClusterTdeKeyStoreTypeEnum, 0)
+	for _, v := range mappingCloudVmClusterTdeKeyStoreTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudVmClusterTdeKeyStoreTypeEnumStringValues Enumerates the set of values in String for CloudVmClusterTdeKeyStoreTypeEnum
+func GetCloudVmClusterTdeKeyStoreTypeEnumStringValues() []string {
+	return []string{
+		"AZURE",
+		"OCI",
+		"GCP",
+		"AWS",
+	}
+}
+
+// GetMappingCloudVmClusterTdeKeyStoreTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudVmClusterTdeKeyStoreTypeEnum(val string) (CloudVmClusterTdeKeyStoreTypeEnum, bool) {
+	enum, ok := mappingCloudVmClusterTdeKeyStoreTypeEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudVmClusterVmFileSystemStorageTypeEnum Enum with underlying type: string
+type CloudVmClusterVmFileSystemStorageTypeEnum string
+
+// Set of constants representing the allowable values for CloudVmClusterVmFileSystemStorageTypeEnum
+const (
+	CloudVmClusterVmFileSystemStorageTypeLocal    CloudVmClusterVmFileSystemStorageTypeEnum = "LOCAL"
+	CloudVmClusterVmFileSystemStorageTypeExascale CloudVmClusterVmFileSystemStorageTypeEnum = "EXASCALE"
+)
+
+var mappingCloudVmClusterVmFileSystemStorageTypeEnum = map[string]CloudVmClusterVmFileSystemStorageTypeEnum{
+	"LOCAL":    CloudVmClusterVmFileSystemStorageTypeLocal,
+	"EXASCALE": CloudVmClusterVmFileSystemStorageTypeExascale,
+}
+
+var mappingCloudVmClusterVmFileSystemStorageTypeEnumLowerCase = map[string]CloudVmClusterVmFileSystemStorageTypeEnum{
+	"local":    CloudVmClusterVmFileSystemStorageTypeLocal,
+	"exascale": CloudVmClusterVmFileSystemStorageTypeExascale,
+}
+
+// GetCloudVmClusterVmFileSystemStorageTypeEnumValues Enumerates the set of values for CloudVmClusterVmFileSystemStorageTypeEnum
+func GetCloudVmClusterVmFileSystemStorageTypeEnumValues() []CloudVmClusterVmFileSystemStorageTypeEnum {
+	values := make([]CloudVmClusterVmFileSystemStorageTypeEnum, 0)
+	for _, v := range mappingCloudVmClusterVmFileSystemStorageTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudVmClusterVmFileSystemStorageTypeEnumStringValues Enumerates the set of values in String for CloudVmClusterVmFileSystemStorageTypeEnum
+func GetCloudVmClusterVmFileSystemStorageTypeEnumStringValues() []string {
+	return []string{
+		"LOCAL",
+		"EXASCALE",
+	}
+}
+
+// GetMappingCloudVmClusterVmFileSystemStorageTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudVmClusterVmFileSystemStorageTypeEnum(val string) (CloudVmClusterVmFileSystemStorageTypeEnum, bool) {
+	enum, ok := mappingCloudVmClusterVmFileSystemStorageTypeEnumLowerCase[strings.ToLower(val)]
+	return enum, ok
+}
+
+// CloudVmClusterVmBackupStorageTypeEnum Enum with underlying type: string
+type CloudVmClusterVmBackupStorageTypeEnum string
+
+// Set of constants representing the allowable values for CloudVmClusterVmBackupStorageTypeEnum
+const (
+	CloudVmClusterVmBackupStorageTypeLocal    CloudVmClusterVmBackupStorageTypeEnum = "LOCAL"
+	CloudVmClusterVmBackupStorageTypeExascale CloudVmClusterVmBackupStorageTypeEnum = "EXASCALE"
+)
+
+var mappingCloudVmClusterVmBackupStorageTypeEnum = map[string]CloudVmClusterVmBackupStorageTypeEnum{
+	"LOCAL":    CloudVmClusterVmBackupStorageTypeLocal,
+	"EXASCALE": CloudVmClusterVmBackupStorageTypeExascale,
+}
+
+var mappingCloudVmClusterVmBackupStorageTypeEnumLowerCase = map[string]CloudVmClusterVmBackupStorageTypeEnum{
+	"local":    CloudVmClusterVmBackupStorageTypeLocal,
+	"exascale": CloudVmClusterVmBackupStorageTypeExascale,
+}
+
+// GetCloudVmClusterVmBackupStorageTypeEnumValues Enumerates the set of values for CloudVmClusterVmBackupStorageTypeEnum
+func GetCloudVmClusterVmBackupStorageTypeEnumValues() []CloudVmClusterVmBackupStorageTypeEnum {
+	values := make([]CloudVmClusterVmBackupStorageTypeEnum, 0)
+	for _, v := range mappingCloudVmClusterVmBackupStorageTypeEnum {
+		values = append(values, v)
+	}
+	return values
+}
+
+// GetCloudVmClusterVmBackupStorageTypeEnumStringValues Enumerates the set of values in String for CloudVmClusterVmBackupStorageTypeEnum
+func GetCloudVmClusterVmBackupStorageTypeEnumStringValues() []string {
+	return []string{
+		"LOCAL",
+		"EXASCALE",
+	}
+}
+
+// GetMappingCloudVmClusterVmBackupStorageTypeEnum performs case Insensitive comparison on enum value and return the desired enum
+func GetMappingCloudVmClusterVmBackupStorageTypeEnum(val string) (CloudVmClusterVmBackupStorageTypeEnum, bool) {
+	enum, ok := mappingCloudVmClusterVmBackupStorageTypeEnumLowerCase[strings.ToLower(val)]
 	return enum, ok
 }

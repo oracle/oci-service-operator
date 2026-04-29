@@ -12,7 +12,7 @@
   "pageShape": "argumentReferenceHTML",
   "inputSource": "fixture",
   "inputIdentity": "fixture:7.22.0/core/instance/page.html",
-  "bodySHA256": "50fb076e95d3831c14a89ea5e8f61da0a44fd651d6344fe51caee2efb6479169",
-  "bodyBytes": 450,
+  "bodySHA256": "df89605e2f67ac26179bae490f4fb34df4c14becec4854f10986270dca8ef31b",
+  "bodyBytes": 46803,
   "fixtureBodyPath": "7.22.0/core/instance/page.html"
 }

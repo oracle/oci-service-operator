@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "oda",
+  "slug": "skillparameter",
+  "kind": "SkillParameter",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "scaffold_oda_skillparameter",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateSkillParameter",
+        "requestType": "oda.CreateSkillParameterRequest",
+        "responseType": "oda.CreateSkillParameterResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetSkillParameter",
+        "requestType": "oda.GetSkillParameterRequest",
+        "responseType": "oda.GetSkillParameterResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListSkillParameter",
+        "requestType": "oda.ListSkillParameterRequest",
+        "responseType": "oda.ListSkillParameterResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateSkillParameter",
+        "requestType": "oda.UpdateSkillParameterRequest",
+        "responseType": "oda.UpdateSkillParameterResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteSkillParameter",
+        "requestType": "oda.DeleteSkillParameterRequest",
+        "responseType": "oda.DeleteSkillParameterResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "PROVISIONING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "scaffold_oda_skillparameter",
+    "collectionField": "skillparameter",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/oda/skillparameter/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/oda/skillparameter/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Scaffold placeholder for oda/skillparameter; replace imported facts before promoting this row beyond scaffold."
+  ]
+}

@@ -82,7 +82,7 @@ services:
           formalSpec: application
           async:
             strategy: lifecycle
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: lifecycle
 
   - service: nosql
@@ -100,7 +100,7 @@ services:
           formalSpec: table
           async:
             strategy: lifecycle
-            runtime: handwritten
+            runtime: generatedruntime
             formalClassification: lifecycle
 
   - service: objectstorage

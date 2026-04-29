@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -6,8 +6,8 @@
 //
 // OCI Generative AI is a fully managed service that provides a set of state-of-the-art, customizable large language models (LLMs) that cover a wide range of use cases for text generation, summarization, and text embeddings.
 // Use the Generative AI service management API to create and manage DedicatedAiCluster, Endpoint, Model, and WorkRequest in the Generative AI service. For example, create a custom model by fine-tuning an out-of-the-box model using your own data, on a fine-tuning dedicated AI cluster. Then, create a hosting dedicated AI cluster with an endpoint to host your custom model.
-// To access your custom model endpoints, or to try the out-of-the-box models to generate text, summarize, and create text embeddings see the Generative AI Inference API (https://docs.cloud.oracle.com/#/en/generative-ai-inference/latest/).
-// To learn more about the service, see the Generative AI documentation (https://docs.cloud.oracle.com/iaas/Content/generative-ai/home.htm).
+// To access your custom model endpoints, or to try the out-of-the-box models to generate text, summarize, and create text embeddings see the Generative AI Inference API (https://docs.oracle.com/iaas/api/#/en/generative-ai-inference/latest/).
+// To learn more about the service, see the Generative AI documentation (https://docs.oracle.com/iaas/Content/generative-ai/home.htm).
 //
 
 package generativeai
@@ -74,13 +74,19 @@ type ModelSummary struct {
 	// Corresponds to the time when the custom model and its associated foundation model will be deprecated.
 	TimeDeprecated *common.SDKTime `mandatory:"false" json:"timeDeprecated"`
 
+	// The timestamp indicating when the base model will no longer be available for on-demand usage.
+	TimeOnDemandRetired *common.SDKTime `mandatory:"false" json:"timeOnDemandRetired"`
+
+	// The timestamp indicating when the custom model and its associated foundation model will be fully retired.
+	TimeDedicatedRetired *common.SDKTime `mandatory:"false" json:"timeDedicatedRetired"`
+
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+	// For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -112,7 +118,7 @@ func (m ModelSummary) ValidateEnumValue() (bool, error) {
 	}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -120,24 +126,26 @@ func (m ModelSummary) ValidateEnumValue() (bool, error) {
 // UnmarshalJSON unmarshals from json
 func (m *ModelSummary) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		LifecycleDetails    *string                           `json:"lifecycleDetails"`
-		DisplayName         *string                           `json:"displayName"`
-		Vendor              *string                           `json:"vendor"`
-		Version             *string                           `json:"version"`
-		BaseModelId         *string                           `json:"baseModelId"`
-		FineTuneDetails     *FineTuneDetails                  `json:"fineTuneDetails"`
-		ModelMetrics        modelmetrics                      `json:"modelMetrics"`
-		IsLongTermSupported *bool                             `json:"isLongTermSupported"`
-		TimeDeprecated      *common.SDKTime                   `json:"timeDeprecated"`
-		FreeformTags        map[string]string                 `json:"freeformTags"`
-		DefinedTags         map[string]map[string]interface{} `json:"definedTags"`
-		SystemTags          map[string]map[string]interface{} `json:"systemTags"`
-		Id                  *string                           `json:"id"`
-		CompartmentId       *string                           `json:"compartmentId"`
-		Capabilities        []ModelCapabilityEnum             `json:"capabilities"`
-		LifecycleState      ModelLifecycleStateEnum           `json:"lifecycleState"`
-		TimeCreated         *common.SDKTime                   `json:"timeCreated"`
-		Type                ModelTypeEnum                     `json:"type"`
+		LifecycleDetails     *string                           `json:"lifecycleDetails"`
+		DisplayName          *string                           `json:"displayName"`
+		Vendor               *string                           `json:"vendor"`
+		Version              *string                           `json:"version"`
+		BaseModelId          *string                           `json:"baseModelId"`
+		FineTuneDetails      *FineTuneDetails                  `json:"fineTuneDetails"`
+		ModelMetrics         modelmetrics                      `json:"modelMetrics"`
+		IsLongTermSupported  *bool                             `json:"isLongTermSupported"`
+		TimeDeprecated       *common.SDKTime                   `json:"timeDeprecated"`
+		TimeOnDemandRetired  *common.SDKTime                   `json:"timeOnDemandRetired"`
+		TimeDedicatedRetired *common.SDKTime                   `json:"timeDedicatedRetired"`
+		FreeformTags         map[string]string                 `json:"freeformTags"`
+		DefinedTags          map[string]map[string]interface{} `json:"definedTags"`
+		SystemTags           map[string]map[string]interface{} `json:"systemTags"`
+		Id                   *string                           `json:"id"`
+		CompartmentId        *string                           `json:"compartmentId"`
+		Capabilities         []ModelCapabilityEnum             `json:"capabilities"`
+		LifecycleState       ModelLifecycleStateEnum           `json:"lifecycleState"`
+		TimeCreated          *common.SDKTime                   `json:"timeCreated"`
+		Type                 ModelTypeEnum                     `json:"type"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -170,6 +178,10 @@ func (m *ModelSummary) UnmarshalJSON(data []byte) (e error) {
 	m.IsLongTermSupported = model.IsLongTermSupported
 
 	m.TimeDeprecated = model.TimeDeprecated
+
+	m.TimeOnDemandRetired = model.TimeOnDemandRetired
+
+	m.TimeDedicatedRetired = model.TimeDedicatedRetired
 
 	m.FreeformTags = model.FreeformTags
 

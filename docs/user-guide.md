@@ -54,7 +54,7 @@ Use one of the authentication paths from [Installation](installation.md):
   cluster runs in OCI
 - [User Principal](installation.md#enable-user-principal) when the controller
   runs outside OCI
-- [Security Token](installation.md#enable-security-token) when that matches
+- [Security Token](installation.md#security-token) when that matches
   your external-OCI workflow
 
 For this example, the MySQL controller runs in the

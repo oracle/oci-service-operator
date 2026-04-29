@@ -32,6 +32,10 @@ type DbSystemSpec struct {
 	// User-provided data about the DB System.
 	// +kubebuilder:validation:Optional
 	Description string `json:"description,omitempty"`
+	// +kubebuilder:validation:Optional
+	Rest DbSystemRest `json:"rest,omitempty"`
+	// +kubebuilder:validation:Optional
+	DatabaseConsole DbSystemDatabaseConsole `json:"databaseConsole,omitempty"`
 	// Specifies if the DB System is highly available.
 	// When creating a DB System with High Availability, three instances
 	// are created and placed according to your region- and
@@ -60,6 +64,14 @@ type DbSystemSpec struct {
 	// The specific MySQL version identifier.
 	// +kubebuilder:validation:Optional
 	MysqlVersion string `json:"mysqlVersion,omitempty"`
+	// Network Security Group OCIDs used for the VNIC attachment.
+	// +kubebuilder:validation:Optional
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	// +kubebuilder:validation:Optional
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
 	// The username for the administrative user sourced from a Kubernetes Secret in the same namespace.
 	// The referenced Secret must contain a `username` key.
 	// +kubebuilder:validation:Optional
@@ -73,6 +85,8 @@ type DbSystemSpec struct {
 	// the log volume for the database will be scaled appropriately with its shape.
 	// +kubebuilder:validation:Optional
 	DataStorageSizeInGBs int `json:"dataStorageSizeInGBs,omitempty"`
+	// +kubebuilder:validation:Optional
+	DataStorage DbSystemDataStorage `json:"dataStorage,omitempty"`
 	// The hostname for the primary endpoint of the DB System. Used for DNS.
 	// The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN)
 	// (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com").
@@ -117,6 +131,79 @@ type DbSystemSpec struct {
 	DatabaseManagement string `json:"databaseManagement,omitempty"`
 	// +kubebuilder:validation:Optional
 	SecureConnections DbSystemSecureConnections `json:"secureConnections,omitempty"`
+	// +kubebuilder:validation:Optional
+	EncryptData DbSystemEncryptData `json:"encryptData,omitempty"`
+	// The database mode indicating the types of statements that will be allowed to run in the DB system.
+	// This mode will apply only to statements run by user connections. Replicated write statements will continue
+	// to be allowed regardless of the DatabaseMode.
+	//   - READ_WRITE (default): allow running read and write statements on the DB system;
+	//   - READ_ONLY: only allow running read statements on the DB system.
+	// +kubebuilder:validation:Optional
+	DatabaseMode string `json:"databaseMode,omitempty"`
+	// The access mode indicating if the database access will be restricted only to administrators or not:
+	//  - UNRESTRICTED (default): the access to the database is not restricted;
+	//  - RESTRICTED: the access will be allowed only to users with specific privileges;
+	//    RESTRICTED will correspond to setting the MySQL system variable
+	//    offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON.
+	// +kubebuilder:validation:Optional
+	AccessMode string `json:"accessMode,omitempty"`
+	// The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource.
+	// Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators.
+	// Up to 10 email addresses can be added to the customer contacts for a DB System.
+	// +kubebuilder:validation:Optional
+	CustomerContacts []DbSystemCustomerContact `json:"customerContacts,omitempty"`
+	// +kubebuilder:validation:Optional
+	ReadEndpoint DbSystemReadEndpoint `json:"readEndpoint,omitempty"`
+	// +kubebuilder:validation:Optional
+	TelemetryConfiguration DbSystemTelemetryConfiguration `json:"telemetryConfiguration,omitempty"`
+}
+
+// DbSystemRest defines nested fields for DbSystem.Rest.
+type DbSystemRest struct {
+	// Select how REST is configured across the DB System instances.
+	// +kubebuilder:validation:Required
+	Configuration string `json:"configuration"`
+	// The port for REST to listen on. Supported port numbers are 443 and from 1024 to 65535.
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
+}
+
+// DbSystemDatabaseConsole defines nested fields for DbSystem.DatabaseConsole.
+type DbSystemDatabaseConsole struct {
+	// Enable/disable the database console on the DB System.
+	// +kubebuilder:validation:Required
+	Status string `json:"status"`
+	// The port on which the database console can be accessed. Supported port numbers are 443 and from 1024 to 65535.
+	// +kubebuilder:validation:Optional
+	Port int `json:"port,omitempty"`
+}
+
+// DbSystemDataStorage defines nested fields for DbSystem.DataStorage.
+type DbSystemDataStorage struct {
+	// Enable/disable automatic storage expansion. When set to true, the DB System will automatically
+	// add storage incrementally up to the value specified in maxStorageSizeInGBs.
+	// +kubebuilder:validation:Optional
+	IsAutoExpandStorageEnabled bool `json:"isAutoExpandStorageEnabled,omitempty"`
+	// Maximum storage size this DB System can expand to. When isAutoExpandStorageEnabled
+	// is set to true, the DB System will add storage incrementally up to this value.
+	// DB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB.
+	// DB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB.
+	// DB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB.
+	// DB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB.
+	// It is not possible to decrease data storage size. You cannot set the maximum data storage size to less
+	// than either current DB System dataStorageSizeInGBs or allocatedStorageSizeInGBs.
+	// +kubebuilder:validation:Optional
+	MaxStorageSizeInGBs int `json:"maxStorageSizeInGBs,omitempty"`
+}
+
+// DbSystemBackupPolicyCopyPolicy defines nested fields for DbSystem.BackupPolicy.CopyPolicy.
+type DbSystemBackupPolicyCopyPolicy struct {
+	// The destination region name to which the DB system backup will be copied.
+	// +kubebuilder:validation:Required
+	CopyToRegion string `json:"copyToRegion"`
+	// Number of days to retain the copied DB system backup.
+	// +kubebuilder:validation:Optional
+	BackupCopyRetentionInDays int `json:"backupCopyRetentionInDays,omitempty"`
 }
 
 // DbSystemBackupPolicyPitrPolicy defines nested fields for DbSystem.BackupPolicy.PitrPolicy.
@@ -131,6 +218,16 @@ type DbSystemBackupPolicy struct {
 	// Specifies if automatic backups are enabled.
 	// +kubebuilder:validation:Optional
 	IsEnabled bool `json:"isEnabled,omitempty"`
+	// Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED
+	// state for 7 days before permanently deleting it.
+	// +kubebuilder:validation:Optional
+	SoftDelete string `json:"softDelete,omitempty"`
+	// List of policies of a DB system to schedule cross-region DB system backup copy.
+	// The policy includes the name of the destination region to which the DB system backup will be copied, and
+	// an optional parameter which specifies the retention period of the copied DB system backup in days.
+	// **Note:** Currently, only one policy can be specified in the list.
+	// +kubebuilder:validation:Optional
+	CopyPolicies []DbSystemBackupPolicyCopyPolicy `json:"copyPolicies,omitempty"`
 	// The start of a 30-minute window of time in which daily, automated backups occur.
 	// This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
 	// At some point in the window, the system may incur a brief service disruption as the backup is performed.
@@ -183,6 +280,20 @@ type DbSystemSource struct {
 	RecoveryPoint string `json:"recoveryPoint,omitempty"`
 }
 
+// DbSystemMaintenanceMaintenanceDisabledWindow defines nested fields for DbSystem.Maintenance.MaintenanceDisabledWindow.
+type DbSystemMaintenanceMaintenanceDisabledWindow struct {
+	// The time from when maintenance is disabled.
+	// Must be set together with timeEnd and must be before timeEnd.
+	// as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+	// +kubebuilder:validation:Required
+	TimeStart string `json:"timeStart"`
+	// The time until when maintenance is disabled.
+	// Must be set together with timeStart and must be after timeStart.
+	// as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+	// +kubebuilder:validation:Required
+	TimeEnd string `json:"timeEnd"`
+}
+
 // DbSystemMaintenance defines nested fields for DbSystem.Maintenance.
 type DbSystemMaintenance struct {
 	// The start of the 2 hour maintenance window.
@@ -192,6 +303,28 @@ type DbSystemMaintenance struct {
 	// If you set the read replica maintenance window to "" or if not specified, the read replica is set same as the DB system maintenance window.
 	// +kubebuilder:validation:Required
 	WindowStartTime string `json:"windowStartTime"`
+	// The preferred version to target when performing an automatic MySQL upgrade. Defaults to OLDEST.
+	// OLDEST: Choose the oldest available MySQL version based on the current version of the DB System.
+	// SECOND_NEWEST: Choose the MySQL version before the newest for auto-upgrade.
+	// NEWEST: Choose the latest and greatest MySQL version available for auto-upgrade.
+	// +kubebuilder:validation:Optional
+	VersionPreference string `json:"versionPreference,omitempty"`
+	// The preferred version track to target when performing an automatic MySQL upgrade. Defaults to FOLLOW.
+	// LONG_TERM_SUPPORT: No MySQL database behavior changes.
+	// INNOVATION:        Provides access to the latest features and all bug fixes.
+	// FOLLOW:            Follows the track of the current MySQL version.
+	// +kubebuilder:validation:Optional
+	VersionTrackPreference string `json:"versionTrackPreference,omitempty"`
+	// The maintenance schedule type of the DB system. Defaults to REGULAR.
+	// EARLY:   Maintenance schedule follows a cycle where upgrades are performed when versions become deprecated.
+	// REGULAR: Maintenance schedule follows the normal cycle where upgrades are performed when versions become unavailable.
+	// +kubebuilder:validation:Optional
+	MaintenanceScheduleType string `json:"maintenanceScheduleType,omitempty"`
+	// Time window during which downtime-inducing maintenance shall not be performed.
+	// Downtime-free maintenance may be performed to apply required security patches.
+	// At most one configured window is supported.
+	// +kubebuilder:validation:Optional
+	MaintenanceDisabledWindows []DbSystemMaintenanceMaintenanceDisabledWindow `json:"maintenanceDisabledWindows,omitempty"`
 }
 
 // DbSystemDeletionPolicy defines nested fields for DbSystem.DeletionPolicy.
@@ -217,6 +350,138 @@ type DbSystemSecureConnections struct {
 	// The OCID of the certificate to use.
 	// +kubebuilder:validation:Optional
 	CertificateId string `json:"certificateId,omitempty"`
+}
+
+// DbSystemEncryptData defines nested fields for DbSystem.EncryptData.
+type DbSystemEncryptData struct {
+	// Select whether to use Oracle-managed key (SYSTEM) or your own key (BYOK).
+	// +kubebuilder:validation:Required
+	KeyGenerationType string `json:"keyGenerationType"`
+	// The OCID of the key to use.
+	// +kubebuilder:validation:Optional
+	KeyId string `json:"keyId,omitempty"`
+}
+
+// DbSystemCustomerContact defines nested fields for DbSystem.CustomerContact.
+type DbSystemCustomerContact struct {
+	// The email address used by Oracle to send notifications regarding the DB System.
+	// +kubebuilder:validation:Required
+	Email string `json:"email"`
+}
+
+// DbSystemReadEndpoint defines nested fields for DbSystem.ReadEndpoint.
+type DbSystemReadEndpoint struct {
+	// Specifies if the DB System read endpoint is enabled or not.
+	// +kubebuilder:validation:Optional
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// The IP address the DB System read endpoint is configured to listen on.
+	// A private IP address of your choice to assign to the read endpoint of the DB System.
+	// Must be an available IP address within the subnet's CIDR. If you don't specify a value,
+	// Oracle automatically assigns a private IP address from the subnet. This should be a
+	// "dotted-quad" style IPv4 address.
+	// +kubebuilder:validation:Optional
+	ReadEndpointIpAddress string `json:"readEndpointIpAddress,omitempty"`
+	// The hostname for the read endpoint of the DB System. Used for DNS.
+	// The value is the hostname portion of the primary private IP's fully qualified domain name (FQDN)
+	// (for example, "dbsystem-1" in FQDN "dbsystem-1.subnet123.vcn1.oraclevcn.com").
+	// Must be unique across all VNICs in the subnet and comply with RFC 952 and RFC 1123.
+	// +kubebuilder:validation:Optional
+	ReadEndpointHostnameLabel string `json:"readEndpointHostnameLabel,omitempty"`
+	// A list of IP addresses of read replicas that are excluded from serving read requests.
+	// +kubebuilder:validation:Optional
+	ExcludeIps []string `json:"excludeIps,omitempty"`
+}
+
+// DbSystemTelemetryConfigurationLogDestinationConfiguration defines nested fields for DbSystem.TelemetryConfiguration.Log.DestinationConfiguration.
+type DbSystemTelemetryConfigurationLogDestinationConfiguration struct {
+	// Name of the destination configuration variable.
+	// +kubebuilder:validation:Required
+	Key string `json:"key"`
+	// Value of the destination configuration variable.
+	// +kubebuilder:validation:Required
+	Value string `json:"value"`
+}
+
+// DbSystemTelemetryConfigurationLog defines nested fields for DbSystem.TelemetryConfiguration.Log.
+type DbSystemTelemetryConfigurationLog struct {
+	// Type of destination where MySQL telemetry is exposed to.
+	// +kubebuilder:validation:Required
+	Destination string `json:"destination"`
+	// List of configuration variables for a given destination type.
+	// +kubebuilder:validation:Required
+	DestinationConfigurations []DbSystemTelemetryConfigurationLogDestinationConfiguration `json:"destinationConfigurations"`
+	// List of MySQL telemetry types that can be exposed on a telemetry destination
+	// +kubebuilder:validation:Required
+	LogTypes []string `json:"logTypes"`
+}
+
+// DbSystemTelemetryConfiguration defines nested fields for DbSystem.TelemetryConfiguration.
+type DbSystemTelemetryConfiguration struct {
+	// Telemetry configuration details for logging.
+	// +kubebuilder:validation:Optional
+	Logs []DbSystemTelemetryConfigurationLog `json:"logs,omitempty"`
+}
+
+// DbSystemDataStorageObservedState defines nested fields for DbSystem.DataStorage.
+type DbSystemDataStorageObservedState struct {
+	// Enable/disable automatic storage expansion. When set to true, the DB System will automatically
+	// add storage incrementally up to the value specified in maxStorageSizeInGBs.
+	IsAutoExpandStorageEnabled bool `json:"isAutoExpandStorageEnabled,omitempty"`
+	// Maximum storage size this DB System can expand to. When isAutoExpandStorageEnabled
+	// is set to true, the DB System will add storage incrementally up to this value.
+	// DB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB.
+	// DB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB.
+	// DB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB.
+	// DB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB.
+	// It is not possible to decrease data storage size. You cannot set the maximum data storage size to less
+	// than either current DB System dataStorageSizeInGBs or allocatedStorageSizeInGBs.
+	MaxStorageSizeInGBs int `json:"maxStorageSizeInGBs,omitempty"`
+	// The actual allocated storage size for the DB System. This may be higher than dataStorageSizeInGBs
+	// if an automatic storage expansion has occurred.
+	AllocatedStorageSizeInGBs int `json:"allocatedStorageSizeInGBs,omitempty"`
+	// User specified size of the data volume. May be less than current allocatedStorageSizeInGBs.
+	DataStorageSizeInGBs int `json:"dataStorageSizeInGBs,omitempty"`
+	// The absolute limit the DB System's storage size may ever expand to, either manually or automatically.
+	// This limit is based based on the initial dataStorageSizeInGBs when the DB System was first created.
+	// Both dataStorageSizeInGBs and maxDataStorageSizeInGBs can not exceed this value.
+	// DB Systems with an initial storage size of 400 GB or less can be expanded up to 32 TB.
+	// DB Systems with an initial storage size between 401-800 GB can be expanded up to 64 TB.
+	// DB Systems with an initial storage size between 801-1200 GB can be expanded up to 96 TB.
+	// DB Systems with an initial storage size of 1201 GB or more can be expanded up to 128 TB.
+	DataStorageSizeLimitInGBs int `json:"dataStorageSizeLimitInGBs,omitempty"`
+}
+
+// DbSystemMaintenanceObservedState defines nested fields for DbSystem.Maintenance.
+type DbSystemMaintenanceObservedState struct {
+	// The start time of the maintenance window.
+	// This string is of the format: "{day-of-week} {time-of-day}".
+	// "{day-of-week}" is a case-insensitive string like "mon", "tue", &c.
+	// "{time-of-day}" is the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
+	// If you set the read replica maintenance window to "" or if not specified, the read replica is set same as the DB system maintenance window.
+	WindowStartTime string `json:"windowStartTime,omitempty"`
+	// The preferred version to target when performing an automatic MySQL upgrade.
+	// OLDEST: Choose the oldest available MySQL version based on the current version of the DB System.
+	// SECOND_NEWEST: Choose the MySQL version before the newest for auto-upgrade.
+	// NEWEST: Choose the latest and greatest MySQL version available for auto-upgrade.
+	VersionPreference string `json:"versionPreference,omitempty"`
+	// The preferred version track to target when performing an automatic MySQL upgrade.
+	// LONG_TERM_SUPPORT: No MySQL database behavior changes.
+	// INNOVATION:        Provides access to the latest features and all bug fixes.
+	// FOLLOW:            Follows the track of the current MySQL version.
+	VersionTrackPreference string `json:"versionTrackPreference,omitempty"`
+	// The maintenance schedule type of the DB system.
+	// EARLY:   Maintenance schedule follows a cycle where upgrades are performed when versions become deprecated.
+	// REGULAR: Maintenance schedule follows the normal cycle where upgrades are performed when versions become unavailable.
+	MaintenanceScheduleType string `json:"maintenanceScheduleType,omitempty"`
+	// The time the scheduled maintenance is expected to start,
+	// as described by RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+	TimeScheduled string `json:"timeScheduled,omitempty"`
+	// The version that is expected to be targeted during the next scheduled maintenance run.
+	TargetVersion string `json:"targetVersion,omitempty"`
+	// Time window during which downtime-inducing maintenance shall not be performed.
+	// Downtime-free maintenance may be performed to apply required security patches.
+	// At most one configured window is supported.
+	MaintenanceDisabledWindows []DbSystemMaintenanceMaintenanceDisabledWindow `json:"maintenanceDisabledWindows,omitempty"`
 }
 
 // DbSystemCurrentPlacement defines nested fields for DbSystem.CurrentPlacement.
@@ -245,6 +510,54 @@ type DbSystemHeatWaveCluster struct {
 	TimeUpdated string `json:"timeUpdated,omitempty"`
 	// Lakehouse enabled status for the HeatWave cluster.
 	IsLakehouseEnabled bool `json:"isLakehouseEnabled,omitempty"`
+}
+
+// DbSystemControlledUpdate defines nested fields for DbSystem.ControlledUpdate.
+type DbSystemControlledUpdate struct {
+	// The MySQL version to be applied to the selected instances.
+	TargetMysqlVersion string `json:"targetMysqlVersion,omitempty"`
+	// Defines the MySQL instances to be operated during a controlled update.
+	//  - ALL_BUT_PRIMARY: Update all MySQL instances in a highly available DB System except the primary group member,
+	//    without triggering a controlled failover.
+	//  - PRIMARY_ONLY: Update the primary group member in a highly available DB System
+	//    after a controlled failover (downtime is expected). This operation requires that the other
+	//    MySQL instances have been previously updated using the ALL_BUT_PRIMARY option.
+	TargetDbInstances string `json:"targetDbInstances,omitempty"`
+}
+
+// DbSystemBackupPolicyObservedState defines nested fields for DbSystem.BackupPolicy.
+type DbSystemBackupPolicyObservedState struct {
+	// If automated backups are enabled or disabled.
+	IsEnabled bool `json:"isEnabled,omitempty"`
+	// The start of a 30-minute window of time in which daily, automated backups occur.
+	// This should be in the format of the "Time" portion of an RFC3339-formatted timestamp. Any second or sub-second time data will be truncated to zero.
+	// At some point in the window, the system may incur a brief service disruption as the backup is performed.
+	// If not defined, a window is selected from the following Region-based time-spans:
+	// - eu-frankfurt-1: 20:00 - 04:00 UTC
+	// - us-ashburn-1: 03:00 - 11:00 UTC
+	// - uk-london-1: 06:00 - 14:00 UTC
+	// - ap-tokyo-1: 13:00 - 21:00
+	// - us-phoenix-1: 06:00 - 14:00
+	WindowStartTime string `json:"windowStartTime,omitempty"`
+	// The number of days automated backups are retained.
+	RetentionInDays int `json:"retentionInDays,omitempty"`
+	// Retains the backup to be deleted due to the retention policy in DELETE SCHEDULED
+	// state for 7 days before permanently deleting it.
+	SoftDelete string `json:"softDelete,omitempty"`
+	// List of policies of a DB system to schedule cross-region DB system backup copy.
+	// The policy includes the name of the destination region to which the DB system backup will be copied, and
+	// an optional parameter which specifies the retention period of the copied DB system backup in days.
+	// **Note:** Currently, only one policy can be specified in the list.
+	CopyPolicies []DbSystemBackupPolicyCopyPolicy `json:"copyPolicies,omitempty"`
+	// Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+	// Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
+	// Example: `{"bar-key": "value"}`
+	FreeformTags map[string]string `json:"freeformTags,omitempty"`
+	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+	// Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
+	// Example: `{"foo-namespace": {"bar-key": "value"}}`
+	DefinedTags map[string]shared.MapValue     `json:"definedTags,omitempty"`
+	PitrPolicy  DbSystemBackupPolicyPitrPolicy `json:"pitrPolicy,omitempty"`
 }
 
 // DbSystemSourceObservedState defines nested fields for DbSystem.Source.
@@ -393,6 +706,9 @@ type DbSystemChannel struct {
 	// Usage of predefined tag keys. These predefined keys are scoped to namespaces.
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 }
 
 // DbSystemPointInTimeRecoveryDetails defines nested fields for DbSystem.PointInTimeRecoveryDetails.
@@ -416,18 +732,41 @@ type DbSystemStatus struct {
 	SubnetId string `json:"subnetId,omitempty"`
 	// Name of the MySQL Version in use for the DB System.
 	MysqlVersion string `json:"mysqlVersion,omitempty"`
-	// Initial size of the data volume in GiBs that will be created and attached.
-	DataStorageSizeInGBs int `json:"dataStorageSizeInGBs,omitempty"`
+	// DEPRECATED: User specified size of the data volume. May be less than current allocatedStorageSizeInGBs.
+	// Replaced by dataStorage.dataStorageSizeInGBs.
+	DataStorageSizeInGBs int                              `json:"dataStorageSizeInGBs,omitempty"`
+	DataStorage          DbSystemDataStorageObservedState `json:"dataStorage,omitempty"`
 	// The current state of the DB System.
-	LifecycleState string                 `json:"lifecycleState,omitempty"`
-	Maintenance    DbSystemMaintenance    `json:"maintenance,omitempty"`
-	DeletionPolicy DbSystemDeletionPolicy `json:"deletionPolicy,omitempty"`
+	LifecycleState string                           `json:"lifecycleState,omitempty"`
+	Maintenance    DbSystemMaintenanceObservedState `json:"maintenance,omitempty"`
+	DeletionPolicy DbSystemDeletionPolicy           `json:"deletionPolicy,omitempty"`
 	// The date and time the DB System was created.
 	TimeCreated string `json:"timeCreated,omitempty"`
 	// The time the DB System was last updated.
 	TimeUpdated string `json:"timeUpdated,omitempty"`
+	// The database mode indicating the types of statements that are allowed to run in the the DB system.
+	// This mode applies only to statements run by user connections. Replicated write statements continue
+	// to be allowed regardless of the DatabaseMode.
+	//   - READ_WRITE: allow running read and write statements on the DB system;
+	//   - READ_ONLY: only allow running read statements on the DB system.
+	DatabaseMode string `json:"databaseMode,omitempty"`
+	// The access mode indicating if the database access is unrestricted (to all MySQL user accounts),
+	// or restricted (to only certain users with specific privileges):
+	//  - UNRESTRICTED: the access to the database is not restricted;
+	//  - RESTRICTED: access allowed only to users with specific privileges;
+	//    RESTRICTED will correspond to setting the MySQL system variable
+	//    offline_mode (https://dev.mysql.com/doc/en/server-system-variables.html#sysvar_offline_mode) to ON.
+	AccessMode string `json:"accessMode,omitempty"`
 	// User-provided data about the DB System.
 	Description string `json:"description,omitempty"`
+	// Network Security Group OCIDs used for the VNIC attachment.
+	NsgIds []string `json:"nsgIds,omitempty"`
+	// Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see ZPR Artifacts (https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm).
+	// Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+	SecurityAttributes map[string]shared.MapValue `json:"securityAttributes,omitempty"`
+	Rest               DbSystemRest               `json:"rest,omitempty"`
+	DatabaseConsole    DbSystemDatabaseConsole    `json:"databaseConsole,omitempty"`
 	// Specifies if the DB System is highly available.
 	IsHighlyAvailable bool                     `json:"isHighlyAvailable,omitempty"`
 	CurrentPlacement  DbSystemCurrentPlacement `json:"currentPlacement,omitempty"`
@@ -451,9 +790,10 @@ type DbSystemStatus struct {
 	// and memory for VM shapes; CPU cores, memory and storage for non-VM
 	// (or bare metal) shapes. To get a list of shapes, use (the
 	// ListShapes operation.
-	ShapeName    string                      `json:"shapeName,omitempty"`
-	BackupPolicy DbSystemBackupPolicy        `json:"backupPolicy,omitempty"`
-	Source       DbSystemSourceObservedState `json:"source,omitempty"`
+	ShapeName        string                            `json:"shapeName,omitempty"`
+	ControlledUpdate DbSystemControlledUpdate          `json:"controlledUpdate,omitempty"`
+	BackupPolicy     DbSystemBackupPolicyObservedState `json:"backupPolicy,omitempty"`
+	Source           DbSystemSourceObservedState       `json:"source,omitempty"`
 	// The OCID of the Configuration to be used for Instances in this DB System.
 	ConfigurationId string `json:"configurationId,omitempty"`
 	// The hostname for the primary endpoint of the DB System. Used for DNS.
@@ -482,6 +822,9 @@ type DbSystemStatus struct {
 	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
 	// Example: `{"foo-namespace": {"bar-key": "value"}}`
 	DefinedTags map[string]shared.MapValue `json:"definedTags,omitempty"`
+	// Usage of system tag keys. These predefined keys are scoped to namespaces.
+	// Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+	SystemTags map[string]shared.MapValue `json:"systemTags,omitempty"`
 	// Whether to run the DB System with InnoDB Redo Logs and the Double Write Buffer enabled or disabled,
 	// and whether to enable or disable syncing of the Binary Logs.
 	CrashRecovery              string                             `json:"crashRecovery,omitempty"`
@@ -489,6 +832,13 @@ type DbSystemStatus struct {
 	// Whether to enable monitoring via the Database Management service.
 	DatabaseManagement string                    `json:"databaseManagement,omitempty"`
 	SecureConnections  DbSystemSecureConnections `json:"secureConnections,omitempty"`
+	EncryptData        DbSystemEncryptData       `json:"encryptData,omitempty"`
+	// The list of customer email addresses that receive information from Oracle about the specified OCI DB System resource.
+	// Oracle uses these email addresses to send notifications about planned and unplanned software maintenance updates, information about system hardware, and other information needed by administrators.
+	// Up to 10 email addresses can be added to the customer contacts for a DB System.
+	CustomerContacts       []DbSystemCustomerContact      `json:"customerContacts,omitempty"`
+	ReadEndpoint           DbSystemReadEndpoint           `json:"readEndpoint,omitempty"`
+	TelemetryConfiguration DbSystemTelemetryConfiguration `json:"telemetryConfiguration,omitempty"`
 	// The last applied secret reference for the administrative username.
 	AdminUsername shared.UsernameSource `json:"adminUsername,omitempty,omitzero"`
 	// The last applied secret reference for the administrative password.

@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -75,6 +75,10 @@ func (m *pipelinesteprun) UnmarshalPolymorphicJSON(data []byte) (interface{}, er
 
 	var err error
 	switch m.StepType {
+	case "CONTAINER":
+		mm := PipelineContainerStepRun{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	case "CUSTOM_SCRIPT":
 		mm := PipelineCustomScriptStepRun{}
 		err = json.Unmarshal(data, &mm)
@@ -83,8 +87,12 @@ func (m *pipelinesteprun) UnmarshalPolymorphicJSON(data []byte) (interface{}, er
 		mm := PipelineMlJobStepRun{}
 		err = json.Unmarshal(data, &mm)
 		return mm, err
+	case "DATAFLOW":
+		mm := PipelineDataflowStepRun{}
+		err = json.Unmarshal(data, &mm)
+		return mm, err
 	default:
-		common.Logf("Recieved unsupported enum value for PipelineStepRun: %s.", m.StepType)
+		common.Logf("Received unsupported enum value for PipelineStepRun: %s.", m.StepType)
 		return *m, nil
 	}
 }
@@ -128,7 +136,7 @@ func (m pipelinesteprun) ValidateEnumValue() (bool, error) {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for LifecycleState: %s. Supported values are: %s.", m.LifecycleState, strings.Join(GetPipelineStepRunLifecycleStateEnumStringValues(), ",")))
 	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -210,16 +218,22 @@ type PipelineStepRunStepTypeEnum string
 const (
 	PipelineStepRunStepTypeMlJob        PipelineStepRunStepTypeEnum = "ML_JOB"
 	PipelineStepRunStepTypeCustomScript PipelineStepRunStepTypeEnum = "CUSTOM_SCRIPT"
+	PipelineStepRunStepTypeContainer    PipelineStepRunStepTypeEnum = "CONTAINER"
+	PipelineStepRunStepTypeDataflow     PipelineStepRunStepTypeEnum = "DATAFLOW"
 )
 
 var mappingPipelineStepRunStepTypeEnum = map[string]PipelineStepRunStepTypeEnum{
 	"ML_JOB":        PipelineStepRunStepTypeMlJob,
 	"CUSTOM_SCRIPT": PipelineStepRunStepTypeCustomScript,
+	"CONTAINER":     PipelineStepRunStepTypeContainer,
+	"DATAFLOW":      PipelineStepRunStepTypeDataflow,
 }
 
 var mappingPipelineStepRunStepTypeEnumLowerCase = map[string]PipelineStepRunStepTypeEnum{
 	"ml_job":        PipelineStepRunStepTypeMlJob,
 	"custom_script": PipelineStepRunStepTypeCustomScript,
+	"container":     PipelineStepRunStepTypeContainer,
+	"dataflow":      PipelineStepRunStepTypeDataflow,
 }
 
 // GetPipelineStepRunStepTypeEnumValues Enumerates the set of values for PipelineStepRunStepTypeEnum
@@ -236,6 +250,8 @@ func GetPipelineStepRunStepTypeEnumStringValues() []string {
 	return []string{
 		"ML_JOB",
 		"CUSTOM_SCRIPT",
+		"CONTAINER",
+		"DATAFLOW",
 	}
 }
 

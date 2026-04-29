@@ -12,7 +12,7 @@
   "pageShape": "argumentReferenceHTML",
   "inputSource": "fixture",
   "inputIdentity": "fixture:7.22.0/ocvp/cluster/page.html",
-  "bodySHA256": "6529509603c062a3081b127aa9f415f8e17cd3d1fc2d11241a1ad1685d8b6bae",
-  "bodyBytes": 2124,
+  "bodySHA256": "473e7160bc2e5a5938b1d8a0fb48f9dd7ece562199149329b9ca407a1c432f0a",
+  "bodyBytes": 14546,
   "fixtureBodyPath": "7.22.0/ocvp/cluster/page.html"
 }

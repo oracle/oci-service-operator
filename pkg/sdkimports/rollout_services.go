@@ -10,6 +10,7 @@ package sdkimports
 import (
 	_ "github.com/oracle/oci-go-sdk/v65/aidocument"
 	_ "github.com/oracle/oci-go-sdk/v65/ailanguage"
+	_ "github.com/oracle/oci-go-sdk/v65/aispeech"
 	_ "github.com/oracle/oci-go-sdk/v65/aivision"
 	_ "github.com/oracle/oci-go-sdk/v65/analytics"
 	_ "github.com/oracle/oci-go-sdk/v65/artifacts"

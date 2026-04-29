@@ -24,7 +24,4 @@ Manage OCI Monitoring resources from Kubernetes.
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `monitoring/Alarm` | `monitoring.oracle.com/v1beta1` | — | — | [Sample](../../samples/monitoring/v1beta1/alarm.md) | [Reference](../../api/monitoring/v1beta1/index.md#kind-alarm) |
-| `monitoring/AlarmHistory` | `monitoring.oracle.com/v1beta1` | — | — | [Sample](../../samples/monitoring/v1beta1/alarmhistory.md) | [Reference](../../api/monitoring/v1beta1/index.md#kind-alarmhistory) |
-| `monitoring/AlarmStatus` | `monitoring.oracle.com/v1beta1` | — | — | [Sample](../../samples/monitoring/v1beta1/alarmstatus.md) | [Reference](../../api/monitoring/v1beta1/index.md#kind-alarmstatus) |
 | `monitoring/AlarmSuppression` | `monitoring.oracle.com/v1beta1` | — | — | [Sample](../../samples/monitoring/v1beta1/alarmsuppression.md) | [Reference](../../api/monitoring/v1beta1/index.md#kind-alarmsuppression) |
-| `monitoring/Metric` | `monitoring.oracle.com/v1beta1` | — | — | [Sample](../../samples/monitoring/v1beta1/metric.md) | [Reference](../../api/monitoring/v1beta1/index.md#kind-metric) |

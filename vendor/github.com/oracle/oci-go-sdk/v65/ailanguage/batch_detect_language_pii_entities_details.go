@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -24,14 +24,19 @@ type BatchDetectLanguagePiiEntitiesDetails struct {
 	// List of documents to detect personal identification information.
 	Documents []TextDocument `mandatory:"true" json:"documents"`
 
+	// Unique name across user tenancy in a region to identify an endpoint to be used for inferencing.
+	Alias *string `mandatory:"false" json:"alias"`
+
 	// The endpoint which have to be used for inferencing. If endpointId and compartmentId is provided, then inference will be served from custom model which is mapped to this Endpoint.
 	EndpointId *string `mandatory:"false" json:"endpointId"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment that calls the API, inference will be served from pre trained model
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that calls the API, inference will be served from pre trained model
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
 	// Mask recognized PII entities with different modes.
 	Masking map[string]PiiEntityMasking `mandatory:"false" json:"masking"`
+
+	Profile *Profile `mandatory:"false" json:"profile"`
 }
 
 func (m BatchDetectLanguagePiiEntitiesDetails) String() string {
@@ -45,7 +50,7 @@ func (m BatchDetectLanguagePiiEntitiesDetails) ValidateEnumValue() (bool, error)
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -53,9 +58,11 @@ func (m BatchDetectLanguagePiiEntitiesDetails) ValidateEnumValue() (bool, error)
 // UnmarshalJSON unmarshals from json
 func (m *BatchDetectLanguagePiiEntitiesDetails) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
+		Alias         *string                     `json:"alias"`
 		EndpointId    *string                     `json:"endpointId"`
 		CompartmentId *string                     `json:"compartmentId"`
 		Masking       map[string]piientitymasking `json:"masking"`
+		Profile       *Profile                    `json:"profile"`
 		Documents     []TextDocument              `json:"documents"`
 	}{}
 
@@ -64,6 +71,8 @@ func (m *BatchDetectLanguagePiiEntitiesDetails) UnmarshalJSON(data []byte) (e er
 		return
 	}
 	var nn interface{}
+	m.Alias = model.Alias
+
 	m.EndpointId = model.EndpointId
 
 	m.CompartmentId = model.CompartmentId
@@ -80,6 +89,8 @@ func (m *BatchDetectLanguagePiiEntitiesDetails) UnmarshalJSON(data []byte) (e er
 			m.Masking[k] = nil
 		}
 	}
+
+	m.Profile = model.Profile
 
 	m.Documents = make([]TextDocument, len(model.Documents))
 	copy(m.Documents, model.Documents)

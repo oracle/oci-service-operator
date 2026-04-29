@@ -56,6 +56,17 @@ spec:
           spec:
             description: BackendSetSpec defines the desired state of BackendSet.
             properties:
+              backendMaxConnections:
+                description: |-
+                  The maximum number of simultaneous connections the load balancer can make to any backend
+                  in the backend set unless the backend has its own maxConnections setting. If this is not
+                  set or set to 0 then the number of simultaneous connections the load balancer can make
+                  to any backend in the backend set unless the backend has its own maxConnections setting
+                  is unlimited.
+                  If setting backendMaxConnections to some value other than 0 then that value must be greater
+                  or equal to 256.
+                  Example: `300`
+                type: integer
               backends:
                 items:
                   description: BackendSetBackend defines nested fields for BackendSet.Backend.
@@ -78,6 +89,15 @@ spec:
                         The IP address of the backend server.
                         Example: `10.0.0.3`
                       type: string
+                    maxConnections:
+                      description: |-
+                        The maximum number of simultaneous connections the load balancer can make to the backend.
+                        If this is not set or set to 0 then the maximum number of simultaneous connections the
+                        load balancer can make to the backend is unlimited.
+                        If setting maxConnections to some value other than 0 then that value must be greater
+                        or equal to 256.
+                        Example: `300`
+                      type: integer
                     offline:
                       description: |-
                         Whether the load balancer should treat this server as offline. Offline servers receive no incoming
@@ -95,7 +115,7 @@ spec:
                         proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
                         as a server weighted '1'.
                         For more information on load balancing policies, see
-                        How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+                        How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
                         Example: `3`
                       type: integer
                   required:
@@ -322,6 +342,14 @@ spec:
                          this field.
                       example: `example_cipher_suite`
                     type: string
+                  hasSessionResumption:
+                    description: |-
+                      Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again.
+                      If "true", the service resumes the previous TLS encrypted session.
+                      If "false", the service starts a new TLS encrypted session.
+                      Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance.
+                      Example: `true`
+                    type: boolean
                   protocols:
                     description: |-
                       A list of SSL protocols the load balancer must support for HTTPS or SSL connections.
@@ -331,6 +359,7 @@ spec:
                       *  TLSv1
                       *  TLSv1.1
                       *  TLSv1.2
+                      *  TLSv1.3
                       If this field is not specified, TLSv1.2 is the default.
                       **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
                       **Notes:**
@@ -377,6 +406,15 @@ spec:
           status:
             description: BackendSetStatus defines the observed state of BackendSet.
             properties:
+              backendMaxConnections:
+                description: |-
+                  The maximum number of simultaneous connections the load balancer can make to any backend
+                  in the backend set unless the backend has its own maxConnections setting. If this is not
+                  set or set to 0 then the number of simultaneous connections the load balancer can make
+                  to any backend in the backend set unless the backend has its own maxConnections setting
+                  is unlimited.
+                  Example: `300`
+                type: integer
               backends:
                 items:
                   description: BackendSetBackend defines nested fields for BackendSet.Backend.
@@ -399,6 +437,15 @@ spec:
                         The IP address of the backend server.
                         Example: `10.0.0.3`
                       type: string
+                    maxConnections:
+                      description: |-
+                        The maximum number of simultaneous connections the load balancer can make to the backend.
+                        If this is not set or set to 0 then the maximum number of simultaneous connections the
+                        load balancer can make to the backend is unlimited.
+                        If setting maxConnections to some value other than 0 then that value must be greater
+                        or equal to 256.
+                        Example: `300`
+                      type: integer
                     offline:
                       description: |-
                         Whether the load balancer should treat this server as offline. Offline servers receive no incoming
@@ -416,7 +463,7 @@ spec:
                         proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
                         as a server weighted '1'.
                         For more information on load balancing policies, see
-                        How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+                        How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
                         Example: `3`
                       type: integer
                   required:
@@ -643,6 +690,14 @@ spec:
                          this field.
                       example: `example_cipher_suite`
                     type: string
+                  hasSessionResumption:
+                    description: |-
+                      Whether the load balancer listener should resume an encrypted session by reusing the cryptographic parameters of a previous TLS session, without having to perform a full handshake again.
+                      If "true", the service resumes the previous TLS encrypted session.
+                      If "false", the service starts a new TLS encrypted session.
+                      Enabling session resumption improves performance but provides a lower level of security. Disabling session resumption improves security but reduces performance.
+                      Example: `true`
+                    type: boolean
                   protocols:
                     description: |-
                       A list of SSL protocols the load balancer must support for HTTPS or SSL connections.
@@ -652,6 +707,7 @@ spec:
                       *  TLSv1
                       *  TLSv1.1
                       *  TLSv1.2
+                      *  TLSv1.3
                       If this field is not specified, TLSv1.2 is the default.
                       **Warning:** All SSL listeners created on a given port must use the same set of SSL protocols.
                       **Notes:**

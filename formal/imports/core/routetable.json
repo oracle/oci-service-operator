@@ -130,6 +130,7 @@
     "Pinned OCI SDK contract: UpdateRouteTableDetails exposes defined_tags, display_name, freeform_tags, and route_rules as in-place updates; the handwritten runtime rejects create-only drift for compartment_id and vcn_id.",
     "Repo-authored route-rule comparison normalizes ordering and filters OCI-managed LOCAL rules so order-only diffs and implicit local rules do not trigger updates.",
     "Repo-authored delete confirmation requires GetRouteTable to return not found; observed TERMINATING and TERMINATED remain intermediate finalizer-holding states.",
+    "The handwritten runtime hard-fails if CreateRouteTableDetails, UpdateRouteTableDetails, RouteRule, or the vendored route-rule enum surface drifts from these formal assumptions.",
     "formal/controllers/core/routetable/* is the authoritative formal path for this RouteTable runtime work; the separate coreroutetable manifest row is tracked as distinct cleanup, not folded into this row."
   ]
 }

@@ -26,10 +26,18 @@ type BackendSpec struct {
 	// proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
 	// as a server weighted '1'.
 	// For more information on load balancing policies, see
-	// How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
 	// Example: `3`
 	// +kubebuilder:validation:Optional
 	Weight int `json:"weight,omitempty"`
+	// The maximum number of simultaneous connections the load balancer can make to the backend.
+	// If this is not set or set to 0 then the maximum number of simultaneous connections the
+	// load balancer can make to the backend is unlimited.
+	// If setting maxConnections to some value other than 0 then that value must be greater
+	// or equal to 256.
+	// Example: `300`
+	// +kubebuilder:validation:Optional
+	MaxConnections int `json:"maxConnections,omitempty"`
 	// Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
 	// traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy.
 	// **Note:** You cannot add a backend server marked as `backup` to a backend set that uses the IP Hash policy.
@@ -71,7 +79,7 @@ type BackendStatus struct {
 	// proportion of incoming traffic. For example, a server weighted '3' receives 3 times the number of new connections
 	// as a server weighted '1'.
 	// For more information on load balancing policies, see
-	// How Load Balancing Policies Work (https://docs.cloud.oracle.com/Content/Balance/Reference/lbpolicies.htm).
+	// How Load Balancing Policies Work (https://docs.oracle.com/iaas/Content/Balance/Reference/lbpolicies.htm).
 	// Example: `3`
 	Weight int `json:"weight,omitempty"`
 	// Whether the load balancer should drain this server. Servers marked "drain" receive no new
@@ -87,6 +95,11 @@ type BackendStatus struct {
 	// traffic.
 	// Example: `false`
 	Offline bool `json:"offline,omitempty"`
+	// The maximum number of simultaneous connections the load balancer can make to the backend.
+	// If this is not set or set to 0 then the maximum number of simultaneous connections the
+	// load balancer can make to the backend is unlimited.
+	// Example: `300`
+	MaxConnections int `json:"maxConnections,omitempty"`
 	// The bound load balancer OCID used to address this backend.
 	LoadBalancerId string `json:"loadBalancerId,omitempty"`
 	// The bound backend set name used to address this backend.

@@ -161,8 +161,8 @@ If CR creation fails, monitor the OSOK controller pod logs (with steps outlined 
 ```
 This happens mostly due to user authorization. Follow below steps for remediation : 
 * Check if the instance principals are configured correctly for the OCI resource being provisioned. 
-* If using User credentials, cross verify if the secret for user credentials (ocicredentials as per installation doc) is populated correctly.
-* Note that OSOK uses user credentials for authorization if the secret 'ocicredentials' is available during installation. Else it uses instance principal by default. Delete the secret 'ocicredentials' if user principals are not intended and restart the deployment to switch to Instance principals
+* If using user credentials or security-token auth, cross verify that the `ocicredentials` secret is populated correctly and that `auth_type` matches the intended mode.
+* If `auth_type` is omitted and the secret still contains user-principal inputs (`user`, `tenancy`, `region`, `fingerprint`, `privatekey`) or OCI config-file inputs (`config_file_path`, `config_file_profile`), OSOK will use the user-principal path. Remove those inputs or set `auth_type=instance_principal` if instance principal auth is intended.
 
 2. **Legacy or unsupported Autonomous Database credential fields rejected by schema validation**
 

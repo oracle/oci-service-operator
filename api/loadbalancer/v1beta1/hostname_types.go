@@ -20,7 +20,7 @@ type HostnameSpec struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// A virtual hostname. For more information about virtual hostname string construction, see
-	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+	// Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing).
 	// Example: `app.example.com`
 	// +kubebuilder:validation:Required
 	Hostname string `json:"hostname"`
@@ -34,7 +34,7 @@ type HostnameStatus struct {
 	// Example: `example_hostname_001`
 	Name string `json:"name,omitempty"`
 	// A virtual hostname. For more information about virtual hostname string construction, see
-	// Managing Request Routing (https://docs.cloud.oracle.com/Content/Balance/Tasks/managingrequest.htm#routing).
+	// Managing Request Routing (https://docs.oracle.com/iaas/Content/Balance/Tasks/managingrequest.htm#routing).
 	// Example: `app.example.com`
 	Hostname string `json:"hostname,omitempty"`
 }

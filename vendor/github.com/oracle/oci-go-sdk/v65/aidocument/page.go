@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -40,6 +40,15 @@ type Page struct {
 
 	// The form fields detected on the page.
 	DocumentFields []DocumentField `mandatory:"false" json:"documentFields"`
+
+	// The signatures detected on the page.
+	Signatures []Signature `mandatory:"false" json:"signatures"`
+
+	// The bar codes detected on the page.
+	BarCodes []BarCode `mandatory:"false" json:"barCodes"`
+
+	// The checkboxes and selection marks detected on the page.
+	SelectionMarks []SelectionMark `mandatory:"false" json:"selectionMarks"`
 }
 
 func (m Page) String() string {
@@ -53,7 +62,7 @@ func (m Page) ValidateEnumValue() (bool, error) {
 	errMessage := []string{}
 
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }

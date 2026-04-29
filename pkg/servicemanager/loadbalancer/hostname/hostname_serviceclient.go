@@ -19,7 +19,7 @@ import (
 )
 
 // HostnameServiceClient is the handwritten extension seam for Hostname runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*HostnameServiceManager).WithClient.
 type HostnameServiceClient interface {
 	CreateOrUpdate(context.Context, *loadbalancerv1beta1.Hostname, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ HostnameServiceClient = defaultHostnameServiceClient{}
 
 var newHostnameServiceClient = func(manager *HostnameServiceManager) HostnameServiceClient {
 	sdkClient, err := loadbalancersdk.NewLoadBalancerClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*loadbalancerv1beta1.Hostname]{
-		Kind:    "Hostname",
-		SDKName: "Hostname",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.CreateHostnameRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateHostname(ctx, *request.(*loadbalancersdk.CreateHostnameRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.GetHostnameRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetHostname(ctx, *request.(*loadbalancersdk.GetHostnameRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.ListHostnamesRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListHostnames(ctx, *request.(*loadbalancersdk.ListHostnamesRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.UpdateHostnameRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateHostname(ctx, *request.(*loadbalancersdk.UpdateHostnameRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &loadbalancersdk.DeleteHostnameRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteHostname(ctx, *request.(*loadbalancersdk.DeleteHostnameRequest))
-			},
-		},
-	}
+	hooks := newHostnameRuntimeHooks(manager, sdkClient)
+	config := buildHostnameGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Hostname OCI client: %w", err)
 	}
-	return defaultHostnameServiceClient{
+	delegate := defaultHostnameServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*loadbalancerv1beta1.Hostname](config),
 	}
+	return wrapHostnameGeneratedClient(hooks, delegate)
 }

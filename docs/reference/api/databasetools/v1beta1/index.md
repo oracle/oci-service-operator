@@ -39,7 +39,7 @@ DatabaseToolsConnectionSpec defines the desired state of DatabaseToolsConnection
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `advancedProperties` | The advanced connection properties key-value pair. | `map[string, string]` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection. | `string` | Yes | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection. | `string` | Yes | - | - |
 | `connectionString` | The connection string used to connect to the PostgreSQL Server. | `string` | No | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | Yes | - | - |
@@ -47,13 +47,14 @@ DatabaseToolsConnectionSpec defines the desired state of DatabaseToolsConnection
 | `jsonData` | - | `string` | No | - | - |
 | [`keyStores`](#kind-databasetoolsconnection-spec-keystores) | The CA certificate to verify the server's certificate and the client private key and associated certificate required for client authentication. | `list[object]` | No | - | - |
 | [`locks`](#kind-databasetoolsconnection-spec-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
-| `privateEndpointId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN. | `string` | No | - | - |
+| `privateEndpointId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN. | `string` | No | - | - |
 | [`proxyClient`](#kind-databasetoolsconnection-spec-proxyclient) | DatabaseToolsConnectionProxyClient defines nested fields for DatabaseToolsConnection.ProxyClient. | `object` | No | - | - |
 | [`relatedResource`](#kind-databasetoolsconnection-spec-relatedresource) | DatabaseToolsConnectionRelatedResource defines nested fields for DatabaseToolsConnection.RelatedResource. | `object` | No | - | - |
+| `runtimeIdentity` | Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault). | `string` | No | - | - |
 | `runtimeSupport` | Specifies whether this connection is supported by the Database Tools Runtime. | `string` | No | - | - |
 | `type` | - | `string` | No | - | - |
 | `url` | The JDBC URL used to connect to the Generic JDBC database system. | `string` | No | - | - |
-| `userName` | The user name. | `string` | No | - | - |
+| `userName` | The database user name. | `string` | No | - | - |
 | [`userPassword`](#kind-databasetoolsconnection-spec-userpassword) | DatabaseToolsConnectionUserPassword defines nested fields for DatabaseToolsConnection.UserPassword. | `object` | No | - | - |
 
 <a id="kind-databasetoolsconnection-spec-keystores"></a>
@@ -79,7 +80,7 @@ DatabaseToolsConnectionKeyStoreKeyStoreContent defines nested fields for Databas
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the key store. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 
 <a id="kind-databasetoolsconnection-spec-keystores-keystorepassword"></a>
@@ -92,7 +93,7 @@ DatabaseToolsConnectionKeyStoreKeyStorePassword defines nested fields for Databa
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the key store password. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 
 <a id="kind-databasetoolsconnection-spec-locks"></a>
@@ -134,7 +135,7 @@ DatabaseToolsConnectionProxyClientUserPassword defines nested fields for Databas
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 
 <a id="kind-databasetoolsconnection-spec-relatedresource"></a>
@@ -147,7 +148,7 @@ DatabaseToolsConnectionRelatedResource defines nested fields for DatabaseToolsCo
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `entityType` | The resource entity type. | `string` | Yes | - | - |
-| `identifier` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the related resource. | `string` | Yes | - | - |
+| `identifier` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the related resource. | `string` | Yes | - | - |
 
 <a id="kind-databasetoolsconnection-spec-userpassword"></a>
 #### Spec.userPassword
@@ -159,7 +160,7 @@ DatabaseToolsConnectionUserPassword defines nested fields for DatabaseToolsConne
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 
 <a id="kind-databasetoolsconnection-status"></a>
@@ -170,25 +171,27 @@ DatabaseToolsConnectionStatus defines the observed state of DatabaseToolsConnect
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `advancedProperties` | The advanced connection properties key-value pair (for example, `oracle.net.ssl_server_dn_match`). | `map[string, string]` | No | - | - |
-| `compartmentId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection. | `string` | No | - | - |
+| `compartmentId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection. | `string` | No | - | - |
 | `connectionString` | The connect descriptor or Easy Connect Naming method used to connect to the database. | `string` | No | - | - |
 | `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
 | `displayName` | A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. | `string` | No | - | - |
 | `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
-| `id` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools connection. | `string` | No | - | - |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools connection. | `string` | No | - | - |
 | `jsonData` | - | `string` | No | - | - |
 | [`keyStores`](#kind-databasetoolsconnection-status-keystores) | The Oracle wallet or Java Keystores containing trusted certificates for authenticating the server's public certificate and the client private key and associated certificates required for client authentication. | `list[object]` | No | - | - |
 | `lifecycleDetails` | A message describing the current state in more detail. For example, this message can be used to provide actionable information for a resource in the Failed state. | `string` | No | - | - |
 | `lifecycleState` | The current state of the Database Tools connection. | `string` | No | - | - |
 | [`locks`](#kind-databasetoolsconnection-status-locks) | Locks associated with this resource. | `list[object]` | No | - | - |
-| `privateEndpointId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN. | `string` | No | - | - |
+| `privateEndpointId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools private endpoint used to access the database in the customer VCN. | `string` | No | - | - |
 | [`proxyClient`](#kind-databasetoolsconnection-status-proxyclient) | DatabaseToolsConnectionProxyClient defines nested fields for DatabaseToolsConnection.ProxyClient. | `object` | No | - | - |
 | [`relatedResource`](#kind-databasetoolsconnection-status-relatedresource) | DatabaseToolsConnectionRelatedResource defines nested fields for DatabaseToolsConnection.RelatedResource. | `object` | No | - | - |
+| `runtimeEndpoint` | Specifies the Database Tools Runtime endpoint. | `string` | No | - | - |
+| `runtimeIdentity` | Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault). | `string` | No | - | - |
 | `runtimeSupport` | Specifies whether this connection is supported by the Database Tools Runtime. | `string` | No | - | - |
 | [`status`](#kind-databasetoolsconnection-status-status) | - | `object` | Yes | - | - |
 | `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
 | `timeCreated` | The time the Database Tools connection was created. An RFC3339 formatted datetime string. | `string` | No | - | - |
-| `timeUpdated` | The time the DatabaseToolsConnection was updated. An RFC3339 formatted datetime string. | `string` | No | - | - |
+| `timeUpdated` | The time the Database Tools connection was updated. An RFC3339 formatted datetime string. | `string` | No | - | - |
 | `type` | - | `string` | No | - | - |
 | `url` | The JDBC URL used to connect to the Generic JDBC database system. | `string` | No | - | - |
 | `userName` | The database user name. | `string` | No | - | - |
@@ -217,7 +220,7 @@ DatabaseToolsConnectionKeyStoreKeyStoreContent defines nested fields for Databas
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the key store. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 
 <a id="kind-databasetoolsconnection-status-keystores-keystorepassword"></a>
@@ -230,7 +233,7 @@ DatabaseToolsConnectionKeyStoreKeyStorePassword defines nested fields for Databa
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the key store password. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the key store password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 
 <a id="kind-databasetoolsconnection-status-locks"></a>
@@ -272,7 +275,7 @@ DatabaseToolsConnectionProxyClientUserPassword defines nested fields for Databas
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 
 <a id="kind-databasetoolsconnection-status-relatedresource"></a>
@@ -285,7 +288,7 @@ DatabaseToolsConnectionRelatedResource defines nested fields for DatabaseToolsCo
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `entityType` | The resource entity type. | `string` | Yes | - | - |
-| `identifier` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the related resource. | `string` | Yes | - | - |
+| `identifier` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the related resource. | `string` | Yes | - | - |
 
 <a id="kind-databasetoolsconnection-status-status"></a>
 #### Status.status
@@ -356,6 +359,6 @@ DatabaseToolsConnectionUserPassword defines nested fields for DatabaseToolsConne
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
 | `jsonData` | - | `string` | No | - | - |
-| `secretId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
+| `secretId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret containing the user password. | `string` | No | - | - |
 | `valueType` | - | `string` | No | - | - |
 

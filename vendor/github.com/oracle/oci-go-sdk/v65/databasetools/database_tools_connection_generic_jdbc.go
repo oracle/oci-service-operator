@@ -1,4 +1,4 @@
-// Copyright (c) 2016, 2018, 2024, Oracle and/or its affiliates.  All rights reserved.
+// Copyright (c) 2016, 2018, 2026, Oracle and/or its affiliates.  All rights reserved.
 // This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
@@ -19,20 +19,23 @@ import (
 // DatabaseToolsConnectionGenericJdbc Database Tools connection of a Generic JDBC database system.
 type DatabaseToolsConnectionGenericJdbc struct {
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the Database Tools connection.
 	Id *string `mandatory:"true" json:"id"`
 
 	// A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
-	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
+	// The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the Database Tools connection.
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The time the Database Tools connection was created. An RFC3339 formatted datetime string.
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
-	// The time the DatabaseToolsConnection was updated. An RFC3339 formatted datetime string.
+	// The time the Database Tools connection was updated. An RFC3339 formatted datetime string.
 	TimeUpdated *common.SDKTime `mandatory:"true" json:"timeUpdated"`
+
+	// Specifies the Database Tools Runtime endpoint.
+	RuntimeEndpoint *string `mandatory:"true" json:"runtimeEndpoint"`
 
 	// The JDBC URL used to connect to the Generic JDBC database system.
 	Url *string `mandatory:"true" json:"url"`
@@ -55,7 +58,7 @@ type DatabaseToolsConnectionGenericJdbc struct {
 	// Locks associated with this resource.
 	Locks []ResourceLock `mandatory:"false" json:"locks"`
 
-	// The user name.
+	// The database user name.
 	UserName *string `mandatory:"false" json:"userName"`
 
 	UserPassword DatabaseToolsUserPassword `mandatory:"false" json:"userPassword"`
@@ -72,6 +75,9 @@ type DatabaseToolsConnectionGenericJdbc struct {
 
 	// Specifies whether this connection is supported by the Database Tools Runtime.
 	RuntimeSupport RuntimeSupportEnum `mandatory:"true" json:"runtimeSupport"`
+
+	// Specifies the identity used by the Database Tools service to issue requests to other OCI services (e.g., Secrets in Vault).
+	RuntimeIdentity RuntimeIdentityEnum `mandatory:"true" json:"runtimeIdentity"`
 }
 
 // GetId returns Id
@@ -134,6 +140,16 @@ func (m DatabaseToolsConnectionGenericJdbc) GetRuntimeSupport() RuntimeSupportEn
 	return m.RuntimeSupport
 }
 
+// GetRuntimeEndpoint returns RuntimeEndpoint
+func (m DatabaseToolsConnectionGenericJdbc) GetRuntimeEndpoint() *string {
+	return m.RuntimeEndpoint
+}
+
+// GetRuntimeIdentity returns RuntimeIdentity
+func (m DatabaseToolsConnectionGenericJdbc) GetRuntimeIdentity() RuntimeIdentityEnum {
+	return m.RuntimeIdentity
+}
+
 func (m DatabaseToolsConnectionGenericJdbc) String() string {
 	return common.PointerString(m)
 }
@@ -150,8 +166,11 @@ func (m DatabaseToolsConnectionGenericJdbc) ValidateEnumValue() (bool, error) {
 	if _, ok := GetMappingRuntimeSupportEnum(string(m.RuntimeSupport)); !ok && m.RuntimeSupport != "" {
 		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeSupport: %s. Supported values are: %s.", m.RuntimeSupport, strings.Join(GetRuntimeSupportEnumStringValues(), ",")))
 	}
+	if _, ok := GetMappingRuntimeIdentityEnum(string(m.RuntimeIdentity)); !ok && m.RuntimeIdentity != "" {
+		errMessage = append(errMessage, fmt.Sprintf("unsupported enum value for RuntimeIdentity: %s. Supported values are: %s.", m.RuntimeIdentity, strings.Join(GetRuntimeIdentityEnumStringValues(), ",")))
+	}
 	if len(errMessage) > 0 {
-		return true, fmt.Errorf(strings.Join(errMessage, "\n"))
+		return true, fmt.Errorf("%s", strings.Join(errMessage, "\n"))
 	}
 	return false, nil
 }
@@ -189,6 +208,8 @@ func (m *DatabaseToolsConnectionGenericJdbc) UnmarshalJSON(data []byte) (e error
 		TimeCreated        *common.SDKTime                    `json:"timeCreated"`
 		TimeUpdated        *common.SDKTime                    `json:"timeUpdated"`
 		RuntimeSupport     RuntimeSupportEnum                 `json:"runtimeSupport"`
+		RuntimeEndpoint    *string                            `json:"runtimeEndpoint"`
+		RuntimeIdentity    RuntimeIdentityEnum                `json:"runtimeIdentity"`
 		Url                *string                            `json:"url"`
 	}{}
 
@@ -236,6 +257,10 @@ func (m *DatabaseToolsConnectionGenericJdbc) UnmarshalJSON(data []byte) (e error
 	m.TimeUpdated = model.TimeUpdated
 
 	m.RuntimeSupport = model.RuntimeSupport
+
+	m.RuntimeEndpoint = model.RuntimeEndpoint
+
+	m.RuntimeIdentity = model.RuntimeIdentity
 
 	m.Url = model.Url
 

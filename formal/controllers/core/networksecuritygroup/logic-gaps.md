@@ -19,6 +19,9 @@ gaps: []
 - Supported in-place updates are limited to `displayName`, `definedTags`, and
   `freeformTags`, matching the pinned `UpdateNetworkSecurityGroupDetails` SDK surface
   and the handwritten runtime.
+- The runtime fails fast if the vendored `CreateNetworkSecurityGroupDetails`,
+  `UpdateNetworkSecurityGroupDetails`, or lifecycle enum surface drifts away
+  from the assumptions captured in this row.
 - Create-only drift is rejected for `compartmentId` and `vcnId`.
 - The runtime observes by tracked `status.osokStatus.ocid` and only recreates after
   confirmed OCI not-found clears the tracked identity.

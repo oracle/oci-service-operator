@@ -19,7 +19,7 @@ import (
 )
 
 // DrgServiceClient is the handwritten extension seam for Drg runtime behavior.
-// Add a manual file in this package that implements the interface and wire it through
+// Add a manual file in this package that registers runtime hook mutators or wires a custom client through
 // (*DrgServiceManager).WithClient.
 type DrgServiceClient interface {
 	CreateOrUpdate(context.Context, *corev1beta1.Drg, ctrl.Request) (servicemanager.OSOKResponse, error)
@@ -34,45 +34,13 @@ var _ DrgServiceClient = defaultDrgServiceClient{}
 
 var newDrgServiceClient = func(manager *DrgServiceManager) DrgServiceClient {
 	sdkClient, err := coresdk.NewVirtualNetworkClientWithConfigurationProvider(manager.Provider)
-	config := generatedruntime.Config[*corev1beta1.Drg]{
-		Kind:    "Drg",
-		SDKName: "Drg",
-		Log:     manager.Log,
-		Create: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.CreateDrgRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.CreateDrg(ctx, *request.(*coresdk.CreateDrgRequest))
-			},
-		},
-		Get: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.GetDrgRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.GetDrg(ctx, *request.(*coresdk.GetDrgRequest))
-			},
-		},
-		List: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.ListDrgsRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.ListDrgs(ctx, *request.(*coresdk.ListDrgsRequest))
-			},
-		},
-		Update: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.UpdateDrgRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.UpdateDrg(ctx, *request.(*coresdk.UpdateDrgRequest))
-			},
-		},
-		Delete: &generatedruntime.Operation{
-			NewRequest: func() any { return &coresdk.DeleteDrgRequest{} },
-			Call: func(ctx context.Context, request any) (any, error) {
-				return sdkClient.DeleteDrg(ctx, *request.(*coresdk.DeleteDrgRequest))
-			},
-		},
-	}
+	hooks := newDrgRuntimeHooks(manager, sdkClient)
+	config := buildDrgGeneratedRuntimeConfig(manager, hooks)
 	if err != nil {
 		config.InitError = fmt.Errorf("initialize Drg OCI client: %w", err)
 	}
-	return defaultDrgServiceClient{
+	delegate := defaultDrgServiceClient{
 		ServiceClient: generatedruntime.NewServiceClient[*corev1beta1.Drg](config),
 	}
+	return wrapDrgGeneratedClient(hooks, delegate)
 }

@@ -26,9 +26,6 @@ type BdsInstanceSpec struct {
 	// The SSH public key used to authenticate the cluster connection.
 	// +kubebuilder:validation:Required
 	ClusterPublicKey string `json:"clusterPublicKey"`
-	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user.
-	// +kubebuilder:validation:Required
-	ClusterAdminPassword string `json:"clusterAdminPassword"`
 	// Boolean flag specifying whether or not the cluster is highly available (HA).
 	// +kubebuilder:validation:Required
 	IsHighAvailability bool `json:"isHighAvailability"`
@@ -38,6 +35,15 @@ type BdsInstanceSpec struct {
 	// The list of nodes in the Big Data Service cluster.
 	// +kubebuilder:validation:Required
 	Nodes []BdsInstanceNode `json:"nodes"`
+	// Base-64 encoded password for the cluster (and Cloudera Manager) admin user. Not required if the secretId is specified.
+	// +kubebuilder:validation:Optional
+	ClusterAdminPassword string `json:"clusterAdminPassword,omitempty"`
+	// The secretId for the clusterAdminPassword.
+	// +kubebuilder:validation:Optional
+	SecretId string `json:"secretId,omitempty"`
+	// Boolean flag specifying whether or not to persist the provided secret OCID and reuse it for future operations.
+	// +kubebuilder:validation:Optional
+	IsSecretReused bool `json:"isSecretReused,omitempty"`
 	// +kubebuilder:validation:Optional
 	NetworkConfig BdsInstanceNetworkConfig `json:"networkConfig,omitempty"`
 	// Pre-authenticated URL of the script in Object Store that is downloaded and executed.
@@ -60,6 +66,8 @@ type BdsInstanceSpec struct {
 	// Profile of the Big Data Service cluster.
 	// +kubebuilder:validation:Optional
 	ClusterProfile string `json:"clusterProfile,omitempty"`
+	// +kubebuilder:validation:Optional
+	BdsClusterVersionSummary BdsInstanceBdsClusterVersionSummary `json:"bdsClusterVersionSummary,omitempty"`
 }
 
 // BdsInstanceNodeShapeConfig defines nested fields for BdsInstance.Node.ShapeConfig.
@@ -102,6 +110,16 @@ type BdsInstanceNetworkConfig struct {
 	// The CIDR IP address block of the VCN.
 	// +kubebuilder:validation:Optional
 	CidrBlock string `json:"cidrBlock,omitempty"`
+}
+
+// BdsInstanceBdsClusterVersionSummary defines nested fields for BdsInstance.BdsClusterVersionSummary.
+type BdsInstanceBdsClusterVersionSummary struct {
+	// BDS version to be used for cluster creation
+	// +kubebuilder:validation:Required
+	BdsVersion string `json:"bdsVersion"`
+	// ODH version to be used for cluster creation
+	// +kubebuilder:validation:Optional
+	OdhVersion string `json:"odhVersion,omitempty"`
 }
 
 // BdsInstanceNodeAttachedBlockVolume defines nested fields for BdsInstance.Node.AttachedBlockVolume.
@@ -194,7 +212,11 @@ type BdsInstanceStatus struct {
 	// Number of nodes that forming the cluster
 	NumberOfNodes int `json:"numberOfNodes,omitempty"`
 	// Version of the Hadoop distribution.
-	ClusterVersion  string                     `json:"clusterVersion,omitempty"`
+	ClusterVersion string `json:"clusterVersion,omitempty"`
+	// The secretId for the clusterAdminPassword.
+	SecretId string `json:"secretId,omitempty"`
+	// Boolean flag specifying whether or not to persist the provided secret OCID and reuse it for future operations.
+	IsSecretReused  bool                       `json:"isSecretReused,omitempty"`
 	NetworkConfig   BdsInstanceNetworkConfig   `json:"networkConfig,omitempty"`
 	ClusterDetails  BdsInstanceClusterDetails  `json:"clusterDetails,omitempty"`
 	CloudSqlDetails BdsInstanceCloudSqlDetails `json:"cloudSqlDetails,omitempty"`
@@ -217,7 +239,10 @@ type BdsInstanceStatus struct {
 	// The OCID of the Key Management master encryption key.
 	KmsKeyId string `json:"kmsKeyId,omitempty"`
 	// Profile of the Big Data Service cluster.
-	ClusterProfile string `json:"clusterProfile,omitempty"`
+	ClusterProfile           string                              `json:"clusterProfile,omitempty"`
+	BdsClusterVersionSummary BdsInstanceBdsClusterVersionSummary `json:"bdsClusterVersionSummary,omitempty"`
+	// The earliest time of certificate expiration date across the certificates of all current nodes under this cluster.
+	TimeEarliestCertificateExpiration string `json:"timeEarliestCertificateExpiration,omitempty"`
 }
 
 // +kubebuilder:object:root=true
