@@ -5,10 +5,18 @@ validation, and repository-owned documentation flows.
 
 ## Maintainer References
 
+- [Access Governance Control Plane Onboarding Audit](accessgovernancecp-onboarding-audit.md)
+- [ADM Onboarding Audit](adm-onboarding-audit.md)
 - [AI Language Onboarding Audit](ailanguage-onboarding-audit.md)
 - [AI Vision Onboarding Audit](aivision-onboarding-audit.md)
-- [API Error Coverage Registry](api-error-coverage-registry.md)
 - [Analytics Onboarding Audit](analytics-onboarding-audit.md)
+- [APM Control Plane Onboarding Audit](apmcontrolplane-onboarding-audit.md)
+- [API Error Coverage Registry](api-error-coverage-registry.md)
+- [API Platform Onboarding Audit](apiplatform-onboarding-audit.md)
+- [Budget Onboarding Audit](budget-onboarding-audit.md)
+- [Cluster Placement Groups Onboarding Audit](clusterplacementgroups-onboarding-audit.md)
+- [Data Labeling Service Onboarding Audit](datalabelingservice-onboarding-audit.md)
+- [Database Migration Onboarding Audit](databasemigration-onboarding-audit.md)
 - [Generator Contract](../api-generator-contract.md)
 - [Enabled Resource Async Strategy Audit](async-strategy-audit.md)
 - [Runtime Hook Adoption Audit](runtime-hook-adoption-audit.md)
