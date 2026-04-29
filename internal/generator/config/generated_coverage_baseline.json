@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 86,
-    "mappings": 362,
-    "trackedMappings": 362,
+    "specs": 87,
+    "mappings": 366,
+    "trackedMappings": 366,
     "untrackedMappings": 0,
-    "presentFields": 4078,
+    "presentFields": 4109,
     "missingFields": 36,
-    "mandatoryPresentFields": 1292,
+    "mandatoryPresentFields": 1300,
     "mandatoryMissingFields": 33,
-    "extraSpecFields": 435,
-    "overallCoveragePercent": 99.1249392318911,
-    "mandatoryCoveragePercent": 97.50943396226415
+    "extraSpecFields": 437,
+    "overallCoveragePercent": 99.13148371531966,
+    "mandatoryCoveragePercent": 97.52438109527381
   },
   "services": [
     {
@@ -124,6 +124,20 @@
       "extraSpecFields": 2,
       "overallCoveragePercent": 96.875,
       "mandatoryCoveragePercent": 94.11764705882352
+    },
+    {
+      "service": "apmcontrolplane",
+      "specs": 1,
+      "mappings": 4,
+      "trackedMappings": 4,
+      "untrackedMappings": 0,
+      "presentFields": 31,
+      "missingFields": 0,
+      "mandatoryPresentFields": 8,
+      "mandatoryMissingFields": 0,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 100,
+      "mandatoryCoveragePercent": 100
     },
     {
       "service": "bds",

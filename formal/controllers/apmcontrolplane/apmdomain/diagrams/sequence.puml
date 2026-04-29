@@ -1,0 +1,161 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - apmcontrolplane/ApmDomain
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue ApmDomain reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired ApmDomain
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetApmDomain
+else tracked identity is missing
+ServiceManager -> OCI: ListApmDomains(filters:\ncompartmentId, displayName)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateApmDomain
+loop create pending CREATING
+ServiceManager -> OCI: GetApmDomain
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetApmDomain
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteApmDomain
+ServiceManager -> OCI: confirm delete via GetApmDomain or\nListApmDomains
+loop delete pending DELETING
+ServiceManager -> OCI: GetApmDomain or ListApmDomains
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: definedTags,
+description, displayName, freeformTags
+Reject before mutate: force-new fields
+compartmentId, isFreeTier
+Lookup filters: compartmentId,
+displayName
+Lookup matching: exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, or UPDATING; duplicate matches
+fail
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply ChangeApmDomainCompartment,\nUpdateApmDomain only for mutable\nfields definedTags, description,\ndisplayName, freeformTags
+loop update pending UPDATING
+ServiceManager -> OCI: GetApmDomain
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=apmdomain action=CREATED;\nupdate=tfresource.UpdateResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=apmdomain action=UPDATED;\ndelete=tfresource.DeleteResource,\ntfresource.WaitForWorkRequestWithErrorHandling\nentity=apmdomain action=DELETED
+ServiceManager -> OCI: apply follow-up strategy\ncreate=GetWorkRequest ->\nGetApmDomain; update=GetWorkRequest\n-> GetApmDomain;\ndelete=GetWorkRequest ->\nGetApmDomain/ListApmDomains\nconfirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: apmcontrolplane
+slug: apmdomain
+kind: ApmDomain
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=GetWorkRequest ->
+GetApmDomain; update=GetWorkRequest ->
+GetApmDomain; delete=GetWorkRequest ->
+GetApmDomain/ListApmDomains confirm-delete
+supported drift: definedTags, description,
+displayName, freeformTags
+reject before mutate: force-new fields
+compartmentId, isFreeTier
+create-only fields: none
+list lookup: oci_apm_apm_domains filters
+compartmentId, displayName; exact compartmentId
+plus displayName unique match in ACTIVE,
+CREATING, or UPDATING; duplicate matches fail
+conflicts: none
+open gaps: none
+Reviewed lifecycle mapping treats CREATING as
+provisioning, UPDATING as updating, ACTIVE as
+success, and DELETING as terminating; FAILED is
+terminal and DELETED is only a
+delete-confirmation target.
+Create, update, and delete responses expose
+work-request headers but do not return an
+ApmDomain body. The runtime resumes through
+GetWorkRequest, recovers the affected ApmDomain
+OCID from work-request resources, and then
+rereads GetApmDomain before settling.
+Pre-create reuse only runs when spec.displayName
+is present and keeps exact compartmentId plus
+displayName matching bounded to ACTIVE,
+CREATING, or UPDATING summaries.
+Only displayName, description, freeformTags, and
+definedTags reconcile in place; compartmentId
+and isFreeTier remain replacement-only and
+ChangeApmDomainCompartment stays out of scope
+for the published runtime.
+DataUploadEndpoint is status-projected only
+after follow-up reads. Delete keeps the
+finalizer until the work request is terminal and
+GetApmDomain or fallback ListApmDomains confirms
+the resource is gone.
+end note
+@enduml

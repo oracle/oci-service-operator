@@ -218,6 +218,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - apmcontrolplane.oracle.com
+  resources:
+  - apmdomains
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apmcontrolplane.oracle.com
+  resources:
+  - apmdomains/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apmcontrolplane.oracle.com
+  resources:
+  - apmdomains/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - bds.oracle.com
   resources:
   - bdsinstances

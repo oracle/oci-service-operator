@@ -123,6 +123,20 @@ packages:
         kind: ApiPlatformInstance
         summary: Manage OCI API Platform instances.
 
+  - package: apmcontrolplane
+    displayName: Application Performance Monitoring Control Plane
+    summary: Manage OCI Application Performance Monitoring domains from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to ApmDomain while DataKey, ApmDomainWorkRequest, and generic work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with replacement-only handling for `compartmentId` and `isFreeTier`.
+    kindOverrides:
+      - group: apmcontrolplane
+        kind: ApmDomain
+        summary: Manage OCI Application Performance Monitoring domains.
+
   - package: bds
     displayName: Big Data Service
     summary: Manage OCI Big Data Service instances from Kubernetes with an initial controller-backed BdsInstance rollout.

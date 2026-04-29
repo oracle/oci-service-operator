@@ -137,6 +137,7 @@ nav:
           - analytics.oracle.com/v1beta1: reference/api/analytics/v1beta1/index.md
           - apigateway.oracle.com/v1beta1: reference/api/apigateway/v1beta1/index.md
           - apiplatform.oracle.com/v1beta1: reference/api/apiplatform/v1beta1/index.md
+          - apmcontrolplane.oracle.com/v1beta1: reference/api/apmcontrolplane/v1beta1/index.md
           - bds.oracle.com/v1beta1: reference/api/bds/v1beta1/index.md
           - budget.oracle.com/v1beta1: reference/api/budget/v1beta1/index.md
           - clusterplacementgroups.oracle.com/v1beta1: reference/api/clusterplacementgroups/v1beta1/index.md

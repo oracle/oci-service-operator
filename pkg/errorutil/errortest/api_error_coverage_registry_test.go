@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 184; got != want {
+	if got, want := len(inventory), 190; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 86; got != want {
+	if got, want := countRegistrations(inventory), 87; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 98; got != want {
+	if got, want := countExceptions(inventory), 103; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -32,6 +32,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "aivision/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "analytics/AnalyticsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apiplatform/ApiPlatformInstance", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "apmcontrolplane/ApmDomain", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "bds/BdsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "budget/Budget", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "clusterplacementgroups/ClusterPlacementGroup", "selection.includeKinds")
@@ -70,6 +71,12 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "apiplatform/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "apiplatform/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "apiplatform/WorkRequestLog", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "apmcontrolplane/ApmDomain")
+	assertInventoryException(t, byKey, "apmcontrolplane/ApmDomainWorkRequest", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apmcontrolplane/DataKey", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apmcontrolplane/WorkRequest", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apmcontrolplane/WorkRequestError", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apmcontrolplane/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "bds/BdsInstance")
 	assertInventoryException(t, byKey, "bds/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "budget/Budget")
@@ -118,6 +125,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "aivision/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apiplatform/ApiPlatformInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "apmcontrolplane/ApmDomain", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "budget/Budget", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "clusterplacementgroups/ClusterPlacementGroup", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
@@ -160,6 +168,11 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "apiplatform/WorkRequest", "strategy=none")
 	assertReviewedException(t, "apiplatform/WorkRequestError", "strategy=none")
 	assertReviewedException(t, "apiplatform/WorkRequestLog", "strategy=none")
+	assertReviewedException(t, "apmcontrolplane/ApmDomainWorkRequest", "strategy=none")
+	assertReviewedException(t, "apmcontrolplane/DataKey", "strategy=none")
+	assertReviewedException(t, "apmcontrolplane/WorkRequest", "strategy=none")
+	assertReviewedException(t, "apmcontrolplane/WorkRequestError", "strategy=none")
+	assertReviewedException(t, "apmcontrolplane/WorkRequestLog", "strategy=none")
 	assertReviewedException(t, "bds/WorkRequest", "strategy=none")
 	assertReviewedException(t, "budget/AlertRule", "strategy=none")
 	assertReviewedException(t, "clusterplacementgroups/WorkRequest", "strategy=none")

@@ -11,6 +11,7 @@ import (
 	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	apiplatformv1beta1 "github.com/oracle/oci-service-operator/api/apiplatform/v1beta1"
+	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
 	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
@@ -1579,6 +1580,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "apiplatform.ApiPlatformInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "ApmcontrolplaneApmDomain",
+		SpecType:   reflect.TypeOf(apmcontrolplanev1beta1.ApmDomainSpec{}),
+		StatusType: reflect.TypeOf(apmcontrolplanev1beta1.ApmDomainStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apmcontrolplane.CreateApmDomainDetails",
+			},
+			{
+				SDKStruct: "apmcontrolplane.UpdateApmDomainDetails",
+			},
+			{
+				SDKStruct: "apmcontrolplane.ApmDomain",
+			},
+			{
+				SDKStruct: "apmcontrolplane.ApmDomainSummary",
 			},
 		},
 	},

@@ -12,6 +12,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/aivision"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apiplatform"
+	"github.com/oracle/oci-go-sdk/v65/apmcontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
 	"github.com/oracle/oci-go-sdk/v65/clusterplacementgroups"
@@ -422,6 +423,12 @@ var seedTargets = []Target{
 	newTarget("apiplatform", "ApiPlatformInstance", reflect.TypeOf(apiplatform.ApiPlatformInstance{})),
 	newTarget("apiplatform", "ApiPlatformInstanceCollection", reflect.TypeOf(apiplatform.ApiPlatformInstanceCollection{})),
 	newTarget("apiplatform", "ApiPlatformInstanceSummary", reflect.TypeOf(apiplatform.ApiPlatformInstanceSummary{})),
+
+	// Apmcontrolplane CRD support
+	newTarget("apmcontrolplane", "CreateApmDomainDetails", reflect.TypeOf(apmcontrolplane.CreateApmDomainDetails{})),
+	newTarget("apmcontrolplane", "UpdateApmDomainDetails", reflect.TypeOf(apmcontrolplane.UpdateApmDomainDetails{})),
+	newTarget("apmcontrolplane", "ApmDomain", reflect.TypeOf(apmcontrolplane.ApmDomain{})),
+	newTarget("apmcontrolplane", "ApmDomainSummary", reflect.TypeOf(apmcontrolplane.ApmDomainSummary{})),
 
 	// Bds CRD support
 	newTarget("bds", "CreateBdsInstanceDetails", reflect.TypeOf(bds.CreateBdsInstanceDetails{})),
