@@ -131,7 +131,7 @@ func TestReviewedGovernanceInstanceRuntimeSemanticsEncodesLifecycleContract(t *t
 	if !slices.Equal(got.Mutation.Mutable, []string{"definedTags", "description", "displayName", "freeformTags", "licenseType"}) {
 		t.Fatalf("Mutation.Mutable = %#v, want reviewed mutable fields", got.Mutation.Mutable)
 	}
-	if !slices.Equal(got.Mutation.ForceNew, []string{"compartmentId", "idcsAccessToken", "systemTags", "tenancyNamespace"}) {
+	if !slices.Equal(got.Mutation.ForceNew, []string{"compartmentId", "systemTags", "tenancyNamespace"}) {
 		t.Fatalf("Mutation.ForceNew = %#v, want reviewed force-new fields", got.Mutation.ForceNew)
 	}
 	if got.FinalizerPolicy != "retain-until-confirmed-delete" {

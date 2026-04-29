@@ -78,7 +78,7 @@ func newGovernanceInstanceRuntimeSemantics() *generatedruntime.Semantics {
 		},
 		Mutation: generatedruntime.MutationSemantics{
 			Mutable:       []string{"definedTags", "description", "displayName", "freeformTags", "licenseType"},
-			ForceNew:      []string{"compartmentId", "idcsAccessToken", "systemTags", "tenancyNamespace"},
+			ForceNew:      []string{"compartmentId", "systemTags", "tenancyNamespace"},
 			ConflictsWith: map[string][]string{},
 		},
 		Hooks: generatedruntime.HookSet{

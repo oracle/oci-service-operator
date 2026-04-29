@@ -40,12 +40,13 @@ the scaffold placeholder with the published lifecycle-backed contract.
 - Mutable drift is explicit: `displayName`, `description`, `licenseType`,
   `freeformTags`, and `definedTags` reconcile in place. The handwritten update
   builder preserves clear-to-empty intent for `description` and both tag maps.
-  `compartmentId`, `tenancyNamespace`, `idcsAccessToken`, and `systemTags`
-  remain replacement-only drift, and `ChangeGovernanceInstanceCompartment`
-  stays out of scope for the published runtime.
+  `compartmentId`, `tenancyNamespace`, and `systemTags` remain
+  replacement-only drift, and `ChangeGovernanceInstanceCompartment` stays out
+  of scope for the published runtime.
 - `IdcsAccessToken` remains a create-time input only. OCI does not project it
   back on `GovernanceInstance`, so post-create reconciles normalize it out of
-  parity checks instead of treating it as perpetual unsupported drift.
+  parity checks instead of treating it as perpetual unsupported or
+  replacement-required drift.
 - Create, update, and delete responses all expose `opc-work-request-id`, but
   the service package does not expose service-local work-request readers. The
   reviewed runtime records request and work-request breadcrumbs when OCI

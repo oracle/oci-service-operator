@@ -71,8 +71,8 @@ Supported update surface: definedTags,
 description, displayName, freeformTags
 (+1 more)
 Reject before mutate: force-new fields
-compartmentId, idcsAccessToken,
-systemTags, tenancyNamespace
+compartmentId, systemTags,
+tenancyNamespace
 Create-only fields: idcsAccessToken
 Lookup filters: compartmentId,
 displayName, id
@@ -125,8 +125,7 @@ update=read-after-write; delete=confirm-delete
 supported drift: definedTags, description,
 displayName, freeformTags (+1 more)
 reject before mutate: force-new fields
-compartmentId, idcsAccessToken, systemTags,
-tenancyNamespace
+compartmentId, systemTags, tenancyNamespace
 create-only fields: idcsAccessToken
 list lookup:
 oci_access_governance_cp_governance_instances
@@ -155,9 +154,11 @@ candidate through GetGovernanceInstance so
 tenancyNamespace must also match before reuse.
 Only displayName, description, licenseType,
 freeformTags, and definedTags reconcile in
-place; compartmentId, tenancyNamespace,
-idcsAccessToken, and systemTags remain
-replacement-only drift, and compartment changes
-stay out of scope for the published runtime.
+place; compartmentId, tenancyNamespace, and
+systemTags remain replacement-only drift.
+`idcsAccessToken` is create-only and normalized
+out of post-create parity checks, and
+compartment changes stay out of scope for the
+published runtime.
 end note
 @enduml

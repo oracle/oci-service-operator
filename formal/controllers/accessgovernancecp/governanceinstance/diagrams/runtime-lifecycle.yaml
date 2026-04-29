@@ -29,7 +29,6 @@ repoAuthored:
       - licenseType
     forceNew:
       - compartmentId
-      - idcsAccessToken
       - systemTags
       - tenancyNamespace
     createOnly:
@@ -57,6 +56,7 @@ notes:
     matching licenseType summaries, then rereads each candidate through
     GetGovernanceInstance so tenancyNamespace must also match before reuse.
   - Only displayName, description, licenseType, freeformTags, and definedTags
-    reconcile in place; compartmentId, tenancyNamespace, idcsAccessToken, and
-    systemTags remain replacement-only drift, and compartment changes stay out
-    of scope for the published runtime.
+    reconcile in place; compartmentId, tenancyNamespace, and systemTags remain
+    replacement-only drift. `idcsAccessToken` is create-only and normalized out
+    of post-create parity checks, and compartment changes stay out of scope for
+    the published runtime.

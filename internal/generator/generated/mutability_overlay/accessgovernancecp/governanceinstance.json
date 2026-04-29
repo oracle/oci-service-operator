@@ -169,33 +169,6 @@
       }
     },
     {
-      "astFieldPath": "idcsAccessToken",
-      "terraformFieldPath": "idcsAccessToken",
-      "canonicalJoinKey": "idcsAccessToken",
-      "pathShape": "scalar",
-      "ast": {
-        "updateCandidateState": "notUpdateCandidate",
-        "forceNew": true,
-        "conflictsWith": null
-      },
-      "docs": {
-        "evidenceState": "notDocumented",
-        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
-      },
-      "merge": {
-        "joinStatus": "matched",
-        "mergeCase": "replacementRequired",
-        "finalPolicy": "replacementRequired"
-      },
-      "provenance": {
-        "formalImportPath": "imports/accessgovernancecp/governanceinstance.json",
-        "formalSourceRef": "terraform-provider-oci",
-        "astSourceBucket": "mutation.forceNew",
-        "terraformDocsPage": "access_governance_cp_governance_instance#argument-reference",
-        "terraformDocsSection": "Argument Reference"
-      }
-    },
-    {
       "astFieldPath": "licenseType",
       "terraformFieldPath": "license_type",
       "canonicalJoinKey": "licenseType",
