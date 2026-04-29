@@ -11,6 +11,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/aispeech"
 	"github.com/oracle/oci-go-sdk/v65/aivision"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
+	"github.com/oracle/oci-go-sdk/v65/apiplatform"
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
 	"github.com/oracle/oci-go-sdk/v65/clusterplacementgroups"
@@ -412,6 +413,13 @@ var seedTargets = []Target{
 	newTarget("analytics", "UpdateAnalyticsInstanceDetails", reflect.TypeOf(analytics.UpdateAnalyticsInstanceDetails{})),
 	newTarget("analytics", "AnalyticsInstance", reflect.TypeOf(analytics.AnalyticsInstance{})),
 	newTarget("analytics", "AnalyticsInstanceSummary", reflect.TypeOf(analytics.AnalyticsInstanceSummary{})),
+
+	// Apiplatform CRD support
+	newTarget("apiplatform", "CreateApiPlatformInstanceDetails", reflect.TypeOf(apiplatform.CreateApiPlatformInstanceDetails{})),
+	newTarget("apiplatform", "UpdateApiPlatformInstanceDetails", reflect.TypeOf(apiplatform.UpdateApiPlatformInstanceDetails{})),
+	newTarget("apiplatform", "ApiPlatformInstance", reflect.TypeOf(apiplatform.ApiPlatformInstance{})),
+	newTarget("apiplatform", "ApiPlatformInstanceCollection", reflect.TypeOf(apiplatform.ApiPlatformInstanceCollection{})),
+	newTarget("apiplatform", "ApiPlatformInstanceSummary", reflect.TypeOf(apiplatform.ApiPlatformInstanceSummary{})),
 
 	// Bds CRD support
 	newTarget("bds", "CreateBdsInstanceDetails", reflect.TypeOf(bds.CreateBdsInstanceDetails{})),

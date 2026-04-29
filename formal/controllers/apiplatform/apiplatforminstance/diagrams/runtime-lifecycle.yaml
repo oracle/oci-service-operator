@@ -1,0 +1,66 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: apiplatform
+slug: apiplatforminstance
+kind: ApiPlatformInstance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - name
+      - id
+    matchRule: exact compartmentId plus name unique match in ACTIVE, CREATING, or UPDATING; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - freeformTags
+    forceNew:
+      - compartmentId
+      - name
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE as success, and DELETING as terminating; FAILED is
+    terminal failure without requeue, and DELETED is a delete-confirmation
+    target.
+  - Pre-create reuse uses exact compartmentId plus name matching. Generated
+    reuse remains bounded to reusable lifecycle states and rejects duplicate
+    exact matches instead of binding an arbitrary existing instance. The
+    published runtime intentionally omits lifecycleState from the list query
+    contract for first bind-or-create.
+  - Only description, freeformTags, and definedTags reconcile in place.
+    ChangeApiPlatformInstanceCompartment remains out of scope, so
+    compartmentId and name stay replacement-only drift in the published
+    runtime.
+  - Create and delete responses expose work-request headers, but the published
+    surface has no service-local work-request readers. Generatedruntime records
+    async breadcrumbs when OCI returns them and relies on lifecycle rereads
+    plus confirm-delete observation rather than work-request polling.
+  - The published `ApiPlatformInstance` kind keeps generated controller and
+    service-manager wiring, but a package-local runtime hook narrows list
+    lookup semantics and clears auxiliary compartment-change operations from
+    the reviewed runtime contract. The kind has no secret side effects.

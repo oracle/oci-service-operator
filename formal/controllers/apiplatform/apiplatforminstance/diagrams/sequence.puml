@@ -1,0 +1,166 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - apiplatform/ApiPlatformInstance
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue ApiPlatformInstance\nreconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired\nApiPlatformInstance
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetApiPlatformInstance
+else tracked identity is missing
+ServiceManager -> OCI: ListApiPlatformInstances(filters:\ncompartmentId, name, id)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateApiPlatformInstance
+loop create pending CREATING
+ServiceManager -> OCI: GetApiPlatformInstance
+end
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetApiPlatformInstance
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteApiPlatformInstance
+ServiceManager -> OCI: confirm delete via\nGetApiPlatformInstance or\nListApiPlatformInstances
+loop delete pending DELETING
+ServiceManager -> OCI: GetApiPlatformInstance or\nListApiPlatformInstances
+end
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else OCI state is retryable
+ServiceManager --> BaseReconciler: requeue while OCI remains in\nCREATING, UPDATING, DELETING
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: definedTags,
+description, freeformTags
+Reject before mutate: force-new fields
+compartmentId, name
+Lookup filters: compartmentId, name, id
+Lookup matching: exact compartmentId
+plus name unique match in ACTIVE,
+CREATING, or UPDATING; duplicate matches
+fail
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply\nChangeApiPlatformInstanceCompartment,\nUpdateApiPlatformInstance only for\nmutable fields definedTags,\ndescription, freeformTags
+loop update pending UPDATING
+ServiceManager -> OCI: GetApiPlatformInstance
+end
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on provisioning, updating,\nterminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: apiplatform
+slug: apiplatforminstance
+kind: ApiPlatformInstance
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: definedTags, description,
+freeformTags
+reject before mutate: force-new fields
+compartmentId, name
+create-only fields: none
+list lookup:
+oci_api_platform_api_platform_instances filters
+compartmentId, name, id; exact compartmentId
+plus name unique match in ACTIVE, CREATING, or
+UPDATING; duplicate matches fail
+conflicts: none
+open gaps: none
+Reviewed lifecycle mapping treats CREATING as
+provisioning, UPDATING as updating, ACTIVE as
+success, and DELETING as terminating; FAILED is
+terminal failure without requeue, and DELETED is
+a delete-confirmation target.
+Pre-create reuse uses exact compartmentId plus
+name matching. Generated reuse remains bounded
+to reusable lifecycle states and rejects
+duplicate exact matches instead of binding an
+arbitrary existing instance. The published
+runtime intentionally omits lifecycleState from
+the list query contract for first
+bind-or-create.
+Only description, freeformTags, and definedTags
+reconcile in place.
+ChangeApiPlatformInstanceCompartment remains out
+of scope, so compartmentId and name stay
+replacement-only drift in the published runtime.
+Create and delete responses expose work-request
+headers, but the published surface has no
+service-local work-request readers.
+Generatedruntime records async breadcrumbs when
+OCI returns them and relies on lifecycle rereads
+plus confirm-delete observation rather than
+work-request polling.
+The published `ApiPlatformInstance` kind keeps
+generated controller and service-manager wiring,
+but a package-local runtime hook narrows list
+lookup semantics and clears auxiliary
+compartment-change operations from the reviewed
+runtime contract. The kind has no secret side
+effects.
+end note
+@enduml

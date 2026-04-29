@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 83,
-    "mappings": 351,
-    "trackedMappings": 351,
+    "specs": 84,
+    "mappings": 356,
+    "trackedMappings": 356,
     "untrackedMappings": 0,
-    "presentFields": 3998,
-    "missingFields": 33,
-    "mandatoryPresentFields": 1255,
-    "mandatoryMissingFields": 30,
-    "extraSpecFields": 426,
-    "overallCoveragePercent": 99.18134457950882,
-    "mandatoryCoveragePercent": 97.66536964980544
+    "presentFields": 4029,
+    "missingFields": 34,
+    "mandatoryPresentFields": 1271,
+    "mandatoryMissingFields": 31,
+    "extraSpecFields": 428,
+    "overallCoveragePercent": 99.16317991631799,
+    "mandatoryCoveragePercent": 97.61904761904762
   },
   "services": [
     {
@@ -110,6 +110,20 @@
       "extraSpecFields": 10,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "apiplatform",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 31,
+      "missingFields": 1,
+      "mandatoryPresentFields": 16,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 96.875,
+      "mandatoryCoveragePercent": 94.11764705882352
     },
     {
       "service": "bds",

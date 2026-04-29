@@ -10,6 +10,7 @@ import (
 	aispeechv1beta1 "github.com/oracle/oci-service-operator/api/aispeech/v1beta1"
 	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
+	apiplatformv1beta1 "github.com/oracle/oci-service-operator/api/apiplatform/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
 	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
@@ -1554,6 +1555,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "analytics.AnalyticsInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "ApiplatformApiPlatformInstance",
+		SpecType:   reflect.TypeOf(apiplatformv1beta1.ApiPlatformInstanceSpec{}),
+		StatusType: reflect.TypeOf(apiplatformv1beta1.ApiPlatformInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apiplatform.CreateApiPlatformInstanceDetails",
+			},
+			{
+				SDKStruct: "apiplatform.UpdateApiPlatformInstanceDetails",
+			},
+			{
+				SDKStruct: "apiplatform.ApiPlatformInstance",
+			},
+			{
+				SDKStruct: "apiplatform.ApiPlatformInstanceCollection",
+			},
+			{
+				SDKStruct: "apiplatform.ApiPlatformInstanceSummary",
 			},
 		},
 	},
