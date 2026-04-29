@@ -19,6 +19,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-go-sdk/v65/database"
+	"github.com/oracle/oci-go-sdk/v65/databasemigration"
 	"github.com/oracle/oci-go-sdk/v65/databasetools"
 	"github.com/oracle/oci-go-sdk/v65/dataflow"
 	"github.com/oracle/oci-go-sdk/v65/datalabelingservice"
@@ -447,6 +448,9 @@ var seedTargets = []Target{
 	newTarget("containerinstances", "ContainerInstance", reflect.TypeOf(containerinstances.ContainerInstance{})),
 	newTarget("containerinstances", "ContainerInstanceCollection", reflect.TypeOf(containerinstances.ContainerInstanceCollection{})),
 	newTarget("containerinstances", "ContainerInstanceSummary", reflect.TypeOf(containerinstances.ContainerInstanceSummary{})),
+
+	// Databasemigration CRD support
+	newTarget("databasemigration", "ConnectionCollection", reflect.TypeOf(databasemigration.ConnectionCollection{})),
 
 	// Databasetools CRD support
 	newTarget("databasetools", "CreateDatabaseToolsConnectionGenericJdbcDetails", reflect.TypeOf(databasetools.CreateDatabaseToolsConnectionGenericJdbcDetails{})),

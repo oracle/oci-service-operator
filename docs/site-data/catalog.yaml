@@ -220,6 +220,20 @@ packages:
         kind: AutonomousDatabase
         summary: Manage OCI Autonomous Database instances.
 
+  - package: databasemigration
+    displayName: Database Migration
+    summary: Manage OCI Database Migration connections from Kubernetes with a reviewed controller-backed Connection rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Connection while the remaining Database Migration resource families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with explicit MYSQL versus ORACLE request shaping and replacement-only handling for `compartmentId`, `connectionType`, and `technologyType`.
+    kindOverrides:
+      - group: databasemigration
+        kind: Connection
+        summary: Manage OCI Database Migration connections.
+
   - package: databasetools
     displayName: Database Tools
     summary: Manage OCI Database Tools connections from Kubernetes with an initial controller-backed DatabaseToolsConnection rollout.

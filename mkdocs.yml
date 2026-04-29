@@ -144,6 +144,7 @@ nav:
           - containerinstances.oracle.com/v1beta1: reference/api/containerinstances/v1beta1/index.md
           - core.oracle.com/v1beta1: reference/api/core/v1beta1/index.md
           - database.oracle.com/v1beta1: reference/api/database/v1beta1/index.md
+          - databasemigration.oracle.com/v1beta1: reference/api/databasemigration/v1beta1/index.md
           - databasetools.oracle.com/v1beta1: reference/api/databasetools/v1beta1/index.md
           - dataflow.oracle.com/v1beta1: reference/api/dataflow/v1beta1/index.md
           - datalabelingservice.oracle.com/v1beta1: reference/api/datalabelingservice/v1beta1/index.md

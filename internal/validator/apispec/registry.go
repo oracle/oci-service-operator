@@ -18,6 +18,7 @@ import (
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
+	databasemigrationv1beta1 "github.com/oracle/oci-service-operator/api/databasemigration/v1beta1"
 	databasetoolsv1beta1 "github.com/oracle/oci-service-operator/api/databasetools/v1beta1"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
 	datalabelingservicev1beta1 "github.com/oracle/oci-service-operator/api/datalabelingservice/v1beta1"
@@ -1662,6 +1663,16 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatabasemigrationConnection",
+		SpecType:   reflect.TypeOf(databasemigrationv1beta1.ConnectionSpec{}),
+		StatusType: reflect.TypeOf(databasemigrationv1beta1.ConnectionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "databasemigration.ConnectionCollection",
 			},
 		},
 	},

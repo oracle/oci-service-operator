@@ -430,6 +430,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - databasemigration.oracle.com
+  resources:
+  - connections
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - databasemigration.oracle.com
+  resources:
+  - connections/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - databasemigration.oracle.com
+  resources:
+  - connections/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - databasetools.oracle.com
   resources:
   - databasetoolsconnections
