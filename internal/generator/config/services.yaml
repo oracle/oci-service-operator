@@ -415,6 +415,54 @@ services:
           serviceManager:
             strategy: none
 
+  - service: budget
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/budget
+    group: budget
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Budget
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Budget
+          formalSpec: budget
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+        - kind: AlertRule
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: CostAlertSubscription
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: CostAnomalyEvent
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: CostAnomalyMonitor
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: certificates
     sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates
     group: certificates
