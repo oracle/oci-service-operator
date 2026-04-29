@@ -146,6 +146,7 @@ nav:
           - database.oracle.com/v1beta1: reference/api/database/v1beta1/index.md
           - databasetools.oracle.com/v1beta1: reference/api/databasetools/v1beta1/index.md
           - dataflow.oracle.com/v1beta1: reference/api/dataflow/v1beta1/index.md
+          - datalabelingservice.oracle.com/v1beta1: reference/api/datalabelingservice/v1beta1/index.md
           - datascience.oracle.com/v1beta1: reference/api/datascience/v1beta1/index.md
           - email.oracle.com/v1beta1: reference/api/email/v1beta1/index.md
           - functions.oracle.com/v1beta1: reference/api/functions/v1beta1/index.md

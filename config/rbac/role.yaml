@@ -482,6 +482,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - datalabelingservice.oracle.com
+  resources:
+  - datasets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - datalabelingservice.oracle.com
+  resources:
+  - datasets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - datalabelingservice.oracle.com
+  resources:
+  - datasets/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - email.oracle.com
   resources:
   - dkims

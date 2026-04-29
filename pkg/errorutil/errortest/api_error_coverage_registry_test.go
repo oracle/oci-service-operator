@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 178; got != want {
+	if got, want := len(inventory), 183; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 84; got != want {
+	if got, want := countRegistrations(inventory), 85; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 94; got != want {
+	if got, want := countExceptions(inventory), 98; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -39,6 +39,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
 	assertInventorySelectionSource(t, byKey, "databasetools/DatabaseToolsConnection", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "datalabelingservice/Dataset", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datascience/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
@@ -77,6 +78,11 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "databasetools/DatabaseToolsConnection")
+	assertInventoryRegistration(t, byKey, "datalabelingservice/Dataset")
+	assertInventoryException(t, byKey, "datalabelingservice/AnnotationFormat", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "datalabelingservice/WorkRequest", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "datalabelingservice/WorkRequestError", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "datalabelingservice/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "databasetools/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "datascience/Project")
 	assertInventoryException(t, byKey, "datascience/WorkRequest", `controller.strategy="none"`)
@@ -118,6 +124,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
 	assertReviewedFamily(t, "core/Vcn", APIErrorCoverageFamilyManualRuntime)
 	assertReviewedFamily(t, "databasetools/DatabaseToolsConnection", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "datalabelingservice/Dataset", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datascience/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "email/Dkim", APIErrorCoverageFamilyGeneratedRuntimePlain)
@@ -154,6 +161,10 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "budget/AlertRule", "strategy=none")
 	assertReviewedException(t, "clusterplacementgroups/WorkRequest", "strategy=none")
 	assertReviewedException(t, "databasetools/WorkRequest", "strategy=none")
+	assertReviewedException(t, "datalabelingservice/AnnotationFormat", "strategy=none")
+	assertReviewedException(t, "datalabelingservice/WorkRequest", "strategy=none")
+	assertReviewedException(t, "datalabelingservice/WorkRequestError", "strategy=none")
+	assertReviewedException(t, "datalabelingservice/WorkRequestLog", "strategy=none")
 	assertReviewedException(t, "datascience/WorkRequest", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")
 	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")

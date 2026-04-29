@@ -26,6 +26,7 @@ This landing page is generated from the checked-in package and release inventory
 | [database.oracle.com/v1beta1](database/v1beta1/index.md) | [AutonomousDatabase](database/v1beta1/index.md#kind-autonomousdatabase) | Autonomous Database (`v2.0.0-alpha`) |
 | [databasetools.oracle.com/v1beta1](databasetools/v1beta1/index.md) | [DatabaseToolsConnection](databasetools/v1beta1/index.md#kind-databasetoolsconnection) | - |
 | [dataflow.oracle.com/v1beta1](dataflow/v1beta1/index.md) | [Application](dataflow/v1beta1/index.md#kind-application) | Data Flow (`v2.0.0-alpha`) |
+| [datalabelingservice.oracle.com/v1beta1](datalabelingservice/v1beta1/index.md) | [Dataset](datalabelingservice/v1beta1/index.md#kind-dataset) | - |
 | [datascience.oracle.com/v1beta1](datascience/v1beta1/index.md) | [Project](datascience/v1beta1/index.md#kind-project) | - |
 | [email.oracle.com/v1beta1](email/v1beta1/index.md) | [Dkim](email/v1beta1/index.md#kind-dkim), [EmailDomain](email/v1beta1/index.md#kind-emaildomain), [Sender](email/v1beta1/index.md#kind-sender), [Suppression](email/v1beta1/index.md#kind-suppression) | - |
 | [functions.oracle.com/v1beta1](functions/v1beta1/index.md) | [Application](functions/v1beta1/index.md#kind-application), [Function](functions/v1beta1/index.md#kind-function) | Functions (`v2.0.0-alpha`) |

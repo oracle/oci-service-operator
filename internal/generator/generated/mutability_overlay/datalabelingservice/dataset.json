@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "sourceContract": {
+    "astPrimaryFacts": [
+      "forceNew",
+      "conflictsWith",
+      "lifecycle",
+      "hooks",
+      "crud",
+      "listLookup"
+    ],
+    "astMutableAlias": "updateCandidate",
+    "docsOverlayScope": "terraform-argument-reference-for-ast-update-candidate-fields",
+    "docsEvidenceSource": "terraform-argument-reference"
+  },
+  "resource": {
+    "service": "datalabelingservice",
+    "kind": "Dataset",
+    "formalSlug": "dataset",
+    "providerResource": "oci_data_labeling_service_dataset",
+    "repoAuthoredSpecPath": "controllers/datalabelingservice/dataset/spec.cfg",
+    "formalImportPath": "imports/datalabelingservice/dataset.json"
+  },
+  "fields": [
+    {
+      "astFieldPath": "definedTags",
+      "terraformFieldPath": "defined_tags",
+      "canonicalJoinKey": "definedTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/datalabelingservice/dataset.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "data_labeling_service_dataset#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "description",
+      "terraformFieldPath": "description",
+      "canonicalJoinKey": "description",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/datalabelingservice/dataset.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "data_labeling_service_dataset#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "displayName",
+      "terraformFieldPath": "display_name",
+      "canonicalJoinKey": "displayName",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/datalabelingservice/dataset.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "data_labeling_service_dataset#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "freeformTags",
+      "terraformFieldPath": "freeform_tags",
+      "canonicalJoinKey": "freeformTags",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/datalabelingservice/dataset.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "data_labeling_service_dataset#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "labelingInstructions",
+      "terraformFieldPath": "labeling_instructions",
+      "canonicalJoinKey": "labelingInstructions",
+      "pathShape": "scalar",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "confirmedUpdatable",
+        "detail": "Argument Reference marks the field as updatable in place.",
+        "rawSignal": "(updatable)"
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "docsConfirmedCandidate",
+        "finalPolicy": "allowInPlaceUpdate"
+      },
+      "provenance": {
+        "formalImportPath": "imports/datalabelingservice/dataset.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "data_labeling_service_dataset#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    }
+  ]
+}

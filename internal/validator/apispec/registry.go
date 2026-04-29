@@ -20,6 +20,7 @@ import (
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	databasetoolsv1beta1 "github.com/oracle/oci-service-operator/api/databasetools/v1beta1"
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
+	datalabelingservicev1beta1 "github.com/oracle/oci-service-operator/api/datalabelingservice/v1beta1"
 	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
 	emailv1beta1 "github.com/oracle/oci-service-operator/api/email/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
@@ -1748,6 +1749,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "dataflow.ApplicationSummary",
+			},
+		},
+	},
+	{
+		Name:       "DatalabelingserviceDataset",
+		SpecType:   reflect.TypeOf(datalabelingservicev1beta1.DatasetSpec{}),
+		StatusType: reflect.TypeOf(datalabelingservicev1beta1.DatasetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "datalabelingservice.CreateDatasetDetails",
+			},
+			{
+				SDKStruct: "datalabelingservice.UpdateDatasetDetails",
+			},
+			{
+				SDKStruct: "datalabelingservice.Dataset",
+			},
+			{
+				SDKStruct: "datalabelingservice.DatasetCollection",
+			},
+			{
+				SDKStruct: "datalabelingservice.DatasetSummary",
 			},
 		},
 	},

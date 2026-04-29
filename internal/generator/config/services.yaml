@@ -1352,6 +1352,91 @@ services:
           serviceManager:
             strategy: none
 
+  - service: datalabelingservice
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datalabelingservice
+    group: datalabelingservice
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Dataset
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Dataset
+          formalSpec: dataset
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: DatasetSourceDetails
+              type: DatasetCreateSourceDetails
+              tag: 'json:"datasetSourceDetails"'
+            - name: DatasetFormatDetails
+              type: DatasetCreateFormatDetails
+              tag: 'json:"datasetFormatDetails"'
+            - name: InitialImportDatasetConfiguration
+              type: DatasetCreateInitialImportDatasetConfiguration
+              tag: 'json:"initialImportDatasetConfiguration,omitempty"'
+          sample:
+            body: |-
+              apiVersion: datalabelingservice.oracle.com/v1beta1
+              kind: Dataset
+              metadata:
+                name: dataset-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                annotationFormat: SINGLE_LABEL
+                datasetSourceDetails:
+                  sourceType: OBJECT_STORAGE
+                  namespace: objectstorage-namespace
+                  bucket: dataset-bucket
+                  prefix: records/
+                datasetFormatDetails:
+                  formatType: TEXT
+                  textFileTypeMetadata:
+                    formatType: DELIMITED
+                    columnIndex: 0
+                    columnName: text
+                    columnDelimiter: ","
+                labelSet:
+                  items:
+                    - name: positive
+                displayName: dataset-sample
+                description: Sample OCI Data Labeling dataset
+                labelingInstructions: Label each record as positive or negative.
+        - kind: AnnotationFormat
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: datascience
     sdkPackage: github.com/oracle/oci-go-sdk/v65/datascience
     group: datascience
