@@ -10,6 +10,7 @@ kind: Kustomization
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
+- bases/accessgovernancecp.oracle.com_governanceinstances.yaml
 - bases/adm.oracle.com_knowledgebases.yaml
 - bases/aidocument.oracle.com_projects.yaml
 - bases/ailanguage.oracle.com_projects.yaml

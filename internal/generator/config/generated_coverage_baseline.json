@@ -1,18 +1,32 @@
 {
   "aggregate": {
-    "specs": 82,
-    "mappings": 346,
-    "trackedMappings": 346,
+    "specs": 83,
+    "mappings": 351,
+    "trackedMappings": 351,
     "untrackedMappings": 0,
-    "presentFields": 3959,
-    "missingFields": 32,
-    "mandatoryPresentFields": 1242,
-    "mandatoryMissingFields": 29,
-    "extraSpecFields": 422,
-    "overallCoveragePercent": 99.19819594086695,
-    "mandatoryCoveragePercent": 97.7183320220299
+    "presentFields": 3998,
+    "missingFields": 33,
+    "mandatoryPresentFields": 1255,
+    "mandatoryMissingFields": 30,
+    "extraSpecFields": 426,
+    "overallCoveragePercent": 99.18134457950882,
+    "mandatoryCoveragePercent": 97.66536964980544
   },
   "services": [
+    {
+      "service": "accessgovernancecp",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 39,
+      "missingFields": 1,
+      "mandatoryPresentFields": 13,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 4,
+      "overallCoveragePercent": 97.5,
+      "mandatoryCoveragePercent": 92.85714285714286
+    },
     {
       "service": "adm",
       "specs": 1,

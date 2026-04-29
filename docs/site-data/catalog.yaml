@@ -2,6 +2,20 @@
 # or release history alone.
 schemaVersion: v1alpha1
 packages:
+  - package: accessgovernancecp
+    displayName: Access Governance Control Plane
+    summary: Manage OCI Access Governance Control Plane governance instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to GovernanceInstance while GovernanceInstanceConfiguration and SenderConfig stay unpublished.
+      - The published runtime keeps lifecycle-based CRUD semantics with tenant-scoped pre-create reuse and explicit create-only handling for `idcsAccessToken`.
+    kindOverrides:
+      - group: accessgovernancecp
+        kind: GovernanceInstance
+        summary: Manage OCI Access Governance Control Plane governance instances.
+
   - package: adm
     displayName: Application Dependency Management
     summary: Manage OCI Application Dependency Management knowledge bases from Kubernetes with an initial controller-backed KnowledgeBase rollout.

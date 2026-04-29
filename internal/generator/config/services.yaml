@@ -20,6 +20,46 @@ packageProfiles:
     description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
 
 services:
+  - service: accessgovernancecp
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/accessgovernancecp
+    group: accessgovernancecp
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - GovernanceInstance
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: GovernanceInstance
+          formalSpec: governanceinstance
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          serviceManager:
+            packagePath: accessgovernancecp/governanceinstance
+        - kind: GovernanceInstanceConfiguration
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: SenderConfig
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: adm
     sdkPackage: github.com/oracle/oci-go-sdk/v65/adm
     group: adm
