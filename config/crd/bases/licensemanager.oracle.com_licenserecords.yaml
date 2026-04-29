@@ -1,0 +1,303 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: licenserecords.licensemanager.oracle.com
+spec:
+  group: licensemanager.oracle.com
+  names:
+    kind: LicenseRecord
+    listKind: LicenseRecordList
+    plural: licenserecords
+    singular: licenserecord
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the LicenseRecord
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the LicenseRecord
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: LicenseRecord is the Schema for the licenserecords API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LicenseRecordSpec defines the desired state of LicenseRecord.
+            properties:
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: License record name.
+                type: string
+              expirationDate:
+                description: |-
+                  The license record end date in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  date format.
+                  Example: `2018-09-12`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isPerpetual:
+                description: Specifies if the license record term is perpertual.
+                type: boolean
+              isUnlimited:
+                description: Specifies if the license count is unlimited.
+                type: boolean
+              licenseCount:
+                description: |-
+                  The number of license units added by a user in a license record.
+                  Default 1
+                type: integer
+              productId:
+                description: The license record product ID.
+                type: string
+              supportEndDate:
+                description: |-
+                  The license record support end date in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  date format.
+                  Example: `2018-09-12`
+                type: string
+            required:
+            - displayName
+            - isPerpetual
+            - isUnlimited
+            type: object
+          status:
+            description: LicenseRecordStatus defines the observed state of LicenseRecord.
+            properties:
+              compartmentId:
+                description: The compartment OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  where the license record is created.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: The license record display name. Avoid entering confidential
+                  information.
+                type: string
+              expirationDate:
+                description: |-
+                  The license record end date in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  date format.
+                  Example: `2018-09-12`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The license record OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              isPerpetual:
+                description: Specifies if the license record term is perpertual.
+                type: boolean
+              isUnlimited:
+                description: Specifies if the license count is unlimited.
+                type: boolean
+              licenseCount:
+                description: |-
+                  The number of license units added by the user for the given license record.
+                  Default 1
+                type: integer
+              licenseUnit:
+                description: The product license unit.
+                type: string
+              lifecycleState:
+                description: The current license record state.
+                type: string
+              productId:
+                description: The license record product ID.
+                type: string
+              productLicense:
+                description: The product license name with which the license record
+                  is associated.
+                type: string
+              productLicenseId:
+                description: The product license OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  with which the license record is associated.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              supportEndDate:
+                description: |-
+                  The license record support end date in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  date format.
+                  Example: `2018-09-12`
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the license record was created. An RFC 3339
+                  (https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+                type: string
+              timeUpdated:
+                description: The time the license record was updated. An RFC 3339
+                  (https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -26,15 +26,25 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/events"
 	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
+	"github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/healthchecks"
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/oracle/oci-go-sdk/v65/integration"
+	"github.com/oracle/oci-go-sdk/v65/iot"
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
+	"github.com/oracle/oci-go-sdk/v65/licensemanager"
 	"github.com/oracle/oci-go-sdk/v65/limits"
+	"github.com/oracle/oci-go-sdk/v65/limitsincrease"
 	"github.com/oracle/oci-go-sdk/v65/loadbalancer"
+	"github.com/oracle/oci-go-sdk/v65/lockbox"
+	"github.com/oracle/oci-go-sdk/v65/loganalytics"
 	"github.com/oracle/oci-go-sdk/v65/logging"
 	"github.com/oracle/oci-go-sdk/v65/managedkafka"
+	"github.com/oracle/oci-go-sdk/v65/managementagent"
+	"github.com/oracle/oci-go-sdk/v65/managementdashboard"
 	"github.com/oracle/oci-go-sdk/v65/marketplace"
+	"github.com/oracle/oci-go-sdk/v65/marketplaceprivateoffer"
+	"github.com/oracle/oci-go-sdk/v65/marketplacepublisher"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
@@ -44,13 +54,25 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/oda"
 	"github.com/oracle/oci-go-sdk/v65/ons"
 	"github.com/oracle/oci-go-sdk/v65/opensearch"
+	"github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol"
+	"github.com/oracle/oci-go-sdk/v65/opsi"
+	"github.com/oracle/oci-go-sdk/v65/optimizer"
+	"github.com/oracle/oci-go-sdk/v65/osmanagementhub"
 	"github.com/oracle/oci-go-sdk/v65/psql"
 	"github.com/oracle/oci-go-sdk/v65/queue"
+	"github.com/oracle/oci-go-sdk/v65/recovery"
 	"github.com/oracle/oci-go-sdk/v65/redis"
+	"github.com/oracle/oci-go-sdk/v65/resourceanalytics"
+	"github.com/oracle/oci-go-sdk/v65/resourcescheduler"
 	"github.com/oracle/oci-go-sdk/v65/sch"
+	"github.com/oracle/oci-go-sdk/v65/securityattribute"
 	"github.com/oracle/oci-go-sdk/v65/servicecatalog"
+	"github.com/oracle/oci-go-sdk/v65/stackmonitoring"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
 	"github.com/oracle/oci-go-sdk/v65/usageapi"
+	"github.com/oracle/oci-go-sdk/v65/waa"
+	"github.com/oracle/oci-go-sdk/v65/waas"
+	"github.com/oracle/oci-go-sdk/v65/waf"
 )
 
 const (
@@ -584,6 +606,13 @@ var seedTargets = []Target{
 	newTarget("devops", "ProjectSummary", reflect.TypeOf(devops.ProjectSummary{})),
 	newTarget("devops", "RepositorySummary", reflect.TypeOf(devops.RepositorySummary{})),
 
+	// Governancerulescontrolplane CRD support
+	newTarget("governancerulescontrolplane", "CreateGovernanceRuleDetails", reflect.TypeOf(governancerulescontrolplane.CreateGovernanceRuleDetails{})),
+	newTarget("governancerulescontrolplane", "UpdateGovernanceRuleDetails", reflect.TypeOf(governancerulescontrolplane.UpdateGovernanceRuleDetails{})),
+	newTarget("governancerulescontrolplane", "GovernanceRule", reflect.TypeOf(governancerulescontrolplane.GovernanceRule{})),
+	newTarget("governancerulescontrolplane", "GovernanceRuleCollection", reflect.TypeOf(governancerulescontrolplane.GovernanceRuleCollection{})),
+	newTarget("governancerulescontrolplane", "GovernanceRuleSummary", reflect.TypeOf(governancerulescontrolplane.GovernanceRuleSummary{})),
+
 	// Healthchecks CRD support
 	newTarget("healthchecks", "CreateHttpMonitorDetails", reflect.TypeOf(healthchecks.CreateHttpMonitorDetails{})),
 	newTarget("healthchecks", "CreatePingMonitorDetails", reflect.TypeOf(healthchecks.CreatePingMonitorDetails{})),
@@ -600,6 +629,100 @@ var seedTargets = []Target{
 	newTarget("integration", "IntegrationInstance", reflect.TypeOf(integration.IntegrationInstance{})),
 	newTarget("integration", "IntegrationInstanceSummary", reflect.TypeOf(integration.IntegrationInstanceSummary{})),
 
+	// Iot CRD support
+	newTarget("iot", "CreateDigitalTwinAdapterDetails", reflect.TypeOf(iot.CreateDigitalTwinAdapterDetails{})),
+	newTarget("iot", "CreateDigitalTwinInstanceDetails", reflect.TypeOf(iot.CreateDigitalTwinInstanceDetails{})),
+	newTarget("iot", "CreateDigitalTwinModelDetails", reflect.TypeOf(iot.CreateDigitalTwinModelDetails{})),
+	newTarget("iot", "CreateDigitalTwinRelationshipDetails", reflect.TypeOf(iot.CreateDigitalTwinRelationshipDetails{})),
+	newTarget("iot", "CreateIotDomainDetails", reflect.TypeOf(iot.CreateIotDomainDetails{})),
+	newTarget("iot", "CreateIotDomainGroupDetails", reflect.TypeOf(iot.CreateIotDomainGroupDetails{})),
+	newTarget("iot", "UpdateDigitalTwinAdapterDetails", reflect.TypeOf(iot.UpdateDigitalTwinAdapterDetails{})),
+	newTarget("iot", "UpdateDigitalTwinInstanceDetails", reflect.TypeOf(iot.UpdateDigitalTwinInstanceDetails{})),
+	newTarget("iot", "UpdateDigitalTwinModelDetails", reflect.TypeOf(iot.UpdateDigitalTwinModelDetails{})),
+	newTarget("iot", "UpdateDigitalTwinRelationshipDetails", reflect.TypeOf(iot.UpdateDigitalTwinRelationshipDetails{})),
+	newTarget("iot", "UpdateIotDomainDetails", reflect.TypeOf(iot.UpdateIotDomainDetails{})),
+	newTarget("iot", "UpdateIotDomainGroupDetails", reflect.TypeOf(iot.UpdateIotDomainGroupDetails{})),
+	newTarget("iot", "DigitalTwinAdapter", reflect.TypeOf(iot.DigitalTwinAdapter{})),
+	newTarget("iot", "DigitalTwinAdapterCollection", reflect.TypeOf(iot.DigitalTwinAdapterCollection{})),
+	newTarget("iot", "DigitalTwinInstance", reflect.TypeOf(iot.DigitalTwinInstance{})),
+	newTarget("iot", "DigitalTwinInstanceCollection", reflect.TypeOf(iot.DigitalTwinInstanceCollection{})),
+	newTarget("iot", "DigitalTwinModel", reflect.TypeOf(iot.DigitalTwinModel{})),
+	newTarget("iot", "DigitalTwinModelCollection", reflect.TypeOf(iot.DigitalTwinModelCollection{})),
+	newTarget("iot", "DigitalTwinRelationship", reflect.TypeOf(iot.DigitalTwinRelationship{})),
+	newTarget("iot", "DigitalTwinRelationshipCollection", reflect.TypeOf(iot.DigitalTwinRelationshipCollection{})),
+	newTarget("iot", "IotDomain", reflect.TypeOf(iot.IotDomain{})),
+	newTarget("iot", "IotDomainCollection", reflect.TypeOf(iot.IotDomainCollection{})),
+	newTarget("iot", "IotDomainGroup", reflect.TypeOf(iot.IotDomainGroup{})),
+	newTarget("iot", "IotDomainGroupCollection", reflect.TypeOf(iot.IotDomainGroupCollection{})),
+	newTarget("iot", "DigitalTwinAdapterSummary", reflect.TypeOf(iot.DigitalTwinAdapterSummary{})),
+	newTarget("iot", "DigitalTwinInstanceSummary", reflect.TypeOf(iot.DigitalTwinInstanceSummary{})),
+	newTarget("iot", "DigitalTwinModelSummary", reflect.TypeOf(iot.DigitalTwinModelSummary{})),
+	newTarget("iot", "DigitalTwinRelationshipSummary", reflect.TypeOf(iot.DigitalTwinRelationshipSummary{})),
+	newTarget("iot", "IotDomainGroupSummary", reflect.TypeOf(iot.IotDomainGroupSummary{})),
+	newTarget("iot", "IotDomainSummary", reflect.TypeOf(iot.IotDomainSummary{})),
+
+	// Licensemanager CRD support
+	newTarget("licensemanager", "CreateLicenseRecordDetails", reflect.TypeOf(licensemanager.CreateLicenseRecordDetails{})),
+	newTarget("licensemanager", "CreateProductLicenseDetails", reflect.TypeOf(licensemanager.CreateProductLicenseDetails{})),
+	newTarget("licensemanager", "UpdateLicenseRecordDetails", reflect.TypeOf(licensemanager.UpdateLicenseRecordDetails{})),
+	newTarget("licensemanager", "UpdateProductLicenseDetails", reflect.TypeOf(licensemanager.UpdateProductLicenseDetails{})),
+	newTarget("licensemanager", "LicenseRecord", reflect.TypeOf(licensemanager.LicenseRecord{})),
+	newTarget("licensemanager", "LicenseRecordCollection", reflect.TypeOf(licensemanager.LicenseRecordCollection{})),
+	newTarget("licensemanager", "ProductLicense", reflect.TypeOf(licensemanager.ProductLicense{})),
+	newTarget("licensemanager", "ProductLicenseCollection", reflect.TypeOf(licensemanager.ProductLicenseCollection{})),
+	newTarget("licensemanager", "LicenseRecordSummary", reflect.TypeOf(licensemanager.LicenseRecordSummary{})),
+	newTarget("licensemanager", "ProductLicenseSummary", reflect.TypeOf(licensemanager.ProductLicenseSummary{})),
+
+	// Limitsincrease CRD support
+	newTarget("limitsincrease", "CreateLimitsIncreaseRequestDetails", reflect.TypeOf(limitsincrease.CreateLimitsIncreaseRequestDetails{})),
+	newTarget("limitsincrease", "UpdateLimitsIncreaseRequestDetails", reflect.TypeOf(limitsincrease.UpdateLimitsIncreaseRequestDetails{})),
+	newTarget("limitsincrease", "LimitsIncreaseRequest", reflect.TypeOf(limitsincrease.LimitsIncreaseRequest{})),
+	newTarget("limitsincrease", "LimitsIncreaseRequestCollection", reflect.TypeOf(limitsincrease.LimitsIncreaseRequestCollection{})),
+	newTarget("limitsincrease", "LimitsIncreaseRequestSummary", reflect.TypeOf(limitsincrease.LimitsIncreaseRequestSummary{})),
+
+	// Lockbox CRD support
+	newTarget("lockbox", "CreateApprovalTemplateDetails", reflect.TypeOf(lockbox.CreateApprovalTemplateDetails{})),
+	newTarget("lockbox", "CreateLockboxDetails", reflect.TypeOf(lockbox.CreateLockboxDetails{})),
+	newTarget("lockbox", "UpdateApprovalTemplateDetails", reflect.TypeOf(lockbox.UpdateApprovalTemplateDetails{})),
+	newTarget("lockbox", "UpdateLockboxDetails", reflect.TypeOf(lockbox.UpdateLockboxDetails{})),
+	newTarget("lockbox", "ApprovalTemplate", reflect.TypeOf(lockbox.ApprovalTemplate{})),
+	newTarget("lockbox", "ApprovalTemplateCollection", reflect.TypeOf(lockbox.ApprovalTemplateCollection{})),
+	newTarget("lockbox", "Lockbox", reflect.TypeOf(lockbox.Lockbox{})),
+	newTarget("lockbox", "LockboxCollection", reflect.TypeOf(lockbox.LockboxCollection{})),
+	newTarget("lockbox", "ApprovalTemplateSummary", reflect.TypeOf(lockbox.ApprovalTemplateSummary{})),
+	newTarget("lockbox", "LockboxSummary", reflect.TypeOf(lockbox.LockboxSummary{})),
+
+	// Loganalytics CRD support
+	newTarget("loganalytics", "CreateIngestTimeRuleDetails", reflect.TypeOf(loganalytics.CreateIngestTimeRuleDetails{})),
+	newTarget("loganalytics", "CreateLogAnalyticsEmBridgeDetails", reflect.TypeOf(loganalytics.CreateLogAnalyticsEmBridgeDetails{})),
+	newTarget("loganalytics", "CreateLogAnalyticsEntityDetails", reflect.TypeOf(loganalytics.CreateLogAnalyticsEntityDetails{})),
+	newTarget("loganalytics", "CreateLogAnalyticsEntityTypeDetails", reflect.TypeOf(loganalytics.CreateLogAnalyticsEntityTypeDetails{})),
+	newTarget("loganalytics", "CreateLogAnalyticsLogGroupDetails", reflect.TypeOf(loganalytics.CreateLogAnalyticsLogGroupDetails{})),
+	newTarget("loganalytics", "CreateLogAnalyticsObjectCollectionRuleDetails", reflect.TypeOf(loganalytics.CreateLogAnalyticsObjectCollectionRuleDetails{})),
+	newTarget("loganalytics", "UpdateLogAnalyticsEmBridgeDetails", reflect.TypeOf(loganalytics.UpdateLogAnalyticsEmBridgeDetails{})),
+	newTarget("loganalytics", "UpdateLogAnalyticsEntityDetails", reflect.TypeOf(loganalytics.UpdateLogAnalyticsEntityDetails{})),
+	newTarget("loganalytics", "UpdateLogAnalyticsEntityTypeDetails", reflect.TypeOf(loganalytics.UpdateLogAnalyticsEntityTypeDetails{})),
+	newTarget("loganalytics", "UpdateLogAnalyticsLogGroupDetails", reflect.TypeOf(loganalytics.UpdateLogAnalyticsLogGroupDetails{})),
+	newTarget("loganalytics", "UpdateLogAnalyticsObjectCollectionRuleDetails", reflect.TypeOf(loganalytics.UpdateLogAnalyticsObjectCollectionRuleDetails{})),
+	newTarget("loganalytics", "IngestTimeRule", reflect.TypeOf(loganalytics.IngestTimeRule{})),
+	newTarget("loganalytics", "LogAnalyticsEmBridge", reflect.TypeOf(loganalytics.LogAnalyticsEmBridge{})),
+	newTarget("loganalytics", "LogAnalyticsEmBridgeCollection", reflect.TypeOf(loganalytics.LogAnalyticsEmBridgeCollection{})),
+	newTarget("loganalytics", "LogAnalyticsEntity", reflect.TypeOf(loganalytics.LogAnalyticsEntity{})),
+	newTarget("loganalytics", "LogAnalyticsEntityCollection", reflect.TypeOf(loganalytics.LogAnalyticsEntityCollection{})),
+	newTarget("loganalytics", "LogAnalyticsEntityType", reflect.TypeOf(loganalytics.LogAnalyticsEntityType{})),
+	newTarget("loganalytics", "LogAnalyticsEntityTypeCollection", reflect.TypeOf(loganalytics.LogAnalyticsEntityTypeCollection{})),
+	newTarget("loganalytics", "LogAnalyticsLogGroup", reflect.TypeOf(loganalytics.LogAnalyticsLogGroup{})),
+	newTarget("loganalytics", "LogAnalyticsObjectCollectionRule", reflect.TypeOf(loganalytics.LogAnalyticsObjectCollectionRule{})),
+	newTarget("loganalytics", "LogAnalyticsObjectCollectionRuleCollection", reflect.TypeOf(loganalytics.LogAnalyticsObjectCollectionRuleCollection{})),
+	newTarget("loganalytics", "ScheduledTaskCollection", reflect.TypeOf(loganalytics.ScheduledTaskCollection{})),
+	newTarget("loganalytics", "IngestTimeRuleSummary", reflect.TypeOf(loganalytics.IngestTimeRuleSummary{})),
+	newTarget("loganalytics", "LogAnalyticsEmBridgeSummary", reflect.TypeOf(loganalytics.LogAnalyticsEmBridgeSummary{})),
+	newTarget("loganalytics", "LogAnalyticsEntitySummary", reflect.TypeOf(loganalytics.LogAnalyticsEntitySummary{})),
+	newTarget("loganalytics", "LogAnalyticsEntityTypeSummary", reflect.TypeOf(loganalytics.LogAnalyticsEntityTypeSummary{})),
+	newTarget("loganalytics", "LogAnalyticsLogGroupSummary", reflect.TypeOf(loganalytics.LogAnalyticsLogGroupSummary{})),
+	newTarget("loganalytics", "LogAnalyticsObjectCollectionRuleSummary", reflect.TypeOf(loganalytics.LogAnalyticsObjectCollectionRuleSummary{})),
+	newTarget("loganalytics", "ScheduledTaskSummary", reflect.TypeOf(loganalytics.ScheduledTaskSummary{})),
+
 	// Managedkafka CRD support
 	newTarget("managedkafka", "CreateKafkaClusterConfigDetails", reflect.TypeOf(managedkafka.CreateKafkaClusterConfigDetails{})),
 	newTarget("managedkafka", "CreateKafkaClusterDetails", reflect.TypeOf(managedkafka.CreateKafkaClusterDetails{})),
@@ -613,12 +736,193 @@ var seedTargets = []Target{
 	newTarget("managedkafka", "KafkaClusterConfigSummary", reflect.TypeOf(managedkafka.KafkaClusterConfigSummary{})),
 	newTarget("managedkafka", "KafkaClusterSummary", reflect.TypeOf(managedkafka.KafkaClusterSummary{})),
 
+	// Managementagent CRD support
+	newTarget("managementagent", "CreateManagementAgentInstallKeyDetails", reflect.TypeOf(managementagent.CreateManagementAgentInstallKeyDetails{})),
+	newTarget("managementagent", "CreateNamedCredentialDetails", reflect.TypeOf(managementagent.CreateNamedCredentialDetails{})),
+	newTarget("managementagent", "UpdateManagementAgentInstallKeyDetails", reflect.TypeOf(managementagent.UpdateManagementAgentInstallKeyDetails{})),
+	newTarget("managementagent", "UpdateNamedCredentialDetails", reflect.TypeOf(managementagent.UpdateNamedCredentialDetails{})),
+	newTarget("managementagent", "ManagementAgentInstallKey", reflect.TypeOf(managementagent.ManagementAgentInstallKey{})),
+	newTarget("managementagent", "NamedCredential", reflect.TypeOf(managementagent.NamedCredential{})),
+	newTarget("managementagent", "NamedCredentialCollection", reflect.TypeOf(managementagent.NamedCredentialCollection{})),
+	newTarget("managementagent", "ManagementAgentInstallKeySummary", reflect.TypeOf(managementagent.ManagementAgentInstallKeySummary{})),
+	newTarget("managementagent", "NamedCredentialSummary", reflect.TypeOf(managementagent.NamedCredentialSummary{})),
+
+	// Managementdashboard CRD support
+	newTarget("managementdashboard", "CreateManagementDashboardDetails", reflect.TypeOf(managementdashboard.CreateManagementDashboardDetails{})),
+	newTarget("managementdashboard", "CreateManagementSavedSearchDetails", reflect.TypeOf(managementdashboard.CreateManagementSavedSearchDetails{})),
+	newTarget("managementdashboard", "UpdateManagementDashboardDetails", reflect.TypeOf(managementdashboard.UpdateManagementDashboardDetails{})),
+	newTarget("managementdashboard", "UpdateManagementSavedSearchDetails", reflect.TypeOf(managementdashboard.UpdateManagementSavedSearchDetails{})),
+	newTarget("managementdashboard", "ManagementDashboard", reflect.TypeOf(managementdashboard.ManagementDashboard{})),
+	newTarget("managementdashboard", "ManagementDashboardCollection", reflect.TypeOf(managementdashboard.ManagementDashboardCollection{})),
+	newTarget("managementdashboard", "ManagementSavedSearch", reflect.TypeOf(managementdashboard.ManagementSavedSearch{})),
+	newTarget("managementdashboard", "ManagementSavedSearchCollection", reflect.TypeOf(managementdashboard.ManagementSavedSearchCollection{})),
+	newTarget("managementdashboard", "ManagementDashboardSummary", reflect.TypeOf(managementdashboard.ManagementDashboardSummary{})),
+	newTarget("managementdashboard", "ManagementSavedSearchSummary", reflect.TypeOf(managementdashboard.ManagementSavedSearchSummary{})),
+
+	// Marketplaceprivateoffer CRD support
+	newTarget("marketplaceprivateoffer", "CreateOfferDetails", reflect.TypeOf(marketplaceprivateoffer.CreateOfferDetails{})),
+	newTarget("marketplaceprivateoffer", "UpdateOfferDetails", reflect.TypeOf(marketplaceprivateoffer.UpdateOfferDetails{})),
+	newTarget("marketplaceprivateoffer", "Offer", reflect.TypeOf(marketplaceprivateoffer.Offer{})),
+	newTarget("marketplaceprivateoffer", "OfferCollection", reflect.TypeOf(marketplaceprivateoffer.OfferCollection{})),
+	newTarget("marketplaceprivateoffer", "OfferSummary", reflect.TypeOf(marketplaceprivateoffer.OfferSummary{})),
+
+	// Marketplacepublisher CRD support
+	newTarget("marketplacepublisher", "CreateListingDetails", reflect.TypeOf(marketplacepublisher.CreateListingDetails{})),
+	newTarget("marketplacepublisher", "CreateListingRevisionNoteDetails", reflect.TypeOf(marketplacepublisher.CreateListingRevisionNoteDetails{})),
+	newTarget("marketplacepublisher", "CreateListingRevisionPackageDetails", reflect.TypeOf(marketplacepublisher.CreateListingRevisionPackageDetails{})),
+	newTarget("marketplacepublisher", "CreateTermDetails", reflect.TypeOf(marketplacepublisher.CreateTermDetails{})),
+	newTarget("marketplacepublisher", "UpdateListingDetails", reflect.TypeOf(marketplacepublisher.UpdateListingDetails{})),
+	newTarget("marketplacepublisher", "UpdateListingRevisionNoteDetails", reflect.TypeOf(marketplacepublisher.UpdateListingRevisionNoteDetails{})),
+	newTarget("marketplacepublisher", "UpdateListingRevisionPackageDetails", reflect.TypeOf(marketplacepublisher.UpdateListingRevisionPackageDetails{})),
+	newTarget("marketplacepublisher", "UpdateTermDetails", reflect.TypeOf(marketplacepublisher.UpdateTermDetails{})),
+	newTarget("marketplacepublisher", "UpdateTermVersionDetails", reflect.TypeOf(marketplacepublisher.UpdateTermVersionDetails{})),
+	newTarget("marketplacepublisher", "ArtifactCollection", reflect.TypeOf(marketplacepublisher.ArtifactCollection{})),
+	newTarget("marketplacepublisher", "Listing", reflect.TypeOf(marketplacepublisher.Listing{})),
+	newTarget("marketplacepublisher", "ListingCollection", reflect.TypeOf(marketplacepublisher.ListingCollection{})),
+	newTarget("marketplacepublisher", "ListingRevisionAttachmentCollection", reflect.TypeOf(marketplacepublisher.ListingRevisionAttachmentCollection{})),
+	newTarget("marketplacepublisher", "ListingRevisionCollection", reflect.TypeOf(marketplacepublisher.ListingRevisionCollection{})),
+	newTarget("marketplacepublisher", "ListingRevisionNote", reflect.TypeOf(marketplacepublisher.ListingRevisionNote{})),
+	newTarget("marketplacepublisher", "ListingRevisionNoteCollection", reflect.TypeOf(marketplacepublisher.ListingRevisionNoteCollection{})),
+	newTarget("marketplacepublisher", "ListingRevisionPackageCollection", reflect.TypeOf(marketplacepublisher.ListingRevisionPackageCollection{})),
+	newTarget("marketplacepublisher", "Term", reflect.TypeOf(marketplacepublisher.Term{})),
+	newTarget("marketplacepublisher", "TermCollection", reflect.TypeOf(marketplacepublisher.TermCollection{})),
+	newTarget("marketplacepublisher", "TermVersion", reflect.TypeOf(marketplacepublisher.TermVersion{})),
+	newTarget("marketplacepublisher", "TermVersionCollection", reflect.TypeOf(marketplacepublisher.TermVersionCollection{})),
+	newTarget("marketplacepublisher", "TermVersionSummary", reflect.TypeOf(marketplacepublisher.TermVersionSummary{})),
+	newTarget("marketplacepublisher", "ArtifactSummary", reflect.TypeOf(marketplacepublisher.ArtifactSummary{})),
+	newTarget("marketplacepublisher", "ListingRevisionAttachmentSummary", reflect.TypeOf(marketplacepublisher.ListingRevisionAttachmentSummary{})),
+	newTarget("marketplacepublisher", "ListingRevisionNoteSummary", reflect.TypeOf(marketplacepublisher.ListingRevisionNoteSummary{})),
+	newTarget("marketplacepublisher", "ListingRevisionPackageSummary", reflect.TypeOf(marketplacepublisher.ListingRevisionPackageSummary{})),
+	newTarget("marketplacepublisher", "ListingRevisionSummary", reflect.TypeOf(marketplacepublisher.ListingRevisionSummary{})),
+	newTarget("marketplacepublisher", "ListingSummary", reflect.TypeOf(marketplacepublisher.ListingSummary{})),
+	newTarget("marketplacepublisher", "TermSummary", reflect.TypeOf(marketplacepublisher.TermSummary{})),
+
 	// Opensearch CRD support
 	newTarget("opensearch", "CreateOpensearchClusterDetails", reflect.TypeOf(opensearch.CreateOpensearchClusterDetails{})),
 	newTarget("opensearch", "UpdateOpensearchClusterDetails", reflect.TypeOf(opensearch.UpdateOpensearchClusterDetails{})),
 	newTarget("opensearch", "OpensearchCluster", reflect.TypeOf(opensearch.OpensearchCluster{})),
 	newTarget("opensearch", "OpensearchClusterCollection", reflect.TypeOf(opensearch.OpensearchClusterCollection{})),
 	newTarget("opensearch", "OpensearchClusterSummary", reflect.TypeOf(opensearch.OpensearchClusterSummary{})),
+
+	// Operatoraccesscontrol CRD support
+	newTarget("operatoraccesscontrol", "CreateOperatorControlAssignmentDetails", reflect.TypeOf(operatoraccesscontrol.CreateOperatorControlAssignmentDetails{})),
+	newTarget("operatoraccesscontrol", "CreateOperatorControlDetails", reflect.TypeOf(operatoraccesscontrol.CreateOperatorControlDetails{})),
+	newTarget("operatoraccesscontrol", "UpdateOperatorControlAssignmentDetails", reflect.TypeOf(operatoraccesscontrol.UpdateOperatorControlAssignmentDetails{})),
+	newTarget("operatoraccesscontrol", "UpdateOperatorControlDetails", reflect.TypeOf(operatoraccesscontrol.UpdateOperatorControlDetails{})),
+	newTarget("operatoraccesscontrol", "OperatorControl", reflect.TypeOf(operatoraccesscontrol.OperatorControl{})),
+	newTarget("operatoraccesscontrol", "OperatorControlAssignment", reflect.TypeOf(operatoraccesscontrol.OperatorControlAssignment{})),
+	newTarget("operatoraccesscontrol", "OperatorControlAssignmentCollection", reflect.TypeOf(operatoraccesscontrol.OperatorControlAssignmentCollection{})),
+	newTarget("operatoraccesscontrol", "OperatorControlCollection", reflect.TypeOf(operatoraccesscontrol.OperatorControlCollection{})),
+	newTarget("operatoraccesscontrol", "OperatorControlAssignmentSummary", reflect.TypeOf(operatoraccesscontrol.OperatorControlAssignmentSummary{})),
+	newTarget("operatoraccesscontrol", "OperatorControlSummary", reflect.TypeOf(operatoraccesscontrol.OperatorControlSummary{})),
+
+	// Opsi CRD support
+	newTarget("opsi", "CreateAwrHubDetails", reflect.TypeOf(opsi.CreateAwrHubDetails{})),
+	newTarget("opsi", "CreateAwrHubSourceDetails", reflect.TypeOf(opsi.CreateAwrHubSourceDetails{})),
+	newTarget("opsi", "CreateChargebackPlanReportDetails", reflect.TypeOf(opsi.CreateChargebackPlanReportDetails{})),
+	newTarget("opsi", "CreateEnterpriseManagerBridgeDetails", reflect.TypeOf(opsi.CreateEnterpriseManagerBridgeDetails{})),
+	newTarget("opsi", "CreateNewsReportDetails", reflect.TypeOf(opsi.CreateNewsReportDetails{})),
+	newTarget("opsi", "CreateOperationsInsightsPrivateEndpointDetails", reflect.TypeOf(opsi.CreateOperationsInsightsPrivateEndpointDetails{})),
+	newTarget("opsi", "CreateOperationsInsightsWarehouseDetails", reflect.TypeOf(opsi.CreateOperationsInsightsWarehouseDetails{})),
+	newTarget("opsi", "CreateOperationsInsightsWarehouseUserDetails", reflect.TypeOf(opsi.CreateOperationsInsightsWarehouseUserDetails{})),
+	newTarget("opsi", "UpdateAwrHubDetails", reflect.TypeOf(opsi.UpdateAwrHubDetails{})),
+	newTarget("opsi", "UpdateAwrHubSourceDetails", reflect.TypeOf(opsi.UpdateAwrHubSourceDetails{})),
+	newTarget("opsi", "UpdateChargebackPlanDetails", reflect.TypeOf(opsi.UpdateChargebackPlanDetails{})),
+	newTarget("opsi", "UpdateChargebackPlanReportDetails", reflect.TypeOf(opsi.UpdateChargebackPlanReportDetails{})),
+	newTarget("opsi", "UpdateEnterpriseManagerBridgeDetails", reflect.TypeOf(opsi.UpdateEnterpriseManagerBridgeDetails{})),
+	newTarget("opsi", "UpdateNewsReportDetails", reflect.TypeOf(opsi.UpdateNewsReportDetails{})),
+	newTarget("opsi", "UpdateOperationsInsightsPrivateEndpointDetails", reflect.TypeOf(opsi.UpdateOperationsInsightsPrivateEndpointDetails{})),
+	newTarget("opsi", "UpdateOperationsInsightsWarehouseDetails", reflect.TypeOf(opsi.UpdateOperationsInsightsWarehouseDetails{})),
+	newTarget("opsi", "UpdateOperationsInsightsWarehouseUserDetails", reflect.TypeOf(opsi.UpdateOperationsInsightsWarehouseUserDetails{})),
+	newTarget("opsi", "ChargebackPlanDetails", reflect.TypeOf(opsi.ChargebackPlanDetails{})),
+	newTarget("opsi", "AwrHub", reflect.TypeOf(opsi.AwrHub{})),
+	newTarget("opsi", "AwrHubSource", reflect.TypeOf(opsi.AwrHubSource{})),
+	newTarget("opsi", "AwrHubSources", reflect.TypeOf(opsi.AwrHubSources{})),
+	newTarget("opsi", "AwrHubs", reflect.TypeOf(opsi.AwrHubs{})),
+	newTarget("opsi", "ChargebackPlan", reflect.TypeOf(opsi.ChargebackPlan{})),
+	newTarget("opsi", "ChargebackPlanCollection", reflect.TypeOf(opsi.ChargebackPlanCollection{})),
+	newTarget("opsi", "ChargebackPlanReport", reflect.TypeOf(opsi.ChargebackPlanReport{})),
+	newTarget("opsi", "ChargebackPlanReportCollection", reflect.TypeOf(opsi.ChargebackPlanReportCollection{})),
+	newTarget("opsi", "DatabaseInsights", reflect.TypeOf(opsi.DatabaseInsights{})),
+	newTarget("opsi", "EnterpriseManagerBridge", reflect.TypeOf(opsi.EnterpriseManagerBridge{})),
+	newTarget("opsi", "EnterpriseManagerBridgeCollection", reflect.TypeOf(opsi.EnterpriseManagerBridgeCollection{})),
+	newTarget("opsi", "EnterpriseManagerBridges", reflect.TypeOf(opsi.EnterpriseManagerBridges{})),
+	newTarget("opsi", "ExadataInsights", reflect.TypeOf(opsi.ExadataInsights{})),
+	newTarget("opsi", "HostInsights", reflect.TypeOf(opsi.HostInsights{})),
+	newTarget("opsi", "NewsReport", reflect.TypeOf(opsi.NewsReport{})),
+	newTarget("opsi", "NewsReportCollection", reflect.TypeOf(opsi.NewsReportCollection{})),
+	newTarget("opsi", "NewsReports", reflect.TypeOf(opsi.NewsReports{})),
+	newTarget("opsi", "OperationsInsightsPrivateEndpoint", reflect.TypeOf(opsi.OperationsInsightsPrivateEndpoint{})),
+	newTarget("opsi", "OperationsInsightsPrivateEndpointCollection", reflect.TypeOf(opsi.OperationsInsightsPrivateEndpointCollection{})),
+	newTarget("opsi", "OperationsInsightsWarehouse", reflect.TypeOf(opsi.OperationsInsightsWarehouse{})),
+	newTarget("opsi", "OperationsInsightsWarehouseUser", reflect.TypeOf(opsi.OperationsInsightsWarehouseUser{})),
+	newTarget("opsi", "OperationsInsightsWarehouseUsers", reflect.TypeOf(opsi.OperationsInsightsWarehouseUsers{})),
+	newTarget("opsi", "OperationsInsightsWarehouses", reflect.TypeOf(opsi.OperationsInsightsWarehouses{})),
+	newTarget("opsi", "OpsiConfigurations", reflect.TypeOf(opsi.OpsiConfigurations{})),
+	newTarget("opsi", "AwrHubSourceSummary", reflect.TypeOf(opsi.AwrHubSourceSummary{})),
+	newTarget("opsi", "AwrHubSummary", reflect.TypeOf(opsi.AwrHubSummary{})),
+	newTarget("opsi", "ChargebackPlanReportSummary", reflect.TypeOf(opsi.ChargebackPlanReportSummary{})),
+	newTarget("opsi", "ChargebackPlanSummary", reflect.TypeOf(opsi.ChargebackPlanSummary{})),
+	newTarget("opsi", "EnterpriseManagerBridgeSummary", reflect.TypeOf(opsi.EnterpriseManagerBridgeSummary{})),
+	newTarget("opsi", "NewsReportSummary", reflect.TypeOf(opsi.NewsReportSummary{})),
+	newTarget("opsi", "OperationsInsightsPrivateEndpointSummary", reflect.TypeOf(opsi.OperationsInsightsPrivateEndpointSummary{})),
+	newTarget("opsi", "OperationsInsightsWarehouseSummary", reflect.TypeOf(opsi.OperationsInsightsWarehouseSummary{})),
+	newTarget("opsi", "OperationsInsightsWarehouseUserSummary", reflect.TypeOf(opsi.OperationsInsightsWarehouseUserSummary{})),
+
+	// Optimizer CRD support
+	newTarget("optimizer", "CreateProfileDetails", reflect.TypeOf(optimizer.CreateProfileDetails{})),
+	newTarget("optimizer", "UpdateProfileDetails", reflect.TypeOf(optimizer.UpdateProfileDetails{})),
+	newTarget("optimizer", "Profile", reflect.TypeOf(optimizer.Profile{})),
+	newTarget("optimizer", "ProfileCollection", reflect.TypeOf(optimizer.ProfileCollection{})),
+	newTarget("optimizer", "ProfileSummary", reflect.TypeOf(optimizer.ProfileSummary{})),
+
+	// Osmanagementhub CRD support
+	newTarget("osmanagementhub", "CreateLifecycleEnvironmentDetails", reflect.TypeOf(osmanagementhub.CreateLifecycleEnvironmentDetails{})),
+	newTarget("osmanagementhub", "CreateManagedInstanceGroupDetails", reflect.TypeOf(osmanagementhub.CreateManagedInstanceGroupDetails{})),
+	newTarget("osmanagementhub", "CreateManagementStationDetails", reflect.TypeOf(osmanagementhub.CreateManagementStationDetails{})),
+	newTarget("osmanagementhub", "CreateScheduledJobDetails", reflect.TypeOf(osmanagementhub.CreateScheduledJobDetails{})),
+	newTarget("osmanagementhub", "UpdateLifecycleEnvironmentDetails", reflect.TypeOf(osmanagementhub.UpdateLifecycleEnvironmentDetails{})),
+	newTarget("osmanagementhub", "UpdateManagedInstanceGroupDetails", reflect.TypeOf(osmanagementhub.UpdateManagedInstanceGroupDetails{})),
+	newTarget("osmanagementhub", "UpdateManagementStationDetails", reflect.TypeOf(osmanagementhub.UpdateManagementStationDetails{})),
+	newTarget("osmanagementhub", "UpdateProfileDetails", reflect.TypeOf(osmanagementhub.UpdateProfileDetails{})),
+	newTarget("osmanagementhub", "UpdateScheduledJobDetails", reflect.TypeOf(osmanagementhub.UpdateScheduledJobDetails{})),
+	newTarget("osmanagementhub", "LifecycleEnvironmentDetails", reflect.TypeOf(osmanagementhub.LifecycleEnvironmentDetails{})),
+	newTarget("osmanagementhub", "ManagedInstanceGroupDetails", reflect.TypeOf(osmanagementhub.ManagedInstanceGroupDetails{})),
+	newTarget("osmanagementhub", "ManagementStationDetails", reflect.TypeOf(osmanagementhub.ManagementStationDetails{})),
+	newTarget("osmanagementhub", "SoftwareSourceDetails", reflect.TypeOf(osmanagementhub.SoftwareSourceDetails{})),
+	newTarget("osmanagementhub", "LifecycleEnvironment", reflect.TypeOf(osmanagementhub.LifecycleEnvironment{})),
+	newTarget("osmanagementhub", "LifecycleEnvironmentCollection", reflect.TypeOf(osmanagementhub.LifecycleEnvironmentCollection{})),
+	newTarget("osmanagementhub", "ManagedInstanceGroup", reflect.TypeOf(osmanagementhub.ManagedInstanceGroup{})),
+	newTarget("osmanagementhub", "ManagedInstanceGroupCollection", reflect.TypeOf(osmanagementhub.ManagedInstanceGroupCollection{})),
+	newTarget("osmanagementhub", "ManagementStation", reflect.TypeOf(osmanagementhub.ManagementStation{})),
+	newTarget("osmanagementhub", "ManagementStationCollection", reflect.TypeOf(osmanagementhub.ManagementStationCollection{})),
+	newTarget("osmanagementhub", "ProfileCollection", reflect.TypeOf(osmanagementhub.ProfileCollection{})),
+	newTarget("osmanagementhub", "ScheduledJob", reflect.TypeOf(osmanagementhub.ScheduledJob{})),
+	newTarget("osmanagementhub", "ScheduledJobCollection", reflect.TypeOf(osmanagementhub.ScheduledJobCollection{})),
+	newTarget("osmanagementhub", "SoftwareSourceCollection", reflect.TypeOf(osmanagementhub.SoftwareSourceCollection{})),
+	newTarget("osmanagementhub", "LifecycleEnvironmentSummary", reflect.TypeOf(osmanagementhub.LifecycleEnvironmentSummary{})),
+	newTarget("osmanagementhub", "ManagedInstanceGroupSummary", reflect.TypeOf(osmanagementhub.ManagedInstanceGroupSummary{})),
+	newTarget("osmanagementhub", "ManagementStationSummary", reflect.TypeOf(osmanagementhub.ManagementStationSummary{})),
+	newTarget("osmanagementhub", "ProfileSummary", reflect.TypeOf(osmanagementhub.ProfileSummary{})),
+	newTarget("osmanagementhub", "ScheduledJobSummary", reflect.TypeOf(osmanagementhub.ScheduledJobSummary{})),
+
+	// Recovery CRD support
+	newTarget("recovery", "CreateProtectedDatabaseDetails", reflect.TypeOf(recovery.CreateProtectedDatabaseDetails{})),
+	newTarget("recovery", "CreateProtectionPolicyDetails", reflect.TypeOf(recovery.CreateProtectionPolicyDetails{})),
+	newTarget("recovery", "CreateRecoveryServiceSubnetDetails", reflect.TypeOf(recovery.CreateRecoveryServiceSubnetDetails{})),
+	newTarget("recovery", "UpdateProtectedDatabaseDetails", reflect.TypeOf(recovery.UpdateProtectedDatabaseDetails{})),
+	newTarget("recovery", "UpdateProtectionPolicyDetails", reflect.TypeOf(recovery.UpdateProtectionPolicyDetails{})),
+	newTarget("recovery", "UpdateRecoveryServiceSubnetDetails", reflect.TypeOf(recovery.UpdateRecoveryServiceSubnetDetails{})),
+	newTarget("recovery", "RecoveryServiceSubnetDetails", reflect.TypeOf(recovery.RecoveryServiceSubnetDetails{})),
+	newTarget("recovery", "ProtectedDatabase", reflect.TypeOf(recovery.ProtectedDatabase{})),
+	newTarget("recovery", "ProtectedDatabaseCollection", reflect.TypeOf(recovery.ProtectedDatabaseCollection{})),
+	newTarget("recovery", "ProtectionPolicy", reflect.TypeOf(recovery.ProtectionPolicy{})),
+	newTarget("recovery", "ProtectionPolicyCollection", reflect.TypeOf(recovery.ProtectionPolicyCollection{})),
+	newTarget("recovery", "RecoveryServiceSubnet", reflect.TypeOf(recovery.RecoveryServiceSubnet{})),
+	newTarget("recovery", "RecoveryServiceSubnetCollection", reflect.TypeOf(recovery.RecoveryServiceSubnetCollection{})),
+	newTarget("recovery", "ProtectedDatabaseSummary", reflect.TypeOf(recovery.ProtectedDatabaseSummary{})),
+	newTarget("recovery", "ProtectionPolicySummary", reflect.TypeOf(recovery.ProtectionPolicySummary{})),
+	newTarget("recovery", "RecoveryServiceSubnetSummary", reflect.TypeOf(recovery.RecoveryServiceSubnetSummary{})),
 
 	// Redis CRD support
 	newTarget("redis", "CreateRedisClusterDetails", reflect.TypeOf(redis.CreateRedisClusterDetails{})),
@@ -627,12 +931,41 @@ var seedTargets = []Target{
 	newTarget("redis", "RedisClusterCollection", reflect.TypeOf(redis.RedisClusterCollection{})),
 	newTarget("redis", "RedisClusterSummary", reflect.TypeOf(redis.RedisClusterSummary{})),
 
+	// Resourceanalytics CRD support
+	newTarget("resourceanalytics", "CreateResourceAnalyticsInstanceDetails", reflect.TypeOf(resourceanalytics.CreateResourceAnalyticsInstanceDetails{})),
+	newTarget("resourceanalytics", "CreateTenancyAttachmentDetails", reflect.TypeOf(resourceanalytics.CreateTenancyAttachmentDetails{})),
+	newTarget("resourceanalytics", "UpdateResourceAnalyticsInstanceDetails", reflect.TypeOf(resourceanalytics.UpdateResourceAnalyticsInstanceDetails{})),
+	newTarget("resourceanalytics", "UpdateTenancyAttachmentDetails", reflect.TypeOf(resourceanalytics.UpdateTenancyAttachmentDetails{})),
+	newTarget("resourceanalytics", "ResourceAnalyticsInstance", reflect.TypeOf(resourceanalytics.ResourceAnalyticsInstance{})),
+	newTarget("resourceanalytics", "ResourceAnalyticsInstanceCollection", reflect.TypeOf(resourceanalytics.ResourceAnalyticsInstanceCollection{})),
+	newTarget("resourceanalytics", "TenancyAttachment", reflect.TypeOf(resourceanalytics.TenancyAttachment{})),
+	newTarget("resourceanalytics", "TenancyAttachmentCollection", reflect.TypeOf(resourceanalytics.TenancyAttachmentCollection{})),
+	newTarget("resourceanalytics", "ResourceAnalyticsInstanceSummary", reflect.TypeOf(resourceanalytics.ResourceAnalyticsInstanceSummary{})),
+	newTarget("resourceanalytics", "TenancyAttachmentSummary", reflect.TypeOf(resourceanalytics.TenancyAttachmentSummary{})),
+
+	// Resourcescheduler CRD support
+	newTarget("resourcescheduler", "CreateScheduleDetails", reflect.TypeOf(resourcescheduler.CreateScheduleDetails{})),
+	newTarget("resourcescheduler", "UpdateScheduleDetails", reflect.TypeOf(resourcescheduler.UpdateScheduleDetails{})),
+	newTarget("resourcescheduler", "Schedule", reflect.TypeOf(resourcescheduler.Schedule{})),
+	newTarget("resourcescheduler", "ScheduleCollection", reflect.TypeOf(resourcescheduler.ScheduleCollection{})),
+	newTarget("resourcescheduler", "ScheduleSummary", reflect.TypeOf(resourcescheduler.ScheduleSummary{})),
+
 	// Sch CRD support
 	newTarget("sch", "CreateServiceConnectorDetails", reflect.TypeOf(sch.CreateServiceConnectorDetails{})),
 	newTarget("sch", "UpdateServiceConnectorDetails", reflect.TypeOf(sch.UpdateServiceConnectorDetails{})),
 	newTarget("sch", "ServiceConnector", reflect.TypeOf(sch.ServiceConnector{})),
 	newTarget("sch", "ServiceConnectorCollection", reflect.TypeOf(sch.ServiceConnectorCollection{})),
 	newTarget("sch", "ServiceConnectorSummary", reflect.TypeOf(sch.ServiceConnectorSummary{})),
+
+	// Securityattribute CRD support
+	newTarget("securityattribute", "CreateSecurityAttributeDetails", reflect.TypeOf(securityattribute.CreateSecurityAttributeDetails{})),
+	newTarget("securityattribute", "CreateSecurityAttributeNamespaceDetails", reflect.TypeOf(securityattribute.CreateSecurityAttributeNamespaceDetails{})),
+	newTarget("securityattribute", "UpdateSecurityAttributeDetails", reflect.TypeOf(securityattribute.UpdateSecurityAttributeDetails{})),
+	newTarget("securityattribute", "UpdateSecurityAttributeNamespaceDetails", reflect.TypeOf(securityattribute.UpdateSecurityAttributeNamespaceDetails{})),
+	newTarget("securityattribute", "SecurityAttribute", reflect.TypeOf(securityattribute.SecurityAttribute{})),
+	newTarget("securityattribute", "SecurityAttributeNamespace", reflect.TypeOf(securityattribute.SecurityAttributeNamespace{})),
+	newTarget("securityattribute", "SecurityAttributeNamespaceSummary", reflect.TypeOf(securityattribute.SecurityAttributeNamespaceSummary{})),
+	newTarget("securityattribute", "SecurityAttributeSummary", reflect.TypeOf(securityattribute.SecurityAttributeSummary{})),
 
 	// Servicecatalog CRD support
 	newTarget("servicecatalog", "CreatePrivateApplicationDetails", reflect.TypeOf(servicecatalog.CreatePrivateApplicationDetails{})),
@@ -645,6 +978,89 @@ var seedTargets = []Target{
 	newTarget("servicecatalog", "ServiceCatalogCollection", reflect.TypeOf(servicecatalog.ServiceCatalogCollection{})),
 	newTarget("servicecatalog", "PrivateApplicationSummary", reflect.TypeOf(servicecatalog.PrivateApplicationSummary{})),
 	newTarget("servicecatalog", "ServiceCatalogSummary", reflect.TypeOf(servicecatalog.ServiceCatalogSummary{})),
+
+	// Stackmonitoring CRD support
+	newTarget("stackmonitoring", "CreateAlarmConditionDetails", reflect.TypeOf(stackmonitoring.CreateAlarmConditionDetails{})),
+	newTarget("stackmonitoring", "CreateBaselineableMetricDetails", reflect.TypeOf(stackmonitoring.CreateBaselineableMetricDetails{})),
+	newTarget("stackmonitoring", "CreateMaintenanceWindowDetails", reflect.TypeOf(stackmonitoring.CreateMaintenanceWindowDetails{})),
+	newTarget("stackmonitoring", "CreateMetricExtensionDetails", reflect.TypeOf(stackmonitoring.CreateMetricExtensionDetails{})),
+	newTarget("stackmonitoring", "CreateMonitoredResourceDetails", reflect.TypeOf(stackmonitoring.CreateMonitoredResourceDetails{})),
+	newTarget("stackmonitoring", "CreateMonitoredResourceTypeDetails", reflect.TypeOf(stackmonitoring.CreateMonitoredResourceTypeDetails{})),
+	newTarget("stackmonitoring", "CreateMonitoringTemplateDetails", reflect.TypeOf(stackmonitoring.CreateMonitoringTemplateDetails{})),
+	newTarget("stackmonitoring", "CreateProcessSetDetails", reflect.TypeOf(stackmonitoring.CreateProcessSetDetails{})),
+	newTarget("stackmonitoring", "UpdateAlarmConditionDetails", reflect.TypeOf(stackmonitoring.UpdateAlarmConditionDetails{})),
+	newTarget("stackmonitoring", "UpdateBaselineableMetricDetails", reflect.TypeOf(stackmonitoring.UpdateBaselineableMetricDetails{})),
+	newTarget("stackmonitoring", "UpdateMaintenanceWindowDetails", reflect.TypeOf(stackmonitoring.UpdateMaintenanceWindowDetails{})),
+	newTarget("stackmonitoring", "UpdateMetricExtensionDetails", reflect.TypeOf(stackmonitoring.UpdateMetricExtensionDetails{})),
+	newTarget("stackmonitoring", "UpdateMonitoredResourceDetails", reflect.TypeOf(stackmonitoring.UpdateMonitoredResourceDetails{})),
+	newTarget("stackmonitoring", "UpdateMonitoredResourceTypeDetails", reflect.TypeOf(stackmonitoring.UpdateMonitoredResourceTypeDetails{})),
+	newTarget("stackmonitoring", "UpdateMonitoringTemplateDetails", reflect.TypeOf(stackmonitoring.UpdateMonitoringTemplateDetails{})),
+	newTarget("stackmonitoring", "UpdateProcessSetDetails", reflect.TypeOf(stackmonitoring.UpdateProcessSetDetails{})),
+	newTarget("stackmonitoring", "MonitoredResourceDetails", reflect.TypeOf(stackmonitoring.MonitoredResourceDetails{})),
+	newTarget("stackmonitoring", "AlarmCondition", reflect.TypeOf(stackmonitoring.AlarmCondition{})),
+	newTarget("stackmonitoring", "AlarmConditionCollection", reflect.TypeOf(stackmonitoring.AlarmConditionCollection{})),
+	newTarget("stackmonitoring", "BaselineableMetric", reflect.TypeOf(stackmonitoring.BaselineableMetric{})),
+	newTarget("stackmonitoring", "ConfigCollection", reflect.TypeOf(stackmonitoring.ConfigCollection{})),
+	newTarget("stackmonitoring", "MaintenanceWindow", reflect.TypeOf(stackmonitoring.MaintenanceWindow{})),
+	newTarget("stackmonitoring", "MaintenanceWindowCollection", reflect.TypeOf(stackmonitoring.MaintenanceWindowCollection{})),
+	newTarget("stackmonitoring", "MetricExtension", reflect.TypeOf(stackmonitoring.MetricExtension{})),
+	newTarget("stackmonitoring", "MetricExtensionCollection", reflect.TypeOf(stackmonitoring.MetricExtensionCollection{})),
+	newTarget("stackmonitoring", "MonitoredResource", reflect.TypeOf(stackmonitoring.MonitoredResource{})),
+	newTarget("stackmonitoring", "MonitoredResourceCollection", reflect.TypeOf(stackmonitoring.MonitoredResourceCollection{})),
+	newTarget("stackmonitoring", "MonitoredResourceType", reflect.TypeOf(stackmonitoring.MonitoredResourceType{})),
+	newTarget("stackmonitoring", "MonitoringTemplate", reflect.TypeOf(stackmonitoring.MonitoringTemplate{})),
+	newTarget("stackmonitoring", "MonitoringTemplateCollection", reflect.TypeOf(stackmonitoring.MonitoringTemplateCollection{})),
+	newTarget("stackmonitoring", "ProcessSet", reflect.TypeOf(stackmonitoring.ProcessSet{})),
+	newTarget("stackmonitoring", "ProcessSetCollection", reflect.TypeOf(stackmonitoring.ProcessSetCollection{})),
+	newTarget("stackmonitoring", "AlarmConditionSummary", reflect.TypeOf(stackmonitoring.AlarmConditionSummary{})),
+	newTarget("stackmonitoring", "BaselineableMetricSummary", reflect.TypeOf(stackmonitoring.BaselineableMetricSummary{})),
+	newTarget("stackmonitoring", "MaintenanceWindowSummary", reflect.TypeOf(stackmonitoring.MaintenanceWindowSummary{})),
+	newTarget("stackmonitoring", "MetricExtensionSummary", reflect.TypeOf(stackmonitoring.MetricExtensionSummary{})),
+	newTarget("stackmonitoring", "MonitoredResourceSummary", reflect.TypeOf(stackmonitoring.MonitoredResourceSummary{})),
+	newTarget("stackmonitoring", "MonitoredResourceTypeSummary", reflect.TypeOf(stackmonitoring.MonitoredResourceTypeSummary{})),
+	newTarget("stackmonitoring", "MonitoringTemplateSummary", reflect.TypeOf(stackmonitoring.MonitoringTemplateSummary{})),
+	newTarget("stackmonitoring", "ProcessSetSummary", reflect.TypeOf(stackmonitoring.ProcessSetSummary{})),
+
+	// Waa CRD support
+	newTarget("waa", "CreateWebAppAccelerationPolicyDetails", reflect.TypeOf(waa.CreateWebAppAccelerationPolicyDetails{})),
+	newTarget("waa", "UpdateWebAppAccelerationDetails", reflect.TypeOf(waa.UpdateWebAppAccelerationDetails{})),
+	newTarget("waa", "UpdateWebAppAccelerationPolicyDetails", reflect.TypeOf(waa.UpdateWebAppAccelerationPolicyDetails{})),
+	newTarget("waa", "WebAppAccelerationCollection", reflect.TypeOf(waa.WebAppAccelerationCollection{})),
+	newTarget("waa", "WebAppAccelerationPolicy", reflect.TypeOf(waa.WebAppAccelerationPolicy{})),
+	newTarget("waa", "WebAppAccelerationPolicyCollection", reflect.TypeOf(waa.WebAppAccelerationPolicyCollection{})),
+	newTarget("waa", "WebAppAccelerationPolicySummary", reflect.TypeOf(waa.WebAppAccelerationPolicySummary{})),
+
+	// Waas CRD support
+	newTarget("waas", "CreateAddressListDetails", reflect.TypeOf(waas.CreateAddressListDetails{})),
+	newTarget("waas", "CreateCertificateDetails", reflect.TypeOf(waas.CreateCertificateDetails{})),
+	newTarget("waas", "CreateCustomProtectionRuleDetails", reflect.TypeOf(waas.CreateCustomProtectionRuleDetails{})),
+	newTarget("waas", "CreateHttpRedirectDetails", reflect.TypeOf(waas.CreateHttpRedirectDetails{})),
+	newTarget("waas", "CreateWaasPolicyDetails", reflect.TypeOf(waas.CreateWaasPolicyDetails{})),
+	newTarget("waas", "UpdateAddressListDetails", reflect.TypeOf(waas.UpdateAddressListDetails{})),
+	newTarget("waas", "UpdateCertificateDetails", reflect.TypeOf(waas.UpdateCertificateDetails{})),
+	newTarget("waas", "UpdateCustomProtectionRuleDetails", reflect.TypeOf(waas.UpdateCustomProtectionRuleDetails{})),
+	newTarget("waas", "UpdateHttpRedirectDetails", reflect.TypeOf(waas.UpdateHttpRedirectDetails{})),
+	newTarget("waas", "UpdateWaasPolicyDetails", reflect.TypeOf(waas.UpdateWaasPolicyDetails{})),
+	newTarget("waas", "AddressList", reflect.TypeOf(waas.AddressList{})),
+	newTarget("waas", "Certificate", reflect.TypeOf(waas.Certificate{})),
+	newTarget("waas", "CustomProtectionRule", reflect.TypeOf(waas.CustomProtectionRule{})),
+	newTarget("waas", "HttpRedirect", reflect.TypeOf(waas.HttpRedirect{})),
+	newTarget("waas", "WaasPolicy", reflect.TypeOf(waas.WaasPolicy{})),
+	newTarget("waas", "AddressListSummary", reflect.TypeOf(waas.AddressListSummary{})),
+	newTarget("waas", "CertificateSummary", reflect.TypeOf(waas.CertificateSummary{})),
+	newTarget("waas", "CustomProtectionRuleSummary", reflect.TypeOf(waas.CustomProtectionRuleSummary{})),
+	newTarget("waas", "HttpRedirectSummary", reflect.TypeOf(waas.HttpRedirectSummary{})),
+	newTarget("waas", "WaasPolicySummary", reflect.TypeOf(waas.WaasPolicySummary{})),
+
+	// Waf CRD support
+	newTarget("waf", "CreateWebAppFirewallPolicyDetails", reflect.TypeOf(waf.CreateWebAppFirewallPolicyDetails{})),
+	newTarget("waf", "UpdateWebAppFirewallDetails", reflect.TypeOf(waf.UpdateWebAppFirewallDetails{})),
+	newTarget("waf", "UpdateWebAppFirewallPolicyDetails", reflect.TypeOf(waf.UpdateWebAppFirewallPolicyDetails{})),
+	newTarget("waf", "NetworkAddressListCollection", reflect.TypeOf(waf.NetworkAddressListCollection{})),
+	newTarget("waf", "WebAppFirewallCollection", reflect.TypeOf(waf.WebAppFirewallCollection{})),
+	newTarget("waf", "WebAppFirewallPolicy", reflect.TypeOf(waf.WebAppFirewallPolicy{})),
+	newTarget("waf", "WebAppFirewallPolicyCollection", reflect.TypeOf(waf.WebAppFirewallPolicyCollection{})),
+	newTarget("waf", "WebAppFirewallPolicySummary", reflect.TypeOf(waf.WebAppFirewallPolicySummary{})),
 }
 
 var interfaceImplementations = map[string][]reflect.Type{

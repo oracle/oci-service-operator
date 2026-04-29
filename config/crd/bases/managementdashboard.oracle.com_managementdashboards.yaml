@@ -1,0 +1,715 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: managementdashboards.managementdashboard.oracle.com
+spec:
+  group: managementdashboard.oracle.com
+  names:
+    kind: ManagementDashboard
+    listKind: ManagementDashboardList
+    plural: managementdashboards
+    singular: managementdashboard
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the ManagementDashboard
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ManagementDashboard
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ManagementDashboard is the Schema for the managementdashboards
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ManagementDashboardSpec defines the desired state of ManagementDashboard.
+            properties:
+              compartmentId:
+                description: OCID of the compartment in which the dashboard resides.
+                type: string
+              dashboardId:
+                description: ID of the dashboard, which must only be provided for
+                  Out-of-the-Box (OOB) dashboards.
+                type: string
+              dataConfig:
+                description: Array of JSON that contain data source options.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the dashboard.
+                type: string
+              displayName:
+                description: Display name of the dashboard.
+                type: string
+              drilldownConfig:
+                description: Drill-down configuration to define the destination of
+                  a drill-down action.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              featuresConfig:
+                description: Contains configuration for enabling features.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isFavorite:
+                description: Determines whether the dashboard is set as favorite.
+                type: boolean
+              isOobDashboard:
+                description: Determines whether the dashboard is an Out-of-the-Box
+                  (OOB) dashboard. Note that OOB dashboards are only provided by Oracle
+                  and cannot be modified.
+                type: boolean
+              isShowDescription:
+                description: Determines whether the description of the dashboard is
+                  displayed.
+                type: boolean
+              isShowInHome:
+                description: Determines whether the dashboard will be displayed in
+                  Dashboard Home.
+                type: boolean
+              metadataVersion:
+                description: The version of the metadata defined in the API. This
+                  is maintained and enforced by dashboard server. Currently it is
+                  2.0.
+                type: string
+              nls:
+                description: JSON that contains internationalization options.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              parametersConfig:
+                description: Defines parameters for the dashboard.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              providerId:
+                description: ID of the service (for example, log-analytics) that owns
+                  the dashboard. Each service has a unique ID.
+                type: string
+              providerName:
+                description: The user friendly name of the service (for example, Logging
+                  Analytics) that owns the dashboard.
+                type: string
+              providerVersion:
+                description: The version of the metadata of the provider. This is
+                  useful for provider to version its features and metadata. Any newly
+                  created saved search (or dashboard) should use providerVersion 3.0.0.
+                type: string
+              screenImage:
+                description: Screen image of the dashboard.
+                type: string
+              tiles:
+                description: Array of dashboard tiles.
+                items:
+                  description: ManagementDashboardTile defines nested fields for ManagementDashboard.Tile.
+                  properties:
+                    column:
+                      description: Tile's column number.
+                      type: integer
+                    dataConfig:
+                      description: It defines how data is fetched. A functional saved
+                        search needs a valid dataConfig. See examples on how it can
+                        be constructed for various data sources.
+                      items:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      type: array
+                    description:
+                      description: Description of the tile.
+                      type: string
+                    displayName:
+                      description: Display name of the saved search.
+                      type: string
+                    drilldownConfig:
+                      description: Drill-down configuration to define the destination
+                        of a drill-down action.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    height:
+                      description: The number of rows the tile occupies.
+                      type: integer
+                    nls:
+                      description: JSON that contains internationalization options.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    parametersMap:
+                      description: Specifies the saved search parameters values
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    row:
+                      description: Tile's row number.
+                      type: integer
+                    savedSearchId:
+                      description: ID of the saved search.
+                      type: string
+                    state:
+                      description: Current state of the saved search.
+                      type: string
+                    uiConfig:
+                      description: It defines the visualization type of the widget
+                        saved search, the UI options of that visualization type, the
+                        binding of data to the visualization.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    width:
+                      description: The number of columns the tile occupies.
+                      type: integer
+                  required:
+                  - column
+                  - dataConfig
+                  - displayName
+                  - drilldownConfig
+                  - height
+                  - nls
+                  - row
+                  - savedSearchId
+                  - state
+                  - uiConfig
+                  - width
+                  type: object
+                type: array
+              type:
+                description: Type of dashboard. NORMAL denotes a single dashboard
+                  and SET denotes a dashboard set.
+                type: string
+              uiConfig:
+                description: JSON that contains user interface options.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            required:
+            - compartmentId
+            - dataConfig
+            - description
+            - displayName
+            - isFavorite
+            - isOobDashboard
+            - isShowDescription
+            - isShowInHome
+            - metadataVersion
+            - nls
+            - providerId
+            - providerName
+            - providerVersion
+            - screenImage
+            - tiles
+            - type
+            - uiConfig
+            type: object
+          status:
+            description: ManagementDashboardStatus defines the observed state of ManagementDashboard.
+            properties:
+              compartmentId:
+                description: OCID of the compartment in which the dashboard resides.
+                type: string
+              createdBy:
+                description: User who created the dashboard.
+                type: string
+              dashboardId:
+                description: ID of the dashboard.  Same as id.
+                type: string
+              dataConfig:
+                description: Array of JSON that contain data source options.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Description of the dashboard.
+                type: string
+              displayName:
+                description: Display name of the dashboard.
+                type: string
+              drilldownConfig:
+                description: Drill-down configuration to define the destination of
+                  a drill-down action.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              featuresConfig:
+                description: Contains configuration for enabling features.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: ID of the dashboard.  Same as dashboardId.
+                type: string
+              isFavorite:
+                description: Determines whether the dashboard is set as favorite.
+                type: boolean
+              isOobDashboard:
+                description: Determines whether the dashboard is an Out-of-the-Box
+                  (OOB) dashboard. Note that OOB dashboards are only provided by Oracle
+                  and cannot be modified.
+                type: boolean
+              isShowDescription:
+                description: Determines whether the description of the dashboard is
+                  displayed.
+                type: boolean
+              isShowInHome:
+                description: Determines whether the dashboard will be displayed in
+                  Dashboard Home.
+                type: boolean
+              lifecycleState:
+                description: State of dashboard.
+                type: string
+              metadataVersion:
+                description: The version of the metadata defined in the API. This
+                  is maintained and enforced by dashboard server. Currently it is
+                  2.0.
+                type: string
+              nls:
+                description: JSON that contains internationalization options.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              parametersConfig:
+                description: Defines parameters for the dashboard.
+                items:
+                  description: JSONValue preserves arbitrary JSON values inside generated
+                    CRD fields.
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+                type: array
+              providerId:
+                description: ID of the service (for example, log-analytics) that owns
+                  the dashboard. Each service has a unique ID.
+                type: string
+              providerName:
+                description: Name of the service (for example, Logging Analytics)
+                  that owns the dashboard.
+                type: string
+              providerVersion:
+                description: Version of the service that owns the dashboard.
+                type: string
+              savedSearches:
+                description: Array of saved searches in the dashboard.
+                items:
+                  description: ManagementDashboardSavedSearch defines nested fields
+                    for ManagementDashboard.SavedSearch.
+                  properties:
+                    compartmentId:
+                      description: OCID of the compartment in which the saved search
+                        resides.
+                      type: string
+                    createdBy:
+                      description: The principle id of the user that created this
+                        saved search. This is automatically managed by the system.
+                        In OCI the value is ignored. In EM it can skipped or otherwise
+                        it is ignored in both create and update API and system automatically
+                        sets its value.
+                      type: string
+                    dataConfig:
+                      description: It defines how data is fetched. A functional saved
+                        search needs a valid dataConfig. See examples on how it can
+                        be constructed for various data sources.
+                      items:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      type: array
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                        Example: `{"foo-namespace": {"bar-key": "value"}}`
+                      type: object
+                    description:
+                      description: Description of the saved search.
+                      type: string
+                    displayName:
+                      description: Display name of the saved search.
+                      type: string
+                    drilldownConfig:
+                      description: Drill-down configuration to define the destination
+                        of a drill-down action.
+                      items:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      type: array
+                    featuresConfig:
+                      description: Contains configuration for enabling features.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                        Example: `{"bar-key": "value"}`
+                      type: object
+                    id:
+                      description: ID of the saved search.
+                      type: string
+                    isOobSavedSearch:
+                      description: Determines whether the saved search is an Out-of-the-Box
+                        (OOB) saved search. Note that OOB saved searches are only
+                        provided by Oracle and cannot be modified.
+                      type: boolean
+                    lifecycleState:
+                      description: OCI lifecycle status. This is automatically managed
+                        by the system.
+                      type: string
+                    metadataVersion:
+                      description: The version of the metadata defined in the API.
+                        This is maintained and enforced by dashboard server. Currently
+                        it is 2.0.
+                      type: string
+                    nls:
+                      description: JSON that contains internationalization options.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    parametersConfig:
+                      description: Defines parameters for the saved search.
+                      items:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      type: array
+                    providerId:
+                      description: ID of the service (for example log-analytics) that
+                        owns the saved search. Each service has a unique ID.
+                      type: string
+                    providerName:
+                      description: Name of the service (for example, Logging Analytics)
+                        that owns the saved search.
+                      type: string
+                    providerVersion:
+                      description: Version of the service that owns this saved search.
+                      type: string
+                    screenImage:
+                      description: Screen image of the saved search.
+                      type: string
+                    systemTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Usage of system tag keys. These predefined keys are scoped to namespaces.
+                        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                      type: object
+                    timeCreated:
+                      description: Date and time the saved search was created.
+                      type: string
+                    timeUpdated:
+                      description: Date and time the saved search was updated.
+                      type: string
+                    type:
+                      description: Determines how the saved search is displayed in
+                        a dashboard.
+                      type: string
+                    uiConfig:
+                      description: It defines the visualization type of the widget
+                        saved search, the UI options of that visualization type, the
+                        binding of data to the visualization.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    updatedBy:
+                      description: The principle id of the user that updated this
+                        saved search.
+                      type: string
+                    widgetTemplate:
+                      description: The UI template that the saved search uses to render
+                        itself.
+                      type: string
+                    widgetVM:
+                      description: The View Model that the saved search uses to render
+                        itself.
+                      type: string
+                  type: object
+                type: array
+              screenImage:
+                description: Screen image of the dashboard.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              tiles:
+                description: Array of dashboard tiles.
+                items:
+                  description: ManagementDashboardTile defines nested fields for ManagementDashboard.Tile.
+                  properties:
+                    column:
+                      description: Tile's column number.
+                      type: integer
+                    dataConfig:
+                      description: It defines how data is fetched. A functional saved
+                        search needs a valid dataConfig. See examples on how it can
+                        be constructed for various data sources.
+                      items:
+                        description: JSONValue preserves arbitrary JSON values inside
+                          generated CRD fields.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      type: array
+                    description:
+                      description: Description of the tile.
+                      type: string
+                    displayName:
+                      description: Display name of the saved search.
+                      type: string
+                    drilldownConfig:
+                      description: Drill-down configuration to define the destination
+                        of a drill-down action.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    height:
+                      description: The number of rows the tile occupies.
+                      type: integer
+                    nls:
+                      description: JSON that contains internationalization options.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    parametersMap:
+                      description: Specifies the saved search parameters values
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    row:
+                      description: Tile's row number.
+                      type: integer
+                    savedSearchId:
+                      description: ID of the saved search.
+                      type: string
+                    state:
+                      description: Current state of the saved search.
+                      type: string
+                    uiConfig:
+                      description: It defines the visualization type of the widget
+                        saved search, the UI options of that visualization type, the
+                        binding of data to the visualization.
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    width:
+                      description: The number of columns the tile occupies.
+                      type: integer
+                  required:
+                  - column
+                  - dataConfig
+                  - displayName
+                  - drilldownConfig
+                  - height
+                  - nls
+                  - row
+                  - savedSearchId
+                  - state
+                  - uiConfig
+                  - width
+                  type: object
+                type: array
+              timeCreated:
+                description: Date and time the dashboard was created.
+                type: string
+              timeUpdated:
+                description: Date and time the dashboard was updated.
+                type: string
+              type:
+                description: Type of dashboard. NORMAL denotes a single dashboard
+                  and SET denotes a dashboard set.
+                type: string
+              uiConfig:
+                description: JSON that contains user interface options.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              updatedBy:
+                description: User who updated the dashboard.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

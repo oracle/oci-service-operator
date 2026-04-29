@@ -1,0 +1,396 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: profiles.osmanagementhub.oracle.com
+spec:
+  group: osmanagementhub.oracle.com
+  names:
+    kind: Profile
+    listKind: ProfileList
+    plural: profiles
+    singular: profile
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Profile
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Profile
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Profile is the Schema for the profiles API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ProfileSpec defines the desired state of Profile.
+            properties:
+              archType:
+                description: The architecture type.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the registration profile.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: User-specified description of the registration profile.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique and you can change the name later. Avoid entering
+                  confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isDefaultProfile:
+                description: Indicates if the profile is set as the default. There
+                  is exactly one default profile for a specified architecture, OS
+                  family, registration type, and vendor. When registering an instance
+                  with the corresonding characteristics, the default profile is used,
+                  unless another profile is specified.
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleStageId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the lifecycle stage that the instance will be associated with.
+                type: string
+              managedInstanceGroupId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the managed instance group that the instance will join after
+                  registration.
+                type: string
+              managementStationId:
+                description: |-
+                  description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management station to associate
+                  with an instance once registered. This is required when creating a profile for non-OCI instances.
+                type: string
+              osFamily:
+                description: The operating system family.
+                type: string
+              profileType:
+                type: string
+              registrationType:
+                description: The type of instance to register.
+                type: string
+              softwareSourceIds:
+                description: The list of software source OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  that the registration profile will use.
+                items:
+                  type: string
+                type: array
+              vendorName:
+                description: The vendor of the operating system for the instance.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            type: object
+          status:
+            description: ProfileStatus defines the observed state of Profile.
+            properties:
+              archType:
+                description: The architecture type.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that contains the registration profile.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the registration profile.
+                type: string
+              displayName:
+                description: A user-friendly name for the profile.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the registration profile.
+                type: string
+              isDefaultProfile:
+                description: Indicates if the profile is set as the default. There
+                  is exactly one default profile for a specified architecture, OS
+                  family, registration type, and vendor. When registering an instance
+                  with the corresonding characteristics, the default profile is used,
+                  unless another profile is specified.
+                type: boolean
+              isServiceProvidedProfile:
+                description: Indicates if the profile was created by the service.
+                  OS Management Hub provides a limited set of standardized profiles
+                  that can be used to register Autonomous Linux or Windows instances.
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleEnvironment:
+                description: ProfileLifecycleEnvironment defines nested fields for
+                  Profile.LifecycleEnvironment.
+                properties:
+                  displayName:
+                    description: Lifecycle environment name.
+                    type: string
+                  id:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the lifecycle environment.
+                    type: string
+                type: object
+              lifecycleStage:
+                description: ProfileLifecycleStage defines nested fields for Profile.LifecycleStage.
+                properties:
+                  displayName:
+                    description: Lifecycle stage name.
+                    type: string
+                  id:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the lifecycle stage.
+                    type: string
+                type: object
+              lifecycleState:
+                description: The current state of the registration profile.
+                type: string
+              managedInstanceGroup:
+                description: ProfileManagedInstanceGroup defines nested fields for
+                  Profile.ManagedInstanceGroup.
+                properties:
+                  displayName:
+                    description: Managed instance group name.
+                    type: string
+                  id:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the managed instance group.
+                    type: string
+                type: object
+              managementStationId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the management station to associate with an
+                  instance once registered. Management stations are only used by non-OCI instances.
+                type: string
+              osFamily:
+                description: The operating system family.
+                type: string
+              profileType:
+                type: string
+              profileVersion:
+                description: The version of the profile. The version is automatically
+                  incremented each time the profiled is edited.
+                type: string
+              registrationType:
+                description: The type of instance to register.
+                type: string
+              softwareSources:
+                description: The list of software sources that the registration profile
+                  will use.
+                items:
+                  description: ProfileSoftwareSource defines nested fields for Profile.SoftwareSource.
+                  properties:
+                    description:
+                      description: Software source description.
+                      type: string
+                    displayName:
+                      description: Software source name.
+                      type: string
+                    id:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the software source.
+                      type: string
+                    isMandatoryForAutonomousLinux:
+                      description: Indicates whether this is a required software source
+                        for Autonomous Linux instances. If true, the user can't unselect
+                        it.
+                      type: boolean
+                    softwareSourceType:
+                      description: Type of the software source.
+                      type: string
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the registration profile was created (in RFC
+                  3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              timeModified:
+                description: The time the registration profile was last modified (in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339) format).
+                type: string
+              vendorName:
+                description: The vendor of the operating system for the instance.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

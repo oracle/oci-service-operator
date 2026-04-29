@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 185; got != want {
+	if got, want := len(inventory), 267; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 113; got != want {
+	if got, want := countRegistrations(inventory), 195; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 72; got != want {
@@ -43,6 +43,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "waf/WebAppFirewall", "selection.includeKinds")
 
 	assertInventoryRegistration(t, byKey, "aidocument/Project")
 	assertInventoryException(t, byKey, "aidocument/WorkRequest", `controller.strategy="none"`)
@@ -69,6 +70,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryRegistration(t, byKey, "oda/Skill")
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "usageapi/Query")
+	assertInventoryRegistration(t, byKey, "waf/WebAppFirewall")
 }
 
 func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T) {
@@ -113,6 +115,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "waf/WebAppFirewall", APIErrorCoverageFamilyGeneratedRuntimePlain)
 
 	assertReviewedException(t, "aidocument/WorkRequest", "strategy=none")
 	assertReviewedException(t, "ailanguage/WorkRequest", "strategy=none")

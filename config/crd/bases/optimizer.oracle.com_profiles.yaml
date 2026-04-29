@@ -1,0 +1,415 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: profiles.optimizer.oracle.com
+spec:
+  group: optimizer.oracle.com
+  names:
+    kind: Profile
+    listKind: ProfileList
+    plural: profiles
+    singular: profile
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the Profile
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Profile
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Profile is the Schema for the profiles API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ProfileSpec defines the desired state of Profile.
+            properties:
+              aggregationIntervalInDays:
+                description: The time period over which to collect data for the recommendations,
+                  measured in number of days.
+                type: integer
+              compartmentId:
+                description: The OCID of the tenancy. The tenancy is the root compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Text describing the profile. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair applied without any predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              levelsConfiguration:
+                description: ProfileLevelsConfiguration defines nested fields for
+                  Profile.LevelsConfiguration.
+                properties:
+                  items:
+                    description: The array of configuration levels.
+                    items:
+                      description: ProfileLevelsConfigurationItem defines nested fields
+                        for Profile.LevelsConfiguration.Item.
+                      properties:
+                        level:
+                          description: The pre-defined profile level.
+                          type: string
+                        recommendationId:
+                          description: The unique OCID of the recommendation.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              name:
+                description: The name assigned to the profile. Avoid entering confidential
+                  information.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
+                type: object
+              targetCompartments:
+                description: ProfileTargetCompartments defines nested fields for Profile.TargetCompartments.
+                properties:
+                  items:
+                    description: The list of OCIDs attached to the compartments specified
+                      in the current profile override.
+                    items:
+                      type: string
+                    type: array
+                required:
+                - items
+                type: object
+              targetTags:
+                description: ProfileTargetTags defines nested fields for Profile.TargetTags.
+                properties:
+                  items:
+                    description: The list of tags specified in the current profile
+                      override.
+                    items:
+                      description: ProfileTargetTagsItem defines nested fields for
+                        Profile.TargetTags.Item.
+                      properties:
+                        tagDefinitionName:
+                          description: The name you use to refer to the tag, also
+                            known as the tag key.
+                          type: string
+                        tagNamespaceName:
+                          description: The name of the tag namespace.
+                          type: string
+                        tagValueType:
+                          description: |-
+                            Specifies which tag value types in the `tagValues` field result in overrides of the recommendation criteria.
+                            When the value for this field is `ANY`, the `tagValues` field should be empty, which enforces overrides to the recommendation
+                            for resources with any tag values attached to them.
+                            When the value for this field value is `VALUE`, the `tagValues` field must include a specific value or list of values.
+                            Overrides to the recommendation criteria only occur for resources that match the values in the `tagValues` fields.
+                          type: string
+                        tagValues:
+                          description: The list of tag values. The tag value is the
+                            value that the user applying the tag adds to the tag key.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - tagDefinitionName
+                      - tagNamespaceName
+                      - tagValueType
+                      type: object
+                    type: array
+                required:
+                - items
+                type: object
+            required:
+            - compartmentId
+            - description
+            - levelsConfiguration
+            - name
+            type: object
+          status:
+            description: ProfileStatus defines the observed state of Profile.
+            properties:
+              aggregationIntervalInDays:
+                description: The time period over which to collect data for the recommendations,
+                  measured in number of days.
+                type: integer
+              compartmentId:
+                description: The OCID of the tenancy. The tenancy is the root compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Text describing the profile. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair applied without any predefined name, type, or namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm). Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The unique OCID of the profile.
+                type: string
+              levelsConfiguration:
+                description: ProfileLevelsConfiguration defines nested fields for
+                  Profile.LevelsConfiguration.
+                properties:
+                  items:
+                    description: The array of configuration levels.
+                    items:
+                      description: ProfileLevelsConfigurationItem defines nested fields
+                        for Profile.LevelsConfiguration.Item.
+                      properties:
+                        level:
+                          description: The pre-defined profile level.
+                          type: string
+                        recommendationId:
+                          description: The unique OCID of the recommendation.
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              lifecycleState:
+                description: The profile's current state.
+                type: string
+              name:
+                description: The name assigned to the profile. Avoid entering confidential
+                  information.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
+                type: object
+              targetCompartments:
+                description: ProfileTargetCompartments defines nested fields for Profile.TargetCompartments.
+                properties:
+                  items:
+                    description: The list of OCIDs attached to the compartments specified
+                      in the current profile override.
+                    items:
+                      type: string
+                    type: array
+                required:
+                - items
+                type: object
+              targetTags:
+                description: ProfileTargetTags defines nested fields for Profile.TargetTags.
+                properties:
+                  items:
+                    description: The list of tags specified in the current profile
+                      override.
+                    items:
+                      description: ProfileTargetTagsItem defines nested fields for
+                        Profile.TargetTags.Item.
+                      properties:
+                        tagDefinitionName:
+                          description: The name you use to refer to the tag, also
+                            known as the tag key.
+                          type: string
+                        tagNamespaceName:
+                          description: The name of the tag namespace.
+                          type: string
+                        tagValueType:
+                          description: |-
+                            Specifies which tag value types in the `tagValues` field result in overrides of the recommendation criteria.
+                            When the value for this field is `ANY`, the `tagValues` field should be empty, which enforces overrides to the recommendation
+                            for resources with any tag values attached to them.
+                            When the value for this field value is `VALUE`, the `tagValues` field must include a specific value or list of values.
+                            Overrides to the recommendation criteria only occur for resources that match the values in the `tagValues` fields.
+                          type: string
+                        tagValues:
+                          description: The list of tag values. The tag value is the
+                            value that the user applying the tag adds to the tag key.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - tagDefinitionName
+                      - tagNamespaceName
+                      - tagValueType
+                      type: object
+                    type: array
+                required:
+                - items
+                type: object
+              timeCreated:
+                description: The date and time the profile was created, in the format
+                  defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the profile was last updated, in the
+                  format defined by RFC3339.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

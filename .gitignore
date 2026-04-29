@@ -5,6 +5,7 @@ cover.out
 unittests.cover
 unittests.percent
 generated-coverage-report.json
+generated-mutability-report.json
 generated-runtime-report.json
 validator-report.json
 codex-session.log

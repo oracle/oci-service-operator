@@ -321,6 +321,13 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: governancerulescontrolplane
+    displayName: Governance Rules Control Plane
+    summary: Manage OCI Governance Rules Control Plane resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: healthchecks
     displayName: Health Checks
     summary: Manage OCI Health Checks HTTP and ping monitors from Kubernetes.
@@ -359,6 +366,13 @@ packages:
         kind: IntegrationInstance
         summary: Manage OCI Integration instances.
 
+  - package: iot
+    displayName: IoT
+    summary: Manage OCI IoT resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: keymanagement
     displayName: Key Management
     summary: Manage OCI Key Management vaults and EKMS private endpoints from Kubernetes.
@@ -375,6 +389,13 @@ packages:
         kind: Vault
         summary: Manage OCI Vault resources and their scheduled deletion lifecycle.
 
+  - package: licensemanager
+    displayName: License Manager
+    summary: Manage OCI License Manager resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: limits
     displayName: Limits
     summary: Manage OCI Limits quotas from Kubernetes.
@@ -386,9 +407,30 @@ packages:
         kind: Quota
         summary: Manage OCI Limits quotas.
 
+  - package: limitsincrease
+    displayName: Limits Increase
+    summary: Manage OCI Limits Increase resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: loadbalancer
     displayName: Load Balancer
     summary: Manage OCI Load Balancer resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: lockbox
+    displayName: Lockbox
+    summary: Manage OCI Lockbox resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: loganalytics
+    displayName: Log Analytics
+    summary: Manage OCI Log Analytics resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
@@ -414,9 +456,37 @@ packages:
         kind: KafkaClusterConfig
         summary: Manage OCI Managed Kafka cluster configurations.
 
+  - package: managementagent
+    displayName: Management Agent
+    summary: Manage OCI Management Agent resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: managementdashboard
+    displayName: Management Dashboard
+    summary: Manage OCI Management Dashboard resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: marketplace
     displayName: Marketplace
     summary: Manage OCI Marketplace resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: marketplaceprivateoffer
+    displayName: Marketplace Private Offer
+    summary: Manage OCI Marketplace Private Offer resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: marketplacepublisher
+    displayName: Marketplace Publisher
+    summary: Manage OCI Marketplace Publisher resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
@@ -527,6 +597,34 @@ packages:
         kind: OpensearchCluster
         summary: Manage OCI OpenSearch clusters.
 
+  - package: operatoraccesscontrol
+    displayName: Operator Access Control
+    summary: Manage OCI Operator Access Control resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: opsi
+    displayName: Operations Insights
+    summary: Manage OCI Operations Insights resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: optimizer
+    displayName: Optimizer
+    summary: Manage OCI Optimizer resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: osmanagementhub
+    displayName: OS Management Hub
+    summary: Manage OCI OS Management Hub resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: psql
     displayName: PostgreSQL
     summary: Manage OCI PostgreSQL DB Systems from Kubernetes.
@@ -552,6 +650,13 @@ packages:
         kind: Queue
         summary: Manage OCI Queue service queues.
 
+  - package: recovery
+    displayName: Recovery
+    summary: Manage OCI Recovery resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: redis
     displayName: Redis
     summary: Manage OCI Redis clusters from Kubernetes.
@@ -566,6 +671,20 @@ packages:
         kind: RedisCluster
         summary: Manage OCI Redis clusters.
 
+  - package: resourceanalytics
+    displayName: Resource Analytics
+    summary: Manage OCI Resource Analytics resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: resourcescheduler
+    displayName: Resource Scheduler
+    summary: Manage OCI Resource Scheduler resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: sch
     displayName: Service Connector Hub
     summary: Manage OCI Service Connector Hub service connectors from Kubernetes.
@@ -576,6 +695,13 @@ packages:
       - group: sch
         kind: ServiceConnector
         summary: Manage OCI Service Connector Hub service connectors.
+
+  - package: securityattribute
+    displayName: Security Attribute
+    summary: Manage OCI Security Attribute resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: servicecatalog
     displayName: Service Catalog
@@ -590,6 +716,13 @@ packages:
       - group: servicecatalog
         kind: ServiceCatalog
         summary: Manage OCI Service Catalog resources.
+
+  - package: stackmonitoring
+    displayName: Stack Monitoring
+    summary: Manage OCI Stack Monitoring resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: streaming
     displayName: Streaming
@@ -607,6 +740,27 @@ packages:
   - package: usageapi
     displayName: Usage API
     summary: Manage OCI Usage API resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: waa
+    displayName: Web App Acceleration
+    summary: Manage OCI Web App Acceleration resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: waas
+    displayName: Web Application Acceleration and Security
+    summary: Manage OCI Web Application Acceleration and Security resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: waf
+    displayName: Web Application Firewall
+    summary: Manage OCI Web Application Firewall resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md

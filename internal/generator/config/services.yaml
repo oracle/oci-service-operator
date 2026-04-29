@@ -3144,6 +3144,616 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: governancerulescontrolplane
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/governancerulescontrolplane
+    group: governancerulescontrolplane
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - GovernanceRule
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: iot
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/iot
+    group: iot
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DigitalTwinAdapter
+        - DigitalTwinInstance
+        - DigitalTwinModel
+        - DigitalTwinRelationship
+        - IotDomain
+        - IotDomainGroup
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: licensemanager
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/licensemanager
+    group: licensemanager
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - LicenseRecord
+        - ProductLicense
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: limitsincrease
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/limitsincrease
+    group: limitsincrease
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - LimitsIncreaseRequest
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: lockbox
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/lockbox
+    group: lockbox
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ApprovalTemplate
+        - Lockbox
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: loganalytics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/loganalytics
+    group: loganalytics
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - IngestTimeRule
+        - LogAnalyticsEmBridge
+        - LogAnalyticsEntity
+        - LogAnalyticsEntityType
+        - LogAnalyticsLogGroup
+        - LogAnalyticsObjectCollectionRule
+        - ScheduledTask
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: managementagent
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/managementagent
+    group: managementagent
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DataSource
+        - ManagementAgentInstallKey
+        - NamedCredential
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: managementdashboard
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/managementdashboard
+    group: managementdashboard
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ManagementDashboard
+        - ManagementSavedSearch
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: marketplaceprivateoffer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplaceprivateoffer
+    group: marketplaceprivateoffer
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Offer
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: marketplacepublisher
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/marketplacepublisher
+    group: marketplacepublisher
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Artifact
+        - Listing
+        - ListingRevision
+        - ListingRevisionAttachment
+        - ListingRevisionNote
+        - ListingRevisionPackage
+        - Term
+        - TermVersion
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: operatoraccesscontrol
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/operatoraccesscontrol
+    group: operatoraccesscontrol
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OperatorControl
+        - OperatorControlAssignment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: opsi
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/opsi
+    group: opsi
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AwrHub
+        - AwrHubSource
+        - ChargebackPlan
+        - ChargebackPlanReport
+        - DatabaseInsight
+        - EnterpriseManagerBridge
+        - ExadataInsight
+        - HostInsight
+        - NewsReport
+        - OperationsInsightsPrivateEndpoint
+        - OperationsInsightsWarehouse
+        - OperationsInsightsWarehouseUser
+        - OpsiConfiguration
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: optimizer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/optimizer
+    group: optimizer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Profile
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: osmanagementhub
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/osmanagementhub
+    group: osmanagementhub
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - LifecycleEnvironment
+        - ManagedInstanceGroup
+        - ManagementStation
+        - Profile
+        - ScheduledJob
+        - SoftwareSource
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: recovery
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/recovery
+    group: recovery
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ProtectedDatabase
+        - ProtectionPolicy
+        - RecoveryServiceSubnet
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: resourceanalytics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourceanalytics
+    group: resourceanalytics
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ResourceAnalyticsInstance
+        - TenancyAttachment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: resourcescheduler
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourcescheduler
+    group: resourcescheduler
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Schedule
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: securityattribute
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/securityattribute
+    group: securityattribute
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - SecurityAttribute
+        - SecurityAttributeNamespace
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: stackmonitoring
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/stackmonitoring
+    group: stackmonitoring
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AlarmCondition
+        - BaselineableMetric
+        - Config
+        - MaintenanceWindow
+        - MetricExtension
+        - MonitoredResource
+        - MonitoredResourceType
+        - MonitoringTemplate
+        - ProcessSet
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: waa
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/waa
+    group: waa
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - WebAppAcceleration
+        - WebAppAccelerationPolicy
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: waas
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/waas
+    group: waas
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AddressList
+        - Certificate
+        - CustomProtectionRule
+        - HttpRedirect
+        - WaasPolicy
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: waf
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/waf
+    group: waf
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - NetworkAddressList
+        - WebAppFirewall
+        - WebAppFirewallPolicy
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
     group: vault

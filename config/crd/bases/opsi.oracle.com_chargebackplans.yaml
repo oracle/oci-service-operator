@@ -1,0 +1,313 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: chargebackplans.opsi.oracle.com
+spec:
+  group: opsi.oracle.com
+  names:
+    kind: ChargebackPlan
+    listKind: ChargebackPlanList
+    plural: chargebackplans
+    singular: chargebackplan
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the ChargebackPlan
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ChargebackPlan
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ChargebackPlan is the Schema for the chargebackplans API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ChargebackPlanSpec defines the desired state of ChargebackPlan.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              entitySource:
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              jsonData:
+                type: string
+              planCustomItems:
+                description: List of chargeback plan customizations.
+                items:
+                  description: ChargebackPlanPlanCustomItem defines nested fields
+                    for ChargebackPlan.PlanCustomItem.
+                  properties:
+                    isCustomizable:
+                      description: Indicates whether the chargeback plan customization
+                        item can be customized.
+                      type: boolean
+                    name:
+                      description: Name of chargeback plan customization item. Example
+                        items for Exadata Insights Chargeback are statistic, percentile,
+                        infrastructureCost, additionalServerCost etc.
+                      type: string
+                    value:
+                      description: Value of chargeback plan customization item.
+                      type: string
+                  type: object
+                type: array
+              planDescription:
+                description: Description of OPSI Chargeback Plan.
+                type: string
+              planName:
+                description: Name for the OPSI Chargeback plan.
+                type: string
+              planType:
+                description: Chargeback Plan type of the chargeback entity. For an
+                  Exadata it can be WEIGHTED_ALLOCATION, EQUAL_ALLOCATION, UNUSED_ALLOCATION.
+                type: string
+            required:
+            - compartmentId
+            - planName
+            - planType
+            type: object
+          status:
+            description: ChargebackPlanStatus defines the observed state of ChargebackPlan.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              entitySource:
+                description: Source of the chargeback plan.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of OPSI Chargeback plan resource.
+                type: string
+              isCustomizable:
+                description: Indicates whether the chargeback plan can be customized.
+                type: boolean
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: Chargeback Plan lifecycle states
+                type: string
+              planCategory:
+                description: Chargeback Plan category of the chargeback entity. It
+                  can be OOB, or CUSTOM.
+                type: string
+              planCustomItems:
+                description: List of chargeback plan customizations.
+                items:
+                  description: ChargebackPlanPlanCustomItem defines nested fields
+                    for ChargebackPlan.PlanCustomItem.
+                  properties:
+                    isCustomizable:
+                      description: Indicates whether the chargeback plan customization
+                        item can be customized.
+                      type: boolean
+                    name:
+                      description: Name of chargeback plan customization item. Example
+                        items for Exadata Insights Chargeback are statistic, percentile,
+                        infrastructureCost, additionalServerCost etc.
+                      type: string
+                    value:
+                      description: Value of chargeback plan customization item.
+                      type: string
+                  type: object
+                type: array
+              planDescription:
+                description: Description of OPSI Chargeback Plan.
+                type: string
+              planName:
+                description: Name for the OPSI Chargeback plan.
+                type: string
+              planType:
+                description: Chargeback Plan type of the chargeback entity. For an
+                  Exadata it can be WEIGHTED_ALLOCATION, EQUAL_ALLOCATION, UNUSED_ALLOCATION.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The date and time the chargeback plan was created, in
+                  the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeUpdated:
+                description: The time chargeback plan was updated. An RFC3339 formatted
+                  datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

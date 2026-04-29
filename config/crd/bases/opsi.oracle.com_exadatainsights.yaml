@@ -1,0 +1,615 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: exadatainsights.opsi.oracle.com
+spec:
+  group: opsi.oracle.com
+  names:
+    kind: ExadataInsight
+    listKind: ExadataInsightList
+    plural: exadatainsights
+    singular: exadatainsight
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the ExadataInsight
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ExadataInsight
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ExadataInsight is the Schema for the exadatainsights API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ExadataInsightSpec defines the desired state of ExadataInsight.
+            properties:
+              compartmentId:
+                description: Compartment Identifier of Exadata insight
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              enterpriseManagerBridgeId:
+                description: OPSI Enterprise Manager Bridge OCID
+                type: string
+              enterpriseManagerEntityIdentifier:
+                description: Enterprise Manager Entity Unique Identifier
+                type: string
+              enterpriseManagerIdentifier:
+                description: Enterprise Manager Unique Identifier
+                type: string
+              entitySource:
+                type: string
+              exadataInfraId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Infrastructure.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isAutoSyncEnabled:
+                description: Set to true to enable automatic enablement and disablement
+                  of related targets from Enterprise Manager. New resources (e.g.
+                  Database Insights) will be placed in the same compartment as the
+                  related Exadata Insight.
+                type: boolean
+              jsonData:
+                type: string
+              memberEntityDetails:
+                items:
+                  description: ExadataInsightMemberEntityDetail defines nested fields
+                    for ExadataInsight.MemberEntityDetail.
+                  properties:
+                    compartmentId:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the compartment.
+                      type: string
+                    enterpriseManagerEntityIdentifier:
+                      description: Enterprise Manager Entity Unique Identifier
+                      type: string
+                  required:
+                  - compartmentId
+                  - enterpriseManagerEntityIdentifier
+                  type: object
+                type: array
+              memberVmClusterDetails:
+                items:
+                  description: ExadataInsightMemberVmClusterDetail defines nested
+                    fields for ExadataInsight.MemberVmClusterDetail.
+                  properties:
+                    compartmentId:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the compartment.
+                      type: string
+                    memberAutonomousDetails:
+                      description: The autonomous databases that belong to the Autonmous
+                        VM Cluster
+                      items:
+                        description: ExadataInsightMemberVmClusterDetailMemberAutonomousDetail
+                          defines nested fields for ExadataInsight.MemberVmClusterDetail.MemberAutonomousDetail.
+                        properties:
+                          compartmentId:
+                            description: Compartment Identifier of database
+                            type: string
+                          connectionCredentialDetails:
+                            description: ExadataInsightMemberVmClusterDetailMemberAutonomousDetailConnectionCredentialDetails
+                              defines nested fields for ExadataInsight.MemberVmClusterDetail.MemberAutonomousDetail.ConnectionCredentialDetails.
+                            properties:
+                              credentialSourceName:
+                                description: Credential source name that had been
+                                  added in Management Agent wallet. This value is
+                                  only required when Credential set by CREDENTIALS_BY_SOURCE
+                                  and is optional properties for ther others.
+                                type: string
+                              credentialType:
+                                type: string
+                              jsonData:
+                                type: string
+                              namedCredentialId:
+                                description: The credential OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  stored in management agent.
+                                type: string
+                              passwordSecretId:
+                                description: The secret OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  mapping to the database credentials.
+                                type: string
+                              role:
+                                description: database user role.
+                                type: string
+                              userName:
+                                description: database user name.
+                                type: string
+                              walletSecretId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the Secret where the database keystore contents
+                                  are stored. This is used for TCPS support in BM/VM/ExaCS
+                                  cases.
+                                type: string
+                            type: object
+                          connectionDetails:
+                            description: ExadataInsightMemberVmClusterDetailMemberAutonomousDetailConnectionDetails
+                              defines nested fields for ExadataInsight.MemberVmClusterDetail.MemberAutonomousDetail.ConnectionDetails.
+                            properties:
+                              hostName:
+                                description: Name of the listener host that will be
+                                  used to create the connect string to the database.
+                                type: string
+                              port:
+                                description: Listener port number used for connection
+                                  requests.
+                                type: integer
+                              protocol:
+                                description: Protocol used for connection requests.
+                                type: string
+                              serviceName:
+                                description: Database service name used for connection
+                                  requests.
+                                type: string
+                            required:
+                            - hostName
+                            - port
+                            - protocol
+                            - serviceName
+                            type: object
+                          databaseId:
+                            description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                              of the database.
+                            type: string
+                          databaseResourceType:
+                            description: OCI database resource type
+                            type: string
+                          definedTags:
+                            additionalProperties:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            description: |-
+                              Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                              Example: `{"foo-namespace": {"bar-key": "value"}}`
+                            type: object
+                          deploymentType:
+                            description: Database Deployment Type
+                            type: string
+                          freeformTags:
+                            additionalProperties:
+                              type: string
+                            description: |-
+                              Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                              Example: `{"bar-key": "value"}`
+                            type: object
+                          managementAgentId:
+                            description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                              of the Management Agent
+                            type: string
+                          systemTags:
+                            additionalProperties:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            description: |-
+                              System tags for this resource. Each key is predefined and scoped to a namespace.
+                              Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                            type: object
+                        required:
+                        - compartmentId
+                        - connectionCredentialDetails
+                        - connectionDetails
+                        - databaseId
+                        - databaseResourceType
+                        - deploymentType
+                        - managementAgentId
+                        type: object
+                      type: array
+                    memberDatabaseDetails:
+                      description: The databases that belong to the VM Cluster
+                      items:
+                        description: ExadataInsightMemberVmClusterDetailMemberDatabaseDetail
+                          defines nested fields for ExadataInsight.MemberVmClusterDetail.MemberDatabaseDetail.
+                        properties:
+                          compartmentId:
+                            description: Compartment Identifier of database
+                            type: string
+                          connectionCredentialDetails:
+                            description: ExadataInsightMemberVmClusterDetailMemberDatabaseDetailConnectionCredentialDetails
+                              defines nested fields for ExadataInsight.MemberVmClusterDetail.MemberDatabaseDetail.ConnectionCredentialDetails.
+                            properties:
+                              credentialSourceName:
+                                description: Credential source name that had been
+                                  added in Management Agent wallet. This value is
+                                  only required when Credential set by CREDENTIALS_BY_SOURCE
+                                  and is optional properties for ther others.
+                                type: string
+                              credentialType:
+                                type: string
+                              jsonData:
+                                type: string
+                              namedCredentialId:
+                                description: The credential OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  stored in management agent.
+                                type: string
+                              passwordSecretId:
+                                description: The secret OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  mapping to the database credentials.
+                                type: string
+                              role:
+                                description: database user role.
+                                type: string
+                              userName:
+                                description: database user name.
+                                type: string
+                              walletSecretId:
+                                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                  of the Secret where the database keystore contents
+                                  are stored. This is used for TCPS support in BM/VM/ExaCS
+                                  cases.
+                                type: string
+                            type: object
+                          connectionDetails:
+                            description: ExadataInsightMemberVmClusterDetailMemberDatabaseDetailConnectionDetails
+                              defines nested fields for ExadataInsight.MemberVmClusterDetail.MemberDatabaseDetail.ConnectionDetails.
+                            properties:
+                              hostName:
+                                description: Name of the listener host that will be
+                                  used to create the connect string to the database.
+                                type: string
+                              port:
+                                description: Listener port number used for connection
+                                  requests.
+                                type: integer
+                              protocol:
+                                description: Protocol used for connection requests.
+                                type: string
+                              serviceName:
+                                description: Database service name used for connection
+                                  requests.
+                                type: string
+                            required:
+                            - hostName
+                            - port
+                            - protocol
+                            - serviceName
+                            type: object
+                          databaseId:
+                            description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                              of the database.
+                            type: string
+                          databaseResourceType:
+                            description: OCI database resource type
+                            type: string
+                          definedTags:
+                            additionalProperties:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            description: |-
+                              Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                              Example: `{"foo-namespace": {"bar-key": "value"}}`
+                            type: object
+                          deploymentType:
+                            description: Database Deployment Type (EXACS will be supported
+                              in the future)
+                            type: string
+                          freeformTags:
+                            additionalProperties:
+                              type: string
+                            description: |-
+                              Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                              Example: `{"bar-key": "value"}`
+                            type: object
+                          managementAgentId:
+                            description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                              of the Management Agent
+                            type: string
+                          systemTags:
+                            additionalProperties:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            description: |-
+                              System tags for this resource. Each key is predefined and scoped to a namespace.
+                              Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                            type: object
+                        required:
+                        - compartmentId
+                        - connectionCredentialDetails
+                        - connectionDetails
+                        - databaseId
+                        - databaseResourceType
+                        - deploymentType
+                        - managementAgentId
+                        type: object
+                      type: array
+                    vmclusterId:
+                      description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                        of the VM Cluster.
+                      type: string
+                  required:
+                  - compartmentId
+                  - vmclusterId
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: ExadataInsightStatus defines the observed state of ExadataInsight.
+            properties:
+              chargebackPlanDetails:
+                description: ExadataInsightChargebackPlanDetails defines nested fields
+                  for ExadataInsight.ChargebackPlanDetails.
+                properties:
+                  planId:
+                    description: OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of OPSI Chargeback plan resource.
+                    type: string
+                  planType:
+                    description: Chargeback Plan type of the chargeback entity. For
+                      an Exadata it can be WEIGHTED_ALLOCATION, EQUAL_ALLOCATION,
+                      UNUSED_ALLOCATION.
+                    type: string
+                  timeEnabled:
+                    description: The date and time the chargeback plan was enabled
+                      on the resource, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                    type: string
+                type: object
+              compartmentId:
+                description: Compartment identifier of the Exadata insight resource
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              enterpriseManagerBridgeId:
+                description: OPSI Enterprise Manager Bridge OCID
+                type: string
+              enterpriseManagerEntityDisplayName:
+                description: Enterprise Manager Entity Display Name
+                type: string
+              enterpriseManagerEntityIdentifier:
+                description: Enterprise Manager Entity Unique Identifier
+                type: string
+              enterpriseManagerEntityName:
+                description: Enterprise Manager Entity Name
+                type: string
+              enterpriseManagerEntityType:
+                description: Enterprise Manager Entity Type
+                type: string
+              enterpriseManagerIdentifier:
+                description: Enterprise Manager Unique Identifier
+                type: string
+              entitySource:
+                type: string
+              exadataDisplayName:
+                description: The user-friendly name for the Exadata system. The name
+                  does not have to be unique.
+                type: string
+              exadataInfraId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Infrastructure.
+                type: string
+              exadataInfraResourceType:
+                description: OCI exadata infrastructure resource type
+                type: string
+              exadataName:
+                description: The Exadata system name. If the Exadata systems managed
+                  by Enterprise Manager, the name is unique amongst the Exadata systems
+                  managed by the same Enterprise Manager.
+                type: string
+              exadataRackType:
+                description: Exadata rack type.
+                type: string
+              exadataShape:
+                description: The shape of the Exadata Infrastructure.
+                type: string
+              exadataType:
+                description: Operations Insights internal representation of the the
+                  Exadata system type.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: Exadata insight identifier
+                type: string
+              isAutoSyncEnabled:
+                description: Set to true to enable automatic enablement and disablement
+                  of related targets from Enterprise Manager. New resources (e.g.
+                  Database Insights) will be placed in the same compartment as the
+                  related Exadata Insight.
+                type: boolean
+              isVirtualizedExadata:
+                description: true if virtualization is used in the Exadata system
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Exadata insight.
+                type: string
+              sdkStatus:
+                description: |-
+                  Indicates the status of an Exadata insight in Operations Insights
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              statusDetails:
+                description: A message describing the status of the Exadata Resource.
+                  For example, it can be used to provide actionable information about
+                  the policies needed to access the Exadata Resource.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the the Exadata insight was first enabled. An
+                  RFC3339 formatted datetime string
+                type: string
+              timeUpdated:
+                description: The time the Exadata insight was updated. An RFC3339
+                  formatted datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

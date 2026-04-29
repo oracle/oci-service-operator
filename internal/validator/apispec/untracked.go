@@ -4,7 +4,9 @@ import "strings"
 
 const intentionalUntrackedPrefix = "Intentionally untracked: "
 
-var reviewedUntrackedReasons = map[string]string{}
+var reviewedUntrackedReasons = map[string]string{
+	"ManagementagentDataSource": intentionalUntrackedPrefix + "DataSource uses polymorphic create, update, and response body payloads; generated runtime still exposes the concrete CRD fields, but APISpec coverage needs resource-local review before mapping one concrete SDK shape.",
+}
 
 func reviewedUntrackedReason(targetName string) string {
 	return reviewedUntrackedReasons[strings.TrimSpace(targetName)]

@@ -1,0 +1,394 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: limitsincreaserequests.limitsincrease.oracle.com
+spec:
+  group: limitsincrease.oracle.com
+  names:
+    kind: LimitsIncreaseRequest
+    listKind: LimitsIncreaseRequestList
+    plural: limitsincreaserequests
+    singular: limitsincreaserequest
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the LimitsIncreaseRequest
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the LimitsIncreaseRequest
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: LimitsIncreaseRequest is the Schema for the limitsincreaserequests
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: LimitsIncreaseRequestSpec defines the desired state of LimitsIncreaseRequest.
+            properties:
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment for the new limit increase request.
+                  Note: The tenancy is the root compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: The user-friendly name of the limit increase request.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              justification:
+                description: Reason for the limit increase request.
+                type: string
+              limitsIncreaseItemRequests:
+                description: List of items in the limit increase request.
+                items:
+                  description: LimitsIncreaseRequestLimitsIncreaseItemRequest defines
+                    nested fields for LimitsIncreaseRequest.LimitsIncreaseItemRequest.
+                  properties:
+                    limitName:
+                      description: The name of the limit to be increased.
+                      type: string
+                    questionnaireResponse:
+                      description: List of questionnaire responses.
+                      items:
+                        description: LimitsIncreaseRequestLimitsIncreaseItemRequestQuestionnaireResponse
+                          defines nested fields for LimitsIncreaseRequest.LimitsIncreaseItemRequest.QuestionnaireResponse.
+                        properties:
+                          id:
+                            description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                              of the question.
+                            type: string
+                          questionResponse:
+                            description: The response to the question.
+                            type: string
+                        required:
+                        - id
+                        - questionResponse
+                        type: object
+                      type: array
+                    region:
+                      description: The region for the limit increase.
+                      type: string
+                    scope:
+                      description: |-
+                        The scope of the limit increase item.
+                        For OCI, use the logical availability domain (AD) of the request.
+                        For Multicloud, use the availability zone (AZ) of the request
+                      type: string
+                    serviceName:
+                      description: The name of the service that owns the limit.
+                      type: string
+                    value:
+                      description: The requested value of the increase.
+                      format: int64
+                      type: integer
+                  required:
+                  - limitName
+                  - region
+                  - serviceName
+                  - value
+                  type: object
+                type: array
+              subscriptionId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the tenancy subscription for the limit increase request.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - justification
+            - limitsIncreaseItemRequests
+            type: object
+          status:
+            description: LimitsIncreaseRequestStatus defines the observed state of
+              LimitsIncreaseRequest.
+            properties:
+              compartmentId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the limit increase request.
+                  Note: The tenancy is the root compartment.
+                type: string
+              customerComments:
+                description: List of comments in the limit increase request. A comment
+                  is typically between the requester and OCI Support.
+                items:
+                  description: LimitsIncreaseRequestCustomerComment defines nested
+                    fields for LimitsIncreaseRequest.CustomerComment.
+                  properties:
+                    message:
+                      description: The comment message.
+                      type: string
+                    senderType:
+                      description: The comment sender type.
+                      type: string
+                    timeCreated:
+                      description: The time that the comment was created. Format defined
+                        by RFC3339.
+                      type: string
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: The user-friendly name of the limit increase request.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the limit increase request.
+                type: string
+              itemsInRequest:
+                description: Number of limit increase items in the limit increase
+                  request.
+                format: int64
+                type: integer
+              justification:
+                description: Reason for the limit increase request.
+                type: string
+              lifecycleState:
+                description: The current status of the limit increase request.
+                type: string
+              limitsIncreaseItemRequests:
+                description: List of limit increase items within the limit increase
+                  request.
+                items:
+                  description: LimitsIncreaseRequestLimitsIncreaseItemRequest defines
+                    nested fields for LimitsIncreaseRequest.LimitsIncreaseItemRequest.
+                  properties:
+                    limitName:
+                      description: The name of the limit to be increased.
+                      type: string
+                    questionnaireResponse:
+                      description: List of questionnaire responses.
+                      items:
+                        description: LimitsIncreaseRequestLimitsIncreaseItemRequestQuestionnaireResponse
+                          defines nested fields for LimitsIncreaseRequest.LimitsIncreaseItemRequest.QuestionnaireResponse.
+                        properties:
+                          id:
+                            description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                              of the question.
+                            type: string
+                          questionResponse:
+                            description: The response to the question.
+                            type: string
+                        required:
+                        - id
+                        - questionResponse
+                        type: object
+                      type: array
+                    region:
+                      description: The region for the limit increase.
+                      type: string
+                    scope:
+                      description: |-
+                        The scope of the limit increase item.
+                        For OCI, use the logical availability domain (AD) of the request.
+                        For Multicloud, use the availability zone (AZ) of the request
+                      type: string
+                    serviceName:
+                      description: The name of the service that owns the limit.
+                      type: string
+                    value:
+                      description: The requested value of the increase.
+                      format: int64
+                      type: integer
+                  required:
+                  - limitName
+                  - region
+                  - serviceName
+                  - value
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subscriptionId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the tenancy subscription for the limit increase request.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time that the limit increase request was created.
+                  Format defined by RFC3339.
+                type: string
+              timeResolution:
+                description: The time that the limit increase request was resolved
+                  (reached a terminal state). Format defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The time that the limit increase request was updated.
+                  Format defined by RFC3339.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,342 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: hostinsights.opsi.oracle.com
+spec:
+  group: opsi.oracle.com
+  names:
+    kind: HostInsight
+    listKind: HostInsightList
+    plural: hostinsights
+    singular: hostinsight
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the HostInsight
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the HostInsight
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: HostInsight is the Schema for the hostinsights API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HostInsightSpec defines the desired state of HostInsight.
+            properties:
+              compartmentId:
+                description: Compartment Identifier of host
+                type: string
+              computeId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Compute Instance
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              enterpriseManagerBridgeId:
+                description: OPSI Enterprise Manager Bridge OCID
+                type: string
+              enterpriseManagerEntityIdentifier:
+                description: Enterprise Manager Entity Unique Identifier
+                type: string
+              enterpriseManagerIdentifier:
+                description: Enterprise Manager Unique Identifier
+                type: string
+              entitySource:
+                type: string
+              exadataInsightId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata insight.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              jsonData:
+                type: string
+              managementAgentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Management Agent
+                type: string
+            required:
+            - compartmentId
+            type: object
+          status:
+            description: HostInsightStatus defines the observed state of HostInsight.
+            properties:
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment.
+                type: string
+              computeId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Compute Instance
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              enterpriseManagerBridgeId:
+                description: OPSI Enterprise Manager Bridge OCID
+                type: string
+              enterpriseManagerEntityDisplayName:
+                description: Enterprise Manager Entity Display Name
+                type: string
+              enterpriseManagerEntityIdentifier:
+                description: Enterprise Manager Entity Unique Identifier
+                type: string
+              enterpriseManagerEntityName:
+                description: Enterprise Manager Entity Name
+                type: string
+              enterpriseManagerEntityType:
+                description: Enterprise Manager Entity Type
+                type: string
+              enterpriseManagerIdentifier:
+                description: Enterprise Manager Unique Identifier
+                type: string
+              entitySource:
+                type: string
+              exadataInsightId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata insight.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              hostDisplayName:
+                description: The user-friendly name for the host. The name does not
+                  have to be unique.
+                type: string
+              hostName:
+                description: The host name. The host name is unique amongst the hosts
+                  managed by the same management agent.
+                type: string
+              hostType:
+                description: Ops Insights internal representation of the host type.
+                  Possible value is EXTERNAL-HOST.
+                type: string
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the host insight resource.
+                type: string
+              jsonData:
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the host.
+                type: string
+              managementAgentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Management Agent
+                type: string
+              opsiPrivateEndpointId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the OPSI private endpoint
+                type: string
+              parentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the VM Cluster or DB System ID, depending on which configuration
+                  the resource belongs to.
+                type: string
+              platformName:
+                description: Platform name.
+                type: string
+              platformType:
+                description: |-
+                  Platform type.
+                  Supported platformType(s) for MACS-managed external host insight: [LINUX, SOLARIS, WINDOWS].
+                  Supported platformType(s) for MACS-managed cloud host insight: [LINUX].
+                  Supported platformType(s) for EM-managed external host insight: [LINUX, SOLARIS, SUNOS, ZLINUX, WINDOWS, AIX, HP-UX].
+                type: string
+              platformVersion:
+                description: Platform version.
+                type: string
+              processorCount:
+                description: Processor count. This is the OCPU count for Autonomous
+                  Database and CPU core count for other database types.
+                type: integer
+              rootId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Infrastructure.
+                type: string
+              sdkStatus:
+                description: |-
+                  Indicates the status of a host insight in Operations Insights
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the the host insight was first enabled. An RFC3339
+                  formatted datetime string
+                type: string
+              timeUpdated:
+                description: The time the host insight was updated. An RFC3339 formatted
+                  datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

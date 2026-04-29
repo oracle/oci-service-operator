@@ -1,0 +1,565 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: monitoredresourcetypes.stackmonitoring.oracle.com
+spec:
+  group: stackmonitoring.oracle.com
+  names:
+    kind: MonitoredResourceType
+    listKind: MonitoredResourceTypeList
+    plural: monitoredresourcetypes
+    singular: monitoredresourcetype
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MonitoredResourceType
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MonitoredResourceType
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MonitoredResourceType is the Schema for the monitoredresourcetypes
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MonitoredResourceTypeSpec defines the desired state of MonitoredResourceType.
+            properties:
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A friendly description.
+                type: string
+              displayName:
+                description: Monitored resource type display name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              metadata:
+                description: MonitoredResourceTypeMetadata defines nested fields for
+                  MonitoredResourceType.Metadata.
+                properties:
+                  agentProperties:
+                    description: |-
+                      List of properties needed by the agent for monitoring the resource.
+                      Valid only if resource type is OCI management agent based. When specified,
+                      these properties are passed to the management agent during resource create or update.
+                    items:
+                      type: string
+                    type: array
+                  format:
+                    type: string
+                  jsonData:
+                    type: string
+                  requiredProperties:
+                    description: List of required properties for resource type.
+                    items:
+                      type: string
+                    type: array
+                  uniquePropertySets:
+                    description: |-
+                      List of property sets used to uniquely identify the resources.
+                      This check is made during create or update of stack monitoring resource.
+                      The resource has to pass unique check for each set in the list.
+                      For example, database can have user, password and SID as one unique set.
+                      Another unique set would be user, password and service name.
+                    items:
+                      description: MonitoredResourceTypeMetadataUniquePropertySet
+                        defines nested fields for MonitoredResourceType.Metadata.UniquePropertySet.
+                      properties:
+                        properties:
+                          description: List of properties.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - properties
+                      type: object
+                    type: array
+                  validPropertiesForCreate:
+                    description: |-
+                      List of valid properties for resource type while creating the monitored resource.
+                      If resources of this type specifies any other properties during create operation,
+                      the operation will fail.
+                    items:
+                      type: string
+                    type: array
+                  validPropertiesForUpdate:
+                    description: |-
+                      List of valid properties for resource type while updating the monitored resource.
+                      If resources of this type specifies any other properties during update operation,
+                      the operation will fail.
+                    items:
+                      type: string
+                    type: array
+                  validPropertyValues:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: |-
+                      List of valid values for the properties. This is useful when resource type wants to
+                      restrict only certain values for some properties. For instance for 'osType' property,
+                      supported values can be restricted to be either Linux or Windows.
+                      Example: `{ "osType": ["Linux","Windows","Solaris"]}`
+                    type: object
+                  validSubResourceTypes:
+                    description: |-
+                      List of valid sub-resource types for a composite resource type.
+                      The sub-resource types will be obtained from the valid association pairs corresponding to the composite resource types.
+                      It will be empty for non composite resource types
+                    items:
+                      type: string
+                    type: array
+                type: object
+              metricNamespace:
+                description: Metric namespace for resource type.
+                type: string
+              name:
+                description: |-
+                  A unique monitored resource type name. The name must be unique across tenancy.
+                  Name can not be changed.
+                type: string
+              resourceCategory:
+                description: Resource Category to indicate the kind of resource type.
+                type: string
+              sourceType:
+                description: Source type to indicate if the resource is stack monitoring
+                  discovered, OCI native resource, etc.
+                type: string
+            required:
+            - compartmentId
+            - name
+            type: object
+          status:
+            description: MonitoredResourceTypeStatus defines the observed state of
+              MonitoredResourceType.
+            properties:
+              additionalNamespaceMap:
+                additionalProperties:
+                  type: string
+                description: Key/Value pair for additional namespaces used by stack
+                  monitoring services for SYSTEM (SMB) resource types.
+                type: object
+              availabilityMetricsConfig:
+                description: MonitoredResourceTypeAvailabilityMetricsConfig defines
+                  nested fields for MonitoredResourceType.AvailabilityMetricsConfig.
+                properties:
+                  collectionIntervalInSeconds:
+                    description: Availability metric collection internal in seconds.
+                    type: integer
+                  metrics:
+                    description: List of metrics used for availability calculation
+                      for the resource.
+                    items:
+                      type: string
+                    type: array
+                type: object
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: A friendly description.
+                type: string
+              displayName:
+                description: Monitored resource type display name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              handlerConfig:
+                description: MonitoredResourceTypeHandlerConfig defines nested fields
+                  for MonitoredResourceType.HandlerConfig.
+                properties:
+                  collectdResourceNameConfig:
+                    description: MonitoredResourceTypeHandlerConfigCollectdResourceNameConfig
+                      defines nested fields for MonitoredResourceType.HandlerConfig.CollectdResourceNameConfig.
+                    properties:
+                      excludeProperties:
+                        description: List of property names to be excluded.
+                        items:
+                          type: string
+                        type: array
+                      includeProperties:
+                        description: List of property names to be included.
+                        items:
+                          type: string
+                        type: array
+                      suffix:
+                        description: String to be suffixed to the resource name.
+                        type: string
+                    type: object
+                  collectorTypes:
+                    description: List of collector/plugin names.
+                    items:
+                      type: string
+                    type: array
+                  handlerProperties:
+                    description: List of handler configuration properties
+                    items:
+                      description: MonitoredResourceTypeHandlerConfigHandlerProperty
+                        defines nested fields for MonitoredResourceType.HandlerConfig.HandlerProperty.
+                      properties:
+                        name:
+                          description: Property name.
+                          type: string
+                        value:
+                          description: Property value.
+                          type: string
+                      type: object
+                    type: array
+                  metricMappings:
+                    description: List of AgentExtensionHandlerMetricMappingDetails.
+                    items:
+                      description: MonitoredResourceTypeHandlerConfigMetricMapping
+                        defines nested fields for MonitoredResourceType.HandlerConfig.MetricMapping.
+                      properties:
+                        collectorMetricName:
+                          description: Metric name as defined by the collector.
+                          type: string
+                        isSkipUpload:
+                          description: Is ignoring this metric.
+                          type: boolean
+                        metricUploadIntervalInSeconds:
+                          description: |-
+                            Metric upload interval in seconds. Any metric sent by telegraf/collectd before the
+                            configured interval expires will be dropped.
+                          type: integer
+                        telemetryMetricName:
+                          description: Metric name to be upload to telemetry.
+                          type: string
+                      type: object
+                    type: array
+                  metricNameConfig:
+                    description: MonitoredResourceTypeHandlerConfigMetricNameConfig
+                      defines nested fields for MonitoredResourceType.HandlerConfig.MetricNameConfig.
+                    properties:
+                      excludePatternOnPrefix:
+                        description: String pattern to be removed from the prefix
+                          of the metric name.
+                        type: string
+                      isPrefixWithCollectorType:
+                        description: is prefixing the metric with collector type.
+                        type: boolean
+                    type: object
+                  metricUploadIntervalInSeconds:
+                    description: |-
+                      Metric upload interval in seconds. Any metric sent by telegraf/collectd before the
+                      configured interval expires will be dropped.
+                    type: integer
+                  telegrafResourceNameConfig:
+                    description: MonitoredResourceTypeHandlerConfigTelegrafResourceNameConfig
+                      defines nested fields for MonitoredResourceType.HandlerConfig.TelegrafResourceNameConfig.
+                    properties:
+                      excludeTags:
+                        description: List of tag names to be excluded.
+                        items:
+                          type: string
+                        type: array
+                      includeTags:
+                        description: List of tag names to be included.
+                        items:
+                          type: string
+                        type: array
+                      isUseTagsOnly:
+                        description: Flag to indicate if only tags will be used for
+                          resource name generation.
+                        type: boolean
+                    type: object
+                  telemetryResourceGroup:
+                    description: Resource group string; if not specified, the resource
+                      group string will be generated by the handler.
+                    type: string
+                type: object
+              id:
+                description: Monitored resource type identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              isSystemDefined:
+                description: If boolean flag is true, then the resource type cannot
+                  be modified or deleted.
+                type: boolean
+              lifecycleState:
+                description: Lifecycle state of the monitored resource type.
+                type: string
+              metadata:
+                description: MonitoredResourceTypeMetadata defines nested fields for
+                  MonitoredResourceType.Metadata.
+                properties:
+                  agentProperties:
+                    description: |-
+                      List of properties needed by the agent for monitoring the resource.
+                      Valid only if resource type is OCI management agent based. When specified,
+                      these properties are passed to the management agent during resource create or update.
+                    items:
+                      type: string
+                    type: array
+                  format:
+                    type: string
+                  jsonData:
+                    type: string
+                  requiredProperties:
+                    description: List of required properties for resource type.
+                    items:
+                      type: string
+                    type: array
+                  uniquePropertySets:
+                    description: |-
+                      List of property sets used to uniquely identify the resources.
+                      This check is made during create or update of stack monitoring resource.
+                      The resource has to pass unique check for each set in the list.
+                      For example, database can have user, password and SID as one unique set.
+                      Another unique set would be user, password and service name.
+                    items:
+                      description: MonitoredResourceTypeMetadataUniquePropertySet
+                        defines nested fields for MonitoredResourceType.Metadata.UniquePropertySet.
+                      properties:
+                        properties:
+                          description: List of properties.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - properties
+                      type: object
+                    type: array
+                  validPropertiesForCreate:
+                    description: |-
+                      List of valid properties for resource type while creating the monitored resource.
+                      If resources of this type specifies any other properties during create operation,
+                      the operation will fail.
+                    items:
+                      type: string
+                    type: array
+                  validPropertiesForUpdate:
+                    description: |-
+                      List of valid properties for resource type while updating the monitored resource.
+                      If resources of this type specifies any other properties during update operation,
+                      the operation will fail.
+                    items:
+                      type: string
+                    type: array
+                  validPropertyValues:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: |-
+                      List of valid values for the properties. This is useful when resource type wants to
+                      restrict only certain values for some properties. For instance for 'osType' property,
+                      supported values can be restricted to be either Linux or Windows.
+                      Example: `{ "osType": ["Linux","Windows","Solaris"]}`
+                    type: object
+                  validSubResourceTypes:
+                    description: |-
+                      List of valid sub-resource types for a composite resource type.
+                      The sub-resource types will be obtained from the valid association pairs corresponding to the composite resource types.
+                      It will be empty for non composite resource types
+                    items:
+                      type: string
+                    type: array
+                type: object
+              metricNamespace:
+                description: Metric namespace for resource type.
+                type: string
+              name:
+                description: |-
+                  A unique monitored resource type name. The name must be unique across tenancy.
+                  Name can not be changed.
+                type: string
+              resourceCategory:
+                description: Resource Category to indicate the kind of resource type.
+                type: string
+              sourceType:
+                description: Source type to indicate if the resource is stack monitoring
+                  discovered, OCI native resource, etc.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              tenancyId:
+                description: Tenancy Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              timeCreated:
+                description: |-
+                  The date and time when the monitored resource type was created, expressed in
+                  RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time when the monitored resource was updated, expressed in
+                  RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
