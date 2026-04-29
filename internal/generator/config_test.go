@@ -1147,6 +1147,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"dataflow",
 		"database",
 		"databasetools",
+		"datalabelingservice",
 		"datascience",
 		"email",
 		"functions",
@@ -1193,6 +1194,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"dataflow",
 		"database",
 		"databasetools",
+		"datalabelingservice",
 		"datascience",
 		"email",
 		"functions",
@@ -1231,6 +1233,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
 	assertServiceSelection(t, services["database"], true, SelectionModeExplicit, []string{"AutonomousDatabase"})
 	assertServiceSelection(t, services["databasetools"], true, SelectionModeExplicit, []string{"DatabaseToolsConnection"})
+	assertServiceSelection(t, services["datalabelingservice"], true, SelectionModeExplicit, []string{"Dataset"})
 	assertServiceSelection(t, services["datascience"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["email"], true, SelectionModeExplicit, []string{"Dkim", "EmailDomain", "Sender", "Suppression"})
 	assertServiceSelection(t, services["functions"], true, SelectionModeExplicit, []string{"Application", "Function"})
@@ -1259,7 +1262,7 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasetools", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "ocvp", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "bds", "containerengine", "containerinstances", "core", "dataflow", "database", "databasetools", "datalabelingservice", "datascience", "functions", "identity", "keymanagement", "mysql", "nosql", "ocvp", "psql", "redis", "streaming")
 	assertAIDocumentRuntimeRolloutMetadata(t, services["aidocument"])
 	assertAILanguageRuntimeRolloutMetadata(t, services["ailanguage"])
 	assertAISpeechRuntimeRolloutMetadata(t, services["aispeech"])
@@ -1281,6 +1284,12 @@ func TestCheckedInConfigIncludesRuntimeRolloutMetadata(t *testing.T) {
 		webhook:        GenerationStrategyNone,
 	})
 	assertServiceGenerationStrategies(t, services["mysql"], generationStrategyExpectations{
+		controller:     GenerationStrategyGenerated,
+		serviceManager: GenerationStrategyGenerated,
+		registration:   GenerationStrategyGenerated,
+		webhook:        GenerationStrategyNone,
+	})
+	assertServiceGenerationStrategies(t, services["datalabelingservice"], generationStrategyExpectations{
 		controller:     GenerationStrategyGenerated,
 		serviceManager: GenerationStrategyGenerated,
 		registration:   GenerationStrategyGenerated,
@@ -1332,7 +1341,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	t.Parallel()
 
 	cfg := loadCheckedInConfig(t)
-	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "database", "databasetools", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
+	services := serviceConfigsByName(t, cfg, "aidocument", "ailanguage", "aispeech", "aivision", "analytics", "bds", "containerengine", "containerinstances", "core", "database", "databasetools", "datalabelingservice", "datascience", "dataflow", "identity", "mysql", "objectstorage", "ocvp", "opensearch", "psql", "redis", "streaming")
 	assertFormalSpecFor(t, services["aidocument"], "Project", "project")
 	assertFormalSpecFor(t, services["ailanguage"], "Project", "project")
 	assertFormalSpecFor(t, services["aispeech"], "TranscriptionJob", "transcriptionjob")
@@ -1343,6 +1352,7 @@ func TestCheckedInConfigPromotesFormalSpecReferences(t *testing.T) {
 	assertFormalSpecFor(t, services["containerengine"], "NodePool", "nodepool")
 	assertFormalSpecFor(t, services["containerinstances"], "ContainerInstance", "")
 	assertFormalSpecFor(t, services["databasetools"], "DatabaseToolsConnection", "databasetoolsconnection")
+	assertFormalSpecFor(t, services["datalabelingservice"], "Dataset", "dataset")
 	assertFormalSpecFor(t, services["identity"], "Compartment", "compartment")
 	for _, formal := range []struct {
 		kind string
@@ -1928,33 +1938,34 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 			strategy: AsyncStrategyWorkRequest,
 			runtime:  AsyncRuntimeGeneratedRuntime,
 		},
-		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"database":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"databasetools":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"datascience":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"email":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"functions":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"generativeai":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"identity":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"keymanagement":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"loadbalancer":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"logging":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"marketplace":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"monitoring":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"mysql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ocvp":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"objectstorage":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"oda":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"opensearch":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"psql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
-		"queue":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"redis":              {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"streaming":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"usageapi":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerengine":     {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerinstances":  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"core":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataflow":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"database":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"databasetools":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datalabelingservice": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"datascience":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"email":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"functions":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"generativeai":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"identity":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"keymanagement":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"loadbalancer":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"logging":             {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"marketplace":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"monitoring":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"mysql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"nosql":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ocvp":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"objectstorage":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"oda":                 {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"opensearch":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"psql":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
+		"queue":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"redis":               {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"streaming":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"usageapi":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)

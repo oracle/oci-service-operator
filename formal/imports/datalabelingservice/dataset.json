@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "datalabelingservice",
+  "slug": "dataset",
+  "kind": "Dataset",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_data_labeling_service_dataset",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateDataset",
+        "requestType": "datalabelingservice.CreateDatasetRequest",
+        "responseType": "datalabelingservice.CreateDatasetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetDataset",
+        "requestType": "datalabelingservice.GetDatasetRequest",
+        "responseType": "datalabelingservice.GetDatasetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListDatasets",
+        "requestType": "datalabelingservice.ListDatasetsRequest",
+        "responseType": "datalabelingservice.ListDatasetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "AddDatasetLabels",
+        "requestType": "datalabelingservice.AddDatasetLabelsRequest",
+        "responseType": "datalabelingservice.AddDatasetLabelsResponse"
+      },
+      {
+        "operation": "ChangeDatasetCompartment",
+        "requestType": "datalabelingservice.ChangeDatasetCompartmentRequest",
+        "responseType": "datalabelingservice.ChangeDatasetCompartmentResponse"
+      },
+      {
+        "operation": "GenerateDatasetRecords",
+        "requestType": "datalabelingservice.GenerateDatasetRecordsRequest",
+        "responseType": "datalabelingservice.GenerateDatasetRecordsResponse"
+      },
+      {
+        "operation": "ImportPreAnnotatedData",
+        "requestType": "datalabelingservice.ImportPreAnnotatedDataRequest",
+        "responseType": "datalabelingservice.ImportPreAnnotatedDataResponse"
+      },
+      {
+        "operation": "RemoveDatasetLabels",
+        "requestType": "datalabelingservice.RemoveDatasetLabelsRequest",
+        "responseType": "datalabelingservice.RemoveDatasetLabelsResponse"
+      },
+      {
+        "operation": "RenameDatasetLabels",
+        "requestType": "datalabelingservice.RenameDatasetLabelsRequest",
+        "responseType": "datalabelingservice.RenameDatasetLabelsResponse"
+      },
+      {
+        "operation": "SnapshotDataset",
+        "requestType": "datalabelingservice.SnapshotDatasetRequest",
+        "responseType": "datalabelingservice.SnapshotDatasetResponse"
+      },
+      {
+        "operation": "UpdateDataset",
+        "requestType": "datalabelingservice.UpdateDatasetRequest",
+        "responseType": "datalabelingservice.UpdateDatasetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteDataset",
+        "requestType": "datalabelingservice.DeleteDatasetRequest",
+        "responseType": "datalabelingservice.DeleteDatasetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "label_set.items",
+      "labeling_instructions"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_data_labeling_service_datasets",
+    "collectionField": "dataset_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "annotation_format",
+      "compartment_id",
+      "display_name",
+      "id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/datalabelingservice/dataset/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/datalabelingservice/dataset/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "secret-output",
+      "delete-confirmation",
+      "waiter-work-request"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: Dataset exposes CreateDataset, GetDataset, ListDatasets, UpdateDataset, and DeleteDataset with lifecycle states CREATING, UPDATING, ACTIVE, NEEDS_ATTENTION, DELETING, DELETED, and FAILED. Create and delete responses expose opc-work-request-id headers, while UpdateDataset returns only the Dataset body.",
+    "Pinned OCI SDK contract: CreateDatasetDetails includes compartmentId, annotationFormat, polymorphic datasetSourceDetails, polymorphic datasetFormatDetails, labelSet, optional displayName, description, initialRecordGenerationConfiguration, initialImportDatasetConfiguration, labelingInstructions, freeformTags, and definedTags. UpdateDatasetDetails narrows in-place mutation to displayName, description, labelingInstructions, freeformTags, and definedTags.",
+    "Pinned provider/resource facts: the provider surface for oci_data_labeling_service_dataset also includes auxiliary mutators ChangeDatasetCompartment, AddDatasetLabels, RemoveDatasetLabels, RenameDatasetLabels, GenerateDatasetRecords, ImportPreAnnotatedData, and SnapshotDataset. The reviewed controller-backed runtime does not call those helpers and instead publishes only the base CRUD mutation surface from UpdateDataset.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, safe reuse requires exact compartmentId, annotationFormat, and displayName matching from ListDatasets plus a reusable lifecycle state, and the runtime skips list reuse altogether when displayName is empty.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, labelingInstructions, freeformTags, and definedTags reconcile in place. Create-time dataset structure such as annotationFormat, datasetSourceDetails, datasetFormatDetails, labelSet, and initial import or generation configuration remains unsupported post-create drift for the published runtime.",
+    "Repo-authored async handling stays lifecycle-based: the reviewed generatedruntime client records shared request/work-request breadcrumbs when OCI returns them and uses read-after-write plus confirm-delete rereads instead of service-local work-request polling."
+  ]
+}

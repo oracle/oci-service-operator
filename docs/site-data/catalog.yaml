@@ -244,6 +244,20 @@ packages:
         kind: Application
         summary: Manage OCI Data Flow applications.
 
+  - package: datalabelingservice
+    displayName: Data Labeling Service
+    summary: Manage OCI Data Labeling datasets from Kubernetes with a reviewed controller-backed Dataset rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Dataset while AnnotationFormat and work-request helper families stay unpublished.
+      - The published runtime keeps lifecycle-based CRUD semantics, concrete polymorphic create request shaping, and explicit in-place updates only for displayName, description, labelingInstructions, freeformTags, and definedTags.
+    kindOverrides:
+      - group: datalabelingservice
+        kind: Dataset
+        summary: Manage OCI Data Labeling datasets.
+
   - package: datascience
     displayName: Data Science
     summary: Manage OCI Data Science projects from Kubernetes with an initial controller-backed Project rollout.

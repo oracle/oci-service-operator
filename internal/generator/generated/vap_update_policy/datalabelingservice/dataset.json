@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "datalabelingservice",
+    "apiVersion": "datalabelingservice.oracle.com/v1beta1",
+    "kind": "Dataset",
+    "formalSlug": "dataset",
+    "providerResource": "oci_data_labeling_service_dataset",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "definedTags",
+      "description",
+      "displayName",
+      "freeformTags",
+      "labelingInstructions"
+    ],
+    "denyRules": []
+  }
+}

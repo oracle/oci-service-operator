@@ -1,0 +1,62 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: datalabelingservice
+slug: dataset
+kind: Dataset
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - annotationFormat
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus annotationFormat plus displayName unique match in ACTIVE, CREATING, or UPDATING; missing displayName skips pre-create reuse and duplicate matches fail
+  mutation:
+    mutable:
+      - defined_tags
+      - description
+      - display_name
+      - freeform_tags
+      - labeling_instructions
+    createOnly:
+      - annotation_format
+      - compartment_id
+      - dataset_format_details
+      - dataset_source_details
+      - initial_import_dataset_configuration
+      - initial_record_generation_configuration
+      - label_set
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE as success, and DELETING as terminating; FAILED and
+    NEEDS_ATTENTION are terminal failure states.
+  - Pre-create lookup queries ListDatasets with compartmentId,
+    annotationFormat, displayName, and an optional tracked id; the runtime
+    skips list reuse entirely when displayName is empty.
+  - Only displayName, description, labelingInstructions, freeformTags, and
+    definedTags reconcile in place. Compartment changes, label-set helpers, and
+    import or record-generation helpers stay outside the published runtime
+    contract, and the runtime has no secret side effects.

@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 84,
-    "mappings": 356,
-    "trackedMappings": 356,
+    "specs": 85,
+    "mappings": 361,
+    "trackedMappings": 361,
     "untrackedMappings": 0,
-    "presentFields": 4029,
-    "missingFields": 34,
-    "mandatoryPresentFields": 1271,
-    "mandatoryMissingFields": 31,
-    "extraSpecFields": 428,
-    "overallCoveragePercent": 99.16317991631799,
-    "mandatoryCoveragePercent": 97.61904761904762
+    "presentFields": 4078,
+    "missingFields": 35,
+    "mandatoryPresentFields": 1292,
+    "mandatoryMissingFields": 32,
+    "extraSpecFields": 435,
+    "overallCoveragePercent": 99.14903963044007,
+    "mandatoryCoveragePercent": 97.58308157099698
   },
   "services": [
     {
@@ -250,6 +250,20 @@
       "extraSpecFields": 2,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "datalabelingservice",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 49,
+      "missingFields": 1,
+      "mandatoryPresentFields": 21,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 7,
+      "overallCoveragePercent": 98,
+      "mandatoryCoveragePercent": 95.45454545454545
     },
     {
       "service": "datascience",

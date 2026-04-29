@@ -21,6 +21,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-go-sdk/v65/databasetools"
 	"github.com/oracle/oci-go-sdk/v65/dataflow"
+	"github.com/oracle/oci-go-sdk/v65/datalabelingservice"
 	"github.com/oracle/oci-go-sdk/v65/datascience"
 	"github.com/oracle/oci-go-sdk/v65/email"
 	"github.com/oracle/oci-go-sdk/v65/functions"
@@ -471,6 +472,13 @@ var seedTargets = []Target{
 	newTarget("dataflow", "UpdateApplicationDetails", reflect.TypeOf(dataflow.UpdateApplicationDetails{})),
 	newTarget("dataflow", "Application", reflect.TypeOf(dataflow.Application{})),
 	newTarget("dataflow", "ApplicationSummary", reflect.TypeOf(dataflow.ApplicationSummary{})),
+
+	// Datalabelingservice CRD support
+	newTarget("datalabelingservice", "CreateDatasetDetails", reflect.TypeOf(datalabelingservice.CreateDatasetDetails{})),
+	newTarget("datalabelingservice", "UpdateDatasetDetails", reflect.TypeOf(datalabelingservice.UpdateDatasetDetails{})),
+	newTarget("datalabelingservice", "Dataset", reflect.TypeOf(datalabelingservice.Dataset{})),
+	newTarget("datalabelingservice", "DatasetCollection", reflect.TypeOf(datalabelingservice.DatasetCollection{})),
+	newTarget("datalabelingservice", "DatasetSummary", reflect.TypeOf(datalabelingservice.DatasetSummary{})),
 
 	// Datascience CRD support
 	newTarget("datascience", "CreateProjectDetails", reflect.TypeOf(datascience.CreateProjectDetails{})),

@@ -89,4 +89,5 @@ resources:
 - clusterplacementgroups_v1beta1_clusterplacementgroup.yaml
 - accessgovernancecp_v1beta1_governanceinstance.yaml
 - apiplatform_v1beta1_apiplatforminstance.yaml
+- datalabelingservice_v1beta1_dataset.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
