@@ -4,6 +4,7 @@ import (
 	"path"
 	"reflect"
 
+	"github.com/oracle/oci-go-sdk/v65/adm"
 	"github.com/oracle/oci-go-sdk/v65/aidocument"
 	"github.com/oracle/oci-go-sdk/v65/ailanguage"
 	"github.com/oracle/oci-go-sdk/v65/aispeech"
@@ -361,6 +362,13 @@ var seedTargets = []Target{
 	newTarget("core", "Subnet", reflect.TypeOf(core.Subnet{})),
 	newTarget("core", "Vcn", reflect.TypeOf(core.Vcn{})),
 	newTarget("core", "InstanceSummary", reflect.TypeOf(core.InstanceSummary{})),
+
+	// Adm CRD support
+	newTarget("adm", "CreateKnowledgeBaseDetails", reflect.TypeOf(adm.CreateKnowledgeBaseDetails{})),
+	newTarget("adm", "UpdateKnowledgeBaseDetails", reflect.TypeOf(adm.UpdateKnowledgeBaseDetails{})),
+	newTarget("adm", "KnowledgeBase", reflect.TypeOf(adm.KnowledgeBase{})),
+	newTarget("adm", "KnowledgeBaseCollection", reflect.TypeOf(adm.KnowledgeBaseCollection{})),
+	newTarget("adm", "KnowledgeBaseSummary", reflect.TypeOf(adm.KnowledgeBaseSummary{})),
 
 	// Aidocument CRD support
 	newTarget("aidocument", "CreateProjectDetails", reflect.TypeOf(aidocument.CreateProjectDetails{})),

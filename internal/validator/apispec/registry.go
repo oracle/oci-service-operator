@@ -3,6 +3,7 @@ package apispec
 import (
 	"reflect"
 
+	admv1beta1 "github.com/oracle/oci-service-operator/api/adm/v1beta1"
 	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
 	ailanguagev1beta1 "github.com/oracle/oci-service-operator/api/ailanguage/v1beta1"
 	aispeechv1beta1 "github.com/oracle/oci-service-operator/api/aispeech/v1beta1"
@@ -1400,6 +1401,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "core.Vcn",
+			},
+		},
+	},
+	{
+		Name:       "AdmKnowledgeBase",
+		SpecType:   reflect.TypeOf(admv1beta1.KnowledgeBaseSpec{}),
+		StatusType: reflect.TypeOf(admv1beta1.KnowledgeBaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "adm.CreateKnowledgeBaseDetails",
+			},
+			{
+				SDKStruct: "adm.UpdateKnowledgeBaseDetails",
+			},
+			{
+				SDKStruct: "adm.KnowledgeBase",
+			},
+			{
+				SDKStruct: "adm.KnowledgeBaseCollection",
+			},
+			{
+				SDKStruct: "adm.KnowledgeBaseSummary",
 			},
 		},
 	},

@@ -181,6 +181,16 @@ type APIErrorCoverageRegistry struct {
 var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 	Registrations: mergeReviewedRegistrationSets(
 		map[string]APIErrorCoverageRegistration{
+			resourceKey("adm", "KnowledgeBase"): reviewedRegistration(
+				"adm",
+				"adm",
+				apiErrorCoverageDefaultVersion,
+				"KnowledgeBase",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"KnowledgeBase runtime persists create, update, and delete work-request IDs, recovers KnowledgeBase identity from work-request resources, and bounds pre-create reuse to exact compartmentId plus displayName matches.",
+			),
 			resourceKey("aidocument", "Project"): reviewedRegistration(
 				"aidocument",
 				"aidocument",
@@ -1142,6 +1152,76 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 		),
 	),
 	Exceptions: map[string]APIErrorCoverageException{
+		resourceKey("adm", "ApplicationDependencyRecommendation"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"ApplicationDependencyRecommendation",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "ApplicationDependencyVulnerability"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"ApplicationDependencyVulnerability",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "RemediationRecipe"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"RemediationRecipe",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "RemediationRun"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"RemediationRun",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "Stage"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"Stage",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "Vulnerability"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"Vulnerability",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "VulnerabilityAudit"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"VulnerabilityAudit",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "WorkRequest"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequest",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "WorkRequestError"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestError",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("adm", "WorkRequestLog"): reviewedException(
+			"adm",
+			"adm",
+			apiErrorCoverageDefaultVersion,
+			"WorkRequestLog",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
 		resourceKey("aidocument", "Model"): reviewedException(
 			"aidocument",
 			"aidocument",

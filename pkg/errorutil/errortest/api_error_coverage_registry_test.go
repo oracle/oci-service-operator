@@ -14,16 +14,17 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 156; got != want {
+	if got, want := len(inventory), 167; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 80; got != want {
+	if got, want := countRegistrations(inventory), 81; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 76; got != want {
+	if got, want := countExceptions(inventory), 86; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
+	assertInventorySelectionSource(t, byKey, "adm/KnowledgeBase", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "aidocument/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "ailanguage/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "aispeech/TranscriptionJob", "selection.includeKinds")
@@ -45,6 +46,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 
+	assertInventoryRegistration(t, byKey, "adm/KnowledgeBase")
+	assertInventoryException(t, byKey, "adm/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "aidocument/Project")
 	assertInventoryException(t, byKey, "aidocument/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "ailanguage/Project")
@@ -85,6 +88,7 @@ func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T)
 func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	t.Parallel()
 
+	assertReviewedFamily(t, "adm/KnowledgeBase", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "aidocument/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "ailanguage/Project", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "aispeech/TranscriptionJob", APIErrorCoverageFamilyGeneratedRuntimePlain)
@@ -118,6 +122,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
 
+	assertReviewedException(t, "adm/WorkRequest", "strategy=none")
 	assertReviewedException(t, "aidocument/WorkRequest", "strategy=none")
 	assertReviewedException(t, "ailanguage/WorkRequest", "strategy=none")
 	assertReviewedException(t, "aispeech/TranscriptionTask", "strategy=none")

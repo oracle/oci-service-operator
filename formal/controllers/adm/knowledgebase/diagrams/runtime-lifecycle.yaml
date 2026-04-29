@@ -1,0 +1,70 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: adm
+slug: knowledgebase
+kind: KnowledgeBase
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - id
+    matchRule: exact compartmentId plus displayName unique match in ACTIVE, CREATING, or UPDATING; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - displayName
+      - freeformTags
+    forceNew:
+      - compartmentId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: knowledgebase
+        action: CREATED
+    update:
+      - helper: tfresource.UpdateResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: knowledgebase
+        action: UPDATED
+    delete:
+      - helper: tfresource.DeleteResource
+      - helper: tfresource.WaitForWorkRequestWithErrorHandling
+        entityType: knowledgebase
+        action: DELETED
+  followUp:
+    create: GetWorkRequest -> GetKnowledgeBase
+    update: GetWorkRequest -> GetKnowledgeBase
+    delete: GetWorkRequest -> GetKnowledgeBase/ListKnowledgeBases confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as
+    updating, ACTIVE as success, and DELETING as terminating; FAILED is
+    terminal and DELETED is only a delete-confirmation target.
+  - Create, update, and delete responses expose work-request headers but do
+    not return a KnowledgeBase body. The runtime resumes through
+    GetWorkRequest, recovers the affected KnowledgeBase OCID from work-request
+    resources, and then rereads GetKnowledgeBase before settling.
+  - Pre-create reuse only runs when spec.displayName is present and keeps
+    exact compartmentId plus displayName matching bounded to ACTIVE, CREATING,
+    or UPDATING summaries.
+  - Only displayName, freeformTags, and definedTags reconcile in place;
+    compartmentId remains replacement-only and
+    ChangeKnowledgeBaseCompartment stays out of scope for the published
+    runtime.
+  - Delete keeps the finalizer until the work request is terminal and
+    GetKnowledgeBase or fallback ListKnowledgeBases confirms the resource is
+    gone.

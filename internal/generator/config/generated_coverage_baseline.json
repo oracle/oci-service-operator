@@ -1,18 +1,32 @@
 {
   "aggregate": {
-    "specs": 80,
-    "mappings": 336,
-    "trackedMappings": 336,
+    "specs": 81,
+    "mappings": 341,
+    "trackedMappings": 341,
     "untrackedMappings": 0,
-    "presentFields": 3895,
-    "missingFields": 30,
-    "mandatoryPresentFields": 1201,
-    "mandatoryMissingFields": 27,
-    "extraSpecFields": 415,
-    "overallCoveragePercent": 99.23566878980891,
-    "mandatoryCoveragePercent": 97.80130293159608
+    "presentFields": 3920,
+    "missingFields": 31,
+    "mandatoryPresentFields": 1218,
+    "mandatoryMissingFields": 28,
+    "extraSpecFields": 416,
+    "overallCoveragePercent": 99.21538850923817,
+    "mandatoryCoveragePercent": 97.75280898876404
   },
   "services": [
+    {
+      "service": "adm",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 25,
+      "missingFields": 1,
+      "mandatoryPresentFields": 17,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 1,
+      "overallCoveragePercent": 96.15384615384616,
+      "mandatoryCoveragePercent": 94.44444444444444
+    },
     {
       "service": "aidocument",
       "specs": 1,

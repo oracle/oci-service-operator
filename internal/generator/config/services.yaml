@@ -20,6 +20,90 @@ packageProfiles:
     description: Generated API groups that ship CRDs and samples before controller, service-manager, and registration rollout is enabled.
 
 services:
+  - service: adm
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/adm
+    group: adm
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - KnowledgeBase
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: KnowledgeBase
+          formalSpec: knowledgebase
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+        - kind: ApplicationDependencyRecommendation
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ApplicationDependencyVulnerability
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: RemediationRecipe
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: RemediationRun
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Stage
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: Vulnerability
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: VulnerabilityAudit
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: aidocument
     sdkPackage: github.com/oracle/oci-go-sdk/v65/aidocument
     group: aidocument

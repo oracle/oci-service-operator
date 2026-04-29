@@ -1,5 +1,6 @@
 service	slug	kind	stage	surface	import	spec	logic_gaps	diagram_dir
 template	template	Template	scaffold	repo-authored-semantics	imports/template/template.json	controllers/template/spec.cfg	controllers/template/logic-gaps.md	controllers/template/diagrams
+adm	knowledgebase	KnowledgeBase	seeded	repo-authored-semantics	imports/adm/knowledgebase.json	controllers/adm/knowledgebase/spec.cfg	controllers/adm/knowledgebase/logic-gaps.md	controllers/adm/knowledgebase/diagrams
 aidocument	project	Project	seeded	repo-authored-semantics	imports/aidocument/project.json	controllers/aidocument/project/spec.cfg	controllers/aidocument/project/logic-gaps.md	controllers/aidocument/project/diagrams
 ailanguage	project	Project	seeded	repo-authored-semantics	imports/ailanguage/project.json	controllers/ailanguage/project/spec.cfg	controllers/ailanguage/project/logic-gaps.md	controllers/ailanguage/project/diagrams
 aispeech	transcriptionjob	TranscriptionJob	seeded	repo-authored-semantics	imports/aispeech/transcriptionjob.json	controllers/aispeech/transcriptionjob/spec.cfg	controllers/aispeech/transcriptionjob/logic-gaps.md	controllers/aispeech/transcriptionjob/diagrams
