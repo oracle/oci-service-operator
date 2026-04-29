@@ -83,37 +83,6 @@ packages:
         kind: ApiGatewayDeployment
         summary: Manage OCI API Gateway deployment routes and backend bindings.
 
-  - package: artifacts
-    displayName: Artifacts
-    summary: Manage OCI Artifact Registry repositories, container repositories, and image signatures from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: artifacts
-        kind: ContainerImageSignature
-        summary: Manage OCI container image signatures.
-      - group: artifacts
-        kind: ContainerRepository
-        summary: Manage OCI container repositories.
-      - group: artifacts
-        kind: Repository
-        summary: Manage OCI generic artifact repositories.
-
-  - package: bastion
-    displayName: Bastion
-    summary: Manage OCI Bastion bastions and sessions from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: bastion
-        kind: Bastion
-        summary: Manage OCI Bastion bastion resources.
-      - group: bastion
-        kind: Session
-        summary: Manage OCI Bastion sessions.
-
   - package: bds
     displayName: Big Data Service
     summary: Manage OCI Big Data Service instances from Kubernetes with an initial controller-backed BdsInstance rollout.
@@ -127,16 +96,18 @@ packages:
         kind: BdsInstance
         summary: Manage OCI Big Data Service instances.
 
-  - package: certificatesmanagement
-    displayName: Certificates Management
-    summary: Manage OCI Certificates Management CA bundles from Kubernetes.
+  - package: budget
+    displayName: Budget
+    summary: Manage OCI Budgets from Kubernetes with an initial controller-backed Budget rollout.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Budget while the remaining Budget resource families stay unpublished.
     kindOverrides:
-      - group: certificatesmanagement
-        kind: CaBundle
-        summary: Manage OCI CA bundle resources.
+      - group: budget
+        kind: Budget
+        summary: Manage OCI Budgets.
 
   - package: containerengine
     displayName: Container Engine for Kubernetes
@@ -233,72 +204,12 @@ packages:
         kind: Project
         summary: Manage OCI Data Science projects.
 
-  - package: devops
-    displayName: DevOps
-    summary: Manage OCI DevOps projects, repositories, pipelines, artifacts, and triggers from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: devops
-        kind: BuildPipeline
-        summary: Manage OCI DevOps build pipelines.
-      - group: devops
-        kind: DeployArtifact
-        summary: Manage OCI DevOps deploy artifacts.
-      - group: devops
-        kind: DeployPipeline
-        summary: Manage OCI DevOps deploy pipelines.
-      - group: devops
-        kind: Project
-        summary: Manage OCI DevOps projects.
-      - group: devops
-        kind: Repository
-        summary: Manage OCI DevOps repositories.
-      - group: devops
-        kind: Trigger
-        summary: Manage OCI DevOps triggers.
-
-  - package: dns
-    displayName: DNS
-    summary: Manage OCI DNS zones, views, TSIG keys, steering policies, and attachments from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: dns
-        kind: SteeringPolicy
-        summary: Manage OCI DNS steering policies.
-      - group: dns
-        kind: SteeringPolicyAttachment
-        summary: Manage OCI DNS steering policy attachments.
-      - group: dns
-        kind: TsigKey
-        summary: Manage OCI DNS TSIG keys.
-      - group: dns
-        kind: View
-        summary: Manage OCI DNS views.
-      - group: dns
-        kind: Zone
-        summary: Manage OCI DNS zones.
-
   - package: email
     displayName: Email
     summary: Manage OCI Email Delivery resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
-
-  - package: events
-    displayName: Events
-    summary: Manage OCI Events rules from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: events
-        kind: Rule
-        summary: Manage OCI Events rules.
 
   - package: functions
     displayName: Functions
@@ -321,27 +232,6 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
-  - package: governancerulescontrolplane
-    displayName: Governance Rules Control Plane
-    summary: Manage OCI Governance Rules Control Plane resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: healthchecks
-    displayName: Health Checks
-    summary: Manage OCI Health Checks HTTP and ping monitors from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: healthchecks
-        kind: HttpMonitor
-        summary: Manage OCI Health Checks HTTP monitors.
-      - group: healthchecks
-        kind: PingMonitor
-        summary: Manage OCI Health Checks ping monitors.
-
   - package: identity
     displayName: Identity
     summary: Manage OCI Identity compartments from Kubernetes.
@@ -355,82 +245,22 @@ packages:
         kind: Compartment
         summary: Manage OCI IAM compartments.
 
-  - package: integration
-    displayName: Integration
-    summary: Manage OCI Integration instances from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: integration
-        kind: IntegrationInstance
-        summary: Manage OCI Integration instances.
-
-  - package: iot
-    displayName: IoT
-    summary: Manage OCI IoT resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
   - package: keymanagement
     displayName: Key Management
-    summary: Manage OCI Key Management vaults and EKMS private endpoints from Kubernetes.
+    summary: Manage OCI Vault resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
     packageNotes:
-      - Current package scope includes Vault and EkmsPrivateEndpoint.
+      - Current package scope is intentionally limited to Vault while the remaining keymanagement kinds stay out of the generatedruntime rollout.
     kindOverrides:
-      - group: keymanagement
-        kind: EkmsPrivateEndpoint
-        summary: Manage OCI EKMS private endpoints.
       - group: keymanagement
         kind: Vault
         summary: Manage OCI Vault resources and their scheduled deletion lifecycle.
 
-  - package: licensemanager
-    displayName: License Manager
-    summary: Manage OCI License Manager resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: limits
-    displayName: Limits
-    summary: Manage OCI Limits quotas from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: limits
-        kind: Quota
-        summary: Manage OCI Limits quotas.
-
-  - package: limitsincrease
-    displayName: Limits Increase
-    summary: Manage OCI Limits Increase resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
   - package: loadbalancer
     displayName: Load Balancer
     summary: Manage OCI Load Balancer resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: lockbox
-    displayName: Lockbox
-    summary: Manage OCI Lockbox resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: loganalytics
-    displayName: Log Analytics
-    summary: Manage OCI Log Analytics resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
@@ -442,51 +272,9 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
-  - package: managedkafka
-    displayName: Managed Kafka
-    summary: Manage OCI Managed Kafka clusters and cluster configurations from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: managedkafka
-        kind: KafkaCluster
-        summary: Manage OCI Managed Kafka clusters.
-      - group: managedkafka
-        kind: KafkaClusterConfig
-        summary: Manage OCI Managed Kafka cluster configurations.
-
-  - package: managementagent
-    displayName: Management Agent
-    summary: Manage OCI Management Agent resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: managementdashboard
-    displayName: Management Dashboard
-    summary: Manage OCI Management Dashboard resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
   - package: marketplace
     displayName: Marketplace
     summary: Manage OCI Marketplace resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: marketplaceprivateoffer
-    displayName: Marketplace Private Offer
-    summary: Manage OCI Marketplace Private Offer resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: marketplacepublisher
-    displayName: Marketplace Publisher
-    summary: Manage OCI Marketplace Publisher resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
@@ -508,26 +296,6 @@ packages:
       - group: mysql
         kind: DbSystem
         summary: Manage OCI MySQL DB Systems.
-
-  - package: networkloadbalancer
-    displayName: Network Load Balancer
-    summary: Manage OCI Network Load Balancer resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: networkloadbalancer
-        kind: Backend
-        summary: Manage OCI Network Load Balancer backends.
-      - group: networkloadbalancer
-        kind: BackendSet
-        summary: Manage OCI Network Load Balancer backend sets.
-      - group: networkloadbalancer
-        kind: Listener
-        summary: Manage OCI Network Load Balancer listeners.
-      - group: networkloadbalancer
-        kind: NetworkLoadBalancer
-        summary: Manage OCI Network Load Balancers.
 
   - package: nosql
     displayName: NoSQL
@@ -570,20 +338,6 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
-  - package: ons
-    displayName: Notifications
-    summary: Manage OCI Notifications topics and subscriptions from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: ons
-        kind: Subscription
-        summary: Manage OCI Notifications subscriptions.
-      - group: ons
-        kind: Topic
-        summary: Manage OCI Notifications topics.
-
   - package: opensearch
     displayName: OpenSearch
     summary: Manage OCI OpenSearch clusters from Kubernetes.
@@ -596,34 +350,6 @@ packages:
       - group: opensearch
         kind: OpensearchCluster
         summary: Manage OCI OpenSearch clusters.
-
-  - package: operatoraccesscontrol
-    displayName: Operator Access Control
-    summary: Manage OCI Operator Access Control resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: opsi
-    displayName: Operations Insights
-    summary: Manage OCI Operations Insights resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: optimizer
-    displayName: Optimizer
-    summary: Manage OCI Optimizer resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: osmanagementhub
-    displayName: OS Management Hub
-    summary: Manage OCI OS Management Hub resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
 
   - package: psql
     displayName: PostgreSQL
@@ -650,13 +376,6 @@ packages:
         kind: Queue
         summary: Manage OCI Queue service queues.
 
-  - package: recovery
-    displayName: Recovery
-    summary: Manage OCI Recovery resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
   - package: redis
     displayName: Redis
     summary: Manage OCI Redis clusters from Kubernetes.
@@ -670,59 +389,6 @@ packages:
       - group: redis
         kind: RedisCluster
         summary: Manage OCI Redis clusters.
-
-  - package: resourceanalytics
-    displayName: Resource Analytics
-    summary: Manage OCI Resource Analytics resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: resourcescheduler
-    displayName: Resource Scheduler
-    summary: Manage OCI Resource Scheduler resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: sch
-    displayName: Service Connector Hub
-    summary: Manage OCI Service Connector Hub service connectors from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: sch
-        kind: ServiceConnector
-        summary: Manage OCI Service Connector Hub service connectors.
-
-  - package: securityattribute
-    displayName: Security Attribute
-    summary: Manage OCI Security Attribute resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: servicecatalog
-    displayName: Service Catalog
-    summary: Manage OCI Service Catalog catalogs and private applications from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-    kindOverrides:
-      - group: servicecatalog
-        kind: PrivateApplication
-        summary: Manage OCI Service Catalog private applications.
-      - group: servicecatalog
-        kind: ServiceCatalog
-        summary: Manage OCI Service Catalog resources.
-
-  - package: stackmonitoring
-    displayName: Stack Monitoring
-    summary: Manage OCI Stack Monitoring resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
 
   - package: streaming
     displayName: Streaming
@@ -740,27 +406,6 @@ packages:
   - package: usageapi
     displayName: Usage API
     summary: Manage OCI Usage API resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: waa
-    displayName: Web App Acceleration
-    summary: Manage OCI Web App Acceleration resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: waas
-    displayName: Web Application Acceleration and Security
-    summary: Manage OCI Web Application Acceleration and Security resources from Kubernetes.
-    supportStatus: preview
-    customerVisible: false
-    guidePath: docs/installation.md
-
-  - package: waf
-    displayName: Web Application Firewall
-    summary: Manage OCI Web Application Firewall resources from Kubernetes.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md

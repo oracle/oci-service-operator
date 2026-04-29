@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "budget",
+  "slug": "budget",
+  "kind": "Budget",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_budget_budget",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateBudget",
+        "requestType": "budget.CreateBudgetRequest",
+        "responseType": "budget.CreateBudgetResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetBudget",
+        "requestType": "budget.GetBudgetRequest",
+        "responseType": "budget.GetBudgetResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListBudgets",
+        "requestType": "budget.ListBudgetsRequest",
+        "responseType": "budget.ListBudgetsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateBudget",
+        "requestType": "budget.UpdateBudgetRequest",
+        "responseType": "budget.UpdateBudgetResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteBudget",
+        "requestType": "budget.DeleteBudgetRequest",
+        "responseType": "budget.DeleteBudgetResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "display_name"
+    ],
+    "forceNew": [
+      "compartment_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_budget_budgets",
+    "collectionField": "budget",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/budget/budget/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/budget/budget/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Reviewed budget/budget row keeps repo-authored lifecycle classification: create and update settle in ACTIVE or INACTIVE with no published in-flight lifecycle states.",
+    "Delete confirmation is repo-authored: generatedruntime retains the finalizer until confirm-delete rereads report NotFound."
+  ]
+}

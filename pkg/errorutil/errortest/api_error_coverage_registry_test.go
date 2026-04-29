@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 271; got != want {
+	if got, want := len(inventory), 156; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 199; got != want {
+	if got, want := countRegistrations(inventory), 80; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 72; got != want {
+	if got, want := countExceptions(inventory), 76; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -30,6 +30,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "aivision/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "analytics/AnalyticsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "bds/BdsInstance", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "budget/Budget", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
@@ -43,7 +44,6 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "oda/Skill", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
-	assertInventorySelectionSource(t, byKey, "waf/WebAppFirewall", "selection.includeKinds")
 
 	assertInventoryRegistration(t, byKey, "aidocument/Project")
 	assertInventoryException(t, byKey, "aidocument/WorkRequest", `controller.strategy="none"`)
@@ -57,6 +57,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "analytics/PrivateAccessChannel", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "bds/BdsInstance")
 	assertInventoryException(t, byKey, "bds/WorkRequest", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "budget/Budget")
+	assertInventoryException(t, byKey, "budget/AlertRule", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "databasetools/DatabaseToolsConnection")
 	assertInventoryException(t, byKey, "databasetools/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "datascience/Project")
@@ -66,15 +68,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "loadbalancer/LoadBalancer")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
-	assertInventoryRegistration(t, byKey, "governancerulescontrolplane/InclusionCriterion")
-	assertInventoryRegistration(t, byKey, "marketplaceprivateoffer/Attachment")
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
 	assertInventoryRegistration(t, byKey, "oda/Skill")
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
-	assertInventoryRegistration(t, byKey, "resourceanalytics/MonitoredRegion")
-	assertInventoryRegistration(t, byKey, "stackmonitoring/DiscoveryJob")
 	assertInventoryRegistration(t, byKey, "usageapi/Query")
-	assertInventoryRegistration(t, byKey, "waf/WebAppFirewall")
 }
 
 func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T) {
@@ -94,6 +91,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "aivision/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "budget/Budget", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerengine/Cluster", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
@@ -119,7 +117,6 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "redis/RedisCluster", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
-	assertReviewedFamily(t, "waf/WebAppFirewall", APIErrorCoverageFamilyGeneratedRuntimePlain)
 
 	assertReviewedException(t, "aidocument/WorkRequest", "strategy=none")
 	assertReviewedException(t, "ailanguage/WorkRequest", "strategy=none")
@@ -127,6 +124,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "aivision/WorkRequest", "strategy=none")
 	assertReviewedException(t, "analytics/WorkRequest", "strategy=none")
 	assertReviewedException(t, "bds/WorkRequest", "strategy=none")
+	assertReviewedException(t, "budget/AlertRule", "strategy=none")
 	assertReviewedException(t, "databasetools/WorkRequest", "strategy=none")
 	assertReviewedException(t, "datascience/WorkRequest", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")

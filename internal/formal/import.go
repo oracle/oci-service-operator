@@ -232,7 +232,11 @@ func Import(opts ImportOptions) (ImportReport, error) {
 			updated.Mutation = facts.Mutation
 		}
 		updated.Hooks = facts.Hooks
-		updated.DeleteConfirmation = facts.DeleteConfirmation
+		if excludedSemantics.has("delete-confirmation") {
+			updated.DeleteConfirmation = currentDoc.DeleteConfirmation
+		} else {
+			updated.DeleteConfirmation = facts.DeleteConfirmation
+		}
 		if excludedSemantics.has("list-lookup") {
 			updated.Operations.List = currentDoc.Operations.List
 			updated.ListLookup = currentDoc.ListLookup

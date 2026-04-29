@@ -1,0 +1,20 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: budget
+slug: budget
+kind: Budget
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  followUp:
+    delete: confirm-delete
+notes:
+  - Budget exposes only steady OCI lifecycle states ACTIVE and INACTIVE. The
+    published runtime does not model provisioning or updating phases for
+    create/update.
+  - Delete keeps the finalizer until DeleteBudget succeeds and confirm-delete
+    rereads return NotFound.
+  - The published Budget kind keeps generated controller and service-manager
+    wiring with no handwritten runtime override.
