@@ -53,6 +53,13 @@ type BackendSpec struct {
 	// Example: `false`
 	// +kubebuilder:validation:Optional
 	IsOffline bool `json:"isOffline,omitempty"`
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network load balancer associated with the backend set and server.
+	// +kubebuilder:validation:Required
+	NetworkLoadBalancerId string `json:"networkLoadBalancerId"`
+	// The name of the backend set associated with the backend server.
+	// Example: `example_backend_set`
+	// +kubebuilder:validation:Required
+	BackendSetName string `json:"backendSetName"`
 }
 
 // BackendStatus defines the observed state of Backend.
@@ -89,6 +96,10 @@ type BackendStatus struct {
 	// traffic.
 	// Example: `false`
 	IsOffline bool `json:"isOffline,omitempty"`
+	// The bound network load balancer OCID used to address this backend.
+	NetworkLoadBalancerId string `json:"networkLoadBalancerId,omitempty"`
+	// The bound backend set name used to address this backend.
+	BackendSetName string `json:"backendSetName,omitempty"`
 }
 
 // +kubebuilder:object:root=true

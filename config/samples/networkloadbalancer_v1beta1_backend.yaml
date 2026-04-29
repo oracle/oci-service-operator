@@ -7,4 +7,12 @@ apiVersion: networkloadbalancer.oracle.com/v1beta1
 kind: Backend
 metadata:
   name: backend-sample
-spec: {}
+spec:
+  networkLoadBalancerId: ocid1.networkloadbalancer.oc1..<unique_ID>
+  backendSetName: example_backend_set
+  ipAddress: "10.0.0.3"
+  port: 8080
+  weight: 1
+  isBackup: false
+  isDrain: false
+  isOffline: false

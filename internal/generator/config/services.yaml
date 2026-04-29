@@ -2291,6 +2291,50 @@ services:
         strategy: generated
       webhooks:
         strategy: none
+      resources:
+        - kind: Backend
+          specFields:
+            - name: NetworkLoadBalancerId
+              type: string
+              tag: 'json:"networkLoadBalancerId"'
+              comments:
+                - "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network load balancer associated with the backend set and server."
+              markers:
+                - +kubebuilder:validation:Required
+            - name: BackendSetName
+              type: string
+              tag: 'json:"backendSetName"'
+              comments:
+                - "The name of the backend set associated with the backend server."
+                - "Example: `example_backend_set`"
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: NetworkLoadBalancerId
+              type: string
+              tag: 'json:"networkLoadBalancerId,omitempty"'
+              comments:
+                - The bound network load balancer OCID used to address this backend.
+            - name: BackendSetName
+              type: string
+              tag: 'json:"backendSetName,omitempty"'
+              comments:
+                - The bound backend set name used to address this backend.
+          sample:
+            body: |-
+              apiVersion: networkloadbalancer.oracle.com/v1beta1
+              kind: Backend
+              metadata:
+                name: backend-sample
+              spec:
+                networkLoadBalancerId: ocid1.networkloadbalancer.oc1..<unique_ID>
+                backendSetName: example_backend_set
+                ipAddress: "10.0.0.3"
+                port: 8080
+                weight: 1
+                isBackup: false
+                isDrain: false
+                isOffline: false
     observedState:
       sdkAliases:
         WorkRequestLog:

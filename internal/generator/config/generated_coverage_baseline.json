@@ -8,7 +8,7 @@
     "missingFields": 44,
     "mandatoryPresentFields": 1729,
     "mandatoryMissingFields": 41,
-    "extraSpecFields": 507,
+    "extraSpecFields": 515,
     "overallCoveragePercent": 99.15123456790124,
     "mandatoryCoveragePercent": 97.68361581920904
   },
@@ -485,7 +485,7 @@
       "missingFields": 0,
       "mandatoryPresentFields": 47,
       "mandatoryMissingFields": 0,
-      "extraSpecFields": 15,
+      "extraSpecFields": 23,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
     },

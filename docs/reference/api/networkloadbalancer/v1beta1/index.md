@@ -41,11 +41,13 @@ BackendSpec defines the desired state of Backend.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendSetName` | The name of the backend set associated with the backend server. Example: `example_backend_set` | `string` | Yes | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | No | - | - |
 | `isBackup` | Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy. Example: `false` | `boolean` | No | - | - |
 | `isDrain` | Whether the network load balancer should drain this server. Servers marked "isDrain" stop receiving new connections but will continue to receive traffic on existing connections until the connection is terminated. Example: `false` | `boolean` | No | - | - |
 | `isOffline` | Whether the network load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `name` | Optional unique name identifying the backend within the backend set. If not specified, then one will be generated. Example: `webServer1` | `string` | No | - | - |
+| `networkLoadBalancerId` | The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the network load balancer associated with the backend set and server. | `string` | Yes | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | Yes | - | - |
 | `targetId` | The IP OCID/Instance OCID associated with the backend server. Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>` | `string` | No | - | - |
 | `weight` | The network load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger proportion of incoming traffic. For example, a server weighted '3' receives three times the number of new connections as a server weighted '1'. For more information about network load balancer policies, see Network Load Balancer Policies (https://docs.oracle.com/iaas/Content/NetworkLoadBalancer/introduction.htm#Policies). Example: `3` | `integer` | No | - | - |
@@ -57,11 +59,13 @@ BackendStatus defines the observed state of Backend.
 
 | Field | Description | Type | Required | Default | Enum |
 | --- | --- | --- | --- | --- | --- |
+| `backendSetName` | The bound backend set name used to address this backend. | `string` | No | - | - |
 | `ipAddress` | The IP address of the backend server. Example: `10.0.0.3` | `string` | No | - | - |
 | `isBackup` | Whether the network load balancer should treat this server as a backup unit. If `true`, then the network load balancer forwards no ingress traffic to this backend server unless all other backend servers not marked as "isBackup" fail the health check policy. Example: `false` | `boolean` | No | - | - |
 | `isDrain` | Whether the network load balancer should drain this server. Servers marked "isDrain" stop receiving new connections but will continue to receive traffic on existing connections until the connection is terminated or times out. Example: `false` | `boolean` | No | - | - |
 | `isOffline` | Whether the network load balancer should treat this server as offline. Offline servers receive no incoming traffic. Example: `false` | `boolean` | No | - | - |
 | `name` | A read-only field showing the IP address/IP OCID and port that uniquely identify this backend server in the backend set. Example: `10.0.0.3:8080`, or `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>:443` or `10.0.0.3:0` | `string` | No | - | - |
+| `networkLoadBalancerId` | The bound network load balancer OCID used to address this backend. | `string` | No | - | - |
 | `port` | The communication port for the backend server. Example: `8080` | `integer` | No | - | - |
 | [`status`](#kind-backend-status-status) | - | `object` | Yes | - | - |
 | `targetId` | The IP OCID/Instance OCID associated with the backend server. Example: `ocid1.privateip..oc1.<var>&lt;unique_ID&gt;</var>` | `string` | No | - | - |
