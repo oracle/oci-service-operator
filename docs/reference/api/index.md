@@ -8,6 +8,7 @@ This landing page is generated from the checked-in package and release inventory
 
 | API version | Resources | Packages |
 | --- | --- | --- |
+| [adm.oracle.com/v1beta1](adm/v1beta1/index.md) | [KnowledgeBase](adm/v1beta1/index.md#kind-knowledgebase) | - |
 | [aidocument.oracle.com/v1beta1](aidocument/v1beta1/index.md) | [Project](aidocument/v1beta1/index.md#kind-project) | - |
 | [ailanguage.oracle.com/v1beta1](ailanguage/v1beta1/index.md) | [Project](ailanguage/v1beta1/index.md#kind-project) | - |
 | [aispeech.oracle.com/v1beta1](aispeech/v1beta1/index.md) | [TranscriptionJob](aispeech/v1beta1/index.md#kind-transcriptionjob) | - |

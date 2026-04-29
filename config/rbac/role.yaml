@@ -24,6 +24,32 @@ rules:
   - update
   - watch
 - apiGroups:
+  - adm.oracle.com
+  resources:
+  - knowledgebases
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - adm.oracle.com
+  resources:
+  - knowledgebases/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - adm.oracle.com
+  resources:
+  - knowledgebases/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - aidocument.oracle.com
   - ailanguage.oracle.com
   - aivision.oracle.com

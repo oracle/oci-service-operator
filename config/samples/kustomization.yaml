@@ -85,4 +85,5 @@ resources:
 - usageapi_v1beta1_usagecarbonemissionsquery.yaml
 - aispeech_v1beta1_transcriptionjob.yaml
 - budget_v1beta1_budget.yaml
+- adm_v1beta1_knowledgebase.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

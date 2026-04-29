@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "adm",
+  "kind": "KnowledgeBase",
+  "formalSlug": "knowledgebase",
+  "providerResource": "oci_adm_knowledge_base",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/adm_knowledge_base",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/adm_knowledge_base",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/adm/knowledgebase/page.html",
+  "bodySHA256": "ece9115d6a5f294c4b9ed0767cc01d5817f083d6b38bc406929ee2232b17045d",
+  "bodyBytes": 729,
+  "fixtureBodyPath": "7.22.0/adm/knowledgebase/page.html"
+}

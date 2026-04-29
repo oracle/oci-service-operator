@@ -2,6 +2,19 @@
 # or release history alone.
 schemaVersion: v1alpha1
 packages:
+  - package: adm
+    displayName: Application Dependency Management
+    summary: Manage OCI Application Dependency Management knowledge bases from Kubernetes with an initial controller-backed KnowledgeBase rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to KnowledgeBase while the remaining ADM resource families stay unpublished.
+    kindOverrides:
+      - group: adm
+        kind: KnowledgeBase
+        summary: Manage OCI Application Dependency Management knowledge bases.
+
   - package: aidocument
     displayName: AI Document
     summary: Manage OCI AI Document projects from Kubernetes with an initial controller-backed Project rollout.

@@ -1130,6 +1130,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 
 	activeServices := serviceNames(cfg.DefaultActiveServices())
 	wantActiveServices := []string{
+		"adm",
 		"aidocument",
 		"ailanguage",
 		"aispeech",
@@ -1172,6 +1173,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	services := requireServices(
 		t,
 		cfg,
+		"adm",
 		"aidocument",
 		"ailanguage",
 		"aispeech",
@@ -1904,6 +1906,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		strategy string
 		runtime  string
 	}{
+		"adm":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"aidocument":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"ailanguage":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"aispeech":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
