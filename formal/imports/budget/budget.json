@@ -99,7 +99,7 @@
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
-      "state"
+      "display_name"
     ]
   },
   "boundary": {
@@ -110,11 +110,13 @@
       "bind-versus-create",
       "delete-confirmation",
       "lifecycle-classification",
+      "list-lookup",
       "secret-output"
     ]
   },
   "notes": [
     "Reviewed budget/budget row keeps repo-authored lifecycle classification: create and update settle in ACTIVE or INACTIVE with no published in-flight lifecycle states.",
-    "Delete confirmation is repo-authored: generatedruntime retains the finalizer until confirm-delete rereads report NotFound."
+    "Delete confirmation is repo-authored: generatedruntime retains the finalizer until confirm-delete rereads report NotFound.",
+    "Pre-create reuse is repo-authored: the controller only attempts existing-before-create lookup when spec.displayName is present, and duplicate compartmentId plus displayName matches fail instead of binding arbitrarily."
   ]
 }

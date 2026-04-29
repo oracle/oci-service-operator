@@ -75,13 +75,18 @@ reject before mutate: force-new fields
 compartment_id
 create-only fields: none
 list lookup: oci_budget_budgets filters
-compartment_id, state
+compartment_id, display_name
 conflicts: none
 open gaps: none
 Budget exposes only steady OCI lifecycle states
 ACTIVE and INACTIVE. The published runtime does
 not model provisioning or updating phases for
 create/update.
+Pre-create reuse only runs when spec.displayName
+is present. Generic reuse matches exact
+compartmentId plus displayName, and duplicate
+matches fail instead of binding an arbitrary
+existing budget.
 Delete keeps the finalizer until DeleteBudget
 succeeds and confirm-delete rereads return
 NotFound.

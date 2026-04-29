@@ -74,7 +74,7 @@ func newBudgetRuntimeSemantics() *generatedruntime.Semantics {
 		},
 		List: &generatedruntime.ListSemantics{
 			ResponseItemsField: "Items",
-			MatchFields:        []string{"compartmentId", "state"},
+			MatchFields:        []string{"compartmentId", "displayName"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
 			Mutable:       []string{"displayName"},

@@ -3,6 +3,9 @@ package budget
 import (
 	"slices"
 	"testing"
+
+	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
+	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 )
 
 func TestBudgetGeneratedRuntimeSemanticsMatchReviewedFormalContract(t *testing.T) {
@@ -38,6 +41,12 @@ func TestBudgetGeneratedRuntimeSemanticsMatchReviewedFormalContract(t *testing.T
 	if !slices.Equal(semantics.Delete.TerminalStates, []string{"NOT_FOUND"}) {
 		t.Fatalf("Budget delete terminal states = %v, want [NOT_FOUND]", semantics.Delete.TerminalStates)
 	}
+	if semantics.List == nil {
+		t.Fatal("Budget list semantics = nil, want explicit pre-create lookup match fields")
+	}
+	if !slices.Equal(semantics.List.MatchFields, []string{"compartmentId", "displayName"}) {
+		t.Fatalf("Budget list match fields = %v, want [compartmentId displayName]", semantics.List.MatchFields)
+	}
 	if semantics.CreateFollowUp.Strategy != "read-after-write" {
 		t.Fatalf("Budget create follow-up = %q, want %q", semantics.CreateFollowUp.Strategy, "read-after-write")
 	}
@@ -46,5 +55,33 @@ func TestBudgetGeneratedRuntimeSemanticsMatchReviewedFormalContract(t *testing.T
 	}
 	if semantics.DeleteFollowUp.Strategy != "confirm-delete" {
 		t.Fatalf("Budget delete follow-up = %q, want %q", semantics.DeleteFollowUp.Strategy, "confirm-delete")
+	}
+}
+
+func TestGuardBudgetExistingBeforeCreateSkipsReuseWithoutDisplayName(t *testing.T) {
+	resource := &budgetv1beta1.Budget{}
+	decision, err := guardBudgetExistingBeforeCreate(nil, resource)
+	if err != nil {
+		t.Fatalf("guardBudgetExistingBeforeCreate(empty displayName) error = %v", err)
+	}
+	if decision != generatedruntime.ExistingBeforeCreateDecisionSkip {
+		t.Fatalf(
+			"guardBudgetExistingBeforeCreate(empty displayName) = %q, want %q",
+			decision,
+			generatedruntime.ExistingBeforeCreateDecisionSkip,
+		)
+	}
+
+	resource.Spec.DisplayName = "budget-a"
+	decision, err = guardBudgetExistingBeforeCreate(nil, resource)
+	if err != nil {
+		t.Fatalf("guardBudgetExistingBeforeCreate(named budget) error = %v", err)
+	}
+	if decision != generatedruntime.ExistingBeforeCreateDecisionAllow {
+		t.Fatalf(
+			"guardBudgetExistingBeforeCreate(named budget) = %q, want %q",
+			decision,
+			generatedruntime.ExistingBeforeCreateDecisionAllow,
+		)
 	}
 }

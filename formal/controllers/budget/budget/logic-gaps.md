@@ -22,6 +22,11 @@ contract.
   operations and only lifecycle states `ACTIVE` and `INACTIVE`. The reviewed
   runtime treats both as steady success states, publishes no provisioning or
   updating lifecycle buckets, and keeps `async.strategy=none`.
+- Pre-create reuse is bounded: when `spec.displayName` is empty the controller
+  skips existing-before-create lookup and always creates a fresh Budget. When a
+  display name is present, reuse only considers exact `compartmentId` plus
+  `displayName` matches, and duplicate matches fail instead of adopting an
+  arbitrary existing budget.
 - Delete confirmation stays explicit but synchronous: the generated runtime
   retains the finalizer after `DeleteBudget` until confirm-delete rereads stop
   finding the resource. The row does not model service-local delete lifecycle

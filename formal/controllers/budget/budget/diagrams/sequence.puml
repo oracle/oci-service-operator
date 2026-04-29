@@ -38,7 +38,7 @@ group Lookup and bind
 alt tracked or explicit OCI identity already exists
 ServiceManager -> OCI: GetBudget
 else tracked identity is missing
-ServiceManager -> OCI: ListBudgets(filters: compartment_id,\nstate)
+ServiceManager -> OCI: ListBudgets(filters: compartment_id,\ndisplay_name)
 alt reusable OCI resource is not found
 ServiceManager -> OCI: CreateBudget
 else reusable OCI resource already exists
@@ -62,7 +62,8 @@ note over ServiceManager,OCI
 Supported update surface: display_name
 Reject before mutate: force-new fields
 compartment_id
-Lookup filters: compartment_id, state
+Lookup filters: compartment_id,
+display_name
 end note
 opt force-new or conflicting drift is detected
 ServiceManager --> BaseReconciler: reject before OCI mutation
@@ -106,13 +107,18 @@ reject before mutate: force-new fields
 compartment_id
 create-only fields: none
 list lookup: oci_budget_budgets filters
-compartment_id, state
+compartment_id, display_name
 conflicts: none
 open gaps: none
 Budget exposes only steady OCI lifecycle states
 ACTIVE and INACTIVE. The published runtime does
 not model provisioning or updating phases for
 create/update.
+Pre-create reuse only runs when spec.displayName
+is present. Generic reuse matches exact
+compartmentId plus displayName, and duplicate
+matches fail instead of binding an arbitrary
+existing budget.
 Delete keeps the finalizer until DeleteBudget
 succeeds and confirm-delete rereads return
 NotFound.
