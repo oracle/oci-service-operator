@@ -597,6 +597,61 @@ services:
       webhooks:
         strategy: none
 
+  - service: clusterplacementgroups
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/clusterplacementgroups
+    group: clusterplacementgroups
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ClusterPlacementGroup
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ClusterPlacementGroup
+          formalSpec: clusterplacementgroup
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          serviceManager:
+            packagePath: clusterplacementgroups/clusterplacementgroup
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+    observedState:
+      sdkAliases:
+        WorkRequestLog:
+          - WorkRequestLogEntry
+
   - service: containerengine
     sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
     group: containerengine

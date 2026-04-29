@@ -86,4 +86,5 @@ resources:
 - aispeech_v1beta1_transcriptionjob.yaml
 - budget_v1beta1_budget.yaml
 - adm_v1beta1_knowledgebase.yaml
+- clusterplacementgroups_v1beta1_clusterplacementgroup.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

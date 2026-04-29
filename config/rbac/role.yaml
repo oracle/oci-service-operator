@@ -218,6 +218,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - clusterplacementgroups.oracle.com
+  resources:
+  - clusterplacementgroups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - clusterplacementgroups.oracle.com
+  resources:
+  - clusterplacementgroups/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - clusterplacementgroups.oracle.com
+  resources:
+  - clusterplacementgroups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - containerengine.oracle.com
   resources:
   - clusters

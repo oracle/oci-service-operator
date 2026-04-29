@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "clusterplacementgroups",
+  "slug": "clusterplacementgroup",
+  "kind": "ClusterPlacementGroup",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_cluster_placement_groups_cluster_placement_group",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateClusterPlacementGroup",
+        "requestType": "clusterplacementgroups.CreateClusterPlacementGroupRequest",
+        "responseType": "clusterplacementgroups.CreateClusterPlacementGroupResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetClusterPlacementGroup",
+        "requestType": "clusterplacementgroups.GetClusterPlacementGroupRequest",
+        "responseType": "clusterplacementgroups.GetClusterPlacementGroupResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListClusterPlacementGroups",
+        "requestType": "clusterplacementgroups.ListClusterPlacementGroupsRequest",
+        "responseType": "clusterplacementgroups.ListClusterPlacementGroupsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ActivateClusterPlacementGroup",
+        "requestType": "clusterplacementgroups.ActivateClusterPlacementGroupRequest",
+        "responseType": "clusterplacementgroups.ActivateClusterPlacementGroupResponse"
+      },
+      {
+        "operation": "ChangeClusterPlacementGroupCompartment",
+        "requestType": "clusterplacementgroups.ChangeClusterPlacementGroupCompartmentRequest",
+        "responseType": "clusterplacementgroups.ChangeClusterPlacementGroupCompartmentResponse"
+      },
+      {
+        "operation": "DeactivateClusterPlacementGroup",
+        "requestType": "clusterplacementgroups.DeactivateClusterPlacementGroupRequest",
+        "responseType": "clusterplacementgroups.DeactivateClusterPlacementGroupResponse"
+      },
+      {
+        "operation": "UpdateClusterPlacementGroup",
+        "requestType": "clusterplacementgroups.UpdateClusterPlacementGroupRequest",
+        "responseType": "clusterplacementgroups.UpdateClusterPlacementGroupResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteClusterPlacementGroup",
+        "requestType": "clusterplacementgroups.DeleteClusterPlacementGroupRequest",
+        "responseType": "clusterplacementgroups.DeleteClusterPlacementGroupResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "capabilities",
+      "cluster_placement_group_type",
+      "compartment_id",
+      "name",
+      "placement_instruction"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "clusterplacementgroup",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "clusterplacementgroup",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "clusterplacementgroup",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_cluster_placement_groups_cluster_placement_groups",
+    "collectionField": "cluster_placement_group_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "ad",
+      "compartment_id",
+      "id",
+      "lifecycle_state",
+      "name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/clusterplacementgroups/clusterplacementgroup/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/clusterplacementgroups/clusterplacementgroup/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "delete-confirmation",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateClusterPlacementGroup, GetClusterPlacementGroup, ListClusterPlacementGroups, UpdateClusterPlacementGroup, DeleteClusterPlacementGroup, ActivateClusterPlacementGroup, DeactivateClusterPlacementGroup, ChangeClusterPlacementGroupCompartment, and GetWorkRequest are present in v65.110.0. Create returns a ClusterPlacementGroup body plus opc-work-request-id; update and delete expose opc-work-request-id without returning the resource body.",
+    "Pinned provider implementation: oci_cluster_placement_groups_cluster_placement_group uses GetWorkRequest and ListWorkRequestErrors for base CRUD, while activate, deactivate, and compartment-change helpers continue through direct lifecycle rereads. The reviewed runtime keeps using service-sdk GetWorkRequest polling and shared async status for CRUD only.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses paginated ListClusterPlacementGroups matches on exact compartmentId plus name and availabilityDomain, then keeps only unique matches whose clusterPlacementGroupType also matches and whose lifecycle is ACTIVE, INACTIVE, CREATING, or UPDATING.",
+    "Repo-authored mutation policy stays explicit: only description, freeformTags, and definedTags reconcile in place. ActivateClusterPlacementGroup, DeactivateClusterPlacementGroup, and ChangeClusterPlacementGroupCompartment remain out-of-scope auxiliary operations for the published runtime."
+  ]
+}

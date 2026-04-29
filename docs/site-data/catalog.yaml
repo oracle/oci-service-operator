@@ -122,6 +122,19 @@ packages:
         kind: Budget
         summary: Manage OCI Budgets.
 
+  - package: clusterplacementgroups
+    displayName: Cluster Placement Groups
+    summary: Manage OCI Cluster Placement Groups from Kubernetes with an initial controller-backed ClusterPlacementGroup rollout.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to ClusterPlacementGroup while the service-local work-request helper families stay unpublished.
+    kindOverrides:
+      - group: clusterplacementgroups
+        kind: ClusterPlacementGroup
+        summary: Manage OCI Cluster Placement Groups.
+
   - package: containerengine
     displayName: Container Engine for Kubernetes
     summary: Manage OCI Container Engine for Kubernetes clusters and node pools from Kubernetes.

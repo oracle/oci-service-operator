@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 167; got != want {
+	if got, want := len(inventory), 171; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 81; got != want {
+	if got, want := countRegistrations(inventory), 82; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 86; got != want {
+	if got, want := countExceptions(inventory), 89; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -32,6 +32,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "analytics/AnalyticsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "bds/BdsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "budget/Budget", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "clusterplacementgroups/ClusterPlacementGroup", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/Cluster", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "containerengine/NodePool", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "core/Drg", "packageSplits[core-network].includeKinds")
@@ -62,6 +63,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "bds/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "budget/Budget")
 	assertInventoryException(t, byKey, "budget/AlertRule", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "clusterplacementgroups/ClusterPlacementGroup")
+	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequest", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestError", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "clusterplacementgroups/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "databasetools/DatabaseToolsConnection")
 	assertInventoryException(t, byKey, "databasetools/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "datascience/Project")
@@ -96,6 +101,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "budget/Budget", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "clusterplacementgroups/ClusterPlacementGroup", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "containerengine/Cluster", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "containerengine/NodePool", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "containerinstances/ContainerInstance", APIErrorCoverageFamilyLegacyAdapter)
@@ -130,6 +136,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "analytics/WorkRequest", "strategy=none")
 	assertReviewedException(t, "bds/WorkRequest", "strategy=none")
 	assertReviewedException(t, "budget/AlertRule", "strategy=none")
+	assertReviewedException(t, "clusterplacementgroups/WorkRequest", "strategy=none")
 	assertReviewedException(t, "databasetools/WorkRequest", "strategy=none")
 	assertReviewedException(t, "datascience/WorkRequest", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")

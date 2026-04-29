@@ -1138,6 +1138,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"analytics",
 		"bds",
 		"budget",
+		"clusterplacementgroups",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1181,6 +1182,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"analytics",
 		"bds",
 		"budget",
+		"clusterplacementgroups",
 		"containerengine",
 		"containerinstances",
 		"core",
@@ -1217,6 +1219,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
 	assertServiceSelection(t, services["bds"], true, SelectionModeExplicit, []string{"BdsInstance"})
 	assertServiceSelection(t, services["budget"], true, SelectionModeExplicit, []string{"Budget"})
+	assertServiceSelection(t, services["clusterplacementgroups"], true, SelectionModeExplicit, []string{"ClusterPlacementGroup"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
@@ -1906,14 +1909,18 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		strategy string
 		runtime  string
 	}{
-		"adm":                {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"aidocument":         {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"ailanguage":         {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
-		"aispeech":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"aivision":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"analytics":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"bds":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"budget":             {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"adm":        {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"aidocument": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"ailanguage": {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
+		"aispeech":   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"aivision":   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"analytics":  {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"bds":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"budget":     {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"clusterplacementgroups": {
+			strategy: AsyncStrategyWorkRequest,
+			runtime:  AsyncRuntimeGeneratedRuntime,
+		},
 		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"containerinstances": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeHandwritten},
 		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
@@ -1983,6 +1990,33 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 	}
 	if queue.WorkRequest.LegacyFieldBridge.Delete != "DeleteWorkRequestId" {
 		t.Fatalf("queue Queue delete bridge = %q, want DeleteWorkRequestId", queue.WorkRequest.LegacyFieldBridge.Delete)
+	}
+
+	clusterPlacementGroups := assertAsyncContract(
+		t,
+		services["clusterplacementgroups"],
+		"ClusterPlacementGroup",
+		AsyncStrategyWorkRequest,
+		AsyncRuntimeGeneratedRuntime,
+	)
+	if clusterPlacementGroups.WorkRequest.Source != AsyncWorkRequestSourceServiceSDK {
+		t.Fatalf(
+			"clusterplacementgroups ClusterPlacementGroup workRequest.source = %q, want %q",
+			clusterPlacementGroups.WorkRequest.Source,
+			AsyncWorkRequestSourceServiceSDK,
+		)
+	}
+	if !slices.Equal(clusterPlacementGroups.WorkRequest.Phases, []string{AsyncPhaseCreate, AsyncPhaseUpdate, AsyncPhaseDelete}) {
+		t.Fatalf(
+			"clusterplacementgroups ClusterPlacementGroup workRequest.phases = %v",
+			clusterPlacementGroups.WorkRequest.Phases,
+		)
+	}
+	if clusterPlacementGroups.WorkRequest.LegacyFieldBridge.hasOverride() {
+		t.Fatalf(
+			"clusterplacementgroups ClusterPlacementGroup workRequest.legacyFieldBridge = %#v, want empty legacy bridge",
+			clusterPlacementGroups.WorkRequest.LegacyFieldBridge,
+		)
 	}
 
 	redis := assertAsyncContract(t, services["redis"], "RedisCluster", AsyncStrategyWorkRequest, AsyncRuntimeGeneratedRuntime)

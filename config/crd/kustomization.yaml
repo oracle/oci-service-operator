@@ -20,6 +20,7 @@ resources:
 - bases/apigateway.oracle.com_apigateways.yaml
 - bases/bds.oracle.com_bdsinstances.yaml
 - bases/budget.oracle.com_budgets.yaml
+- bases/clusterplacementgroups.oracle.com_clusterplacementgroups.yaml
 - bases/containerengine.oracle.com_clusters.yaml
 - bases/containerengine.oracle.com_nodepools.yaml
 - bases/containerinstances.oracle.com_containerinstances.yaml
