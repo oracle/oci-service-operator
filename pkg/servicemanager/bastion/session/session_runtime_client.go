@@ -720,7 +720,13 @@ func (c sessionRuntimeClient) CreateOrUpdate(
 	resource *bastionv1beta1.Session,
 	req ctrl.Request,
 ) (servicemanager.OSOKResponse, error) {
+	if hasTrackedSessionWriteWorkRequest(resource) {
+		return c.delegate.CreateOrUpdate(ctx, resource, req)
+	}
 	if err := c.validateTrackedTargetJSONData(ctx, resource); err != nil {
+		if errorutil.ClassifyDeleteError(err).IsUnambiguousNotFound() {
+			return c.delegate.CreateOrUpdate(ctx, resource, req)
+		}
 		return servicemanager.OSOKResponse{IsSuccessful: false}, err
 	}
 	return c.delegate.CreateOrUpdate(ctx, resource, req)
@@ -793,6 +799,20 @@ func trackedSessionID(resource *bastionv1beta1.Session) string {
 		return id
 	}
 	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+}
+
+func hasTrackedSessionWriteWorkRequest(resource *bastionv1beta1.Session) bool {
+	if resource == nil || resource.Status.OsokStatus.Async.Current == nil {
+		return false
+	}
+	current := resource.Status.OsokStatus.Async.Current
+	if current.Source != "" && current.Source != shared.OSOKAsyncSourceWorkRequest {
+		return false
+	}
+	if strings.TrimSpace(current.WorkRequestID) == "" {
+		return false
+	}
+	return current.Phase == shared.OSOKAsyncPhaseCreate || current.Phase == shared.OSOKAsyncPhaseUpdate
 }
 
 func pendingSessionWriteWorkRequest(resource *bastionv1beta1.Session) (string, shared.OSOKAsyncPhase, bool) {

@@ -320,6 +320,90 @@ func TestSessionCreateOrUpdateRejectsTargetResourceJSONDataWhenReadbackIsMissing
 	}
 }
 
+func TestSessionCreateOrUpdateObservesPendingCreateWorkRequestBeforeTargetJSONDataRead(t *testing.T) {
+	resource := newTestSessionWithTargetJSONData("session-json-pending-create", "ocid1.instance.oc1..target")
+	resource.Status.Id = testSessionID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSessionID)
+	markTestWorkRequest(resource, shared.OSOKAsyncPhaseCreate, "wr-create-1")
+
+	fake := &fakeSessionOCIClient{
+		getSessionFunc: func(context.Context, bastionsdk.GetSessionRequest) (bastionsdk.GetSessionResponse, error) {
+			t.Fatal("GetSession() called before pending create work request was observed")
+			return bastionsdk.GetSessionResponse{}, nil
+		},
+		listSessionsFunc: func(context.Context, bastionsdk.ListSessionsRequest) (bastionsdk.ListSessionsResponse, error) {
+			t.Fatal("ListSessions() called before pending create work request was observed")
+			return bastionsdk.ListSessionsResponse{}, nil
+		},
+		createSessionFunc: func(context.Context, bastionsdk.CreateSessionRequest) (bastionsdk.CreateSessionResponse, error) {
+			t.Fatal("CreateSession() called while pending create work request was tracked")
+			return bastionsdk.CreateSessionResponse{}, nil
+		},
+		getWorkRequestFunc: getSessionWorkRequestByID(t, "wr-create-1", newSessionWorkRequest("wr-create-1", bastionsdk.OperationTypeCreateSession, bastionsdk.OperationStatusInProgress, testSessionID)),
+	}
+
+	response, err := newTestSessionClient(fake).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful requeue while work request is pending", response)
+	}
+	if got := len(fake.getWorkRequestCalls); got != 1 {
+		t.Fatalf("GetWorkRequest() calls = %d, want 1", got)
+	}
+	if got := len(fake.getSessionCalls); got != 0 {
+		t.Fatalf("GetSession() calls = %d, want 0 before pending create is observed", got)
+	}
+	if got := len(fake.createSessionCalls); got != 0 {
+		t.Fatalf("CreateSession() calls = %d, want 0 while pending create is tracked", got)
+	}
+}
+
+func TestSessionCreateOrUpdateLetsStaleTrackedNotFoundWithTargetJSONDataRecover(t *testing.T) {
+	resource := newTestSessionWithTargetJSONData("session-json-stale-tracked", "ocid1.instance.oc1..target")
+	resource.Status.Id = "ocid1.bastionsession.oc1..stale"
+	resource.Status.OsokStatus.Ocid = shared.OCID(resource.Status.Id)
+	notFoundErr := errortest.NewServiceError(404, errorutil.NotFound, "session not found")
+
+	fake := &fakeSessionOCIClient{
+		getSessionFunc: func(_ context.Context, request bastionsdk.GetSessionRequest) (bastionsdk.GetSessionResponse, error) {
+			if got, want := stringPointerValue(request.SessionId), "ocid1.bastionsession.oc1..stale"; got != want {
+				t.Fatalf("GetSession() SessionId = %q, want %q", got, want)
+			}
+			return bastionsdk.GetSessionResponse{}, notFoundErr
+		},
+		listSessionsFunc: func(context.Context, bastionsdk.ListSessionsRequest) (bastionsdk.ListSessionsResponse, error) {
+			return bastionsdk.ListSessionsResponse{}, nil
+		},
+		createSessionFunc:  createSessionWithWorkRequest(t, "session-json-stale-tracked", "wr-create-1", "opc-create-1"),
+		getWorkRequestFunc: getSessionWorkRequestByID(t, "wr-create-1", newSessionWorkRequest("wr-create-1", bastionsdk.OperationTypeCreateSession, bastionsdk.OperationStatusInProgress, testSessionID)),
+	}
+
+	response, err := newTestSessionClient(fake).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful requeue after recreating stale tracked identity", response)
+	}
+	if got := len(fake.getSessionCalls); got != 2 {
+		t.Fatalf("GetSession() calls = %d, want wrapper validation plus generatedruntime stale-id check", got)
+	}
+	if got := len(fake.createSessionCalls); got != 1 {
+		t.Fatalf("CreateSession() calls = %d, want 1 after stale tracked identity is cleared", got)
+	}
+	if got := len(fake.getWorkRequestCalls); got != 1 {
+		t.Fatalf("GetWorkRequest() calls = %d, want 1", got)
+	}
+	if got := resource.Status.Id; got != testSessionID {
+		t.Fatalf("status.id = %q, want %q", got, testSessionID)
+	}
+	if got := resource.Status.OsokStatus.Ocid; got != shared.OCID(testSessionID) {
+		t.Fatalf("status.status.ocid = %q, want %q", got, testSessionID)
+	}
+}
+
 func TestSessionDeleteStartsWorkRequestAndRetainsFinalizer(t *testing.T) {
 	resource := newTestSession("session-delete")
 	resource.Status.Id = testSessionID
