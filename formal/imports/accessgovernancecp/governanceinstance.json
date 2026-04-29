@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "accessgovernancecp",
+  "slug": "governanceinstance",
+  "kind": "GovernanceInstance",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_access_governance_cp_governance_instance",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateGovernanceInstance",
+        "requestType": "accessgovernancecp.CreateGovernanceInstanceRequest",
+        "responseType": "accessgovernancecp.CreateGovernanceInstanceResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetGovernanceInstance",
+        "requestType": "accessgovernancecp.GetGovernanceInstanceRequest",
+        "responseType": "accessgovernancecp.GetGovernanceInstanceResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListGovernanceInstances",
+        "requestType": "accessgovernancecp.ListGovernanceInstancesRequest",
+        "responseType": "accessgovernancecp.ListGovernanceInstancesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeGovernanceInstanceCompartment",
+        "requestType": "accessgovernancecp.ChangeGovernanceInstanceCompartmentRequest",
+        "responseType": "accessgovernancecp.ChangeGovernanceInstanceCompartmentResponse"
+      },
+      {
+        "operation": "UpdateGovernanceInstance",
+        "requestType": "accessgovernancecp.UpdateGovernanceInstanceRequest",
+        "responseType": "accessgovernancecp.UpdateGovernanceInstanceResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteGovernanceInstance",
+        "requestType": "accessgovernancecp.DeleteGovernanceInstanceRequest",
+        "responseType": "accessgovernancecp.DeleteGovernanceInstanceResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "license_type"
+    ],
+    "forceNew": [
+      "compartment_id",
+      "system_tags",
+      "tenancy_namespace"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_access_governance_cp_governance_instances",
+    "collectionField": "governance_instances",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/accessgovernancecp/governanceinstance/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/accessgovernancecp/governanceinstance/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateGovernanceInstance, GetGovernanceInstance, ListGovernanceInstances, UpdateGovernanceInstance, DeleteGovernanceInstance, and ChangeGovernanceInstanceCompartment are present in v65.110.0. Create and update return a GovernanceInstance body plus opc-work-request-id; delete returns only request and work-request headers. The lifecycle enum is CREATING, ACTIVE, DELETING, DELETED, and NEEDS_ATTENTION.",
+    "Pinned provider coverage is unconfirmed. formal/sources.lock still points at github.com/oracle/terraform-provider-oci@eb653febb1bab4cc6650a96d404a8baf36fdf671, but the accessible provider inventory did not expose a matching GovernanceInstance resource or data source. The providerResource and datasource names therefore stay provisional OCI-style placeholders so generator-owned registry artifacts can derive stable links without claiming verified provider coverage.",
+    "Repo-authored runtime contract stays narrower than the imported SDK surface: only displayName, description, licenseType, freeformTags, and definedTags reconcile in place. ChangeGovernanceInstanceCompartment remains out of scope, while compartmentId, tenancyNamespace, and systemTags stay replacement-only drift.",
+    "Repo-authored bind-versus-create stays explicit: pre-create lookup lists by exact compartmentId plus displayName, narrows to matching licenseType summaries, then rereads each candidate through GetGovernanceInstance and reuses only a unique candidate whose tenancyNamespace also matches and whose lifecycle is ACTIVE or CREATING.",
+    "IdcsAccessToken remains a create-time input only. OCI does not echo it back on GovernanceInstance, so the reviewed runtime intentionally normalizes it out of post-create parity checks instead of treating it as replacement-required drift.",
+    "Create, update, and delete responses expose opc-work-request-id, but the SDK exposes no service-local GetWorkRequest or ListWorkRequests helpers. The reviewed generatedruntime client records request and work-request breadcrumbs when present and relies on lifecycle projection plus confirm-delete rereads rather than work-request polling.",
+    "Needs-attention behavior stays explicit in repo-authored semantics: GovernanceInstance lifecycle state NEEDS_ATTENTION is treated as a terminal failure without requeue, not as a reusable or successful steady state."
+  ]
+}

@@ -3,6 +3,7 @@ package apispec
 import (
 	"reflect"
 
+	accessgovernancecpv1beta1 "github.com/oracle/oci-service-operator/api/accessgovernancecp/v1beta1"
 	admv1beta1 "github.com/oracle/oci-service-operator/api/adm/v1beta1"
 	aidocumentv1beta1 "github.com/oracle/oci-service-operator/api/aidocument/v1beta1"
 	ailanguagev1beta1 "github.com/oracle/oci-service-operator/api/ailanguage/v1beta1"
@@ -1402,6 +1403,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "core.Vcn",
+			},
+		},
+	},
+	{
+		Name:       "AccessgovernancecpGovernanceInstance",
+		SpecType:   reflect.TypeOf(accessgovernancecpv1beta1.GovernanceInstanceSpec{}),
+		StatusType: reflect.TypeOf(accessgovernancecpv1beta1.GovernanceInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "accessgovernancecp.CreateGovernanceInstanceDetails",
+			},
+			{
+				SDKStruct: "accessgovernancecp.UpdateGovernanceInstanceDetails",
+			},
+			{
+				SDKStruct: "accessgovernancecp.GovernanceInstance",
+			},
+			{
+				SDKStruct: "accessgovernancecp.GovernanceInstanceCollection",
+			},
+			{
+				SDKStruct: "accessgovernancecp.GovernanceInstanceSummary",
 			},
 		},
 	},

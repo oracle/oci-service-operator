@@ -1,0 +1,62 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: accessgovernancecp
+slug: governanceinstance
+kind: GovernanceInstance
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+      - id
+    matchRule: exact compartmentId plus displayName list match with matching licenseType, then GetGovernanceInstance confirms tenancyNamespace and reusable ACTIVE or CREATING lifecycle; duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+      - licenseType
+    forceNew:
+      - compartmentId
+      - systemTags
+      - tenancyNamespace
+    createOnly:
+      - idcsAccessToken
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, ACTIVE as
+    success, DELETING as terminating, and DELETED as the delete-confirmation
+    target; NEEDS_ATTENTION is terminal failure without requeue.
+  - Create, update, and delete responses expose work-request headers, but the
+    SDK exposes no matching GetWorkRequest or ListWorkRequests helpers. The
+    runtime records those breadcrumbs without polling them directly and relies
+    on lifecycle rereads instead.
+  - Pre-create reuse lists by exact compartmentId plus displayName, narrows to
+    matching licenseType summaries, then rereads each candidate through
+    GetGovernanceInstance so tenancyNamespace must also match before reuse.
+  - Only displayName, description, licenseType, freeformTags, and definedTags
+    reconcile in place; compartmentId, tenancyNamespace, and systemTags remain
+    replacement-only drift. `idcsAccessToken` is create-only and normalized out
+    of post-create parity checks, and compartment changes stay out of scope for
+    the published runtime.

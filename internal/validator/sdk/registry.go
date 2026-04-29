@@ -4,6 +4,7 @@ import (
 	"path"
 	"reflect"
 
+	"github.com/oracle/oci-go-sdk/v65/accessgovernancecp"
 	"github.com/oracle/oci-go-sdk/v65/adm"
 	"github.com/oracle/oci-go-sdk/v65/aidocument"
 	"github.com/oracle/oci-go-sdk/v65/ailanguage"
@@ -363,6 +364,13 @@ var seedTargets = []Target{
 	newTarget("core", "Subnet", reflect.TypeOf(core.Subnet{})),
 	newTarget("core", "Vcn", reflect.TypeOf(core.Vcn{})),
 	newTarget("core", "InstanceSummary", reflect.TypeOf(core.InstanceSummary{})),
+
+	// Accessgovernancecp CRD support
+	newTarget("accessgovernancecp", "CreateGovernanceInstanceDetails", reflect.TypeOf(accessgovernancecp.CreateGovernanceInstanceDetails{})),
+	newTarget("accessgovernancecp", "UpdateGovernanceInstanceDetails", reflect.TypeOf(accessgovernancecp.UpdateGovernanceInstanceDetails{})),
+	newTarget("accessgovernancecp", "GovernanceInstance", reflect.TypeOf(accessgovernancecp.GovernanceInstance{})),
+	newTarget("accessgovernancecp", "GovernanceInstanceCollection", reflect.TypeOf(accessgovernancecp.GovernanceInstanceCollection{})),
+	newTarget("accessgovernancecp", "GovernanceInstanceSummary", reflect.TypeOf(accessgovernancecp.GovernanceInstanceSummary{})),
 
 	// Adm CRD support
 	newTarget("adm", "CreateKnowledgeBaseDetails", reflect.TypeOf(adm.CreateKnowledgeBaseDetails{})),

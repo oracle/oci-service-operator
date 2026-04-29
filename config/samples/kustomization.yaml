@@ -87,4 +87,5 @@ resources:
 - budget_v1beta1_budget.yaml
 - adm_v1beta1_knowledgebase.yaml
 - clusterplacementgroups_v1beta1_clusterplacementgroup.yaml
+- accessgovernancecp_v1beta1_governanceinstance.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

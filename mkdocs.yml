@@ -128,6 +128,7 @@ nav:
       - reference/api/index.md
       # BEGIN GENERATED API VERSION NAV
       - API Versions:
+          - accessgovernancecp.oracle.com/v1beta1: reference/api/accessgovernancecp/v1beta1/index.md
           - adm.oracle.com/v1beta1: reference/api/adm/v1beta1/index.md
           - aidocument.oracle.com/v1beta1: reference/api/aidocument/v1beta1/index.md
           - ailanguage.oracle.com/v1beta1: reference/api/ailanguage/v1beta1/index.md

@@ -14,16 +14,17 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 171; got != want {
+	if got, want := len(inventory), 174; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 82; got != want {
+	if got, want := countRegistrations(inventory), 83; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 89; got != want {
+	if got, want := countExceptions(inventory), 91; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
+	assertInventorySelectionSource(t, byKey, "accessgovernancecp/GovernanceInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "adm/KnowledgeBase", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "aidocument/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "ailanguage/Project", "selection.includeKinds")
@@ -47,6 +48,9 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "queue/Queue", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "usageapi/Query", "selection.includeKinds")
 
+	assertInventoryRegistration(t, byKey, "accessgovernancecp/GovernanceInstance")
+	assertInventoryException(t, byKey, "accessgovernancecp/GovernanceInstanceConfiguration", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "accessgovernancecp/SenderConfig", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "adm/KnowledgeBase")
 	assertInventoryException(t, byKey, "adm/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "aidocument/Project")
@@ -93,6 +97,7 @@ func TestReviewedAPIErrorCoverageRegistryMatchesCheckedInInventory(t *testing.T)
 func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	t.Parallel()
 
+	assertReviewedFamily(t, "accessgovernancecp/GovernanceInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "adm/KnowledgeBase", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "aidocument/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "ailanguage/Project", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
@@ -128,6 +133,8 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "streaming/Stream", APIErrorCoverageFamilyGeneratedRuntimeFollowUp)
 	assertReviewedFamily(t, "usageapi/Query", APIErrorCoverageFamilyGeneratedRuntimePlain)
 
+	assertReviewedException(t, "accessgovernancecp/GovernanceInstanceConfiguration", "strategy=none")
+	assertReviewedException(t, "accessgovernancecp/SenderConfig", "strategy=none")
 	assertReviewedException(t, "adm/WorkRequest", "strategy=none")
 	assertReviewedException(t, "aidocument/WorkRequest", "strategy=none")
 	assertReviewedException(t, "ailanguage/WorkRequest", "strategy=none")

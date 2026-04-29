@@ -181,6 +181,16 @@ type APIErrorCoverageRegistry struct {
 var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 	Registrations: mergeReviewedRegistrationSets(
 		map[string]APIErrorCoverageRegistration{
+			resourceKey("accessgovernancecp", "GovernanceInstance"): reviewedRegistration(
+				"accessgovernancecp",
+				"accessgovernancecp",
+				apiErrorCoverageDefaultVersion,
+				"GovernanceInstance",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"GovernanceInstance uses plain generatedruntime lifecycle rereads with a handwritten hook layer for tenant-safe pre-create reuse, explicit mutable-field shaping, and create-only idcsAccessToken normalization; the SDK exposes work-request headers but no service-local work-request reader.",
+			),
 			resourceKey("adm", "KnowledgeBase"): reviewedRegistration(
 				"adm",
 				"adm",
@@ -1162,6 +1172,20 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 		),
 	),
 	Exceptions: map[string]APIErrorCoverageException{
+		resourceKey("accessgovernancecp", "GovernanceInstanceConfiguration"): reviewedException(
+			"accessgovernancecp",
+			"accessgovernancecp",
+			apiErrorCoverageDefaultVersion,
+			"GovernanceInstanceConfiguration",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("accessgovernancecp", "SenderConfig"): reviewedException(
+			"accessgovernancecp",
+			"accessgovernancecp",
+			apiErrorCoverageDefaultVersion,
+			"SenderConfig",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
 		resourceKey("adm", "ApplicationDependencyRecommendation"): reviewedException(
 			"adm",
 			"adm",
