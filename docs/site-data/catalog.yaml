@@ -110,6 +110,19 @@ packages:
         kind: ApiGatewayDeployment
         summary: Manage OCI API Gateway deployment routes and backend bindings.
 
+  - package: apiplatform
+    displayName: API Platform
+    summary: Manage OCI API Platform instances from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - API Platform ships a reviewed controller-backed runtime for `ApiPlatformInstance` in the current checked-in package surface.
+    kindOverrides:
+      - group: apiplatform
+        kind: ApiPlatformInstance
+        summary: Manage OCI API Platform instances.
+
   - package: bds
     displayName: Big Data Service
     summary: Manage OCI Big Data Service instances from Kubernetes with an initial controller-backed BdsInstance rollout.
