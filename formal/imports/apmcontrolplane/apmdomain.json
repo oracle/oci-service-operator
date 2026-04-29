@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apmcontrolplane",
+  "slug": "apmdomain",
+  "kind": "ApmDomain",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_apm_domain",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateApmDomain",
+        "requestType": "apmcontrolplane.CreateApmDomainRequest",
+        "responseType": "apmcontrolplane.CreateApmDomainResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetApmDomain",
+        "requestType": "apmcontrolplane.GetApmDomainRequest",
+        "responseType": "apmcontrolplane.GetApmDomainResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListApmDomains",
+        "requestType": "apmcontrolplane.ListApmDomainsRequest",
+        "responseType": "apmcontrolplane.ListApmDomainsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangeApmDomainCompartment",
+        "requestType": "apmcontrolplane.ChangeApmDomainCompartmentRequest",
+        "responseType": "apmcontrolplane.ChangeApmDomainCompartmentResponse"
+      },
+      {
+        "operation": "UpdateApmDomain",
+        "requestType": "apmcontrolplane.UpdateApmDomainRequest",
+        "responseType": "apmcontrolplane.UpdateApmDomainResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteApmDomain",
+        "requestType": "apmcontrolplane.DeleteApmDomainRequest",
+        "responseType": "apmcontrolplane.DeleteApmDomainResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags"
+    ],
+    "forceNew": [
+      "is_free_tier"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "apmdomain",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "apmdomain",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "apmdomain",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_apm_apm_domains",
+    "collectionField": "apm_domain_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "lifecycle_state"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apmcontrolplane/apmdomain/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apmcontrolplane/apmdomain/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateApmDomain, GetApmDomain, ListApmDomains, ChangeApmDomainCompartment, UpdateApmDomain, DeleteApmDomain, and GetWorkRequest are present in v65.110.0. ListApmDomains filters compartmentId, displayName, and lifecycleState, while create, update, and delete responses expose opc-work-request-id but do not return an ApmDomain body.",
+    "Pinned provider implementation: oci_apm_apm_domain uses service-SDK GetWorkRequest and ListWorkRequestErrors for create, update, delete, and compartment-change flows. The reviewed runtime keeps using service-SDK GetWorkRequest polling and shared async status instead of provider helper waiters.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses paginated ListApmDomains matches on exact compartmentId plus displayName, ignores FAILED, DELETING, and DELETED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, freeformTags, and definedTags reconcile in place. The provider's ChangeApmDomainCompartment support remains out-of-scope drift because the published runtime treats compartmentId as replacement-only, and isFreeTier remains create-time-only replacement drift."
+  ]
+}

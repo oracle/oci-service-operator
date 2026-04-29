@@ -454,6 +454,82 @@ services:
           serviceManager:
             strategy: none
 
+  - service: apmcontrolplane
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmcontrolplane
+    group: apmcontrolplane
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ApmDomain
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ApmDomain
+          formalSpec: apmdomain
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the compartment OCID below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing ApmDomain with the same compartmentId and displayName.
+              #
+              apiVersion: apmcontrolplane.oracle.com/v1beta1
+              kind: ApmDomain
+              metadata:
+                name: apmdomain-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: apm-domain-sample
+                description: Sample Application Performance Monitoring domain
+                freeformTags:
+                  managed-by: oci-service-operator
+        - kind: ApmDomainWorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: DataKey
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: artifacts
     sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
     group: artifacts

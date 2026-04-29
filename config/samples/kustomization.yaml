@@ -91,4 +91,5 @@ resources:
 - apiplatform_v1beta1_apiplatforminstance.yaml
 - datalabelingservice_v1beta1_dataset.yaml
 - databasemigration_v1beta1_connection.yaml
+- apmcontrolplane_v1beta1_apmdomain.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
