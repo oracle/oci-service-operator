@@ -37,6 +37,10 @@ var sessionWorkRequestAsyncAdapter = servicemanager.WorkRequestAsyncAdapter{
 		string(bastionsdk.OperationTypeCreateSession),
 		string(bastionsdk.ActionTypeCreated),
 	},
+	UpdateActionTokens: []string{
+		"UPDATE_SESSION",
+		string(bastionsdk.ActionTypeUpdated),
+	},
 	DeleteActionTokens: []string{
 		string(bastionsdk.OperationTypeDeleteSession),
 		string(bastionsdk.ActionTypeDeleted),
@@ -112,7 +116,8 @@ func applySessionRuntimeHooks(
 	}
 	hooks.Async.ResolveAction = resolveSessionWorkRequestAction
 	hooks.Async.RecoverResourceID = recoverSessionIDFromWorkRequest
-	wrapSessionDeleteConfirmation(hooks)
+	hooks.ParityHooks.NormalizeDesiredState = normalizeSessionDesiredState
+	wrapSessionRuntimeClient(hooks, workRequestClient, initErr)
 }
 
 func newSessionServiceClientWithOCIClient(log loggerutil.OSOKLogger, client sessionOCIClient) SessionServiceClient {
@@ -466,6 +471,173 @@ func portForwardingSessionTargetDetails(details bastionv1beta1.SessionTargetReso
 	return body
 }
 
+func normalizeSessionDesiredState(resource *bastionv1beta1.Session, _ any) {
+	if resource == nil {
+		return
+	}
+	details, ok := normalizedSessionTargetDetails(resource.Spec.TargetResourceDetails)
+	if ok {
+		resource.Spec.TargetResourceDetails = details
+	}
+}
+
+func validateSessionTargetJSONDataCreateOnlyDrift(resource *bastionv1beta1.Session, currentResponse any) error {
+	if resource == nil {
+		return fmt.Errorf("%s resource is nil", sessionKind)
+	}
+	if strings.TrimSpace(resource.Spec.TargetResourceDetails.JsonData) == "" {
+		return nil
+	}
+	desiredDetails, err := resolvedSessionTargetDetails(resource.Spec.TargetResourceDetails)
+	if err != nil {
+		return err
+	}
+	desiredDetails.JsonData = ""
+	current, ok := sessionFromResponse(currentResponse)
+	if !ok {
+		return fmt.Errorf("%s current response %T does not expose a %s body", sessionKind, currentResponse, sessionKind)
+	}
+	if current.TargetResourceDetails == nil {
+		return fmt.Errorf("%s current targetResourceDetails is empty; refusing to validate targetResourceDetails.jsonData drift", sessionKind)
+	}
+	currentDetails, ok := sessionTargetDetailsFromSDK(current.TargetResourceDetails)
+	if !ok {
+		return fmt.Errorf("%s current targetResourceDetails has unexpected type %T", sessionKind, current.TargetResourceDetails)
+	}
+	if path := sessionTargetDetailsDriftPath(desiredDetails, currentDetails); path != "" {
+		return fmt.Errorf("%s formal semantics require replacement when targetResourceDetails.jsonData changes (%s)", sessionKind, path)
+	}
+	return nil
+}
+
+func normalizedSessionTargetDetails(spec bastionv1beta1.SessionTargetResourceDetails) (bastionv1beta1.SessionTargetResourceDetails, bool) {
+	if strings.TrimSpace(spec.JsonData) == "" {
+		return spec, false
+	}
+	details, err := resolvedSessionTargetDetails(spec)
+	if err != nil {
+		return spec, false
+	}
+	details.JsonData = ""
+	return details, true
+}
+
+func sessionTargetDetailsFromSDK(details bastionsdk.TargetResourceDetails) (bastionv1beta1.SessionTargetResourceDetails, bool) {
+	if managed, ok := managedSSHSessionTargetDetailsFromSDK(details); ok {
+		return managed, true
+	}
+	if portForwarding, ok := portForwardingSessionTargetDetailsFromSDK(details); ok {
+		return portForwarding, true
+	}
+	if _, ok := details.(bastionsdk.DynamicPortForwardingSessionTargetResourceDetails); ok {
+		return bastionv1beta1.SessionTargetResourceDetails{SessionType: "DYNAMIC_PORT_FORWARDING"}, true
+	}
+	if value, ok := details.(*bastionsdk.DynamicPortForwardingSessionTargetResourceDetails); ok && value != nil {
+		return bastionv1beta1.SessionTargetResourceDetails{SessionType: "DYNAMIC_PORT_FORWARDING"}, true
+	}
+	return bastionv1beta1.SessionTargetResourceDetails{}, false
+}
+
+func managedSSHSessionTargetDetailsFromSDK(details bastionsdk.TargetResourceDetails) (bastionv1beta1.SessionTargetResourceDetails, bool) {
+	switch value := details.(type) {
+	case bastionsdk.ManagedSshSessionTargetResourceDetails:
+		return managedSSHSessionTargetDetailsFromValue(value), true
+	case *bastionsdk.ManagedSshSessionTargetResourceDetails:
+		if value != nil {
+			return managedSSHSessionTargetDetailsFromValue(*value), true
+		}
+	}
+	return bastionv1beta1.SessionTargetResourceDetails{}, false
+}
+
+func managedSSHSessionTargetDetailsFromValue(details bastionsdk.ManagedSshSessionTargetResourceDetails) bastionv1beta1.SessionTargetResourceDetails {
+	return bastionv1beta1.SessionTargetResourceDetails{
+		SessionType:                           "MANAGED_SSH",
+		TargetResourceOperatingSystemUserName: stringPointerValue(details.TargetResourceOperatingSystemUserName),
+		TargetResourceId:                      stringPointerValue(details.TargetResourceId),
+		TargetResourcePrivateIpAddress:        stringPointerValue(details.TargetResourcePrivateIpAddress),
+		TargetResourcePort:                    intPointerValue(details.TargetResourcePort),
+	}
+}
+
+func portForwardingSessionTargetDetailsFromSDK(details bastionsdk.TargetResourceDetails) (bastionv1beta1.SessionTargetResourceDetails, bool) {
+	switch value := details.(type) {
+	case bastionsdk.PortForwardingSessionTargetResourceDetails:
+		return portForwardingSessionTargetDetailsFromValue(value), true
+	case *bastionsdk.PortForwardingSessionTargetResourceDetails:
+		if value != nil {
+			return portForwardingSessionTargetDetailsFromValue(*value), true
+		}
+	}
+	return bastionv1beta1.SessionTargetResourceDetails{}, false
+}
+
+func portForwardingSessionTargetDetailsFromValue(details bastionsdk.PortForwardingSessionTargetResourceDetails) bastionv1beta1.SessionTargetResourceDetails {
+	return bastionv1beta1.SessionTargetResourceDetails{
+		SessionType:                    "PORT_FORWARDING",
+		TargetResourceId:               stringPointerValue(details.TargetResourceId),
+		TargetResourcePrivateIpAddress: stringPointerValue(details.TargetResourcePrivateIpAddress),
+		TargetResourcePort:             intPointerValue(details.TargetResourcePort),
+		TargetResourceFqdn:             stringPointerValue(details.TargetResourceFqdn),
+	}
+}
+
+type sessionTargetDetailDriftCheck struct {
+	path    string
+	desired string
+	current string
+}
+
+func sessionTargetDetailsDriftPath(desired bastionv1beta1.SessionTargetResourceDetails, current bastionv1beta1.SessionTargetResourceDetails) string {
+	for _, check := range sessionTargetDetailDriftChecks(desired, current) {
+		if check.desired != "" && check.desired != check.current {
+			return check.path
+		}
+	}
+	return ""
+}
+
+func sessionTargetDetailDriftChecks(
+	desired bastionv1beta1.SessionTargetResourceDetails,
+	current bastionv1beta1.SessionTargetResourceDetails,
+) []sessionTargetDetailDriftCheck {
+	checks := []sessionTargetDetailDriftCheck{
+		{
+			path:    "targetResourceDetails.sessionType",
+			desired: strings.ToUpper(strings.TrimSpace(desired.SessionType)),
+			current: strings.ToUpper(strings.TrimSpace(current.SessionType)),
+		},
+		{
+			path:    "targetResourceDetails.targetResourceOperatingSystemUserName",
+			desired: strings.TrimSpace(desired.TargetResourceOperatingSystemUserName),
+			current: strings.TrimSpace(current.TargetResourceOperatingSystemUserName),
+		},
+		{
+			path:    "targetResourceDetails.targetResourceId",
+			desired: strings.TrimSpace(desired.TargetResourceId),
+			current: strings.TrimSpace(current.TargetResourceId),
+		},
+		{
+			path:    "targetResourceDetails.targetResourcePrivateIpAddress",
+			desired: strings.TrimSpace(desired.TargetResourcePrivateIpAddress),
+			current: strings.TrimSpace(current.TargetResourcePrivateIpAddress),
+		},
+		{
+			path:    "targetResourceDetails.targetResourceFqdn",
+			desired: strings.TrimSpace(desired.TargetResourceFqdn),
+			current: strings.TrimSpace(current.TargetResourceFqdn),
+		},
+	}
+	if desired.TargetResourcePort != 0 {
+		checks = append(checks, sessionTargetDetailDriftCheck{
+			path:    "targetResourceDetails.targetResourcePort",
+			desired: fmt.Sprint(desired.TargetResourcePort),
+			current: fmt.Sprint(current.TargetResourcePort),
+		})
+	}
+	return checks
+}
+
 func listSessionPages(
 	ctx context.Context,
 	call func(context.Context, bastionsdk.ListSessionsRequest) (bastionsdk.ListSessionsResponse, error),
@@ -521,40 +693,83 @@ func handleSessionDeleteError(resource *bastionv1beta1.Session, err error) error
 	return err
 }
 
-func wrapSessionDeleteConfirmation(hooks *SessionRuntimeHooks) {
+func wrapSessionRuntimeClient(hooks *SessionRuntimeHooks, workRequestClient sessionOCIClient, initErr error) {
 	if hooks.Get.Call == nil {
 		return
 	}
 	getSession := hooks.Get.Call
 	hooks.WrapGeneratedClient = append(hooks.WrapGeneratedClient, func(delegate SessionServiceClient) SessionServiceClient {
-		return sessionDeleteConfirmationClient{
-			delegate:   delegate,
-			getSession: getSession,
+		return sessionRuntimeClient{
+			delegate:          delegate,
+			getSession:        getSession,
+			workRequestClient: workRequestClient,
+			initErr:           initErr,
 		}
 	})
 }
 
-type sessionDeleteConfirmationClient struct {
-	delegate   SessionServiceClient
-	getSession func(context.Context, bastionsdk.GetSessionRequest) (bastionsdk.GetSessionResponse, error)
+type sessionRuntimeClient struct {
+	delegate          SessionServiceClient
+	getSession        func(context.Context, bastionsdk.GetSessionRequest) (bastionsdk.GetSessionResponse, error)
+	workRequestClient sessionOCIClient
+	initErr           error
 }
 
-func (c sessionDeleteConfirmationClient) CreateOrUpdate(
+func (c sessionRuntimeClient) CreateOrUpdate(
 	ctx context.Context,
 	resource *bastionv1beta1.Session,
 	req ctrl.Request,
 ) (servicemanager.OSOKResponse, error) {
+	if err := c.validateTrackedTargetJSONData(ctx, resource); err != nil {
+		return servicemanager.OSOKResponse{IsSuccessful: false}, err
+	}
 	return c.delegate.CreateOrUpdate(ctx, resource, req)
 }
 
-func (c sessionDeleteConfirmationClient) Delete(ctx context.Context, resource *bastionv1beta1.Session) (bool, error) {
+func (c sessionRuntimeClient) Delete(ctx context.Context, resource *bastionv1beta1.Session) (bool, error) {
+	if handled, err := c.observePendingWriteWorkRequest(ctx, resource); handled || err != nil {
+		return false, err
+	}
 	if err := c.rejectAuthShapedConfirmRead(ctx, resource); err != nil {
 		return false, err
 	}
 	return c.delegate.Delete(ctx, resource)
 }
 
-func (c sessionDeleteConfirmationClient) rejectAuthShapedConfirmRead(ctx context.Context, resource *bastionv1beta1.Session) error {
+func (c sessionRuntimeClient) observePendingWriteWorkRequest(ctx context.Context, resource *bastionv1beta1.Session) (bool, error) {
+	workRequestID, phase, ok := pendingSessionWriteWorkRequest(resource)
+	if !ok {
+		return false, nil
+	}
+	workRequest, err := getSessionWorkRequest(ctx, c.workRequestClient, c.initErr, workRequestID)
+	if err != nil {
+		servicemanager.RecordErrorOpcRequestID(&resource.Status.OsokStatus, err)
+		return true, err
+	}
+	current, err := sessionWorkRequestAsyncOperation(&resource.Status.OsokStatus, workRequest, phase)
+	if err != nil {
+		return true, err
+	}
+	_ = servicemanager.ApplyAsyncOperation(&resource.Status.OsokStatus, current, loggerutil.OSOKLogger{})
+	return true, nil
+}
+
+func (c sessionRuntimeClient) validateTrackedTargetJSONData(ctx context.Context, resource *bastionv1beta1.Session) error {
+	if c.getSession == nil || resource == nil || strings.TrimSpace(resource.Spec.TargetResourceDetails.JsonData) == "" {
+		return nil
+	}
+	sessionID := trackedSessionID(resource)
+	if sessionID == "" {
+		return nil
+	}
+	response, err := c.getSession(ctx, bastionsdk.GetSessionRequest{SessionId: common.String(sessionID)})
+	if err != nil {
+		return err
+	}
+	return validateSessionTargetJSONDataCreateOnlyDrift(resource, response)
+}
+
+func (c sessionRuntimeClient) rejectAuthShapedConfirmRead(ctx context.Context, resource *bastionv1beta1.Session) error {
 	if c.getSession == nil || resource == nil {
 		return nil
 	}
@@ -578,6 +793,48 @@ func trackedSessionID(resource *bastionv1beta1.Session) string {
 		return id
 	}
 	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+}
+
+func pendingSessionWriteWorkRequest(resource *bastionv1beta1.Session) (string, shared.OSOKAsyncPhase, bool) {
+	if resource == nil || resource.Status.OsokStatus.Async.Current == nil {
+		return "", "", false
+	}
+	current := resource.Status.OsokStatus.Async.Current
+	if current.Source != "" && current.Source != shared.OSOKAsyncSourceWorkRequest {
+		return "", "", false
+	}
+	if current.NormalizedClass != shared.OSOKAsyncClassPending {
+		return "", "", false
+	}
+	workRequestID := strings.TrimSpace(current.WorkRequestID)
+	if workRequestID == "" {
+		return "", "", false
+	}
+	switch current.Phase {
+	case shared.OSOKAsyncPhaseCreate, shared.OSOKAsyncPhaseUpdate:
+		return workRequestID, current.Phase, true
+	default:
+		return "", "", false
+	}
+}
+
+func sessionWorkRequestAsyncOperation(
+	status *shared.OSOKStatus,
+	workRequest any,
+	fallbackPhase shared.OSOKAsyncPhase,
+) (*shared.OSOKAsyncOperation, error) {
+	wr, ok := sessionWorkRequestFromAny(workRequest)
+	if !ok {
+		return nil, fmt.Errorf("%s work request has unexpected type %T", sessionKind, workRequest)
+	}
+	return servicemanager.BuildWorkRequestAsyncOperation(status, sessionWorkRequestAsyncAdapter, servicemanager.WorkRequestAsyncInput{
+		RawStatus:        string(wr.Status),
+		RawAction:        string(wr.OperationType),
+		RawOperationType: string(wr.OperationType),
+		WorkRequestID:    stringPointerValue(wr.Id),
+		PercentComplete:  wr.PercentComplete,
+		FallbackPhase:    fallbackPhase,
+	})
 }
 
 func ambiguousSessionError(operation string, err error) error {
@@ -653,6 +910,16 @@ func sessionWorkRequestFromAny(workRequest any) (bastionsdk.WorkRequest, bool) {
 }
 
 func sessionFromResponse(response any) (bastionsdk.Session, bool) {
+	if session, ok := sessionFromReadOrCreateResponse(response); ok {
+		return session, true
+	}
+	if session, ok := sessionFromUpdateOrBody(response); ok {
+		return session, true
+	}
+	return bastionsdk.Session{}, false
+}
+
+func sessionFromReadOrCreateResponse(response any) (bastionsdk.Session, bool) {
 	switch value := response.(type) {
 	case bastionsdk.GetSessionResponse:
 		return value.Session, true
@@ -668,6 +935,13 @@ func sessionFromResponse(response any) (bastionsdk.Session, bool) {
 			return bastionsdk.Session{}, false
 		}
 		return value.Session, true
+	default:
+		return bastionsdk.Session{}, false
+	}
+}
+
+func sessionFromUpdateOrBody(response any) (bastionsdk.Session, bool) {
+	switch value := response.(type) {
 	case bastionsdk.UpdateSessionResponse:
 		return value.Session, true
 	case *bastionsdk.UpdateSessionResponse:
@@ -692,4 +966,11 @@ func stringPointerValue(value *string) string {
 		return ""
 	}
 	return strings.TrimSpace(*value)
+}
+
+func intPointerValue(value *int) int {
+	if value == nil {
+		return 0
+	}
+	return *value
 }

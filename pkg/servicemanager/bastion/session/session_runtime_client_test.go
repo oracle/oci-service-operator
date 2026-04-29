@@ -98,30 +98,8 @@ func TestSessionCreateOrUpdateCreatesWithWorkRequestTracking(t *testing.T) {
 		listSessionsFunc: func(_ context.Context, _ bastionsdk.ListSessionsRequest) (bastionsdk.ListSessionsResponse, error) {
 			return bastionsdk.ListSessionsResponse{}, nil
 		},
-		createSessionFunc: func(_ context.Context, request bastionsdk.CreateSessionRequest) (bastionsdk.CreateSessionResponse, error) {
-			if request.OpcRetryToken == nil || strings.TrimSpace(*request.OpcRetryToken) == "" {
-				t.Fatalf("CreateSession() OpcRetryToken is empty")
-			}
-			if got, want := stringPointerValue(request.BastionId), testBastionID; got != want {
-				t.Fatalf("CreateSession() BastionId = %q, want %q", got, want)
-			}
-			if _, ok := request.TargetResourceDetails.(bastionsdk.CreateManagedSshSessionTargetResourceDetails); !ok {
-				t.Fatalf("CreateSession() TargetResourceDetails = %T, want CreateManagedSshSessionTargetResourceDetails", request.TargetResourceDetails)
-			}
-			return bastionsdk.CreateSessionResponse{
-				Session:          newSDKSession(testSessionID, "session-create", bastionsdk.SessionLifecycleStateCreating),
-				OpcWorkRequestId: common.String("wr-create-1"),
-				OpcRequestId:     common.String("opc-create-1"),
-			}, nil
-		},
-		getWorkRequestFunc: func(_ context.Context, request bastionsdk.GetWorkRequestRequest) (bastionsdk.GetWorkRequestResponse, error) {
-			if got, want := stringPointerValue(request.WorkRequestId), "wr-create-1"; got != want {
-				t.Fatalf("GetWorkRequest() id = %q, want %q", got, want)
-			}
-			return bastionsdk.GetWorkRequestResponse{
-				WorkRequest: newSessionWorkRequest("wr-create-1", bastionsdk.OperationTypeCreateSession, bastionsdk.OperationStatusInProgress, testSessionID),
-			}, nil
-		},
+		createSessionFunc:  createSessionWithWorkRequest(t, "session-create", "wr-create-1", "opc-create-1"),
+		getWorkRequestFunc: getSessionWorkRequestByID(t, "wr-create-1", newSessionWorkRequest("wr-create-1", bastionsdk.OperationTypeCreateSession, bastionsdk.OperationStatusInProgress, testSessionID)),
 	}
 
 	response, err := newTestSessionClient(fake).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
@@ -265,6 +243,83 @@ func TestSessionCreateOrUpdateRejectsCreateOnlyDriftBeforeUpdate(t *testing.T) {
 	}
 }
 
+func TestSessionCreateOrUpdateAcceptsMatchingTargetResourceJSONData(t *testing.T) {
+	resource := newTestSessionWithTargetJSONData("session-json", "ocid1.instance.oc1..target")
+	resource.Status.Id = testSessionID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSessionID)
+
+	fake := &fakeSessionOCIClient{
+		getSessionFunc: func(_ context.Context, _ bastionsdk.GetSessionRequest) (bastionsdk.GetSessionResponse, error) {
+			return bastionsdk.GetSessionResponse{
+				Session: newSDKSession(testSessionID, "session-json", bastionsdk.SessionLifecycleStateActive),
+			}, nil
+		},
+	}
+
+	response, err := newTestSessionClient(fake).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful no requeue", response)
+	}
+	if got := len(fake.updateSessionCalls); got != 0 {
+		t.Fatalf("UpdateSession() calls = %d, want 0", got)
+	}
+	if got := resource.Spec.TargetResourceDetails.JsonData; got != "" {
+		t.Fatalf("spec.targetResourceDetails.jsonData = %q, want normalized empty value", got)
+	}
+}
+
+func TestSessionCreateOrUpdateRejectsTargetResourceJSONDataDriftBeforeUpdate(t *testing.T) {
+	resource := newTestSessionWithTargetJSONData("session-json-drift", "ocid1.instance.oc1..drifted")
+	resource.Status.Id = testSessionID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSessionID)
+
+	fake := &fakeSessionOCIClient{
+		getSessionFunc: func(_ context.Context, _ bastionsdk.GetSessionRequest) (bastionsdk.GetSessionResponse, error) {
+			return bastionsdk.GetSessionResponse{
+				Session: newSDKSession(testSessionID, "session-json-drift", bastionsdk.SessionLifecycleStateActive),
+			}, nil
+		},
+	}
+
+	_, err := newTestSessionClient(fake).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil || !strings.Contains(err.Error(), "targetResourceDetails.jsonData changes") {
+		t.Fatalf("CreateOrUpdate() error = %v, want targetResourceDetails.jsonData drift", err)
+	}
+	if got := len(fake.updateSessionCalls); got != 0 {
+		t.Fatalf("UpdateSession() calls = %d, want 0", got)
+	}
+}
+
+func TestSessionCreateOrUpdateRejectsTargetResourceJSONDataWhenReadbackIsMissing(t *testing.T) {
+	resource := newTestSessionWithTargetJSONData("session-json-missing-readback", "ocid1.instance.oc1..target")
+	resource.Status.Id = testSessionID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSessionID)
+
+	fake := &fakeSessionOCIClient{
+		getSessionFunc: func(_ context.Context, _ bastionsdk.GetSessionRequest) (bastionsdk.GetSessionResponse, error) {
+			return bastionsdk.GetSessionResponse{
+				Session: bastionsdk.Session{
+					Id:             common.String(testSessionID),
+					BastionId:      common.String(testBastionID),
+					LifecycleState: bastionsdk.SessionLifecycleStateActive,
+					DisplayName:    common.String("session-json-missing-readback"),
+				},
+			}, nil
+		},
+	}
+
+	_, err := newTestSessionClient(fake).CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err == nil || !strings.Contains(err.Error(), "current targetResourceDetails is empty") {
+		t.Fatalf("CreateOrUpdate() error = %v, want missing targetResourceDetails readback", err)
+	}
+	if got := len(fake.updateSessionCalls); got != 0 {
+		t.Fatalf("UpdateSession() calls = %d, want 0", got)
+	}
+}
+
 func TestSessionDeleteStartsWorkRequestAndRetainsFinalizer(t *testing.T) {
 	resource := newTestSession("session-delete")
 	resource.Status.Id = testSessionID
@@ -308,6 +363,69 @@ func TestSessionDeleteStartsWorkRequestAndRetainsFinalizer(t *testing.T) {
 	}
 	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-delete-1" {
 		t.Fatalf("status.status.opcRequestId = %q, want opc-delete-1", got)
+	}
+}
+
+func TestSessionDeleteObservesPendingCreateWorkRequestBeforeDelete(t *testing.T) {
+	requireSessionDeleteObservesPendingWriteWorkRequest(
+		t,
+		"session-delete-pending-create",
+		shared.OSOKAsyncPhaseCreate,
+		"wr-create-1",
+		bastionsdk.OperationTypeCreateSession,
+	)
+}
+
+func TestSessionDeleteObservesPendingUpdateWorkRequestBeforeDelete(t *testing.T) {
+	requireSessionDeleteObservesPendingWriteWorkRequest(
+		t,
+		"session-delete-pending-update",
+		shared.OSOKAsyncPhaseUpdate,
+		"wr-update-1",
+		bastionsdk.OperationTypeEnum("UPDATE_SESSION"),
+	)
+}
+
+func requireSessionDeleteObservesPendingWriteWorkRequest(
+	t *testing.T,
+	resourceName string,
+	phase shared.OSOKAsyncPhase,
+	workRequestID string,
+	operation bastionsdk.OperationTypeEnum,
+) {
+	t.Helper()
+	resource := newTestSession(resourceName)
+	resource.Status.Id = testSessionID
+	resource.Status.OsokStatus.Ocid = shared.OCID(testSessionID)
+	markTestWorkRequest(resource, phase, workRequestID)
+
+	fake := &fakeSessionOCIClient{
+		getWorkRequestFunc: func(_ context.Context, request bastionsdk.GetWorkRequestRequest) (bastionsdk.GetWorkRequestResponse, error) {
+			if got := stringPointerValue(request.WorkRequestId); got != workRequestID {
+				t.Fatalf("GetWorkRequest() id = %q, want %q", got, workRequestID)
+			}
+			return bastionsdk.GetWorkRequestResponse{
+				WorkRequest: newSessionWorkRequest(workRequestID, operation, bastionsdk.OperationStatusInProgress, testSessionID),
+			}, nil
+		},
+	}
+
+	deleted, err := newTestSessionClient(fake).Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatalf("Delete() deleted = true, want false while %s work request is pending", phase)
+	}
+	if got := len(fake.deleteSessionCalls); got != 0 {
+		t.Fatalf("DeleteSession() calls = %d, want 0", got)
+	}
+	if got := len(fake.getSessionCalls); got != 0 {
+		t.Fatalf("GetSession() calls = %d, want 0 before pending %s is observed", got, phase)
+	}
+	current := resource.Status.OsokStatus.Async.Current
+	if current == nil || current.WorkRequestID != workRequestID || current.Phase != phase {
+		t.Fatalf("status.status.async.current = %#v, want pending %s work request %s", current, phase, workRequestID)
 	}
 }
 
@@ -364,6 +482,50 @@ func newTestSessionClient(fake *fakeSessionOCIClient) SessionServiceClient {
 	return newSessionServiceClientWithOCIClient(loggerutil.OSOKLogger{Logger: logr.Discard()}, fake)
 }
 
+func createSessionWithWorkRequest(
+	t *testing.T,
+	displayName string,
+	workRequestID string,
+	opcRequestID string,
+) func(context.Context, bastionsdk.CreateSessionRequest) (bastionsdk.CreateSessionResponse, error) {
+	t.Helper()
+	return func(_ context.Context, request bastionsdk.CreateSessionRequest) (bastionsdk.CreateSessionResponse, error) {
+		requireCreateSessionRequest(t, request)
+		return bastionsdk.CreateSessionResponse{
+			Session:          newSDKSession(testSessionID, displayName, bastionsdk.SessionLifecycleStateCreating),
+			OpcWorkRequestId: common.String(workRequestID),
+			OpcRequestId:     common.String(opcRequestID),
+		}, nil
+	}
+}
+
+func requireCreateSessionRequest(t *testing.T, request bastionsdk.CreateSessionRequest) {
+	t.Helper()
+	if request.OpcRetryToken == nil || strings.TrimSpace(*request.OpcRetryToken) == "" {
+		t.Fatalf("CreateSession() OpcRetryToken is empty")
+	}
+	if got, want := stringPointerValue(request.BastionId), testBastionID; got != want {
+		t.Fatalf("CreateSession() BastionId = %q, want %q", got, want)
+	}
+	if _, ok := request.TargetResourceDetails.(bastionsdk.CreateManagedSshSessionTargetResourceDetails); !ok {
+		t.Fatalf("CreateSession() TargetResourceDetails = %T, want CreateManagedSshSessionTargetResourceDetails", request.TargetResourceDetails)
+	}
+}
+
+func getSessionWorkRequestByID(
+	t *testing.T,
+	workRequestID string,
+	workRequest bastionsdk.WorkRequest,
+) func(context.Context, bastionsdk.GetWorkRequestRequest) (bastionsdk.GetWorkRequestResponse, error) {
+	t.Helper()
+	return func(_ context.Context, request bastionsdk.GetWorkRequestRequest) (bastionsdk.GetWorkRequestResponse, error) {
+		if got := stringPointerValue(request.WorkRequestId); got != workRequestID {
+			t.Fatalf("GetWorkRequest() id = %q, want %q", got, workRequestID)
+		}
+		return bastionsdk.GetWorkRequestResponse{WorkRequest: workRequest}, nil
+	}
+}
+
 func newTestSession(name string) *bastionv1beta1.Session {
 	return &bastionv1beta1.Session{
 		ObjectMeta: metav1.ObjectMeta{
@@ -387,6 +549,30 @@ func newTestSession(name string) *bastionv1beta1.Session {
 			KeyType:             "PUB",
 			SessionTtlInSeconds: 3600,
 		},
+	}
+}
+
+func newTestSessionWithTargetJSONData(name string, targetResourceID string) *bastionv1beta1.Session {
+	resource := newTestSession(name)
+	resource.Spec.TargetResourceDetails = bastionv1beta1.SessionTargetResourceDetails{
+		JsonData: `{
+			"sessionType":"MANAGED_SSH",
+			"targetResourceOperatingSystemUserName":"opc",
+			"targetResourceId":"` + targetResourceID + `",
+			"targetResourcePrivateIpAddress":"10.0.0.10",
+			"targetResourcePort":22
+		}`,
+	}
+	return resource
+}
+
+func markTestWorkRequest(resource *bastionv1beta1.Session, phase shared.OSOKAsyncPhase, workRequestID string) {
+	resource.Status.OsokStatus.Async.Current = &shared.OSOKAsyncOperation{
+		Source:          shared.OSOKAsyncSourceWorkRequest,
+		Phase:           phase,
+		WorkRequestID:   workRequestID,
+		RawStatus:       string(bastionsdk.OperationStatusAccepted),
+		NormalizedClass: shared.OSOKAsyncClassPending,
 	}
 }
 
