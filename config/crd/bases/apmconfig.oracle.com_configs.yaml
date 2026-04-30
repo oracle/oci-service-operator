@@ -1,0 +1,665 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: configs.apmconfig.oracle.com
+spec:
+  group: apmconfig.oracle.com
+  names:
+    kind: Config
+    listKind: ConfigList
+    plural: configs
+    singular: config
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Config
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Config
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Config is the Schema for the configs API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConfigSpec defines the desired state of Config.
+            properties:
+              agentVersion:
+                description: The version of the referenced agent bundle.
+                type: string
+              apmDomainId:
+                description: The APM Domain ID the request is intended for.
+                type: string
+              attachInstallDir:
+                description: The directory owned by runAsUser.
+                type: string
+              config:
+                description: ConfigFields defines nested fields for Config.Config.
+                properties:
+                  configMap:
+                    additionalProperties:
+                      description: ConfigConfigMap defines nested fields for Config.Config.ConfigMap.
+                      properties:
+                        body:
+                          description: The Base64 encoded agent configuration file.
+                          type: string
+                        contentType:
+                          description: The MIME Content-Type that describes the content
+                            of the body field, for example, text/yaml or text/yaml;
+                            charset=utf-8
+                          type: string
+                      type: object
+                    description: Map of agent configuration files, where keys are
+                      file names.
+                    type: object
+                type: object
+              configType:
+                description: |-
+                  The discriminator that selects which OCI Config subtype to create or update.
+                  Supported values are `SPAN_FILTER`, `METRIC_GROUP`, `APDEX`, `OPTIONS`, `AGENT`, and `MACS_APM_EXTENSION`.
+                enum:
+                - SPAN_FILTER
+                - METRIC_GROUP
+                - APDEX
+                - OPTIONS
+                - AGENT
+                - MACS_APM_EXTENSION
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: An optional string that describes what the filter is
+                  intended or used for.
+                type: string
+              dimensions:
+                description: A list of dimensions for the metric. This variable should
+                  not be used.
+                items:
+                  description: ConfigDimension defines nested fields for Config.Dimension.
+                  properties:
+                    name:
+                      description: The name of the dimension.
+                      type: string
+                    valueSource:
+                      description: The source to populate the dimension. This must
+                        not be specified.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              displayName:
+                description: The name by which a configuration entity is displayed
+                  to the end user.
+                type: string
+              filterId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a Span Filter. The filterId is mandatory for the creation
+                  of MetricGroups. A filterId is generated when a Span Filter is created.
+                type: string
+              filterText:
+                description: The string that defines the Span Filter expression.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              group:
+                description: A string that specifies the group that an OPTIONS item
+                  belongs to.
+                type: string
+              jsonData:
+                type: string
+              managementAgentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Management Agent that will provision the APM Agent.
+                type: string
+              matchAgentsWithAttributeValue:
+                description: |-
+                  The agent attribute VALUE by which an agent configuration is matched to an agent.
+                  Each agent configuration object must specify a different value.
+                  The attribute KEY corresponding to this VALUE is in the matchAgentsWithAttributeKey field.
+                type: string
+              metrics:
+                description: The list of metrics in this group.
+                items:
+                  description: ConfigMetric defines nested fields for Config.Metric.
+                  properties:
+                    description:
+                      description: A description of the metric.
+                      type: string
+                    name:
+                      description: The name of the metric. This must be a known metric
+                        name.
+                      type: string
+                    unit:
+                      description: The unit of the metric.
+                      type: string
+                    valueSource:
+                      description: This must not be set.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              namespace:
+                description: The namespace to which the metrics are published. It
+                  must be one of several predefined namespaces.
+                type: string
+              options:
+                description: The options are stored here as JSON.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              overrides:
+                description: ConfigOverrides defines nested fields for Config.Overrides.
+                properties:
+                  overrideList:
+                    items:
+                      description: ConfigOverridesOverrideList defines nested fields
+                        for Config.Overrides.OverrideList.
+                      properties:
+                        agentFilter:
+                          description: The string that defines the Agent Filter expression.
+                          type: string
+                        overrideMap:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            A map whose key is a substitution variable specified within the configuration's body. For example, if below was specified in the configuration's body
+                            {{ isJfrEnabled | default false }}
+                            Then a valid map key would be "isJfrEnabled". The value is typically different than the default specified in the configuration's body.
+                            Thus, in this example, the map entry could be "isJfrEnabled": true
+                          type: object
+                      type: object
+                    type: array
+                type: object
+              processFilter:
+                description: Filter patterns used to discover active Java processes
+                  for provisioning the APM Agent.
+                items:
+                  type: string
+                type: array
+              rules:
+                items:
+                  description: ConfigRule defines nested fields for Config.Rule.
+                  properties:
+                    displayName:
+                      description: The name by which a configuration entity is displayed
+                        to the end user.
+                      type: string
+                    filterText:
+                      description: The string that defines the Span Filter expression.
+                      type: string
+                    isApplyToErrorSpans:
+                      description: |-
+                        Specifies whether an Apdex score should be computed for error spans. Setting it to "true" means that the Apdex
+                        score is computed in the usual way. Setting it to "false" skips the Apdex computation and sets the Apdex
+                        score to "frustrating" regardless of the configured thresholds. The default is "false".
+                      type: boolean
+                    isEnabled:
+                      description: |-
+                        Specifies whether the Apdex score should be computed for spans matching the rule. This can be used to disable
+                        Apdex score for spans that do not need or require it. The default is "true".
+                      type: boolean
+                    priority:
+                      description: |-
+                        The priority controls the order in which multiple rules in a rule set are applied. Lower values indicate higher
+                        priorities. Rules with higher priority are applied first, and once a match is found, the rest of the rules are
+                        ignored. Rules within the same rule set cannot have the same priority.
+                      type: integer
+                    satisfiedResponseTime:
+                      description: The maximum response time in milliseconds that
+                        is considered "satisfactory" for the end user.
+                      type: integer
+                    toleratingResponseTime:
+                      description: |-
+                        The maximum response time in milliseconds that is considered "tolerable" for the end user. A response
+                        time beyond this threshold is considered "frustrating".
+                        This value cannot be lower than "satisfiedResponseTime".
+                      type: integer
+                  required:
+                  - filterText
+                  - priority
+                  type: object
+                type: array
+              runAsUser:
+                description: The OS user that should be used to discover Java processes.
+                type: string
+              serviceName:
+                description: |-
+                  The name of the service being monitored. This argument enables you to filter by
+                  service and view traces and other signals in the APM Explorer user interface.
+                type: string
+            required:
+            - apmDomainId
+            - configType
+            type: object
+          status:
+            description: ConfigStatus defines the observed state of Config.
+            properties:
+              agentVersion:
+                description: The version of the referenced agent bundle.
+                type: string
+              apmDomainId:
+                description: The bound APM Domain ID used to address this configuration
+                  item.
+                type: string
+              attachInstallDir:
+                description: The directory owned by runAsUser.
+                type: string
+              config:
+                description: ConfigFields defines nested fields for Config.Config.
+                properties:
+                  configMap:
+                    additionalProperties:
+                      description: ConfigConfigMap defines nested fields for Config.Config.ConfigMap.
+                      properties:
+                        body:
+                          description: The Base64 encoded agent configuration file.
+                          type: string
+                        contentType:
+                          description: The MIME Content-Type that describes the content
+                            of the body field, for example, text/yaml or text/yaml;
+                            charset=utf-8
+                          type: string
+                      type: object
+                    description: Map of agent configuration files, where keys are
+                      file names.
+                    type: object
+                type: object
+              configType:
+                type: string
+              createdBy:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of a user.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: An optional string that describes what the options are
+                  intended or used for.
+                type: string
+              dimensions:
+                description: A list of dimensions for the metric. This variable should
+                  not be used.
+                items:
+                  description: ConfigDimension defines nested fields for Config.Dimension.
+                  properties:
+                    name:
+                      description: The name of the dimension.
+                      type: string
+                    valueSource:
+                      description: The source to populate the dimension. This must
+                        not be specified.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              displayName:
+                description: The name by which a configuration entity is displayed
+                  to the end user.
+                type: string
+              etag:
+                description: For optimistic concurrency control. See `if-match`.
+                type: string
+              filterId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of a Span Filter. The filterId is mandatory for the creation
+                  of MetricGroups. A filterId is generated when a Span Filter is created.
+                type: string
+              filterText:
+                description: The string that defines the Span Filter expression.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              group:
+                description: A string that specifies the group that an OPTIONS item
+                  belongs to.
+                type: string
+              id:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration item. An OCID is generated
+                  when the item is created.
+                type: string
+              inUseBy:
+                description: The list of configuration items that reference the span
+                  filter.
+                items:
+                  description: ConfigInUseBy defines nested fields for Config.InUseBy.
+                  properties:
+                    configType:
+                      description: The type of configuration item.
+                      type: string
+                    displayName:
+                      description: The name by which a configuration entity is displayed
+                        to the end user.
+                      type: string
+                    id:
+                      description: |-
+                        The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the configuration item. An OCID is generated
+                        when the item is created.
+                      type: string
+                    optionsGroup:
+                      description: A string that specifies the group that an OPTIONS
+                        item belongs to.
+                      type: string
+                  type: object
+                type: array
+              jsonData:
+                type: string
+              managementAgentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Management Agent that will provision the APM Agent.
+                type: string
+              matchAgentsWithAttributeKey:
+                description: |-
+                  The agent attribute KEY by which an Agent configuration is matched to an agent.
+                  All agent configuration objects share the same key. It is [ServiceName, service.name] by default.
+                  The attribute VALUE corresponding to this KEY is in the matchAgentsWithAttributeValue field.
+                items:
+                  type: string
+                type: array
+              matchAgentsWithAttributeValue:
+                description: |-
+                  The agent attribute VALUE by which an agent configuration is matched to an agent.
+                  Each agent configuration object must specify a different value.
+                  The attribute KEY corresponding to this VALUE is in the matchAgentsWithAttributeKey field.
+                type: string
+              metrics:
+                description: The list of metrics in this group.
+                items:
+                  description: ConfigMetric defines nested fields for Config.Metric.
+                  properties:
+                    description:
+                      description: A description of the metric.
+                      type: string
+                    name:
+                      description: The name of the metric. This must be a known metric
+                        name.
+                      type: string
+                    unit:
+                      description: The unit of the metric.
+                      type: string
+                    valueSource:
+                      description: This must not be set.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              namespace:
+                description: The namespace to which the metrics are published. It
+                  must be one of several predefined namespaces.
+                type: string
+              options:
+                description: The options are stored here as JSON.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              overrides:
+                description: ConfigOverrides defines nested fields for Config.Overrides.
+                properties:
+                  overrideList:
+                    items:
+                      description: ConfigOverridesOverrideList defines nested fields
+                        for Config.Overrides.OverrideList.
+                      properties:
+                        agentFilter:
+                          description: The string that defines the Agent Filter expression.
+                          type: string
+                        overrideMap:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            A map whose key is a substitution variable specified within the configuration's body. For example, if below was specified in the configuration's body
+                            {{ isJfrEnabled | default false }}
+                            Then a valid map key would be "isJfrEnabled". The value is typically different than the default specified in the configuration's body.
+                            Thus, in this example, the map entry could be "isJfrEnabled": true
+                          type: object
+                      type: object
+                    type: array
+                type: object
+              processFilter:
+                description: Filter patterns used to discover active Java processes
+                  for provisioning the APM Agent.
+                items:
+                  type: string
+                type: array
+              rules:
+                items:
+                  description: ConfigRule defines nested fields for Config.Rule.
+                  properties:
+                    displayName:
+                      description: The name by which a configuration entity is displayed
+                        to the end user.
+                      type: string
+                    filterText:
+                      description: The string that defines the Span Filter expression.
+                      type: string
+                    isApplyToErrorSpans:
+                      description: |-
+                        Specifies whether an Apdex score should be computed for error spans. Setting it to "true" means that the Apdex
+                        score is computed in the usual way. Setting it to "false" skips the Apdex computation and sets the Apdex
+                        score to "frustrating" regardless of the configured thresholds. The default is "false".
+                      type: boolean
+                    isEnabled:
+                      description: |-
+                        Specifies whether the Apdex score should be computed for spans matching the rule. This can be used to disable
+                        Apdex score for spans that do not need or require it. The default is "true".
+                      type: boolean
+                    priority:
+                      description: |-
+                        The priority controls the order in which multiple rules in a rule set are applied. Lower values indicate higher
+                        priorities. Rules with higher priority are applied first, and once a match is found, the rest of the rules are
+                        ignored. Rules within the same rule set cannot have the same priority.
+                      type: integer
+                    satisfiedResponseTime:
+                      description: The maximum response time in milliseconds that
+                        is considered "satisfactory" for the end user.
+                      type: integer
+                    toleratingResponseTime:
+                      description: |-
+                        The maximum response time in milliseconds that is considered "tolerable" for the end user. A response
+                        time beyond this threshold is considered "frustrating".
+                        This value cannot be lower than "satisfiedResponseTime".
+                      type: integer
+                  required:
+                  - filterText
+                  - priority
+                  type: object
+                type: array
+              runAsUser:
+                description: The OS user that should be used to discover Java processes.
+                type: string
+              serviceName:
+                description: |-
+                  The name of the service being monitored. This argument enables you to filter by
+                  service and view traces and other signals in the APM Explorer user interface.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: |-
+                  The time the resource was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format.
+                  Example: `2020-02-12T22:47:12.613Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The time the resource was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format.
+                  Example: `2020-02-13T22:47:12.613Z`
+                type: string
+              updatedBy:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of a user.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

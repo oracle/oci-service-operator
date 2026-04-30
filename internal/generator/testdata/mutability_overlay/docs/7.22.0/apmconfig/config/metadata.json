@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "apmconfig",
+  "kind": "Config",
+  "formalSlug": "config",
+  "providerResource": "oci_apm_config_config",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/apm_config_config",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/apm_config_config",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/apmconfig/config/page.html",
+  "bodySHA256": "147b2af396ae160654d04369595522faf249d6c0233f2e3430f99148244ffb18",
+  "bodyBytes": 6080,
+  "fixtureBodyPath": "7.22.0/apmconfig/config/page.html"
+}

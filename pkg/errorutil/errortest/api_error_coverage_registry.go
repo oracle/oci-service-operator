@@ -271,6 +271,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"The published ApiPlatformInstance runtime keeps generatedruntime CRUD, lifecycle rereads, and confirm-delete behavior, while a small handwritten hook narrows list lookup semantics and clears ChangeApiPlatformInstanceCompartment from the reviewed surface.",
 			),
+			resourceKey("apmconfig", "Config"): reviewedRegistration(
+				"apmconfig",
+				"apmconfig",
+				apiErrorCoverageDefaultVersion,
+				"Config",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"Config keeps generatedruntime CRUD and confirm-delete handling, while a handwritten polymorphic runtime hook layer dispatches subtype-specific request bodies, mirrors apmDomainId into status, and rejects incompatible top-level fields before OCI calls.",
+			),
 			resourceKey("apmcontrolplane", "ApmDomain"): reviewedRegistration(
 				"apmcontrolplane",
 				"apmcontrolplane",

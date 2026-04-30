@@ -93,4 +93,5 @@ resources:
 - databasemigration_v1beta1_connection.yaml
 - apmcontrolplane_v1beta1_apmdomain.yaml
 - apiaccesscontrol_v1beta1_privilegedapicontrol.yaml
+- apmconfig_v1beta1_config.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 88,
-    "mappings": 371,
-    "trackedMappings": 371,
+    "specs": 89,
+    "mappings": 372,
+    "trackedMappings": 372,
     "untrackedMappings": 0,
     "presentFields": 4163,
-    "missingFields": 37,
+    "missingFields": 38,
     "mandatoryPresentFields": 1321,
-    "mandatoryMissingFields": 34,
+    "mandatoryMissingFields": 35,
     "extraSpecFields": 438,
-    "overallCoveragePercent": 99.11904761904762,
-    "mandatoryCoveragePercent": 97.49077490774908
+    "overallCoveragePercent": 99.09545346346108,
+    "mandatoryCoveragePercent": 97.4188790560472
   },
   "services": [
     {
@@ -138,6 +138,20 @@
       "extraSpecFields": 2,
       "overallCoveragePercent": 96.875,
       "mandatoryCoveragePercent": 94.11764705882352
+    },
+    {
+      "service": "apmconfig",
+      "specs": 1,
+      "mappings": 1,
+      "trackedMappings": 1,
+      "untrackedMappings": 0,
+      "presentFields": 0,
+      "missingFields": 1,
+      "mandatoryPresentFields": 0,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 0,
+      "overallCoveragePercent": 0,
+      "mandatoryCoveragePercent": 0
     },
     {
       "service": "apmcontrolplane",
