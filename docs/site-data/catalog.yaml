@@ -165,6 +165,20 @@ packages:
         kind: ApmDomain
         summary: Manage OCI Application Performance Monitoring domains.
 
+  - package: apmsynthetics
+    displayName: Application Performance Monitoring Synthetics
+    summary: Manage OCI Application Performance Monitoring synthetics scripts from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Script while monitors, vantage points, workers, and helper families stay unpublished.
+      - The published runtime uses synchronous read-after-write follow-up semantics, scopes reuse by exact `displayName` plus `contentType` within one `apmDomainId`, and mirrors `apmDomainId` into status because OCI does not echo it in response bodies.
+    kindOverrides:
+      - group: apmsynthetics
+        kind: Script
+        summary: Manage OCI Application Performance Monitoring synthetics scripts.
+
   - package: apmtraces
     displayName: Application Performance Monitoring Traces
     summary: Manage OCI Application Performance Monitoring scheduled trace queries from Kubernetes with a reviewed controller-backed runtime.

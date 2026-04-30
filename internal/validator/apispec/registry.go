@@ -14,6 +14,7 @@ import (
 	apiplatformv1beta1 "github.com/oracle/oci-service-operator/api/apiplatform/v1beta1"
 	apmconfigv1beta1 "github.com/oracle/oci-service-operator/api/apmconfig/v1beta1"
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
+	apmsyntheticsv1beta1 "github.com/oracle/oci-service-operator/api/apmsynthetics/v1beta1"
 	apmtracesv1beta1 "github.com/oracle/oci-service-operator/api/apmtraces/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
@@ -1635,6 +1636,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "apmcontrolplane.ApmDomainSummary",
+			},
+		},
+	},
+	{
+		Name:       "ApmsyntheticsScript",
+		SpecType:   reflect.TypeOf(apmsyntheticsv1beta1.ScriptSpec{}),
+		StatusType: reflect.TypeOf(apmsyntheticsv1beta1.ScriptStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apmsynthetics.CreateScriptDetails",
+			},
+			{
+				SDKStruct: "apmsynthetics.UpdateScriptDetails",
+			},
+			{
+				SDKStruct: "apmsynthetics.Script",
+			},
+			{
+				SDKStruct: "apmsynthetics.ScriptCollection",
+			},
+			{
+				SDKStruct: "apmsynthetics.ScriptSummary",
 			},
 		},
 	},

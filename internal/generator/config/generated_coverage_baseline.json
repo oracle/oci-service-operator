@@ -4,13 +4,13 @@
     "mappings": 382,
     "trackedMappings": 382,
     "untrackedMappings": 0,
-    "presentFields": 4247,
-    "missingFields": 40,
-    "mandatoryPresentFields": 1339,
-    "mandatoryMissingFields": 37,
-    "extraSpecFields": 441,
-    "overallCoveragePercent": 99.06694658269186,
-    "mandatoryCoveragePercent": 97.31104651162791
+    "presentFields": 4280,
+    "missingFields": 43,
+    "mandatoryPresentFields": 1350,
+    "mandatoryMissingFields": 38,
+    "extraSpecFields": 443,
+    "overallCoveragePercent": 99.00532037936618,
+    "mandatoryCoveragePercent": 97.26224783861672
   },
   "services": [
     {
@@ -166,6 +166,20 @@
       "extraSpecFields": 2,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "apmsynthetics",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 33,
+      "missingFields": 3,
+      "mandatoryPresentFields": 11,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 91.66666666666666,
+      "mandatoryCoveragePercent": 91.66666666666666
     },
     {
       "service": "apmtraces",

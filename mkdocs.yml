@@ -140,6 +140,7 @@ nav:
           - apiplatform.oracle.com/v1beta1: reference/api/apiplatform/v1beta1/index.md
           - apmconfig.oracle.com/v1beta1: reference/api/apmconfig/v1beta1/index.md
           - apmcontrolplane.oracle.com/v1beta1: reference/api/apmcontrolplane/v1beta1/index.md
+          - apmsynthetics.oracle.com/v1beta1: reference/api/apmsynthetics/v1beta1/index.md
           - apmtraces.oracle.com/v1beta1: reference/api/apmtraces/v1beta1/index.md
           - bds.oracle.com/v1beta1: reference/api/bds/v1beta1/index.md
           - budget.oracle.com/v1beta1: reference/api/budget/v1beta1/index.md
