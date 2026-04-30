@@ -18,6 +18,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/apmtraces"
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
+	"github.com/oracle/oci-go-sdk/v65/capacitymanagement"
 	"github.com/oracle/oci-go-sdk/v65/clusterplacementgroups"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
@@ -462,6 +463,13 @@ var seedTargets = []Target{
 	newTarget("budget", "UpdateBudgetDetails", reflect.TypeOf(budget.UpdateBudgetDetails{})),
 	newTarget("budget", "Budget", reflect.TypeOf(budget.Budget{})),
 	newTarget("budget", "BudgetSummary", reflect.TypeOf(budget.BudgetSummary{})),
+
+	// Capacitymanagement CRD support
+	newTarget("capacitymanagement", "CreateOccCapacityRequestDetails", reflect.TypeOf(capacitymanagement.CreateOccCapacityRequestDetails{})),
+	newTarget("capacitymanagement", "UpdateOccCapacityRequestDetails", reflect.TypeOf(capacitymanagement.UpdateOccCapacityRequestDetails{})),
+	newTarget("capacitymanagement", "OccCapacityRequest", reflect.TypeOf(capacitymanagement.OccCapacityRequest{})),
+	newTarget("capacitymanagement", "OccCapacityRequestCollection", reflect.TypeOf(capacitymanagement.OccCapacityRequestCollection{})),
+	newTarget("capacitymanagement", "OccCapacityRequestSummary", reflect.TypeOf(capacitymanagement.OccCapacityRequestSummary{})),
 
 	// Clusterplacementgroups CRD support
 	newTarget("clusterplacementgroups", "CreateClusterPlacementGroupDetails", reflect.TypeOf(clusterplacementgroups.CreateClusterPlacementGroupDetails{})),

@@ -23,6 +23,7 @@ This landing page is generated from the checked-in package and release inventory
 | [apmtraces.oracle.com/v1beta1](apmtraces/v1beta1/index.md) | [ScheduledQuery](apmtraces/v1beta1/index.md#kind-scheduledquery) | - |
 | [bds.oracle.com/v1beta1](bds/v1beta1/index.md) | [BdsInstance](bds/v1beta1/index.md#kind-bdsinstance) | - |
 | [budget.oracle.com/v1beta1](budget/v1beta1/index.md) | [Budget](budget/v1beta1/index.md#kind-budget) | - |
+| [capacitymanagement.oracle.com/v1beta1](capacitymanagement/v1beta1/index.md) | [OccCapacityRequest](capacitymanagement/v1beta1/index.md#kind-occcapacityrequest) | - |
 | [clusterplacementgroups.oracle.com/v1beta1](clusterplacementgroups/v1beta1/index.md) | [ClusterPlacementGroup](clusterplacementgroups/v1beta1/index.md#kind-clusterplacementgroup) | - |
 | [containerengine.oracle.com/v1beta1](containerengine/v1beta1/index.md) | [Cluster](containerengine/v1beta1/index.md#kind-cluster), [NodePool](containerengine/v1beta1/index.md#kind-nodepool) | - |
 | [containerinstances.oracle.com/v1beta1](containerinstances/v1beta1/index.md) | [ContainerInstance](containerinstances/v1beta1/index.md#kind-containerinstance) | Container Instances (`v2.0.0-alpha`) |

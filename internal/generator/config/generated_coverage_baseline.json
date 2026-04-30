@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 91,
-    "mappings": 382,
-    "trackedMappings": 382,
+    "specs": 92,
+    "mappings": 387,
+    "trackedMappings": 387,
     "untrackedMappings": 0,
-    "presentFields": 4247,
-    "missingFields": 40,
-    "mandatoryPresentFields": 1339,
-    "mandatoryMissingFields": 37,
-    "extraSpecFields": 441,
-    "overallCoveragePercent": 99.06694658269186,
-    "mandatoryCoveragePercent": 97.31104651162791
+    "presentFields": 4304,
+    "missingFields": 41,
+    "mandatoryPresentFields": 1372,
+    "mandatoryMissingFields": 38,
+    "extraSpecFields": 451,
+    "overallCoveragePercent": 99.05638665132336,
+    "mandatoryCoveragePercent": 97.30496453900709
   },
   "services": [
     {
@@ -208,6 +208,20 @@
       "extraSpecFields": 4,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "capacitymanagement",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 57,
+      "missingFields": 1,
+      "mandatoryPresentFields": 33,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 10,
+      "overallCoveragePercent": 98.27586206896551,
+      "mandatoryCoveragePercent": 97.05882352941177
     },
     {
       "service": "clusterplacementgroups",

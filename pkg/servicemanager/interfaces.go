@@ -21,10 +21,19 @@ type OSOKResponse struct {
 	RequeueDuration time.Duration
 }
 
+type OSOKDeleteResult struct {
+	Deleted         bool
+	RequeueDuration time.Duration
+}
+
 type OSOKServiceManager interface {
 	CreateOrUpdate(ctx context.Context, obj runtime.Object, req ctrl.Request) (OSOKResponse, error)
 
 	Delete(ctx context.Context, obj runtime.Object) (bool, error)
 
 	GetCrdStatus(obj runtime.Object) (*shared.OSOKStatus, error)
+}
+
+type OSOKDeleteResultProvider interface {
+	DeleteWithResult(ctx context.Context, obj runtime.Object) (OSOKDeleteResult, error)
 }

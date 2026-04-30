@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "capacitymanagement",
+  "kind": "OccCapacityRequest",
+  "formalSlug": "occcapacityrequest",
+  "providerResource": "oci_capacity_management_occ_capacity_request",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/capacity_management_occ_capacity_request",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/capacity_management_occ_capacity_request",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/capacitymanagement/occcapacityrequest/page.html",
+  "bodySHA256": "e3ae1a1d3a9c7525cfbcbb40327557815b55bfd97401e284177a464ada85ed58",
+  "bodyBytes": 1702,
+  "fixtureBodyPath": "7.22.0/capacitymanagement/occcapacityrequest/page.html"
+}

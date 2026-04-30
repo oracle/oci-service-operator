@@ -1144,6 +1144,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"apmtraces",
 		"bds",
 		"budget",
+		"capacitymanagement",
 		"clusterplacementgroups",
 		"containerengine",
 		"containerinstances",
@@ -1197,6 +1198,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"apmtraces",
 		"bds",
 		"budget",
+		"capacitymanagement",
 		"clusterplacementgroups",
 		"containerengine",
 		"containerinstances",
@@ -1241,6 +1243,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["apmtraces"], true, SelectionModeExplicit, []string{"ScheduledQuery"})
 	assertServiceSelection(t, services["bds"], true, SelectionModeExplicit, []string{"BdsInstance"})
 	assertServiceSelection(t, services["budget"], true, SelectionModeExplicit, []string{"Budget"})
+	assertServiceSelection(t, services["capacitymanagement"], true, SelectionModeExplicit, []string{"OccCapacityRequest"})
 	assertServiceSelection(t, services["clusterplacementgroups"], true, SelectionModeExplicit, []string{"ClusterPlacementGroup"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"Cluster", "NodePool"})
 	assertServiceSelection(t, services["containerinstances"], true, SelectionModeExplicit, []string{"ContainerInstance"})
@@ -1963,6 +1966,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"apmtraces":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"bds":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"budget":             {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
+		"capacitymanagement": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"clusterplacementgroups": {
 			strategy: AsyncStrategyWorkRequest,
 			runtime:  AsyncRuntimeGeneratedRuntime,
@@ -2115,9 +2119,10 @@ func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContra
 		t.Fatalf("LoadConfig(%q) error = %v", cfgPath, err)
 	}
 
-	services := serviceConfigsByName(t, cfg, "analytics", "containerengine", "core", "dataflow", "nosql", "objectstorage")
+	services := serviceConfigsByName(t, cfg, "analytics", "capacitymanagement", "containerengine", "core", "dataflow", "nosql", "objectstorage")
 
 	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
+	assertServiceSelection(t, services["capacitymanagement"], true, SelectionModeExplicit, []string{"OccCapacityRequest"})
 	assertServiceSelection(t, services["containerengine"], true, SelectionModeExplicit, []string{"NodePool"})
 	assertServiceSelection(t, services["core"], true, SelectionModeExplicit, []string{"Instance"})
 	assertServiceSelection(t, services["dataflow"], true, SelectionModeExplicit, []string{"Application"})
@@ -2128,12 +2133,13 @@ func TestCheckedInMutabilityValidationConfigSelectedKindsHaveExplicitAsyncContra
 		strategy string
 		runtime  string
 	}{
-		"analytics":       {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"containerengine": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"core":            {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"dataflow":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"nosql":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
-		"objectstorage":   {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"analytics":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"capacitymanagement": {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"containerengine":    {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"core":               {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"dataflow":           {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"nosql":              {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"objectstorage":      {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 	}
 
 	targets := defaultActiveExplicitSelectedKindTargets(cfg)

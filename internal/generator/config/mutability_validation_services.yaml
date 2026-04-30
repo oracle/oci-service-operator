@@ -27,6 +27,24 @@ services:
             runtime: generatedruntime
             formalClassification: lifecycle
 
+  - service: capacitymanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/capacitymanagement
+    group: capacitymanagement
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OccCapacityRequest
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      resources:
+        - kind: OccCapacityRequest
+          formalSpec: occcapacityrequest
+
   - service: containerengine
     sdkPackage: github.com/oracle/oci-go-sdk/v65/containerengine
     group: containerengine

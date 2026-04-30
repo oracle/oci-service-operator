@@ -930,6 +930,36 @@ services:
           serviceManager:
             strategy: none
 
+  - service: capacitymanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/capacitymanagement
+    group: capacitymanagement
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OccCapacityRequest
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: OccCapacityRequest
+          formalSpec: occcapacityrequest
+          serviceManager:
+            packagePath: capacitymanagement/occcapacityrequest
+
   - service: certificates
     sdkPackage: github.com/oracle/oci-go-sdk/v65/certificates
     group: certificates
