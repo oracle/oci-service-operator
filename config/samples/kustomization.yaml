@@ -97,4 +97,5 @@ resources:
 - apmtraces_v1beta1_scheduledquery.yaml
 - dashboardservice_v1beta1_dashboardgroup.yaml
 - apmsynthetics_v1beta1_script.yaml
+- capacitymanagement_v1beta1_occcapacityrequest.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

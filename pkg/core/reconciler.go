@@ -71,8 +71,8 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 			r.Log.InfoLogWithFixedMessage(ctx, "The Deletion time is non zero. Deleting the resource")
 
 			oldObj := obj.DeepCopyObject().(client.Object)
-			delSuc, err := r.DeleteResource(ctx, obj, req)
-			if err != nil || !delSuc {
+			deleteResult, err := r.deleteResourceResult(ctx, obj, req)
+			if err != nil || !deleteResult.Deleted {
 				if patchErr := r.patchDeleteStatusIfChanged(ctx, oldObj, obj, req); patchErr != nil {
 					err = errors.Join(err, patchErr)
 				}
@@ -83,7 +83,7 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 					"Requeuing object due to error during delete of CR", req.Name, req.Namespace)
 				return util.RequeueWithError(ctx, err, defaultRequeueTime, r.Log)
 			}
-			if delSuc {
+			if deleteResult.Deleted {
 				if err := r.removeFinalizer(ctx, obj, strings.Join(r.AdditionalFinalizers, " "), OSOKFinalizerName); err != nil {
 					r.Log.ErrorLogWithFixedMessage(ctx, err, "Failed to remove the finalizer")
 					r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
@@ -96,7 +96,11 @@ func (r *BaseReconciler) Reconcile(ctx context.Context, req ctrl.Request, obj cl
 				r.Recorder.Event(obj, v1.EventTypeNormal, "Success", "Removed finalizer")
 				return util.DoNotRequeue()
 			} else {
-				return util.RequeueWithoutError(ctx, defaultRequeueTime, r.Log)
+				requeueDuration := deleteResult.RequeueDuration
+				if requeueDuration <= 0 {
+					requeueDuration = defaultRequeueTime
+				}
+				return util.RequeueWithoutError(ctx, requeueDuration, r.Log)
 			}
 		}
 	}
@@ -198,11 +202,17 @@ func (r *BaseReconciler) ReconcileResource(ctx context.Context, obj client.Objec
 	}
 }
 
-func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, req ctrl.Request) (bool, error) {
+func (r *BaseReconciler) deleteResourceResult(ctx context.Context, obj client.Object, req ctrl.Request) (servicemanager.OSOKDeleteResult, error) {
 	ctx = metrics.AddFixedLogMapEntries(ctx, req.Name, req.Namespace)
-	//log := util.LogUtil{Log: r.Log.WithValues("name", req.Name, "namespace", req.Namespace)}
-	//TODO Emit Delete Start metrics
-	delSucc, err := r.OSOKServiceManager.Delete(ctx, obj)
+	var (
+		delResult servicemanager.OSOKDeleteResult
+		err       error
+	)
+	if manager, ok := r.OSOKServiceManager.(servicemanager.OSOKDeleteResultProvider); ok {
+		delResult, err = manager.DeleteWithResult(ctx, obj)
+	} else {
+		delResult.Deleted, err = r.OSOKServiceManager.Delete(ctx, obj)
+	}
 	if err != nil {
 		classification := errorutil.ClassifyDeleteError(err)
 		if classification.IsUnambiguousNotFound() {
@@ -210,7 +220,7 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 				"oci_http_status_code", classification.HTTPStatusCodeString(),
 				"oci_error_code", classification.ErrorCodeString(),
 				"normalized_error_type", classification.NormalizedTypeString())
-			return true, nil
+			return servicemanager.OSOKDeleteResult{Deleted: true}, nil
 		}
 		if classification.IsConflict() {
 			r.Log.InfoLogWithFixedMessage(ctx, r.messageWithAsyncBreadcrumb(obj, "Delete is blocked and will be retried"),
@@ -219,7 +229,7 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 				"normalized_error_type", classification.NormalizedTypeString())
 			r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonBlocked,
 				r.messageWithAsyncBreadcrumb(obj, fmt.Sprintf("Delete blocked and will be retried: %s", err.Error())))
-			return false, nil
+			return servicemanager.OSOKDeleteResult{Deleted: false}, nil
 		}
 		r.Log.ErrorLogWithFixedMessage(ctx, err, r.messageWithAsyncBreadcrumb(obj, "Delete failed in the Service Manager with error"), "name", req.Name,
 			"namespace", req.Namespace, "namespacedName", req.String(),
@@ -228,18 +238,21 @@ func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, 
 			"normalized_error_type", classification.NormalizedTypeString())
 		r.Recorder.Event(obj, v1.EventTypeWarning, "Failed",
 			r.messageWithAsyncBreadcrumb(obj, fmt.Sprintf("Failed to delete resource: %s", err.Error())))
-		// TODO Emit Delete Fault metrics end
-		return false, err
+		return servicemanager.OSOKDeleteResult{}, err
 	}
-	if delSucc {
+	if delResult.Deleted {
 		r.Log.InfoLogWithFixedMessage(ctx, "Delete Successful")
 	} else {
 		r.Log.InfoLogWithFixedMessage(ctx, r.messageWithAsyncBreadcrumb(obj, "Delete is in progress and will be retried"))
 		r.Recorder.Event(obj, v1.EventTypeNormal, deleteEventReasonInProgress,
 			r.messageWithAsyncBreadcrumb(obj, "Delete is in progress"))
 	}
-	// TODO Emit Delete Success metrics end
-	return delSucc, nil
+	return delResult, nil
+}
+
+func (r *BaseReconciler) DeleteResource(ctx context.Context, obj client.Object, req ctrl.Request) (bool, error) {
+	result, err := r.deleteResourceResult(ctx, obj, req)
+	return result.Deleted, err
 }
 
 func (r *BaseReconciler) patchDeleteStatusIfChanged(ctx context.Context, oldObj, obj client.Object, req ctrl.Request) error {

@@ -27,6 +27,7 @@ resources:
 - bases/apmtraces.oracle.com_scheduledqueries.yaml
 - bases/bds.oracle.com_bdsinstances.yaml
 - bases/budget.oracle.com_budgets.yaml
+- bases/capacitymanagement.oracle.com_occcapacityrequests.yaml
 - bases/clusterplacementgroups.oracle.com_clusterplacementgroups.yaml
 - bases/containerengine.oracle.com_clusters.yaml
 - bases/containerengine.oracle.com_nodepools.yaml

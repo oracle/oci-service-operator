@@ -400,6 +400,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - capacitymanagement.oracle.com
+  resources:
+  - occcapacityrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - capacitymanagement.oracle.com
+  resources:
+  - occcapacityrequests/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - capacitymanagement.oracle.com
+  resources:
+  - occcapacityrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - clusterplacementgroups.oracle.com
   resources:
   - clusterplacementgroups

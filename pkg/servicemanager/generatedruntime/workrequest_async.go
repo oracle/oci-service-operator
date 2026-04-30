@@ -431,7 +431,8 @@ func (c ServiceClient[T]) completeGeneratedWorkRequestDelete(
 		return false, err
 	}
 	if semantics := c.config.Semantics; semantics != nil {
-		return c.applyDeletePolicy(resource, response, semantics)
+		deleteResult, err := c.applyDeletePolicy(resource, response, semantics, 0)
+		return deleteResult.Deleted, err
 	}
 	if err := c.markTerminatingWithHooks(resource, response); err != nil {
 		return false, err

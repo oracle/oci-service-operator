@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "capacitymanagement",
+  "slug": "occcapacityrequest",
+  "kind": "OccCapacityRequest",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_capacity_management_occ_capacity_request",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateOccCapacityRequest",
+        "requestType": "capacitymanagement.CreateOccCapacityRequestRequest",
+        "responseType": "capacitymanagement.CreateOccCapacityRequestResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetOccCapacityRequest",
+        "requestType": "capacitymanagement.GetOccCapacityRequestRequest",
+        "responseType": "capacitymanagement.GetOccCapacityRequestResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListOccCapacityRequests",
+        "requestType": "capacitymanagement.ListOccCapacityRequestsRequest",
+        "responseType": "capacitymanagement.ListOccCapacityRequestsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateOccCapacityRequest",
+        "requestType": "capacitymanagement.UpdateOccCapacityRequestRequest",
+        "responseType": "capacitymanagement.UpdateOccCapacityRequestResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteOccCapacityRequest",
+        "requestType": "capacitymanagement.DeleteOccCapacityRequestRequest",
+        "responseType": "capacitymanagement.DeleteOccCapacityRequestResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "request_state"
+    ],
+    "forceNew": [
+      "availability_domain",
+      "compartment_id",
+      "date_expected_capacity_handover",
+      "description",
+      "details",
+      "namespace",
+      "occ_availability_catalog_id",
+      "region",
+      "request_type"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "template",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED",
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_capacity_management_occ_capacity_requests",
+    "collectionField": "occ_capacity_requests",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "namespace",
+      "occ_availability_catalog_id",
+      "request_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/capacitymanagement/occcapacityrequest/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/capacitymanagement/occcapacityrequest/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "delete-confirmation",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "secret-output"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateOccCapacityRequest, GetOccCapacityRequest, ListOccCapacityRequests, UpdateOccCapacityRequest, and DeleteOccCapacityRequest are present in v65.110.0. The SDK also exposes ListOccCapacityRequestsInternal and UpdateInternalOccCapacityRequest, but those internal helpers are outside the published provider-backed surface.",
+    "Pinned OCI SDK contract: lifecycle states are CREATING, UPDATING, ACTIVE, DELETING, DELETED, and FAILED. Create, update, and delete responses expose retry-after headers; create and update also return the OccCapacityRequest body.",
+    "Pinned provider coverage: the provider-facts inventory aligned to formal/sources.lock exposes resource oci_capacity_management_occ_capacity_request plus singular and list datasources oci_capacity_management_occ_capacity_request and oci_capacity_management_occ_capacity_requests for this kind. The checked-in mutability docs fixture is used because the live Terraform Registry page currently renders as a JavaScript shell instead of a deterministic argument-reference HTML page.",
+    "Repo-authored runtime intentionally does not adopt untracked live capacity requests by list lookup. DisplayName is mutable, the public list surface cannot prove full create-time equivalence for region/date/details, and the internal list requires occCustomerGroupId that the CR does not model.",
+    "Repo-authored mutation policy matches the public update surface: only displayName, requestState, freeformTags, and definedTags reconcile in place. All other meaningful spec fields remain create-time only drift for the published runtime.",
+    "Delete confirmation stays lifecycle-based rather than header-only: the finalizer remains until DeleteOccCapacityRequest succeeds and GetOccCapacityRequest confirms DELETED or NotFound."
+  ]
+}

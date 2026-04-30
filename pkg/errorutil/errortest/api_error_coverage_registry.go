@@ -331,6 +331,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"Initial Budget rollout keeps plain generatedruntime CRUD, rereads, and confirm-delete handling with async.strategy=none because the service exposes direct CRUD without service-local work requests.",
 			),
+			resourceKey("capacitymanagement", "OccCapacityRequest"): reviewedRegistration(
+				"capacitymanagement",
+				"capacitymanagement",
+				apiErrorCoverageDefaultVersion,
+				"OccCapacityRequest",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"OccCapacityRequest keeps lifecycle-based generatedruntime CRUD and confirm-delete handling, disables untracked list adoption entirely, and preserves OCI retry-after hints across create, update, and delete requeues.",
+			),
 			resourceKey("clusterplacementgroups", "ClusterPlacementGroup"): reviewedRegistration(
 				"clusterplacementgroups",
 				"clusterplacementgroups",

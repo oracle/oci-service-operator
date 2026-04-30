@@ -209,6 +209,33 @@ func TestReconcileDeleteInProgressRequeuesAndKeepsFinalizer(t *testing.T) {
 	assertNoEventContains(t, events, "Failed Delete the resource")
 }
 
+func TestReconcileDeleteInProgressUsesServiceDeleteRequeueDuration(t *testing.T) {
+	t.Parallel()
+
+	const customRequeue = 23 * time.Second
+
+	reconciler, recorder, kubeClient := newDeleteReconciler(t, deleteBehavior{
+		requeueDuration: customRequeue,
+	})
+
+	result, err := reconciler.Reconcile(context.Background(), testRequest(), &corev1.ConfigMap{})
+	if err != nil {
+		t.Fatalf("Reconcile() error = %v, want nil", err)
+	}
+	if result.RequeueAfter != customRequeue {
+		t.Fatalf("Reconcile() requeueAfter = %v, want %v", result.RequeueAfter, customRequeue)
+	}
+
+	stored := kubeClient.StoredConfigMap()
+	if !HasFinalizer(stored, OSOKFinalizerName) {
+		t.Fatal("finalizer removed during delete-in-progress, want retained")
+	}
+
+	events := drainEvents(recorder)
+	assertContainsEvent(t, events, "Delete is in progress")
+	assertNoEventContains(t, events, "Removed finalizer")
+}
+
 func TestReconcileDeleteInProgressPersistsDeleteStatusMutations(t *testing.T) {
 	t.Parallel()
 
@@ -774,10 +801,11 @@ type createOrUpdateBehavior struct {
 }
 
 type deleteBehavior struct {
-	deleted bool
-	err     error
-	status  *shared.OSOKStatus
-	mutate  func(runtime.Object)
+	deleted         bool
+	err             error
+	status          *shared.OSOKStatus
+	mutate          func(runtime.Object)
+	requeueDuration time.Duration
 }
 
 type stubServiceManager struct {
@@ -797,6 +825,17 @@ func (m *stubServiceManager) Delete(_ context.Context, obj runtime.Object) (bool
 	}
 	m.currentStatus = cloneStatus(m.deleteBehavior.status)
 	return m.deleteBehavior.deleted, m.deleteBehavior.err
+}
+
+func (m *stubServiceManager) DeleteWithResult(_ context.Context, obj runtime.Object) (servicemanager.OSOKDeleteResult, error) {
+	if m.deleteBehavior.mutate != nil {
+		m.deleteBehavior.mutate(obj)
+	}
+	m.currentStatus = cloneStatus(m.deleteBehavior.status)
+	return servicemanager.OSOKDeleteResult{
+		Deleted:         m.deleteBehavior.deleted,
+		RequeueDuration: m.deleteBehavior.requeueDuration,
+	}, m.deleteBehavior.err
 }
 
 func (m *stubServiceManager) GetCrdStatus(runtime.Object) (*shared.OSOKStatus, error) {

@@ -18,6 +18,7 @@ import (
 	apmtracesv1beta1 "github.com/oracle/oci-service-operator/api/apmtraces/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
+	capacitymanagementv1beta1 "github.com/oracle/oci-service-operator/api/capacitymanagement/v1beta1"
 	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
@@ -1718,6 +1719,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "budget.BudgetSummary",
+			},
+		},
+	},
+	{
+		Name:       "CapacitymanagementOccCapacityRequest",
+		SpecType:   reflect.TypeOf(capacitymanagementv1beta1.OccCapacityRequestSpec{}),
+		StatusType: reflect.TypeOf(capacitymanagementv1beta1.OccCapacityRequestStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "capacitymanagement.CreateOccCapacityRequestDetails",
+			},
+			{
+				SDKStruct: "capacitymanagement.UpdateOccCapacityRequestDetails",
+			},
+			{
+				SDKStruct: "capacitymanagement.OccCapacityRequest",
+			},
+			{
+				SDKStruct: "capacitymanagement.OccCapacityRequestCollection",
+			},
+			{
+				SDKStruct: "capacitymanagement.OccCapacityRequestSummary",
 			},
 		},
 	},

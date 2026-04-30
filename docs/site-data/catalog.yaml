@@ -219,6 +219,20 @@ packages:
         kind: Budget
         summary: Manage OCI Budgets.
 
+  - package: capacitymanagement
+    displayName: Capacity Management
+    summary: Manage OCI Capacity Management capacity requests from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to OccCapacityRequest while the remaining Capacity Management resource families stay unpublished.
+      - The published runtime binds only tracked OCI identity, does not adopt untracked live requests, and honors OCI retry-after headers during lifecycle requeues.
+    kindOverrides:
+      - group: capacitymanagement
+        kind: OccCapacityRequest
+        summary: Manage OCI Capacity Management capacity requests.
+
   - package: clusterplacementgroups
     displayName: Cluster Placement Groups
     summary: Manage OCI Cluster Placement Groups from Kubernetes with an initial controller-backed ClusterPlacementGroup rollout.
