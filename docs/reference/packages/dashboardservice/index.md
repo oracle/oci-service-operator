@@ -17,7 +17,8 @@ Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed ru
 ## Notes
 
 - Current package scope is intentionally limited to DashboardGroup while the dashboard content model itself stays unpublished.
-- The published runtime keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, and preserves clear-to-empty updates for `displayName`, `description`, `freeformTags`, and `definedTags`.
+- The published runtime keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, updates non-empty `displayName` and `description` values in place, and preserves explicit empty-map clears for `freeformTags` and `definedTags`.
+- Empty-string `displayName` and `description` values currently behave as omission rather than explicit clear because the generated spec cannot distinguish those intents.
 - Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.

@@ -509,7 +509,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				APIErrorCoverageFamilyGeneratedRuntimePlain,
 				deleteNotFoundGeneratedRuntime,
 				retryableConflictGeneratedRuntime,
-				"DashboardGroup keeps generatedruntime CRUD and lifecycle rereads, while a small handwritten seam clears the bootstrap formal gaps, skips unsafe pre-create reuse when displayName is empty, and preserves explicit clear-to-empty updates for displayName, description, and tag maps.",
+				"DashboardGroup keeps generatedruntime CRUD and lifecycle rereads, while a small handwritten seam skips unsafe pre-create reuse when displayName is empty, preserves explicit empty-map clears for tag maps, and treats empty-string displayName/description values as omission until the spec can distinguish clear from omit.",
 			),
 			resourceKey("dataflow", "Application"): reviewedRegistration(
 				"dataflow",

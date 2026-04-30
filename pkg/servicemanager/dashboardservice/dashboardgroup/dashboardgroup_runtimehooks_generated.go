@@ -99,7 +99,7 @@ func newDashboardGroupRuntimeSemantics() *generatedruntime.Semantics {
 			Hooks:    []generatedruntime.Hook{{Helper: "tfresource.DeleteResource", EntityType: "", Action: ""}},
 		},
 		AuxiliaryOperations: []generatedruntime.AuxiliaryOperation{{Phase: "update", MethodName: "ChangeDashboardGroupCompartment", RequestTypeName: "dashboardservice.ChangeDashboardGroupCompartmentRequest", ResponseTypeName: "dashboardservice.ChangeDashboardGroupCompartmentResponse"}},
-		Unsupported:         []generatedruntime.UnsupportedSemantic{},
+		Unsupported:         []generatedruntime.UnsupportedSemantic{{Category: "drift-guard", StopCondition: "Close when the generated DashboardGroup spec preserves explicit empty-string update intent for displayName and description so the runtime can distinguish omission from clear-to-empty."}},
 	}
 }
 func newDashboardGroupDefaultRuntimeHooks(sdkClient dashboardservicesdk.DashboardGroupClient) DashboardGroupRuntimeHooks {

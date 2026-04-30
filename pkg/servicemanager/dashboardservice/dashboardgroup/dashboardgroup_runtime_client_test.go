@@ -76,7 +76,7 @@ func (s stubDashboardGroupOCIClient) DeleteDashboardGroup(
 	return s.delete(ctx, req)
 }
 
-func TestApplyDashboardGroupRuntimeHooksClearsBootstrapFormalGaps(t *testing.T) {
+func TestApplyDashboardGroupRuntimeHooksPublishesReviewedSemantics(t *testing.T) {
 	t.Parallel()
 
 	hooks := newDashboardGroupDefaultRuntimeHooks(dashboardservicesdk.DashboardGroupClient{})
@@ -108,6 +108,18 @@ func TestApplyDashboardGroupRuntimeHooksClearsBootstrapFormalGaps(t *testing.T) 
 	}
 	if hooks.List.Fields[0].FieldName != "CompartmentId" || hooks.List.Fields[1].FieldName != "DisplayName" {
 		t.Fatalf("hooks.List.Fields = %#v, want compartmentId/displayName lookup fields", hooks.List.Fields)
+	}
+}
+
+func TestDashboardGroupDesiredStringUpdateDoesNotTreatEmptyAsClear(t *testing.T) {
+	t.Parallel()
+
+	desired, ok := dashboardGroupDesiredStringUpdate("", common.String("existing"))
+	if ok {
+		t.Fatal("dashboardGroupDesiredStringUpdate() ok = true, want false for ambiguous empty string")
+	}
+	if desired != nil {
+		t.Fatalf("dashboardGroupDesiredStringUpdate() desired = %#v, want nil", desired)
 	}
 }
 
@@ -169,7 +181,7 @@ func TestGuardDashboardGroupExistingBeforeCreate(t *testing.T) {
 	}
 }
 
-func TestBuildDashboardGroupUpdateBodySupportsExplicitClears(t *testing.T) {
+func TestBuildDashboardGroupUpdateBodySkipsAmbiguousStringClears(t *testing.T) {
 	t.Parallel()
 
 	desired := newDashboardGroupTestResource()
@@ -194,8 +206,8 @@ func TestBuildDashboardGroupUpdateBodySupportsExplicitClears(t *testing.T) {
 	if details.DisplayName == nil || *details.DisplayName != desired.Spec.DisplayName {
 		t.Fatalf("details.DisplayName = %#v, want %q", details.DisplayName, desired.Spec.DisplayName)
 	}
-	if details.Description == nil || *details.Description != "" {
-		t.Fatalf("details.Description = %#v, want explicit empty string", details.Description)
+	if details.Description != nil {
+		t.Fatalf("details.Description = %#v, want nil because empty string is treated as omission", details.Description)
 	}
 	if details.FreeformTags == nil || len(details.FreeformTags) != 0 {
 		t.Fatalf("details.FreeformTags = %#v, want explicit empty map", details.FreeformTags)
@@ -210,13 +222,15 @@ func TestBuildDashboardGroupUpdateBodySupportsExplicitClears(t *testing.T) {
 	}, http.MethodPut, "/dashboardGroups/ocid1.dashboardgroup.oc1..existing")
 	for _, want := range []string{
 		`"displayName":"dashboards-updated"`,
-		`"description":""`,
 		`"freeformTags":{}`,
 		`"definedTags":{}`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("request body %s does not contain %s", body, want)
 		}
+	}
+	if strings.Contains(body, `"description":`) {
+		t.Fatalf("request body %s contains description clear, want description omitted", body)
 	}
 }
 

@@ -85,7 +85,7 @@ plus displayName unique match in ACTIVE,
 CREATING, or UPDATING; empty displayName skips
 lookup and duplicate matches fail
 conflicts: none
-open gaps: none
+open gaps: drift-guard
 Reviewed lifecycle mapping treats CREATING as
 provisioning, UPDATING as updating, ACTIVE as
 success, and DELETING as terminating; FAILED is
@@ -99,8 +99,12 @@ unique candidate in ACTIVE, CREATING, or
 UPDATING.
 Only displayName, description, freeformTags, and
 definedTags reconcile in place. The handwritten
-update builder preserves clear-to-empty intent
-for those fields, while compartmentId and
+update builder keeps non-empty string updates
+for displayName and description and preserves
+explicit empty-map clears for the tag maps;
+empty-string displayName and description values
+are treated as omission until the spec can
+distinguish clear from omit. CompartmentId and
 systemTags remain replacement-only drift and
 ChangeDashboardGroupCompartment stays out of
 scope.

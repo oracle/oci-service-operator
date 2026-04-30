@@ -3,14 +3,17 @@ schemaVersion: 1
 surface: repo-authored-semantics
 service: dashboardservice
 slug: dashboardgroup
-gaps: []
+gaps:
+  - category: drift-guard
+    status: open
+    stopCondition: "Close when the generated DashboardGroup spec preserves explicit empty-string update intent for displayName and description so the runtime can distinguish omission from clear-to-empty."
 ---
 
 # Logic Gaps
 
-No open logic gaps remain for the seeded `dashboardservice/DashboardGroup` row
-after the runtime review replaced the scaffold bootstrap with a published
-generated-runtime contract plus a narrow manual update/reuse seam.
+`DashboardGroup` no longer relies on the scaffold-only bootstrap runtime, but
+one string-update gap remains open until the generated spec can represent
+explicit clear intent separately from omission.
 
 ## Current runtime path
 
@@ -30,8 +33,12 @@ generated-runtime contract plus a narrow manual update/reuse seam.
   `CREATING`, or `UPDATING`). Duplicate exact-name matches fail instead of
   guessing.
 - Mutable drift is explicit: `displayName`, `description`, `freeformTags`, and
-  `definedTags` reconcile in place. The handwritten update builder preserves
-  clear-to-empty intent for `displayName`, `description`, and both tag maps.
+  `definedTags` reconcile in place when the desired value is representable.
+  The handwritten update builder keeps non-empty string updates for
+  `displayName` and `description` and preserves explicit empty-map clears for
+  both tag maps. Because the current generated spec models `displayName` and
+  `description` as plain optional strings, empty-string values collapse with
+  omission and therefore do not clear the live OCI value.
   `compartmentId` and `systemTags` remain replacement-only drift, and
   `ChangeDashboardGroupCompartment` stays out of scope for the published
   runtime.
@@ -49,3 +56,11 @@ generated-runtime contract plus a narrow manual update/reuse seam.
   tenancy home region are not viewable in the Console even though the SDK still
   permits those calls, so the generated docs and formal metadata keep that
   limitation visible.
+
+## Open Gap
+
+- Explicit clear-to-empty intent for `displayName` and `description` is not
+  representable in the current generated `DashboardGroup` spec shape. Empty
+  strings are treated as omission during reconcile, so the runtime leaves the
+  current OCI string value in place instead of sending an explicit clear until
+  the spec can model that distinction.

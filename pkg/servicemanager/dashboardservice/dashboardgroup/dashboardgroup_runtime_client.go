@@ -314,15 +314,18 @@ func dashboardGroupFromResponse(currentResponse any) (dashboardservicesdk.Dashbo
 	}
 }
 
+// Empty string and omission are indistinguishable for DashboardGroup string
+// spec fields, so only non-empty desired values trigger in-place updates.
 func dashboardGroupDesiredStringUpdate(spec string, current *string) (*string, bool) {
+	if spec == "" {
+		return nil, false
+	}
+
 	currentValue := ""
 	if current != nil {
 		currentValue = *current
 	}
 	if spec == currentValue {
-		return nil, false
-	}
-	if spec == "" && current == nil {
 		return nil, false
 	}
 	return common.String(spec), true
