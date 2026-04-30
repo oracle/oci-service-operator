@@ -664,6 +664,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - delegateaccesscontrol.oracle.com
+  resources:
+  - delegationcontrols
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - delegateaccesscontrol.oracle.com
+  resources:
+  - delegationcontrols/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - delegateaccesscontrol.oracle.com
+  resources:
+  - delegationcontrols/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - email.oracle.com
   resources:
   - dkims

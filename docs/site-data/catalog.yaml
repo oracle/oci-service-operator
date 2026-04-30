@@ -357,6 +357,20 @@ packages:
         kind: Project
         summary: Manage OCI Data Science projects.
 
+  - package: delegateaccesscontrol
+    displayName: Delegate Access Control
+    summary: Manage OCI Delegate Access Control delegation controls from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DelegationControl while DelegatedResourceAccessRequest, DelegationSubscription, ServiceProvider, ServiceProviderAction, ServiceProviderInteraction, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, keeps pre-create reuse scoped to unique exact resource identity matches, and leaves move-compartment plus CLOUDVMCLUSTER vault drift explicit.
+    kindOverrides:
+      - group: delegateaccesscontrol
+        kind: DelegationControl
+        summary: Manage OCI Delegate Access Control delegation controls.
+
   - package: email
     displayName: Email
     summary: Manage OCI Email Delivery resources from Kubernetes.

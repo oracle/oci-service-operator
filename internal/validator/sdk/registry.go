@@ -29,6 +29,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/dataflow"
 	"github.com/oracle/oci-go-sdk/v65/datalabelingservice"
 	"github.com/oracle/oci-go-sdk/v65/datascience"
+	"github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol"
 	"github.com/oracle/oci-go-sdk/v65/email"
 	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/oracle/oci-go-sdk/v65/generativeai"
@@ -524,6 +525,12 @@ var seedTargets = []Target{
 	newTarget("datascience", "UpdateProjectDetails", reflect.TypeOf(datascience.UpdateProjectDetails{})),
 	newTarget("datascience", "Project", reflect.TypeOf(datascience.Project{})),
 	newTarget("datascience", "ProjectSummary", reflect.TypeOf(datascience.ProjectSummary{})),
+
+	// Delegateaccesscontrol CRD support
+	newTarget("delegateaccesscontrol", "CreateDelegationControlDetails", reflect.TypeOf(delegateaccesscontrol.CreateDelegationControlDetails{})),
+	newTarget("delegateaccesscontrol", "UpdateDelegationControlDetails", reflect.TypeOf(delegateaccesscontrol.UpdateDelegationControlDetails{})),
+	newTarget("delegateaccesscontrol", "DelegationControl", reflect.TypeOf(delegateaccesscontrol.DelegationControl{})),
+	newTarget("delegateaccesscontrol", "DelegationControlSummary", reflect.TypeOf(delegateaccesscontrol.DelegationControlSummary{})),
 
 	// Opensearch CRD support
 	newTarget("opensearch", "CreateOpensearchClusterDetails", reflect.TypeOf(opensearch.CreateOpensearchClusterDetails{})),

@@ -28,6 +28,7 @@ import (
 	dataflowv1beta1 "github.com/oracle/oci-service-operator/api/dataflow/v1beta1"
 	datalabelingservicev1beta1 "github.com/oracle/oci-service-operator/api/datalabelingservice/v1beta1"
 	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
+	delegateaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/delegateaccesscontrol/v1beta1"
 	emailv1beta1 "github.com/oracle/oci-service-operator/api/email/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
@@ -1901,6 +1902,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "datascience.ProjectSummary",
+			},
+		},
+	},
+	{
+		Name:       "DelegateaccesscontrolDelegationControl",
+		SpecType:   reflect.TypeOf(delegateaccesscontrolv1beta1.DelegationControlSpec{}),
+		StatusType: reflect.TypeOf(delegateaccesscontrolv1beta1.DelegationControlStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "delegateaccesscontrol.CreateDelegationControlDetails",
+			},
+			{
+				SDKStruct: "delegateaccesscontrol.UpdateDelegationControlDetails",
+			},
+			{
+				SDKStruct: "delegateaccesscontrol.DelegationControl",
+			},
+			{
+				SDKStruct: "delegateaccesscontrol.DelegationControlSummary",
 			},
 		},
 	},
