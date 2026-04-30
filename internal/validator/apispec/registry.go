@@ -10,6 +10,7 @@ import (
 	aispeechv1beta1 "github.com/oracle/oci-service-operator/api/aispeech/v1beta1"
 	aivisionv1beta1 "github.com/oracle/oci-service-operator/api/aivision/v1beta1"
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
+	apiaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/apiaccesscontrol/v1beta1"
 	apiplatformv1beta1 "github.com/oracle/oci-service-operator/api/apiplatform/v1beta1"
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
@@ -1558,6 +1559,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "analytics.AnalyticsInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "ApiaccesscontrolPrivilegedApiControl",
+		SpecType:   reflect.TypeOf(apiaccesscontrolv1beta1.PrivilegedApiControlSpec{}),
+		StatusType: reflect.TypeOf(apiaccesscontrolv1beta1.PrivilegedApiControlStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apiaccesscontrol.CreatePrivilegedApiControlDetails",
+			},
+			{
+				SDKStruct: "apiaccesscontrol.UpdatePrivilegedApiControlDetails",
+			},
+			{
+				SDKStruct: "apiaccesscontrol.PrivilegedApiControl",
+			},
+			{
+				SDKStruct: "apiaccesscontrol.PrivilegedApiControlCollection",
+			},
+			{
+				SDKStruct: "apiaccesscontrol.PrivilegedApiControlSummary",
 			},
 		},
 	},

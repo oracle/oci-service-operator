@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 190; got != want {
+	if got, want := len(inventory), 197; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 87; got != want {
+	if got, want := countRegistrations(inventory), 88; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 103; got != want {
+	if got, want := countExceptions(inventory), 109; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -31,6 +31,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "aispeech/TranscriptionJob", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "aivision/Project", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "analytics/AnalyticsInstance", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "apiaccesscontrol/PrivilegedApiControl", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apiplatform/ApiPlatformInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apmcontrolplane/ApmDomain", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "bds/BdsInstance", "selection.includeKinds")
@@ -67,6 +68,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "aivision/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "analytics/AnalyticsInstance")
 	assertInventoryException(t, byKey, "analytics/PrivateAccessChannel", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "apiaccesscontrol/PrivilegedApiControl")
+	assertInventoryException(t, byKey, "apiaccesscontrol/ApiMetadata", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apiaccesscontrol/ApiMetadataByEntityType", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apiaccesscontrol/PrivilegedApiRequest", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apiaccesscontrol/WorkRequest", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apiaccesscontrol/WorkRequestError", `controller.strategy="none"`)
+	assertInventoryException(t, byKey, "apiaccesscontrol/WorkRequestLog", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "apiplatform/ApiPlatformInstance")
 	assertInventoryException(t, byKey, "apiplatform/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "apiplatform/WorkRequestError", `controller.strategy="none"`)
@@ -124,6 +132,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "aispeech/TranscriptionJob", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "aivision/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "analytics/AnalyticsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "apiaccesscontrol/PrivilegedApiControl", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "apiplatform/ApiPlatformInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apmcontrolplane/ApmDomain", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
@@ -165,6 +174,12 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "aispeech/TranscriptionTask", "strategy=none")
 	assertReviewedException(t, "aivision/WorkRequest", "strategy=none")
 	assertReviewedException(t, "analytics/WorkRequest", "strategy=none")
+	assertReviewedException(t, "apiaccesscontrol/ApiMetadata", "strategy=none")
+	assertReviewedException(t, "apiaccesscontrol/ApiMetadataByEntityType", "strategy=none")
+	assertReviewedException(t, "apiaccesscontrol/PrivilegedApiRequest", "strategy=none")
+	assertReviewedException(t, "apiaccesscontrol/WorkRequest", "strategy=none")
+	assertReviewedException(t, "apiaccesscontrol/WorkRequestError", "strategy=none")
+	assertReviewedException(t, "apiaccesscontrol/WorkRequestLog", "strategy=none")
 	assertReviewedException(t, "apiplatform/WorkRequest", "strategy=none")
 	assertReviewedException(t, "apiplatform/WorkRequestError", "strategy=none")
 	assertReviewedException(t, "apiplatform/WorkRequestLog", "strategy=none")

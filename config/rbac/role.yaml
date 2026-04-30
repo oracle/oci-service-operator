@@ -163,6 +163,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - apiaccesscontrol.oracle.com
+  resources:
+  - privilegedapicontrols
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apiaccesscontrol.oracle.com
+  resources:
+  - privilegedapicontrols/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apiaccesscontrol.oracle.com
+  resources:
+  - privilegedapicontrols/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - apigateway.oracle.com
   resources:
   - apigatewaydeployments

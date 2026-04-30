@@ -94,6 +94,20 @@ packages:
         kind: AnalyticsInstance
         summary: Manage OCI Analytics instances.
 
+  - package: apiaccesscontrol
+    displayName: API Access Control
+    summary: Manage OCI API Access Control privileged API controls from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to PrivilegedApiControl while ApiMetadata, ApiMetadataByEntityType, PrivilegedApiRequest, and work-request helper families stay unpublished.
+      - The published runtime uses service-SDK work requests for create, update, and delete, with explicit pre-create reuse on exact `compartmentId`, `displayName`, and `resourceType`.
+    kindOverrides:
+      - group: apiaccesscontrol
+        kind: PrivilegedApiControl
+        summary: Manage OCI API Access Control privileged API controls.
+
   - package: apigateway
     displayName: API Gateway
     summary: Manage OCI API Gateway gateways and deployments from Kubernetes.

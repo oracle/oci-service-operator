@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "apiaccesscontrol",
+  "kind": "PrivilegedApiControl",
+  "formalSlug": "privilegedapicontrol",
+  "providerResource": "oci_apiaccesscontrol_privileged_api_control",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/apiaccesscontrol_privileged_api_control",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/apiaccesscontrol_privileged_api_control",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/apiaccesscontrol/privilegedapicontrol/page.html",
+  "bodySHA256": "fcc3eb86a08fbdd9b0962c90f2d9b6791ab29087da5d6432e153b162284eebef",
+  "bodyBytes": 1547,
+  "fixtureBodyPath": "7.22.0/apiaccesscontrol/privilegedapicontrol/page.html"
+}

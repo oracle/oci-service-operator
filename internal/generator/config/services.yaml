@@ -409,6 +409,99 @@ services:
           serviceManager:
             strategy: none
 
+  - service: apiaccesscontrol
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apiaccesscontrol
+    group: apiaccesscontrol
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - PrivilegedApiControl
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: PrivilegedApiControl
+          formalSpec: privilegedapicontrol
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCIDs and governed resource identifiers below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing PrivilegedApiControl with the same compartmentId, displayName,
+              # and resourceType.
+              #
+              apiVersion: apiaccesscontrol.oracle.com/v1beta1
+              kind: PrivilegedApiControl
+              metadata:
+                name: privilegedapicontrol-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                notificationTopicId: ocid1.onstopic.oc1..exampleuniqueID
+                approverGroupIdList:
+                  - ocid1.group.oc1..exampleapprover
+                privilegedOperationList:
+                  - apiName: LaunchInstance
+                    entityType: instance
+                    attributeNames:
+                      - shape
+                resourceType: core-instance
+                resources:
+                  - ocid1.instance.oc1..exampleuniqueID
+                displayName: privileged-api-control-sample
+                description: Sample PrivilegedApiControl managed by OSOK
+                freeformTags:
+                  managed-by: oci-service-operator
+        - kind: ApiMetadata
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: ApiMetadataByEntityType
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: PrivilegedApiRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequest
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestError
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+        - kind: WorkRequestLog
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: apiplatform
     sdkPackage: github.com/oracle/oci-go-sdk/v65/apiplatform
     group: apiplatform

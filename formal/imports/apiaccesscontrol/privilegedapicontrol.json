@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apiaccesscontrol",
+  "slug": "privilegedapicontrol",
+  "kind": "PrivilegedApiControl",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apiaccesscontrol_privileged_api_control",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreatePrivilegedApiControl",
+        "requestType": "apiaccesscontrol.CreatePrivilegedApiControlRequest",
+        "responseType": "apiaccesscontrol.CreatePrivilegedApiControlResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetPrivilegedApiControl",
+        "requestType": "apiaccesscontrol.GetPrivilegedApiControlRequest",
+        "responseType": "apiaccesscontrol.GetPrivilegedApiControlResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListPrivilegedApiControls",
+        "requestType": "apiaccesscontrol.ListPrivilegedApiControlsRequest",
+        "responseType": "apiaccesscontrol.ListPrivilegedApiControlsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "ChangePrivilegedApiControlCompartment",
+        "requestType": "apiaccesscontrol.ChangePrivilegedApiControlCompartmentRequest",
+        "responseType": "apiaccesscontrol.ChangePrivilegedApiControlCompartmentResponse"
+      },
+      {
+        "operation": "UpdatePrivilegedApiControl",
+        "requestType": "apiaccesscontrol.UpdatePrivilegedApiControlRequest",
+        "responseType": "apiaccesscontrol.UpdatePrivilegedApiControlResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeletePrivilegedApiControl",
+        "requestType": "apiaccesscontrol.DeletePrivilegedApiControlRequest",
+        "responseType": "apiaccesscontrol.DeletePrivilegedApiControlResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "approver_group_id_list",
+      "compartment_id",
+      "defined_tags",
+      "description",
+      "display_name",
+      "freeform_tags",
+      "notification_topic_id",
+      "number_of_approvers",
+      "privileged_operation_list",
+      "resource_type",
+      "resources"
+    ],
+    "forceNew": null,
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "privilegedapicontrol",
+        "action": "CREATED"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "privilegedapicontrol",
+        "action": "UPDATED"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      },
+      {
+        "helper": "tfresource.WaitForWorkRequestWithErrorHandling",
+        "entityType": "privilegedapicontrol",
+        "action": "DELETED"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_apiaccesscontrol_privileged_api_controls",
+    "collectionField": "privileged_api_control_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "compartment_id",
+      "display_name",
+      "id",
+      "lifecycle_state",
+      "resource_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apiaccesscontrol/privilegedapicontrol/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apiaccesscontrol/privilegedapicontrol/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "waiter-work-request",
+      "secret-output",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreatePrivilegedApiControl, GetPrivilegedApiControl, ListPrivilegedApiControls, ChangePrivilegedApiControlCompartment, UpdatePrivilegedApiControl, DeletePrivilegedApiControl, and GetWorkRequest are present in v65.110.0. ListPrivilegedApiControls filters compartmentId, id, lifecycleState, displayName, and resourceType, create returns the resource body plus opc-work-request-id, and update/delete return opc-work-request-id without a resource body.",
+    "Pinned provider implementation: oci_apiaccesscontrol_privileged_api_control is work-request-backed for create, update, delete, and compartment changes. The reviewed runtime keeps using service-sdk GetWorkRequest polling and shared async status instead of provider helper waiters.",
+    "Repo-authored bind-versus-create stays explicit: when no OCI identifier is tracked, the runtime uses exact compartmentId plus displayName plus resourceType list matches, ignores FAILED, NEEDS_ATTENTION, DELETING, and DELETED summaries, and fails on duplicate exact-name matches instead of adopting arbitrarily.",
+    "Repo-authored mutation policy stays explicit: only displayName, description, notificationTopicId, approverGroupIdList, resourceType, resources, privilegedOperationList, numberOfApprovers, freeformTags, and definedTags reconcile in place. Provider support for moving compartment_id remains out-of-scope drift because the published runtime treats compartmentId as replacement-only and never calls ChangePrivilegedApiControlCompartment."
+  ]
+}
