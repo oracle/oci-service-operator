@@ -98,4 +98,5 @@ resources:
 - dashboardservice_v1beta1_dashboardgroup.yaml
 - apmsynthetics_v1beta1_script.yaml
 - capacitymanagement_v1beta1_occcapacityrequest.yaml
+- delegateaccesscontrol_v1beta1_delegationcontrol.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

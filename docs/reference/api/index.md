@@ -36,6 +36,7 @@ This landing page is generated from the checked-in package and release inventory
 | [dataflow.oracle.com/v1beta1](dataflow/v1beta1/index.md) | [Application](dataflow/v1beta1/index.md#kind-application) | Data Flow (`v2.0.0-alpha`) |
 | [datalabelingservice.oracle.com/v1beta1](datalabelingservice/v1beta1/index.md) | [Dataset](datalabelingservice/v1beta1/index.md#kind-dataset) | - |
 | [datascience.oracle.com/v1beta1](datascience/v1beta1/index.md) | [Project](datascience/v1beta1/index.md#kind-project) | - |
+| [delegateaccesscontrol.oracle.com/v1beta1](delegateaccesscontrol/v1beta1/index.md) | [DelegationControl](delegateaccesscontrol/v1beta1/index.md#kind-delegationcontrol) | - |
 | [email.oracle.com/v1beta1](email/v1beta1/index.md) | [Dkim](email/v1beta1/index.md#kind-dkim), [EmailDomain](email/v1beta1/index.md#kind-emaildomain), [Sender](email/v1beta1/index.md#kind-sender), [Suppression](email/v1beta1/index.md#kind-suppression) | - |
 | [functions.oracle.com/v1beta1](functions/v1beta1/index.md) | [Application](functions/v1beta1/index.md#kind-application), [Function](functions/v1beta1/index.md#kind-function) | Functions (`v2.0.0-alpha`) |
 | [generativeai.oracle.com/v1beta1](generativeai/v1beta1/index.md) | [DedicatedAiCluster](generativeai/v1beta1/index.md#kind-dedicatedaicluster), [Endpoint](generativeai/v1beta1/index.md#kind-endpoint), [Model](generativeai/v1beta1/index.md#kind-model) | - |

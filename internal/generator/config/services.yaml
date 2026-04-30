@@ -2102,6 +2102,67 @@ services:
           serviceManager:
             strategy: none
 
+  - service: delegateaccesscontrol
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol
+    group: delegateaccesscontrol
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DelegationControl
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DelegationControl
+          formalSpec: delegationcontrol
+          async:
+            strategy: workrequest
+            runtime: generatedruntime
+            formalClassification: workrequest
+            workRequest:
+              source: service-sdk
+              phases:
+                - create
+                - update
+                - delete
+          sample:
+            body: |-
+              #
+              # Replace the OCIDs below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing DelegationControl with the same compartmentId, displayName,
+              # resourceType, and reusable identity fields.
+              # For CLOUDVMCLUSTER resources, also set spec.vaultId and spec.vaultKeyId.
+              #
+              apiVersion: delegateaccesscontrol.oracle.com/v1beta1
+              kind: DelegationControl
+              metadata:
+                name: delegationcontrol-sample
+              spec:
+                compartmentId: ocid1.compartment.oc1..exampleuniqueID
+                displayName: delegation-control-sample
+                delegationSubscriptionIds:
+                  - ocid1.delegationsubscription.oc1..exampleuniqueID
+                resourceIds:
+                  - ocid1.vmcluster.oc1..exampleuniqueID
+                resourceType: VMCLUSTER
+                notificationTopicId: ocid1.onstopic.oc1..exampleuniqueID
+                notificationMessageFormat: JSON
+                numApprovalsRequired: 1
+                description: Sample DelegationControl managed by OSOK
+                freeformTags:
+                  managed-by: oci-service-operator
+
   - service: devops
     sdkPackage: github.com/oracle/oci-go-sdk/v65/devops
     group: devops

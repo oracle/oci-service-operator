@@ -49,6 +49,7 @@ resources:
 - bases/dataflow.oracle.com_applications.yaml
 - bases/datalabelingservice.oracle.com_datasets.yaml
 - bases/datascience.oracle.com_projects.yaml
+- bases/delegateaccesscontrol.oracle.com_delegationcontrols.yaml
 - bases/email.oracle.com_dkims.yaml
 - bases/email.oracle.com_emaildomains.yaml
 - bases/email.oracle.com_senders.yaml
