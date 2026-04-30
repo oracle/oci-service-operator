@@ -16,9 +16,24 @@ This page is generated from the checked-in sample manifest at `config/samples/ca
 # Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
 #
 
+#
+# Replace the tenancy-scoped OCID and region below before running e2e.
+# Update metadata.name and spec.displayName if you want to force a fresh create
+# instead of reconciling an existing tracked request.
+#
 apiVersion: capacitymanagement.oracle.com/v1beta1
 kind: OccCapacityRequest
 metadata:
   name: occcapacityrequest-sample
-spec: {}
+spec:
+  compartmentId: ocid1.tenancy.oc1..exampleuniqueID
+  namespace: "COMPUTE"
+  region: "us-phoenix-1"
+  displayName: "capacity-request-sample"
+  dateExpectedCapacityHandover: "2026-12-31T00:00:00Z"
+  details:
+    - resourceType: "SERVER"
+      workloadType: "GENERIC"
+      resourceName: "BM.Standard.E5.192"
+      demandQuantity: 1
 ```
