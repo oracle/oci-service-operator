@@ -220,7 +220,9 @@ func reviewedDelegationControlRuntimeSemantics() *generatedruntime.Semantics {
 	semantics := newDelegationControlRuntimeSemantics()
 	semantics.List = &generatedruntime.ListSemantics{
 		ResponseItemsField: "Items",
-		MatchFields:        []string{"compartmentId", "displayName", "resourceType", "resourceIds"},
+		// DelegateAccessControl list summaries do not expose resourceIds, so generic no-ID
+		// read/delete fallback must stay on summary-compatible fields.
+		MatchFields: []string{"compartmentId", "displayName", "resourceType"},
 	}
 	semantics.Hooks = generatedruntime.HookSet{
 		Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},

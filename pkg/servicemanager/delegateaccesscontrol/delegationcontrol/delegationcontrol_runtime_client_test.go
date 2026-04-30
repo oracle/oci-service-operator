@@ -125,7 +125,7 @@ func TestReviewedDelegationControlRuntimeSemanticsEncodesWorkRequestContract(t *
 	assertDelegationControlStringSliceEqual(t, "Lifecycle.ActiveStates", got.Lifecycle.ActiveStates, []string{"ACTIVE"})
 	assertDelegationControlStringSliceEqual(t, "Delete.PendingStates", got.Delete.PendingStates, []string{"DELETING"})
 	assertDelegationControlStringSliceEqual(t, "Delete.TerminalStates", got.Delete.TerminalStates, []string{"DELETED"})
-	assertDelegationControlStringSliceEqual(t, "List.MatchFields", got.List.MatchFields, []string{"compartmentId", "displayName", "resourceType", "resourceIds"})
+	assertDelegationControlStringSliceEqual(t, "List.MatchFields", got.List.MatchFields, []string{"compartmentId", "displayName", "resourceType"})
 	assertDelegationControlStringSliceEqual(t, "Mutation.Mutable", got.Mutation.Mutable, []string{
 		"definedTags",
 		"delegationSubscriptionIds",
@@ -497,6 +497,123 @@ func TestDelegationControlServiceClientCreatesAndResumesWorkRequest(t *testing.T
 	}
 	if resource.Status.OsokStatus.Async.Current != nil {
 		t.Fatalf("status.async.current = %#v, want cleared", resource.Status.OsokStatus.Async.Current)
+	}
+}
+
+func TestDelegationControlDeleteResolvesPendingCreateWithoutTrackedID(t *testing.T) {
+	t.Parallel()
+
+	const (
+		createdID         = "ocid1.delegationcontrol.oc1..created"
+		createWorkRequest = "wr-delegationcontrol-create"
+		deleteWorkRequest = "wr-delegationcontrol-delete"
+	)
+
+	resource := makeDelegationControlResource()
+	listCalls := 0
+	deleteCalls := 0
+
+	client := newTestDelegationControlClient(&fakeDelegationControlOCIClient{
+		listFn: func(_ context.Context, req delegateaccesscontrolsdk.ListDelegationControlsRequest) (delegateaccesscontrolsdk.ListDelegationControlsResponse, error) {
+			listCalls++
+			requireDelegationControlStringPtr(t, "list compartmentId", req.CompartmentId, resource.Spec.CompartmentId)
+			requireDelegationControlStringPtr(t, "list displayName", req.DisplayName, resource.Spec.DisplayName)
+			if req.ResourceType != delegateaccesscontrolsdk.ListDelegationControlsResourceTypeEnum(resource.Spec.ResourceType) {
+				t.Fatalf("list resourceType = %q, want %q", req.ResourceType, resource.Spec.ResourceType)
+			}
+			switch listCalls {
+			case 1, 2:
+				return delegateaccesscontrolsdk.ListDelegationControlsResponse{}, nil
+			case 3:
+				return delegateaccesscontrolsdk.ListDelegationControlsResponse{
+					DelegationControlSummaryCollection: delegateaccesscontrolsdk.DelegationControlSummaryCollection{
+						Items: []delegateaccesscontrolsdk.DelegationControlSummary{
+							makeSDKDelegationControlSummary(createdID, resource, delegateaccesscontrolsdk.DelegationControlLifecycleStateCreating),
+						},
+					},
+				}, nil
+			default:
+				t.Fatalf("ListDelegationControls() unexpected call %d", listCalls)
+				return delegateaccesscontrolsdk.ListDelegationControlsResponse{}, nil
+			}
+		},
+		createFn: func(_ context.Context, _ delegateaccesscontrolsdk.CreateDelegationControlRequest) (delegateaccesscontrolsdk.CreateDelegationControlResponse, error) {
+			return delegateaccesscontrolsdk.CreateDelegationControlResponse{
+				OpcWorkRequestId: common.String(createWorkRequest),
+				OpcRequestId:     common.String("opc-create-delegationcontrol"),
+			}, nil
+		},
+		deleteFn: func(_ context.Context, req delegateaccesscontrolsdk.DeleteDelegationControlRequest) (delegateaccesscontrolsdk.DeleteDelegationControlResponse, error) {
+			deleteCalls++
+			requireDelegationControlStringPtr(t, "delete delegationControlId", req.DelegationControlId, createdID)
+			if req.Description != nil {
+				t.Fatalf("delete description = %v, want nil", req.Description)
+			}
+			return delegateaccesscontrolsdk.DeleteDelegationControlResponse{
+				OpcWorkRequestId: common.String(deleteWorkRequest),
+				OpcRequestId:     common.String("opc-delete-delegationcontrol"),
+			}, nil
+		},
+		workRequestFn: func(_ context.Context, req delegateaccesscontrolsdk.GetWorkRequestRequest) (delegateaccesscontrolsdk.GetWorkRequestResponse, error) {
+			switch stringValue(req.WorkRequestId) {
+			case createWorkRequest:
+				return delegateaccesscontrolsdk.GetWorkRequestResponse{
+					WorkRequest: makeDelegationControlWorkRequest(
+						createWorkRequest,
+						delegateaccesscontrolsdk.OperationTypeCreateDelegationControl,
+						delegateaccesscontrolsdk.OperationStatusInProgress,
+						delegateaccesscontrolsdk.ActionTypeInProgress,
+						"",
+					),
+				}, nil
+			case deleteWorkRequest:
+				return delegateaccesscontrolsdk.GetWorkRequestResponse{
+					WorkRequest: makeDelegationControlWorkRequest(
+						deleteWorkRequest,
+						delegateaccesscontrolsdk.OperationTypeDeleteDelegationControl,
+						delegateaccesscontrolsdk.OperationStatusInProgress,
+						delegateaccesscontrolsdk.ActionTypeInProgress,
+						createdID,
+					),
+				}, nil
+			default:
+				t.Fatalf("GetWorkRequest() unexpected work request id %q", stringValue(req.WorkRequestId))
+				return delegateaccesscontrolsdk.GetWorkRequestResponse{}, nil
+			}
+		},
+	})
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful pending create", response)
+	}
+	if resource.Status.Id != "" {
+		t.Fatalf("status.id = %q, want empty before create work request bind resolves", resource.Status.Id)
+	}
+	requireDelegationControlAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, createWorkRequest, shared.OSOKAsyncClassPending)
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if deleted {
+		t.Fatal("Delete() = true, want pending delete while delete work request is in progress")
+	}
+	if deleteCalls != 1 {
+		t.Fatalf("DeleteDelegationControl() calls = %d, want 1 after no-ID delete resolution", deleteCalls)
+	}
+	if listCalls != 3 {
+		t.Fatalf("ListDelegationControls() calls = %d, want 3 across create lookup, create fallback, and delete resolution", listCalls)
+	}
+	if got := resource.Status.Id; got != createdID {
+		t.Fatalf("status.id = %q, want %q after delete resolved the OCI identifier", got, createdID)
+	}
+	requireDelegationControlAsyncCurrent(t, resource, shared.OSOKAsyncPhaseDelete, deleteWorkRequest, shared.OSOKAsyncClassPending)
+	if got := resource.Status.OsokStatus.OpcRequestID; got != "opc-delete-delegationcontrol" {
+		t.Fatalf("status.opcRequestId = %q, want opc-delete-delegationcontrol", got)
 	}
 }
 
