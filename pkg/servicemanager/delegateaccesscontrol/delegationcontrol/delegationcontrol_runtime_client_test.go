@@ -125,7 +125,7 @@ func TestReviewedDelegationControlRuntimeSemanticsEncodesWorkRequestContract(t *
 	assertDelegationControlStringSliceEqual(t, "Lifecycle.ActiveStates", got.Lifecycle.ActiveStates, []string{"ACTIVE"})
 	assertDelegationControlStringSliceEqual(t, "Delete.PendingStates", got.Delete.PendingStates, []string{"DELETING"})
 	assertDelegationControlStringSliceEqual(t, "Delete.TerminalStates", got.Delete.TerminalStates, []string{"DELETED"})
-	assertDelegationControlStringSliceEqual(t, "List.MatchFields", got.List.MatchFields, []string{"compartmentId", "displayName", "resourceType"})
+	assertDelegationControlStringSliceEqual(t, "List.MatchFields", got.List.MatchFields, []string{"compartmentId", "displayName", "resourceType", "resourceIds"})
 	assertDelegationControlStringSliceEqual(t, "Mutation.Mutable", got.Mutation.Mutable, []string{
 		"definedTags",
 		"delegationSubscriptionIds",
@@ -387,6 +387,93 @@ func TestDelegationControlCreateOrUpdateRejectsAmbiguousReuse(t *testing.T) {
 	}
 }
 
+func TestDelegationControlCreateOrUpdateDoesNotReuseDifferentResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	const workRequestID = "wr-delegationcontrol-create-different-resource"
+
+	resource := makeDelegationControlResource()
+	createCalls := 0
+	getCalls := 0
+	listCalls := 0
+
+	client := newTestDelegationControlClient(&fakeDelegationControlOCIClient{
+		listFn: func(_ context.Context, req delegateaccesscontrolsdk.ListDelegationControlsRequest) (delegateaccesscontrolsdk.ListDelegationControlsResponse, error) {
+			listCalls++
+			requireDelegationControlStringPtr(t, "list compartmentId", req.CompartmentId, resource.Spec.CompartmentId)
+			requireDelegationControlStringPtr(t, "list displayName", req.DisplayName, resource.Spec.DisplayName)
+			if req.ResourceType != delegateaccesscontrolsdk.ListDelegationControlsResourceTypeEnum(resource.Spec.ResourceType) {
+				t.Fatalf("list resourceType = %q, want %q", req.ResourceType, resource.Spec.ResourceType)
+			}
+			if listCalls == 1 {
+				requireDelegationControlStringPtr(t, "strict lookup resourceId", req.ResourceId, "ocid1.vmcluster.oc1..one")
+			} else if req.ResourceId != nil {
+				t.Fatalf("generic fallback resourceId = %v, want nil", req.ResourceId)
+			}
+			return delegateaccesscontrolsdk.ListDelegationControlsResponse{
+				DelegationControlSummaryCollection: delegateaccesscontrolsdk.DelegationControlSummaryCollection{
+					Items: []delegateaccesscontrolsdk.DelegationControlSummary{
+						makeSDKDelegationControlSummary(
+							"ocid1.delegationcontrol.oc1..different-resource",
+							resource,
+							delegateaccesscontrolsdk.DelegationControlLifecycleStateActive,
+						),
+					},
+				},
+			}, nil
+		},
+		getFn: func(_ context.Context, req delegateaccesscontrolsdk.GetDelegationControlRequest) (delegateaccesscontrolsdk.GetDelegationControlResponse, error) {
+			getCalls++
+			requireDelegationControlStringPtr(t, "get delegationControlId", req.DelegationControlId, "ocid1.delegationcontrol.oc1..different-resource")
+			candidate := makeSDKDelegationControl(
+				"ocid1.delegationcontrol.oc1..different-resource",
+				resource,
+				delegateaccesscontrolsdk.DelegationControlLifecycleStateActive,
+			)
+			candidate.ResourceIds = []string{"ocid1.vmcluster.oc1..different"}
+			return delegateaccesscontrolsdk.GetDelegationControlResponse{DelegationControl: candidate}, nil
+		},
+		createFn: func(_ context.Context, req delegateaccesscontrolsdk.CreateDelegationControlRequest) (delegateaccesscontrolsdk.CreateDelegationControlResponse, error) {
+			createCalls++
+			requireDelegationControlStringPtr(t, "create compartmentId", req.CreateDelegationControlDetails.CompartmentId, resource.Spec.CompartmentId)
+			return delegateaccesscontrolsdk.CreateDelegationControlResponse{
+				OpcWorkRequestId: common.String(workRequestID),
+				OpcRequestId:     common.String("opc-create-delegationcontrol-different-resource"),
+			}, nil
+		},
+		workRequestFn: func(_ context.Context, req delegateaccesscontrolsdk.GetWorkRequestRequest) (delegateaccesscontrolsdk.GetWorkRequestResponse, error) {
+			requireDelegationControlStringPtr(t, "workRequestId", req.WorkRequestId, workRequestID)
+			return delegateaccesscontrolsdk.GetWorkRequestResponse{
+				WorkRequest: makeDelegationControlWorkRequest(
+					workRequestID,
+					delegateaccesscontrolsdk.OperationTypeCreateDelegationControl,
+					delegateaccesscontrolsdk.OperationStatusInProgress,
+					delegateaccesscontrolsdk.ActionTypeInProgress,
+					"",
+				),
+			}, nil
+		},
+	})
+
+	response, err := client.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+	if err != nil {
+		t.Fatalf("CreateOrUpdate() error = %v", err)
+	}
+	if !response.IsSuccessful || !response.ShouldRequeue {
+		t.Fatalf("CreateOrUpdate() response = %#v, want successful pending create", response)
+	}
+	if getCalls != 1 {
+		t.Fatalf("GetDelegationControl() calls = %d, want 1 strict reread before create", getCalls)
+	}
+	if listCalls != 2 {
+		t.Fatalf("ListDelegationControls() calls = %d, want strict lookup plus generic fallback", listCalls)
+	}
+	if createCalls != 1 {
+		t.Fatalf("CreateDelegationControl() calls = %d, want 1 when existing resource identity differs", createCalls)
+	}
+	requireDelegationControlAsyncCurrent(t, resource, shared.OSOKAsyncPhaseCreate, workRequestID, shared.OSOKAsyncClassPending)
+}
+
 func TestDelegationControlServiceClientCreatesAndResumesWorkRequest(t *testing.T) {
 	t.Parallel()
 
@@ -536,6 +623,16 @@ func TestDelegationControlDeleteResolvesPendingCreateWithoutTrackedID(t *testing
 				t.Fatalf("ListDelegationControls() unexpected call %d", listCalls)
 				return delegateaccesscontrolsdk.ListDelegationControlsResponse{}, nil
 			}
+		},
+		getFn: func(_ context.Context, req delegateaccesscontrolsdk.GetDelegationControlRequest) (delegateaccesscontrolsdk.GetDelegationControlResponse, error) {
+			requireDelegationControlStringPtr(t, "get delegationControlId", req.DelegationControlId, createdID)
+			return delegateaccesscontrolsdk.GetDelegationControlResponse{
+				DelegationControl: makeSDKDelegationControl(
+					createdID,
+					resource,
+					delegateaccesscontrolsdk.DelegationControlLifecycleStateCreating,
+				),
+			}, nil
 		},
 		createFn: func(_ context.Context, _ delegateaccesscontrolsdk.CreateDelegationControlRequest) (delegateaccesscontrolsdk.CreateDelegationControlResponse, error) {
 			return delegateaccesscontrolsdk.CreateDelegationControlResponse{

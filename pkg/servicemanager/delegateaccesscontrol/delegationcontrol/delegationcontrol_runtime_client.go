@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	delegateaccesscontrolsdk "github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol"
 	delegateaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/delegateaccesscontrol/v1beta1"
+	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
@@ -143,6 +144,13 @@ func applyDelegationControlRuntimeHooks(
 	}
 	hooks.Identity.GuardExistingBeforeCreate = guardDelegationControlExistingBeforeCreate
 	hooks.ParityHooks.ValidateCreateOnlyDrift = validateDelegationControlCreateOnlyDrift
+	hooks.DeleteHooks.ConfirmRead = func(
+		ctx context.Context,
+		resource *delegateaccesscontrolv1beta1.DelegationControl,
+		currentID string,
+	) (any, error) {
+		return confirmDelegationControlDeleteRead(ctx, ociClient, ociClientErr, resource, currentID)
+	}
 	hooks.Create.Fields = delegationControlCreateFields()
 	hooks.Get.Fields = delegationControlGetFields()
 	hooks.List.Fields = delegationControlListFields()
@@ -220,9 +228,9 @@ func reviewedDelegationControlRuntimeSemantics() *generatedruntime.Semantics {
 	semantics := newDelegationControlRuntimeSemantics()
 	semantics.List = &generatedruntime.ListSemantics{
 		ResponseItemsField: "Items",
-		// DelegateAccessControl list summaries do not expose resourceIds, so generic no-ID
-		// read/delete fallback must stay on summary-compatible fields.
-		MatchFields: []string{"compartmentId", "displayName", "resourceType"},
+		// Keep generic generatedruntime list matching strict enough that create-time fallback
+		// cannot reuse a summary-only match after the handwritten identity lookup rejected it.
+		MatchFields: []string{"compartmentId", "displayName", "resourceType", "resourceIds"},
 	}
 	semantics.Hooks = generatedruntime.HookSet{
 		Create: []generatedruntime.Hook{{Helper: "tfresource.CreateResource"}},
@@ -405,6 +413,41 @@ func lookupExistingDelegationControl(
 			identity.resourceIDs,
 		)
 	}
+}
+
+func confirmDelegationControlDeleteRead(
+	ctx context.Context,
+	client delegationControlOCIClient,
+	initErr error,
+	resource *delegateaccesscontrolv1beta1.DelegationControl,
+	currentID string,
+) (any, error) {
+	if initErr != nil {
+		return nil, initErr
+	}
+	if client == nil {
+		return nil, fmt.Errorf("DelegationControl OCI client is nil")
+	}
+
+	if currentID := strings.TrimSpace(currentID); currentID != "" {
+		return client.GetDelegationControl(ctx, delegateaccesscontrolsdk.GetDelegationControlRequest{
+			DelegationControlId: common.String(currentID),
+		})
+	}
+
+	identity, err := resolveDelegationControlIdentity(resource)
+	if err != nil {
+		return nil, err
+	}
+	response, err := lookupExistingDelegationControl(ctx, client, nil, identity)
+	if err != nil {
+		return nil, err
+	}
+	if response == nil {
+		_, err := errorutil.NewServiceFailureFromResponse(errorutil.NotFound, 404, "", "DelegationControl not found during delete confirmation")
+		return nil, err
+	}
+	return response, nil
 }
 
 func delegationControlSummaryMatchesIdentity(
