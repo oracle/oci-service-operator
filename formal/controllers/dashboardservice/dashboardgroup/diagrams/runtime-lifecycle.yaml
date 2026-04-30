@@ -1,0 +1,49 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: dashboardservice
+slug: dashboardgroup
+kind: DashboardGroup
+archetype: generated-service-manager
+states:
+  - provisioning
+  - active
+  - updating
+  - terminating
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - CREATING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - DELETING
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: exact compartmentId plus displayName unique match in ACTIVE, CREATING, or UPDATING; empty displayName skips lookup and duplicate matches fail
+  mutation:
+    mutable:
+      - definedTags
+      - description
+      - displayName
+      - freeformTags
+    forceNew:
+      - compartmentId
+      - systemTags
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Reviewed lifecycle mapping treats CREATING as provisioning, UPDATING as updating, ACTIVE as success, and DELETING as terminating; FAILED is terminal and DELETED is the delete-confirmation target.
+  - Existing-before-create lookup runs only when both compartmentId and displayName are present, then scopes ListDashboardGroups by exact compartmentId plus displayName and reuses only a unique candidate in ACTIVE, CREATING, or UPDATING.
+  - Only displayName, description, freeformTags, and definedTags reconcile in place. The handwritten update builder preserves clear-to-empty intent for those fields, while compartmentId and systemTags remain replacement-only drift and ChangeDashboardGroupCompartment stays out of scope.
+  - Create, get, and update return the DashboardGroup body directly, delete returns headers only, and the Dashboards home-region caveat remains explicit in the published runtime contract.

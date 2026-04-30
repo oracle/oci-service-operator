@@ -14,13 +14,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 199; got != want {
+	if got, want := len(inventory), 201; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 90; got != want {
+	if got, want := countRegistrations(inventory), 91; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
-	if got, want := countExceptions(inventory), 109; got != want {
+	if got, want := countExceptions(inventory), 110; got != want {
 		t.Fatalf("exception inventory count = %d, want %d", got, want)
 	}
 
@@ -46,6 +46,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "databasetools/DatabaseToolsConnection", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datalabelingservice/Dataset", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "datascience/Project", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "dashboardservice/DashboardGroup", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "dataflow/Application", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "email/Dkim", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "functions/Application", "selection.includeKinds")
@@ -107,6 +108,8 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "databasetools/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "datascience/Project")
 	assertInventoryException(t, byKey, "datascience/WorkRequest", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "dashboardservice/DashboardGroup")
+	assertInventoryException(t, byKey, "dashboardservice/Dashboard", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "email/Dkim")
 	assertInventoryRegistration(t, byKey, "keymanagement/Vault")
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
@@ -152,6 +155,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "databasetools/DatabaseToolsConnection", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datalabelingservice/Dataset", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "datascience/Project", APIErrorCoverageFamilyGeneratedRuntimePlain)
+	assertReviewedFamily(t, "dashboardservice/DashboardGroup", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "dataflow/Application", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "email/Dkim", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "functions/Application", APIErrorCoverageFamilyLegacyAdapter)
@@ -203,6 +207,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedException(t, "datalabelingservice/WorkRequestError", "strategy=none")
 	assertReviewedException(t, "datalabelingservice/WorkRequestLog", "strategy=none")
 	assertReviewedException(t, "datascience/WorkRequest", "strategy=none")
+	assertReviewedException(t, "dashboardservice/Dashboard", "strategy=none")
 	assertReviewedException(t, "keymanagement/Key", "strategy=none")
 	assertReviewedException(t, "opensearch/WorkRequest", "strategy=none")
 }

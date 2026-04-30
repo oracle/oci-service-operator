@@ -21,6 +21,7 @@ import (
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
 	corev1beta1 "github.com/oracle/oci-service-operator/api/core/v1beta1"
+	dashboardservicev1beta1 "github.com/oracle/oci-service-operator/api/dashboardservice/v1beta1"
 	databasev1beta1 "github.com/oracle/oci-service-operator/api/database/v1beta1"
 	databasemigrationv1beta1 "github.com/oracle/oci-service-operator/api/databasemigration/v1beta1"
 	databasetoolsv1beta1 "github.com/oracle/oci-service-operator/api/databasetools/v1beta1"
@@ -1740,6 +1741,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "containerinstances.ContainerInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "DashboardserviceDashboardGroup",
+		SpecType:   reflect.TypeOf(dashboardservicev1beta1.DashboardGroupSpec{}),
+		StatusType: reflect.TypeOf(dashboardservicev1beta1.DashboardGroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dashboardservice.CreateDashboardGroupDetails",
+			},
+			{
+				SDKStruct: "dashboardservice.UpdateDashboardGroupDetails",
+			},
+			{
+				SDKStruct: "dashboardservice.DashboardGroup",
+			},
+			{
+				SDKStruct: "dashboardservice.DashboardGroupCollection",
+			},
+			{
+				SDKStruct: "dashboardservice.DashboardGroupSummary",
 			},
 		},
 	},

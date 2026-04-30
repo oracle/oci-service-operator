@@ -263,6 +263,21 @@ packages:
     packageNotes:
       - Split package carved from selected core networking kinds.
 
+  - package: dashboardservice
+    displayName: Dashboard Service
+    summary: Manage OCI dashboard groups from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to DashboardGroup while the dashboard content model itself stays unpublished.
+      - The published runtime keeps lifecycle-based generatedruntime semantics, scopes existing-before-create reuse to exact `compartmentId` plus `displayName`, and preserves clear-to-empty updates for `displayName`, `description`, `freeformTags`, and `definedTags`.
+      - Dashboard resources created outside the tenancy home region are not viewable in the Console, so that Dashboards service caveat remains explicit in the published docs and formal metadata.
+    kindOverrides:
+      - group: dashboardservice
+        kind: DashboardGroup
+        summary: Manage OCI dashboard groups.
+
   - package: database
     displayName: Autonomous Database
     summary: Manage OCI Autonomous Databases from Kubernetes.

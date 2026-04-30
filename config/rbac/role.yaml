@@ -508,6 +508,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - dashboardservice.oracle.com
+  resources:
+  - dashboardgroups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dashboardservice.oracle.com
+  resources:
+  - dashboardgroups/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dashboardservice.oracle.com
+  resources:
+  - dashboardgroups/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - database.oracle.com
   resources:
   - autonomousdatabases
