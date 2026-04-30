@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apmtraces",
+  "slug": "scheduledquery",
+  "kind": "ScheduledQuery",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_traces_scheduled_query",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateScheduledQuery",
+        "requestType": "apmtraces.CreateScheduledQueryRequest",
+        "responseType": "apmtraces.CreateScheduledQueryResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetScheduledQuery",
+        "requestType": "apmtraces.GetScheduledQueryRequest",
+        "responseType": "apmtraces.GetScheduledQueryResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListScheduledQueries",
+        "requestType": "apmtraces.ListScheduledQueriesRequest",
+        "responseType": "apmtraces.ListScheduledQueriesResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateScheduledQuery",
+        "requestType": "apmtraces.UpdateScheduledQueryRequest",
+        "responseType": "apmtraces.UpdateScheduledQueryResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteScheduledQuery",
+        "requestType": "apmtraces.DeleteScheduledQueryRequest",
+        "responseType": "apmtraces.DeleteScheduledQueryResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [
+        "CREATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "defined_tags",
+      "freeform_tags",
+      "scheduled_query_description",
+      "scheduled_query_maximum_runtime_in_seconds",
+      "scheduled_query_name",
+      "scheduled_query_processing_configuration",
+      "scheduled_query_processing_sub_type",
+      "scheduled_query_processing_type",
+      "scheduled_query_retention_criteria",
+      "scheduled_query_retention_period_in_ms",
+      "scheduled_query_schedule",
+      "scheduled_query_text"
+    ],
+    "forceNew": [
+      "apm_domain_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [
+      "DELETING"
+    ],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_apm_traces_scheduled_queries",
+    "collectionField": "scheduled_queries",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "apm_domain_id",
+      "display_name"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apmtraces/scheduledquery/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apmtraces/scheduledquery/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateScheduledQuery, GetScheduledQuery, ListScheduledQueries, UpdateScheduledQuery, and DeleteScheduledQuery all require the query apmDomainId. Create/Get/Update return the ScheduledQuery body directly, while DeleteScheduledQueryResponse returns only headers.",
+    "Pinned OCI SDK contract: ScheduledQuery lifecycle exposes CREATING, UPDATING, ACTIVE, DELETING, DELETED, and FAILED. The reviewed runtime keeps lifecycle-based generatedruntime handling and does not publish a separate work-request surface.",
+    "ListScheduledQueriesRequest filters by apmDomainId and displayName, where the displayName filter is a starts-with match on the scheduled query name. The published runtime therefore scopes by apmDomainId, sends displayName from spec.scheduledQueryName, and adopts only a unique exact-name match from reusable ACTIVE, CREATING, or UPDATING summaries.",
+    "UpdateScheduledQueryDetails exposes scheduled_query_name, scheduled_query_processing_type, scheduled_query_processing_sub_type, scheduled_query_text, scheduled_query_schedule, scheduled_query_description, scheduled_query_maximum_runtime_in_seconds, scheduled_query_retention_period_in_ms, scheduled_query_processing_configuration, scheduled_query_retention_criteria, freeform_tags, and defined_tags. Repo-authored behavior keeps apmDomainId replacement-only and currently treats zero-value clear intent as an explicit gap in the generated spec projection.",
+    "OCI response bodies and summaries do not echo the request apmDomainId, so the published runtime mirrors that bound domain into status.apmDomainId while keeping the returned ScheduledQuery body, lifecycle state, and systemTags in required status projection."
+  ]
+}

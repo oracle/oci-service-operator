@@ -15,6 +15,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/apiplatform"
 	"github.com/oracle/oci-go-sdk/v65/apmconfig"
 	"github.com/oracle/oci-go-sdk/v65/apmcontrolplane"
+	"github.com/oracle/oci-go-sdk/v65/apmtraces"
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
 	"github.com/oracle/oci-go-sdk/v65/clusterplacementgroups"
@@ -441,6 +442,13 @@ var seedTargets = []Target{
 	newTarget("apmcontrolplane", "UpdateApmDomainDetails", reflect.TypeOf(apmcontrolplane.UpdateApmDomainDetails{})),
 	newTarget("apmcontrolplane", "ApmDomain", reflect.TypeOf(apmcontrolplane.ApmDomain{})),
 	newTarget("apmcontrolplane", "ApmDomainSummary", reflect.TypeOf(apmcontrolplane.ApmDomainSummary{})),
+
+	// Apmtraces CRD support
+	newTarget("apmtraces", "CreateScheduledQueryDetails", reflect.TypeOf(apmtraces.CreateScheduledQueryDetails{})),
+	newTarget("apmtraces", "UpdateScheduledQueryDetails", reflect.TypeOf(apmtraces.UpdateScheduledQueryDetails{})),
+	newTarget("apmtraces", "ScheduledQuery", reflect.TypeOf(apmtraces.ScheduledQuery{})),
+	newTarget("apmtraces", "ScheduledQueryCollection", reflect.TypeOf(apmtraces.ScheduledQueryCollection{})),
+	newTarget("apmtraces", "ScheduledQuerySummary", reflect.TypeOf(apmtraces.ScheduledQuerySummary{})),
 
 	// Bds CRD support
 	newTarget("bds", "CreateBdsInstanceDetails", reflect.TypeOf(bds.CreateBdsInstanceDetails{})),

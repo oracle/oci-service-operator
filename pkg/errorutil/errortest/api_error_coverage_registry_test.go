@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 198; got != want {
+	if got, want := len(inventory), 199; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 89; got != want {
+	if got, want := countRegistrations(inventory), 90; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 109; got != want {
@@ -35,6 +35,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventorySelectionSource(t, byKey, "apiplatform/ApiPlatformInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apmconfig/Config", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "apmcontrolplane/ApmDomain", "selection.includeKinds")
+	assertInventorySelectionSource(t, byKey, "apmtraces/ScheduledQuery", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "bds/BdsInstance", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "budget/Budget", "selection.includeKinds")
 	assertInventorySelectionSource(t, byKey, "clusterplacementgroups/ClusterPlacementGroup", "selection.includeKinds")
@@ -87,6 +88,7 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "apmcontrolplane/WorkRequest", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "apmcontrolplane/WorkRequestError", `controller.strategy="none"`)
 	assertInventoryException(t, byKey, "apmcontrolplane/WorkRequestLog", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "apmtraces/ScheduledQuery")
 	assertInventoryRegistration(t, byKey, "bds/BdsInstance")
 	assertInventoryException(t, byKey, "bds/WorkRequest", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "budget/Budget")
@@ -138,6 +140,7 @@ func TestReviewedAPIErrorCoverageRegistryRepresentativeMappings(t *testing.T) {
 	assertReviewedFamily(t, "apiplatform/ApiPlatformInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apmconfig/Config", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "apmcontrolplane/ApmDomain", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)
+	assertReviewedFamily(t, "apmtraces/ScheduledQuery", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "bds/BdsInstance", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "budget/Budget", APIErrorCoverageFamilyGeneratedRuntimePlain)
 	assertReviewedFamily(t, "clusterplacementgroups/ClusterPlacementGroup", APIErrorCoverageFamilyGeneratedRuntimeWorkRequest)

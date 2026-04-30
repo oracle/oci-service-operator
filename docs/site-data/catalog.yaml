@@ -165,6 +165,20 @@ packages:
         kind: ApmDomain
         summary: Manage OCI Application Performance Monitoring domains.
 
+  - package: apmtraces
+    displayName: Application Performance Monitoring Traces
+    summary: Manage OCI Application Performance Monitoring scheduled trace queries from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to ScheduledQuery while the remaining APM Traces query and discovery families stay unpublished.
+      - The published runtime uses lifecycle-based generatedruntime semantics, scopes reuse by exact scheduledQueryName within one apmDomainId, and mirrors `apmDomainId` into status because OCI does not echo it in response bodies.
+    kindOverrides:
+      - group: apmtraces
+        kind: ScheduledQuery
+        summary: Manage OCI Application Performance Monitoring scheduled trace queries.
+
   - package: bds
     displayName: Big Data Service
     summary: Manage OCI Big Data Service instances from Kubernetes with an initial controller-backed BdsInstance rollout.

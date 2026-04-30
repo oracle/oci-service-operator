@@ -94,4 +94,5 @@ resources:
 - apmcontrolplane_v1beta1_apmdomain.yaml
 - apiaccesscontrol_v1beta1_privilegedapicontrol.yaml
 - apmconfig_v1beta1_config.yaml
+- apmtraces_v1beta1_scheduledquery.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

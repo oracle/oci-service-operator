@@ -1,0 +1,133 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Activity - apmtraces/ScheduledQuery
+skinparam activity {
+  backgroundColor #f8fafc
+  borderColor #0f172a
+  fontColor #0f172a
+  diamondBackgroundColor #e2e8f0
+  diamondBorderColor #1d4ed8
+  diamondFontColor #0f172a
+  startColor #1d4ed8
+  endColor #0f172a
+  barColor #1d4ed8
+}
+start
+partition "Observe and Bind" {
+:Start from shared flow\nshared/diagrams/shared-reconcile-activity.svg;
+:Read desired ScheduledQuery spec, tracked\nstatus, and delete intent;
+if ("Tracked or explicit OCI identity present?") then (yes)
+:Get the current OCI resource via\nGetScheduledQuery;
+else (no)
+:Resolve an existing OCI resource through\nListScheduledQueries using filters\napmDomainId, displayName;
+:Create the OCI resource via\nCreateScheduledQuery when no reusable match is\nfound;
+:Persist the resolved or created OCI identity\ninto status;
+endif
+}
+if ("Delete requested?") then (yes)
+partition "Delete" {
+:Delete path uses DeleteScheduledQuery with\nrequired via GetScheduledQuery or\nListScheduledQueries to DELETED confirmation;
+:Confirm deletion via GetScheduledQuery or\nListScheduledQueries until OCI reaches DELETED;
+if ("Delete cleanup and finalizer release succeed?") then (yes)
+:Remove the finalizer after delete completion;
+else (no)
+:Stay blocked until cleanup or finalizer\nrelease succeeds;
+endif
+}
+stop
+else (no)
+partition "Lifecycle Classification" {
+if ("OCI state in retryable set?") then (yes)
+:Request requeue while OCI remains in CREATING,\nUPDATING, DELETING;
+stop
+endif
+if ("OCI state is outside success targets?") then (yes)
+:Return an unsuccessful reconcile result until\nOCI reaches ACTIVE;
+stop
+endif
+}
+partition "Ready and Drift Handling" {
+:Compare live OCI state against the\nrepo-authored mutation surface;
+if ("Force-new or conflicting drift detected?") then (yes)
+:Reject drift before OCI mutation for force-new\nfields apmDomainId;
+stop
+endif
+if ("Supported mutable drift detected?") then (yes)
+:Apply UpdateScheduledQuery only for mutable\nfields definedTags, freeformTags,\nscheduledQueryDescription,\nscheduledQueryMaximumRuntimeInSeconds (+8\nmore);
+else (no)
+:Skip the no-op mutation path;
+endif
+:Run provider helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource when the\nmatching field-driven path executes;
+:Return success for the ACTIVE success state;
+:Project required status and finalizer policy\nretain-until-confirmed-delete;
+:Requeue on provisioning, updating, terminating;
+:Keep promotion blocked on drift-guard;
+}
+endif
+stop
+note right
+shared diagram:
+shared/diagrams/shared-reconcile-activity.svg
+Start from the shared reconcile activity and
+specialize provider-backed CRUD, wait, and
+status-projection details here.
+Controller-local activity diagrams add
+list-lookup hints, secret policies, delete
+handling, and open formal gaps.
+archetype batch: Generated service-manager
+controllers specialize the shared reconcile path
+with formal runtime ownership.
+service: apmtraces
+slug: scheduledquery
+kind: ScheduledQuery
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: provisioning, updating, terminating
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: definedTags, freeformTags,
+scheduledQueryDescription,
+scheduledQueryMaximumRuntimeInSeconds (+8 more)
+reject before mutate: force-new fields
+apmDomainId
+create-only fields: none
+list lookup: oci_apm_traces_scheduled_queries
+filters apmDomainId, displayName; exact
+scheduledQueryName unique match in ACTIVE,
+CREATING, or UPDATING; duplicate matches fail
+conflicts: none
+open gaps: drift-guard
+Reviewed lifecycle mapping treats CREATING as
+provisioning, UPDATING as updating, ACTIVE as
+success, and DELETING as terminating; FAILED is
+terminal and DELETED is only a
+delete-confirmation target.
+Pre-create reuse always scopes by apmDomainId
+and uses the SDK displayName filter from
+spec.scheduledQueryName, but adoption still
+requires a unique exact-name match from the list
+summary surface.
+Create and update return the ScheduledQuery body
+directly, while delete returns headers only. The
+runtime stays lifecycle-based and relies on
+read-after-write plus confirm-delete rereads
+instead of work-request polling.
+status.apmDomainId mirrors the bound request
+domain because OCI does not echo that query
+parameter back on ScheduledQuery or
+ScheduledQuerySummary.
+Explicit clear-to-empty intent for zero-value
+top-level fields remains a current gap until the
+generated spec preserves empty-string, zero, and
+empty-map updates distinctly from omission.
+end note
+@enduml
