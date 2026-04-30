@@ -92,4 +92,5 @@ resources:
 - datalabelingservice_v1beta1_dataset.yaml
 - databasemigration_v1beta1_connection.yaml
 - apmcontrolplane_v1beta1_apmdomain.yaml
+- apiaccesscontrol_v1beta1_privilegedapicontrol.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

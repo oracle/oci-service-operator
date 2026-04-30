@@ -11,6 +11,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/aispeech"
 	"github.com/oracle/oci-go-sdk/v65/aivision"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
+	"github.com/oracle/oci-go-sdk/v65/apiaccesscontrol"
 	"github.com/oracle/oci-go-sdk/v65/apiplatform"
 	"github.com/oracle/oci-go-sdk/v65/apmcontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/bds"
@@ -416,6 +417,13 @@ var seedTargets = []Target{
 	newTarget("analytics", "UpdateAnalyticsInstanceDetails", reflect.TypeOf(analytics.UpdateAnalyticsInstanceDetails{})),
 	newTarget("analytics", "AnalyticsInstance", reflect.TypeOf(analytics.AnalyticsInstance{})),
 	newTarget("analytics", "AnalyticsInstanceSummary", reflect.TypeOf(analytics.AnalyticsInstanceSummary{})),
+
+	// Apiaccesscontrol CRD support
+	newTarget("apiaccesscontrol", "CreatePrivilegedApiControlDetails", reflect.TypeOf(apiaccesscontrol.CreatePrivilegedApiControlDetails{})),
+	newTarget("apiaccesscontrol", "UpdatePrivilegedApiControlDetails", reflect.TypeOf(apiaccesscontrol.UpdatePrivilegedApiControlDetails{})),
+	newTarget("apiaccesscontrol", "PrivilegedApiControl", reflect.TypeOf(apiaccesscontrol.PrivilegedApiControl{})),
+	newTarget("apiaccesscontrol", "PrivilegedApiControlCollection", reflect.TypeOf(apiaccesscontrol.PrivilegedApiControlCollection{})),
+	newTarget("apiaccesscontrol", "PrivilegedApiControlSummary", reflect.TypeOf(apiaccesscontrol.PrivilegedApiControlSummary{})),
 
 	// Apiplatform CRD support
 	newTarget("apiplatform", "CreateApiPlatformInstanceDetails", reflect.TypeOf(apiplatform.CreateApiPlatformInstanceDetails{})),

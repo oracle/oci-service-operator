@@ -15,6 +15,7 @@ This landing page is generated from the checked-in package and release inventory
 | [aispeech.oracle.com/v1beta1](aispeech/v1beta1/index.md) | [TranscriptionJob](aispeech/v1beta1/index.md#kind-transcriptionjob) | - |
 | [aivision.oracle.com/v1beta1](aivision/v1beta1/index.md) | [Project](aivision/v1beta1/index.md#kind-project) | - |
 | [analytics.oracle.com/v1beta1](analytics/v1beta1/index.md) | [AnalyticsInstance](analytics/v1beta1/index.md#kind-analyticsinstance) | - |
+| [apiaccesscontrol.oracle.com/v1beta1](apiaccesscontrol/v1beta1/index.md) | [PrivilegedApiControl](apiaccesscontrol/v1beta1/index.md#kind-privilegedapicontrol) | - |
 | [apigateway.oracle.com/v1beta1](apigateway/v1beta1/index.md) | [ApiGateway](apigateway/v1beta1/index.md#kind-apigateway), [ApiGatewayDeployment](apigateway/v1beta1/index.md#kind-apigatewaydeployment) | API Gateway (`v2.0.0-alpha`) |
 | [apiplatform.oracle.com/v1beta1](apiplatform/v1beta1/index.md) | [ApiPlatformInstance](apiplatform/v1beta1/index.md#kind-apiplatforminstance) | - |
 | [apmcontrolplane.oracle.com/v1beta1](apmcontrolplane/v1beta1/index.md) | [ApmDomain](apmcontrolplane/v1beta1/index.md#kind-apmdomain) | - |

@@ -17,6 +17,7 @@ resources:
 - bases/aispeech.oracle.com_transcriptionjobs.yaml
 - bases/aivision.oracle.com_projects.yaml
 - bases/analytics.oracle.com_analyticsinstances.yaml
+- bases/apiaccesscontrol.oracle.com_privilegedapicontrols.yaml
 - bases/apigateway.oracle.com_apigatewaydeployments.yaml
 - bases/apigateway.oracle.com_apigateways.yaml
 - bases/apiplatform.oracle.com_apiplatforminstances.yaml
