@@ -301,6 +301,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"ScheduledQuery keeps lifecycle-based generatedruntime CRUD and confirm-delete handling, while a handwritten hook layer rewires the SDK displayName filter to spec.scheduledQueryName, bounds pre-create reuse to exact-name matches inside one apmDomainId, and mirrors apmDomainId into status because OCI does not echo it back.",
 			),
+			resourceKey("apmsynthetics", "Script"): reviewedRegistration(
+				"apmsynthetics",
+				"apmsynthetics",
+				apiErrorCoverageDefaultVersion,
+				"Script",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"Script keeps generatedruntime CRUD and confirm-delete handling, while a handwritten hook layer scopes requests by apmDomainId, mirrors that bound domain into status, settles synchronous create and update rereads as Active, and bounds pre-create reuse to exact apmDomainId plus displayName plus contentType matches.",
+			),
 			resourceKey("bds", "BdsInstance"): reviewedRegistration(
 				"bds",
 				"bds",

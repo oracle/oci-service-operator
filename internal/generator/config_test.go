@@ -1142,6 +1142,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"apmcontrolplane",
 		"apmconfig",
 		"apmtraces",
+		"apmsynthetics",
 		"bds",
 		"budget",
 		"clusterplacementgroups",
@@ -1194,6 +1195,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"apmconfig",
 		"apmcontrolplane",
 		"apmtraces",
+		"apmsynthetics",
 		"bds",
 		"budget",
 		"clusterplacementgroups",
@@ -1237,6 +1239,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["apiaccesscontrol"], true, SelectionModeExplicit, []string{"PrivilegedApiControl"})
 	assertServiceSelection(t, services["apmconfig"], true, SelectionModeExplicit, []string{"Config"})
 	assertServiceSelection(t, services["apmtraces"], true, SelectionModeExplicit, []string{"ScheduledQuery"})
+	assertServiceSelection(t, services["apmsynthetics"], true, SelectionModeExplicit, []string{"Script"})
 	assertServiceSelection(t, services["bds"], true, SelectionModeExplicit, []string{"BdsInstance"})
 	assertServiceSelection(t, services["budget"], true, SelectionModeExplicit, []string{"Budget"})
 	assertServiceSelection(t, services["clusterplacementgroups"], true, SelectionModeExplicit, []string{"ClusterPlacementGroup"})
@@ -1959,6 +1962,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"apmconfig":          {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmcontrolplane":    {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmtraces":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"apmsynthetics":      {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"bds":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"budget":             {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"clusterplacementgroups": {

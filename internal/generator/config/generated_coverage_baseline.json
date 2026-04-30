@@ -1,16 +1,16 @@
 {
   "aggregate": {
-    "specs": 90,
-    "mappings": 377,
-    "trackedMappings": 377,
+    "specs": 91,
+    "mappings": 382,
+    "trackedMappings": 382,
     "untrackedMappings": 0,
-    "presentFields": 4218,
-    "missingFields": 39,
-    "mandatoryPresentFields": 1321,
-    "mandatoryMissingFields": 36,
-    "extraSpecFields": 440,
-    "overallCoveragePercent": 99.08386187455956,
-    "mandatoryCoveragePercent": 97.34708916728077
+    "presentFields": 4251,
+    "missingFields": 42,
+    "mandatoryPresentFields": 1332,
+    "mandatoryMissingFields": 37,
+    "extraSpecFields": 442,
+    "overallCoveragePercent": 99.02166317260657,
+    "mandatoryCoveragePercent": 97.2972972972973
   },
   "services": [
     {
@@ -166,6 +166,20 @@
       "extraSpecFields": 2,
       "overallCoveragePercent": 100,
       "mandatoryCoveragePercent": 100
+    },
+    {
+      "service": "apmsynthetics",
+      "specs": 1,
+      "mappings": 5,
+      "trackedMappings": 5,
+      "untrackedMappings": 0,
+      "presentFields": 33,
+      "missingFields": 3,
+      "mandatoryPresentFields": 11,
+      "mandatoryMissingFields": 1,
+      "extraSpecFields": 2,
+      "overallCoveragePercent": 91.66666666666666,
+      "mandatoryCoveragePercent": 91.66666666666666
     },
     {
       "service": "apmtraces",
