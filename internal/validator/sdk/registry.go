@@ -13,6 +13,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apiaccesscontrol"
 	"github.com/oracle/oci-go-sdk/v65/apiplatform"
+	"github.com/oracle/oci-go-sdk/v65/apmconfig"
 	"github.com/oracle/oci-go-sdk/v65/apmcontrolplane"
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
@@ -431,6 +432,9 @@ var seedTargets = []Target{
 	newTarget("apiplatform", "ApiPlatformInstance", reflect.TypeOf(apiplatform.ApiPlatformInstance{})),
 	newTarget("apiplatform", "ApiPlatformInstanceCollection", reflect.TypeOf(apiplatform.ApiPlatformInstanceCollection{})),
 	newTarget("apiplatform", "ApiPlatformInstanceSummary", reflect.TypeOf(apiplatform.ApiPlatformInstanceSummary{})),
+
+	// Apmconfig CRD support
+	newTarget("apmconfig", "ConfigCollection", reflect.TypeOf(apmconfig.ConfigCollection{})),
 
 	// Apmcontrolplane CRD support
 	newTarget("apmcontrolplane", "CreateApmDomainDetails", reflect.TypeOf(apmcontrolplane.CreateApmDomainDetails{})),

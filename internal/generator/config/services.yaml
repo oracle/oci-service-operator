@@ -623,6 +623,75 @@ services:
           serviceManager:
             strategy: none
 
+  - service: apmconfig
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmconfig
+    group: apmconfig
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Config
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Config
+          formalSpec: config
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          specFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId"'
+              comments:
+                - The APM Domain ID the request is intended for.
+              markers:
+                - +kubebuilder:validation:Required
+            - name: ConfigType
+              type: string
+              tag: 'json:"configType"'
+              comments:
+                - The discriminator that selects which OCI Config subtype to create or update.
+                - Supported values are `SPAN_FILTER`, `METRIC_GROUP`, `APDEX`, `OPTIONS`, `AGENT`, and `MACS_APM_EXTENSION`.
+              markers:
+                - +kubebuilder:validation:Required
+                - +kubebuilder:validation:Enum=SPAN_FILTER;METRIC_GROUP;APDEX;OPTIONS;AGENT;MACS_APM_EXTENSION
+          statusFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId,omitempty"'
+              comments:
+                - The bound APM Domain ID used to address this configuration item.
+          sample:
+            body: |-
+              #
+              # Replace the APM Domain OCID below before running e2e.
+              # Set spec.configType first, then only populate the top-level fields that belong to that subtype.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing Config with the same apmDomainId, configType, and matching subtype fields.
+              #
+              apiVersion: apmconfig.oracle.com/v1beta1
+              kind: Config
+              metadata:
+                name: config-sample
+              spec:
+                apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
+                configType: SPAN_FILTER
+                displayName: span-filter-sample
+                filterText: 'service.name = "checkout"'
+                description: Sample span filter managed by OCI Service Operator
+
   - service: artifacts
     sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
     group: artifacts

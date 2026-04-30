@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apmconfig",
+  "slug": "config",
+  "kind": "Config",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_config_config",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateConfig",
+        "requestType": "apmconfig.CreateConfigRequest",
+        "responseType": "apmconfig.CreateConfigResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetConfig",
+        "requestType": "apmconfig.GetConfigRequest",
+        "responseType": "apmconfig.GetConfigResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListConfigs",
+        "requestType": "apmconfig.ListConfigsRequest",
+        "responseType": "apmconfig.ListConfigsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateConfig",
+        "requestType": "apmconfig.UpdateConfigRequest",
+        "responseType": "apmconfig.UpdateConfigResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteConfig",
+        "requestType": "apmconfig.DeleteConfigRequest",
+        "responseType": "apmconfig.DeleteConfigResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "agent_version",
+      "attach_install_dir",
+      "config",
+      "defined_tags",
+      "description",
+      "dimensions",
+      "display_name",
+      "filter_id",
+      "filter_text",
+      "freeform_tags",
+      "group",
+      "metrics",
+      "namespace",
+      "options",
+      "overrides",
+      "process_filter",
+      "rules",
+      "run_as_user",
+      "service_name"
+    ],
+    "forceNew": [
+      "apm_domain_id",
+      "config_type",
+      "management_agent_id",
+      "match_agents_with_attribute_value"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "DELETED"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_apm_config_configs",
+    "collectionField": "config_collection",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "config_type",
+      "display_name",
+      "options_group"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apmconfig/config/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apmconfig/config/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "mutation-policy",
+      "status-projection",
+      "synchronous-write-success",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateConfig, GetConfig, ListConfigs, UpdateConfig, and DeleteConfig all require the query apmDomainId, address one polymorphic Config root, and use polymorphic CreateConfigDetails, UpdateConfigDetails, and ConfigSummary shapes across AGENT, OPTIONS, MACS_APM_EXTENSION, METRIC_GROUP, APDEX, and SPAN_FILTER.",
+    "ListConfigs exposes configType, displayName, and optionsGroup query filters, but the reviewed runtime still owns subtype dispatch, bind-versus-create policy, and mutation parity over the published union Config surface.",
+    "Repo-authored reuse is explicit: the runtime mirrors apmDomainId into status, skips pre-create lookup until the selected subtype exposes enough identity, and only adopts a unique exact match on configType, displayName, group, filterId, filterText, namespace, managementAgentId, matchAgentsWithAttributeValue, and serviceName."
+  ]
+}

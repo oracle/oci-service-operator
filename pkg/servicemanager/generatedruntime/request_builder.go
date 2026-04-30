@@ -14,6 +14,7 @@ import (
 	"strings"
 	"unicode"
 
+	apmconfigsdk "github.com/oracle/oci-go-sdk/v65/apmconfig"
 	databasesdk "github.com/oracle/oci-go-sdk/v65/database"
 	databasemigrationsdk "github.com/oracle/oci-go-sdk/v65/databasemigration"
 	databasetoolssdk "github.com/oracle/oci-go-sdk/v65/databasetools"
@@ -559,6 +560,22 @@ func convertPolymorphicInterfaceValue(payload []byte, targetType reflect.Type) (
 		converted := reflect.New(targetType).Elem()
 		converted.Set(reflect.ValueOf(body))
 		return converted, true, nil
+	case configCreateDetailsType:
+		body, err := convertConfigCreateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
+	case configUpdateDetailsType:
+		body, err := convertConfigUpdateDetails(payload)
+		if err != nil {
+			return reflect.Value{}, true, err
+		}
+		converted := reflect.New(targetType).Elem()
+		converted.Set(reflect.ValueOf(body))
+		return converted, true, nil
 	case databaseToolsConnectionCreateDetailsType:
 		body, err := convertDatabaseToolsConnectionCreateDetails(payload)
 		if err != nil {
@@ -695,6 +712,40 @@ func convertDatabaseToolsConnectionUpdateDetails(payload []byte) (databasetoolss
 	return body, nil
 }
 
+func convertConfigCreateDetails(payload []byte) (apmconfigsdk.CreateConfigDetails, error) {
+	concreteType, err := configCreateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(apmconfigsdk.CreateConfigDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved CreateConfigDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
+func convertConfigUpdateDetails(payload []byte) (apmconfigsdk.UpdateConfigDetails, error) {
+	concreteType, err := configUpdateConcreteType(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	converted := reflect.New(concreteType)
+	if err := json.Unmarshal(payload, converted.Interface()); err != nil {
+		return nil, fmt.Errorf("unmarshal into %s: %w", concreteType, err)
+	}
+	body, ok := converted.Elem().Interface().(apmconfigsdk.UpdateConfigDetails)
+	if !ok {
+		return nil, fmt.Errorf("resolved UpdateConfigDetails type %s does not implement the polymorphic interface", concreteType)
+	}
+	return body, nil
+}
+
 func databaseToolsConnectionCreateConcreteType(payload []byte) (reflect.Type, error) {
 	connectionType, err := jsonFieldString(payload, "type")
 	if err != nil {
@@ -731,6 +782,30 @@ func connectionCreateConcreteType(payload []byte) (reflect.Type, error) {
 	}
 }
 
+func configCreateConcreteType(payload []byte) (reflect.Type, error) {
+	configType, err := jsonFieldString(payload, "configType")
+	if err != nil {
+		return nil, fmt.Errorf("decode Config create type: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(configType)) {
+	case "AGENT":
+		return reflect.TypeOf(apmconfigsdk.CreateAgentConfigDetails{}), nil
+	case "APDEX":
+		return reflect.TypeOf(apmconfigsdk.CreateApdexRulesDetails{}), nil
+	case "MACS_APM_EXTENSION":
+		return reflect.TypeOf(apmconfigsdk.CreateMacsApmExtensionDetails{}), nil
+	case "METRIC_GROUP":
+		return reflect.TypeOf(apmconfigsdk.CreateMetricGroupDetails{}), nil
+	case "OPTIONS":
+		return reflect.TypeOf(apmconfigsdk.CreateOptionsDetails{}), nil
+	case "SPAN_FILTER":
+		return reflect.TypeOf(apmconfigsdk.CreateSpanFilterDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported CreateConfigDetails type %q", configType)
+	}
+}
+
 func connectionUpdateConcreteType(payload []byte) (reflect.Type, error) {
 	connectionType, err := jsonFieldString(payload, "connectionType")
 	if err != nil {
@@ -744,6 +819,30 @@ func connectionUpdateConcreteType(payload []byte) (reflect.Type, error) {
 		return reflect.TypeOf(databasemigrationsdk.UpdateOracleConnectionDetails{}), nil
 	default:
 		return nil, fmt.Errorf("unsupported UpdateConnectionDetails type %q", connectionType)
+	}
+}
+
+func configUpdateConcreteType(payload []byte) (reflect.Type, error) {
+	configType, err := jsonFieldString(payload, "configType")
+	if err != nil {
+		return nil, fmt.Errorf("decode Config update type: %w", err)
+	}
+
+	switch strings.ToUpper(strings.TrimSpace(configType)) {
+	case "AGENT":
+		return reflect.TypeOf(apmconfigsdk.UpdateAgentConfigDetails{}), nil
+	case "APDEX":
+		return reflect.TypeOf(apmconfigsdk.UpdateApdexRulesDetails{}), nil
+	case "MACS_APM_EXTENSION":
+		return reflect.TypeOf(apmconfigsdk.UpdateMacsApmExtensionDetails{}), nil
+	case "METRIC_GROUP":
+		return reflect.TypeOf(apmconfigsdk.UpdateMetricGroupDetails{}), nil
+	case "OPTIONS":
+		return reflect.TypeOf(apmconfigsdk.UpdateOptionsDetails{}), nil
+	case "SPAN_FILTER":
+		return reflect.TypeOf(apmconfigsdk.UpdateSpanFilterDetails{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported UpdateConfigDetails type %q", configType)
 	}
 }
 

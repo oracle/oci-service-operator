@@ -1140,6 +1140,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"apiaccesscontrol",
 		"apiplatform",
 		"apmcontrolplane",
+		"apmconfig",
 		"bds",
 		"budget",
 		"clusterplacementgroups",
@@ -1189,6 +1190,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 		"analytics",
 		"apiaccesscontrol",
 		"apiplatform",
+		"apmconfig",
 		"apmcontrolplane",
 		"bds",
 		"budget",
@@ -1231,6 +1233,7 @@ func TestCheckedInConfigIncludesDefaultActiveSelectionMetadata(t *testing.T) {
 	assertServiceSelection(t, services["aivision"], true, SelectionModeExplicit, []string{"Project"})
 	assertServiceSelection(t, services["analytics"], true, SelectionModeExplicit, []string{"AnalyticsInstance"})
 	assertServiceSelection(t, services["apiaccesscontrol"], true, SelectionModeExplicit, []string{"PrivilegedApiControl"})
+	assertServiceSelection(t, services["apmconfig"], true, SelectionModeExplicit, []string{"Config"})
 	assertServiceSelection(t, services["bds"], true, SelectionModeExplicit, []string{"BdsInstance"})
 	assertServiceSelection(t, services["budget"], true, SelectionModeExplicit, []string{"Budget"})
 	assertServiceSelection(t, services["clusterplacementgroups"], true, SelectionModeExplicit, []string{"ClusterPlacementGroup"})
@@ -1950,6 +1953,7 @@ func TestCheckedInConfigSelectedKindsHaveExplicitAsyncContracts(t *testing.T) {
 		"analytics":          {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"apiaccesscontrol":   {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"apiplatform":        {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
+		"apmconfig":          {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},
 		"apmcontrolplane":    {strategy: AsyncStrategyWorkRequest, runtime: AsyncRuntimeGeneratedRuntime},
 		"bds":                {strategy: AsyncStrategyLifecycle, runtime: AsyncRuntimeGeneratedRuntime},
 		"budget":             {strategy: AsyncStrategyNone, runtime: AsyncRuntimeGeneratedRuntime},

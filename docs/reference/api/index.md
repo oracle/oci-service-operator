@@ -18,6 +18,7 @@ This landing page is generated from the checked-in package and release inventory
 | [apiaccesscontrol.oracle.com/v1beta1](apiaccesscontrol/v1beta1/index.md) | [PrivilegedApiControl](apiaccesscontrol/v1beta1/index.md#kind-privilegedapicontrol) | - |
 | [apigateway.oracle.com/v1beta1](apigateway/v1beta1/index.md) | [ApiGateway](apigateway/v1beta1/index.md#kind-apigateway), [ApiGatewayDeployment](apigateway/v1beta1/index.md#kind-apigatewaydeployment) | API Gateway (`v2.0.0-alpha`) |
 | [apiplatform.oracle.com/v1beta1](apiplatform/v1beta1/index.md) | [ApiPlatformInstance](apiplatform/v1beta1/index.md#kind-apiplatforminstance) | - |
+| [apmconfig.oracle.com/v1beta1](apmconfig/v1beta1/index.md) | [Config](apmconfig/v1beta1/index.md#kind-config) | - |
 | [apmcontrolplane.oracle.com/v1beta1](apmcontrolplane/v1beta1/index.md) | [ApmDomain](apmcontrolplane/v1beta1/index.md#kind-apmdomain) | - |
 | [bds.oracle.com/v1beta1](bds/v1beta1/index.md) | [BdsInstance](bds/v1beta1/index.md#kind-bdsinstance) | - |
 | [budget.oracle.com/v1beta1](budget/v1beta1/index.md) | [Budget](budget/v1beta1/index.md#kind-budget) | - |

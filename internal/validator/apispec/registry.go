@@ -12,6 +12,7 @@ import (
 	analyticsv1beta1 "github.com/oracle/oci-service-operator/api/analytics/v1beta1"
 	apiaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/apiaccesscontrol/v1beta1"
 	apiplatformv1beta1 "github.com/oracle/oci-service-operator/api/apiplatform/v1beta1"
+	apmconfigv1beta1 "github.com/oracle/oci-service-operator/api/apmconfig/v1beta1"
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
@@ -1603,6 +1604,16 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "apiplatform.ApiPlatformInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "ApmconfigConfig",
+		SpecType:   reflect.TypeOf(apmconfigv1beta1.ConfigSpec{}),
+		StatusType: reflect.TypeOf(apmconfigv1beta1.ConfigStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apmconfig.ConfigCollection",
 			},
 		},
 	},

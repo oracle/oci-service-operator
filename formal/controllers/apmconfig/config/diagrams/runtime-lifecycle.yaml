@@ -1,0 +1,75 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: apmconfig
+slug: config
+kind: Config
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+repoAuthored:
+  listLookup:
+    filters:
+      - apmDomainId
+      - configType
+      - displayName
+      - optionsGroup
+    matchRule: >-
+      Pre-create reuse sends apmDomainId plus configType and any available
+      displayName or options-group filters, then adopts only a unique exact
+      match on configType, displayName, group, filterId, filterText,
+      namespace, managementAgentId, matchAgentsWithAttributeValue, and
+      serviceName; duplicate matches fail instead of guessing.
+  mutation:
+    mutable:
+      - agentVersion
+      - attachInstallDir
+      - config
+      - definedTags
+      - description
+      - dimensions
+      - displayName
+      - filterId
+      - filterText
+      - freeformTags
+      - group
+      - metrics
+      - namespace
+      - options
+      - overrides
+      - processFilter
+      - rules
+      - runAsUser
+      - serviceName
+    forceNew:
+      - apmDomainId
+      - configType
+      - managementAgentId
+      - matchAgentsWithAttributeValue
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - The published Config kind is polymorphic. spec.configType selects the OCI
+    subtype decode path across AGENT, OPTIONS, MACS_APM_EXTENSION,
+    METRIC_GROUP, APDEX, and SPAN_FILTER, and the runtime rejects top-level
+    fields that do not belong to the selected subtype before OCI calls.
+  - The reviewed runtime is synchronous. Create and update settle from the
+    follow-up read, the row publishes no provisioning or updating lifecycle
+    buckets, and delete keeps the finalizer until confirm-delete rereads stop
+    finding the resource.
+  - status.apmDomainId mirrors the bound request domain because OCI response
+    bodies do not echo it, but replacement-only domain drift still needs an
+    explicit read model.
+  - APDEX rule booleans remain a current gap in the generated spec projection.
+    Explicit false values inside spec.rules[] are not preserved today, so the
+    handwritten runtime cannot distinguish omission from false for
+    rules.isEnabled and rules.isApplyToErrorSpans.

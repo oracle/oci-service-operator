@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-vap-update-policy-input",
+  "contractVersion": "v1alpha1",
+  "metadata": {
+    "sourceSurface": "generator-mutability-overlay",
+    "providerSourceRef": "terraform-provider-oci",
+    "providerRevision": "eb653febb1bab4cc6650a96d404a8baf36fdf671",
+    "terraformDocsVersion": "7.22.0"
+  },
+  "target": {
+    "service": "apmconfig",
+    "apiVersion": "apmconfig.oracle.com/v1beta1",
+    "kind": "Config",
+    "formalSlug": "config",
+    "providerResource": "oci_apm_config_config",
+    "specPathPrefix": "spec"
+  },
+  "update": {
+    "allowInPlacePaths": [
+      "agentVersion",
+      "attachInstallDir",
+      "config",
+      "definedTags",
+      "description",
+      "dimensions",
+      "displayName",
+      "filterId",
+      "filterText",
+      "freeformTags",
+      "group",
+      "metrics",
+      "namespace",
+      "options",
+      "overrides",
+      "processFilter",
+      "rules",
+      "runAsUser",
+      "serviceName"
+    ],
+    "denyRules": [
+      {
+        "fieldPath": "apmDomainId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "configType",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "managementAgentId",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      },
+      {
+        "fieldPath": "matchAgentsWithAttributeValue",
+        "decision": "replacementRequired",
+        "mergeCase": "replacementRequired",
+        "docsEvidenceState": "notDocumented",
+        "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
+      }
+    ]
+  }
+}

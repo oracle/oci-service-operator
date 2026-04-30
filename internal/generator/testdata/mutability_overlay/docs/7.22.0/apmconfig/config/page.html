@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2 id="argument-reference">Argument Reference</h2>
+    <p>The following arguments are supported:</p>
+    <ul>
+      <li><code>agent_version</code> - (Required when config_type=MACS_APM_EXTENSION) (Updatable) The version of the referenced agent bundle.</li>
+      <li><code>apm_domain_id</code> - (Required) (Updatable) The APM Domain ID the request is intended for.</li>
+      <li><code>attach_install_dir</code> - (Required when config_type=MACS_APM_EXTENSION) (Updatable) The directory owned by run_as_user.</li>
+      <li><code>config</code> - (Applicable when config_type=AGENT) (Updatable) Collection of agent configuration files.
+        <ul>
+          <li><code>config_map</code> - (Applicable when config_type=AGENT) (Updatable) Map of an agent configuration file.
+            <ul>
+              <li><code>file_name</code> - (Applicable when config_type=AGENT) (Updatable) An agent configuration file name.</li>
+              <li><code>body</code> - (Applicable when config_type=AGENT) (Updatable) The Base64 encoded agent configuration file.</li>
+              <li><code>content_type</code> - (Applicable when config_type=AGENT) (Updatable) The MIME content type for the config body.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>config_type</code> - (Required) (Updatable) The type of configuration item.</li>
+      <li><code>defined_tags</code> - (Optional) (Updatable) Defined tags for this resource.</li>
+      <li><code>description</code> - (Applicable when config_type=OPTIONS | SPAN_FILTER) (Updatable) An optional string that describes what the options are intended or used for.</li>
+      <li><code>dimensions</code> - (Applicable when config_type=METRIC_GROUP) (Updatable) A list of dimensions for the metric.
+        <ul>
+          <li><code>name</code> - (Required when config_type=METRIC_GROUP) (Updatable) The name of the dimension.</li>
+          <li><code>value_source</code> - (Applicable when config_type=METRIC_GROUP) (Updatable) The source used to populate the dimension.</li>
+        </ul>
+      </li>
+      <li><code>display_name</code> - (Required when config_type=APDEX | MACS_APM_EXTENSION | METRIC_GROUP | OPTIONS | SPAN_FILTER) (Updatable) The user-facing display name.</li>
+      <li><code>filter_id</code> - (Required when config_type=METRIC_GROUP) (Updatable) The OCID of a span filter.</li>
+      <li><code>filter_text</code> - (Required when config_type=SPAN_FILTER) (Updatable) The span filter expression.</li>
+      <li><code>freeform_tags</code> - (Optional) (Updatable) Free-form tags for this resource.</li>
+      <li><code>group</code> - (Applicable when config_type=OPTIONS) (Updatable) The group that an OPTIONS item belongs to.</li>
+      <li><code>management_agent_id</code> - (Required when config_type=MACS_APM_EXTENSION) Updating this field after creation is not supported.</li>
+      <li><code>match_agents_with_attribute_value</code> - (Required when config_type=AGENT) Updating this field after creation is not supported.</li>
+      <li><code>metrics</code> - (Required when config_type=METRIC_GROUP) (Updatable) The list of metrics in this group.
+        <ul>
+          <li><code>description</code> - (Applicable when config_type=METRIC_GROUP) (Updatable) A description of the metric.</li>
+          <li><code>name</code> - (Required when config_type=METRIC_GROUP) (Updatable) The metric name.</li>
+          <li><code>unit</code> - (Applicable when config_type=METRIC_GROUP) (Updatable) The metric unit.</li>
+          <li><code>value_source</code> - (Applicable when config_type=METRIC_GROUP) (Updatable) The metric value source.</li>
+        </ul>
+      </li>
+      <li><code>namespace</code> - (Applicable when config_type=METRIC_GROUP) (Updatable) The namespace that receives the metrics.</li>
+      <li><code>options</code> - (Applicable when config_type=OPTIONS) (Updatable) The OPTIONS payload stored as JSON.</li>
+      <li><code>overrides</code> - (Applicable when config_type=AGENT) (Updatable) Agent configuration overrides.
+        <ul>
+          <li><code>override_list</code> - (Applicable when config_type=AGENT) (Updatable) One override rule.
+            <ul>
+              <li><code>agent_filter</code> - (Applicable when config_type=AGENT) (Updatable) The Agent Filter expression.</li>
+              <li><code>override_map</code> - (Applicable when config_type=AGENT) (Updatable) A map of configuration override variables.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><code>process_filter</code> - (Required when config_type=MACS_APM_EXTENSION) (Updatable) Filter patterns used to discover active Java processes.</li>
+      <li><code>rules</code> - (Required when config_type=APDEX) (Updatable) The list of Apdex rules.
+        <ul>
+          <li><code>display_name</code> - (Applicable when config_type=APDEX) (Updatable) The rule display name.</li>
+          <li><code>filter_text</code> - (Required when config_type=APDEX) (Updatable) The Apdex span filter expression.</li>
+          <li><code>is_apply_to_error_spans</code> - (Applicable when config_type=APDEX) (Updatable) Whether the rule applies to error spans.</li>
+          <li><code>is_enabled</code> - (Applicable when config_type=APDEX) (Updatable) Whether the rule is enabled.</li>
+          <li><code>priority</code> - (Required when config_type=APDEX) (Updatable) The rule priority.</li>
+          <li><code>satisfied_response_time</code> - (Applicable when config_type=APDEX) (Updatable) The satisfactory response threshold in milliseconds.</li>
+          <li><code>tolerating_response_time</code> - (Applicable when config_type=APDEX) (Updatable) The tolerating response threshold in milliseconds.</li>
+        </ul>
+      </li>
+      <li><code>run_as_user</code> - (Required when config_type=MACS_APM_EXTENSION) (Updatable) The OS user used to discover Java processes.</li>
+      <li><code>service_name</code> - (Required when config_type=MACS_APM_EXTENSION) (Updatable) The monitored service name.</li>
+    </ul>
+  </body>
+</html>

@@ -137,6 +137,20 @@ packages:
         kind: ApiPlatformInstance
         summary: Manage OCI API Platform instances.
 
+  - package: apmconfig
+    displayName: Application Performance Monitoring Config
+    summary: Manage OCI Application Performance Monitoring configuration items from Kubernetes with a reviewed controller-backed runtime.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+    packageNotes:
+      - Current package scope is intentionally limited to Config while the remaining APM Config resource families stay unpublished.
+      - The published runtime is subtype-aware, uses synchronous read-after-write follow-up semantics, and keeps `apmDomainId`, `configType`, `managementAgentId`, and `matchAgentsWithAttributeValue` replacement-only.
+    kindOverrides:
+      - group: apmconfig
+        kind: Config
+        summary: Manage OCI Application Performance Monitoring configuration items.
+
   - package: apmcontrolplane
     displayName: Application Performance Monitoring Control Plane
     summary: Manage OCI Application Performance Monitoring domains from Kubernetes with a reviewed controller-backed runtime.
