@@ -291,6 +291,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictWorkRequest,
 				"ApmDomain runtime persists create, update, and delete work-request IDs in shared async status, recovers ApmDomain identity from work-request resources, and bounds pre-create reuse to exact compartmentId plus displayName matches while keeping ChangeApmDomainCompartment out of the published surface.",
 			),
+			resourceKey("apmtraces", "ScheduledQuery"): reviewedRegistration(
+				"apmtraces",
+				"apmtraces",
+				apiErrorCoverageDefaultVersion,
+				"ScheduledQuery",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"ScheduledQuery keeps lifecycle-based generatedruntime CRUD and confirm-delete handling, while a handwritten hook layer rewires the SDK displayName filter to spec.scheduledQueryName, bounds pre-create reuse to exact-name matches inside one apmDomainId, and mirrors apmDomainId into status because OCI does not echo it back.",
+			),
 			resourceKey("bds", "BdsInstance"): reviewedRegistration(
 				"bds",
 				"bds",

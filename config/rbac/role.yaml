@@ -296,6 +296,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - apmtraces.oracle.com
+  resources:
+  - scheduledqueries
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apmtraces.oracle.com
+  resources:
+  - scheduledqueries/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apmtraces.oracle.com
+  resources:
+  - scheduledqueries/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - bds.oracle.com
   resources:
   - bdsinstances

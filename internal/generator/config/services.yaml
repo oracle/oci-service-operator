@@ -692,6 +692,66 @@ services:
                 filterText: 'service.name = "checkout"'
                 description: Sample span filter managed by OCI Service Operator
 
+  - service: apmtraces
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmtraces
+    group: apmtraces
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ScheduledQuery
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: ScheduledQuery
+          formalSpec: scheduledquery
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+          specFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId"'
+              comments:
+                - The APM Domain ID the request is intended for.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId,omitempty"'
+              comments:
+                - The bound APM Domain ID used to address this scheduled query.
+          sample:
+            body: |-
+              #
+              # Replace the APM Domain OCID below before running e2e.
+              # Update metadata.name or spec.scheduledQueryName if you want to force a fresh create instead of
+              # binding to an existing ScheduledQuery with the same apmDomainId and exact scheduledQueryName.
+              #
+              apiVersion: apmtraces.oracle.com/v1beta1
+              kind: ScheduledQuery
+              metadata:
+                name: scheduledquery-sample
+              spec:
+                apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
+                scheduledQueryName: scheduled-query-sample
+                scheduledQueryProcessingType: QUERY
+                scheduledQueryText: 'show spans where service.name = "checkout"'
+                scheduledQuerySchedule: '0 */12 * * *'
+                scheduledQueryDescription: Sample scheduled query managed by OCI Service Operator
+
   - service: artifacts
     sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
     group: artifacts

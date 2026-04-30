@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "apmtraces",
+  "kind": "ScheduledQuery",
+  "formalSlug": "scheduledquery",
+  "providerResource": "oci_apm_traces_scheduled_query",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/apm_traces_scheduled_query",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/apm_traces_scheduled_query",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/apmtraces/scheduledquery/page.html",
+  "bodySHA256": "651b85f0fcc743b5ba71e2baf6fd08aa7610f9c6add7da3654c080147a4d7a14",
+  "bodyBytes": 4901,
+  "fixtureBodyPath": "7.22.0/apmtraces/scheduledquery/page.html"
+}

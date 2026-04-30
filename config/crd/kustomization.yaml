@@ -23,6 +23,7 @@ resources:
 - bases/apiplatform.oracle.com_apiplatforminstances.yaml
 - bases/apmconfig.oracle.com_configs.yaml
 - bases/apmcontrolplane.oracle.com_apmdomains.yaml
+- bases/apmtraces.oracle.com_scheduledqueries.yaml
 - bases/bds.oracle.com_bdsinstances.yaml
 - bases/budget.oracle.com_budgets.yaml
 - bases/clusterplacementgroups.oracle.com_clusterplacementgroups.yaml

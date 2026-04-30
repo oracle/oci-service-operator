@@ -14,6 +14,7 @@ import (
 	apiplatformv1beta1 "github.com/oracle/oci-service-operator/api/apiplatform/v1beta1"
 	apmconfigv1beta1 "github.com/oracle/oci-service-operator/api/apmconfig/v1beta1"
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
+	apmtracesv1beta1 "github.com/oracle/oci-service-operator/api/apmtraces/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
 	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
@@ -1633,6 +1634,28 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "apmcontrolplane.ApmDomainSummary",
+			},
+		},
+	},
+	{
+		Name:       "ApmtracesScheduledQuery",
+		SpecType:   reflect.TypeOf(apmtracesv1beta1.ScheduledQuerySpec{}),
+		StatusType: reflect.TypeOf(apmtracesv1beta1.ScheduledQueryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "apmtraces.CreateScheduledQueryDetails",
+			},
+			{
+				SDKStruct: "apmtraces.UpdateScheduledQueryDetails",
+			},
+			{
+				SDKStruct: "apmtraces.ScheduledQuery",
+			},
+			{
+				SDKStruct: "apmtraces.ScheduledQueryCollection",
+			},
+			{
+				SDKStruct: "apmtraces.ScheduledQuerySummary",
 			},
 		},
 	},
