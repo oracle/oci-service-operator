@@ -296,6 +296,32 @@ rules:
   - patch
   - update
 - apiGroups:
+  - apmsynthetics.oracle.com
+  resources:
+  - scripts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apmsynthetics.oracle.com
+  resources:
+  - scripts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apmsynthetics.oracle.com
+  resources:
+  - scripts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - apmtraces.oracle.com
   resources:
   - scheduledqueries

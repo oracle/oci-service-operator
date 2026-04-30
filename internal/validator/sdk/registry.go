@@ -15,6 +15,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/apiplatform"
 	"github.com/oracle/oci-go-sdk/v65/apmconfig"
 	"github.com/oracle/oci-go-sdk/v65/apmcontrolplane"
+	"github.com/oracle/oci-go-sdk/v65/apmsynthetics"
 	"github.com/oracle/oci-go-sdk/v65/apmtraces"
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
@@ -442,6 +443,13 @@ var seedTargets = []Target{
 	newTarget("apmcontrolplane", "UpdateApmDomainDetails", reflect.TypeOf(apmcontrolplane.UpdateApmDomainDetails{})),
 	newTarget("apmcontrolplane", "ApmDomain", reflect.TypeOf(apmcontrolplane.ApmDomain{})),
 	newTarget("apmcontrolplane", "ApmDomainSummary", reflect.TypeOf(apmcontrolplane.ApmDomainSummary{})),
+
+	// Apmsynthetics CRD support
+	newTarget("apmsynthetics", "CreateScriptDetails", reflect.TypeOf(apmsynthetics.CreateScriptDetails{})),
+	newTarget("apmsynthetics", "UpdateScriptDetails", reflect.TypeOf(apmsynthetics.UpdateScriptDetails{})),
+	newTarget("apmsynthetics", "Script", reflect.TypeOf(apmsynthetics.Script{})),
+	newTarget("apmsynthetics", "ScriptCollection", reflect.TypeOf(apmsynthetics.ScriptCollection{})),
+	newTarget("apmsynthetics", "ScriptSummary", reflect.TypeOf(apmsynthetics.ScriptSummary{})),
 
 	// Apmtraces CRD support
 	newTarget("apmtraces", "CreateScheduledQueryDetails", reflect.TypeOf(apmtraces.CreateScheduledQueryDetails{})),

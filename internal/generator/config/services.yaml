@@ -752,6 +752,72 @@ services:
                 scheduledQuerySchedule: '0 */12 * * *'
                 scheduledQueryDescription: Sample scheduled query managed by OCI Service Operator
 
+  - service: apmsynthetics
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/apmsynthetics
+    group: apmsynthetics
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Script
+    observedState:
+      excludedFieldPaths:
+        Script:
+          - Content
+          - Parameters
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: Script
+          formalSpec: script
+          async:
+            strategy: none
+            runtime: generatedruntime
+            formalClassification: none
+          specFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId"'
+              comments:
+                - The APM Domain ID the request is intended for.
+              markers:
+                - +kubebuilder:validation:Required
+          statusFields:
+            - name: ApmDomainId
+              type: string
+              tag: 'json:"apmDomainId,omitempty"'
+              comments:
+                - The bound APM Domain ID used to address this script.
+          sample:
+            body: |-
+              #
+              # Replace the APM Domain OCID below before running e2e.
+              # Update metadata.name or spec.displayName if you want to force a fresh create instead of
+              # binding to an existing Script with the same apmDomainId, displayName, and contentType.
+              #
+              apiVersion: apmsynthetics.oracle.com/v1beta1
+              kind: Script
+              metadata:
+                name: script-sample
+              spec:
+                apmDomainId: ocid1.apmdomain.oc1..exampleuniqueID
+                displayName: script-sample
+                contentType: JS
+                content: "console.log('apmsynthetics script sample');"
+                contentFileName: script-sample.js
+                freeformTags:
+                  managed-by: oci-service-operator
+
   - service: artifacts
     sdkPackage: github.com/oracle/oci-go-sdk/v65/artifacts
     group: artifacts

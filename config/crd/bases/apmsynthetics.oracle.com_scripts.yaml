@@ -1,0 +1,303 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: scripts.apmsynthetics.oracle.com
+spec:
+  group: apmsynthetics.oracle.com
+  names:
+    kind: Script
+    listKind: ScriptList
+    plural: scripts
+    singular: script
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Script
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Script
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Script is the Schema for the scripts API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ScriptSpec defines the desired state of Script.
+            properties:
+              apmDomainId:
+                description: The APM Domain ID the request is intended for.
+                type: string
+              content:
+                description: |-
+                  The content of the script. It may contain custom-defined tags that can be used for setting dynamic parameters.
+                  The format to set dynamic parameters is: `<ORAP><ON>param name</ON><OV>param value</OV><OS>isParamValueSecret(true/false)</OS></ORAP>`.
+                  Param value and isParamValueSecret are optional, the default value for isParamValueSecret is false.
+                  Examples:
+                  With mandatory param name : `<ORAP><ON>param name</ON></ORAP>`
+                  With parameter name and value : `<ORAP><ON>param name</ON><OV>param value</OV></ORAP>`
+                  Note that the content is valid if it matches the given content type. For example, if the content type is SIDE, then the content should be in Side script format. If the content type is JS, then the content should be in JavaScript format. If the content type is PLAYWRIGHT_TS, then the content should be in TypeScript format.
+                type: string
+              contentFileName:
+                description: File name of uploaded script content.
+                type: string
+              contentType:
+                description: Content type of script.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Unique name that can be edited. The name should not contain
+                  any confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              parameters:
+                description: 'List of script parameters. Example: `[{"paramName":
+                  "userid", "paramValue":"testuser", "isSecret": false}]`'
+                items:
+                  description: ScriptParameter defines nested fields for Script.Parameter.
+                  properties:
+                    isSecret:
+                      description: If the parameter value is secret and should be
+                        kept confidential, then set isSecret to true.
+                      type: boolean
+                    paramName:
+                      description: Name of the parameter.
+                      type: string
+                    paramValue:
+                      description: Value of the parameter.
+                      type: string
+                  required:
+                  - paramName
+                  type: object
+                type: array
+            required:
+            - apmDomainId
+            - content
+            - contentType
+            - displayName
+            type: object
+          status:
+            description: ScriptStatus defines the observed state of Script.
+            properties:
+              apmDomainId:
+                description: The bound APM Domain ID used to address this script.
+                type: string
+              contentFileName:
+                description: File name of the uploaded script content.
+                type: string
+              contentSizeInBytes:
+                description: Size of the script content.
+                type: integer
+              contentType:
+                description: Content type of the script.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              displayName:
+                description: Unique name that can be edited. The name should not contain
+                  any confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the script.
+                  scriptId is mandatory for creation of SCRIPTED_BROWSER and SCRIPTED_REST monitor types. For other monitor types, it should be set to null.
+                type: string
+              monitorStatusCountMap:
+                description: ScriptMonitorStatusCountMap defines nested fields for
+                  Script.MonitorStatusCountMap.
+                properties:
+                  disabled:
+                    description: Number of disabled monitors using the script.
+                    type: integer
+                  enabled:
+                    description: Number of enabled monitors using the script.
+                    type: integer
+                  invalid:
+                    description: Number of invalid monitors using the script.
+                    type: integer
+                  total:
+                    description: Total number of monitors using the script.
+                    type: integer
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The time the resource was created, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format.
+                  Example: `2020-02-12T22:47:12.613Z`
+                type: string
+              timeUpdated:
+                description: |-
+                  The time the resource was updated, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339)
+                  timestamp format.
+                  Example: `2020-02-13T22:47:12.613Z`
+                type: string
+              timeUploaded:
+                description: The time the script was uploaded.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,139 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #fcfcfd
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam arrowColor #0f172a
+skinparam noteBackgroundColor #fff7d6
+skinparam noteBorderColor #b45309
+skinparam noteFontColor #334155
+skinparam roundcorner 16
+title Sequence - apmsynthetics/Script
+hide footbox
+skinparam sequence {
+  actorBorderColor #0f172a
+  actorBackgroundColor #e2e8f0
+  participantBorderColor #0f172a
+  participantBackgroundColor #e2e8f0
+  participantFontColor #0f172a
+  lifeLineBorderColor #94a3b8
+  groupBorderColor #cbd5e1
+  groupBackgroundColor #f8fafc
+}
+actor Kubernetes
+participant Controller
+participant BaseReconciler
+participant "OSOKServiceManager" as ServiceManager
+participant OCI
+note over BaseReconciler,ServiceManager
+shared resolution:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete:
+shared/diagrams/shared-delete-sequence.svg
+end note
+Kubernetes -> Controller: enqueue Script reconcile
+Controller -> BaseReconciler: Reconcile(request)
+BaseReconciler -> ServiceManager: reconcile desired Script
+group Lookup and bind
+alt tracked or explicit OCI identity already exists
+ServiceManager -> OCI: GetScript
+else tracked identity is missing
+ServiceManager -> OCI: ListScripts(filters: apmDomainId,\ndisplayName, contentType)
+alt reusable OCI resource is not found
+ServiceManager -> OCI: CreateScript
+else reusable OCI resource already exists
+ServiceManager -> OCI: GetScript
+end
+ServiceManager --> BaseReconciler: persist resolved OCI identity in status
+end
+alt delete requested
+group Delete
+ServiceManager -> OCI: DeleteScript
+ServiceManager -> OCI: confirm delete via GetScript or\nListScripts
+alt cleanup or finalizer release is blocked
+ServiceManager --> BaseReconciler: retain delete state and retry
+else delete completion observed
+ServiceManager --> BaseReconciler: release finalizer after delete completion
+end
+end
+else live state requires field-aware\ndrift evaluation
+group Drift handling
+note over ServiceManager,OCI
+Supported update surface: content,
+contentFileName, contentType,
+definedTags (+3 more)
+Reject before mutate: force-new fields
+apmDomainId
+Lookup filters: apmDomainId,
+displayName, contentType
+Lookup matching: exact apmDomainId plus
+displayName plus contentType unique
+match; duplicate matches fail
+end note
+opt force-new or conflicting drift is detected
+ServiceManager --> BaseReconciler: reject before OCI mutation
+end
+opt supported mutable drift is detected
+ServiceManager -> OCI: Apply UpdateScript only for mutable\nfields content, contentFileName,\ncontentType, definedTags (+3 more)
+end
+ServiceManager -> OCI: run helper hooks\ncreate=tfresource.CreateResource;\nupdate=tfresource.UpdateResource;\ndelete=tfresource.DeleteResource
+ServiceManager -> OCI: apply follow-up strategy\ncreate=read-after-write;\nupdate=read-after-write;\ndelete=confirm-delete
+end
+ServiceManager --> BaseReconciler: status=required,\nfinalizer=retain-until-confirmed-delete
+end
+BaseReconciler --> Controller: requeue on terminating
+note right of ServiceManager
+shared diagram:
+shared/diagrams/shared-resolution-sequence.svg
+shared delete diagram:
+shared/diagrams/shared-delete-sequence.svg
+Start from the shared resolution sequence for
+OCID binding, datasource pagination, and
+create-or-update dispatch.
+Layer the shared delete sequence when finalizer
+retention, delete confirmation, work-request
+polling, or Secret cleanup apply.
+archetype batch: Generated service-manager
+controllers follow the shared resolution and
+delete sequences with imported waits and
+controller-local policy.
+service: apmsynthetics
+slug: script
+kind: Script
+archetype: generated-service-manager
+status/finalizer: required /
+retain-until-confirmed-delete
+requeue: terminating
+provider states: create none; update none;
+delete none
+follow-up: create=read-after-write;
+update=read-after-write; delete=confirm-delete
+supported drift: content, contentFileName,
+contentType, definedTags (+3 more)
+reject before mutate: force-new fields
+apmDomainId
+create-only fields: none
+list lookup: oci_apm_synthetics_scripts filters
+apmDomainId, displayName, contentType; exact
+apmDomainId plus displayName plus contentType
+unique match; duplicate matches fail
+conflicts: none
+open gaps: none
+Script create and update are synchronous reread
+flows. The SDK does not expose lifecycle-state
+fields on Script bodies, so the reviewed runtime
+converts a confirmed read-after-write response
+into settled Active status.
+Pre-create reuse always scopes by apmDomainId
+and uses the SDK displayName plus contentType
+filters, but adoption still requires a unique
+exact match on that reviewed identity surface.
+status.apmDomainId mirrors the bound request
+domain because OCI does not echo that query
+parameter back on Script or ScriptSummary.
+The published status surface intentionally
+excludes content and parameters to avoid
+projecting secret-capable script bodies or
+parameter values.
+end note
+@enduml

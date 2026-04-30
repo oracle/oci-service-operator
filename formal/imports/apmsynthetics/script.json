@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "surface": "provider-facts",
+  "service": "apmsynthetics",
+  "slug": "script",
+  "kind": "Script",
+  "sourceRef": "terraform-provider-oci",
+  "providerResource": "oci_apm_synthetics_script",
+  "operations": {
+    "create": [
+      {
+        "operation": "CreateScript",
+        "requestType": "apmsynthetics.CreateScriptRequest",
+        "responseType": "apmsynthetics.CreateScriptResponse"
+      }
+    ],
+    "get": [
+      {
+        "operation": "GetScript",
+        "requestType": "apmsynthetics.GetScriptRequest",
+        "responseType": "apmsynthetics.GetScriptResponse"
+      }
+    ],
+    "list": [
+      {
+        "operation": "ListScripts",
+        "requestType": "apmsynthetics.ListScriptsRequest",
+        "responseType": "apmsynthetics.ListScriptsResponse"
+      }
+    ],
+    "update": [
+      {
+        "operation": "UpdateScript",
+        "requestType": "apmsynthetics.UpdateScriptRequest",
+        "responseType": "apmsynthetics.UpdateScriptResponse"
+      }
+    ],
+    "delete": [
+      {
+        "operation": "DeleteScript",
+        "requestType": "apmsynthetics.DeleteScriptRequest",
+        "responseType": "apmsynthetics.DeleteScriptResponse"
+      }
+    ]
+  },
+  "lifecycle": {
+    "create": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    },
+    "update": {
+      "pending": [],
+      "target": [
+        "ACTIVE"
+      ]
+    }
+  },
+  "mutation": {
+    "mutable": [
+      "content",
+      "content_file_name",
+      "content_type",
+      "defined_tags",
+      "display_name",
+      "freeform_tags",
+      "parameters"
+    ],
+    "forceNew": [
+      "apm_domain_id"
+    ],
+    "conflictsWith": {}
+  },
+  "hooks": {
+    "create": [
+      {
+        "helper": "tfresource.CreateResource"
+      }
+    ],
+    "update": [
+      {
+        "helper": "tfresource.UpdateResource"
+      }
+    ],
+    "delete": [
+      {
+        "helper": "tfresource.DeleteResource"
+      }
+    ]
+  },
+  "deleteConfirmation": {
+    "pending": [],
+    "target": [
+      "NOT_FOUND"
+    ]
+  },
+  "listLookup": {
+    "datasource": "oci_apm_synthetics_scripts",
+    "collectionField": "scripts",
+    "responseItemsField": "Items",
+    "filterFields": [
+      "apm_domain_id",
+      "display_name",
+      "content_type"
+    ]
+  },
+  "boundary": {
+    "providerFactsOnly": true,
+    "repoAuthoredSpecPath": "controllers/apmsynthetics/script/spec.cfg",
+    "repoAuthoredLogicGapsPath": "controllers/apmsynthetics/script/logic-gaps.md",
+    "excludedSemantics": [
+      "bind-versus-create",
+      "lifecycle-classification",
+      "list-lookup",
+      "status-projection",
+      "secret-output",
+      "synchronous-write-success",
+      "delete-confirmation"
+    ]
+  },
+  "notes": [
+    "Pinned OCI SDK contract: CreateScript, GetScript, ListScripts, UpdateScript, and DeleteScript all require the query apmDomainId. Create/Get/Update return the Script body directly, while DeleteScriptResponse returns only headers.",
+    "Pinned OCI SDK contract: Script does not expose lifecycle-state fields. The reviewed runtime therefore treats create and update as synchronous read-after-write flows and uses explicit confirm-delete rereads instead of lifecycle polling or work-request tracking.",
+    "ListScriptsRequest filters by apmDomainId, exact displayName, and contentType. The published runtime scopes by apmDomainId, sends displayName from spec.displayName, sends contentType from spec.contentType, and adopts only a unique exact match on that reviewed identity surface.",
+    "UpdateScriptDetails exposes displayName, contentType, content, contentFileName, parameters, freeformTags, and definedTags. Repo-authored behavior keeps apmDomainId replacement-only while reconciling the update-body surface in place.",
+    "OCI response bodies and summaries do not echo the request apmDomainId, so the published runtime mirrors that bound domain into status.apmDomainId. The checked-in status surface intentionally excludes content and parameters to avoid projecting secret-capable script bodies or parameter values."
+  ]
+}

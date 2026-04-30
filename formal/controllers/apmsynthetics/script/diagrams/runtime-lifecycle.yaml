@@ -1,0 +1,50 @@
+schemaVersion: 1
+surface: repo-authored-semantics
+service: apmsynthetics
+slug: script
+kind: Script
+archetype: generated-service-manager
+states:
+  - active
+  - terminating
+  - deleted
+repoAuthored:
+  listLookup:
+    filters:
+      - apmDomainId
+      - displayName
+      - contentType
+    matchRule: exact apmDomainId plus displayName plus contentType unique match; duplicate matches fail
+  mutation:
+    mutable:
+      - content
+      - contentFileName
+      - contentType
+      - definedTags
+      - displayName
+      - freeformTags
+      - parameters
+    forceNew:
+      - apmDomainId
+  hooks:
+    create:
+      - helper: tfresource.CreateResource
+    update:
+      - helper: tfresource.UpdateResource
+    delete:
+      - helper: tfresource.DeleteResource
+  followUp:
+    create: read-after-write
+    update: read-after-write
+    delete: confirm-delete
+notes:
+  - Script create and update are synchronous reread flows. The SDK does not
+    expose lifecycle-state fields on Script bodies, so the reviewed runtime
+    converts a confirmed read-after-write response into settled Active status.
+  - Pre-create reuse always scopes by apmDomainId and uses the SDK displayName
+    plus contentType filters, but adoption still requires a unique exact match
+    on that reviewed identity surface.
+  - status.apmDomainId mirrors the bound request domain because OCI does not
+    echo that query parameter back on Script or ScriptSummary.
+  - The published status surface intentionally excludes content and parameters
+    to avoid projecting secret-capable script bodies or parameter values.
