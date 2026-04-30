@@ -1951,6 +1951,39 @@ services:
           serviceManager:
             strategy: none
 
+  - service: dashboardservice
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dashboardservice
+    group: dashboardservice
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DashboardGroup
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DashboardGroup
+          formalSpec: dashboardgroup
+          async:
+            strategy: lifecycle
+            runtime: generatedruntime
+            formalClassification: lifecycle
+        - kind: Dashboard
+          controller:
+            strategy: none
+          serviceManager:
+            strategy: none
+
   - service: devops
     sdkPackage: github.com/oracle/oci-go-sdk/v65/devops
     group: devops

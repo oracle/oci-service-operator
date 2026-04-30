@@ -40,6 +40,7 @@ resources:
 - bases/core.oracle.com_servicegateways.yaml
 - bases/core.oracle.com_subnets.yaml
 - bases/core.oracle.com_vcns.yaml
+- bases/dashboardservice.oracle.com_dashboardgroups.yaml
 - bases/database.oracle.com_autonomousdatabases.yaml
 - bases/databasemigration.oracle.com_connections.yaml
 - bases/databasetools.oracle.com_databasetoolsconnections.yaml

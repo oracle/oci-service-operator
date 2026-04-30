@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "surface": "generator-mutability-overlay-docs-input",
+  "service": "dashboardservice",
+  "kind": "DashboardGroup",
+  "formalSlug": "dashboardgroup",
+  "providerResource": "oci_dashboard_service_dashboard_group",
+  "terraformDocsVersion": "7.22.0",
+  "registryPath": "providers/oracle/oci/7.22.0/docs/resources/dashboard_service_dashboard_group",
+  "registryURL": "https://registry.terraform.io/providers/oracle/oci/7.22.0/docs/resources/dashboard_service_dashboard_group",
+  "contentType": "text/html; charset=utf-8",
+  "pageShape": "argumentReferenceHTML",
+  "inputSource": "fixture",
+  "inputIdentity": "fixture:7.22.0/dashboardservice/dashboardgroup/page.html",
+  "bodySHA256": "71ad99e929c51130b1d1a8d5cc6f5e797f85c3ecc7a74a24db277693fdea61e2",
+  "bodyBytes": 811,
+  "fixtureBodyPath": "7.22.0/dashboardservice/dashboardgroup/page.html"
+}

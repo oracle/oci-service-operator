@@ -501,6 +501,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"Initial Project rollout keeps plain generatedruntime CRUD and lifecycle rereads even though the SDK also exposes work-request identifiers and a separate ChangeProjectCompartment action.",
 			),
+			resourceKey("dashboardservice", "DashboardGroup"): reviewedRegistration(
+				"dashboardservice",
+				"dashboardservice",
+				apiErrorCoverageDefaultVersion,
+				"DashboardGroup",
+				APIErrorCoverageFamilyGeneratedRuntimePlain,
+				deleteNotFoundGeneratedRuntime,
+				retryableConflictGeneratedRuntime,
+				"DashboardGroup keeps generatedruntime CRUD and lifecycle rereads, while a small handwritten seam skips unsafe pre-create reuse when displayName is empty, preserves explicit empty-map clears for tag maps, and treats empty-string displayName/description values as omission until the spec can distinguish clear from omit.",
+			),
 			resourceKey("dataflow", "Application"): reviewedRegistration(
 				"dataflow",
 				"dataflow",
@@ -1933,6 +1943,13 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"datascience",
 			apiErrorCoverageDefaultVersion,
 			"WorkRequestLog",
+			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
+		),
+		resourceKey("dashboardservice", "Dashboard"): reviewedException(
+			"dashboardservice",
+			"dashboardservice",
+			apiErrorCoverageDefaultVersion,
+			"Dashboard",
 			"`services.yaml` keeps this subresource out of the active controller-backed surface with controller.strategy=none and serviceManager.strategy=none.",
 		),
 		resourceKey("keymanagement", "Key"): reviewedException(

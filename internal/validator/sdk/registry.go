@@ -22,6 +22,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
+	"github.com/oracle/oci-go-sdk/v65/dashboardservice"
 	"github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-go-sdk/v65/databasemigration"
 	"github.com/oracle/oci-go-sdk/v65/databasetools"
@@ -475,6 +476,13 @@ var seedTargets = []Target{
 	newTarget("containerinstances", "ContainerInstance", reflect.TypeOf(containerinstances.ContainerInstance{})),
 	newTarget("containerinstances", "ContainerInstanceCollection", reflect.TypeOf(containerinstances.ContainerInstanceCollection{})),
 	newTarget("containerinstances", "ContainerInstanceSummary", reflect.TypeOf(containerinstances.ContainerInstanceSummary{})),
+
+	// Dashboardservice CRD support
+	newTarget("dashboardservice", "CreateDashboardGroupDetails", reflect.TypeOf(dashboardservice.CreateDashboardGroupDetails{})),
+	newTarget("dashboardservice", "UpdateDashboardGroupDetails", reflect.TypeOf(dashboardservice.UpdateDashboardGroupDetails{})),
+	newTarget("dashboardservice", "DashboardGroup", reflect.TypeOf(dashboardservice.DashboardGroup{})),
+	newTarget("dashboardservice", "DashboardGroupCollection", reflect.TypeOf(dashboardservice.DashboardGroupCollection{})),
+	newTarget("dashboardservice", "DashboardGroupSummary", reflect.TypeOf(dashboardservice.DashboardGroupSummary{})),
 
 	// Databasemigration CRD support
 	newTarget("databasemigration", "ConnectionCollection", reflect.TypeOf(databasemigration.ConnectionCollection{})),
