@@ -1,0 +1,341 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: alarmconditions.stackmonitoring.oracle.com
+spec:
+  group: stackmonitoring.oracle.com
+  names:
+    kind: AlarmCondition
+    listKind: AlarmConditionList
+    plural: alarmconditions
+    singular: alarmcondition
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the AlarmCondition
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AlarmCondition
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AlarmCondition is the Schema for the alarmconditions API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlarmConditionSpec defines the desired state of AlarmCondition.
+            properties:
+              compositeType:
+                description: The OCID of the composite resource type like EBS/PEOPLE_SOFT.
+                type: string
+              conditionType:
+                description: Type of defined monitoring template.
+                type: string
+              conditions:
+                description: Monitoring template conditions.
+                items:
+                  description: AlarmConditionCondition defines nested fields for AlarmCondition.Condition.
+                  properties:
+                    body:
+                      description: The human-readable content of the delivered alarm
+                        notification. Oracle recommends providing guidance to operators
+                        for resolving the alarm condition. Consider adding links to
+                        standard runbook practices. Avoid entering confidential information.
+                      type: string
+                    query:
+                      description: The Monitoring Query Language (MQL) expression
+                        to evaluate for the alarm.
+                      type: string
+                    severity:
+                      description: Severity - Critical/Warning
+                      type: string
+                    shouldAppendNote:
+                      description: Whether the note need to add into bottom of the
+                        body for mapping the alarms information with template or not.
+                      type: boolean
+                    shouldAppendUrl:
+                      description: Whether the URL need to add into bottom of the
+                        body for mapping the alarms information with template or not.
+                      type: boolean
+                    triggerDelay:
+                      description: The period of time that the condition defined in
+                        the alarm must persist before the alarm state changes from
+                        "OK" to "FIRING".
+                      type: string
+                  required:
+                  - query
+                  - severity
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              metricName:
+                description: The metric name.
+                type: string
+              namespace:
+                description: The stack monitoring service or application emitting
+                  the metric that is evaluated by the alarm.
+                type: string
+              resourceType:
+                description: The resource group OCID.
+                type: string
+            required:
+            - conditionType
+            - conditions
+            - metricName
+            - namespace
+            - resourceType
+            type: object
+          status:
+            description: AlarmConditionStatus defines the observed state of AlarmCondition.
+            properties:
+              compositeType:
+                description: The OCID of the composite resource type like EBS/PEOPLE_SOFT.
+                type: string
+              conditionType:
+                description: Type of defined monitoring template.
+                type: string
+              conditions:
+                description: Monitoring template conditions
+                items:
+                  description: AlarmConditionCondition defines nested fields for AlarmCondition.Condition.
+                  properties:
+                    body:
+                      description: The human-readable content of the delivered alarm
+                        notification. Oracle recommends providing guidance to operators
+                        for resolving the alarm condition. Consider adding links to
+                        standard runbook practices. Avoid entering confidential information.
+                      type: string
+                    query:
+                      description: The Monitoring Query Language (MQL) expression
+                        to evaluate for the alarm.
+                      type: string
+                    severity:
+                      description: Severity - Critical/Warning
+                      type: string
+                    shouldAppendNote:
+                      description: Whether the note need to add into bottom of the
+                        body for mapping the alarms information with template or not.
+                      type: boolean
+                    shouldAppendUrl:
+                      description: Whether the URL need to add into bottom of the
+                        body for mapping the alarms information with template or not.
+                      type: boolean
+                    triggerDelay:
+                      description: The period of time that the condition defined in
+                        the alarm must persist before the alarm state changes from
+                        "OK" to "FIRING".
+                      type: string
+                  required:
+                  - query
+                  - severity
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Alarm Condition.
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the monitoring template
+                type: string
+              metricName:
+                description: The metric name.
+                type: string
+              monitoringTemplateId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the monitoring template.
+                type: string
+              namespace:
+                description: The stack monitoring service or application emitting
+                  the metric that is evaluated by the alarm.
+                type: string
+              resourceType:
+                description: The resource type OCID.
+                type: string
+              sdkStatus:
+                description: |-
+                  The current status of the monitoring template i.e. whether it is Published or Unpublished
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The date and time the alarm condition was created. Format
+                  defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the alarm condition was updated. Format
+                  defined by RFC3339.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

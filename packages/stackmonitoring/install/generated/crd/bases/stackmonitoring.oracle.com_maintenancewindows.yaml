@@ -1,0 +1,392 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: maintenancewindows.stackmonitoring.oracle.com
+spec:
+  group: stackmonitoring.oracle.com
+  names:
+    kind: MaintenanceWindow
+    listKind: MaintenanceWindowList
+    plural: maintenancewindows
+    singular: maintenancewindow
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: Name
+      priority: 1
+      type: string
+    - description: status of the MaintenanceWindow
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MaintenanceWindow
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MaintenanceWindow is the Schema for the maintenancewindows API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MaintenanceWindowSpec defines the desired state of MaintenanceWindow.
+            properties:
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Maintenance Window description.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              name:
+                description: Maintenance Window name.
+                type: string
+              resources:
+                description: List of resource Ids which are part of the Maintenance
+                  Window
+                items:
+                  description: MaintenanceWindowResource defines nested fields for
+                    MaintenanceWindow.Resource.
+                  properties:
+                    areMembersIncluded:
+                      description: |-
+                        Flag to indicate if the members of the resource has to be include in the
+                        Maintenance Window.
+                      type: boolean
+                    resourceId:
+                      description: |-
+                        The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of monitored resource
+                        part of the Maintenance window.
+                      type: string
+                  required:
+                  - resourceId
+                  type: object
+                type: array
+              schedule:
+                description: MaintenanceWindowSchedule defines nested fields for MaintenanceWindow.Schedule.
+                properties:
+                  jsonData:
+                    type: string
+                  maintenanceWindowDuration:
+                    description: |-
+                      Duration time of each recurrence of each Maintenance Window.
+                      It must be specified as a string in ISO 8601 extended format.
+                    type: string
+                  maintenanceWindowRecurrences:
+                    description: |-
+                      A RFC5545 formatted recurrence string which represents the Maintenance Window Recurrence.
+                      Please refer this for details:https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10
+                      FREQ: Frequency of the Maintenance Window. The supported values are: DAILY and WEEKLY.
+                      BYDAY: Comma separated days for Weekly Maintenance Window.
+                      BYHOUR: Specifies the start hour of each recurrence after `timeMaintenanceWindowStart` value.
+                      BYMINUTE: Specifies the start minute of each reccurrence after `timeMaintenanceWindowStart` value. The default value is 00
+                      BYSECOND: Specifies the start second of each reccurrence after `timeMaintenanceWindowStart` value. The default value is 00
+                      Other Rules are not supported.
+                    type: string
+                  scheduleType:
+                    type: string
+                  timeMaintenanceWindowEnd:
+                    description: Start time of Maintenance window. A RFC3339 formatted
+                      datetime string
+                    type: string
+                  timeMaintenanceWindowStart:
+                    description: Start time of Maintenance window. A RFC3339 formatted
+                      datetime string
+                    type: string
+                type: object
+            required:
+            - compartmentId
+            - name
+            - resources
+            - schedule
+            type: object
+          status:
+            description: MaintenanceWindowStatus defines the observed state of MaintenanceWindow.
+            properties:
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: Maintenance Window description.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of maintenance window.
+                type: string
+              lifecycleDetails:
+                description: Lifecycle Details of the Maintenance Window.
+                type: string
+              lifecycleState:
+                description: Lifecycle state of the monitored resource.
+                type: string
+              name:
+                description: Maintenance Window name.
+                type: string
+              numberOfResources:
+                description: Number of resources of the Maintenance window.
+                type: integer
+              operationStatus:
+                description: Status of the most recent operation of the Maintenance
+                  Window.
+                type: string
+              operationType:
+                description: The name of the most recent operation of the Maintenance
+                  window.
+                type: string
+              resources:
+                description: List of resource Ids which are part of the Maintenance
+                  Window
+                items:
+                  description: MaintenanceWindowResource defines nested fields for
+                    MaintenanceWindow.Resource.
+                  properties:
+                    areMembersIncluded:
+                      description: |-
+                        Flag to indicate if the members of the resource has to be include in the
+                        Maintenance Window.
+                      type: boolean
+                    resourceId:
+                      description: |-
+                        The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of monitored resource
+                        part of the Maintenance window.
+                      type: string
+                  required:
+                  - resourceId
+                  type: object
+                type: array
+              resourcesDetails:
+                description: List of resource details that are part of the Maintenance
+                  Window.
+                items:
+                  description: MaintenanceWindowResourcesDetail defines nested fields
+                    for MaintenanceWindow.ResourcesDetail.
+                  properties:
+                    name:
+                      description: Name of the monitored resource
+                      type: string
+                    numberOfMembers:
+                      description: Number of members of the resource
+                      type: integer
+                    resourceId:
+                      description: |-
+                        The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of monitored resource
+                        part of the Maintenance window.
+                      type: string
+                    type:
+                      description: Type of the monitored resource
+                      type: string
+                  type: object
+                type: array
+              schedule:
+                description: MaintenanceWindowSchedule defines nested fields for MaintenanceWindow.Schedule.
+                properties:
+                  jsonData:
+                    type: string
+                  maintenanceWindowDuration:
+                    description: |-
+                      Duration time of each recurrence of each Maintenance Window.
+                      It must be specified as a string in ISO 8601 extended format.
+                    type: string
+                  maintenanceWindowRecurrences:
+                    description: |-
+                      A RFC5545 formatted recurrence string which represents the Maintenance Window Recurrence.
+                      Please refer this for details:https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10
+                      FREQ: Frequency of the Maintenance Window. The supported values are: DAILY and WEEKLY.
+                      BYDAY: Comma separated days for Weekly Maintenance Window.
+                      BYHOUR: Specifies the start hour of each recurrence after `timeMaintenanceWindowStart` value.
+                      BYMINUTE: Specifies the start minute of each reccurrence after `timeMaintenanceWindowStart` value. The default value is 00
+                      BYSECOND: Specifies the start second of each reccurrence after `timeMaintenanceWindowStart` value. The default value is 00
+                      Other Rules are not supported.
+                    type: string
+                  scheduleType:
+                    type: string
+                  timeMaintenanceWindowEnd:
+                    description: Start time of Maintenance window. A RFC3339 formatted
+                      datetime string
+                    type: string
+                  timeMaintenanceWindowStart:
+                    description: Start time of Maintenance window. A RFC3339 formatted
+                      datetime string
+                    type: string
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time the the maintenance window was created. An RFC3339
+                  formatted datetime string
+                type: string
+              timeUpdated:
+                description: The time the the mainteance window was updated. An RFC3339
+                  formatted datetime string
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -643,6 +643,7 @@ rules:
   - governancerulescontrolplane.oracle.com
   resources:
   - governancerules
+  - inclusioncriterions
   verbs:
   - create
   - delete
@@ -655,12 +656,14 @@ rules:
   - governancerulescontrolplane.oracle.com
   resources:
   - governancerules/finalizers
+  - inclusioncriterions/finalizers
   verbs:
   - update
 - apiGroups:
   - governancerulescontrolplane.oracle.com
   resources:
   - governancerules/status
+  - inclusioncriterions/status
   verbs:
   - get
   - patch
@@ -1180,6 +1183,7 @@ rules:
 - apiGroups:
   - marketplaceprivateoffer.oracle.com
   resources:
+  - attachments
   - offers
   verbs:
   - create
@@ -1192,12 +1196,14 @@ rules:
 - apiGroups:
   - marketplaceprivateoffer.oracle.com
   resources:
+  - attachments/finalizers
   - offers/finalizers
   verbs:
   - update
 - apiGroups:
   - marketplaceprivateoffer.oracle.com
   resources:
+  - attachments/status
   - offers/status
   verbs:
   - get
@@ -1786,6 +1792,7 @@ rules:
 - apiGroups:
   - resourceanalytics.oracle.com
   resources:
+  - monitoredregions
   - resourceanalyticsinstances
   - tenancyattachments
   verbs:
@@ -1799,6 +1806,7 @@ rules:
 - apiGroups:
   - resourceanalytics.oracle.com
   resources:
+  - monitoredregions/finalizers
   - resourceanalyticsinstances/finalizers
   - tenancyattachments/finalizers
   verbs:
@@ -1806,6 +1814,7 @@ rules:
 - apiGroups:
   - resourceanalytics.oracle.com
   resources:
+  - monitoredregions/status
   - resourceanalyticsinstances/status
   - tenancyattachments/status
   verbs:
@@ -1928,6 +1937,7 @@ rules:
   - alarmconditions
   - baselineablemetrics
   - configs
+  - discoveryjobs
   - maintenancewindows
   - metricextensions
   - monitoredresources
@@ -1948,6 +1958,7 @@ rules:
   - alarmconditions/finalizers
   - baselineablemetrics/finalizers
   - configs/finalizers
+  - discoveryjobs/finalizers
   - maintenancewindows/finalizers
   - metricextensions/finalizers
   - monitoredresources/finalizers
@@ -1962,6 +1973,7 @@ rules:
   - alarmconditions/status
   - baselineablemetrics/status
   - configs/status
+  - discoveryjobs/status
   - maintenancewindows/status
   - metricextensions/status
   - monitoredresources/status

@@ -19,6 +19,7 @@ No customer-visible package currently exposes `governancerulescontrolplane.oracl
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
 | [GovernanceRule](#kind-governancerule) | Namespaced | [Sample](../../../samples/governancerulescontrolplane/v1beta1/governancerule.md) | - |
+| [InclusionCriterion](#kind-inclusioncriterion) | Namespaced | [Sample](../../../samples/governancerulescontrolplane/v1beta1/inclusioncriterion.md) | - |
 
 <a id="kind-governancerule"></a>
 ## GovernanceRule
@@ -247,3 +248,126 @@ GovernanceRuleTemplateTagValidator defines nested fields for GovernanceRule.Temp
 | `jsonData` | - | `string` | No | - | - |
 | `validatorType` | - | `string` | No | - | - |
 | `values` | The list of allowed values for a definedTag value. | `list[string]` | No | - | - |
+
+<a id="kind-inclusioncriterion"></a>
+## InclusionCriterion
+
+InclusionCriterion is the Schema for the inclusioncriterions API.
+
+- `Plural`: `inclusioncriteria`
+- `Scope`: `Namespaced`
+- `APIVersion`: `governancerulescontrolplane.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/governancerulescontrolplane/v1beta1/inclusioncriterion.md) (`config/samples/governancerulescontrolplane_v1beta1_inclusioncriterion.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-inclusioncriterion-spec"></a>
+### Spec
+
+InclusionCriterionSpec defines the desired state of InclusionCriterion.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`association`](#kind-inclusioncriterion-spec-association) | InclusionCriterionAssociation defines nested fields for InclusionCriterion.Association. | `object` | No | - | - |
+| `governanceRuleId` | The Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)) of the governance rule. Every inclusion criterion is associated with a governance rule. | `string` | Yes | - | - |
+| `type` | Type of inclusion criterion - TENANCY, ALL or TAG. We support TENANCY and ALL for now. | `string` | Yes | - | - |
+
+<a id="kind-inclusioncriterion-spec-association"></a>
+#### Spec.association
+
+[Back to InclusionCriterion spec](#kind-inclusioncriterion-spec)
+
+InclusionCriterionAssociation defines nested fields for InclusionCriterion.Association.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `tenancyId` | The Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)) of the tenancy to which the governance rule will be applied as part of this tenancy inclusion criterion. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-inclusioncriterion-status"></a>
+### Status
+
+InclusionCriterionStatus defines the observed state of InclusionCriterion.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`association`](#kind-inclusioncriterion-status-association) | InclusionCriterionAssociation defines nested fields for InclusionCriterion.Association. | `object` | No | - | - |
+| `governanceRuleId` | The Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)) of the governance rule. Every inclusion criterion is associated with a governance rule. | `string` | No | - | - |
+| `id` | The Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)) of the inclusion criterion. | `string` | No | - | - |
+| `lifecycleState` | The current state of the inclusion criterion. | `string` | No | - | - |
+| [`status`](#kind-inclusioncriterion-status-status) | - | `object` | Yes | - | - |
+| `timeCreated` | Date and time the inclusion criterion was created. An RFC3339 formatted datetime string. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `timeUpdated` | Date and time the inclusion criterion was updated. An RFC3339 formatted datetime string. Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `type` | Type of inclusion criterion - TENANCY, ALL or TAG. We support TENANCY and ALL for now. | `string` | No | - | - |
+
+<a id="kind-inclusioncriterion-status-association"></a>
+#### Status.association
+
+[Back to InclusionCriterion status](#kind-inclusioncriterion-status)
+
+InclusionCriterionAssociation defines nested fields for InclusionCriterion.Association.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `jsonData` | - | `string` | No | - | - |
+| `tenancyId` | The Oracle ID (OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)) of the tenancy to which the governance rule will be applied as part of this tenancy inclusion criterion. | `string` | No | - | - |
+| `type` | - | `string` | No | - | - |
+
+<a id="kind-inclusioncriterion-status-status"></a>
+#### Status.status
+
+[Back to InclusionCriterion status](#kind-inclusioncriterion-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-inclusioncriterion-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-inclusioncriterion-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-inclusioncriterion-status-status-async"></a>
+##### Status.status.async
+
+[Back to InclusionCriterion status](#kind-inclusioncriterion-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-inclusioncriterion-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-inclusioncriterion-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to InclusionCriterion status](#kind-inclusioncriterion-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-inclusioncriterion-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to InclusionCriterion status](#kind-inclusioncriterion-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |

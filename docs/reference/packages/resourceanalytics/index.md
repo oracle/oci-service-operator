@@ -23,5 +23,6 @@ Manage OCI Resource Analytics resources from Kubernetes.
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `resourceanalytics/MonitoredRegion` | `resourceanalytics.oracle.com/v1beta1` | — | — | [Sample](../../samples/resourceanalytics/v1beta1/monitoredregion.md) | [Reference](../../api/resourceanalytics/v1beta1/index.md#kind-monitoredregion) |
 | `resourceanalytics/ResourceAnalyticsInstance` | `resourceanalytics.oracle.com/v1beta1` | — | — | [Sample](../../samples/resourceanalytics/v1beta1/resourceanalyticsinstance.md) | [Reference](../../api/resourceanalytics/v1beta1/index.md#kind-resourceanalyticsinstance) |
 | `resourceanalytics/TenancyAttachment` | `resourceanalytics.oracle.com/v1beta1` | — | — | [Sample](../../samples/resourceanalytics/v1beta1/tenancyattachment.md) | [Reference](../../api/resourceanalytics/v1beta1/index.md#kind-tenancyattachment) |

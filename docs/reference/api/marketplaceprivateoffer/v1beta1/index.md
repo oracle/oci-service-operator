@@ -18,7 +18,109 @@ No customer-visible package currently exposes `marketplaceprivateoffer.oracle.co
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [Attachment](#kind-attachment) | Namespaced | [Sample](../../../samples/marketplaceprivateoffer/v1beta1/attachment.md) | - |
 | [Offer](#kind-offer) | Namespaced | [Sample](../../../samples/marketplaceprivateoffer/v1beta1/offer.md) | - |
+
+<a id="kind-attachment"></a>
+## Attachment
+
+Attachment is the Schema for the attachments API.
+
+- `Plural`: `attachments`
+- `Scope`: `Namespaced`
+- `APIVersion`: `marketplaceprivateoffer.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/marketplaceprivateoffer/v1beta1/attachment.md) (`config/samples/marketplaceprivateoffer_v1beta1_attachment.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-attachment-spec"></a>
+### Spec
+
+AttachmentSpec defines the desired state of Attachment.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `displayName` | The name used to refer to the uploaded data. | `string` | Yes | - | - |
+| `fileBase64Encoded` | Base64-encoded file to attach to the Offer. File must be a PDF with maximum size of 1 MB | `string` | Yes | - | - |
+| `type` | The type of offer attachment. | `string` | Yes | - | - |
+
+<a id="kind-attachment-status"></a>
+### Status
+
+AttachmentStatus defines the observed state of Attachment.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `buyerCompartmentId` | OCID of the buyer's tenancy (root compartment). | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `displayName` | The name used to refer to the uploaded data. | `string` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `id` | Unique identifier that is immutable on creation | `string` | No | - | - |
+| `lifecycleState` | The current state of the Offer. | `string` | No | - | - |
+| `mimeType` | The MIME type of the uploaded data. | `string` | No | - | - |
+| `offerId` | Unique identifier of the associated offer that is immutable on creation | `string` | No | - | - |
+| `sellerCompartmentId` | OCID of the seller's tenancy (root compartment). | `string` | No | - | - |
+| [`status`](#kind-attachment-status-status) | - | `object` | Yes | - | - |
+| `timeCreated` | The time the the Offer was created. An RFC3339 formatted datetime string | `string` | No | - | - |
+| `type` | The type of offer attachment. | `string` | No | - | - |
+
+<a id="kind-attachment-status-status"></a>
+#### Status.status
+
+[Back to Attachment status](#kind-attachment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-attachment-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-attachment-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-attachment-status-status-async"></a>
+##### Status.status.async
+
+[Back to Attachment status](#kind-attachment-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-attachment-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-attachment-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to Attachment status](#kind-attachment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-attachment-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to Attachment status](#kind-attachment-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-offer"></a>
 ## Offer

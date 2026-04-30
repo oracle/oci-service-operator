@@ -63,6 +63,7 @@ resources:
 - bases/generativeai.oracle.com_endpoints.yaml
 - bases/generativeai.oracle.com_models.yaml
 - bases/governancerulescontrolplane.oracle.com_governancerules.yaml
+- bases/governancerulescontrolplane.oracle.com_inclusioncriteria.yaml
 - bases/healthchecks.oracle.com_httpmonitors.yaml
 - bases/healthchecks.oracle.com_pingmonitors.yaml
 - bases/identity.oracle.com_compartments.yaml
@@ -111,6 +112,7 @@ resources:
 - bases/managementdashboard.oracle.com_managementsavedsearches.yaml
 - bases/marketplace.oracle.com_acceptedagreements.yaml
 - bases/marketplace.oracle.com_publications.yaml
+- bases/marketplaceprivateoffer.oracle.com_attachments.yaml
 - bases/marketplaceprivateoffer.oracle.com_offers.yaml
 - bases/marketplacepublisher.oracle.com_artifacts.yaml
 - bases/marketplacepublisher.oracle.com_listingrevisionattachments.yaml
@@ -175,6 +177,7 @@ resources:
 - bases/recovery.oracle.com_protectionpolicies.yaml
 - bases/recovery.oracle.com_recoveryservicesubnets.yaml
 - bases/redis.oracle.com_redisclusters.yaml
+- bases/resourceanalytics.oracle.com_monitoredregions.yaml
 - bases/resourceanalytics.oracle.com_resourceanalyticsinstances.yaml
 - bases/resourceanalytics.oracle.com_tenancyattachments.yaml
 - bases/resourcescheduler.oracle.com_schedules.yaml
@@ -186,6 +189,7 @@ resources:
 - bases/stackmonitoring.oracle.com_alarmconditions.yaml
 - bases/stackmonitoring.oracle.com_baselineablemetrics.yaml
 - bases/stackmonitoring.oracle.com_configs.yaml
+- bases/stackmonitoring.oracle.com_discoveryjobs.yaml
 - bases/stackmonitoring.oracle.com_maintenancewindows.yaml
 - bases/stackmonitoring.oracle.com_metricextensions.yaml
 - bases/stackmonitoring.oracle.com_monitoredresources.yaml

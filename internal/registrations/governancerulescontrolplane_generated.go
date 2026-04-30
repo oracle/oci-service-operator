@@ -14,6 +14,7 @@ import (
 	governancerulescontrolplanecontrollers "github.com/oracle/oci-service-operator/controllers/governancerulescontrolplane"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	governancerulescontrolplanegovernanceruleservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/governancerulescontrolplane/governancerule"
+	governancerulescontrolplaneinclusioncriterionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/governancerulescontrolplane/inclusioncriterion"
 )
 
 func init() {
@@ -31,6 +32,17 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup GovernanceRule controller: %w", err)
+			}
+			if err := (&governancerulescontrolplanecontrollers.InclusionCriterionReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"InclusionCriterion",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return governancerulescontrolplaneinclusioncriterionservicemanager.NewInclusionCriterionServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup InclusionCriterion controller: %w", err)
 			}
 			return nil
 		},

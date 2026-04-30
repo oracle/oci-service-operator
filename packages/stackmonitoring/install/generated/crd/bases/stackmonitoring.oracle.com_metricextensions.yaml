@@ -1,0 +1,607 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: metricextensions.stackmonitoring.oracle.com
+spec:
+  group: stackmonitoring.oracle.com
+  names:
+    kind: MetricExtension
+    listKind: MetricExtensionList
+    plural: metricextensions
+    singular: metricextension
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the MetricExtension
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the MetricExtension
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: MetricExtension is the Schema for the metricextensions API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: MetricExtensionSpec defines the desired state of MetricExtension.
+            properties:
+              collectionRecurrences:
+                description: Schedule of metric extension should use RFC 5545 format
+                  i.e. recur-rule-part = "FREQ";INTERVAL where FREQ rule part identifies
+                  the type of recurrence rule. Valid values are "MINUTELY","HOURLY","DAILY"
+                  to specify repeating events based on an interval of a minute, an
+                  hour and a day or more. Example- FREQ=DAILY;INTERVAL=1
+                type: string
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                type: string
+              description:
+                description: Description of the metric extension.
+                type: string
+              displayName:
+                description: Metric Extension display name.
+                type: string
+              metricList:
+                description: List of metrics which are part of this metric extension
+                items:
+                  description: MetricExtensionMetricList defines nested fields for
+                    MetricExtension.MetricList.
+                  properties:
+                    computeExpression:
+                      description: Compute Expression to calculate the value of this
+                        metric
+                      type: string
+                    dataType:
+                      description: Data type of value of this metric
+                      type: string
+                    displayName:
+                      description: Display name of the metric.
+                      type: string
+                    isDimension:
+                      description: Current metric need to be included as dimension
+                        or not
+                      type: boolean
+                    isHidden:
+                      description: Flag to marks whether a metric has to be uploaded
+                        or not. When isHidden = false -> Metric is uploaded, isHidden
+                        = true -> Metric is NOT uploaded
+                      type: boolean
+                    metricCategory:
+                      description: Metric category
+                      type: string
+                    name:
+                      description: Name of the metric.
+                      type: string
+                    unit:
+                      description: Unit of metric value
+                      type: string
+                  required:
+                  - dataType
+                  - name
+                  type: object
+                type: array
+              name:
+                description: Metric Extension Resource name.
+                type: string
+              queryProperties:
+                description: MetricExtensionQueryProperties defines nested fields
+                  for MetricExtension.QueryProperties.
+                properties:
+                  arguments:
+                    description: Arguments required by either command or script
+                    type: string
+                  autoRowPrefix:
+                    description: Prefix for an auto generated metric, in case multiple
+                      rows with non unique key values are returned
+                    type: string
+                  collectionMethod:
+                    type: string
+                  command:
+                    description: OS command to execute without arguments
+                    type: string
+                  delimiter:
+                    description: Character used to delimit multiple metric values
+                      in single line of output
+                    type: string
+                  identityMetric:
+                    description: Semi-colon separated list of key properties from
+                      Managed Bean ObjectName to be used as key metrics
+                    type: string
+                  inParamDetails:
+                    description: List of values and position of PL/SQL procedure IN
+                      parameters
+                    items:
+                      description: MetricExtensionQueryPropertiesInParamDetail defines
+                        nested fields for MetricExtension.QueryProperties.InParamDetail.
+                      properties:
+                        inParamPosition:
+                          description: Position of IN parameter
+                          type: integer
+                        inParamValue:
+                          description: Value of IN parameter
+                          type: string
+                      required:
+                      - inParamPosition
+                      - inParamValue
+                      type: object
+                    type: array
+                  isMetricServiceEnabled:
+                    description: Indicates if Metric Service is enabled on server
+                      domain
+                    type: boolean
+                  jmxAttributes:
+                    description: List of JMX attributes or Metric Service Table columns
+                      separated by semi-colon
+                    type: string
+                  jsonData:
+                    type: string
+                  managedBeanQuery:
+                    description: JMX Managed Bean Query or Metric Service Table name
+                    type: string
+                  outParamDetails:
+                    description: MetricExtensionQueryPropertiesOutParamDetails defines
+                      nested fields for MetricExtension.QueryProperties.OutParamDetails.
+                    properties:
+                      outParamName:
+                        description: Name of the Out Parameter
+                        type: string
+                      outParamPosition:
+                        description: Position of PL/SQL procedure OUT parameter. The
+                          value of this property is ignored during update, if "outParamType"
+                          is set to NO_OUT_PARAM value.
+                        type: integer
+                      outParamType:
+                        description: SQL Type of PL/SQL procedure OUT parameter. During
+                          the update, to completely remove the out parameter, use
+                          the value NO_OUT_PARAM. In that case, the value of "outParamPosition"
+                          will be ignored.
+                        type: string
+                    required:
+                    - outParamPosition
+                    - outParamType
+                    type: object
+                  protocolType:
+                    description: Supported protocol of resources to be associated
+                      with this metric extension. This is optional and defaults to
+                      HTTPS, which uses secure connection to the URL
+                    type: string
+                  responseContentType:
+                    description: Type of content response given by the http(s) URL
+                    type: string
+                  scriptDetails:
+                    description: MetricExtensionQueryPropertiesScriptDetails defines
+                      nested fields for MetricExtension.QueryProperties.ScriptDetails.
+                    properties:
+                      content:
+                        description: Content of the script file as base64 encoded
+                          string
+                        type: string
+                      name:
+                        description: Name of the script file
+                        type: string
+                    required:
+                    - content
+                    - name
+                    type: object
+                  sqlDetails:
+                    description: MetricExtensionQueryPropertiesSqlDetails defines
+                      nested fields for MetricExtension.QueryProperties.SqlDetails.
+                    properties:
+                      content:
+                        description: Sql statement or script file content as base64
+                          encoded string
+                        type: string
+                      scriptFileName:
+                        description: If a script needs to be executed, then provide
+                          file name of the script
+                        type: string
+                    required:
+                    - content
+                    type: object
+                  sqlType:
+                    description: Type of SQL data collection method i.e. either a
+                      Statement or SQL Script File
+                    type: string
+                  startsWith:
+                    description: String prefix used to identify metric output of the
+                      OS Command
+                    type: string
+                  url:
+                    description: Http(s) end point URL
+                    type: string
+                type: object
+              resourceType:
+                description: Resource type to which Metric Extension applies
+                type: string
+            required:
+            - collectionRecurrences
+            - compartmentId
+            - displayName
+            - metricList
+            - name
+            - queryProperties
+            - resourceType
+            type: object
+          status:
+            description: MetricExtensionStatus defines the observed state of MetricExtension.
+            properties:
+              collectionMethod:
+                description: Collection Method  Metric Extension applies
+                type: string
+              collectionRecurrences:
+                description: Schedule of metric extension should use RFC 5545 format
+                  -> recur-rule-part = "FREQ";"INTERVAL" where FREQ rule part identifies
+                  the type of recurrence rule. Valid values are "MINUTELY","HOURLY","DAILY"
+                  to specify repeating events based on an interval of a minute, an
+                  hour and a day or more. Example- FREQ=DAILY;INTERVAL=1
+                type: string
+              compartmentId:
+                description: Compartment Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                type: string
+              createdBy:
+                description: Created by user
+                type: string
+              description:
+                description: Description of the metric extension.
+                type: string
+              displayName:
+                description: Metric Extension resource display name
+                type: string
+              enabledOnResources:
+                description: List of resource details objects having resourceIds on
+                  which this metric extension is enabled.
+                items:
+                  description: MetricExtensionEnabledOnResource defines nested fields
+                    for MetricExtension.EnabledOnResource.
+                  properties:
+                    resourceId:
+                      description: The OCID of the resource on which Metric Extension
+                        is enabled
+                      type: string
+                  type: object
+                type: array
+              enabledOnResourcesCount:
+                description: Count of resources on which this metric extension is
+                  enabled.
+                type: integer
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of Metric Extension resource
+                type: string
+              lastUpdatedBy:
+                description: Last updated by user
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the metric extension
+                type: string
+              metricList:
+                description: List of metrics which are part of this metric extension
+                items:
+                  description: MetricExtensionMetricList defines nested fields for
+                    MetricExtension.MetricList.
+                  properties:
+                    computeExpression:
+                      description: Compute Expression to calculate the value of this
+                        metric
+                      type: string
+                    dataType:
+                      description: Data type of value of this metric
+                      type: string
+                    displayName:
+                      description: Display name of the metric.
+                      type: string
+                    isDimension:
+                      description: Current metric need to be included as dimension
+                        or not
+                      type: boolean
+                    isHidden:
+                      description: Flag to marks whether a metric has to be uploaded
+                        or not. When isHidden = false -> Metric is uploaded, isHidden
+                        = true -> Metric is NOT uploaded
+                      type: boolean
+                    metricCategory:
+                      description: Metric category
+                      type: string
+                    name:
+                      description: Name of the metric.
+                      type: string
+                    unit:
+                      description: Unit of metric value
+                      type: string
+                  required:
+                  - dataType
+                  - name
+                  type: object
+                type: array
+              name:
+                description: Metric Extension resource name
+                type: string
+              queryProperties:
+                description: MetricExtensionQueryProperties defines nested fields
+                  for MetricExtension.QueryProperties.
+                properties:
+                  arguments:
+                    description: Arguments required by either command or script
+                    type: string
+                  autoRowPrefix:
+                    description: Prefix for an auto generated metric, in case multiple
+                      rows with non unique key values are returned
+                    type: string
+                  collectionMethod:
+                    type: string
+                  command:
+                    description: OS command to execute without arguments
+                    type: string
+                  delimiter:
+                    description: Character used to delimit multiple metric values
+                      in single line of output
+                    type: string
+                  identityMetric:
+                    description: Semi-colon separated list of key properties from
+                      Managed Bean ObjectName to be used as key metrics
+                    type: string
+                  inParamDetails:
+                    description: List of values and position of PL/SQL procedure IN
+                      parameters
+                    items:
+                      description: MetricExtensionQueryPropertiesInParamDetail defines
+                        nested fields for MetricExtension.QueryProperties.InParamDetail.
+                      properties:
+                        inParamPosition:
+                          description: Position of IN parameter
+                          type: integer
+                        inParamValue:
+                          description: Value of IN parameter
+                          type: string
+                      required:
+                      - inParamPosition
+                      - inParamValue
+                      type: object
+                    type: array
+                  isMetricServiceEnabled:
+                    description: Indicates if Metric Service is enabled on server
+                      domain
+                    type: boolean
+                  jmxAttributes:
+                    description: List of JMX attributes or Metric Service Table columns
+                      separated by semi-colon
+                    type: string
+                  jsonData:
+                    type: string
+                  managedBeanQuery:
+                    description: JMX Managed Bean Query or Metric Service Table name
+                    type: string
+                  outParamDetails:
+                    description: MetricExtensionQueryPropertiesOutParamDetails defines
+                      nested fields for MetricExtension.QueryProperties.OutParamDetails.
+                    properties:
+                      outParamName:
+                        description: Name of the Out Parameter
+                        type: string
+                      outParamPosition:
+                        description: Position of PL/SQL procedure OUT parameter. The
+                          value of this property is ignored during update, if "outParamType"
+                          is set to NO_OUT_PARAM value.
+                        type: integer
+                      outParamType:
+                        description: SQL Type of PL/SQL procedure OUT parameter. During
+                          the update, to completely remove the out parameter, use
+                          the value NO_OUT_PARAM. In that case, the value of "outParamPosition"
+                          will be ignored.
+                        type: string
+                    required:
+                    - outParamPosition
+                    - outParamType
+                    type: object
+                  protocolType:
+                    description: Supported protocol of resources to be associated
+                      with this metric extension. This is optional and defaults to
+                      HTTPS, which uses secure connection to the URL
+                    type: string
+                  responseContentType:
+                    description: Type of content response given by the http(s) URL
+                    type: string
+                  scriptDetails:
+                    description: MetricExtensionQueryPropertiesScriptDetails defines
+                      nested fields for MetricExtension.QueryProperties.ScriptDetails.
+                    properties:
+                      content:
+                        description: Content of the script file as base64 encoded
+                          string
+                        type: string
+                      name:
+                        description: Name of the script file
+                        type: string
+                    required:
+                    - content
+                    - name
+                    type: object
+                  sqlDetails:
+                    description: MetricExtensionQueryPropertiesSqlDetails defines
+                      nested fields for MetricExtension.QueryProperties.SqlDetails.
+                    properties:
+                      content:
+                        description: Sql statement or script file content as base64
+                          encoded string
+                        type: string
+                      scriptFileName:
+                        description: If a script needs to be executed, then provide
+                          file name of the script
+                        type: string
+                    required:
+                    - content
+                    type: object
+                  sqlType:
+                    description: Type of SQL data collection method i.e. either a
+                      Statement or SQL Script File
+                    type: string
+                  startsWith:
+                    description: String prefix used to identify metric output of the
+                      OS Command
+                    type: string
+                  url:
+                    description: Http(s) end point URL
+                    type: string
+                type: object
+              resourceType:
+                description: Resource type to which Metric Extension applies
+                type: string
+              resourceUri:
+                description: The URI path that the user can do a GET on to access
+                  the metric extension metadata
+                type: string
+              sdkStatus:
+                description: |-
+                  The current status of the metric extension i.e. whether it is Draft or Published
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              tenantId:
+                description: Tenant Identifier OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                type: string
+              timeCreated:
+                description: Metric Extension creation time. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: Metric Extension update time. An RFC3339 formatted datetime
+                  string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

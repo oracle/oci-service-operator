@@ -13,6 +13,7 @@ import (
 	resourceanalyticsv1beta1 "github.com/oracle/oci-service-operator/api/resourceanalytics/v1beta1"
 	resourceanalyticscontrollers "github.com/oracle/oci-service-operator/controllers/resourceanalytics"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	resourceanalyticsmonitoredregionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/resourceanalytics/monitoredregion"
 	resourceanalyticsresourceanalyticsinstanceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/resourceanalytics/resourceanalyticsinstance"
 	resourceanalyticstenancyattachmentservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/resourceanalytics/tenancyattachment"
 )
@@ -22,6 +23,17 @@ func init() {
 		Group:       "resourceanalytics",
 		AddToScheme: resourceanalyticsv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&resourceanalyticscontrollers.MonitoredRegionReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"MonitoredRegion",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return resourceanalyticsmonitoredregionservicemanager.NewMonitoredRegionServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup MonitoredRegion controller: %w", err)
+			}
 			if err := (&resourceanalyticscontrollers.ResourceAnalyticsInstanceReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

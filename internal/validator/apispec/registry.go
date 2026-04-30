@@ -2288,6 +2288,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "GovernancerulescontrolplaneInclusionCriterion",
+		SpecType:   reflect.TypeOf(governancerulescontrolplanev1beta1.InclusionCriterionSpec{}),
+		StatusType: reflect.TypeOf(governancerulescontrolplanev1beta1.InclusionCriterionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "governancerulescontrolplane.CreateInclusionCriterionDetails",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.InclusionCriterion",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.InclusionCriterionCollection",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.InclusionCriterionSummary",
+			},
+		},
+	},
+	{
 		Name:       "HealthchecksHttpMonitor",
 		SpecType:   reflect.TypeOf(healthchecksv1beta1.HttpMonitorSpec{}),
 		StatusType: reflect.TypeOf(healthchecksv1beta1.HttpMonitorStatus{}),
@@ -2857,6 +2876,25 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "managementdashboard.ManagementSavedSearchSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplaceprivateofferAttachment",
+		SpecType:   reflect.TypeOf(marketplaceprivateofferv1beta1.AttachmentSpec{}),
+		StatusType: reflect.TypeOf(marketplaceprivateofferv1beta1.AttachmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplaceprivateoffer.CreateAttachmentDetails",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.Attachment",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.AttachmentCollection",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.AttachmentSummary",
 			},
 		},
 	},
@@ -3582,6 +3620,25 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "ResourceanalyticsMonitoredRegion",
+		SpecType:   reflect.TypeOf(resourceanalyticsv1beta1.MonitoredRegionSpec{}),
+		StatusType: reflect.TypeOf(resourceanalyticsv1beta1.MonitoredRegionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "resourceanalytics.CreateMonitoredRegionDetails",
+			},
+			{
+				SDKStruct: "resourceanalytics.MonitoredRegion",
+			},
+			{
+				SDKStruct: "resourceanalytics.MonitoredRegionCollection",
+			},
+			{
+				SDKStruct: "resourceanalytics.MonitoredRegionSummary",
+			},
+		},
+	},
+	{
 		Name:       "ResourceanalyticsResourceAnalyticsInstance",
 		SpecType:   reflect.TypeOf(resourceanalyticsv1beta1.ResourceAnalyticsInstanceSpec{}),
 		StatusType: reflect.TypeOf(resourceanalyticsv1beta1.ResourceAnalyticsInstanceStatus{}),
@@ -3799,6 +3856,25 @@ var targets = []Target{
 		SDKMappings: []SDKMapping{
 			{
 				SDKStruct: "stackmonitoring.ConfigCollection",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringDiscoveryJob",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.DiscoveryJobSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.DiscoveryJobStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateDiscoveryJobDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.DiscoveryJob",
+			},
+			{
+				SDKStruct: "stackmonitoring.DiscoveryJobCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.DiscoveryJobSummary",
 			},
 		},
 	},

@@ -21,6 +21,7 @@ No customer-visible package currently exposes `stackmonitoring.oracle.com/v1beta
 | [AlarmCondition](#kind-alarmcondition) | Namespaced | [Sample](../../../samples/stackmonitoring/v1beta1/alarmcondition.md) | - |
 | [BaselineableMetric](#kind-baselineablemetric) | Namespaced | [Sample](../../../samples/stackmonitoring/v1beta1/baselineablemetric.md) | - |
 | [Config](#kind-config) | Namespaced | [Sample](../../../samples/stackmonitoring/v1beta1/config.md) | - |
+| [DiscoveryJob](#kind-discoveryjob) | Namespaced | [Sample](../../../samples/stackmonitoring/v1beta1/discoveryjob.md) | - |
 | [MaintenanceWindow](#kind-maintenancewindow) | Namespaced | [Sample](../../../samples/stackmonitoring/v1beta1/maintenancewindow.md) | - |
 | [MetricExtension](#kind-metricextension) | Namespaced | [Sample](../../../samples/stackmonitoring/v1beta1/metricextension.md) | - |
 | [MonitoredResource](#kind-monitoredresource) | Namespaced | [Sample](../../../samples/stackmonitoring/v1beta1/monitoredresource.md) | - |
@@ -482,6 +483,265 @@ ConfigUserGroup defines nested fields for Config.UserGroup.
 | `domain` | Identity domain name | `string` | No | - | - |
 | `name` | Name of user Group | `string` | Yes | - | - |
 | `stackMonitoringRole` | Role assigned to user group in context of Stack Monitoring service. Access role can be for example: ADMINISTRATOR, OPERATOR, VIEWER, any other access role | `string` | Yes | - | - |
+
+<a id="kind-discoveryjob"></a>
+## DiscoveryJob
+
+DiscoveryJob is the Schema for the discoveryjobs API.
+
+- `Plural`: `discoveryjobs`
+- `Scope`: `Namespaced`
+- `APIVersion`: `stackmonitoring.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/stackmonitoring/v1beta1/discoveryjob.md) (`config/samples/stackmonitoring_v1beta1_discoveryjob.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-discoveryjob-spec"></a>
+### Spec
+
+DiscoveryJobSpec defines the desired state of DiscoveryJob.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID of Compartment | `string` | Yes | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `discoveryClient` | Client who submits discovery job. | `string` | No | - | - |
+| [`discoveryDetails`](#kind-discoveryjob-spec-discoverydetails) | DiscoveryJobDiscoveryDetails defines nested fields for DiscoveryJob.DiscoveryDetails. | `object` | Yes | - | - |
+| `discoveryType` | Add option submits new discovery Job. Add with retry option to re-submit failed discovery job. Refresh option refreshes the existing discovered resources. | `string` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `shouldPropagateTagsToDiscoveredResources` | If this parameter set to true, the specified tags will be applied to all resources discovered in the current request. Default is true. | `boolean` | No | - | - |
+
+<a id="kind-discoveryjob-spec-discoverydetails"></a>
+#### Spec.discoveryDetails
+
+[Back to DiscoveryJob spec](#kind-discoveryjob-spec)
+
+DiscoveryJobDiscoveryDetails defines nested fields for DiscoveryJob.DiscoveryDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `agentId` | The OCID of Management Agent | `string` | Yes | - | - |
+| [`credentials`](#kind-discoveryjob-spec-discoverydetails-credentials) | DiscoveryJobDiscoveryDetailsCredentials defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials. | `object` | No | - | - |
+| `license` | License edition of the monitored resource. | `string` | No | - | - |
+| [`properties`](#kind-discoveryjob-spec-discoverydetails-properties) | DiscoveryJobDiscoveryDetailsProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Properties. | `object` | Yes | - | - |
+| `resourceName` | The Name of resource type | `string` | Yes | - | - |
+| `resourceType` | Resource Type. | `string` | Yes | - | - |
+| [`tags`](#kind-discoveryjob-spec-discoverydetails-tags) | DiscoveryJobDiscoveryDetailsTags defines nested fields for DiscoveryJob.DiscoveryDetails.Tags. | `object` | No | - | - |
+
+<a id="kind-discoveryjob-spec-discoverydetails-credentials"></a>
+##### Spec.discoveryDetails.credentials
+
+[Back to DiscoveryJob spec](#kind-discoveryjob-spec)
+
+DiscoveryJobDiscoveryDetailsCredentials defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-discoveryjob-spec-discoverydetails-credentials-items) | List of DiscoveryJob credentials. | `list[object]` | Yes | - | - |
+
+<a id="kind-discoveryjob-spec-discoverydetails-credentials-items"></a>
+###### Spec.discoveryDetails.credentials.items[]
+
+[Back to DiscoveryJob spec](#kind-discoveryjob-spec)
+
+DiscoveryJobDiscoveryDetailsCredentialsItem defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `credentialName` | Name of Credential | `string` | Yes | - | - |
+| `credentialType` | Name of Credential Type | `string` | Yes | - | - |
+| [`properties`](#kind-discoveryjob-spec-discoverydetails-credentials-items-properties) | DiscoveryJobDiscoveryDetailsCredentialsItemProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.Item.Properties. | `object` | Yes | - | - |
+
+<a id="kind-discoveryjob-spec-discoverydetails-credentials-items-properties"></a>
+###### Spec.discoveryDetails.credentials.items[].properties
+
+[Back to DiscoveryJob spec](#kind-discoveryjob-spec)
+
+DiscoveryJobDiscoveryDetailsCredentialsItemProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.Item.Properties.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `propertiesMap` | Key/Value pair of Property | `map[string, string]` | No | - | - |
+
+<a id="kind-discoveryjob-spec-discoverydetails-properties"></a>
+##### Spec.discoveryDetails.properties
+
+[Back to DiscoveryJob spec](#kind-discoveryjob-spec)
+
+DiscoveryJobDiscoveryDetailsProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Properties.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `propertiesMap` | Key/Value pair of Property | `map[string, string]` | No | - | - |
+
+<a id="kind-discoveryjob-spec-discoverydetails-tags"></a>
+##### Spec.discoveryDetails.tags
+
+[Back to DiscoveryJob spec](#kind-discoveryjob-spec)
+
+DiscoveryJobDiscoveryDetailsTags defines nested fields for DiscoveryJob.DiscoveryDetails.Tags.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `propertiesMap` | Key/Value pair of Property | `map[string, string]` | No | - | - |
+
+<a id="kind-discoveryjob-status"></a>
+### Status
+
+DiscoveryJobStatus defines the observed state of DiscoveryJob.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `compartmentId` | The OCID of the Compartment | `string` | No | - | - |
+| `definedTags` | Defined tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"foo-namespace": {"bar-key": "value"}}` | `map[string, map[string, string]]` | No | - | - |
+| `discoveryClient` | Client who submits discovery job. | `string` | No | - | - |
+| [`discoveryDetails`](#kind-discoveryjob-status-discoverydetails) | DiscoveryJobDiscoveryDetails defines nested fields for DiscoveryJob.DiscoveryDetails. | `object` | No | - | - |
+| `discoveryType` | Add option submits new discovery Job. Add with retry option to re-submit failed discovery job. Refresh option refreshes the existing discovered resources. | `string` | No | - | - |
+| `freeformTags` | Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only. Example: `{"bar-key": "value"}` | `map[string, string]` | No | - | - |
+| `id` | The OCID of Discovery job | `string` | No | - | - |
+| `license` | License edition of the monitored resource. | `string` | No | - | - |
+| `lifecycleState` | The current state of the DiscoveryJob Resource. | `string` | No | - | - |
+| `resourceName` | The name of resource type | `string` | No | - | - |
+| `resourceType` | Resource Type | `string` | No | - | - |
+| `sdkStatus` | Specifies the status of the discovery job This uses a distinct JSON name so it can coexist with the OSOK status envelope. | `string` | No | - | - |
+| [`status`](#kind-discoveryjob-status-status) | - | `object` | Yes | - | - |
+| `statusMessage` | The short summary of the status of the discovery job | `string` | No | - | - |
+| `systemTags` | Usage of system tag keys. These predefined keys are scoped to namespaces. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `tenantId` | The OCID of Tenant | `string` | No | - | - |
+| `timeUpdated` | The time the discovery Job was updated. | `string` | No | - | - |
+| `userId` | The OCID of user in which the job is submitted | `string` | No | - | - |
+
+<a id="kind-discoveryjob-status-discoverydetails"></a>
+#### Status.discoveryDetails
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+DiscoveryJobDiscoveryDetails defines nested fields for DiscoveryJob.DiscoveryDetails.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `agentId` | The OCID of Management Agent | `string` | Yes | - | - |
+| [`credentials`](#kind-discoveryjob-status-discoverydetails-credentials) | DiscoveryJobDiscoveryDetailsCredentials defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials. | `object` | No | - | - |
+| `license` | License edition of the monitored resource. | `string` | No | - | - |
+| [`properties`](#kind-discoveryjob-status-discoverydetails-properties) | DiscoveryJobDiscoveryDetailsProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Properties. | `object` | Yes | - | - |
+| `resourceName` | The Name of resource type | `string` | Yes | - | - |
+| `resourceType` | Resource Type. | `string` | Yes | - | - |
+| [`tags`](#kind-discoveryjob-status-discoverydetails-tags) | DiscoveryJobDiscoveryDetailsTags defines nested fields for DiscoveryJob.DiscoveryDetails.Tags. | `object` | No | - | - |
+
+<a id="kind-discoveryjob-status-discoverydetails-credentials"></a>
+##### Status.discoveryDetails.credentials
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+DiscoveryJobDiscoveryDetailsCredentials defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`items`](#kind-discoveryjob-status-discoverydetails-credentials-items) | List of DiscoveryJob credentials. | `list[object]` | Yes | - | - |
+
+<a id="kind-discoveryjob-status-discoverydetails-credentials-items"></a>
+###### Status.discoveryDetails.credentials.items[]
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+DiscoveryJobDiscoveryDetailsCredentialsItem defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.Item.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `credentialName` | Name of Credential | `string` | Yes | - | - |
+| `credentialType` | Name of Credential Type | `string` | Yes | - | - |
+| [`properties`](#kind-discoveryjob-status-discoverydetails-credentials-items-properties) | DiscoveryJobDiscoveryDetailsCredentialsItemProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.Item.Properties. | `object` | Yes | - | - |
+
+<a id="kind-discoveryjob-status-discoverydetails-credentials-items-properties"></a>
+###### Status.discoveryDetails.credentials.items[].properties
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+DiscoveryJobDiscoveryDetailsCredentialsItemProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Credentials.Item.Properties.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `propertiesMap` | Key/Value pair of Property | `map[string, string]` | No | - | - |
+
+<a id="kind-discoveryjob-status-discoverydetails-properties"></a>
+##### Status.discoveryDetails.properties
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+DiscoveryJobDiscoveryDetailsProperties defines nested fields for DiscoveryJob.DiscoveryDetails.Properties.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `propertiesMap` | Key/Value pair of Property | `map[string, string]` | No | - | - |
+
+<a id="kind-discoveryjob-status-discoverydetails-tags"></a>
+##### Status.discoveryDetails.tags
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+DiscoveryJobDiscoveryDetailsTags defines nested fields for DiscoveryJob.DiscoveryDetails.Tags.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `propertiesMap` | Key/Value pair of Property | `map[string, string]` | No | - | - |
+
+<a id="kind-discoveryjob-status-status"></a>
+#### Status.status
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-discoveryjob-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-discoveryjob-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-discoveryjob-status-status-async"></a>
+##### Status.status.async
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-discoveryjob-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-discoveryjob-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-discoveryjob-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to DiscoveryJob status](#kind-discoveryjob-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-maintenancewindow"></a>
 ## MaintenanceWindow

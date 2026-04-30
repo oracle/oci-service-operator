@@ -200,4 +200,8 @@ resources:
 - waf_v1beta1_networkaddresslist.yaml
 - waf_v1beta1_webappfirewall.yaml
 - waf_v1beta1_webappfirewallpolicy.yaml
+- governancerulescontrolplane_v1beta1_inclusioncriterion.yaml
+- marketplaceprivateoffer_v1beta1_attachment.yaml
+- resourceanalytics_v1beta1_monitoredregion.yaml
+- stackmonitoring_v1beta1_discoveryjob.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -24,3 +24,4 @@ Manage OCI Governance Rules Control Plane resources from Kubernetes.
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
 | `governancerulescontrolplane/GovernanceRule` | `governancerulescontrolplane.oracle.com/v1beta1` | — | — | [Sample](../../samples/governancerulescontrolplane/v1beta1/governancerule.md) | [Reference](../../api/governancerulescontrolplane/v1beta1/index.md#kind-governancerule) |
+| `governancerulescontrolplane/InclusionCriterion` | `governancerulescontrolplane.oracle.com/v1beta1` | — | — | [Sample](../../samples/governancerulescontrolplane/v1beta1/inclusioncriterion.md) | [Reference](../../api/governancerulescontrolplane/v1beta1/index.md#kind-inclusioncriterion) |

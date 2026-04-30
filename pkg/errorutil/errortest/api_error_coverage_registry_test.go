@@ -14,10 +14,10 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	}
 
 	byKey := inventoryByKey(inventory)
-	if got, want := len(inventory), 267; got != want {
+	if got, want := len(inventory), 271; got != want {
 		t.Fatalf("len(inventory) = %d, want %d", got, want)
 	}
-	if got, want := countRegistrations(inventory), 195; got != want {
+	if got, want := countRegistrations(inventory), 199; got != want {
 		t.Fatalf("registration inventory count = %d, want %d", got, want)
 	}
 	if got, want := countExceptions(inventory), 72; got != want {
@@ -66,9 +66,13 @@ func TestCheckedInAPIErrorCoverageInventoryIncludesSelectedKindsAndExplicitExcep
 	assertInventoryException(t, byKey, "keymanagement/Key", `controller.strategy="none"`)
 	assertInventoryRegistration(t, byKey, "loadbalancer/LoadBalancer")
 	assertInventoryRegistration(t, byKey, "marketplace/AcceptedAgreement")
+	assertInventoryRegistration(t, byKey, "governancerulescontrolplane/InclusionCriterion")
+	assertInventoryRegistration(t, byKey, "marketplaceprivateoffer/Attachment")
 	assertInventoryRegistration(t, byKey, "ocvp/Cluster")
 	assertInventoryRegistration(t, byKey, "oda/Skill")
 	assertInventoryException(t, byKey, "opensearch/WorkRequestLog", `controller.strategy="none"`)
+	assertInventoryRegistration(t, byKey, "resourceanalytics/MonitoredRegion")
+	assertInventoryRegistration(t, byKey, "stackmonitoring/DiscoveryJob")
 	assertInventoryRegistration(t, byKey, "usageapi/Query")
 	assertInventoryRegistration(t, byKey, "waf/WebAppFirewall")
 }

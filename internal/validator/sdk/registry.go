@@ -608,10 +608,14 @@ var seedTargets = []Target{
 
 	// Governancerulescontrolplane CRD support
 	newTarget("governancerulescontrolplane", "CreateGovernanceRuleDetails", reflect.TypeOf(governancerulescontrolplane.CreateGovernanceRuleDetails{})),
+	newTarget("governancerulescontrolplane", "CreateInclusionCriterionDetails", reflect.TypeOf(governancerulescontrolplane.CreateInclusionCriterionDetails{})),
 	newTarget("governancerulescontrolplane", "UpdateGovernanceRuleDetails", reflect.TypeOf(governancerulescontrolplane.UpdateGovernanceRuleDetails{})),
 	newTarget("governancerulescontrolplane", "GovernanceRule", reflect.TypeOf(governancerulescontrolplane.GovernanceRule{})),
 	newTarget("governancerulescontrolplane", "GovernanceRuleCollection", reflect.TypeOf(governancerulescontrolplane.GovernanceRuleCollection{})),
+	newTarget("governancerulescontrolplane", "InclusionCriterion", reflect.TypeOf(governancerulescontrolplane.InclusionCriterion{})),
+	newTarget("governancerulescontrolplane", "InclusionCriterionCollection", reflect.TypeOf(governancerulescontrolplane.InclusionCriterionCollection{})),
 	newTarget("governancerulescontrolplane", "GovernanceRuleSummary", reflect.TypeOf(governancerulescontrolplane.GovernanceRuleSummary{})),
+	newTarget("governancerulescontrolplane", "InclusionCriterionSummary", reflect.TypeOf(governancerulescontrolplane.InclusionCriterionSummary{})),
 
 	// Healthchecks CRD support
 	newTarget("healthchecks", "CreateHttpMonitorDetails", reflect.TypeOf(healthchecks.CreateHttpMonitorDetails{})),
@@ -760,10 +764,14 @@ var seedTargets = []Target{
 	newTarget("managementdashboard", "ManagementSavedSearchSummary", reflect.TypeOf(managementdashboard.ManagementSavedSearchSummary{})),
 
 	// Marketplaceprivateoffer CRD support
+	newTarget("marketplaceprivateoffer", "CreateAttachmentDetails", reflect.TypeOf(marketplaceprivateoffer.CreateAttachmentDetails{})),
 	newTarget("marketplaceprivateoffer", "CreateOfferDetails", reflect.TypeOf(marketplaceprivateoffer.CreateOfferDetails{})),
 	newTarget("marketplaceprivateoffer", "UpdateOfferDetails", reflect.TypeOf(marketplaceprivateoffer.UpdateOfferDetails{})),
+	newTarget("marketplaceprivateoffer", "Attachment", reflect.TypeOf(marketplaceprivateoffer.Attachment{})),
+	newTarget("marketplaceprivateoffer", "AttachmentCollection", reflect.TypeOf(marketplaceprivateoffer.AttachmentCollection{})),
 	newTarget("marketplaceprivateoffer", "Offer", reflect.TypeOf(marketplaceprivateoffer.Offer{})),
 	newTarget("marketplaceprivateoffer", "OfferCollection", reflect.TypeOf(marketplaceprivateoffer.OfferCollection{})),
+	newTarget("marketplaceprivateoffer", "AttachmentSummary", reflect.TypeOf(marketplaceprivateoffer.AttachmentSummary{})),
 	newTarget("marketplaceprivateoffer", "OfferSummary", reflect.TypeOf(marketplaceprivateoffer.OfferSummary{})),
 
 	// Marketplacepublisher CRD support
@@ -932,14 +940,18 @@ var seedTargets = []Target{
 	newTarget("redis", "RedisClusterSummary", reflect.TypeOf(redis.RedisClusterSummary{})),
 
 	// Resourceanalytics CRD support
+	newTarget("resourceanalytics", "CreateMonitoredRegionDetails", reflect.TypeOf(resourceanalytics.CreateMonitoredRegionDetails{})),
 	newTarget("resourceanalytics", "CreateResourceAnalyticsInstanceDetails", reflect.TypeOf(resourceanalytics.CreateResourceAnalyticsInstanceDetails{})),
 	newTarget("resourceanalytics", "CreateTenancyAttachmentDetails", reflect.TypeOf(resourceanalytics.CreateTenancyAttachmentDetails{})),
 	newTarget("resourceanalytics", "UpdateResourceAnalyticsInstanceDetails", reflect.TypeOf(resourceanalytics.UpdateResourceAnalyticsInstanceDetails{})),
 	newTarget("resourceanalytics", "UpdateTenancyAttachmentDetails", reflect.TypeOf(resourceanalytics.UpdateTenancyAttachmentDetails{})),
+	newTarget("resourceanalytics", "MonitoredRegion", reflect.TypeOf(resourceanalytics.MonitoredRegion{})),
+	newTarget("resourceanalytics", "MonitoredRegionCollection", reflect.TypeOf(resourceanalytics.MonitoredRegionCollection{})),
 	newTarget("resourceanalytics", "ResourceAnalyticsInstance", reflect.TypeOf(resourceanalytics.ResourceAnalyticsInstance{})),
 	newTarget("resourceanalytics", "ResourceAnalyticsInstanceCollection", reflect.TypeOf(resourceanalytics.ResourceAnalyticsInstanceCollection{})),
 	newTarget("resourceanalytics", "TenancyAttachment", reflect.TypeOf(resourceanalytics.TenancyAttachment{})),
 	newTarget("resourceanalytics", "TenancyAttachmentCollection", reflect.TypeOf(resourceanalytics.TenancyAttachmentCollection{})),
+	newTarget("resourceanalytics", "MonitoredRegionSummary", reflect.TypeOf(resourceanalytics.MonitoredRegionSummary{})),
 	newTarget("resourceanalytics", "ResourceAnalyticsInstanceSummary", reflect.TypeOf(resourceanalytics.ResourceAnalyticsInstanceSummary{})),
 	newTarget("resourceanalytics", "TenancyAttachmentSummary", reflect.TypeOf(resourceanalytics.TenancyAttachmentSummary{})),
 
@@ -982,6 +994,7 @@ var seedTargets = []Target{
 	// Stackmonitoring CRD support
 	newTarget("stackmonitoring", "CreateAlarmConditionDetails", reflect.TypeOf(stackmonitoring.CreateAlarmConditionDetails{})),
 	newTarget("stackmonitoring", "CreateBaselineableMetricDetails", reflect.TypeOf(stackmonitoring.CreateBaselineableMetricDetails{})),
+	newTarget("stackmonitoring", "CreateDiscoveryJobDetails", reflect.TypeOf(stackmonitoring.CreateDiscoveryJobDetails{})),
 	newTarget("stackmonitoring", "CreateMaintenanceWindowDetails", reflect.TypeOf(stackmonitoring.CreateMaintenanceWindowDetails{})),
 	newTarget("stackmonitoring", "CreateMetricExtensionDetails", reflect.TypeOf(stackmonitoring.CreateMetricExtensionDetails{})),
 	newTarget("stackmonitoring", "CreateMonitoredResourceDetails", reflect.TypeOf(stackmonitoring.CreateMonitoredResourceDetails{})),
@@ -1001,6 +1014,8 @@ var seedTargets = []Target{
 	newTarget("stackmonitoring", "AlarmConditionCollection", reflect.TypeOf(stackmonitoring.AlarmConditionCollection{})),
 	newTarget("stackmonitoring", "BaselineableMetric", reflect.TypeOf(stackmonitoring.BaselineableMetric{})),
 	newTarget("stackmonitoring", "ConfigCollection", reflect.TypeOf(stackmonitoring.ConfigCollection{})),
+	newTarget("stackmonitoring", "DiscoveryJob", reflect.TypeOf(stackmonitoring.DiscoveryJob{})),
+	newTarget("stackmonitoring", "DiscoveryJobCollection", reflect.TypeOf(stackmonitoring.DiscoveryJobCollection{})),
 	newTarget("stackmonitoring", "MaintenanceWindow", reflect.TypeOf(stackmonitoring.MaintenanceWindow{})),
 	newTarget("stackmonitoring", "MaintenanceWindowCollection", reflect.TypeOf(stackmonitoring.MaintenanceWindowCollection{})),
 	newTarget("stackmonitoring", "MetricExtension", reflect.TypeOf(stackmonitoring.MetricExtension{})),
@@ -1014,6 +1029,7 @@ var seedTargets = []Target{
 	newTarget("stackmonitoring", "ProcessSetCollection", reflect.TypeOf(stackmonitoring.ProcessSetCollection{})),
 	newTarget("stackmonitoring", "AlarmConditionSummary", reflect.TypeOf(stackmonitoring.AlarmConditionSummary{})),
 	newTarget("stackmonitoring", "BaselineableMetricSummary", reflect.TypeOf(stackmonitoring.BaselineableMetricSummary{})),
+	newTarget("stackmonitoring", "DiscoveryJobSummary", reflect.TypeOf(stackmonitoring.DiscoveryJobSummary{})),
 	newTarget("stackmonitoring", "MaintenanceWindowSummary", reflect.TypeOf(stackmonitoring.MaintenanceWindowSummary{})),
 	newTarget("stackmonitoring", "MetricExtensionSummary", reflect.TypeOf(stackmonitoring.MetricExtensionSummary{})),
 	newTarget("stackmonitoring", "MonitoredResourceSummary", reflect.TypeOf(stackmonitoring.MonitoredResourceSummary{})),

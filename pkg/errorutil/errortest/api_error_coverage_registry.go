@@ -855,6 +855,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			retryableConflictGeneratedRuntime,
 			"",
 			"GovernanceRule",
+			"InclusionCriterion",
 		),
 		reviewedRegistrationSet(
 			"iot",
@@ -950,6 +951,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			deleteNotFoundGeneratedRuntime,
 			retryableConflictGeneratedRuntime,
 			"",
+			"Attachment",
 			"Offer",
 		),
 		reviewedRegistrationSet(
@@ -1047,6 +1049,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			deleteNotFoundGeneratedRuntime,
 			retryableConflictGeneratedRuntime,
 			"",
+			"MonitoredRegion",
 			"ResourceAnalyticsInstance",
 			"TenancyAttachment",
 		),
@@ -1082,6 +1085,7 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 			"AlarmCondition",
 			"BaselineableMetric",
 			"Config",
+			"DiscoveryJob",
 			"MaintenanceWindow",
 			"MetricExtension",
 			"MonitoredResource",

@@ -13,6 +13,7 @@ import (
 	marketplaceprivateofferv1beta1 "github.com/oracle/oci-service-operator/api/marketplaceprivateoffer/v1beta1"
 	marketplaceprivateoffercontrollers "github.com/oracle/oci-service-operator/controllers/marketplaceprivateoffer"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
+	marketplaceprivateofferattachmentservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplaceprivateoffer/attachment"
 	marketplaceprivateofferofferservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/marketplaceprivateoffer/offer"
 )
 
@@ -21,6 +22,17 @@ func init() {
 		Group:       "marketplaceprivateoffer",
 		AddToScheme: marketplaceprivateofferv1beta1.AddToScheme,
 		SetupWithManager: func(ctx Context) error {
+			if err := (&marketplaceprivateoffercontrollers.AttachmentReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"Attachment",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return marketplaceprivateofferattachmentservicemanager.NewAttachmentServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup Attachment controller: %w", err)
+			}
 			if err := (&marketplaceprivateoffercontrollers.OfferReconciler{
 				Reconciler: NewBaseReconciler(
 					ctx,

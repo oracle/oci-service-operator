@@ -23,4 +23,5 @@ Manage OCI Marketplace Private Offer resources from Kubernetes.
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
+| `marketplaceprivateoffer/Attachment` | `marketplaceprivateoffer.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplaceprivateoffer/v1beta1/attachment.md) | [Reference](../../api/marketplaceprivateoffer/v1beta1/index.md#kind-attachment) |
 | `marketplaceprivateoffer/Offer` | `marketplaceprivateoffer.oracle.com/v1beta1` | — | — | [Sample](../../samples/marketplaceprivateoffer/v1beta1/offer.md) | [Reference](../../api/marketplaceprivateoffer/v1beta1/index.md#kind-offer) |

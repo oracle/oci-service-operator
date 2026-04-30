@@ -3155,6 +3155,7 @@ services:
       mode: explicit
       includeKinds:
         - GovernanceRule
+        - InclusionCriterion
     async:
       strategy: lifecycle
       runtime: generatedruntime
@@ -3370,6 +3371,7 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
+        - Attachment
         - Offer
     async:
       strategy: lifecycle
@@ -3572,6 +3574,7 @@ services:
       enabled: true
       mode: explicit
       includeKinds:
+        - MonitoredRegion
         - ResourceAnalyticsInstance
         - TenancyAttachment
     async:
@@ -3652,6 +3655,7 @@ services:
         - AlarmCondition
         - BaselineableMetric
         - Config
+        - DiscoveryJob
         - MaintenanceWindow
         - MetricExtension
         - MonitoredResource

@@ -16,6 +16,7 @@ import (
 	stackmonitoringalarmconditionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/stackmonitoring/alarmcondition"
 	stackmonitoringbaselineablemetricservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/stackmonitoring/baselineablemetric"
 	stackmonitoringconfigservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/stackmonitoring/config"
+	stackmonitoringdiscoveryjobservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/stackmonitoring/discoveryjob"
 	stackmonitoringmaintenancewindowservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/stackmonitoring/maintenancewindow"
 	stackmonitoringmetricextensionservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/stackmonitoring/metricextension"
 	stackmonitoringmonitoredresourceservicemanager "github.com/oracle/oci-service-operator/pkg/servicemanager/stackmonitoring/monitoredresource"
@@ -61,6 +62,17 @@ func init() {
 				),
 			}).SetupWithManager(ctx.Manager); err != nil {
 				return fmt.Errorf("setup Config controller: %w", err)
+			}
+			if err := (&stackmonitoringcontrollers.DiscoveryJobReconciler{
+				Reconciler: NewBaseReconciler(
+					ctx,
+					"DiscoveryJob",
+					func(deps servicemanager.RuntimeDeps) servicemanager.OSOKServiceManager {
+						return stackmonitoringdiscoveryjobservicemanager.NewDiscoveryJobServiceManagerWithDeps(deps)
+					},
+				),
+			}).SetupWithManager(ctx.Manager); err != nil {
+				return fmt.Errorf("setup DiscoveryJob controller: %w", err)
 			}
 			if err := (&stackmonitoringcontrollers.MaintenanceWindowReconciler{
 				Reconciler: NewBaseReconciler(

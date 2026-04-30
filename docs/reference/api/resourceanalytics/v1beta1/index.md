@@ -18,8 +18,106 @@ No customer-visible package currently exposes `resourceanalytics.oracle.com/v1be
 
 | Kind | Scope | Sample | Packages |
 | --- | --- | --- | --- |
+| [MonitoredRegion](#kind-monitoredregion) | Namespaced | [Sample](../../../samples/resourceanalytics/v1beta1/monitoredregion.md) | - |
 | [ResourceAnalyticsInstance](#kind-resourceanalyticsinstance) | Namespaced | [Sample](../../../samples/resourceanalytics/v1beta1/resourceanalyticsinstance.md) | - |
 | [TenancyAttachment](#kind-tenancyattachment) | Namespaced | [Sample](../../../samples/resourceanalytics/v1beta1/tenancyattachment.md) | - |
+
+<a id="kind-monitoredregion"></a>
+## MonitoredRegion
+
+MonitoredRegion is the Schema for the monitoredregions API.
+
+- `Plural`: `monitoredregions`
+- `Scope`: `Namespaced`
+- `APIVersion`: `resourceanalytics.oracle.com/v1beta1`
+- `Sample`: [Sample](../../../samples/resourceanalytics/v1beta1/monitoredregion.md) (`config/samples/resourceanalytics_v1beta1_monitoredregion.yaml`)
+- `Packages`: Not currently exposed by a customer-visible package.
+
+<a id="kind-monitoredregion-spec"></a>
+### Spec
+
+MonitoredRegionSpec defines the desired state of MonitoredRegion.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `regionId` | The Region Identifier (https://docs.oracle.com/iaas/Content/General/Concepts/regions.htm) of this MonitoredRegion. | `string` | Yes | - | - |
+| `resourceAnalyticsInstanceId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ResourceAnalyticsInstance associated with this MonitoredRegion. | `string` | Yes | - | - |
+
+<a id="kind-monitoredregion-status"></a>
+### Status
+
+MonitoredRegionStatus defines the observed state of MonitoredRegion.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `id` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the MonitoredRegion. | `string` | No | - | - |
+| `lifecycleDetails` | A message that describes the current state of the MonitoredRegion in more detail. For example, can be used to provide actionable information for a resource in the Failed state. | `string` | No | - | - |
+| `lifecycleState` | The current state of the MonitoredRegion. | `string` | No | - | - |
+| `regionId` | The Region Identifier (https://docs.oracle.com/iaas/Content/General/Concepts/regions.htm) of this MonitoredRegion. | `string` | No | - | - |
+| `resourceAnalyticsInstanceId` | The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the ResourceAnalyticsInstance associated with this MonitoredRegion. | `string` | No | - | - |
+| [`status`](#kind-monitoredregion-status-status) | - | `object` | Yes | - | - |
+| `systemTags` | System tags for this resource. Each key is predefined and scoped to a namespace. Example: `{"orcl-cloud": {"free-tier-retained": "true"}}` | `map[string, map[string, string]]` | No | - | - |
+| `timeCreated` | The date and time the MonitoredRegion was created, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+| `timeUpdated` | The date and time the MonitoredRegion was updated, in the format defined by RFC 3339 (https://tools.ietf.org/html/rfc3339). Example: `2016-08-25T21:10:29.600Z` | `string` | No | - | - |
+
+<a id="kind-monitoredregion-status-status"></a>
+#### Status.status
+
+[Back to MonitoredRegion status](#kind-monitoredregion-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`async`](#kind-monitoredregion-status-status-async) | Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first. | `object` | No | - | - |
+| [`conditions`](#kind-monitoredregion-status-status-conditions) | - | `list[object]` | No | - | - |
+| `createdAt` | - | `string (date-time)` | No | - | - |
+| `deletedAt` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `ocid` | - | `string` | No | - | - |
+| `opcRequestId` | OpcRequestID is the latest non-empty OCI request ID from a mutating OCI response or surfaced OCI service error that materially contributed to the current shared status projection. Headerless follow-up observations keep the last non-empty value intact. | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `requestedAt` | - | `string (date-time)` | No | - | - |
+| `updatedAt` | - | `string (date-time)` | No | - | - |
+
+<a id="kind-monitoredregion-status-status-async"></a>
+##### Status.status.async
+
+[Back to MonitoredRegion status](#kind-monitoredregion-status)
+
+Async is the canonical controller-owned async contract. Resource-local legacy work-request fields may remain as compatibility mirrors while follow-on migrations land, but new async state should project here first.
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| [`current`](#kind-monitoredregion-status-status-async-current) | - | `object` | No | - | - |
+
+<a id="kind-monitoredregion-status-status-async-current"></a>
+###### Status.status.async.current
+
+[Back to MonitoredRegion status](#kind-monitoredregion-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `message` | - | `string` | No | - | - |
+| `normalizedClass` | - | `string` | Yes | - | `attention`, `canceled`, `failed`, `pending`, `succeeded`, `unknown` |
+| `percentComplete` | - | `number` | No | - | - |
+| `phase` | - | `string` | Yes | - | `create`, `delete`, `update` |
+| `rawOperationType` | - | `string` | No | - | - |
+| `rawStatus` | - | `string` | No | - | - |
+| `source` | - | `string` | Yes | - | `lifecycle`, `none`, `workrequest` |
+| `updatedAt` | - | `string (date-time)` | Yes | - | - |
+| `workRequestId` | - | `string` | No | - | - |
+
+<a id="kind-monitoredregion-status-status-conditions"></a>
+##### Status.status.conditions[]
+
+[Back to MonitoredRegion status](#kind-monitoredregion-status)
+
+| Field | Description | Type | Required | Default | Enum |
+| --- | --- | --- | --- | --- | --- |
+| `lastTransitionTime` | - | `string (date-time)` | No | - | - |
+| `message` | - | `string` | No | - | - |
+| `reason` | - | `string` | No | - | - |
+| `status` | - | `string` | Yes | - | - |
+| `type` | - | `string` | Yes | - | - |
 
 <a id="kind-resourceanalyticsinstance"></a>
 ## ResourceAnalyticsInstance
