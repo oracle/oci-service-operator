@@ -17,12 +17,23 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	delegateaccesscontrolsdk "github.com/oracle/oci-go-sdk/v65/delegateaccesscontrol"
 	delegateaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/delegateaccesscontrol/v1beta1"
-	"github.com/oracle/oci-service-operator/pkg/errorutil"
 	"github.com/oracle/oci-service-operator/pkg/loggerutil"
 	"github.com/oracle/oci-service-operator/pkg/servicemanager"
 	generatedruntime "github.com/oracle/oci-service-operator/pkg/servicemanager/generatedruntime"
 	shared "github.com/oracle/oci-service-operator/pkg/shared"
 )
+
+const generatedRuntimeResourceNotFoundMessage = "generated runtime resource not found"
+
+type delegationControlGeneratedRuntimeNotFoundError struct{}
+
+func (delegationControlGeneratedRuntimeNotFoundError) Error() string {
+	return generatedRuntimeResourceNotFoundMessage
+}
+
+func (delegationControlGeneratedRuntimeNotFoundError) Is(target error) bool {
+	return target != nil && target.Error() == generatedRuntimeResourceNotFoundMessage
+}
 
 var delegationControlWorkRequestAsyncAdapter = servicemanager.WorkRequestAsyncAdapter{
 	PendingStatusTokens: []string{
@@ -444,8 +455,7 @@ func confirmDelegationControlDeleteRead(
 		return nil, err
 	}
 	if response == nil {
-		_, err := errorutil.NewServiceFailureFromResponse(errorutil.NotFound, 404, "", "DelegationControl not found during delete confirmation")
-		return nil, err
+		return nil, delegationControlGeneratedRuntimeNotFoundError{}
 	}
 	return response, nil
 }

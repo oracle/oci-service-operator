@@ -714,6 +714,48 @@ func TestDelegationControlDeleteResolvesPendingCreateWithoutTrackedID(t *testing
 	}
 }
 
+func TestDelegationControlDeleteTreatsNoTrackedIDAndNoRemoteMatchAsDeleted(t *testing.T) {
+	t.Parallel()
+
+	resource := makeDelegationControlResource()
+	deleteCalls := 0
+	listCalls := 0
+
+	client := newTestDelegationControlClient(&fakeDelegationControlOCIClient{
+		listFn: func(_ context.Context, req delegateaccesscontrolsdk.ListDelegationControlsRequest) (delegateaccesscontrolsdk.ListDelegationControlsResponse, error) {
+			listCalls++
+			requireDelegationControlStringPtr(t, "list compartmentId", req.CompartmentId, resource.Spec.CompartmentId)
+			requireDelegationControlStringPtr(t, "list displayName", req.DisplayName, resource.Spec.DisplayName)
+			requireDelegationControlStringPtr(t, "list resourceId", req.ResourceId, "ocid1.vmcluster.oc1..one")
+			if req.ResourceType != delegateaccesscontrolsdk.ListDelegationControlsResourceTypeEnum(resource.Spec.ResourceType) {
+				t.Fatalf("list resourceType = %q, want %q", req.ResourceType, resource.Spec.ResourceType)
+			}
+			return delegateaccesscontrolsdk.ListDelegationControlsResponse{}, nil
+		},
+		deleteFn: func(_ context.Context, _ delegateaccesscontrolsdk.DeleteDelegationControlRequest) (delegateaccesscontrolsdk.DeleteDelegationControlResponse, error) {
+			deleteCalls++
+			return delegateaccesscontrolsdk.DeleteDelegationControlResponse{}, nil
+		},
+	})
+
+	deleted, err := client.Delete(context.Background(), resource)
+	if err != nil {
+		t.Fatalf("Delete() error = %v", err)
+	}
+	if !deleted {
+		t.Fatal("Delete() = false, want already-absent resource to clear the finalizer path")
+	}
+	if listCalls != 1 {
+		t.Fatalf("ListDelegationControls() calls = %d, want 1 delete-time strict lookup", listCalls)
+	}
+	if deleteCalls != 0 {
+		t.Fatalf("DeleteDelegationControl() calls = %d, want 0 when no remote match exists", deleteCalls)
+	}
+	if got := resource.Status.OsokStatus.Message; got != "OCI resource no longer exists" {
+		t.Fatalf("status.message = %q, want OCI resource no longer exists", got)
+	}
+}
+
 func TestDelegationControlDeleteIgnoresSpecDescriptionField(t *testing.T) {
 	t.Parallel()
 
