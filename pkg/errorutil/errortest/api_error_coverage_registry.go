@@ -531,6 +531,16 @@ var ReviewedAPIErrorCoverageRegistry = APIErrorCoverageRegistry{
 				retryableConflictGeneratedRuntime,
 				"DashboardGroup keeps generatedruntime CRUD and lifecycle rereads, while a small handwritten seam skips unsafe pre-create reuse when displayName is empty, preserves explicit empty-map clears for tag maps, and treats empty-string displayName/description values as omission until the spec can distinguish clear from omit.",
 			),
+			resourceKey("delegateaccesscontrol", "DelegationControl"): reviewedRegistration(
+				"delegateaccesscontrol",
+				"delegateaccesscontrol",
+				apiErrorCoverageDefaultVersion,
+				"DelegationControl",
+				APIErrorCoverageFamilyGeneratedRuntimeWorkRequest,
+				deleteNotFoundReadback,
+				retryableConflictWorkRequest,
+				"DelegationControl stores create, update, and delete work-request IDs in shared async status, recovers identity from work-request resources when OCI omits it from the create response, bounds pre-create reuse to exact compartmentId plus displayName plus resourceType plus resourceIds matches, and confirms delete completion through work-request polling plus Get/List rereads.",
+			),
 			resourceKey("dataflow", "Application"): reviewedRegistration(
 				"dataflow",
 				"dataflow",
