@@ -1,14 +1,14 @@
 {
   "aggregate": {
-    "services": 6,
-    "resources": 6,
-    "overlayArtifacts": 6,
-    "vapArtifacts": 6,
-    "fields": 94,
-    "allowInPlaceCount": 64,
+    "services": 7,
+    "resources": 7,
+    "overlayArtifacts": 7,
+    "vapArtifacts": 7,
+    "fields": 97,
+    "allowInPlaceCount": 67,
     "denyInPlaceCount": 0,
-    "replacementRequiredCount": 18,
-    "unknownPolicyCount": 12,
+    "replacementRequiredCount": 27,
+    "unknownPolicyCount": 3,
     "docsDeniedCount": 0,
     "unresolvedJoinCount": 0,
     "ambiguousJoinCount": 0,
@@ -18,11 +18,24 @@
     {
       "service": "analytics",
       "resources": 1,
-      "fields": 20,
-      "allowInPlaceCount": 7,
+      "fields": 10,
+      "allowInPlaceCount": 6,
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 4,
-      "unknownPolicyCount": 9,
+      "unknownPolicyCount": 0,
+      "docsDeniedCount": 0,
+      "unresolvedJoinCount": 0,
+      "ambiguousJoinCount": 0,
+      "mergeConflictCount": 0
+    },
+    {
+      "service": "capacitymanagement",
+      "resources": 1,
+      "fields": 13,
+      "allowInPlaceCount": 4,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 9,
+      "unknownPolicyCount": 0,
       "docsDeniedCount": 0,
       "unresolvedJoinCount": 0,
       "ambiguousJoinCount": 0,
@@ -103,19 +116,18 @@
       "terraformDocsVersion": "7.22.0",
       "overlayPath": "internal/generator/generated/mutability_overlay/analytics/analyticsinstance.json",
       "vapPath": "internal/generator/generated/vap_update_policy/analytics/analyticsinstance.json",
-      "fields": 20,
-      "allowInPlaceCount": 7,
+      "fields": 10,
+      "allowInPlaceCount": 6,
       "denyInPlaceCount": 0,
       "replacementRequiredCount": 4,
-      "unknownPolicyCount": 9,
+      "unknownPolicyCount": 0,
       "allowInPlacePaths": [
-        "capacity.capacityValue",
-        "compartmentId",
         "definedTags",
         "description",
         "emailNotification",
         "freeformTags",
-        "licenseType"
+        "licenseType",
+        "updateChannel"
       ],
       "decisions": [
         {
@@ -124,20 +136,6 @@
           "joinStatus": "matched",
           "mergeCase": "replacementRequired",
           "docsEvidenceState": "notDocumented"
-        },
-        {
-          "fieldPath": "capacity.capacityValue",
-          "finalPolicy": "allowInPlaceUpdate",
-          "joinStatus": "matched",
-          "mergeCase": "docsConfirmedCandidate",
-          "docsEvidenceState": "confirmedUpdatable"
-        },
-        {
-          "fieldPath": "compartmentId",
-          "finalPolicy": "allowInPlaceUpdate",
-          "joinStatus": "matched",
-          "mergeCase": "docsConfirmedCandidate",
-          "docsEvidenceState": "confirmedUpdatable"
         },
         {
           "fieldPath": "definedTags",
@@ -175,20 +173,6 @@
           "docsEvidenceState": "confirmedUpdatable"
         },
         {
-          "fieldPath": "idcsAccessToken",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "kmsKeyId",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
           "fieldPath": "licenseType",
           "finalPolicy": "allowInPlaceUpdate",
           "joinStatus": "matched",
@@ -210,65 +194,12 @@
           "docsEvidenceState": "notDocumented"
         },
         {
-          "fieldPath": "networkEndpointDetails.networkSecurityGroupIds",
-          "finalPolicy": "unknown",
+          "fieldPath": "updateChannel",
+          "finalPolicy": "allowInPlaceUpdate",
           "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "networkEndpointDetails.subnetId",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "networkEndpointDetails.vcnId",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "networkEndpointDetails.whitelistedIps",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "networkEndpointDetails.whitelistedServices",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "networkEndpointDetails.whitelistedVcns.id",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "networkEndpointDetails.whitelistedVcns.whitelistedIps",
-          "finalPolicy": "unknown",
-          "joinStatus": "matched",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
         }
-      ],
-      "unknownFields": [
-        "idcsAccessToken",
-        "kmsKeyId",
-        "networkEndpointDetails.networkSecurityGroupIds",
-        "networkEndpointDetails.subnetId",
-        "networkEndpointDetails.vcnId",
-        "networkEndpointDetails.whitelistedIps",
-        "networkEndpointDetails.whitelistedServices",
-        "networkEndpointDetails.whitelistedVcns.id",
-        "networkEndpointDetails.whitelistedVcns.whitelistedIps"
       ],
       "denyRules": [
         {
@@ -284,18 +215,6 @@
           "docsEvidenceState": "notDocumented"
         },
         {
-          "fieldPath": "idcsAccessToken",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
-          "fieldPath": "kmsKeyId",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
-        },
-        {
           "fieldPath": "name",
           "decision": "replacementRequired",
           "mergeCase": "replacementRequired",
@@ -306,48 +225,175 @@
           "decision": "replacementRequired",
           "mergeCase": "replacementRequired",
           "docsEvidenceState": "notDocumented"
+        }
+      ]
+    },
+    {
+      "service": "capacitymanagement",
+      "kind": "OccCapacityRequest",
+      "formalSlug": "occcapacityrequest",
+      "providerResource": "oci_capacity_management_occ_capacity_request",
+      "terraformDocsVersion": "7.22.0",
+      "overlayPath": "internal/generator/generated/mutability_overlay/capacitymanagement/occcapacityrequest.json",
+      "vapPath": "internal/generator/generated/vap_update_policy/capacitymanagement/occcapacityrequest.json",
+      "fields": 13,
+      "allowInPlaceCount": 4,
+      "denyInPlaceCount": 0,
+      "replacementRequiredCount": 9,
+      "unknownPolicyCount": 0,
+      "allowInPlacePaths": [
+        "definedTags",
+        "displayName",
+        "freeformTags",
+        "requestState"
+      ],
+      "decisions": [
+        {
+          "fieldPath": "availabilityDomain",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
         },
         {
-          "fieldPath": "networkEndpointDetails.networkSecurityGroupIds",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "fieldPath": "compartmentId",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
         },
         {
-          "fieldPath": "networkEndpointDetails.subnetId",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "fieldPath": "dateExpectedCapacityHandover",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
         },
         {
-          "fieldPath": "networkEndpointDetails.vcnId",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "fieldPath": "definedTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
         },
         {
-          "fieldPath": "networkEndpointDetails.whitelistedIps",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "fieldPath": "description",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
         },
         {
-          "fieldPath": "networkEndpointDetails.whitelistedServices",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "fieldPath": "details",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
         },
         {
-          "fieldPath": "networkEndpointDetails.whitelistedVcns.id",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "fieldPath": "displayName",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
         },
         {
-          "fieldPath": "networkEndpointDetails.whitelistedVcns.whitelistedIps",
-          "decision": "unknown",
-          "mergeCase": "unknown",
-          "docsEvidenceState": "unknown"
+          "fieldPath": "freeformTags",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "namespace",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "occAvailabilityCatalogId",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "region",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "requestState",
+          "finalPolicy": "allowInPlaceUpdate",
+          "joinStatus": "matched",
+          "mergeCase": "docsConfirmedCandidate",
+          "docsEvidenceState": "confirmedUpdatable"
+        },
+        {
+          "fieldPath": "requestType",
+          "finalPolicy": "replacementRequired",
+          "joinStatus": "matched",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        }
+      ],
+      "denyRules": [
+        {
+          "fieldPath": "availabilityDomain",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "compartmentId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "dateExpectedCapacityHandover",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "description",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "details",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "namespace",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "occAvailabilityCatalogId",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "region",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
+        },
+        {
+          "fieldPath": "requestType",
+          "decision": "replacementRequired",
+          "mergeCase": "replacementRequired",
+          "docsEvidenceState": "notDocumented"
         }
       ]
     },
