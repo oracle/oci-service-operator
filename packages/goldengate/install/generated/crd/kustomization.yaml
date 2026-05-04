@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/goldengate.oracle.com_certificates.yaml
+- bases/goldengate.oracle.com_connectionassignments.yaml
+- bases/goldengate.oracle.com_connections.yaml
+- bases/goldengate.oracle.com_databaseregistrations.yaml
+- bases/goldengate.oracle.com_deploymentbackups.yaml
+- bases/goldengate.oracle.com_deployments.yaml
+- bases/goldengate.oracle.com_pipelines.yaml

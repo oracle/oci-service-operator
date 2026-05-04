@@ -900,14 +900,14 @@ type {{ .Kind }} struct {
 {{- range .ListComments }}
 {{ comment . }}
 {{- end }}
-type {{ .Kind }}List struct {
+type {{ .ListTypeName }} struct {
 	metav1.TypeMeta ` + "`json:\",inline\"`" + `
 	metav1.ListMeta ` + "`json:\"metadata,omitempty\"`" + `
 	Items           []{{ .Kind }} ` + "`json:\"items\"`" + `
 }
 
 func init() {
-	SchemeBuilder.Register(&{{ .Kind }}{}, &{{ .Kind }}List{})
+	SchemeBuilder.Register(&{{ .Kind }}{}, &{{ .ListTypeName }}{})
 }
 `
 

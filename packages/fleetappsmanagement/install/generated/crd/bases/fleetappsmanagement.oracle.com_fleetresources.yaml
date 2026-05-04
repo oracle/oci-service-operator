@@ -1,0 +1,264 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: fleetresources.fleetappsmanagement.oracle.com
+spec:
+  group: fleetappsmanagement.oracle.com
+  names:
+    kind: FleetResource
+    listKind: FleetResourceList
+    plural: fleetresources
+    singular: fleetresource
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the FleetResource
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the FleetResource
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: FleetResource is the Schema for the fleetresources API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FleetResourceSpec defines the desired state of FleetResource.
+            properties:
+              compartmentId:
+                description: OCID of the compartment to which the resource belongs
+                  to.
+                type: string
+              resourceId:
+                description: The OCID of the resource.
+                type: string
+              resourceRegion:
+                description: Associated region
+                type: string
+              resourceType:
+                description: Type of the Resource.
+                type: string
+              tenancyId:
+                description: OCID of the tenancy to which the resource belongs to.
+                type: string
+            required:
+            - compartmentId
+            - resourceId
+            - tenancyId
+            type: object
+          status:
+            description: FleetResourceStatus defines the observed state of FleetResource.
+            properties:
+              compartment:
+                description: Resource Compartment name.
+                type: string
+              compartmentId:
+                description: OCID of the compartment to which the resource belongs
+                  to.
+                type: string
+              complianceState:
+                description: Compliance State of the Resource.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              environmentType:
+                description: |-
+                  Environment Type associated with the Fleet when the resource type is fleet.
+                  Will only be returned for ENVIRONMENT fleets that are part of a GROUP Fleet.
+                type: string
+              id:
+                description: The unique id of the resource.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the FleetResource.
+                type: string
+              percentCompliant:
+                description: The compliance percentage.
+                type: number
+              product:
+                description: |-
+                  Product associated with the resource when the resource type is fleet.
+                  Will only be returned for PRODUCT fleets that are part of a GROUP Fleet.
+                type: string
+              productCount:
+                description: Count of products within the resource.
+                type: integer
+              resourceId:
+                description: The OCID of the resource.
+                type: string
+              resourceRegion:
+                description: Associated region
+                type: string
+              resourceType:
+                description: Type of the Resource.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              targetCount:
+                description: Count of targets within the resource.
+                type: integer
+              tenancyId:
+                description: OCID of the tenancy to which the resource belongs to.
+                type: string
+              tenancyName:
+                description: Resource Tenancy Name.
+                type: string
+              timeCreated:
+                description: The time this resource was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: The time this resource was last updated. An RFC3339 formatted
+                  datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

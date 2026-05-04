@@ -1,0 +1,506 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: fsucycles.fleetsoftwareupdate.oracle.com
+spec:
+  group: fleetsoftwareupdate.oracle.com
+  names:
+    kind: FsuCycle
+    listKind: FsuCycleList
+    plural: fsucycles
+    singular: fsucycle
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the FsuCycle
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the FsuCycle
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: FsuCycle is the Schema for the fsucycles API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FsuCycleSpec defines the desired state of FsuCycle.
+            properties:
+              applyActionSchedule:
+                description: FsuCycleApplyActionSchedule defines nested fields for
+                  FsuCycle.ApplyActionSchedule.
+                properties:
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              batchingStrategy:
+                description: FsuCycleBatchingStrategy defines nested fields for FsuCycle.BatchingStrategy.
+                properties:
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              diagnosticsCollection:
+                description: FsuCycleDiagnosticsCollection defines nested fields for
+                  FsuCycle.DiagnosticsCollection.
+                properties:
+                  logCollectionMode:
+                    description: |-
+                      Enable incident logs and trace collection.
+                      Allow Oracle to collect incident logs and traces to enable fault diagnosis and issue resolution according to the selected mode.
+                    type: string
+                type: object
+              displayName:
+                description: The user-friendly name for the Exadata Fleet Update Cycle.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              fsuCollectionId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Fleet Update Collection which will be updated by
+                  the Exadata Fleet Update Cycle being created.
+                type: string
+              goalVersionDetails:
+                description: FsuCycleGoalVersionDetails defines nested fields for
+                  FsuCycle.GoalVersionDetails.
+                properties:
+                  homePolicy:
+                    type: string
+                  jsonData:
+                    type: string
+                  newHomePrefix:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              isIgnoreMissingPatches:
+                description: |-
+                  List of identifiers of patches to ignore.
+                  This attribute will be ignored for Exadata Image (Guest OS) maintenance update.
+                items:
+                  type: string
+                type: array
+              isIgnorePatches:
+                description: |-
+                  Ignore patch conflicts or missing patches between the source and goal homes.
+                  This attribute will be ignored for Exadata Image (Guest OS) maintenance update.
+                type: boolean
+              isKeepPlacement:
+                description: Ensure that database services are online on the same
+                  VMs before and after the maintenance update.
+                type: boolean
+              jsonData:
+                type: string
+              maxDrainTimeoutInSeconds:
+                description: Timeout for session draining for database services specified
+                  in seconds.
+                type: integer
+              stageActionSchedule:
+                description: FsuCycleStageActionSchedule defines nested fields for
+                  FsuCycle.StageActionSchedule.
+                properties:
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              type:
+                type: string
+              upgradeDetails:
+                description: FsuCycleUpgradeDetails defines nested fields for FsuCycle.UpgradeDetails.
+                properties:
+                  collectionType:
+                    type: string
+                  isIgnorePostUpgradeErrors:
+                    description: Ignore errors during post Oracle Grid Infrastructure
+                      upgrade Cluster Verification Utility (CVU) check.
+                    type: boolean
+                  isIgnorePrerequisites:
+                    description: Ignore the Cluster Verification Utility (CVU) prerequisite
+                      checks.
+                    type: boolean
+                  isRecompileInvalidObjects:
+                    description: Enables or disables the recompilation of invalid
+                      objects.
+                    type: boolean
+                  isTimeZoneUpgrade:
+                    description: Enables or disables time zone upgrade.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  maxDrainTimeoutInSeconds:
+                    description: Service drain timeout specified in seconds.
+                    type: integer
+                type: object
+            required:
+            - compartmentId
+            - fsuCollectionId
+            - goalVersionDetails
+            type: object
+          status:
+            description: FsuCycleStatus defines the observed state of FsuCycle.
+            properties:
+              applyActionSchedule:
+                description: FsuCycleApplyActionSchedule defines nested fields for
+                  FsuCycle.ApplyActionSchedule.
+                properties:
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              batchingStrategy:
+                description: FsuCycleBatchingStrategy defines nested fields for FsuCycle.BatchingStrategy.
+                properties:
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              collectionType:
+                description: Type of the Exadata Fleet Update Collection being updated
+                  by this Exadata Fleet Update Cycle.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Compartment.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              diagnosticsCollection:
+                description: FsuCycleDiagnosticsCollection defines nested fields for
+                  FsuCycle.DiagnosticsCollection.
+                properties:
+                  logCollectionMode:
+                    description: |-
+                      Enable incident logs and trace collection.
+                      Allow Oracle to collect incident logs and traces to enable fault diagnosis and issue resolution according to the selected mode.
+                    type: string
+                type: object
+              displayName:
+                description: The user-friendly name for the Exadata Fleet Update Cycle.
+                type: string
+              executingFsuActionId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Fleet Update Action that is currently in progress,
+                  if applicable.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              fsuCollectionId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Fleet Update Collection being updated by this Exadata
+                  Fleet Update Cycle.
+                type: string
+              goalVersionDetails:
+                description: FsuCycleGoalVersionDetails defines nested fields for
+                  FsuCycle.GoalVersionDetails.
+                properties:
+                  homePolicy:
+                    type: string
+                  jsonData:
+                    type: string
+                  newHomePrefix:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the Exadata Fleet Update Cycle.
+                type: string
+              isIgnoreMissingPatches:
+                description: |-
+                  List of identifiers of patches to ignore.
+                  This attribute will be ignored for Exadata Image (Guest OS) maintenance update.
+                items:
+                  type: string
+                type: array
+              isIgnorePatches:
+                description: |-
+                  Ignore patch conflicts or missing patches between the source and goal homes.
+                  This attribute will be ignored for Exadata Image (Guest OS) maintenance update.
+                type: boolean
+              isKeepPlacement:
+                description: Ensure that database services are online on the same
+                  VMs before and after the maintenance update.
+                type: boolean
+              jsonData:
+                type: string
+              lastCompletedAction:
+                description: |-
+                  The latest Action type that was completed in the Exadata Fleet Update Cycle.
+                  No value would indicate that the Cycle has not completed any Action yet.
+                type: string
+              lastCompletedActionId:
+                description: |-
+                  The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the latest Action
+                  in the Exadata Fleet Update Cycle.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Exadata Fleet Update Cycle.
+                type: string
+              maxDrainTimeoutInSeconds:
+                description: Timeout for session draining for database services specified
+                  in seconds.
+                type: integer
+              nextActionToExecute:
+                description: All possible Exadata Fleet Update Actions will be listed.
+                  The first element is the suggested Exadata Fleet Update Action.
+                items:
+                  description: FsuCycleNextActionToExecute defines nested fields for
+                    FsuCycle.NextActionToExecute.
+                  properties:
+                    timeToStart:
+                      description: |-
+                        The date and time the Exadata Fleet Update Action is expected to start. Null if no Action has been scheduled.
+                        RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29.
+                      type: string
+                    type:
+                      description: Type of Exadata Fleet Update Action
+                      type: string
+                  type: object
+                type: array
+              rollbackCycleState:
+                description: |-
+                  Current rollback cycle state if rollback maintenance cycle action has been attempted.
+                  No value would indicate that the Cycle has not run a rollback maintenance cycle action before.
+                type: string
+              stageActionSchedule:
+                description: FsuCycleStageActionSchedule defines nested fields for
+                  FsuCycle.StageActionSchedule.
+                properties:
+                  jsonData:
+                    type: string
+                  type:
+                    type: string
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the Exadata Fleet Update Cycle was created, as described in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29.
+                type: string
+              timeFinished:
+                description: |-
+                  The date and time the Exadata Fleet Update Cycle was finished,
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time the Exadata Fleet Update Cycle was updated,
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339),
+                  section 14.29.
+                type: string
+              type:
+                type: string
+              upgradeDetails:
+                description: FsuCycleUpgradeDetails defines nested fields for FsuCycle.UpgradeDetails.
+                properties:
+                  collectionType:
+                    type: string
+                  isIgnorePostUpgradeErrors:
+                    description: Ignore errors during post Oracle Grid Infrastructure
+                      upgrade Cluster Verification Utility (CVU) check.
+                    type: boolean
+                  isIgnorePrerequisites:
+                    description: Ignore the Cluster Verification Utility (CVU) prerequisite
+                      checks.
+                    type: boolean
+                  isRecompileInvalidObjects:
+                    description: Enables or disables the recompilation of invalid
+                      objects.
+                    type: boolean
+                  isTimeZoneUpgrade:
+                    description: Enables or disables time zone upgrade.
+                    type: boolean
+                  jsonData:
+                    type: string
+                  maxDrainTimeoutInSeconds:
+                    description: Service drain timeout specified in seconds.
+                    type: integer
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

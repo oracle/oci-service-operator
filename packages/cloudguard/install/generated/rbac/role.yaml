@@ -1,0 +1,78 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - cloudguard.oracle.com
+  resources:
+  - adhocqueries
+  - datamaskrules
+  - datasources
+  - detectorrecipedetectorrules
+  - detectorrecipes
+  - managedlists
+  - responderrecipes
+  - savedqueries
+  - securityrecipes
+  - securityzones
+  - targetdetectorrecipes
+  - targetresponderrecipes
+  - targets
+  - wlpagents
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cloudguard.oracle.com
+  resources:
+  - adhocqueries/finalizers
+  - datamaskrules/finalizers
+  - datasources/finalizers
+  - detectorrecipedetectorrules/finalizers
+  - detectorrecipes/finalizers
+  - managedlists/finalizers
+  - responderrecipes/finalizers
+  - savedqueries/finalizers
+  - securityrecipes/finalizers
+  - securityzones/finalizers
+  - targetdetectorrecipes/finalizers
+  - targetresponderrecipes/finalizers
+  - targets/finalizers
+  - wlpagents/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cloudguard.oracle.com
+  resources:
+  - adhocqueries/status
+  - datamaskrules/status
+  - datasources/status
+  - detectorrecipedetectorrules/status
+  - detectorrecipes/status
+  - managedlists/status
+  - responderrecipes/status
+  - savedqueries/status
+  - securityrecipes/status
+  - securityzones/status
+  - targetdetectorrecipes/status
+  - targetresponderrecipes/status
+  - targets/status
+  - wlpagents/status
+  verbs:
+  - get
+  - patch
+  - update

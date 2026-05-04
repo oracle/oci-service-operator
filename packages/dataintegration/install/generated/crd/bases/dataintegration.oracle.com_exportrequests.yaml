@@ -1,0 +1,303 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: exportrequests.dataintegration.oracle.com
+spec:
+  group: dataintegration.oracle.com
+  names:
+    kind: ExportRequest
+    listKind: ExportRequestList
+    plural: exportrequests
+    singular: exportrequest
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the ExportRequest
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ExportRequest
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ExportRequest is the Schema for the exportrequests API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ExportRequestSpec defines the desired state of ExportRequest.
+            properties:
+              areReferencesIncluded:
+                description: This field controls if the references will be exported
+                  along with the objects
+                type: boolean
+              bucketName:
+                description: Name of the Object Storage bucket where the object will
+                  be exported.
+                type: string
+              fileName:
+                description: Name of the exported zip file.
+                type: string
+              filters:
+                description: Filters for exported objects
+                items:
+                  type: string
+                type: array
+              isObjectOverwriteEnabled:
+                description: Flag to control whether to overwrite the object if it
+                  is already present at the provided object storage location.
+                type: boolean
+              objectKeys:
+                description: Field is used to specify which object keys to export
+                items:
+                  type: string
+                type: array
+              objectStorageRegion:
+                description: Region of the object storage (if using object storage
+                  of different region)
+                type: string
+              objectStorageTenancyId:
+                description: Optional parameter to point to object storage tenancy
+                  (if using Object Storage of different tenancy)
+                type: string
+              status:
+                description: The status of the object.
+                type: string
+            required:
+            - bucketName
+            type: object
+          status:
+            description: ExportRequestStatus defines the observed state of ExportRequest.
+            properties:
+              areReferencesIncluded:
+                description: Controls if the references will be exported along with
+                  the objects
+                type: boolean
+              bucketName:
+                description: The name of the Object Storage Bucket where the objects
+                  will be exported to
+                type: string
+              createdBy:
+                description: Name of the user who initiated export request.
+                type: string
+              errorMessages:
+                additionalProperties:
+                  type: string
+                description: Contains key of the error
+                type: object
+              exportedItems:
+                description: The array of exported object details.
+                items:
+                  description: ExportRequestExportedItem defines nested fields for
+                    ExportRequest.ExportedItem.
+                  properties:
+                    aggregatorKey:
+                      description: Aggregator key
+                      type: string
+                    identifier:
+                      description: Object identifier
+                      type: string
+                    key:
+                      description: Key of the object
+                      type: string
+                    name:
+                      description: Name of the object
+                      type: string
+                    namePath:
+                      description: Object name path
+                      type: string
+                    objectType:
+                      description: Object type
+                      type: string
+                    objectVersion:
+                      description: Object version
+                      type: string
+                    timeUpdatedInMillis:
+                      description: time at which this object was last updated.
+                      format: int64
+                      type: integer
+                  type: object
+                type: array
+              fileName:
+                description: Name of the exported zip file.
+                type: string
+              filters:
+                description: Export multiple objects based on filters.
+                items:
+                  type: string
+                type: array
+              isObjectOverwriteEnabled:
+                description: Flag to control whether to overwrite the object if it
+                  is already present at the provided object storage location.
+                type: boolean
+              key:
+                description: Export object request key
+                type: string
+              name:
+                description: Name of the export request.
+                type: string
+              objectKeys:
+                description: The list of the objects to be exported
+                items:
+                  type: string
+                type: array
+              objectStorageRegion:
+                description: Region of the object storage (if using object storage
+                  of different region)
+                type: string
+              objectStorageTenancyId:
+                description: Optional parameter to point to object storage tenancy
+                  (if using Object Storage of different tenancy)
+                type: string
+              referencedItems:
+                description: The array of exported referenced objects.
+                type: string
+              sdkStatus:
+                description: |-
+                  Export Objects request status.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeEndedInMillis:
+                description: Time at which the request was completely processed.
+                format: int64
+                type: integer
+              timeStartedInMillis:
+                description: Time at which the request started getting processed.
+                format: int64
+                type: integer
+              totalExportedObjectCount:
+                description: Number of objects that are exported.
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

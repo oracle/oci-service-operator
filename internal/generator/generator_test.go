@@ -60,6 +60,22 @@ func TestBuildPackageModelDiscoversResources(t *testing.T) {
 	assertDiscoveredOAuthClientCredential(t, findResource(t, pkg.Resources, "OAuthClientCredential"))
 }
 
+func TestAPIObjectListTypeNameAvoidsSelectedKindCollision(t *testing.T) {
+	t.Parallel()
+
+	kindNames := map[string]struct{}{
+		"Service":     {},
+		"ServiceList": {},
+	}
+
+	if got := apiObjectListTypeName("Service", kindNames); got != "ServiceObjectList" {
+		t.Fatalf("apiObjectListTypeName(Service) = %q, want %q", got, "ServiceObjectList")
+	}
+	if got := apiObjectListTypeName("ServiceList", kindNames); got != "ServiceListList" {
+		t.Fatalf("apiObjectListTypeName(ServiceList) = %q, want %q", got, "ServiceListList")
+	}
+}
+
 func TestBuildPackageModelAttachesFormalModelFromResourceOverride(t *testing.T) {
 	t.Parallel()
 
@@ -658,7 +674,7 @@ func TestBuildPackageModelSynthesizesIdentityObservedStateAliases(t *testing.T) 
 		"CostTrackingTag":           {"TagNamespaceId", "TagNamespaceName", "IsRetired", "Validator"},
 		"IdentityProvider":          {"CompartmentId", "Name", "Description", "Metadata", "MetadataUrl", "ProductType"},
 		"NetworkSource":             {"CompartmentId", "Name", "Description", "PublicSourceList", "Services", "VirtualSourceList"},
-		"OrResetUIPassword":         {"Password", "UserId", "TimeCreated", "LifecycleState", "InactiveStatus"},
+		"OrResetUIPassword":         {"UserId", "TimeCreated", "LifecycleState", "InactiveStatus"},
 		"StandardTagNamespace":      {"Description", "StandardTagNamespaceName", "TagDefinitionTemplates"},
 		"StandardTagTemplate":       {"Description", "TagDefinitionName", "Type", "IsCostTracking"},
 		"UserState":                 {"Id", "CompartmentId", "Name", "LifecycleState", "Capabilities"},
@@ -722,7 +738,7 @@ func TestBuildPackageModelSynthesizesCoreObservedStateAliases(t *testing.T) {
 		"IPSecConnectionTunnelSecurityAssociation":        {"CpeSubnet", "OracleSubnet", "TunnelSaStatus"},
 		"InstanceDevice":                                  {"IsAvailable", "Name"},
 		"VolumeBackupPolicyAssetAssignment":               {"AssetId", "Id", "PolicyId", "TimeCreated"},
-		"WindowsInstanceInitialCredential":                {"Password", "Username"},
+		"WindowsInstanceInitialCredential":                {"Username"},
 		"FastConnectProviderVirtualCircuitBandwidthShape": {"BandwidthInMbps", "Name"},
 		"CrossconnectPortSpeedShape":                      {"Name", "PortSpeedInGbps"},
 		"AllDrgAttachment":                                {"Id"},
@@ -921,6 +937,75 @@ func TestBuildPackageModelAppliesResourceFieldAndSampleOverrides(t *testing.T) {
 	assertResourceStatusFields(t, resource, "Id", "AdminUsername")
 	if resource.Sample.MetadataName != "widget-sample" {
 		t.Fatalf("Widget sample metadata name = %q, want %q", resource.Sample.MetadataName, "widget-sample")
+	}
+}
+
+func TestBuildPackageModelPrunesHelperTypesAfterFieldOverrides(t *testing.T) {
+	t.Parallel()
+
+	cfg := &Config{
+		Domain:         "oracle.com",
+		DefaultVersion: "v1beta1",
+	}
+	service := ServiceConfig{
+		Service:        "sample",
+		SDKPackage:     "example.com/test/sdk",
+		Group:          "sample",
+		PackageProfile: PackageProfileCRDOnly,
+		Generation: GenerationConfig{
+			Resources: []ResourceGenerationOverride{
+				{
+					Kind: "Widget",
+					SpecFields: []FieldOverride{
+						{Name: "Payload", Type: "shared.JSONValue", Tag: `json:"payload,omitempty"`},
+					},
+				},
+			},
+		},
+	}
+
+	pkg, err := buildPackageModel(cfg, service, []ResourceModel{
+		{
+			Kind:           "Widget",
+			FileStem:       "widget",
+			KindPlural:     "widgets",
+			StatusTypeName: defaultStatusTypeName("Widget"),
+			SpecFields: []FieldModel{
+				{Name: "Payload", Type: "WidgetPayload", Tag: `json:"payload,omitempty"`},
+				{Name: "Retained", Type: "WidgetRetained", Tag: `json:"retained,omitempty"`},
+			},
+			HelperTypes: []TypeModel{
+				{
+					Name:   "WidgetPayload",
+					Fields: []FieldModel{{Name: "Nested", Type: "WidgetNestedPayload", Tag: `json:"nested,omitempty"`}},
+				},
+				{
+					Name:   "WidgetNestedPayload",
+					Fields: []FieldModel{{Name: "Value", Type: "string", Tag: `json:"value,omitempty"`}},
+				},
+				{
+					Name:   "WidgetRetained",
+					Fields: []FieldModel{{Name: "Name", Type: "string", Tag: `json:"name,omitempty"`}},
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("buildPackageModel() error = %v", err)
+	}
+
+	widget := findResource(t, pkg.Resources, "Widget")
+	assertFieldType(t, "Widget Payload", findFieldModel(t, widget.SpecFields, "Payload"), "shared.JSONValue")
+
+	helperNames := make([]string, 0, len(widget.HelperTypes))
+	for _, helperType := range widget.HelperTypes {
+		helperNames = append(helperNames, helperType.Name)
+	}
+	if slices.Contains(helperNames, "WidgetPayload") || slices.Contains(helperNames, "WidgetNestedPayload") {
+		t.Fatalf("Widget helper types = %#v, want overridden payload helpers pruned", helperNames)
+	}
+	if !slices.Contains(helperNames, "WidgetRetained") {
+		t.Fatalf("Widget helper types = %#v, want retained helper", helperNames)
 	}
 }
 
@@ -4609,9 +4694,12 @@ func assertSecretsSDKFields(t *testing.T, pkg *PackageModel) {
 	t.Helper()
 
 	bundle := findResource(t, pkg.Resources, "SecretBundle")
-	assertFieldType(t, "SecretBundle SecretBundleContent", findFieldModel(t, bundle.StatusFields, "SecretBundleContent"), "SecretBundleContent")
-	assertHelperTypeFields(t, findHelperType(t, bundle.HelperTypes, "SecretBundleContent"), "ContentType", "Content")
-	assertResourceStatusFields(t, findResource(t, pkg.Resources, "SecretBundleByName"), "SecretId", "VersionNumber", "SecretBundleContent", "Metadata")
+	assertResourceStatusFields(t, bundle, "SecretId", "VersionNumber", "Metadata")
+	assertFieldNamesAbsent(t, "SecretBundle status fields", bundle.StatusFields, "SecretBundleContent")
+
+	bundleByName := findResource(t, pkg.Resources, "SecretBundleByName")
+	assertResourceStatusFields(t, bundleByName, "SecretId", "VersionNumber", "Metadata")
+	assertFieldNamesAbsent(t, "SecretBundleByName status fields", bundleByName.StatusFields, "SecretBundleContent")
 }
 
 func assertVaultSDKFields(t *testing.T, pkg *PackageModel) {

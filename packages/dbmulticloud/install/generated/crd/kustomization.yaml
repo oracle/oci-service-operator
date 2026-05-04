@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/dbmulticloud.oracle.com_multicloudresourcediscoveries.yaml
+- bases/dbmulticloud.oracle.com_oracledbawsidentityconnectors.yaml
+- bases/dbmulticloud.oracle.com_oracledbawskeys.yaml
+- bases/dbmulticloud.oracle.com_oracledbazureblobcontainers.yaml
+- bases/dbmulticloud.oracle.com_oracledbazureblobmounts.yaml
+- bases/dbmulticloud.oracle.com_oracledbazureconnectors.yaml
+- bases/dbmulticloud.oracle.com_oracledbazurevaultassociations.yaml
+- bases/dbmulticloud.oracle.com_oracledbazurevaults.yaml
+- bases/dbmulticloud.oracle.com_oracledbgcpidentityconnectors.yaml
+- bases/dbmulticloud.oracle.com_oracledbgcpkeyrings.yaml

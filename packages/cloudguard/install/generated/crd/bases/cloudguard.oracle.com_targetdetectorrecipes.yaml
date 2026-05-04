@@ -1,0 +1,690 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: targetdetectorrecipes.cloudguard.oracle.com
+spec:
+  group: cloudguard.oracle.com
+  names:
+    kind: TargetDetectorRecipe
+    listKind: TargetDetectorRecipeList
+    plural: targetdetectorrecipes
+    singular: targetdetectorrecipe
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the TargetDetectorRecipe
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the TargetDetectorRecipe
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: TargetDetectorRecipe is the Schema for the targetdetectorrecipes
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TargetDetectorRecipeSpec defines the desired state of TargetDetectorRecipe.
+            properties:
+              detectorRecipeId:
+                description: Unique identifier for the target detector recipe
+                type: string
+              detectorRules:
+                description: List of overrides to be applied to detector rules associated
+                  with the target
+                items:
+                  description: TargetDetectorRecipeDetectorRuleFields defines nested
+                    fields for TargetDetectorRecipe.DetectorRule.
+                  properties:
+                    details:
+                      description: TargetDetectorRecipeDetectorRuleDetailsFields defines
+                        nested fields for TargetDetectorRecipe.DetectorRule.Details.
+                      properties:
+                        conditionGroups:
+                          description: Condition group corresponding to each compartment
+                          items:
+                            description: TargetDetectorRecipeDetectorRuleDetailsConditionGroupFields
+                              defines nested fields for TargetDetectorRecipe.DetectorRule.Details.ConditionGroup.
+                            properties:
+                              compartmentId:
+                                description: Compartment OCID associated with condition
+                                type: string
+                              condition:
+                                description: TargetDetectorRecipeDetectorRuleDetailsConditionGroupConditionFields
+                                  defines nested fields for TargetDetectorRecipe.DetectorRule.Details.ConditionGroup.Condition.
+                                properties:
+                                  compositeOperator:
+                                    description: Composite condition operator
+                                    type: string
+                                  jsonData:
+                                    type: string
+                                  kind:
+                                    type: string
+                                  leftOperand:
+                                    description: JSONValue preserves arbitrary JSON
+                                      values inside generated CRD fields.
+                                    type: object
+                                    x-kubernetes-preserve-unknown-fields: true
+                                  operator:
+                                    description: Type of operator
+                                    type: string
+                                  parameter:
+                                    description: Parameter key
+                                    type: string
+                                  rightOperand:
+                                    description: JSONValue preserves arbitrary JSON
+                                      values inside generated CRD fields.
+                                    type: object
+                                    x-kubernetes-preserve-unknown-fields: true
+                                  value:
+                                    description: Value of operator in condition
+                                    type: string
+                                  valueType:
+                                    description: Type of value in condition
+                                    type: string
+                                type: object
+                            required:
+                            - compartmentId
+                            - condition
+                            type: object
+                          type: array
+                      type: object
+                    detectorRuleId:
+                      description: Unique identifier for the detector rule
+                      type: string
+                  required:
+                  - details
+                  - detectorRuleId
+                  type: object
+                type: array
+              isValidationOnlyQuery:
+                description: Is validation to be performed for attaching the detector
+                  recipe?
+                type: boolean
+            required:
+            - detectorRecipeId
+            type: object
+          status:
+            description: TargetDetectorRecipeStatus defines the observed state of
+              TargetDetectorRecipe.
+            properties:
+              compartmentId:
+                description: Compartment OCID of the detector recipe
+                type: string
+              description:
+                description: Detector recipe description.
+                type: string
+              detector:
+                description: Type of detector
+                type: string
+              detectorRecipeId:
+                description: Unique identifier for of original Oracle-managed detector
+                  recipe on which the TargetDetectorRecipe is based
+                type: string
+              detectorRecipeType:
+                description: Recipe type ( STANDARD, ENTERPRISE )
+                type: string
+              detectorRules:
+                description: List of detector rules for the detector recipe - user
+                  input
+                items:
+                  description: TargetDetectorRecipeDetectorRuleFields defines nested
+                    fields for TargetDetectorRecipe.DetectorRule.
+                  properties:
+                    details:
+                      description: TargetDetectorRecipeDetectorRuleDetailsFields defines
+                        nested fields for TargetDetectorRecipe.DetectorRule.Details.
+                      properties:
+                        conditionGroups:
+                          description: Condition group corresponding to each compartment
+                          items:
+                            description: TargetDetectorRecipeDetectorRuleDetailsConditionGroupFields
+                              defines nested fields for TargetDetectorRecipe.DetectorRule.Details.ConditionGroup.
+                            properties:
+                              compartmentId:
+                                description: Compartment OCID associated with condition
+                                type: string
+                              condition:
+                                description: TargetDetectorRecipeDetectorRuleDetailsConditionGroupConditionFields
+                                  defines nested fields for TargetDetectorRecipe.DetectorRule.Details.ConditionGroup.Condition.
+                                properties:
+                                  compositeOperator:
+                                    description: Composite condition operator
+                                    type: string
+                                  jsonData:
+                                    type: string
+                                  kind:
+                                    type: string
+                                  leftOperand:
+                                    description: JSONValue preserves arbitrary JSON
+                                      values inside generated CRD fields.
+                                    type: object
+                                    x-kubernetes-preserve-unknown-fields: true
+                                  operator:
+                                    description: Type of operator
+                                    type: string
+                                  parameter:
+                                    description: Parameter key
+                                    type: string
+                                  rightOperand:
+                                    description: JSONValue preserves arbitrary JSON
+                                      values inside generated CRD fields.
+                                    type: object
+                                    x-kubernetes-preserve-unknown-fields: true
+                                  value:
+                                    description: Value of operator in condition
+                                    type: string
+                                  valueType:
+                                    description: Type of value in condition
+                                    type: string
+                                type: object
+                            required:
+                            - compartmentId
+                            - condition
+                            type: object
+                          type: array
+                      type: object
+                    detectorRuleId:
+                      description: Unique identifier for the detector rule
+                      type: string
+                  required:
+                  - details
+                  - detectorRuleId
+                  type: object
+                type: array
+              displayName:
+                description: Display name of the detector recipe
+                type: string
+              effectiveDetectorRules:
+                description: List of currently enabled detector rules for the detector
+                  type for recipe after applying defaults
+                items:
+                  description: TargetDetectorRecipeEffectiveDetectorRuleFields defines
+                    nested fields for TargetDetectorRecipe.EffectiveDetectorRule.
+                  properties:
+                    dataSourceId:
+                      description: The ID of the attached data source
+                      type: string
+                    description:
+                      description: Description for TargetDetectorRecipeDetectorRule
+                        resource
+                      type: string
+                    details:
+                      description: TargetDetectorRecipeEffectiveDetectorRuleDetailsFields
+                        defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.
+                      properties:
+                        conditionGroups:
+                          description: Condition group corresponding to each compartment
+                          items:
+                            description: TargetDetectorRecipeEffectiveDetectorRuleDetailsConditionGroupFields
+                              defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.ConditionGroup.
+                            properties:
+                              compartmentId:
+                                description: Compartment OCID associated with condition
+                                type: string
+                              condition:
+                                description: TargetDetectorRecipeEffectiveDetectorRuleDetailsConditionGroupConditionFields
+                                  defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.ConditionGroup.Condition.
+                                properties:
+                                  compositeOperator:
+                                    description: Composite condition operator
+                                    type: string
+                                  jsonData:
+                                    type: string
+                                  kind:
+                                    type: string
+                                  leftOperand:
+                                    description: JSONValue preserves arbitrary JSON
+                                      values inside generated CRD fields.
+                                    type: object
+                                    x-kubernetes-preserve-unknown-fields: true
+                                  operator:
+                                    description: Type of operator
+                                    type: string
+                                  parameter:
+                                    description: Parameter key
+                                    type: string
+                                  rightOperand:
+                                    description: JSONValue preserves arbitrary JSON
+                                      values inside generated CRD fields.
+                                    type: object
+                                    x-kubernetes-preserve-unknown-fields: true
+                                  value:
+                                    description: Value of operator in condition
+                                    type: string
+                                  valueType:
+                                    description: Type of value in condition
+                                    type: string
+                                type: object
+                            type: object
+                          type: array
+                        configurations:
+                          description: List of detector rule configurations
+                          items:
+                            description: TargetDetectorRecipeEffectiveDetectorRuleDetailsConfigurationFields
+                              defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.Configuration.
+                            properties:
+                              additionalProperties:
+                                description: Map of additional property values for
+                                  configuration
+                                items:
+                                  description: TargetDetectorRecipeEffectiveDetectorRuleDetailsConfigurationAdditionalPropertyFields
+                                    defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.Configuration.AdditionalProperty.
+                                  properties:
+                                    key:
+                                      description: Name for Additional Property, for
+                                        example, "interpreter", "router"
+                                      type: string
+                                    propertyType:
+                                      description: Property Type
+                                      type: string
+                                    value:
+                                      description: Value for Property Name, for example,
+                                        "generic", "cloudguard"
+                                      type: string
+                                  type: object
+                                type: array
+                              allowedValues:
+                                description: Map of possible values for configuration
+                                items:
+                                  description: TargetDetectorRecipeEffectiveDetectorRuleDetailsConfigurationAllowedValueFields
+                                    defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.Configuration.AllowedValue.
+                                  properties:
+                                    key:
+                                      description: key
+                                      type: string
+                                    value:
+                                      description: value
+                                      type: string
+                                  type: object
+                                type: array
+                              allowedValuesDataType:
+                                description: Map property Value data type
+                                type: string
+                              configKey:
+                                description: Unique identifier of the configuration
+                                type: string
+                              dataType:
+                                description: Configuration data type
+                                type: string
+                              name:
+                                description: Configuration name
+                                type: string
+                              value:
+                                description: Configuration value
+                                type: string
+                              values:
+                                description: List of configuration values
+                                items:
+                                  description: TargetDetectorRecipeEffectiveDetectorRuleDetailsConfigurationValueFields
+                                    defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.Configuration.Value.
+                                  properties:
+                                    listType:
+                                      description: Configuration list item type (CUSTOM
+                                        or MANAGED)
+                                      type: string
+                                    managedListType:
+                                      description: Type of content in the managed
+                                        list
+                                      type: string
+                                    value:
+                                      description: Configuration value
+                                      type: string
+                                  type: object
+                                type: array
+                            type: object
+                          type: array
+                        isConfigurationAllowed:
+                          description: Configuration allowed or not
+                          type: boolean
+                        isEnabled:
+                          description: Enablement state of the detector rule
+                          type: boolean
+                        labels:
+                          description: User-defined labels for a detector rule
+                          items:
+                            type: string
+                          type: array
+                        problemThreshold:
+                          description: Point at which an elevated resource risk score
+                            creates a problem
+                          type: integer
+                        riskLevel:
+                          description: The risk level of the detector rule
+                          type: string
+                        sightingTypes:
+                          description: List of sighting types
+                          items:
+                            description: TargetDetectorRecipeEffectiveDetectorRuleDetailsSightingTypeFields
+                              defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Details.SightingType.
+                            properties:
+                              description:
+                                description: Description of the sighting type
+                                type: string
+                              displayName:
+                                description: Display name of the sighting type
+                                type: string
+                              id:
+                                description: The unique identifier of the sighting
+                                  type
+                                type: string
+                              mitreLink:
+                                description: MITRE ATT@CK framework link for the sighting
+                                  type
+                                type: string
+                              tactic:
+                                description: MITRE ATT@CK framework tactic for the
+                                  sighting type
+                                type: string
+                              techniques:
+                                description: List of MITRE ATT@CK framework techniques
+                                  for the sighting type
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          type: array
+                        targetTypes:
+                          description: List of target types for which the detector
+                            rule is applicable
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                    detector:
+                      description: Detector type for the rule
+                      type: string
+                    detectorRuleId:
+                      description: The unique identifier of the detector rule
+                      type: string
+                    displayName:
+                      description: Display name for TargetDetectorRecipeDetectorRule
+                        resource
+                      type: string
+                    entitiesMappings:
+                      description: Data source entities mapping for a detector rule
+                      items:
+                        description: TargetDetectorRecipeEffectiveDetectorRuleEntitiesMappingFields
+                          defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.EntitiesMapping.
+                        properties:
+                          displayName:
+                            description: Display name of the entity
+                            type: string
+                          entityType:
+                            description: Type of entity
+                            type: string
+                          queryField:
+                            description: The entity value mapped to a data source
+                              query
+                            type: string
+                        type: object
+                      type: array
+                    isCloneable:
+                      description: Is the rule cloneable?
+                      type: boolean
+                    lifecycleDetails:
+                      description: A message describing the current state in more
+                        detail. For example, can be used to provide actionable information
+                        for a resource in Failed state.
+                      type: string
+                    lifecycleState:
+                      description: The current lifecycle state of the detector rule
+                      type: string
+                    locks:
+                      description: Locks associated with this resource.
+                      items:
+                        description: TargetDetectorRecipeEffectiveDetectorRuleLockFields
+                          defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.Lock.
+                        properties:
+                          message:
+                            description: |-
+                              A message added by the creator of the lock. This is typically used to give an
+                              indication of why the resource is locked.
+                            type: string
+                          relatedResourceId:
+                            description: The ID of the resource that is locking this
+                              resource. Indicates that deleting this resource will
+                              remove the lock.
+                            type: string
+                          timeCreated:
+                            description: When the lock was created, in the format
+                              defined by RFC 3339.
+                            type: string
+                          type:
+                            description: Type of the lock.
+                            type: string
+                        type: object
+                      type: array
+                    managedListTypes:
+                      description: List of managed list types related to this rule
+                      items:
+                        type: string
+                      type: array
+                    recommendation:
+                      description: Recommendation for TargetDetectorRecipeDetectorRule
+                        resource
+                      type: string
+                    resourceType:
+                      description: |-
+                        The type of resource which is monitored by the detector rule.
+                        For example, Instance, Database, VCN, Policy. To find the resource type for a
+                        particular rule, see Detector Recipe Reference
+                         (https://docs.oracle.com/iaas/cloud-guard/using/detect-recipes.htm#detect-recipes-reference).
+                        Or try Detector Recipe Reference
+                         (https://docs.oracle.com/iaas/cloud-guard/using/detect-recipes.htm#detect-recipes-reference).
+                      type: string
+                    ruleType:
+                      description: Rule category type
+                      items:
+                        description: TargetDetectorRecipeEffectiveDetectorRuleRuleTypeFields
+                          defines nested fields for TargetDetectorRecipe.EffectiveDetectorRule.RuleType.
+                        properties:
+                          key:
+                            description: The unique identifier of the detector rule
+                              type
+                            type: string
+                          value:
+                            description: Detector rule type value
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      type: array
+                    serviceType:
+                      description: Service type of the configuration to which the
+                        rule is applied
+                      type: string
+                    timeCreated:
+                      description: The date and time the target detector recipe rule
+                        was created. Format defined by RFC3339.
+                      type: string
+                    timeUpdated:
+                      description: The date and time the target detector recipe rule
+                        was last updated. Format defined by RFC3339.
+                      type: string
+                  type: object
+                type: array
+              id:
+                description: OCID for the detector recipe
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current lifecycle state of the resource
+                type: string
+              locks:
+                description: Locks associated with this resource.
+                items:
+                  description: TargetDetectorRecipeLockFields defines nested fields
+                    for TargetDetectorRecipe.Lock.
+                  properties:
+                    message:
+                      description: |-
+                        A message added by the creator of the lock. This is typically used to give an
+                        indication of why the resource is locked.
+                      type: string
+                    relatedResourceId:
+                      description: The ID of the resource that is locking this resource.
+                        Indicates that deleting this resource will remove the lock.
+                      type: string
+                    timeCreated:
+                      description: When the lock was created, in the format defined
+                        by RFC 3339.
+                      type: string
+                    type:
+                      description: Type of the lock.
+                      type: string
+                  type: object
+                type: array
+              owner:
+                description: Owner of the detector recipe
+                type: string
+              sourceDataRetention:
+                description: The number of days for which source data is retained
+                type: integer
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: The date and time the target detector recipe was created.
+                  Format defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the target detector recipe was last
+                  updated. Format defined by RFC3339.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

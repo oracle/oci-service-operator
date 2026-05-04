@@ -1,0 +1,767 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: desktoppools.desktops.oracle.com
+spec:
+  group: desktops.oracle.com
+  names:
+    kind: DesktopPool
+    listKind: DesktopPoolList
+    plural: desktoppools
+    singular: desktoppool
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the DesktopPool
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the DesktopPool
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: DesktopPool is the Schema for the desktoppools API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DesktopPoolSpec defines the desired state of DesktopPool.
+            properties:
+              arePrivilegedUsers:
+                description: Indicates whether desktop pool users have administrative
+                  privileges on their desktop.
+                type: boolean
+              availabilityDomain:
+                description: The availability domain of the desktop pool.
+                type: string
+              availabilityPolicy:
+                description: DesktopPoolAvailabilityPolicy defines nested fields for
+                  DesktopPool.AvailabilityPolicy.
+                properties:
+                  startSchedule:
+                    description: DesktopPoolAvailabilityPolicyStartSchedule defines
+                      nested fields for DesktopPool.AvailabilityPolicy.StartSchedule.
+                    properties:
+                      cronExpression:
+                        description: A cron expression describing the desktop's schedule.
+                        type: string
+                      timezone:
+                        description: The timezone of the desktop's schedule.
+                        type: string
+                    required:
+                    - cronExpression
+                    - timezone
+                    type: object
+                  stopSchedule:
+                    description: DesktopPoolAvailabilityPolicyStopSchedule defines
+                      nested fields for DesktopPool.AvailabilityPolicy.StopSchedule.
+                    properties:
+                      cronExpression:
+                        description: A cron expression describing the desktop's schedule.
+                        type: string
+                      timezone:
+                        description: The timezone of the desktop's schedule.
+                        type: string
+                    required:
+                    - cronExpression
+                    - timezone
+                    type: object
+                required:
+                - startSchedule
+                - stopSchedule
+                type: object
+              bootVolumeSizeInGBs:
+                description: The size in GBs of the boot volume for the desktop pool.
+                type: integer
+              compartmentId:
+                description: The OCID of the compartment which will contain the desktop
+                  pool.
+                type: string
+              contactDetails:
+                description: |-
+                  Contact information of the desktop pool administrator.
+                  Avoid entering confidential information.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: |-
+                  A user friendly description providing additional information about the resource.
+                  Avoid entering confidential information.
+                type: string
+              devicePolicy:
+                description: DesktopPoolDevicePolicy defines nested fields for DesktopPool.DevicePolicy.
+                properties:
+                  audioMode:
+                    description: |-
+                      The audio mode.
+                      NONE: No access to the local audio devices is permitted.
+                      TODESKTOP: The user may record audio on their desktop.
+                      FROMDESKTOP: The user may play audio on their desktop.
+                      FULL: The user may play and record audio on their desktop.
+                    type: string
+                  cdmMode:
+                    description: |-
+                      The client local drive access mode.
+                      NONE: No access to local drives permitted.
+                      READONLY: The user may read from local drives on their desktop.
+                      FULL: The user may read from and write to their local drives on their desktop.
+                    type: string
+                  clipboardMode:
+                    description: |-
+                      The clipboard mode.
+                      NONE: No access to the local clipboard is permitted.
+                      TODESKTOP: The clipboard can be used to transfer data to the desktop only.
+                      FROMDESKTOP: The clipboard can be used to transfer data from the desktop only.
+                      FULL: The clipboard can be used to transfer data to and from the desktop.
+                    type: string
+                  isDisplayEnabled:
+                    description: Indicates whether the display is enabled.
+                    type: boolean
+                  isKeyboardEnabled:
+                    description: Indicates whether the keyboard is enabled.
+                    type: boolean
+                  isPointerEnabled:
+                    description: Indicates whether the pointer is enabled.
+                    type: boolean
+                  isPrintingEnabled:
+                    description: Indicates whether printing is enabled.
+                    type: boolean
+                  isVideoInputEnabled:
+                    description: Indicates whether video input is enabled.
+                    type: boolean
+                required:
+                - audioMode
+                - cdmMode
+                - clipboardMode
+                - isDisplayEnabled
+                - isKeyboardEnabled
+                - isPointerEnabled
+                - isPrintingEnabled
+                type: object
+              displayName:
+                description: A user friendly display name. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              image:
+                description: DesktopPoolImage defines nested fields for DesktopPool.Image.
+                properties:
+                  imageId:
+                    description: The OCID of the desktop image.
+                    type: string
+                  imageName:
+                    description: The name of the desktop image.
+                    type: string
+                  operatingSystem:
+                    description: The operating system of the desktop image, e.g. "Oracle
+                      Linux", "Windows".
+                    type: string
+                required:
+                - imageId
+                - imageName
+                type: object
+              isStorageEnabled:
+                description: Indicates whether storage is enabled for the desktop
+                  pool.
+                type: boolean
+              maximumSize:
+                description: The maximum number of desktops permitted in the desktop
+                  pool.
+                type: integer
+              networkConfiguration:
+                description: DesktopPoolNetworkConfiguration defines nested fields
+                  for DesktopPool.NetworkConfiguration.
+                properties:
+                  subnetId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in the customer VCN where the
+                      connectivity will be established.
+                    type: string
+                  vcnId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the customer VCN.
+                    type: string
+                required:
+                - subnetId
+                - vcnId
+                type: object
+              nsgIds:
+                description: A list of network security groups for the private access.
+                items:
+                  type: string
+                type: array
+              privateAccessDetails:
+                description: DesktopPoolPrivateAccessDetails defines nested fields
+                  for DesktopPool.PrivateAccessDetails.
+                properties:
+                  nsgIds:
+                    description: A list of network security groups for the private
+                      access.
+                    items:
+                      type: string
+                    type: array
+                  privateIp:
+                    description: |-
+                      The IPv4 address from the provided OCI subnet which needs to be assigned to the VNIC. If not provided, it will
+                      be auto-assigned with an available IPv4 address from the subnet.
+                    type: string
+                  subnetId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in the customer VCN where the
+                      connectivity will be established.
+                    type: string
+                required:
+                - subnetId
+                type: object
+              sessionLifecycleActions:
+                description: DesktopPoolSessionLifecycleActions defines nested fields
+                  for DesktopPool.SessionLifecycleActions.
+                properties:
+                  disconnect:
+                    description: DesktopPoolSessionLifecycleActionsDisconnect defines
+                      nested fields for DesktopPool.SessionLifecycleActions.Disconnect.
+                    properties:
+                      action:
+                        description: a disconnect action to be triggered
+                        type: string
+                      gracePeriodInMinutes:
+                        description: |-
+                          The period of time (in minutes) after disconnect before any action occurs.
+                          If the value is not provided, a default value is used.
+                        type: integer
+                    required:
+                    - action
+                    type: object
+                  inactivity:
+                    description: DesktopPoolSessionLifecycleActionsInactivity defines
+                      nested fields for DesktopPool.SessionLifecycleActions.Inactivity.
+                    properties:
+                      action:
+                        description: an inactivity action to be triggered
+                        type: string
+                      gracePeriodInMinutes:
+                        description: |-
+                          The period of time (in minutes) during which the session must remain inactive before any action occurs.
+                          If the value is not provided, a default value is used.
+                        type: integer
+                    required:
+                    - action
+                    type: object
+                type: object
+              shapeConfig:
+                description: DesktopPoolShapeConfig defines nested fields for DesktopPool.ShapeConfig.
+                properties:
+                  baselineOcpuUtilization:
+                    description: |-
+                      The baseline OCPU utilization for a subcore burstable VM instance used for each desktop compute instance in
+                      the desktop pool.
+                      Leave this attribute blank for a non-burstable instance, or explicitly specify non-burstable with
+                      `BASELINE_1_1`.
+
+                      The following values are supported:
+                      - `BASELINE_1_8` - baseline usage is 1/8 of an OCPU.
+                      - `BASELINE_1_2` - baseline usage is 1/2 of an OCPU.
+                      - `BASELINE_1_1` - baseline usage is the entire OCPU. This represents a non-burstable instance.
+                    type: string
+                  memoryInGBs:
+                    description: The total amount of memory available in gigabytes
+                      for each desktop compute instance in the desktop pool.
+                    format: int64
+                    type: integer
+                  ocpus:
+                    description: The total number of OCPUs available for each desktop
+                      compute instance in the desktop pool.
+                    format: int64
+                    type: integer
+                type: object
+              shapeName:
+                description: The shape of the desktop pool.
+                type: string
+              standbySize:
+                description: The maximum number of standby desktops available in the
+                  desktop pool.
+                type: integer
+              storageBackupPolicyId:
+                description: The backup policy OCID of the storage.
+                type: string
+              storageSizeInGBs:
+                description: The size in GBs of the storage for the desktop pool.
+                type: integer
+              timeStartScheduled:
+                description: The start time of the desktop pool.
+                type: string
+              timeStopScheduled:
+                description: The stop time of the desktop pool.
+                type: string
+              useDedicatedVmHost:
+                description: Indicates whether the desktop pool uses dedicated virtual
+                  machine hosts.
+                type: string
+            required:
+            - arePrivilegedUsers
+            - availabilityDomain
+            - availabilityPolicy
+            - compartmentId
+            - contactDetails
+            - devicePolicy
+            - displayName
+            - image
+            - isStorageEnabled
+            - maximumSize
+            - networkConfiguration
+            - shapeName
+            - standbySize
+            - storageBackupPolicyId
+            - storageSizeInGBs
+            type: object
+          status:
+            description: DesktopPoolStatus defines the observed state of DesktopPool.
+            properties:
+              activeDesktops:
+                description: The number of active desktops in the desktop pool.
+                type: integer
+              arePrivilegedUsers:
+                description: Indicates whether desktop pool users have administrative
+                  privileges on their desktop.
+                type: boolean
+              availabilityDomain:
+                description: The availability domain of the desktop pool.
+                type: string
+              availabilityPolicy:
+                description: DesktopPoolAvailabilityPolicy defines nested fields for
+                  DesktopPool.AvailabilityPolicy.
+                properties:
+                  startSchedule:
+                    description: DesktopPoolAvailabilityPolicyStartSchedule defines
+                      nested fields for DesktopPool.AvailabilityPolicy.StartSchedule.
+                    properties:
+                      cronExpression:
+                        description: A cron expression describing the desktop's schedule.
+                        type: string
+                      timezone:
+                        description: The timezone of the desktop's schedule.
+                        type: string
+                    required:
+                    - cronExpression
+                    - timezone
+                    type: object
+                  stopSchedule:
+                    description: DesktopPoolAvailabilityPolicyStopSchedule defines
+                      nested fields for DesktopPool.AvailabilityPolicy.StopSchedule.
+                    properties:
+                      cronExpression:
+                        description: A cron expression describing the desktop's schedule.
+                        type: string
+                      timezone:
+                        description: The timezone of the desktop's schedule.
+                        type: string
+                    required:
+                    - cronExpression
+                    - timezone
+                    type: object
+                required:
+                - startSchedule
+                - stopSchedule
+                type: object
+              bootVolumeSizeInGBs:
+                description: The size in GBs of the boot volume for the desktop pool.
+                type: integer
+              compartmentId:
+                description: The OCID of the compartment of the desktop pool.
+                type: string
+              contactDetails:
+                description: |-
+                  Contact information of the desktop pool administrator.
+                  Avoid entering confidential information.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: |-
+                  A user friendly description providing additional information about the resource.
+                  Avoid entering confidential information.
+                type: string
+              devicePolicy:
+                description: DesktopPoolDevicePolicy defines nested fields for DesktopPool.DevicePolicy.
+                properties:
+                  audioMode:
+                    description: |-
+                      The audio mode.
+                      NONE: No access to the local audio devices is permitted.
+                      TODESKTOP: The user may record audio on their desktop.
+                      FROMDESKTOP: The user may play audio on their desktop.
+                      FULL: The user may play and record audio on their desktop.
+                    type: string
+                  cdmMode:
+                    description: |-
+                      The client local drive access mode.
+                      NONE: No access to local drives permitted.
+                      READONLY: The user may read from local drives on their desktop.
+                      FULL: The user may read from and write to their local drives on their desktop.
+                    type: string
+                  clipboardMode:
+                    description: |-
+                      The clipboard mode.
+                      NONE: No access to the local clipboard is permitted.
+                      TODESKTOP: The clipboard can be used to transfer data to the desktop only.
+                      FROMDESKTOP: The clipboard can be used to transfer data from the desktop only.
+                      FULL: The clipboard can be used to transfer data to and from the desktop.
+                    type: string
+                  isDisplayEnabled:
+                    description: Indicates whether the display is enabled.
+                    type: boolean
+                  isKeyboardEnabled:
+                    description: Indicates whether the keyboard is enabled.
+                    type: boolean
+                  isPointerEnabled:
+                    description: Indicates whether the pointer is enabled.
+                    type: boolean
+                  isPrintingEnabled:
+                    description: Indicates whether printing is enabled.
+                    type: boolean
+                  isVideoInputEnabled:
+                    description: Indicates whether video input is enabled.
+                    type: boolean
+                required:
+                - audioMode
+                - cdmMode
+                - clipboardMode
+                - isDisplayEnabled
+                - isKeyboardEnabled
+                - isPointerEnabled
+                - isPrintingEnabled
+                type: object
+              displayName:
+                description: A user friendly display name. Avoid entering confidential
+                  information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the desktop pool.
+                type: string
+              image:
+                description: DesktopPoolImage defines nested fields for DesktopPool.Image.
+                properties:
+                  imageId:
+                    description: The OCID of the desktop image.
+                    type: string
+                  imageName:
+                    description: The name of the desktop image.
+                    type: string
+                  operatingSystem:
+                    description: The operating system of the desktop image, e.g. "Oracle
+                      Linux", "Windows".
+                    type: string
+                required:
+                - imageId
+                - imageName
+                type: object
+              isStorageEnabled:
+                description: Indicates whether storage is enabled for the desktop
+                  pool.
+                type: boolean
+              lifecycleState:
+                description: The current state of the desktop pool.
+                type: string
+              maximumSize:
+                description: The maximum number of desktops permitted in the desktop
+                  pool.
+                type: integer
+              networkConfiguration:
+                description: DesktopPoolNetworkConfiguration defines nested fields
+                  for DesktopPool.NetworkConfiguration.
+                properties:
+                  subnetId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in the customer VCN where the
+                      connectivity will be established.
+                    type: string
+                  vcnId:
+                    description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                      of the customer VCN.
+                    type: string
+                required:
+                - subnetId
+                - vcnId
+                type: object
+              nsgIds:
+                description: A list of network security groups for the network.
+                items:
+                  type: string
+                type: array
+              privateAccessDetails:
+                description: DesktopPoolPrivateAccessDetails defines nested fields
+                  for DesktopPool.PrivateAccessDetails.
+                properties:
+                  nsgIds:
+                    description: A list of network security groups for the private
+                      access.
+                    items:
+                      type: string
+                    type: array
+                  privateIp:
+                    description: |-
+                      The IPv4 address from the provided OCI subnet which needs to be assigned to the VNIC. If not provided, it will
+                      be auto-assigned with an available IPv4 address from the subnet.
+                    type: string
+                  subnetId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the subnet in the customer VCN where the
+                      connectivity will be established.
+                    type: string
+                required:
+                - subnetId
+                type: object
+              sessionLifecycleActions:
+                description: DesktopPoolSessionLifecycleActions defines nested fields
+                  for DesktopPool.SessionLifecycleActions.
+                properties:
+                  disconnect:
+                    description: DesktopPoolSessionLifecycleActionsDisconnect defines
+                      nested fields for DesktopPool.SessionLifecycleActions.Disconnect.
+                    properties:
+                      action:
+                        description: a disconnect action to be triggered
+                        type: string
+                      gracePeriodInMinutes:
+                        description: |-
+                          The period of time (in minutes) after disconnect before any action occurs.
+                          If the value is not provided, a default value is used.
+                        type: integer
+                    required:
+                    - action
+                    type: object
+                  inactivity:
+                    description: DesktopPoolSessionLifecycleActionsInactivity defines
+                      nested fields for DesktopPool.SessionLifecycleActions.Inactivity.
+                    properties:
+                      action:
+                        description: an inactivity action to be triggered
+                        type: string
+                      gracePeriodInMinutes:
+                        description: |-
+                          The period of time (in minutes) during which the session must remain inactive before any action occurs.
+                          If the value is not provided, a default value is used.
+                        type: integer
+                    required:
+                    - action
+                    type: object
+                type: object
+              shapeConfig:
+                description: DesktopPoolShapeConfig defines nested fields for DesktopPool.ShapeConfig.
+                properties:
+                  baselineOcpuUtilization:
+                    description: |-
+                      The baseline OCPU utilization for a subcore burstable VM instance used for each desktop compute instance in
+                      the desktop pool.
+                      Leave this attribute blank for a non-burstable instance, or explicitly specify non-burstable with
+                      `BASELINE_1_1`.
+
+                      The following values are supported:
+                      - `BASELINE_1_8` - baseline usage is 1/8 of an OCPU.
+                      - `BASELINE_1_2` - baseline usage is 1/2 of an OCPU.
+                      - `BASELINE_1_1` - baseline usage is the entire OCPU. This represents a non-burstable instance.
+                    type: string
+                  memoryInGBs:
+                    description: The total amount of memory available in gigabytes
+                      for each desktop compute instance in the desktop pool.
+                    format: int64
+                    type: integer
+                  ocpus:
+                    description: The total number of OCPUs available for each desktop
+                      compute instance in the desktop pool.
+                    format: int64
+                    type: integer
+                type: object
+              shapeName:
+                description: The shape of the desktop pool.
+                type: string
+              standbySize:
+                description: The maximum number of standby desktops available in the
+                  desktop pool.
+                type: integer
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              storageBackupPolicyId:
+                description: The backup policy OCID of the storage.
+                type: string
+              storageSizeInGBs:
+                description: The size in GBs of the storage for the desktop pool.
+                type: integer
+              timeCreated:
+                description: The date and time the resource was created.
+                type: string
+              timeStartScheduled:
+                description: The start time of the desktop pool.
+                type: string
+              timeStopScheduled:
+                description: The stop time of the desktop pool.
+                type: string
+              useDedicatedVmHost:
+                description: Indicates whether the desktop pool uses dedicated virtual
+                  machine hosts.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

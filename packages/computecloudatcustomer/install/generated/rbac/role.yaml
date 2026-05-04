@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - computecloudatcustomer.oracle.com
+  resources:
+  - cccinfrastructures
+  - cccupgradeschedules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - computecloudatcustomer.oracle.com
+  resources:
+  - cccinfrastructures/finalizers
+  - cccupgradeschedules/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - computecloudatcustomer.oracle.com
+  resources:
+  - cccinfrastructures/status
+  - cccupgradeschedules/status
+  verbs:
+  - get
+  - patch
+  - update

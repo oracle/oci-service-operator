@@ -1,0 +1,340 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: copyobjectrequests.dataintegration.oracle.com
+spec:
+  group: dataintegration.oracle.com
+  names:
+    kind: CopyObjectRequest
+    listKind: CopyObjectRequestList
+    plural: copyobjectrequests
+    singular: copyobjectrequest
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the CopyObjectRequest
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the CopyObjectRequest
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CopyObjectRequest is the Schema for the copyobjectrequests API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CopyObjectRequestSpec defines the desired state of CopyObjectRequest.
+            properties:
+              copyConflictResolution:
+                description: CopyObjectRequestCopyConflictResolution defines nested
+                  fields for CopyObjectRequest.CopyConflictResolution.
+                properties:
+                  duplicatePrefix:
+                    description: In case of DUPLICATE mode, this prefix will be used
+                      to disambiguate the object.
+                    type: string
+                  duplicateSuffix:
+                    description: In case of DUPLICATE mode, this suffix will be used
+                      to disambiguate the object.
+                    type: string
+                  requestType:
+                    description: Copy Object Conflict Resolution Type (RETAIN/DUPLICATE/REPLACE).
+                    type: string
+                required:
+                - requestType
+                type: object
+              objectKeys:
+                description: The list of the objects to be copied.
+                items:
+                  type: string
+                type: array
+              sourceWorkspaceId:
+                description: The workspace id of the source from where we need to
+                  copy object.
+                type: string
+              status:
+                description: The status of the object.
+                type: string
+            required:
+            - copyConflictResolution
+            - objectKeys
+            - sourceWorkspaceId
+            type: object
+          status:
+            description: CopyObjectRequestStatus defines the observed state of CopyObjectRequest.
+            properties:
+              copiedItems:
+                description: The array of copy object details.
+                items:
+                  description: CopyObjectRequestCopiedItem defines nested fields for
+                    CopyObjectRequest.CopiedItem.
+                  properties:
+                    aggregatorKey:
+                      description: Aggregator key
+                      type: string
+                    identifier:
+                      description: Object identifier.
+                      type: string
+                    name:
+                      description: Name of the object.
+                      type: string
+                    namePath:
+                      description: Object name path.
+                      type: string
+                    newKey:
+                      description: New key of the object to identify the copied object.
+                        For example the new dataflow key.
+                      type: string
+                    objectType:
+                      description: Object type.
+                      type: string
+                    objectVersion:
+                      description: Object version.
+                      type: string
+                    oldKey:
+                      description: Old key of the object from where the object was
+                        copied. For example a dataflow key within the project being
+                        copied.
+                      type: string
+                    resolutionAction:
+                      description: Object resolution action.
+                      type: string
+                    timeUpdatedInMillis:
+                      description: time at which this object was last updated.
+                      format: int64
+                      type: integer
+                  type: object
+                type: array
+              copyConflictResolution:
+                description: CopyObjectRequestCopyConflictResolution defines nested
+                  fields for CopyObjectRequest.CopyConflictResolution.
+                properties:
+                  duplicatePrefix:
+                    description: In case of DUPLICATE mode, this prefix will be used
+                      to disambiguate the object.
+                    type: string
+                  duplicateSuffix:
+                    description: In case of DUPLICATE mode, this suffix will be used
+                      to disambiguate the object.
+                    type: string
+                  requestType:
+                    description: Copy Object Conflict Resolution Type (RETAIN/DUPLICATE/REPLACE).
+                    type: string
+                required:
+                - requestType
+                type: object
+              copyMetadataObjectRequestStatus:
+                description: Copy Object request status.
+                type: string
+              createdBy:
+                description: OCID of the user who initiated copy request.
+                type: string
+              createdByName:
+                description: Name of the user who created the copy object request.
+                type: string
+              key:
+                description: Copy object request key.
+                type: string
+              name:
+                description: Name of the copy object request.
+                type: string
+              objectKeys:
+                description: The list of the objects to be copied.
+                items:
+                  type: string
+                type: array
+              referencedItems:
+                description: The array of copied referenced objects.
+                items:
+                  description: CopyObjectRequestReferencedItem defines nested fields
+                    for CopyObjectRequest.ReferencedItem.
+                  properties:
+                    aggregatorKey:
+                      description: Aggregator key
+                      type: string
+                    identifier:
+                      description: Object identifier.
+                      type: string
+                    name:
+                      description: Name of the object.
+                      type: string
+                    namePath:
+                      description: Object name path.
+                      type: string
+                    newKey:
+                      description: New key of the object to identify the copied object.
+                        For example the new dataflow key.
+                      type: string
+                    objectType:
+                      description: Object type.
+                      type: string
+                    objectVersion:
+                      description: Object version.
+                      type: string
+                    oldKey:
+                      description: Old key of the object from where the object was
+                        copied. For example a dataflow key within the project being
+                        copied.
+                      type: string
+                    resolutionAction:
+                      description: Object resolution action.
+                      type: string
+                    timeUpdatedInMillis:
+                      description: time at which this object was last updated.
+                      format: int64
+                      type: integer
+                  type: object
+                type: array
+              sourceWorkspaceId:
+                description: The workspace id of the source from where we need to
+                  copy object.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeEndedInMillis:
+                description: Time at which the request was completely processed.
+                format: int64
+                type: integer
+              timeStartedInMillis:
+                description: Time at which the request started getting processed.
+                format: int64
+                type: integer
+              totalObjectsCopiedIntoTarget:
+                description: Number of objects copied into the target.
+                type: integer
+              totalSourceObjectCount:
+                description: Number of source objects to be copied.
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

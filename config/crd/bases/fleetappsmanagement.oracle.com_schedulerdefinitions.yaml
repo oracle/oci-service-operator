@@ -1,0 +1,549 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: schedulerdefinitions.fleetappsmanagement.oracle.com
+spec:
+  group: fleetappsmanagement.oracle.com
+  names:
+    kind: SchedulerDefinition
+    listKind: SchedulerDefinitionList
+    plural: schedulerdefinitions
+    singular: schedulerdefinition
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the SchedulerDefinition
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the SchedulerDefinition
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: SchedulerDefinition is the Schema for the schedulerdefinitions
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SchedulerDefinitionSpec defines the desired state of SchedulerDefinition.
+            properties:
+              actionGroups:
+                description: Action Groups associated with the Schedule.
+                items:
+                  description: SchedulerDefinitionActionGroup defines nested fields
+                    for SchedulerDefinition.ActionGroup.
+                  properties:
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                        Example: `My new resource`
+                      type: string
+                    fleetId:
+                      description: ID of the fleet
+                      type: string
+                    jsonData:
+                      type: string
+                    kind:
+                      type: string
+                    runbookId:
+                      description: ID of the runbook
+                      type: string
+                    runbookVersionName:
+                      description: Name of the runbook version
+                      type: string
+                    sequence:
+                      description: |-
+                        Sequence of the Action Group.
+                        Action groups will be executed in a seuential order.
+                        All Action Groups having the same sequence will be executed parallely.
+                        If no value is provided a default value of 1 will be given.
+                      type: integer
+                  type: object
+                type: array
+              compartmentId:
+                description: Compartment OCID
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              runBooks:
+                description: Runbooks.
+                items:
+                  description: SchedulerDefinitionRunBook defines nested fields for
+                    SchedulerDefinition.RunBook.
+                  properties:
+                    inputParameters:
+                      description: Input Parameters for the Task
+                      items:
+                        description: SchedulerDefinitionRunBookInputParameter defines
+                          nested fields for SchedulerDefinition.RunBook.InputParameter.
+                        properties:
+                          arguments:
+                            description: Arguments for the Task
+                            items:
+                              description: SchedulerDefinitionRunBookInputParameterArgument
+                                defines nested fields for SchedulerDefinition.RunBook.InputParameter.Argument.
+                              properties:
+                                content:
+                                  description: SchedulerDefinitionRunBookInputParameterArgumentContent
+                                    defines nested fields for SchedulerDefinition.RunBook.InputParameter.Argument.Content.
+                                  properties:
+                                    bucketName:
+                                      description: Bucket Name.
+                                      type: string
+                                    checksum:
+                                      description: md5 checksum of the artifact.
+                                      type: string
+                                    jsonData:
+                                      type: string
+                                    namespaceName:
+                                      description: Namespace.
+                                      type: string
+                                    objectName:
+                                      description: Object Name.
+                                      type: string
+                                    sourceType:
+                                      type: string
+                                  type: object
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                                name:
+                                  description: Name of the input variable
+                                  type: string
+                                value:
+                                  description: The task input
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            type: array
+                          stepName:
+                            description: stepName for which the input parameters are
+                              provided
+                            type: string
+                        required:
+                        - stepName
+                        type: object
+                      type: array
+                    runbookId:
+                      description: The ID of the Runbook
+                      type: string
+                    runbookVersionName:
+                      description: The runbook version name
+                      type: string
+                  required:
+                  - runbookId
+                  - runbookVersionName
+                  type: object
+                type: array
+              schedule:
+                description: SchedulerDefinitionSchedule defines nested fields for
+                  SchedulerDefinition.Schedule.
+                properties:
+                  duration:
+                    description: Duration of the schedule.
+                    type: string
+                  executionStartdate:
+                    description: Start Date for the schedule. An RFC3339 formatted
+                      datetime string
+                    type: string
+                  jsonData:
+                    type: string
+                  maintenanceWindowId:
+                    description: Provide MaintenanceWindowId
+                    type: string
+                  recurrences:
+                    description: Recurrence rule specification if recurring
+                    type: string
+                  type:
+                    type: string
+                required:
+                - executionStartdate
+                type: object
+            required:
+            - actionGroups
+            - compartmentId
+            - schedule
+            type: object
+          status:
+            description: SchedulerDefinitionStatus defines the observed state of SchedulerDefinition.
+            properties:
+              actionGroups:
+                description: Action Groups associated with the Schedule.
+                items:
+                  description: SchedulerDefinitionActionGroup defines nested fields
+                    for SchedulerDefinition.ActionGroup.
+                  properties:
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                        Example: `My new resource`
+                      type: string
+                    fleetId:
+                      description: ID of the fleet
+                      type: string
+                    jsonData:
+                      type: string
+                    kind:
+                      type: string
+                    runbookId:
+                      description: ID of the runbook
+                      type: string
+                    runbookVersionName:
+                      description: Name of the runbook version
+                      type: string
+                    sequence:
+                      description: |-
+                        Sequence of the Action Group.
+                        Action groups will be executed in a seuential order.
+                        All Action Groups having the same sequence will be executed parallely.
+                        If no value is provided a default value of 1 will be given.
+                      type: integer
+                  type: object
+                type: array
+              compartmentId:
+                description: Compartment OCID
+                type: string
+              countOfAffectedActionGroups:
+                description: Count of Action Groups affected by the Schedule.
+                type: integer
+              countOfAffectedResources:
+                description: Count of Resources affected by the Schedule.
+                type: integer
+              countOfAffectedTargets:
+                description: Count of Targets affected by the Schedule.
+                type: integer
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID of the resource.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleOperations:
+                description: All LifeCycle Operations that are part of the schedule.
+                items:
+                  type: string
+                type: array
+              lifecycleState:
+                description: The current state of the SchedulerDefinition.
+                type: string
+              products:
+                description: All products that are part of the schedule for PRODUCT
+                  ActionGroup Type.
+                items:
+                  type: string
+                type: array
+              resourceRegion:
+                description: Associated region
+                type: string
+              runBooks:
+                description: Runbooks.
+                items:
+                  description: SchedulerDefinitionRunBook defines nested fields for
+                    SchedulerDefinition.RunBook.
+                  properties:
+                    inputParameters:
+                      description: Input Parameters for the Task
+                      items:
+                        description: SchedulerDefinitionRunBookInputParameter defines
+                          nested fields for SchedulerDefinition.RunBook.InputParameter.
+                        properties:
+                          arguments:
+                            description: Arguments for the Task
+                            items:
+                              description: SchedulerDefinitionRunBookInputParameterArgument
+                                defines nested fields for SchedulerDefinition.RunBook.InputParameter.Argument.
+                              properties:
+                                content:
+                                  description: SchedulerDefinitionRunBookInputParameterArgumentContent
+                                    defines nested fields for SchedulerDefinition.RunBook.InputParameter.Argument.Content.
+                                  properties:
+                                    bucketName:
+                                      description: Bucket Name.
+                                      type: string
+                                    checksum:
+                                      description: md5 checksum of the artifact.
+                                      type: string
+                                    jsonData:
+                                      type: string
+                                    namespaceName:
+                                      description: Namespace.
+                                      type: string
+                                    objectName:
+                                      description: Object Name.
+                                      type: string
+                                    sourceType:
+                                      type: string
+                                  type: object
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                                name:
+                                  description: Name of the input variable
+                                  type: string
+                                value:
+                                  description: The task input
+                                  type: string
+                              required:
+                              - name
+                              type: object
+                            type: array
+                          stepName:
+                            description: stepName for which the input parameters are
+                              provided
+                            type: string
+                        required:
+                        - stepName
+                        type: object
+                      type: array
+                    runbookId:
+                      description: The ID of the Runbook
+                      type: string
+                    runbookVersionName:
+                      description: The runbook version name
+                      type: string
+                  required:
+                  - runbookId
+                  - runbookVersionName
+                  type: object
+                type: array
+              schedule:
+                description: SchedulerDefinitionSchedule defines nested fields for
+                  SchedulerDefinition.Schedule.
+                properties:
+                  duration:
+                    description: Duration of the schedule.
+                    type: string
+                  executionStartdate:
+                    description: Start Date for the schedule. An RFC3339 formatted
+                      datetime string
+                    type: string
+                  jsonData:
+                    type: string
+                  maintenanceWindowId:
+                    description: Provide MaintenanceWindowId
+                    type: string
+                  recurrences:
+                    description: Recurrence rule specification if recurring
+                    type: string
+                  type:
+                    type: string
+                required:
+                - executionStartdate
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time this resource was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeOfNextRun:
+                description: The scheduled date for the next run of the Job.
+                type: string
+              timeUpdated:
+                description: The time this resource was last updated. An RFC3339 formatted
+                  datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

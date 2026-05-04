@@ -1,0 +1,48 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - fusionapps.oracle.com
+  resources:
+  - fusionenvironmentfamilies
+  - fusionenvironments
+  - refreshactivities
+  - serviceattachments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - fusionapps.oracle.com
+  resources:
+  - fusionenvironmentfamilies/finalizers
+  - fusionenvironments/finalizers
+  - refreshactivities/finalizers
+  - serviceattachments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - fusionapps.oracle.com
+  resources:
+  - fusionenvironmentfamilies/status
+  - fusionenvironments/status
+  - refreshactivities/status
+  - serviceattachments/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,57 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - cloudbridge.oracle.com
+  resources:
+  - agentdependencies
+  - agents
+  - assets
+  - assetsources
+  - discoveryschedules
+  - environments
+  - inventories
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cloudbridge.oracle.com
+  resources:
+  - agentdependencies/finalizers
+  - agents/finalizers
+  - assets/finalizers
+  - assetsources/finalizers
+  - discoveryschedules/finalizers
+  - environments/finalizers
+  - inventories/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cloudbridge.oracle.com
+  resources:
+  - agentdependencies/status
+  - agents/status
+  - assets/status
+  - assetsources/status
+  - discoveryschedules/status
+  - environments/status
+  - inventories/status
+  verbs:
+  - get
+  - patch
+  - update

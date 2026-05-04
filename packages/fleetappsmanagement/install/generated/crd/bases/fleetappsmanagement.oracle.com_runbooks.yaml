@@ -1,0 +1,1375 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: runbooks.fleetappsmanagement.oracle.com
+spec:
+  group: fleetappsmanagement.oracle.com
+  names:
+    kind: Runbook
+    listKind: RunbookList
+    plural: runbooks
+    singular: runbook
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Runbook
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Runbook
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Runbook is the Schema for the runbooks API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RunbookSpec defines the desired state of Runbook.
+            properties:
+              compartmentId:
+                description: OCID of the compartment to which the resource belongs
+                  to.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              estimatedTime:
+                description: Estimated time to successfully complete the runbook execution.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isDefault:
+                description: Is the runbook default?
+                type: boolean
+              isSudoAccessNeeded:
+                description: Does this runbook need SUDO access to execute?
+                type: boolean
+              operation:
+                description: The lifecycle operation performed by the task.
+                type: string
+              osType:
+                description: The OS type for the runbook.
+                type: string
+              platform:
+                description: The platform of the runbook.
+                type: string
+              runbookVersion:
+                description: RunbookVersionFields defines nested fields for Runbook.RunbookVersion.
+                properties:
+                  executionWorkflowDetails:
+                    description: RunbookVersionExecutionWorkflowDetails defines nested
+                      fields for Runbook.RunbookVersion.ExecutionWorkflowDetails.
+                    properties:
+                      workflow:
+                        description: Execution Workflow for the runbook.
+                        items:
+                          description: RunbookVersionExecutionWorkflowDetailsWorkflow
+                            defines nested fields for Runbook.RunbookVersion.ExecutionWorkflowDetails.Workflow.
+                          properties:
+                            groupName:
+                              description: Name of the group.
+                              type: string
+                            steps:
+                              description: Steps within the Group.
+                              items:
+                                description: RunbookVersionExecutionWorkflowDetailsWorkflowStep
+                                  defines nested fields for Runbook.RunbookVersion.ExecutionWorkflowDetails.Workflow.Step.
+                                properties:
+                                  groupName:
+                                    description: Name of the group.
+                                    type: string
+                                  jsonData:
+                                    type: string
+                                  stepName:
+                                    description: Provide StepName for the Task.
+                                    type: string
+                                  steps:
+                                    description: |-
+                                      Tasks within the Group.
+                                      Provide the stepName for all applicable tasks.
+                                    items:
+                                      type: string
+                                    type: array
+                                  type:
+                                    type: string
+                                type: object
+                              type: array
+                            type:
+                              description: Workflow Group  Details.
+                              type: string
+                          required:
+                          - groupName
+                          - steps
+                          - type
+                          type: object
+                        type: array
+                    required:
+                    - workflow
+                    type: object
+                  groups:
+                    description: The groups of the runbook.
+                    items:
+                      description: RunbookVersionGroup defines nested fields for Runbook.RunbookVersion.Group.
+                      properties:
+                        name:
+                          description: The name of the group.
+                          type: string
+                        properties:
+                          description: RunbookVersionGroupProperties defines nested
+                            fields for Runbook.RunbookVersion.Group.Properties.
+                          properties:
+                            actionOnFailure:
+                              description: The action to be taken in case of a failure.
+                              type: string
+                            notificationPreferences:
+                              description: RunbookVersionGroupPropertiesNotificationPreferences
+                                defines nested fields for Runbook.RunbookVersion.Group.Properties.NotificationPreferences.
+                              properties:
+                                shouldNotifyOnPause:
+                                  description: Enables notification on pause.
+                                  type: boolean
+                                shouldNotifyOnTaskFailure:
+                                  description: Enables or disables notification on
+                                    Task Failures.
+                                  type: boolean
+                                shouldNotifyOnTaskSuccess:
+                                  description: Enables or disables notification on
+                                    Task Success.
+                                  type: boolean
+                              type: object
+                            pauseDetails:
+                              description: RunbookVersionGroupPropertiesPauseDetails
+                                defines nested fields for Runbook.RunbookVersion.Group.Properties.PauseDetails.
+                              properties:
+                                durationInMinutes:
+                                  description: Time in minutes to apply Pause.
+                                  type: integer
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                              type: object
+                            preCondition:
+                              description: Build control flow conditions that determine
+                                the relevance of the task execution.
+                              type: string
+                            runOn:
+                              description: RunbookVersionGroupPropertiesRunOn defines
+                                nested fields for Runbook.RunbookVersion.Group.Properties.RunOn.
+                              properties:
+                                condition:
+                                  description: Build control flow conditions that
+                                    determine the relevance of the task execution.
+                                  type: string
+                                host:
+                                  description: OCID of the self hosted instance.
+                                  type: string
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                                previousTaskInstanceDetails:
+                                  description: Previous Task Instance Details
+                                  items:
+                                    description: RunbookVersionGroupPropertiesRunOnPreviousTaskInstanceDetail
+                                      defines nested fields for Runbook.RunbookVersion.Group.Properties.RunOn.PreviousTaskInstanceDetail.
+                                    properties:
+                                      outputVariableDetails:
+                                        description: RunbookVersionGroupPropertiesRunOnPreviousTaskInstanceDetailOutputVariableDetails
+                                          defines nested fields for Runbook.RunbookVersion.Group.Properties.RunOn.PreviousTaskInstanceDetail.OutputVariableDetails.
+                                        properties:
+                                          outputVariableName:
+                                            description: The name of the output variable
+                                              whose value has to be mapped.
+                                            type: string
+                                          stepName:
+                                            description: The name of the task step
+                                              the output variable belongs to.
+                                            type: string
+                                        required:
+                                        - outputVariableName
+                                        - stepName
+                                        type: object
+                                      resourceId:
+                                        description: Resource Ocid.
+                                        type: string
+                                      resourceType:
+                                        description: Resource Type.
+                                        type: string
+                                    required:
+                                    - outputVariableDetails
+                                    - resourceId
+                                    type: object
+                                  type: array
+                              type: object
+                          required:
+                          - actionOnFailure
+                          type: object
+                        type:
+                          description: |-
+                            The type of the group.
+                            PARALLEL_TASK_GROUP : Helps to execute tasks parallelly inside a resource.
+                            PARALLEL_RESOURCE_GROUP : Executes tasks across resources parallelly.
+                            ROLLING_RESOURCE_GROUP : Executes tasks across resources in a rolling order.
+                          type: string
+                      required:
+                      - name
+                      - type
+                      type: object
+                    type: array
+                  isLatest:
+                    description: Is this version the latest?
+                    type: boolean
+                  rollbackWorkflowDetails:
+                    description: RunbookVersionRollbackWorkflowDetails defines nested
+                      fields for Runbook.RunbookVersion.RollbackWorkflowDetails.
+                    properties:
+                      scope:
+                        description: rollback Scope
+                        type: string
+                      workflow:
+                        description: Rollback Workflow for the runbook.
+                        items:
+                          description: RunbookVersionRollbackWorkflowDetailsWorkflow
+                            defines nested fields for Runbook.RunbookVersion.RollbackWorkflowDetails.Workflow.
+                          properties:
+                            groupName:
+                              description: Name of the group.
+                              type: string
+                            steps:
+                              description: Steps within the Group.
+                              items:
+                                description: RunbookVersionRollbackWorkflowDetailsWorkflowStep
+                                  defines nested fields for Runbook.RunbookVersion.RollbackWorkflowDetails.Workflow.Step.
+                                properties:
+                                  groupName:
+                                    description: Name of the group.
+                                    type: string
+                                  jsonData:
+                                    type: string
+                                  stepName:
+                                    description: Provide StepName for the Task.
+                                    type: string
+                                  steps:
+                                    description: |-
+                                      Tasks within the Group.
+                                      Provide the stepName for all applicable tasks.
+                                    items:
+                                      type: string
+                                    type: array
+                                  type:
+                                    type: string
+                                type: object
+                              type: array
+                            type:
+                              description: Workflow Group  Details.
+                              type: string
+                          required:
+                          - groupName
+                          - steps
+                          - type
+                          type: object
+                        type: array
+                    required:
+                    - scope
+                    - workflow
+                    type: object
+                  tasks:
+                    description: A set of tasks to execute in the runbook.
+                    items:
+                      description: RunbookVersionTask defines nested fields for Runbook.RunbookVersion.Task.
+                      properties:
+                        outputVariableMappings:
+                          description: Mapping output variables of previous tasks
+                            to the input variables of the current task.
+                          items:
+                            description: RunbookVersionTaskOutputVariableMapping defines
+                              nested fields for Runbook.RunbookVersion.Task.OutputVariableMapping.
+                            properties:
+                              name:
+                                description: The name of the input variable.
+                                type: string
+                              outputVariableDetails:
+                                description: RunbookVersionTaskOutputVariableMappingOutputVariableDetails
+                                  defines nested fields for Runbook.RunbookVersion.Task.OutputVariableMapping.OutputVariableDetails.
+                                properties:
+                                  outputVariableName:
+                                    description: The name of the output variable whose
+                                      value has to be mapped.
+                                    type: string
+                                  stepName:
+                                    description: The name of the task step the output
+                                      variable belongs to.
+                                    type: string
+                                required:
+                                - outputVariableName
+                                - stepName
+                                type: object
+                            required:
+                            - name
+                            - outputVariableDetails
+                            type: object
+                          type: array
+                        stepName:
+                          description: The name of the task step.
+                          type: string
+                        stepProperties:
+                          description: RunbookVersionTaskStepProperties defines nested
+                            fields for Runbook.RunbookVersion.Task.StepProperties.
+                          properties:
+                            actionOnFailure:
+                              description: The action to be taken in case of a failure.
+                              type: string
+                            notificationPreferences:
+                              description: RunbookVersionTaskStepPropertiesNotificationPreferences
+                                defines nested fields for Runbook.RunbookVersion.Task.StepProperties.NotificationPreferences.
+                              properties:
+                                shouldNotifyOnPause:
+                                  description: Enables notification on pause.
+                                  type: boolean
+                                shouldNotifyOnTaskFailure:
+                                  description: Enables or disables notification on
+                                    Task Failures.
+                                  type: boolean
+                                shouldNotifyOnTaskSuccess:
+                                  description: Enables or disables notification on
+                                    Task Success.
+                                  type: boolean
+                              type: object
+                            pauseDetails:
+                              description: RunbookVersionTaskStepPropertiesPauseDetails
+                                defines nested fields for Runbook.RunbookVersion.Task.StepProperties.PauseDetails.
+                              properties:
+                                durationInMinutes:
+                                  description: Time in minutes to apply Pause.
+                                  type: integer
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                              type: object
+                            preCondition:
+                              description: Build control flow conditions that determine
+                                the relevance of the task execution.
+                              type: string
+                            runOn:
+                              description: RunbookVersionTaskStepPropertiesRunOn defines
+                                nested fields for Runbook.RunbookVersion.Task.StepProperties.RunOn.
+                              properties:
+                                condition:
+                                  description: Build control flow conditions that
+                                    determine the relevance of the task execution.
+                                  type: string
+                                host:
+                                  description: OCID of the self hosted instance.
+                                  type: string
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                                previousTaskInstanceDetails:
+                                  description: Previous Task Instance Details
+                                  items:
+                                    description: RunbookVersionTaskStepPropertiesRunOnPreviousTaskInstanceDetail
+                                      defines nested fields for Runbook.RunbookVersion.Task.StepProperties.RunOn.PreviousTaskInstanceDetail.
+                                    properties:
+                                      outputVariableDetails:
+                                        description: RunbookVersionTaskStepPropertiesRunOnPreviousTaskInstanceDetailOutputVariableDetails
+                                          defines nested fields for Runbook.RunbookVersion.Task.StepProperties.RunOn.PreviousTaskInstanceDetail.OutputVariableDetails.
+                                        properties:
+                                          outputVariableName:
+                                            description: The name of the output variable
+                                              whose value has to be mapped.
+                                            type: string
+                                          stepName:
+                                            description: The name of the task step
+                                              the output variable belongs to.
+                                            type: string
+                                        required:
+                                        - outputVariableName
+                                        - stepName
+                                        type: object
+                                      resourceId:
+                                        description: Resource Ocid.
+                                        type: string
+                                      resourceType:
+                                        description: Resource Type.
+                                        type: string
+                                    required:
+                                    - outputVariableDetails
+                                    - resourceId
+                                    type: object
+                                  type: array
+                              type: object
+                          required:
+                          - actionOnFailure
+                          type: object
+                        taskRecordDetails:
+                          description: RunbookVersionTaskTaskRecordDetails defines
+                            nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.
+                          properties:
+                            description:
+                              description: The description of the task.
+                              type: string
+                            executionDetails:
+                              description: RunbookVersionTaskTaskRecordDetailsExecutionDetails
+                                defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.
+                              properties:
+                                catalogId:
+                                  description: Catalog Id having terraform package.
+                                  type: string
+                                command:
+                                  description: |-
+                                    Optional command to execute the content.
+                                    You can provide any commands/arguments that can't be part of the script.
+                                  type: string
+                                configFile:
+                                  description: Catalog Id having config file.
+                                  type: string
+                                content:
+                                  description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsContent
+                                    defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Content.
+                                  properties:
+                                    bucketName:
+                                      description: Bucket Name.
+                                      type: string
+                                    catalogId:
+                                      description: Catalog Id having terraform package.
+                                      type: string
+                                    checksum:
+                                      description: md5 checksum of the artifact.
+                                      type: string
+                                    jsonData:
+                                      type: string
+                                    namespaceName:
+                                      description: Namespace.
+                                      type: string
+                                    objectName:
+                                      description: Object Name.
+                                      type: string
+                                    sourceType:
+                                      type: string
+                                  type: object
+                                credentials:
+                                  description: Credentials required for executing
+                                    the task.
+                                  items:
+                                    description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsCredential
+                                      defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Credential.
+                                    properties:
+                                      displayName:
+                                        description: |-
+                                          A user-friendly name. Does not have to be unique, and it's changeable.
+                                          Avoid entering confidential information.
+                                          Example: `My new resource`
+                                        type: string
+                                      id:
+                                        description: The OCID of the resource.
+                                        type: string
+                                    required:
+                                    - id
+                                    type: object
+                                  type: array
+                                endpoint:
+                                  description: Endpoint to be invoked.
+                                  type: string
+                                executionType:
+                                  type: string
+                                isExecutableContent:
+                                  description: Is the Content an executable file?
+                                  type: boolean
+                                isLocked:
+                                  description: Is the script locked to prevent changes
+                                    directly in Object Storage?
+                                  type: boolean
+                                isReadOutputVariableEnabled:
+                                  description: Is read output variable enabled
+                                  type: boolean
+                                jsonData:
+                                  type: string
+                                systemVariables:
+                                  description: The list of system variables.
+                                  items:
+                                    type: string
+                                  type: array
+                                targetCompartmentId:
+                                  description: OCID of the compartment to which the
+                                    resource belongs to.
+                                  type: string
+                                variables:
+                                  description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariables
+                                    defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Variables.
+                                  properties:
+                                    inputVariables:
+                                      description: The input variables for the task.
+                                      items:
+                                        description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariablesInputVariable
+                                          defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Variables.InputVariable.
+                                        properties:
+                                          description:
+                                            description: The description of the argument.
+                                            type: string
+                                          jsonData:
+                                            type: string
+                                          name:
+                                            description: The name of the argument.
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - name
+                                        type: object
+                                      type: array
+                                    outputVariables:
+                                      description: The list of output variables.
+                                      items:
+                                        type: string
+                                      type: array
+                                  type: object
+                              type: object
+                            isApplySubjectTask:
+                              description: Is this an Apply Subject Task? Ex. Patch
+                                Execution Task
+                              type: boolean
+                            isCopyToLibraryEnabled:
+                              description: Make a copy of this task in Library
+                              type: boolean
+                            isDiscoveryOutputTask:
+                              description: Is this a discovery output task?
+                              type: boolean
+                            jsonData:
+                              type: string
+                            name:
+                              description: The name of the task
+                              type: string
+                            osType:
+                              description: The OS for the task.
+                              type: string
+                            platform:
+                              description: The platform of the runbook.
+                              type: string
+                            properties:
+                              description: RunbookVersionTaskTaskRecordDetailsProperties
+                                defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.Properties.
+                              properties:
+                                numRetries:
+                                  description: The number of retries allowed.
+                                  type: integer
+                                timeoutInSeconds:
+                                  description: The timeout in seconds for the task.
+                                  type: integer
+                              required:
+                              - numRetries
+                              - timeoutInSeconds
+                              type: object
+                            scope:
+                              type: string
+                            taskRecordId:
+                              description: The ID of taskRecord.
+                              type: string
+                          type: object
+                      required:
+                      - stepName
+                      - taskRecordDetails
+                      type: object
+                    type: array
+                  version:
+                    description: The version of the runbook.
+                    type: string
+                required:
+                - executionWorkflowDetails
+                - groups
+                - tasks
+                type: object
+            required:
+            - compartmentId
+            - displayName
+            - operation
+            - runbookVersion
+            type: object
+          status:
+            description: RunbookStatus defines the observed state of Runbook.
+            properties:
+              compartmentId:
+                description: OCID of the compartment to which the resource belongs
+                  to.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              estimatedTime:
+                description: Estimated time to successfully complete the runbook execution.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              hasDraftVersion:
+                description: Does this runbook has draft versions?
+                type: boolean
+              id:
+                description: The OCID of the resource.
+                type: string
+              isDefault:
+                description: |-
+                  Is the runbook default?
+                  Sets this runbook as the default for the chosen product/product stack for the specified lifecycle operation.
+                type: boolean
+              isSudoAccessNeeded:
+                description: Does this runbook need SUDO access to execute?
+                type: boolean
+              latestVersion:
+                description: Latest runbook version.
+                type: string
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the runbook.
+                type: string
+              operation:
+                description: The lifecycle operation performed by the runbook.
+                type: string
+              originalVersion:
+                description: Original runbook version. This version belongs to original
+                  runbook using which new runbook was exported.
+                type: string
+              osType:
+                description: The OS type for the runbook.
+                type: string
+              platform:
+                description: The platform of the runbook.
+                type: string
+              resourceRegion:
+                description: Associated region
+                type: string
+              runbookVersion:
+                description: RunbookVersionFields defines nested fields for Runbook.RunbookVersion.
+                properties:
+                  executionWorkflowDetails:
+                    description: RunbookVersionExecutionWorkflowDetails defines nested
+                      fields for Runbook.RunbookVersion.ExecutionWorkflowDetails.
+                    properties:
+                      workflow:
+                        description: Execution Workflow for the runbook.
+                        items:
+                          description: RunbookVersionExecutionWorkflowDetailsWorkflow
+                            defines nested fields for Runbook.RunbookVersion.ExecutionWorkflowDetails.Workflow.
+                          properties:
+                            groupName:
+                              description: Name of the group.
+                              type: string
+                            steps:
+                              description: Steps within the Group.
+                              items:
+                                description: RunbookVersionExecutionWorkflowDetailsWorkflowStep
+                                  defines nested fields for Runbook.RunbookVersion.ExecutionWorkflowDetails.Workflow.Step.
+                                properties:
+                                  groupName:
+                                    description: Name of the group.
+                                    type: string
+                                  jsonData:
+                                    type: string
+                                  stepName:
+                                    description: Provide StepName for the Task.
+                                    type: string
+                                  steps:
+                                    description: |-
+                                      Tasks within the Group.
+                                      Provide the stepName for all applicable tasks.
+                                    items:
+                                      type: string
+                                    type: array
+                                  type:
+                                    type: string
+                                type: object
+                              type: array
+                            type:
+                              description: Workflow Group  Details.
+                              type: string
+                          required:
+                          - groupName
+                          - steps
+                          - type
+                          type: object
+                        type: array
+                    required:
+                    - workflow
+                    type: object
+                  groups:
+                    description: The groups of the runbook.
+                    items:
+                      description: RunbookVersionGroup defines nested fields for Runbook.RunbookVersion.Group.
+                      properties:
+                        name:
+                          description: The name of the group.
+                          type: string
+                        properties:
+                          description: RunbookVersionGroupProperties defines nested
+                            fields for Runbook.RunbookVersion.Group.Properties.
+                          properties:
+                            actionOnFailure:
+                              description: The action to be taken in case of a failure.
+                              type: string
+                            notificationPreferences:
+                              description: RunbookVersionGroupPropertiesNotificationPreferences
+                                defines nested fields for Runbook.RunbookVersion.Group.Properties.NotificationPreferences.
+                              properties:
+                                shouldNotifyOnPause:
+                                  description: Enables notification on pause.
+                                  type: boolean
+                                shouldNotifyOnTaskFailure:
+                                  description: Enables or disables notification on
+                                    Task Failures.
+                                  type: boolean
+                                shouldNotifyOnTaskSuccess:
+                                  description: Enables or disables notification on
+                                    Task Success.
+                                  type: boolean
+                              type: object
+                            pauseDetails:
+                              description: RunbookVersionGroupPropertiesPauseDetails
+                                defines nested fields for Runbook.RunbookVersion.Group.Properties.PauseDetails.
+                              properties:
+                                durationInMinutes:
+                                  description: Time in minutes to apply Pause.
+                                  type: integer
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                              type: object
+                            preCondition:
+                              description: Build control flow conditions that determine
+                                the relevance of the task execution.
+                              type: string
+                            runOn:
+                              description: RunbookVersionGroupPropertiesRunOn defines
+                                nested fields for Runbook.RunbookVersion.Group.Properties.RunOn.
+                              properties:
+                                condition:
+                                  description: Build control flow conditions that
+                                    determine the relevance of the task execution.
+                                  type: string
+                                host:
+                                  description: OCID of the self hosted instance.
+                                  type: string
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                                previousTaskInstanceDetails:
+                                  description: Previous Task Instance Details
+                                  items:
+                                    description: RunbookVersionGroupPropertiesRunOnPreviousTaskInstanceDetail
+                                      defines nested fields for Runbook.RunbookVersion.Group.Properties.RunOn.PreviousTaskInstanceDetail.
+                                    properties:
+                                      outputVariableDetails:
+                                        description: RunbookVersionGroupPropertiesRunOnPreviousTaskInstanceDetailOutputVariableDetails
+                                          defines nested fields for Runbook.RunbookVersion.Group.Properties.RunOn.PreviousTaskInstanceDetail.OutputVariableDetails.
+                                        properties:
+                                          outputVariableName:
+                                            description: The name of the output variable
+                                              whose value has to be mapped.
+                                            type: string
+                                          stepName:
+                                            description: The name of the task step
+                                              the output variable belongs to.
+                                            type: string
+                                        required:
+                                        - outputVariableName
+                                        - stepName
+                                        type: object
+                                      resourceId:
+                                        description: Resource Ocid.
+                                        type: string
+                                      resourceType:
+                                        description: Resource Type.
+                                        type: string
+                                    required:
+                                    - outputVariableDetails
+                                    - resourceId
+                                    type: object
+                                  type: array
+                              type: object
+                          required:
+                          - actionOnFailure
+                          type: object
+                        type:
+                          description: |-
+                            The type of the group.
+                            PARALLEL_TASK_GROUP : Helps to execute tasks parallelly inside a resource.
+                            PARALLEL_RESOURCE_GROUP : Executes tasks across resources parallelly.
+                            ROLLING_RESOURCE_GROUP : Executes tasks across resources in a rolling order.
+                          type: string
+                      required:
+                      - name
+                      - type
+                      type: object
+                    type: array
+                  isLatest:
+                    description: Is this version the latest?
+                    type: boolean
+                  rollbackWorkflowDetails:
+                    description: RunbookVersionRollbackWorkflowDetails defines nested
+                      fields for Runbook.RunbookVersion.RollbackWorkflowDetails.
+                    properties:
+                      scope:
+                        description: rollback Scope
+                        type: string
+                      workflow:
+                        description: Rollback Workflow for the runbook.
+                        items:
+                          description: RunbookVersionRollbackWorkflowDetailsWorkflow
+                            defines nested fields for Runbook.RunbookVersion.RollbackWorkflowDetails.Workflow.
+                          properties:
+                            groupName:
+                              description: Name of the group.
+                              type: string
+                            steps:
+                              description: Steps within the Group.
+                              items:
+                                description: RunbookVersionRollbackWorkflowDetailsWorkflowStep
+                                  defines nested fields for Runbook.RunbookVersion.RollbackWorkflowDetails.Workflow.Step.
+                                properties:
+                                  groupName:
+                                    description: Name of the group.
+                                    type: string
+                                  jsonData:
+                                    type: string
+                                  stepName:
+                                    description: Provide StepName for the Task.
+                                    type: string
+                                  steps:
+                                    description: |-
+                                      Tasks within the Group.
+                                      Provide the stepName for all applicable tasks.
+                                    items:
+                                      type: string
+                                    type: array
+                                  type:
+                                    type: string
+                                type: object
+                              type: array
+                            type:
+                              description: Workflow Group  Details.
+                              type: string
+                          required:
+                          - groupName
+                          - steps
+                          - type
+                          type: object
+                        type: array
+                    required:
+                    - scope
+                    - workflow
+                    type: object
+                  tasks:
+                    description: A set of tasks to execute in the runbook.
+                    items:
+                      description: RunbookVersionTask defines nested fields for Runbook.RunbookVersion.Task.
+                      properties:
+                        outputVariableMappings:
+                          description: Mapping output variables of previous tasks
+                            to the input variables of the current task.
+                          items:
+                            description: RunbookVersionTaskOutputVariableMapping defines
+                              nested fields for Runbook.RunbookVersion.Task.OutputVariableMapping.
+                            properties:
+                              name:
+                                description: The name of the input variable.
+                                type: string
+                              outputVariableDetails:
+                                description: RunbookVersionTaskOutputVariableMappingOutputVariableDetails
+                                  defines nested fields for Runbook.RunbookVersion.Task.OutputVariableMapping.OutputVariableDetails.
+                                properties:
+                                  outputVariableName:
+                                    description: The name of the output variable whose
+                                      value has to be mapped.
+                                    type: string
+                                  stepName:
+                                    description: The name of the task step the output
+                                      variable belongs to.
+                                    type: string
+                                required:
+                                - outputVariableName
+                                - stepName
+                                type: object
+                            required:
+                            - name
+                            - outputVariableDetails
+                            type: object
+                          type: array
+                        stepName:
+                          description: The name of the task step.
+                          type: string
+                        stepProperties:
+                          description: RunbookVersionTaskStepProperties defines nested
+                            fields for Runbook.RunbookVersion.Task.StepProperties.
+                          properties:
+                            actionOnFailure:
+                              description: The action to be taken in case of a failure.
+                              type: string
+                            notificationPreferences:
+                              description: RunbookVersionTaskStepPropertiesNotificationPreferences
+                                defines nested fields for Runbook.RunbookVersion.Task.StepProperties.NotificationPreferences.
+                              properties:
+                                shouldNotifyOnPause:
+                                  description: Enables notification on pause.
+                                  type: boolean
+                                shouldNotifyOnTaskFailure:
+                                  description: Enables or disables notification on
+                                    Task Failures.
+                                  type: boolean
+                                shouldNotifyOnTaskSuccess:
+                                  description: Enables or disables notification on
+                                    Task Success.
+                                  type: boolean
+                              type: object
+                            pauseDetails:
+                              description: RunbookVersionTaskStepPropertiesPauseDetails
+                                defines nested fields for Runbook.RunbookVersion.Task.StepProperties.PauseDetails.
+                              properties:
+                                durationInMinutes:
+                                  description: Time in minutes to apply Pause.
+                                  type: integer
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                              type: object
+                            preCondition:
+                              description: Build control flow conditions that determine
+                                the relevance of the task execution.
+                              type: string
+                            runOn:
+                              description: RunbookVersionTaskStepPropertiesRunOn defines
+                                nested fields for Runbook.RunbookVersion.Task.StepProperties.RunOn.
+                              properties:
+                                condition:
+                                  description: Build control flow conditions that
+                                    determine the relevance of the task execution.
+                                  type: string
+                                host:
+                                  description: OCID of the self hosted instance.
+                                  type: string
+                                jsonData:
+                                  type: string
+                                kind:
+                                  type: string
+                                previousTaskInstanceDetails:
+                                  description: Previous Task Instance Details
+                                  items:
+                                    description: RunbookVersionTaskStepPropertiesRunOnPreviousTaskInstanceDetail
+                                      defines nested fields for Runbook.RunbookVersion.Task.StepProperties.RunOn.PreviousTaskInstanceDetail.
+                                    properties:
+                                      outputVariableDetails:
+                                        description: RunbookVersionTaskStepPropertiesRunOnPreviousTaskInstanceDetailOutputVariableDetails
+                                          defines nested fields for Runbook.RunbookVersion.Task.StepProperties.RunOn.PreviousTaskInstanceDetail.OutputVariableDetails.
+                                        properties:
+                                          outputVariableName:
+                                            description: The name of the output variable
+                                              whose value has to be mapped.
+                                            type: string
+                                          stepName:
+                                            description: The name of the task step
+                                              the output variable belongs to.
+                                            type: string
+                                        required:
+                                        - outputVariableName
+                                        - stepName
+                                        type: object
+                                      resourceId:
+                                        description: Resource Ocid.
+                                        type: string
+                                      resourceType:
+                                        description: Resource Type.
+                                        type: string
+                                    required:
+                                    - outputVariableDetails
+                                    - resourceId
+                                    type: object
+                                  type: array
+                              type: object
+                          required:
+                          - actionOnFailure
+                          type: object
+                        taskRecordDetails:
+                          description: RunbookVersionTaskTaskRecordDetails defines
+                            nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.
+                          properties:
+                            description:
+                              description: The description of the task.
+                              type: string
+                            executionDetails:
+                              description: RunbookVersionTaskTaskRecordDetailsExecutionDetails
+                                defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.
+                              properties:
+                                catalogId:
+                                  description: Catalog Id having terraform package.
+                                  type: string
+                                command:
+                                  description: |-
+                                    Optional command to execute the content.
+                                    You can provide any commands/arguments that can't be part of the script.
+                                  type: string
+                                configFile:
+                                  description: Catalog Id having config file.
+                                  type: string
+                                content:
+                                  description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsContent
+                                    defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Content.
+                                  properties:
+                                    bucketName:
+                                      description: Bucket Name.
+                                      type: string
+                                    catalogId:
+                                      description: Catalog Id having terraform package.
+                                      type: string
+                                    checksum:
+                                      description: md5 checksum of the artifact.
+                                      type: string
+                                    jsonData:
+                                      type: string
+                                    namespaceName:
+                                      description: Namespace.
+                                      type: string
+                                    objectName:
+                                      description: Object Name.
+                                      type: string
+                                    sourceType:
+                                      type: string
+                                  type: object
+                                credentials:
+                                  description: Credentials required for executing
+                                    the task.
+                                  items:
+                                    description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsCredential
+                                      defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Credential.
+                                    properties:
+                                      displayName:
+                                        description: |-
+                                          A user-friendly name. Does not have to be unique, and it's changeable.
+                                          Avoid entering confidential information.
+                                          Example: `My new resource`
+                                        type: string
+                                      id:
+                                        description: The OCID of the resource.
+                                        type: string
+                                    required:
+                                    - id
+                                    type: object
+                                  type: array
+                                endpoint:
+                                  description: Endpoint to be invoked.
+                                  type: string
+                                executionType:
+                                  type: string
+                                isExecutableContent:
+                                  description: Is the Content an executable file?
+                                  type: boolean
+                                isLocked:
+                                  description: Is the script locked to prevent changes
+                                    directly in Object Storage?
+                                  type: boolean
+                                isReadOutputVariableEnabled:
+                                  description: Is read output variable enabled
+                                  type: boolean
+                                jsonData:
+                                  type: string
+                                systemVariables:
+                                  description: The list of system variables.
+                                  items:
+                                    type: string
+                                  type: array
+                                targetCompartmentId:
+                                  description: OCID of the compartment to which the
+                                    resource belongs to.
+                                  type: string
+                                variables:
+                                  description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariables
+                                    defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Variables.
+                                  properties:
+                                    inputVariables:
+                                      description: The input variables for the task.
+                                      items:
+                                        description: RunbookVersionTaskTaskRecordDetailsExecutionDetailsVariablesInputVariable
+                                          defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.ExecutionDetails.Variables.InputVariable.
+                                        properties:
+                                          description:
+                                            description: The description of the argument.
+                                            type: string
+                                          jsonData:
+                                            type: string
+                                          name:
+                                            description: The name of the argument.
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - name
+                                        type: object
+                                      type: array
+                                    outputVariables:
+                                      description: The list of output variables.
+                                      items:
+                                        type: string
+                                      type: array
+                                  type: object
+                              type: object
+                            isApplySubjectTask:
+                              description: Is this an Apply Subject Task? Ex. Patch
+                                Execution Task
+                              type: boolean
+                            isCopyToLibraryEnabled:
+                              description: Make a copy of this task in Library
+                              type: boolean
+                            isDiscoveryOutputTask:
+                              description: Is this a discovery output task?
+                              type: boolean
+                            jsonData:
+                              type: string
+                            name:
+                              description: The name of the task
+                              type: string
+                            osType:
+                              description: The OS for the task.
+                              type: string
+                            platform:
+                              description: The platform of the runbook.
+                              type: string
+                            properties:
+                              description: RunbookVersionTaskTaskRecordDetailsProperties
+                                defines nested fields for Runbook.RunbookVersion.Task.TaskRecordDetails.Properties.
+                              properties:
+                                numRetries:
+                                  description: The number of retries allowed.
+                                  type: integer
+                                timeoutInSeconds:
+                                  description: The timeout in seconds for the task.
+                                  type: integer
+                              required:
+                              - numRetries
+                              - timeoutInSeconds
+                              type: object
+                            scope:
+                              type: string
+                            taskRecordId:
+                              description: The ID of taskRecord.
+                              type: string
+                          type: object
+                      required:
+                      - stepName
+                      - taskRecordDetails
+                      type: object
+                    type: array
+                  version:
+                    description: The version of the runbook.
+                    type: string
+                required:
+                - executionWorkflowDetails
+                - groups
+                - tasks
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time this resource was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: The time this resource was last updated. An RFC3339 formatted
+                  datetime string.
+                type: string
+              type:
+                description: The type of the runbook.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

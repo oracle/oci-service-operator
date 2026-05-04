@@ -4699,6 +4699,1063 @@ services:
       webhooks:
         strategy: none
 
+  - service: aidataplatform
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/aidataplatform
+    group: aidataplatform
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AiDataPlatform
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: autoscaling
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/autoscaling
+    group: autoscaling
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AutoScalingConfiguration
+        - AutoScalingPolicy
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: batch
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/batch
+    group: batch
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - BatchContext
+        - BatchJobPool
+        - BatchTaskEnvironment
+        - BatchTaskProfile
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: cloudguard
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/cloudguard
+    group: cloudguard
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AdhocQuery
+        - DataMaskRule
+        - DataSource
+        - DetectorRecipe
+        - DetectorRecipeDetectorRule
+        - ManagedList
+        - ResponderRecipe
+        - SavedQuery
+        - SecurityRecipe
+        - SecurityZone
+        - Target
+        - TargetDetectorRecipe
+        - TargetResponderRecipe
+        - WlpAgent
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: filestorage
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/filestorage
+    group: filestorage
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Export
+        - FileSystem
+        - FilesystemSnapshotPolicy
+        - MountTarget
+        - OutboundConnector
+        - QuotaRule
+        - Replication
+        - Snapshot
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: networkfirewall
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/networkfirewall
+    group: networkfirewall
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AddressList
+        - Application
+        - ApplicationGroup
+        - DecryptionProfile
+        - DecryptionRule
+        - MappedSecret
+        - NatRule
+        - NetworkFirewall
+        - NetworkFirewallPolicy
+        - SecurityRule
+        - Service
+        - ServiceList
+        - TunnelInspectionRule
+        - UrlList
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: datacatalog
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datacatalog
+    group: datacatalog
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Attribute
+        - AttributeTag
+        - Catalog
+        - CatalogPrivateEndpoint
+        - Connection
+        - CustomProperty
+        - DataAsset
+        - DataAssetTag
+        - Entity
+        - EntityTag
+        - Folder
+        - FolderTag
+        - Glossary
+        - Job
+        - JobDefinition
+        - Metastore
+        - Namespace
+        - Pattern
+        - Term
+        - TermRelationship
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: dataintegration
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dataintegration
+    group: dataintegration
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Application
+        - ApplicationDetailedDescription
+        - Connection
+        - ConnectionValidation
+        - CopyObjectRequest
+        - DataAsset
+        - DataFlow
+        - DataFlowValidation
+        - DisApplication
+        - DisApplicationDetailedDescription
+        - ExportRequest
+        - ExternalPublication
+        - ExternalPublicationValidation
+        - Folder
+        - FunctionLibrary
+        - ImportRequest
+        - Patch
+        - Pipeline
+        - PipelineValidation
+        - Project
+        - Schedule
+        - Task
+        - TaskRun
+        - TaskSchedule
+        - TaskValidation
+        - UserDefinedFunction
+        - UserDefinedFunctionValidation
+        - Workspace
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+      resources:
+        - kind: DataFlow
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+          statusFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+            - name: TypedObjectMap
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"typedObjectMap,omitempty"'
+            - name: TargetFieldMapSummary
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"targetFieldMapSummary,omitempty"'
+        - kind: DataFlowValidation
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+            - name: TypedObjectMap
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"typedObjectMap,omitempty"'
+            - name: TargetFieldMapSummary
+              type: 'map[string]shared.JSONValue'
+              tag: 'json:"targetFieldMapSummary,omitempty"'
+        - kind: Pipeline
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Variables
+              type: '[]shared.JSONValue'
+              tag: 'json:"variables,omitempty"'
+          statusFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Variables
+              type: '[]shared.JSONValue'
+              tag: 'json:"variables,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+        - kind: PipelineValidation
+          specFields:
+            - name: Nodes
+              type: '[]shared.JSONValue'
+              tag: 'json:"nodes,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: FlowConfigValues
+              type: shared.JSONValue
+              tag: 'json:"flowConfigValues,omitempty"'
+            - name: Variables
+              type: '[]shared.JSONValue'
+              tag: 'json:"variables,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+        - kind: Task
+          specFields:
+            - name: InputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"inputPorts,omitempty"'
+            - name: OutputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"outputPorts,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: OpConfigValues
+              type: shared.JSONValue
+              tag: 'json:"opConfigValues,omitempty"'
+            - name: ConfigProviderDelegate
+              type: shared.JSONValue
+              tag: 'json:"configProviderDelegate,omitempty"'
+            - name: RegistryMetadata
+              type: shared.JSONValue
+              tag: 'json:"registryMetadata"'
+            - name: DataFlow
+              type: shared.JSONValue
+              tag: 'json:"dataFlow,omitempty"'
+            - name: ConditionalCompositeFieldMap
+              type: shared.JSONValue
+              tag: 'json:"conditionalCompositeFieldMap,omitempty"'
+            - name: Pipeline
+              type: shared.JSONValue
+              tag: 'json:"pipeline,omitempty"'
+            - name: DataflowApplication
+              type: shared.JSONValue
+              tag: 'json:"dataflowApplication,omitempty"'
+            - name: DriverShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"driverShapeDetails,omitempty"'
+            - name: ExecutorShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"executorShapeDetails,omitempty"'
+            - name: Script
+              type: shared.JSONValue
+              tag: 'json:"script,omitempty"'
+            - name: AuthDetails
+              type: shared.JSONValue
+              tag: 'json:"authDetails,omitempty"'
+            - name: AuthConfig
+              type: shared.JSONValue
+              tag: 'json:"authConfig,omitempty"'
+            - name: Endpoint
+              type: shared.JSONValue
+              tag: 'json:"endpoint,omitempty"'
+            - name: CancelEndpoint
+              type: shared.JSONValue
+              tag: 'json:"cancelEndpoint,omitempty"'
+            - name: ExecuteRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"executeRestCallConfig,omitempty"'
+            - name: CancelRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"cancelRestCallConfig,omitempty"'
+            - name: PollRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"pollRestCallConfig,omitempty"'
+            - name: TypedExpressions
+              type: '[]shared.JSONValue'
+              tag: 'json:"typedExpressions,omitempty"'
+          statusFields:
+            - name: InputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"inputPorts,omitempty"'
+            - name: OutputPorts
+              type: '[]shared.JSONValue'
+              tag: 'json:"outputPorts,omitempty"'
+            - name: Parameters
+              type: '[]shared.JSONValue'
+              tag: 'json:"parameters,omitempty"'
+            - name: OpConfigValues
+              type: shared.JSONValue
+              tag: 'json:"opConfigValues,omitempty"'
+            - name: ConfigProviderDelegate
+              type: shared.JSONValue
+              tag: 'json:"configProviderDelegate,omitempty"'
+            - name: Metadata
+              type: shared.JSONValue
+              tag: 'json:"metadata,omitempty"'
+            - name: RegistryMetadata
+              type: shared.JSONValue
+              tag: 'json:"registryMetadata,omitempty"'
+            - name: Pipeline
+              type: shared.JSONValue
+              tag: 'json:"pipeline,omitempty"'
+            - name: DataFlow
+              type: shared.JSONValue
+              tag: 'json:"dataFlow,omitempty"'
+            - name: Script
+              type: shared.JSONValue
+              tag: 'json:"script,omitempty"'
+            - name: AuthDetails
+              type: shared.JSONValue
+              tag: 'json:"authDetails,omitempty"'
+            - name: AuthConfig
+              type: shared.JSONValue
+              tag: 'json:"authConfig,omitempty"'
+            - name: Endpoint
+              type: shared.JSONValue
+              tag: 'json:"endpoint,omitempty"'
+            - name: CancelEndpoint
+              type: shared.JSONValue
+              tag: 'json:"cancelEndpoint,omitempty"'
+            - name: ExecuteRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"executeRestCallConfig,omitempty"'
+            - name: CancelRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"cancelRestCallConfig,omitempty"'
+            - name: PollRestCallConfig
+              type: shared.JSONValue
+              tag: 'json:"pollRestCallConfig,omitempty"'
+            - name: TypedExpressions
+              type: '[]shared.JSONValue'
+              tag: 'json:"typedExpressions,omitempty"'
+            - name: DataflowApplication
+              type: shared.JSONValue
+              tag: 'json:"dataflowApplication,omitempty"'
+            - name: DriverShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"driverShapeDetails,omitempty"'
+            - name: ExecutorShapeDetails
+              type: shared.JSONValue
+              tag: 'json:"executorShapeDetails,omitempty"'
+            - name: ConditionalCompositeFieldMap
+              type: shared.JSONValue
+              tag: 'json:"conditionalCompositeFieldMap,omitempty"'
+        - kind: TaskValidation
+          specFields:
+            - name: DataFlow
+              type: shared.JSONValue
+              tag: 'json:"dataFlow,omitempty"'
+            - name: Pipeline
+              type: shared.JSONValue
+              tag: 'json:"pipeline,omitempty"'
+
+  - service: goldengate
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/goldengate
+    group: goldengate
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Certificate
+        - Connection
+        - ConnectionAssignment
+        - DatabaseRegistration
+        - Deployment
+        - DeploymentBackup
+        - Pipeline
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: datasafe
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datasafe
+    group: datasafe
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AlertPolicy
+        - AlertPolicyRule
+        - AttributeSet
+        - AuditArchiveRetrieval
+        - AuditProfile
+        - DataSafePrivateEndpoint
+        - DiscoveryJob
+        - LibraryMaskingFormat
+        - MaskingColumn
+        - MaskingPolicy
+        - OnPremConnector
+        - PeerTargetDatabase
+        - ReferentialRelation
+        - ReportDefinition
+        - SdmMaskingPolicyDifference
+        - SecurityAssessment
+        - SecurityPolicy
+        - SecurityPolicyConfig
+        - SecurityPolicyDeployment
+        - SensitiveColumn
+        - SensitiveDataModel
+        - SensitiveType
+        - SensitiveTypeGroup
+        - SensitiveTypesExport
+        - SqlCollection
+        - TargetAlertPolicyAssociation
+        - TargetDatabase
+        - TargetDatabaseGroup
+        - UnifiedAuditPolicy
+        - UserAssessment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: resourcemanager
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/resourcemanager
+    group: resourcemanager
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ConfigurationSourceProvider
+        - PrivateEndpoint
+        - Stack
+        - Template
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: vulnerabilityscanning
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/vulnerabilityscanning
+    group: vulnerabilityscanning
+    version: v1beta1
+    phase: security-and-identity
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - ContainerScanRecipe
+        - ContainerScanTarget
+        - HostScanRecipe
+        - HostScanTarget
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: announcementsservice
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/announcementsservice
+    group: announcementsservice
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - AnnouncementSubscription
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: blockchain
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/blockchain
+    group: blockchain
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - BlockchainPlatform
+        - Osn
+        - Peer
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: cloudbridge
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/cloudbridge
+    group: cloudbridge
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Agent
+        - AgentDependency
+        - Asset
+        - AssetSource
+        - DiscoverySchedule
+        - Environment
+        - Inventory
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: cloudmigrations
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/cloudmigrations
+    group: cloudmigrations
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Migration
+        - MigrationAsset
+        - MigrationPlan
+        - ReplicationSchedule
+        - TargetAsset
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: computecloudatcustomer
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/computecloudatcustomer
+    group: computecloudatcustomer
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - CccInfrastructure
+        - CccUpgradeSchedule
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: datalabelingservicedataplane
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/datalabelingservicedataplane
+    group: datalabelingservicedataplane
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Annotation
+        - Record
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: dbmulticloud
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dbmulticloud
+    group: dbmulticloud
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - MultiCloudResourceDiscovery
+        - OracleDbAwsIdentityConnector
+        - OracleDbAwsKey
+        - OracleDbAzureBlobContainer
+        - OracleDbAzureBlobMount
+        - OracleDbAzureConnector
+        - OracleDbAzureVault
+        - OracleDbAzureVaultAssociation
+        - OracleDbGcpIdentityConnector
+        - OracleDbGcpKeyRing
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: demandsignal
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/demandsignal
+    group: demandsignal
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - OccDemandSignal
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: desktops
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/desktops
+    group: desktops
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - DesktopPool
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: dif
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/dif
+    group: dif
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - Stack
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: emwarehouse
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/emwarehouse
+    group: emwarehouse
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - EmWarehouse
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: fleetappsmanagement
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/fleetappsmanagement
+    group: fleetappsmanagement
+    version: v1beta1
+    phase: eventing-messaging-and-observability
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - CatalogItem
+        - CompliancePolicyRule
+        - Fleet
+        - FleetCredential
+        - FleetProperty
+        - FleetResource
+        - MaintenanceWindow
+        - Onboarding
+        - Patch
+        - PlatformConfiguration
+        - Property
+        - Provision
+        - Runbook
+        - RunbookVersion
+        - SchedulerDefinition
+        - TaskRecord
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: fleetsoftwareupdate
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/fleetsoftwareupdate
+    group: fleetsoftwareupdate
+    version: v1beta1
+    phase: networking-and-infrastructure
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - FsuAction
+        - FsuCollection
+        - FsuCycle
+        - FsuDiscovery
+        - FsuReadinessCheck
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
+  - service: fusionapps
+    sdkPackage: github.com/oracle/oci-go-sdk/v65/fusionapps
+    group: fusionapps
+    version: v1beta1
+    phase: data-and-storage
+    packageProfile: controller-backed
+    selection:
+      enabled: true
+      mode: explicit
+      includeKinds:
+        - FusionEnvironment
+        - FusionEnvironmentFamily
+        - RefreshActivity
+        - ServiceAttachment
+    async:
+      strategy: lifecycle
+      runtime: generatedruntime
+      formalClassification: lifecycle
+    generation:
+      controller:
+        strategy: generated
+      serviceManager:
+        strategy: generated
+      registration:
+        strategy: generated
+      webhooks:
+        strategy: none
+
   - service: vault
     sdkPackage: github.com/oracle/oci-go-sdk/v65/vault
     group: vault
