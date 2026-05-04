@@ -2,7 +2,7 @@
 
 # Key Management
 
-Manage OCI Key Management vaults and EKMS private endpoints from Kubernetes.
+Manage OCI Vault resources from Kubernetes.
 
 | Field | Value |
 | --- | --- |
@@ -16,7 +16,7 @@ Manage OCI Key Management vaults and EKMS private endpoints from Kubernetes.
 
 ## Notes
 
-- Current package scope includes Vault and EkmsPrivateEndpoint.
+- Current package scope is intentionally limited to Vault while the remaining keymanagement kinds stay out of the generatedruntime rollout.
 - No checked-in release manifest currently lists this package; the resource scope below reflects the current repository package metadata.
 - This package is currently hidden from the Supported Resources landing page until a checked-in release manifest promotes it to the customer-visible surface.
 
@@ -24,5 +24,5 @@ Manage OCI Key Management vaults and EKMS private endpoints from Kubernetes.
 
 | Resource | API Version | Summary | Guide | Sample | API Spec |
 | --- | --- | --- | --- | --- | --- |
-| `keymanagement/EkmsPrivateEndpoint` | `keymanagement.oracle.com/v1beta1` | Manage OCI EKMS private endpoints. | — | [Sample](../../samples/keymanagement/v1beta1/ekmsprivateendpoint.md) | [Reference](../../api/keymanagement/v1beta1/index.md#kind-ekmsprivateendpoint) |
+| `keymanagement/EkmsPrivateEndpoint` | `keymanagement.oracle.com/v1beta1` | — | — | [Sample](../../samples/keymanagement/v1beta1/ekmsprivateendpoint.md) | [Reference](../../api/keymanagement/v1beta1/index.md#kind-ekmsprivateendpoint) |
 | `keymanagement/Vault` | `keymanagement.oracle.com/v1beta1` | Manage OCI Vault resources and their scheduled deletion lifecycle. | — | [Sample](../../samples/keymanagement/v1beta1/vault.md) | [Reference](../../api/keymanagement/v1beta1/index.md#kind-vault) |

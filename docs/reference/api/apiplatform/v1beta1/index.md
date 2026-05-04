@@ -147,4 +147,3 @@ ApiPlatformInstanceUris defines nested fields for ApiPlatformInstance.Uris.
 | --- | --- | --- | --- | --- | --- |
 | `developersPortalUri` | Developer's Portal URI of the instance (/developers) | `string` | No | - | - |
 | `managementPortalUri` | Management Portal URI of the instance (/apiplatform) | `string` | No | - | - |
-

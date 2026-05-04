@@ -24,7 +24,7 @@ No customer-visible package currently exposes `keymanagement.oracle.com/v1beta1`
 <a id="kind-ekmsprivateendpoint"></a>
 ## EkmsPrivateEndpoint
 
-Manage OCI EKMS private endpoints.
+EkmsPrivateEndpoint is the Schema for the ekmsprivateendpoints API.
 
 - `Plural`: `ekmsprivateendpoints`
 - `Scope`: `Namespaced`

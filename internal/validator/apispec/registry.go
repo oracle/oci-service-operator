@@ -16,9 +16,12 @@ import (
 	apmcontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/apmcontrolplane/v1beta1"
 	apmsyntheticsv1beta1 "github.com/oracle/oci-service-operator/api/apmsynthetics/v1beta1"
 	apmtracesv1beta1 "github.com/oracle/oci-service-operator/api/apmtraces/v1beta1"
+	artifactsv1beta1 "github.com/oracle/oci-service-operator/api/artifacts/v1beta1"
+	bastionv1beta1 "github.com/oracle/oci-service-operator/api/bastion/v1beta1"
 	bdsv1beta1 "github.com/oracle/oci-service-operator/api/bds/v1beta1"
 	budgetv1beta1 "github.com/oracle/oci-service-operator/api/budget/v1beta1"
 	capacitymanagementv1beta1 "github.com/oracle/oci-service-operator/api/capacitymanagement/v1beta1"
+	certificatesmanagementv1beta1 "github.com/oracle/oci-service-operator/api/certificatesmanagement/v1beta1"
 	clusterplacementgroupsv1beta1 "github.com/oracle/oci-service-operator/api/clusterplacementgroups/v1beta1"
 	containerenginev1beta1 "github.com/oracle/oci-service-operator/api/containerengine/v1beta1"
 	containerinstancesv1beta1 "github.com/oracle/oci-service-operator/api/containerinstances/v1beta1"
@@ -31,26 +34,59 @@ import (
 	datalabelingservicev1beta1 "github.com/oracle/oci-service-operator/api/datalabelingservice/v1beta1"
 	datasciencev1beta1 "github.com/oracle/oci-service-operator/api/datascience/v1beta1"
 	delegateaccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/delegateaccesscontrol/v1beta1"
+	devopsv1beta1 "github.com/oracle/oci-service-operator/api/devops/v1beta1"
+	dnsv1beta1 "github.com/oracle/oci-service-operator/api/dns/v1beta1"
 	emailv1beta1 "github.com/oracle/oci-service-operator/api/email/v1beta1"
+	eventsv1beta1 "github.com/oracle/oci-service-operator/api/events/v1beta1"
 	functionsv1beta1 "github.com/oracle/oci-service-operator/api/functions/v1beta1"
 	generativeaiv1beta1 "github.com/oracle/oci-service-operator/api/generativeai/v1beta1"
+	governancerulescontrolplanev1beta1 "github.com/oracle/oci-service-operator/api/governancerulescontrolplane/v1beta1"
+	healthchecksv1beta1 "github.com/oracle/oci-service-operator/api/healthchecks/v1beta1"
 	identityv1beta1 "github.com/oracle/oci-service-operator/api/identity/v1beta1"
+	integrationv1beta1 "github.com/oracle/oci-service-operator/api/integration/v1beta1"
+	iotv1beta1 "github.com/oracle/oci-service-operator/api/iot/v1beta1"
 	keymanagementv1beta1 "github.com/oracle/oci-service-operator/api/keymanagement/v1beta1"
+	licensemanagerv1beta1 "github.com/oracle/oci-service-operator/api/licensemanager/v1beta1"
+	limitsv1beta1 "github.com/oracle/oci-service-operator/api/limits/v1beta1"
+	limitsincreasev1beta1 "github.com/oracle/oci-service-operator/api/limitsincrease/v1beta1"
 	loadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/loadbalancer/v1beta1"
+	lockboxv1beta1 "github.com/oracle/oci-service-operator/api/lockbox/v1beta1"
+	loganalyticsv1beta1 "github.com/oracle/oci-service-operator/api/loganalytics/v1beta1"
 	loggingv1beta1 "github.com/oracle/oci-service-operator/api/logging/v1beta1"
+	managedkafkav1beta1 "github.com/oracle/oci-service-operator/api/managedkafka/v1beta1"
+	managementagentv1beta1 "github.com/oracle/oci-service-operator/api/managementagent/v1beta1"
+	managementdashboardv1beta1 "github.com/oracle/oci-service-operator/api/managementdashboard/v1beta1"
 	marketplacev1beta1 "github.com/oracle/oci-service-operator/api/marketplace/v1beta1"
+	marketplaceprivateofferv1beta1 "github.com/oracle/oci-service-operator/api/marketplaceprivateoffer/v1beta1"
+	marketplacepublisherv1beta1 "github.com/oracle/oci-service-operator/api/marketplacepublisher/v1beta1"
 	monitoringv1beta1 "github.com/oracle/oci-service-operator/api/monitoring/v1beta1"
 	mysqlv1beta1 "github.com/oracle/oci-service-operator/api/mysql/v1beta1"
+	networkloadbalancerv1beta1 "github.com/oracle/oci-service-operator/api/networkloadbalancer/v1beta1"
 	nosqlv1beta1 "github.com/oracle/oci-service-operator/api/nosql/v1beta1"
 	objectstoragev1beta1 "github.com/oracle/oci-service-operator/api/objectstorage/v1beta1"
 	ocvpv1beta1 "github.com/oracle/oci-service-operator/api/ocvp/v1beta1"
 	odav1beta1 "github.com/oracle/oci-service-operator/api/oda/v1beta1"
+	onsv1beta1 "github.com/oracle/oci-service-operator/api/ons/v1beta1"
 	opensearchv1beta1 "github.com/oracle/oci-service-operator/api/opensearch/v1beta1"
+	operatoraccesscontrolv1beta1 "github.com/oracle/oci-service-operator/api/operatoraccesscontrol/v1beta1"
+	opsiv1beta1 "github.com/oracle/oci-service-operator/api/opsi/v1beta1"
+	optimizerv1beta1 "github.com/oracle/oci-service-operator/api/optimizer/v1beta1"
+	osmanagementhubv1beta1 "github.com/oracle/oci-service-operator/api/osmanagementhub/v1beta1"
 	psqlv1beta1 "github.com/oracle/oci-service-operator/api/psql/v1beta1"
 	queuev1beta1 "github.com/oracle/oci-service-operator/api/queue/v1beta1"
+	recoveryv1beta1 "github.com/oracle/oci-service-operator/api/recovery/v1beta1"
 	redisv1beta1 "github.com/oracle/oci-service-operator/api/redis/v1beta1"
+	resourceanalyticsv1beta1 "github.com/oracle/oci-service-operator/api/resourceanalytics/v1beta1"
+	resourceschedulerv1beta1 "github.com/oracle/oci-service-operator/api/resourcescheduler/v1beta1"
+	schv1beta1 "github.com/oracle/oci-service-operator/api/sch/v1beta1"
+	securityattributev1beta1 "github.com/oracle/oci-service-operator/api/securityattribute/v1beta1"
+	servicecatalogv1beta1 "github.com/oracle/oci-service-operator/api/servicecatalog/v1beta1"
+	stackmonitoringv1beta1 "github.com/oracle/oci-service-operator/api/stackmonitoring/v1beta1"
 	streamingv1beta1 "github.com/oracle/oci-service-operator/api/streaming/v1beta1"
 	usageapiv1beta1 "github.com/oracle/oci-service-operator/api/usageapi/v1beta1"
+	waav1beta1 "github.com/oracle/oci-service-operator/api/waa/v1beta1"
+	waasv1beta1 "github.com/oracle/oci-service-operator/api/waas/v1beta1"
+	wafv1beta1 "github.com/oracle/oci-service-operator/api/waf/v1beta1"
 )
 
 type SDKMapping struct {
@@ -731,6 +767,47 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "NotificationSubscription",
+		SpecType:   reflect.TypeOf(onsv1beta1.SubscriptionSpec{}),
+		StatusType: reflect.TypeOf(onsv1beta1.SubscriptionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "ons.CreateSubscriptionDetails",
+			},
+			{
+				SDKStruct: "ons.UpdateSubscriptionDetails",
+			},
+			{
+				SDKStruct:  "ons.Subscription",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "ons.SubscriptionSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "NotificationTopic",
+		SpecType:   reflect.TypeOf(onsv1beta1.TopicSpec{}),
+		StatusType: reflect.TypeOf(onsv1beta1.TopicStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "ons.CreateTopicDetails",
+			},
+			{
+				SDKStruct: "ons.NotificationTopic",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			},
+			{
+				SDKStruct: "ons.NotificationTopicSummary",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: OCI read-model mappings broaden desired-state coverage, and this CRD does not expose a meaningful status surface for parity tracking.",
+			},
+		},
+	},
+	{
 		Name:       "LoggingLog",
 		SpecType:   reflect.TypeOf(loggingv1beta1.LogSpec{}),
 		StatusType: reflect.TypeOf(loggingv1beta1.LogStatus{}),
@@ -933,6 +1010,27 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "EventsRule",
+		SpecType:   reflect.TypeOf(eventsv1beta1.RuleSpec{}),
+		StatusType: reflect.TypeOf(eventsv1beta1.RuleStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "events.CreateRuleDetails",
+			},
+			{
+				SDKStruct: "events.UpdateRuleDetails",
+			},
+			{
+				SDKStruct:  "events.Rule",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "events.RuleSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "MonitoringAlarm",
 		SpecType:   reflect.TypeOf(monitoringv1beta1.AlarmSpec{}),
 		StatusType: reflect.TypeOf(monitoringv1beta1.AlarmStatus{}),
@@ -973,6 +1071,105 @@ var targets = []Target{
 			{
 				SDKStruct:  "monitoring.AlarmSuppressionSummary",
 				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "DNSSteeringPolicy",
+		SpecType:   reflect.TypeOf(dnsv1beta1.SteeringPolicySpec{}),
+		StatusType: reflect.TypeOf(dnsv1beta1.SteeringPolicyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dns.CreateSteeringPolicyDetails",
+			},
+			{
+				SDKStruct: "dns.UpdateSteeringPolicyDetails",
+			},
+			{
+				SDKStruct:  "dns.SteeringPolicy",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "dns.SteeringPolicySummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "DNSSteeringPolicyAttachment",
+		SpecType:   reflect.TypeOf(dnsv1beta1.SteeringPolicyAttachmentSpec{}),
+		StatusType: reflect.TypeOf(dnsv1beta1.SteeringPolicyAttachmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dns.CreateSteeringPolicyAttachmentDetails",
+			},
+			{
+				SDKStruct: "dns.UpdateSteeringPolicyAttachmentDetails",
+			},
+			{
+				SDKStruct: "dns.SteeringPolicyAttachment",
+			},
+			{
+				SDKStruct: "dns.SteeringPolicyAttachmentSummary",
+			},
+		},
+	},
+	{
+		Name:       "DNSTsigKey",
+		SpecType:   reflect.TypeOf(dnsv1beta1.TsigKeySpec{}),
+		StatusType: reflect.TypeOf(dnsv1beta1.TsigKeyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dns.CreateTsigKeyDetails",
+			},
+			{
+				SDKStruct: "dns.UpdateTsigKeyDetails",
+			},
+			{
+				SDKStruct:  "dns.TsigKey",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "dns.TsigKeySummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "DNSView",
+		SpecType:   reflect.TypeOf(dnsv1beta1.ViewSpec{}),
+		StatusType: reflect.TypeOf(dnsv1beta1.ViewStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dns.CreateViewDetails",
+			},
+			{
+				SDKStruct: "dns.UpdateViewDetails",
+			},
+			{
+				SDKStruct: "dns.View",
+			},
+			{
+				SDKStruct: "dns.ViewSummary",
+			},
+		},
+	},
+	{
+		Name:       "DNSZone",
+		SpecType:   reflect.TypeOf(dnsv1beta1.ZoneSpec{}),
+		StatusType: reflect.TypeOf(dnsv1beta1.ZoneStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "dns.CreateZoneDetails",
+			},
+			{
+				SDKStruct: "dns.UpdateZoneDetails",
+			},
+			{
+				SDKStruct: "dns.Zone",
+			},
+			{
+				SDKStruct: "dns.ZoneSummary",
 			},
 		},
 	},
@@ -1171,6 +1368,216 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "NetworkLoadBalancerBackend",
+		SpecType:   reflect.TypeOf(networkloadbalancerv1beta1.BackendSpec{}),
+		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.BackendStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "networkloadbalancer.CreateBackendDetails",
+			},
+			{
+				SDKStruct: "networkloadbalancer.UpdateBackendDetails",
+			},
+			{
+				SDKStruct: "networkloadbalancer.BackendDetails",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.Backend",
+				APISurface: "spec",
+			},
+			{
+				SDKStruct: "networkloadbalancer.BackendCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.BackendSummary",
+				APISurface: "spec",
+			},
+		},
+	},
+	{
+		Name:       "NetworkLoadBalancerBackendSet",
+		SpecType:   reflect.TypeOf(networkloadbalancerv1beta1.BackendSetSpec{}),
+		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.BackendSetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "networkloadbalancer.CreateBackendSetDetails",
+			},
+			{
+				SDKStruct: "networkloadbalancer.UpdateBackendSetDetails",
+			},
+			{
+				SDKStruct: "networkloadbalancer.BackendSetDetails",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.BackendSet",
+				APISurface: "spec",
+			},
+			{
+				SDKStruct: "networkloadbalancer.BackendSetCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.BackendSetSummary",
+				APISurface: "spec",
+			},
+		},
+	},
+	{
+		Name:       "NetworkLoadBalancerListener",
+		SpecType:   reflect.TypeOf(networkloadbalancerv1beta1.ListenerSpec{}),
+		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.ListenerStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "networkloadbalancer.CreateListenerDetails",
+			},
+			{
+				SDKStruct: "networkloadbalancer.UpdateListenerDetails",
+			},
+			{
+				SDKStruct: "networkloadbalancer.ListenerDetails",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.Listener",
+				APISurface: "spec",
+			},
+			{
+				SDKStruct: "networkloadbalancer.ListenerCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.ListenerSummary",
+				APISurface: "spec",
+			},
+		},
+	},
+	{
+		Name:       "NetworkLoadBalancerNetworkLoadBalancer",
+		SpecType:   reflect.TypeOf(networkloadbalancerv1beta1.NetworkLoadBalancerSpec{}),
+		StatusType: reflect.TypeOf(networkloadbalancerv1beta1.NetworkLoadBalancerStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "networkloadbalancer.CreateNetworkLoadBalancerDetails",
+			},
+			{
+				SDKStruct: "networkloadbalancer.UpdateNetworkLoadBalancerDetails",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.NetworkLoadBalancer",
+				APISurface: "status",
+			},
+			{
+				SDKStruct: "networkloadbalancer.NetworkLoadBalancerCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "networkloadbalancer.NetworkLoadBalancerSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "ArtifactsContainerImageSignature",
+		SpecType:   reflect.TypeOf(artifactsv1beta1.ContainerImageSignatureSpec{}),
+		StatusType: reflect.TypeOf(artifactsv1beta1.ContainerImageSignatureStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "artifacts.CreateContainerImageSignatureDetails",
+			},
+			{
+				SDKStruct: "artifacts.UpdateContainerImageSignatureDetails",
+			},
+			{
+				SDKStruct:  "artifacts.ContainerImageSignature",
+				APISurface: "status",
+			},
+			{
+				SDKStruct: "artifacts.ContainerImageSignatureCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "artifacts.ContainerImageSignatureSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
+		Name:       "ArtifactsContainerRepository",
+		SpecType:   reflect.TypeOf(artifactsv1beta1.ContainerRepositorySpec{}),
+		StatusType: reflect.TypeOf(artifactsv1beta1.ContainerRepositoryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "artifacts.CreateContainerRepositoryDetails",
+			},
+			{
+				SDKStruct: "artifacts.UpdateContainerRepositoryDetails",
+			},
+			{
+				SDKStruct: "artifacts.ContainerRepository",
+			},
+			{
+				SDKStruct: "artifacts.ContainerRepositoryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct: "artifacts.ContainerRepositorySummary",
+			},
+		},
+	},
+	{
+		Name:       "ArtifactsRepository",
+		SpecType:   reflect.TypeOf(artifactsv1beta1.RepositorySpec{}),
+		StatusType: reflect.TypeOf(artifactsv1beta1.RepositoryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "artifacts.ContainerRepository",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: ArtifactsRepository status represents generic repositories; container repository parity is tracked on ArtifactsContainerRepository.",
+			},
+			{
+				SDKStruct:  "artifacts.GenericRepository",
+				APISurface: "status",
+			},
+			{
+				SDKStruct: "artifacts.RepositoryCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+		},
+	},
+	{
+		Name:       "CertificatesManagementCaBundle",
+		SpecType:   reflect.TypeOf(certificatesmanagementv1beta1.CaBundleSpec{}),
+		StatusType: reflect.TypeOf(certificatesmanagementv1beta1.CaBundleStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "certificatesmanagement.CreateCaBundleDetails",
+			},
+			{
+				SDKStruct: "certificatesmanagement.UpdateCaBundleDetails",
+			},
+			{
+				SDKStruct:  "certificatesmanagement.CaBundle",
+				APISurface: "status",
+			},
+			{
+				SDKStruct: "certificatesmanagement.CaBundleCollection",
+				Exclude:   true,
+				Reason:    "Intentionally untracked: collection responses do not map to a singular resource status surface.",
+			},
+			{
+				SDKStruct:  "certificatesmanagement.CaBundleSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "ContainerEngineCluster",
 		SpecType:   reflect.TypeOf(containerenginev1beta1.ClusterSpec{}),
 		StatusType: reflect.TypeOf(containerenginev1beta1.ClusterStatus{}),
@@ -1229,6 +1636,27 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "KeyManagementEkmsPrivateEndpoint",
+		SpecType:   reflect.TypeOf(keymanagementv1beta1.EkmsPrivateEndpointSpec{}),
+		StatusType: reflect.TypeOf(keymanagementv1beta1.EkmsPrivateEndpointStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "keymanagement.CreateEkmsPrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "keymanagement.UpdateEkmsPrivateEndpointDetails",
+			},
+			{
+				SDKStruct:  "keymanagement.EkmsPrivateEndpoint",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "keymanagement.EkmsPrivateEndpointSummary",
+				APISurface: "status",
+			},
+		},
+	},
+	{
 		Name:       "KeyManagementVault",
 		SpecType:   reflect.TypeOf(keymanagementv1beta1.VaultSpec{}),
 		StatusType: reflect.TypeOf(keymanagementv1beta1.VaultStatus{}),
@@ -1244,6 +1672,27 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "keymanagement.VaultSummary",
+			},
+		},
+	},
+	{
+		Name:       "LimitsQuota",
+		SpecType:   reflect.TypeOf(limitsv1beta1.QuotaSpec{}),
+		StatusType: reflect.TypeOf(limitsv1beta1.QuotaStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "limits.CreateQuotaDetails",
+			},
+			{
+				SDKStruct: "limits.UpdateQuotaDetails",
+			},
+			{
+				SDKStruct:  "limits.Quota",
+				APISurface: "status",
+			},
+			{
+				SDKStruct:  "limits.QuotaSummary",
+				APISurface: "status",
 			},
 		},
 	},
@@ -1686,6 +2135,44 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "BastionBastion",
+		SpecType:   reflect.TypeOf(bastionv1beta1.BastionSpec{}),
+		StatusType: reflect.TypeOf(bastionv1beta1.BastionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "bastion.CreateBastionDetails",
+			},
+			{
+				SDKStruct: "bastion.UpdateBastionDetails",
+			},
+			{
+				SDKStruct: "bastion.Bastion",
+			},
+			{
+				SDKStruct: "bastion.BastionSummary",
+			},
+		},
+	},
+	{
+		Name:       "BastionSession",
+		SpecType:   reflect.TypeOf(bastionv1beta1.SessionSpec{}),
+		StatusType: reflect.TypeOf(bastionv1beta1.SessionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "bastion.CreateSessionDetails",
+			},
+			{
+				SDKStruct: "bastion.UpdateSessionDetails",
+			},
+			{
+				SDKStruct: "bastion.Session",
+			},
+			{
+				SDKStruct: "bastion.SessionSummary",
+			},
+		},
+	},
+	{
 		Name:       "BdsBdsInstance",
 		SpecType:   reflect.TypeOf(bdsv1beta1.BdsInstanceSpec{}),
 		StatusType: reflect.TypeOf(bdsv1beta1.BdsInstanceStatus{}),
@@ -1971,6 +2458,927 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "DevopsBuildPipeline",
+		SpecType:   reflect.TypeOf(devopsv1beta1.BuildPipelineSpec{}),
+		StatusType: reflect.TypeOf(devopsv1beta1.BuildPipelineStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "devops.CreateBuildPipelineDetails",
+			},
+			{
+				SDKStruct: "devops.UpdateBuildPipelineDetails",
+			},
+			{
+				SDKStruct: "devops.BuildPipeline",
+			},
+			{
+				SDKStruct: "devops.BuildPipelineCollection",
+			},
+			{
+				SDKStruct: "devops.BuildPipelineSummary",
+			},
+		},
+	},
+	{
+		Name:       "DevopsDeployArtifact",
+		SpecType:   reflect.TypeOf(devopsv1beta1.DeployArtifactSpec{}),
+		StatusType: reflect.TypeOf(devopsv1beta1.DeployArtifactStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "devops.CreateDeployArtifactDetails",
+			},
+			{
+				SDKStruct: "devops.UpdateDeployArtifactDetails",
+			},
+			{
+				SDKStruct: "devops.DeployArtifact",
+			},
+			{
+				SDKStruct: "devops.DeployArtifactCollection",
+			},
+			{
+				SDKStruct: "devops.DeployArtifactSummary",
+			},
+		},
+	},
+	{
+		Name:       "DevopsDeployPipeline",
+		SpecType:   reflect.TypeOf(devopsv1beta1.DeployPipelineSpec{}),
+		StatusType: reflect.TypeOf(devopsv1beta1.DeployPipelineStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "devops.CreateDeployPipelineDetails",
+			},
+			{
+				SDKStruct: "devops.UpdateDeployPipelineDetails",
+			},
+			{
+				SDKStruct: "devops.DeployPipeline",
+			},
+			{
+				SDKStruct: "devops.DeployPipelineCollection",
+			},
+			{
+				SDKStruct: "devops.DeployPipelineSummary",
+			},
+		},
+	},
+	{
+		Name:       "DevopsProject",
+		SpecType:   reflect.TypeOf(devopsv1beta1.ProjectSpec{}),
+		StatusType: reflect.TypeOf(devopsv1beta1.ProjectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "devops.CreateProjectDetails",
+			},
+			{
+				SDKStruct: "devops.UpdateProjectDetails",
+			},
+			{
+				SDKStruct: "devops.Project",
+			},
+			{
+				SDKStruct: "devops.ProjectCollection",
+			},
+			{
+				SDKStruct: "devops.ProjectSummary",
+			},
+		},
+	},
+	{
+		Name:       "DevopsRepository",
+		SpecType:   reflect.TypeOf(devopsv1beta1.RepositorySpec{}),
+		StatusType: reflect.TypeOf(devopsv1beta1.RepositoryStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "devops.CreateRepositoryDetails",
+			},
+			{
+				SDKStruct: "devops.UpdateRepositoryDetails",
+			},
+			{
+				SDKStruct: "devops.Repository",
+			},
+			{
+				SDKStruct: "devops.RepositoryCollection",
+			},
+			{
+				SDKStruct: "devops.RepositorySummary",
+			},
+		},
+	},
+	{
+		Name:       "DevopsTrigger",
+		SpecType:   reflect.TypeOf(devopsv1beta1.TriggerSpec{}),
+		StatusType: reflect.TypeOf(devopsv1beta1.TriggerStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "devops.TriggerCollection",
+			},
+		},
+	},
+	{
+		Name:       "GovernancerulescontrolplaneGovernanceRule",
+		SpecType:   reflect.TypeOf(governancerulescontrolplanev1beta1.GovernanceRuleSpec{}),
+		StatusType: reflect.TypeOf(governancerulescontrolplanev1beta1.GovernanceRuleStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "governancerulescontrolplane.CreateGovernanceRuleDetails",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.UpdateGovernanceRuleDetails",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.GovernanceRule",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.GovernanceRuleCollection",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.GovernanceRuleSummary",
+			},
+		},
+	},
+	{
+		Name:       "GovernancerulescontrolplaneInclusionCriterion",
+		SpecType:   reflect.TypeOf(governancerulescontrolplanev1beta1.InclusionCriterionSpec{}),
+		StatusType: reflect.TypeOf(governancerulescontrolplanev1beta1.InclusionCriterionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "governancerulescontrolplane.CreateInclusionCriterionDetails",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.InclusionCriterion",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.InclusionCriterionCollection",
+			},
+			{
+				SDKStruct: "governancerulescontrolplane.InclusionCriterionSummary",
+			},
+		},
+	},
+	{
+		Name:       "HealthchecksHttpMonitor",
+		SpecType:   reflect.TypeOf(healthchecksv1beta1.HttpMonitorSpec{}),
+		StatusType: reflect.TypeOf(healthchecksv1beta1.HttpMonitorStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "healthchecks.CreateHttpMonitorDetails",
+			},
+			{
+				SDKStruct: "healthchecks.UpdateHttpMonitorDetails",
+			},
+			{
+				SDKStruct: "healthchecks.HttpMonitor",
+			},
+			{
+				SDKStruct: "healthchecks.HttpMonitorSummary",
+			},
+		},
+	},
+	{
+		Name:       "HealthchecksPingMonitor",
+		SpecType:   reflect.TypeOf(healthchecksv1beta1.PingMonitorSpec{}),
+		StatusType: reflect.TypeOf(healthchecksv1beta1.PingMonitorStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "healthchecks.CreatePingMonitorDetails",
+			},
+			{
+				SDKStruct: "healthchecks.UpdatePingMonitorDetails",
+			},
+			{
+				SDKStruct: "healthchecks.PingMonitor",
+			},
+			{
+				SDKStruct: "healthchecks.PingMonitorSummary",
+			},
+		},
+	},
+	{
+		Name:       "IntegrationIntegrationInstance",
+		SpecType:   reflect.TypeOf(integrationv1beta1.IntegrationInstanceSpec{}),
+		StatusType: reflect.TypeOf(integrationv1beta1.IntegrationInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "integration.CreateIntegrationInstanceDetails",
+			},
+			{
+				SDKStruct: "integration.UpdateIntegrationInstanceDetails",
+			},
+			{
+				SDKStruct: "integration.IntegrationInstance",
+			},
+			{
+				SDKStruct: "integration.IntegrationInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "IotDigitalTwinAdapter",
+		SpecType:   reflect.TypeOf(iotv1beta1.DigitalTwinAdapterSpec{}),
+		StatusType: reflect.TypeOf(iotv1beta1.DigitalTwinAdapterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "iot.CreateDigitalTwinAdapterDetails",
+			},
+			{
+				SDKStruct: "iot.UpdateDigitalTwinAdapterDetails",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinAdapter",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinAdapterCollection",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinAdapterSummary",
+			},
+		},
+	},
+	{
+		Name:       "IotDigitalTwinInstance",
+		SpecType:   reflect.TypeOf(iotv1beta1.DigitalTwinInstanceSpec{}),
+		StatusType: reflect.TypeOf(iotv1beta1.DigitalTwinInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "iot.CreateDigitalTwinInstanceDetails",
+			},
+			{
+				SDKStruct: "iot.UpdateDigitalTwinInstanceDetails",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinInstance",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinInstanceCollection",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "IotDigitalTwinModel",
+		SpecType:   reflect.TypeOf(iotv1beta1.DigitalTwinModelSpec{}),
+		StatusType: reflect.TypeOf(iotv1beta1.DigitalTwinModelStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "iot.CreateDigitalTwinModelDetails",
+			},
+			{
+				SDKStruct: "iot.UpdateDigitalTwinModelDetails",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinModel",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinModelCollection",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinModelSummary",
+			},
+		},
+	},
+	{
+		Name:       "IotDigitalTwinRelationship",
+		SpecType:   reflect.TypeOf(iotv1beta1.DigitalTwinRelationshipSpec{}),
+		StatusType: reflect.TypeOf(iotv1beta1.DigitalTwinRelationshipStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "iot.CreateDigitalTwinRelationshipDetails",
+			},
+			{
+				SDKStruct: "iot.UpdateDigitalTwinRelationshipDetails",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinRelationship",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinRelationshipCollection",
+			},
+			{
+				SDKStruct: "iot.DigitalTwinRelationshipSummary",
+			},
+		},
+	},
+	{
+		Name:       "IotIotDomain",
+		SpecType:   reflect.TypeOf(iotv1beta1.IotDomainSpec{}),
+		StatusType: reflect.TypeOf(iotv1beta1.IotDomainStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "iot.CreateIotDomainDetails",
+			},
+			{
+				SDKStruct: "iot.UpdateIotDomainDetails",
+			},
+			{
+				SDKStruct: "iot.IotDomain",
+			},
+			{
+				SDKStruct: "iot.IotDomainCollection",
+			},
+			{
+				SDKStruct: "iot.IotDomainSummary",
+			},
+		},
+	},
+	{
+		Name:       "IotIotDomainGroup",
+		SpecType:   reflect.TypeOf(iotv1beta1.IotDomainGroupSpec{}),
+		StatusType: reflect.TypeOf(iotv1beta1.IotDomainGroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "iot.CreateIotDomainGroupDetails",
+			},
+			{
+				SDKStruct: "iot.UpdateIotDomainGroupDetails",
+			},
+			{
+				SDKStruct: "iot.IotDomainGroup",
+			},
+			{
+				SDKStruct: "iot.IotDomainGroupCollection",
+			},
+			{
+				SDKStruct: "iot.IotDomainGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "LicensemanagerLicenseRecord",
+		SpecType:   reflect.TypeOf(licensemanagerv1beta1.LicenseRecordSpec{}),
+		StatusType: reflect.TypeOf(licensemanagerv1beta1.LicenseRecordStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "licensemanager.CreateLicenseRecordDetails",
+			},
+			{
+				SDKStruct: "licensemanager.UpdateLicenseRecordDetails",
+			},
+			{
+				SDKStruct: "licensemanager.LicenseRecord",
+			},
+			{
+				SDKStruct: "licensemanager.LicenseRecordCollection",
+			},
+			{
+				SDKStruct: "licensemanager.LicenseRecordSummary",
+			},
+		},
+	},
+	{
+		Name:       "LicensemanagerProductLicense",
+		SpecType:   reflect.TypeOf(licensemanagerv1beta1.ProductLicenseSpec{}),
+		StatusType: reflect.TypeOf(licensemanagerv1beta1.ProductLicenseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "licensemanager.CreateProductLicenseDetails",
+			},
+			{
+				SDKStruct: "licensemanager.UpdateProductLicenseDetails",
+			},
+			{
+				SDKStruct: "licensemanager.ProductLicense",
+			},
+			{
+				SDKStruct: "licensemanager.ProductLicenseCollection",
+			},
+			{
+				SDKStruct: "licensemanager.ProductLicenseSummary",
+			},
+		},
+	},
+	{
+		Name:       "LimitsincreaseLimitsIncreaseRequest",
+		SpecType:   reflect.TypeOf(limitsincreasev1beta1.LimitsIncreaseRequestSpec{}),
+		StatusType: reflect.TypeOf(limitsincreasev1beta1.LimitsIncreaseRequestStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "limitsincrease.CreateLimitsIncreaseRequestDetails",
+			},
+			{
+				SDKStruct: "limitsincrease.UpdateLimitsIncreaseRequestDetails",
+			},
+			{
+				SDKStruct: "limitsincrease.LimitsIncreaseRequest",
+			},
+			{
+				SDKStruct: "limitsincrease.LimitsIncreaseRequestCollection",
+			},
+			{
+				SDKStruct: "limitsincrease.LimitsIncreaseRequestSummary",
+			},
+		},
+	},
+	{
+		Name:       "LockboxApprovalTemplate",
+		SpecType:   reflect.TypeOf(lockboxv1beta1.ApprovalTemplateSpec{}),
+		StatusType: reflect.TypeOf(lockboxv1beta1.ApprovalTemplateStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "lockbox.CreateApprovalTemplateDetails",
+			},
+			{
+				SDKStruct: "lockbox.UpdateApprovalTemplateDetails",
+			},
+			{
+				SDKStruct: "lockbox.ApprovalTemplate",
+			},
+			{
+				SDKStruct: "lockbox.ApprovalTemplateCollection",
+			},
+			{
+				SDKStruct: "lockbox.ApprovalTemplateSummary",
+			},
+		},
+	},
+	{
+		Name:       "LockboxLockbox",
+		SpecType:   reflect.TypeOf(lockboxv1beta1.LockboxSpec{}),
+		StatusType: reflect.TypeOf(lockboxv1beta1.LockboxStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "lockbox.CreateLockboxDetails",
+			},
+			{
+				SDKStruct: "lockbox.UpdateLockboxDetails",
+			},
+			{
+				SDKStruct: "lockbox.Lockbox",
+			},
+			{
+				SDKStruct: "lockbox.LockboxCollection",
+			},
+			{
+				SDKStruct: "lockbox.LockboxSummary",
+			},
+		},
+	},
+	{
+		Name:       "LoganalyticsIngestTimeRule",
+		SpecType:   reflect.TypeOf(loganalyticsv1beta1.IngestTimeRuleSpec{}),
+		StatusType: reflect.TypeOf(loganalyticsv1beta1.IngestTimeRuleStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "loganalytics.CreateIngestTimeRuleDetails",
+			},
+			{
+				SDKStruct: "loganalytics.IngestTimeRule",
+			},
+			{
+				SDKStruct: "loganalytics.IngestTimeRuleSummary",
+			},
+		},
+	},
+	{
+		Name:       "LoganalyticsLogAnalyticsEmBridge",
+		SpecType:   reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsEmBridgeSpec{}),
+		StatusType: reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsEmBridgeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "loganalytics.CreateLogAnalyticsEmBridgeDetails",
+			},
+			{
+				SDKStruct: "loganalytics.UpdateLogAnalyticsEmBridgeDetails",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEmBridge",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEmBridgeCollection",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEmBridgeSummary",
+			},
+		},
+	},
+	{
+		Name:       "LoganalyticsLogAnalyticsEntity",
+		SpecType:   reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsEntitySpec{}),
+		StatusType: reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsEntityStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "loganalytics.CreateLogAnalyticsEntityDetails",
+			},
+			{
+				SDKStruct: "loganalytics.UpdateLogAnalyticsEntityDetails",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEntity",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEntityCollection",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEntitySummary",
+			},
+		},
+	},
+	{
+		Name:       "LoganalyticsLogAnalyticsEntityType",
+		SpecType:   reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsEntityTypeSpec{}),
+		StatusType: reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsEntityTypeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "loganalytics.CreateLogAnalyticsEntityTypeDetails",
+			},
+			{
+				SDKStruct: "loganalytics.UpdateLogAnalyticsEntityTypeDetails",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEntityType",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEntityTypeCollection",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsEntityTypeSummary",
+			},
+		},
+	},
+	{
+		Name:       "LoganalyticsLogAnalyticsLogGroup",
+		SpecType:   reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsLogGroupSpec{}),
+		StatusType: reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsLogGroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "loganalytics.CreateLogAnalyticsLogGroupDetails",
+			},
+			{
+				SDKStruct: "loganalytics.UpdateLogAnalyticsLogGroupDetails",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsLogGroup",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsLogGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "LoganalyticsLogAnalyticsObjectCollectionRule",
+		SpecType:   reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsObjectCollectionRuleSpec{}),
+		StatusType: reflect.TypeOf(loganalyticsv1beta1.LogAnalyticsObjectCollectionRuleStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "loganalytics.CreateLogAnalyticsObjectCollectionRuleDetails",
+			},
+			{
+				SDKStruct: "loganalytics.UpdateLogAnalyticsObjectCollectionRuleDetails",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsObjectCollectionRule",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsObjectCollectionRuleCollection",
+			},
+			{
+				SDKStruct: "loganalytics.LogAnalyticsObjectCollectionRuleSummary",
+			},
+		},
+	},
+	{
+		Name:       "LoganalyticsScheduledTask",
+		SpecType:   reflect.TypeOf(loganalyticsv1beta1.ScheduledTaskSpec{}),
+		StatusType: reflect.TypeOf(loganalyticsv1beta1.ScheduledTaskStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "loganalytics.ScheduledTaskCollection",
+			},
+			{
+				SDKStruct: "loganalytics.ScheduledTaskSummary",
+			},
+		},
+	},
+	{
+		Name:       "ManagedkafkaKafkaCluster",
+		SpecType:   reflect.TypeOf(managedkafkav1beta1.KafkaClusterSpec{}),
+		StatusType: reflect.TypeOf(managedkafkav1beta1.KafkaClusterStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "managedkafka.CreateKafkaClusterDetails",
+			},
+			{
+				SDKStruct: "managedkafka.UpdateKafkaClusterDetails",
+			},
+			{
+				SDKStruct: "managedkafka.KafkaCluster",
+			},
+			{
+				SDKStruct: "managedkafka.KafkaClusterCollection",
+			},
+			{
+				SDKStruct: "managedkafka.KafkaClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "ManagedkafkaKafkaClusterConfig",
+		SpecType:   reflect.TypeOf(managedkafkav1beta1.KafkaClusterConfigSpec{}),
+		StatusType: reflect.TypeOf(managedkafkav1beta1.KafkaClusterConfigStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "managedkafka.CreateKafkaClusterConfigDetails",
+			},
+			{
+				SDKStruct: "managedkafka.UpdateKafkaClusterConfigDetails",
+			},
+			{
+				SDKStruct: "managedkafka.KafkaClusterConfig",
+			},
+			{
+				SDKStruct: "managedkafka.KafkaClusterConfigCollection",
+			},
+			{
+				SDKStruct: "managedkafka.KafkaClusterConfigVersionSummary",
+			},
+			{
+				SDKStruct: "managedkafka.KafkaClusterConfigSummary",
+			},
+		},
+	},
+	{
+		Name:        "ManagementagentDataSource",
+		SpecType:    reflect.TypeOf(managementagentv1beta1.DataSourceSpec{}),
+		StatusType:  reflect.TypeOf(managementagentv1beta1.DataSourceStatus{}),
+		SDKMappings: []SDKMapping{},
+	},
+	{
+		Name:       "ManagementagentManagementAgentInstallKey",
+		SpecType:   reflect.TypeOf(managementagentv1beta1.ManagementAgentInstallKeySpec{}),
+		StatusType: reflect.TypeOf(managementagentv1beta1.ManagementAgentInstallKeyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "managementagent.CreateManagementAgentInstallKeyDetails",
+			},
+			{
+				SDKStruct: "managementagent.UpdateManagementAgentInstallKeyDetails",
+			},
+			{
+				SDKStruct: "managementagent.ManagementAgentInstallKey",
+			},
+			{
+				SDKStruct: "managementagent.ManagementAgentInstallKeySummary",
+			},
+		},
+	},
+	{
+		Name:       "ManagementagentNamedCredential",
+		SpecType:   reflect.TypeOf(managementagentv1beta1.NamedCredentialSpec{}),
+		StatusType: reflect.TypeOf(managementagentv1beta1.NamedCredentialStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "managementagent.CreateNamedCredentialDetails",
+			},
+			{
+				SDKStruct: "managementagent.UpdateNamedCredentialDetails",
+			},
+			{
+				SDKStruct: "managementagent.NamedCredential",
+			},
+			{
+				SDKStruct: "managementagent.NamedCredentialCollection",
+			},
+			{
+				SDKStruct: "managementagent.NamedCredentialSummary",
+			},
+		},
+	},
+	{
+		Name:       "ManagementdashboardManagementDashboard",
+		SpecType:   reflect.TypeOf(managementdashboardv1beta1.ManagementDashboardSpec{}),
+		StatusType: reflect.TypeOf(managementdashboardv1beta1.ManagementDashboardStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "managementdashboard.CreateManagementDashboardDetails",
+			},
+			{
+				SDKStruct: "managementdashboard.UpdateManagementDashboardDetails",
+			},
+			{
+				SDKStruct: "managementdashboard.ManagementDashboard",
+			},
+			{
+				SDKStruct: "managementdashboard.ManagementDashboardCollection",
+			},
+			{
+				SDKStruct: "managementdashboard.ManagementDashboardSummary",
+			},
+		},
+	},
+	{
+		Name:       "ManagementdashboardManagementSavedSearch",
+		SpecType:   reflect.TypeOf(managementdashboardv1beta1.ManagementSavedSearchSpec{}),
+		StatusType: reflect.TypeOf(managementdashboardv1beta1.ManagementSavedSearchStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "managementdashboard.CreateManagementSavedSearchDetails",
+			},
+			{
+				SDKStruct: "managementdashboard.UpdateManagementSavedSearchDetails",
+			},
+			{
+				SDKStruct: "managementdashboard.ManagementSavedSearch",
+			},
+			{
+				SDKStruct: "managementdashboard.ManagementSavedSearchCollection",
+			},
+			{
+				SDKStruct: "managementdashboard.ManagementSavedSearchSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplaceprivateofferAttachment",
+		SpecType:   reflect.TypeOf(marketplaceprivateofferv1beta1.AttachmentSpec{}),
+		StatusType: reflect.TypeOf(marketplaceprivateofferv1beta1.AttachmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplaceprivateoffer.CreateAttachmentDetails",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.Attachment",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.AttachmentCollection",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.AttachmentSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplaceprivateofferOffer",
+		SpecType:   reflect.TypeOf(marketplaceprivateofferv1beta1.OfferSpec{}),
+		StatusType: reflect.TypeOf(marketplaceprivateofferv1beta1.OfferStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplaceprivateoffer.CreateOfferDetails",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.UpdateOfferDetails",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.Offer",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.OfferCollection",
+			},
+			{
+				SDKStruct: "marketplaceprivateoffer.OfferSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherArtifact",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.ArtifactSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.ArtifactStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.ArtifactCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ArtifactSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherListing",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.ListingSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.ListingStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.CreateListingDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.UpdateListingDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.Listing",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherListingRevision",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherListingRevisionAttachment",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionAttachmentSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionAttachmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionAttachmentCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionAttachmentSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherListingRevisionNote",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionNoteSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionNoteStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.CreateListingRevisionNoteDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.UpdateListingRevisionNoteDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionNote",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionNoteCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionNoteSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherListingRevisionPackage",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionPackageSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.ListingRevisionPackageStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.CreateListingRevisionPackageDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.UpdateListingRevisionPackageDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionPackageCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.ListingRevisionPackageSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherTerm",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.TermSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.TermStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.CreateTermDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.UpdateTermDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.Term",
+			},
+			{
+				SDKStruct: "marketplacepublisher.TermCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.TermVersionSummary",
+			},
+			{
+				SDKStruct: "marketplacepublisher.TermSummary",
+			},
+		},
+	},
+	{
+		Name:       "MarketplacepublisherTermVersion",
+		SpecType:   reflect.TypeOf(marketplacepublisherv1beta1.TermVersionSpec{}),
+		StatusType: reflect.TypeOf(marketplacepublisherv1beta1.TermVersionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "marketplacepublisher.UpdateTermVersionDetails",
+			},
+			{
+				SDKStruct: "marketplacepublisher.TermVersion",
+			},
+			{
+				SDKStruct: "marketplacepublisher.TermVersionCollection",
+			},
+			{
+				SDKStruct: "marketplacepublisher.TermVersionSummary",
+			},
+		},
+	},
+	{
 		Name:       "OpensearchOpensearchCluster",
 		SpecType:   reflect.TypeOf(opensearchv1beta1.OpensearchClusterSpec{}),
 		StatusType: reflect.TypeOf(opensearchv1beta1.OpensearchClusterStatus{}),
@@ -1995,6 +3403,511 @@ var targets = []Target{
 		},
 	},
 	{
+		Name:       "OperatoraccesscontrolOperatorControl",
+		SpecType:   reflect.TypeOf(operatoraccesscontrolv1beta1.OperatorControlSpec{}),
+		StatusType: reflect.TypeOf(operatoraccesscontrolv1beta1.OperatorControlStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "operatoraccesscontrol.CreateOperatorControlDetails",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.UpdateOperatorControlDetails",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.OperatorControl",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.OperatorControlCollection",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.OperatorControlSummary",
+			},
+		},
+	},
+	{
+		Name:       "OperatoraccesscontrolOperatorControlAssignment",
+		SpecType:   reflect.TypeOf(operatoraccesscontrolv1beta1.OperatorControlAssignmentSpec{}),
+		StatusType: reflect.TypeOf(operatoraccesscontrolv1beta1.OperatorControlAssignmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "operatoraccesscontrol.CreateOperatorControlAssignmentDetails",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.UpdateOperatorControlAssignmentDetails",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.OperatorControlAssignment",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.OperatorControlAssignmentCollection",
+			},
+			{
+				SDKStruct: "operatoraccesscontrol.OperatorControlAssignmentSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiAwrHub",
+		SpecType:   reflect.TypeOf(opsiv1beta1.AwrHubSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.AwrHubStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateAwrHubDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateAwrHubDetails",
+			},
+			{
+				SDKStruct: "opsi.AwrHub",
+			},
+			{
+				SDKStruct: "opsi.AwrHubs",
+			},
+			{
+				SDKStruct: "opsi.AwrHubSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiAwrHubSource",
+		SpecType:   reflect.TypeOf(opsiv1beta1.AwrHubSourceSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.AwrHubSourceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateAwrHubSourceDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateAwrHubSourceDetails",
+			},
+			{
+				SDKStruct: "opsi.AwrHubSource",
+			},
+			{
+				SDKStruct: "opsi.AwrHubSources",
+			},
+			{
+				SDKStruct: "opsi.AwrHubSourceSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiChargebackPlan",
+		SpecType:   reflect.TypeOf(opsiv1beta1.ChargebackPlanSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.ChargebackPlanStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.UpdateChargebackPlanDetails",
+			},
+			{
+				SDKStruct: "opsi.ChargebackPlanDetails",
+			},
+			{
+				SDKStruct: "opsi.ChargebackPlan",
+			},
+			{
+				SDKStruct: "opsi.ChargebackPlanCollection",
+			},
+			{
+				SDKStruct: "opsi.ChargebackPlanSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiChargebackPlanReport",
+		SpecType:   reflect.TypeOf(opsiv1beta1.ChargebackPlanReportSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.ChargebackPlanReportStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateChargebackPlanReportDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateChargebackPlanReportDetails",
+			},
+			{
+				SDKStruct: "opsi.ChargebackPlanReport",
+			},
+			{
+				SDKStruct: "opsi.ChargebackPlanReportCollection",
+			},
+			{
+				SDKStruct: "opsi.ChargebackPlanReportSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiDatabaseInsight",
+		SpecType:   reflect.TypeOf(opsiv1beta1.DatabaseInsightSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.DatabaseInsightStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.DatabaseInsights",
+			},
+		},
+	},
+	{
+		Name:       "OpsiEnterpriseManagerBridge",
+		SpecType:   reflect.TypeOf(opsiv1beta1.EnterpriseManagerBridgeSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.EnterpriseManagerBridgeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateEnterpriseManagerBridgeDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateEnterpriseManagerBridgeDetails",
+			},
+			{
+				SDKStruct: "opsi.EnterpriseManagerBridge",
+			},
+			{
+				SDKStruct: "opsi.EnterpriseManagerBridgeCollection",
+			},
+			{
+				SDKStruct: "opsi.EnterpriseManagerBridges",
+			},
+			{
+				SDKStruct: "opsi.EnterpriseManagerBridgeSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiExadataInsight",
+		SpecType:   reflect.TypeOf(opsiv1beta1.ExadataInsightSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.ExadataInsightStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.ExadataInsights",
+			},
+		},
+	},
+	{
+		Name:       "OpsiHostInsight",
+		SpecType:   reflect.TypeOf(opsiv1beta1.HostInsightSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.HostInsightStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.HostInsights",
+			},
+		},
+	},
+	{
+		Name:       "OpsiNewsReport",
+		SpecType:   reflect.TypeOf(opsiv1beta1.NewsReportSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.NewsReportStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateNewsReportDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateNewsReportDetails",
+			},
+			{
+				SDKStruct: "opsi.NewsReport",
+			},
+			{
+				SDKStruct: "opsi.NewsReportCollection",
+			},
+			{
+				SDKStruct: "opsi.NewsReports",
+			},
+			{
+				SDKStruct: "opsi.NewsReportSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiOperationsInsightsPrivateEndpoint",
+		SpecType:   reflect.TypeOf(opsiv1beta1.OperationsInsightsPrivateEndpointSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.OperationsInsightsPrivateEndpointStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateOperationsInsightsPrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateOperationsInsightsPrivateEndpointDetails",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsPrivateEndpoint",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsPrivateEndpointCollection",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsPrivateEndpointSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiOperationsInsightsWarehouse",
+		SpecType:   reflect.TypeOf(opsiv1beta1.OperationsInsightsWarehouseSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.OperationsInsightsWarehouseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateOperationsInsightsWarehouseDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateOperationsInsightsWarehouseDetails",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsWarehouse",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsWarehouses",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsWarehouseSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiOperationsInsightsWarehouseUser",
+		SpecType:   reflect.TypeOf(opsiv1beta1.OperationsInsightsWarehouseUserSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.OperationsInsightsWarehouseUserStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.CreateOperationsInsightsWarehouseUserDetails",
+			},
+			{
+				SDKStruct: "opsi.UpdateOperationsInsightsWarehouseUserDetails",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsWarehouseUser",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsWarehouseUsers",
+			},
+			{
+				SDKStruct: "opsi.OperationsInsightsWarehouseUserSummary",
+			},
+		},
+	},
+	{
+		Name:       "OpsiOpsiConfiguration",
+		SpecType:   reflect.TypeOf(opsiv1beta1.OpsiConfigurationSpec{}),
+		StatusType: reflect.TypeOf(opsiv1beta1.OpsiConfigurationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "opsi.OpsiConfigurations",
+			},
+		},
+	},
+	{
+		Name:       "OptimizerProfile",
+		SpecType:   reflect.TypeOf(optimizerv1beta1.ProfileSpec{}),
+		StatusType: reflect.TypeOf(optimizerv1beta1.ProfileStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "optimizer.CreateProfileDetails",
+			},
+			{
+				SDKStruct: "optimizer.UpdateProfileDetails",
+			},
+			{
+				SDKStruct: "optimizer.Profile",
+			},
+			{
+				SDKStruct: "optimizer.ProfileCollection",
+			},
+			{
+				SDKStruct: "optimizer.ProfileSummary",
+			},
+		},
+	},
+	{
+		Name:       "OsmanagementhubLifecycleEnvironment",
+		SpecType:   reflect.TypeOf(osmanagementhubv1beta1.LifecycleEnvironmentSpec{}),
+		StatusType: reflect.TypeOf(osmanagementhubv1beta1.LifecycleEnvironmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osmanagementhub.CreateLifecycleEnvironmentDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.UpdateLifecycleEnvironmentDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.LifecycleEnvironmentDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.LifecycleEnvironment",
+			},
+			{
+				SDKStruct: "osmanagementhub.LifecycleEnvironmentCollection",
+			},
+			{
+				SDKStruct: "osmanagementhub.LifecycleEnvironmentSummary",
+			},
+		},
+	},
+	{
+		Name:       "OsmanagementhubManagedInstanceGroup",
+		SpecType:   reflect.TypeOf(osmanagementhubv1beta1.ManagedInstanceGroupSpec{}),
+		StatusType: reflect.TypeOf(osmanagementhubv1beta1.ManagedInstanceGroupStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osmanagementhub.CreateManagedInstanceGroupDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.UpdateManagedInstanceGroupDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagedInstanceGroupDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagedInstanceGroup",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagedInstanceGroupCollection",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagedInstanceGroupSummary",
+			},
+		},
+	},
+	{
+		Name:       "OsmanagementhubManagementStation",
+		SpecType:   reflect.TypeOf(osmanagementhubv1beta1.ManagementStationSpec{}),
+		StatusType: reflect.TypeOf(osmanagementhubv1beta1.ManagementStationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osmanagementhub.CreateManagementStationDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.UpdateManagementStationDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagementStationDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagementStation",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagementStationCollection",
+			},
+			{
+				SDKStruct: "osmanagementhub.ManagementStationSummary",
+			},
+		},
+	},
+	{
+		Name:       "OsmanagementhubProfile",
+		SpecType:   reflect.TypeOf(osmanagementhubv1beta1.ProfileSpec{}),
+		StatusType: reflect.TypeOf(osmanagementhubv1beta1.ProfileStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osmanagementhub.UpdateProfileDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.ProfileCollection",
+			},
+			{
+				SDKStruct: "osmanagementhub.ProfileSummary",
+			},
+		},
+	},
+	{
+		Name:       "OsmanagementhubScheduledJob",
+		SpecType:   reflect.TypeOf(osmanagementhubv1beta1.ScheduledJobSpec{}),
+		StatusType: reflect.TypeOf(osmanagementhubv1beta1.ScheduledJobStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osmanagementhub.CreateScheduledJobDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.UpdateScheduledJobDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.ScheduledJob",
+			},
+			{
+				SDKStruct: "osmanagementhub.ScheduledJobCollection",
+			},
+			{
+				SDKStruct: "osmanagementhub.ScheduledJobSummary",
+			},
+		},
+	},
+	{
+		Name:       "OsmanagementhubSoftwareSource",
+		SpecType:   reflect.TypeOf(osmanagementhubv1beta1.SoftwareSourceSpec{}),
+		StatusType: reflect.TypeOf(osmanagementhubv1beta1.SoftwareSourceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "osmanagementhub.SoftwareSourceDetails",
+			},
+			{
+				SDKStruct: "osmanagementhub.SoftwareSourceCollection",
+			},
+		},
+	},
+	{
+		Name:       "RecoveryProtectedDatabase",
+		SpecType:   reflect.TypeOf(recoveryv1beta1.ProtectedDatabaseSpec{}),
+		StatusType: reflect.TypeOf(recoveryv1beta1.ProtectedDatabaseStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "recovery.CreateProtectedDatabaseDetails",
+			},
+			{
+				SDKStruct: "recovery.UpdateProtectedDatabaseDetails",
+			},
+			{
+				SDKStruct: "recovery.ProtectedDatabase",
+			},
+			{
+				SDKStruct: "recovery.ProtectedDatabaseCollection",
+			},
+			{
+				SDKStruct: "recovery.ProtectedDatabaseSummary",
+			},
+		},
+	},
+	{
+		Name:       "RecoveryProtectionPolicy",
+		SpecType:   reflect.TypeOf(recoveryv1beta1.ProtectionPolicySpec{}),
+		StatusType: reflect.TypeOf(recoveryv1beta1.ProtectionPolicyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "recovery.CreateProtectionPolicyDetails",
+			},
+			{
+				SDKStruct: "recovery.UpdateProtectionPolicyDetails",
+			},
+			{
+				SDKStruct: "recovery.ProtectionPolicy",
+			},
+			{
+				SDKStruct: "recovery.ProtectionPolicyCollection",
+			},
+			{
+				SDKStruct: "recovery.ProtectionPolicySummary",
+			},
+		},
+	},
+	{
+		Name:       "RecoveryRecoveryServiceSubnet",
+		SpecType:   reflect.TypeOf(recoveryv1beta1.RecoveryServiceSubnetSpec{}),
+		StatusType: reflect.TypeOf(recoveryv1beta1.RecoveryServiceSubnetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "recovery.CreateRecoveryServiceSubnetDetails",
+			},
+			{
+				SDKStruct: "recovery.UpdateRecoveryServiceSubnetDetails",
+			},
+			{
+				SDKStruct: "recovery.RecoveryServiceSubnetDetails",
+			},
+			{
+				SDKStruct: "recovery.RecoveryServiceSubnet",
+			},
+			{
+				SDKStruct: "recovery.RecoveryServiceSubnetCollection",
+			},
+			{
+				SDKStruct: "recovery.RecoveryServiceSubnetSummary",
+			},
+		},
+	},
+	{
 		Name:       "RedisRedisCluster",
 		SpecType:   reflect.TypeOf(redisv1beta1.RedisClusterSpec{}),
 		StatusType: reflect.TypeOf(redisv1beta1.RedisClusterStatus{}),
@@ -2015,6 +3928,572 @@ var targets = []Target{
 			},
 			{
 				SDKStruct: "redis.RedisClusterSummary",
+			},
+		},
+	},
+	{
+		Name:       "ResourceanalyticsMonitoredRegion",
+		SpecType:   reflect.TypeOf(resourceanalyticsv1beta1.MonitoredRegionSpec{}),
+		StatusType: reflect.TypeOf(resourceanalyticsv1beta1.MonitoredRegionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "resourceanalytics.CreateMonitoredRegionDetails",
+			},
+			{
+				SDKStruct: "resourceanalytics.MonitoredRegion",
+			},
+			{
+				SDKStruct: "resourceanalytics.MonitoredRegionCollection",
+			},
+			{
+				SDKStruct: "resourceanalytics.MonitoredRegionSummary",
+			},
+		},
+	},
+	{
+		Name:       "ResourceanalyticsResourceAnalyticsInstance",
+		SpecType:   reflect.TypeOf(resourceanalyticsv1beta1.ResourceAnalyticsInstanceSpec{}),
+		StatusType: reflect.TypeOf(resourceanalyticsv1beta1.ResourceAnalyticsInstanceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "resourceanalytics.CreateResourceAnalyticsInstanceDetails",
+			},
+			{
+				SDKStruct: "resourceanalytics.UpdateResourceAnalyticsInstanceDetails",
+			},
+			{
+				SDKStruct: "resourceanalytics.ResourceAnalyticsInstance",
+			},
+			{
+				SDKStruct: "resourceanalytics.ResourceAnalyticsInstanceCollection",
+			},
+			{
+				SDKStruct: "resourceanalytics.ResourceAnalyticsInstanceSummary",
+			},
+		},
+	},
+	{
+		Name:       "ResourceanalyticsTenancyAttachment",
+		SpecType:   reflect.TypeOf(resourceanalyticsv1beta1.TenancyAttachmentSpec{}),
+		StatusType: reflect.TypeOf(resourceanalyticsv1beta1.TenancyAttachmentStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "resourceanalytics.CreateTenancyAttachmentDetails",
+			},
+			{
+				SDKStruct: "resourceanalytics.UpdateTenancyAttachmentDetails",
+			},
+			{
+				SDKStruct: "resourceanalytics.TenancyAttachment",
+			},
+			{
+				SDKStruct: "resourceanalytics.TenancyAttachmentCollection",
+			},
+			{
+				SDKStruct: "resourceanalytics.TenancyAttachmentSummary",
+			},
+		},
+	},
+	{
+		Name:       "ResourceschedulerSchedule",
+		SpecType:   reflect.TypeOf(resourceschedulerv1beta1.ScheduleSpec{}),
+		StatusType: reflect.TypeOf(resourceschedulerv1beta1.ScheduleStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "resourcescheduler.CreateScheduleDetails",
+			},
+			{
+				SDKStruct: "resourcescheduler.UpdateScheduleDetails",
+			},
+			{
+				SDKStruct: "resourcescheduler.Schedule",
+			},
+			{
+				SDKStruct: "resourcescheduler.ScheduleCollection",
+			},
+			{
+				SDKStruct: "resourcescheduler.ScheduleSummary",
+			},
+		},
+	},
+	{
+		Name:       "SchServiceConnector",
+		SpecType:   reflect.TypeOf(schv1beta1.ServiceConnectorSpec{}),
+		StatusType: reflect.TypeOf(schv1beta1.ServiceConnectorStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "sch.CreateServiceConnectorDetails",
+			},
+			{
+				SDKStruct: "sch.UpdateServiceConnectorDetails",
+			},
+			{
+				SDKStruct: "sch.ServiceConnector",
+			},
+			{
+				SDKStruct: "sch.ServiceConnectorCollection",
+			},
+			{
+				SDKStruct: "sch.ServiceConnectorSummary",
+			},
+		},
+	},
+	{
+		Name:       "SecurityattributeSecurityAttribute",
+		SpecType:   reflect.TypeOf(securityattributev1beta1.SecurityAttributeSpec{}),
+		StatusType: reflect.TypeOf(securityattributev1beta1.SecurityAttributeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "securityattribute.CreateSecurityAttributeDetails",
+			},
+			{
+				SDKStruct: "securityattribute.UpdateSecurityAttributeDetails",
+			},
+			{
+				SDKStruct: "securityattribute.SecurityAttribute",
+			},
+			{
+				SDKStruct: "securityattribute.SecurityAttributeSummary",
+			},
+		},
+	},
+	{
+		Name:       "SecurityattributeSecurityAttributeNamespace",
+		SpecType:   reflect.TypeOf(securityattributev1beta1.SecurityAttributeNamespaceSpec{}),
+		StatusType: reflect.TypeOf(securityattributev1beta1.SecurityAttributeNamespaceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "securityattribute.CreateSecurityAttributeNamespaceDetails",
+			},
+			{
+				SDKStruct: "securityattribute.UpdateSecurityAttributeNamespaceDetails",
+			},
+			{
+				SDKStruct: "securityattribute.SecurityAttributeNamespace",
+			},
+			{
+				SDKStruct: "securityattribute.SecurityAttributeNamespaceSummary",
+			},
+		},
+	},
+	{
+		Name:       "ServicecatalogPrivateApplication",
+		SpecType:   reflect.TypeOf(servicecatalogv1beta1.PrivateApplicationSpec{}),
+		StatusType: reflect.TypeOf(servicecatalogv1beta1.PrivateApplicationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "servicecatalog.CreatePrivateApplicationDetails",
+			},
+			{
+				SDKStruct: "servicecatalog.UpdatePrivateApplicationDetails",
+			},
+			{
+				SDKStruct: "servicecatalog.PrivateApplication",
+			},
+			{
+				SDKStruct: "servicecatalog.PrivateApplicationCollection",
+			},
+			{
+				SDKStruct: "servicecatalog.PrivateApplicationSummary",
+			},
+		},
+	},
+	{
+		Name:       "ServicecatalogServiceCatalog",
+		SpecType:   reflect.TypeOf(servicecatalogv1beta1.ServiceCatalogSpec{}),
+		StatusType: reflect.TypeOf(servicecatalogv1beta1.ServiceCatalogStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "servicecatalog.CreateServiceCatalogDetails",
+			},
+			{
+				SDKStruct: "servicecatalog.UpdateServiceCatalogDetails",
+			},
+			{
+				SDKStruct: "servicecatalog.ServiceCatalog",
+			},
+			{
+				SDKStruct: "servicecatalog.ServiceCatalogCollection",
+			},
+			{
+				SDKStruct: "servicecatalog.ServiceCatalogSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringAlarmCondition",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.AlarmConditionSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.AlarmConditionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateAlarmConditionDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateAlarmConditionDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.AlarmCondition",
+			},
+			{
+				SDKStruct: "stackmonitoring.AlarmConditionCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.AlarmConditionSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringBaselineableMetric",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.BaselineableMetricSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.BaselineableMetricStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateBaselineableMetricDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateBaselineableMetricDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.BaselineableMetric",
+			},
+			{
+				SDKStruct: "stackmonitoring.BaselineableMetricSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringConfig",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.ConfigSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.ConfigStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.ConfigCollection",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringDiscoveryJob",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.DiscoveryJobSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.DiscoveryJobStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateDiscoveryJobDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.DiscoveryJob",
+			},
+			{
+				SDKStruct: "stackmonitoring.DiscoveryJobCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.DiscoveryJobSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringMaintenanceWindow",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.MaintenanceWindowSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.MaintenanceWindowStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateMaintenanceWindowDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateMaintenanceWindowDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.MaintenanceWindow",
+			},
+			{
+				SDKStruct: "stackmonitoring.MaintenanceWindowCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.MaintenanceWindowSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringMetricExtension",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.MetricExtensionSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.MetricExtensionStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateMetricExtensionDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateMetricExtensionDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.MetricExtension",
+			},
+			{
+				SDKStruct: "stackmonitoring.MetricExtensionCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.MetricExtensionSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringMonitoredResource",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.MonitoredResourceSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.MonitoredResourceStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateMonitoredResourceDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateMonitoredResourceDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoredResourceDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoredResource",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoredResourceCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoredResourceSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringMonitoredResourceType",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.MonitoredResourceTypeSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.MonitoredResourceTypeStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateMonitoredResourceTypeDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateMonitoredResourceTypeDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoredResourceType",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoredResourceTypeSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringMonitoringTemplate",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.MonitoringTemplateSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.MonitoringTemplateStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateMonitoringTemplateDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateMonitoringTemplateDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoringTemplate",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoringTemplateCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.MonitoringTemplateSummary",
+			},
+		},
+	},
+	{
+		Name:       "StackmonitoringProcessSet",
+		SpecType:   reflect.TypeOf(stackmonitoringv1beta1.ProcessSetSpec{}),
+		StatusType: reflect.TypeOf(stackmonitoringv1beta1.ProcessSetStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "stackmonitoring.CreateProcessSetDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.UpdateProcessSetDetails",
+			},
+			{
+				SDKStruct: "stackmonitoring.ProcessSet",
+			},
+			{
+				SDKStruct: "stackmonitoring.ProcessSetCollection",
+			},
+			{
+				SDKStruct: "stackmonitoring.ProcessSetSummary",
+			},
+		},
+	},
+	{
+		Name:       "WaaWebAppAcceleration",
+		SpecType:   reflect.TypeOf(waav1beta1.WebAppAccelerationSpec{}),
+		StatusType: reflect.TypeOf(waav1beta1.WebAppAccelerationStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waa.UpdateWebAppAccelerationDetails",
+			},
+			{
+				SDKStruct: "waa.WebAppAccelerationCollection",
+			},
+		},
+	},
+	{
+		Name:       "WaaWebAppAccelerationPolicy",
+		SpecType:   reflect.TypeOf(waav1beta1.WebAppAccelerationPolicySpec{}),
+		StatusType: reflect.TypeOf(waav1beta1.WebAppAccelerationPolicyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waa.CreateWebAppAccelerationPolicyDetails",
+			},
+			{
+				SDKStruct: "waa.UpdateWebAppAccelerationPolicyDetails",
+			},
+			{
+				SDKStruct: "waa.WebAppAccelerationPolicy",
+			},
+			{
+				SDKStruct: "waa.WebAppAccelerationPolicyCollection",
+			},
+			{
+				SDKStruct: "waa.WebAppAccelerationPolicySummary",
+			},
+		},
+	},
+	{
+		Name:       "WaasAddressList",
+		SpecType:   reflect.TypeOf(waasv1beta1.AddressListSpec{}),
+		StatusType: reflect.TypeOf(waasv1beta1.AddressListStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waas.CreateAddressListDetails",
+			},
+			{
+				SDKStruct: "waas.UpdateAddressListDetails",
+			},
+			{
+				SDKStruct: "waas.AddressList",
+			},
+			{
+				SDKStruct: "waas.AddressListSummary",
+			},
+		},
+	},
+	{
+		Name:       "WaasCertificate",
+		SpecType:   reflect.TypeOf(waasv1beta1.CertificateSpec{}),
+		StatusType: reflect.TypeOf(waasv1beta1.CertificateStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waas.CreateCertificateDetails",
+			},
+			{
+				SDKStruct: "waas.UpdateCertificateDetails",
+			},
+			{
+				SDKStruct: "waas.Certificate",
+			},
+			{
+				SDKStruct: "waas.CertificateSummary",
+			},
+		},
+	},
+	{
+		Name:       "WaasCustomProtectionRule",
+		SpecType:   reflect.TypeOf(waasv1beta1.CustomProtectionRuleSpec{}),
+		StatusType: reflect.TypeOf(waasv1beta1.CustomProtectionRuleStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waas.CreateCustomProtectionRuleDetails",
+			},
+			{
+				SDKStruct: "waas.UpdateCustomProtectionRuleDetails",
+			},
+			{
+				SDKStruct: "waas.CustomProtectionRule",
+			},
+			{
+				SDKStruct: "waas.CustomProtectionRuleSummary",
+			},
+		},
+	},
+	{
+		Name:       "WaasHttpRedirect",
+		SpecType:   reflect.TypeOf(waasv1beta1.HttpRedirectSpec{}),
+		StatusType: reflect.TypeOf(waasv1beta1.HttpRedirectStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waas.CreateHttpRedirectDetails",
+			},
+			{
+				SDKStruct: "waas.UpdateHttpRedirectDetails",
+			},
+			{
+				SDKStruct: "waas.HttpRedirect",
+			},
+			{
+				SDKStruct: "waas.HttpRedirectSummary",
+			},
+		},
+	},
+	{
+		Name:       "WaasWaasPolicy",
+		SpecType:   reflect.TypeOf(waasv1beta1.WaasPolicySpec{}),
+		StatusType: reflect.TypeOf(waasv1beta1.WaasPolicyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waas.CreateWaasPolicyDetails",
+			},
+			{
+				SDKStruct: "waas.UpdateWaasPolicyDetails",
+			},
+			{
+				SDKStruct: "waas.WaasPolicy",
+			},
+			{
+				SDKStruct: "waas.WaasPolicySummary",
+			},
+		},
+	},
+	{
+		Name:       "WafNetworkAddressList",
+		SpecType:   reflect.TypeOf(wafv1beta1.NetworkAddressListSpec{}),
+		StatusType: reflect.TypeOf(wafv1beta1.NetworkAddressListStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waf.NetworkAddressListCollection",
+			},
+		},
+	},
+	{
+		Name:       "WafWebAppFirewall",
+		SpecType:   reflect.TypeOf(wafv1beta1.WebAppFirewallSpec{}),
+		StatusType: reflect.TypeOf(wafv1beta1.WebAppFirewallStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waf.UpdateWebAppFirewallDetails",
+			},
+			{
+				SDKStruct: "waf.WebAppFirewallCollection",
+			},
+		},
+	},
+	{
+		Name:       "WafWebAppFirewallPolicy",
+		SpecType:   reflect.TypeOf(wafv1beta1.WebAppFirewallPolicySpec{}),
+		StatusType: reflect.TypeOf(wafv1beta1.WebAppFirewallPolicyStatus{}),
+		SDKMappings: []SDKMapping{
+			{
+				SDKStruct: "waf.CreateWebAppFirewallPolicyDetails",
+			},
+			{
+				SDKStruct: "waf.UpdateWebAppFirewallPolicyDetails",
+			},
+			{
+				SDKStruct: "waf.WebAppFirewallPolicy",
+			},
+			{
+				SDKStruct: "waf.WebAppFirewallPolicyCollection",
+			},
+			{
+				SDKStruct: "waf.WebAppFirewallPolicySummary",
 			},
 		},
 	},
