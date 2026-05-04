@@ -5,7 +5,7 @@
   "slug": "drg",
   "kind": "Drg",
   "sourceRef": "terraform-provider-oci",
-  "providerResource": "scaffold_core_drg",
+  "providerResource": "oci_core_drg",
   "operations": {
     "create": [
       {
@@ -23,9 +23,9 @@
     ],
     "list": [
       {
-        "operation": "ListDrg",
-        "requestType": "core.ListDrgRequest",
-        "responseType": "core.ListDrgResponse"
+        "operation": "ListDrgs",
+        "requestType": "core.ListDrgsRequest",
+        "responseType": "core.ListDrgsResponse"
       }
     ],
     "update": [
@@ -49,7 +49,7 @@
         "PROVISIONING"
       ],
       "target": [
-        "ACTIVE"
+        "AVAILABLE"
       ]
     },
     "update": {
@@ -57,13 +57,16 @@
         "UPDATING"
       ],
       "target": [
-        "ACTIVE"
+        "AVAILABLE"
       ]
     }
   },
   "mutation": {
     "mutable": [
-      "display_name"
+      "default_drg_route_tables",
+      "defined_tags",
+      "display_name",
+      "freeform_tags"
     ],
     "forceNew": [
       "compartment_id"
@@ -94,18 +97,21 @@
   },
   "deleteConfirmation": {
     "pending": [
-      "DELETING"
+      "TERMINATING",
+      "TERMINATED"
     ],
     "target": [
-      "DELETED"
+      "NOT_FOUND"
     ]
   },
   "listLookup": {
-    "datasource": "scaffold_core_drg",
+    "datasource": "oci_core_drgs",
     "collectionField": "drg",
     "responseItemsField": "Items",
     "filterFields": [
       "compartment_id",
+      "display_name",
+      "id",
       "state"
     ]
   },
@@ -115,11 +121,13 @@
     "repoAuthoredLogicGapsPath": "controllers/core/drg/logic-gaps.md",
     "excludedSemantics": [
       "bind-versus-create",
-      "secret-output",
-      "delete-confirmation"
+      "secret-output"
     ]
   },
   "notes": [
-    "Scaffold placeholder for core/drg; replace imported facts before promoting this row beyond scaffold."
+    "Pinned OCI SDK contract: CreateDrgDetails accepts compartment_id, defined_tags, display_name, and freeform_tags, while UpdateDrgDetails adds default_drg_route_tables as the only extra mutable surface; requested default route-table overrides therefore reconcile after create rather than inside CreateDrg.",
+    "Vendored SDK lifecycle success is AVAILABLE; the handwritten runtime requeues PROVISIONING, defensive literal UPDATING, TERMINATING, and TERMINATED states.",
+    "ListDrgsRequest only filters by compartmentId and returns Items []Drg. The handwritten runtime binds by exact compartment_id plus display_name within the requested compartment, rereads a single candidate through GetDrg, skips reuse when display_name is blank, and fails on duplicates instead of guessing.",
+    "Delete confirmation is absence-based rather than a DELETED SDK state, so observed TERMINATING and TERMINATED keep the finalizer in place until GetDrg returns not found. The create-fallback wrapper only recovers first-create post-read failures when status already carries the created DRG OCID plus a provisioning-like or AVAILABLE lifecycle."
   ]
 }

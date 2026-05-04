@@ -29,8 +29,8 @@ generated-runtime contract.
   `status.id`, `status.compartmentId`, `status.timeCreated`,
   `status.lifecycleState`, `status.displayName`, `status.description`,
   `status.timeUpdated`, `status.lifecycleDetails`, `status.freeformTags`,
-  `status.definedTags`, and `status.systemTags` read-model fields when OCI
-  returns them.
+  `status.definedTags`, `status.systemTags`, and `status.locks` read-model
+  fields when OCI returns them.
 
 ## Repo-authored semantics
 
@@ -44,6 +44,11 @@ generated-runtime contract.
   `freeformTags`, and `definedTags` reconcile in place. `compartmentId` stays
   replacement-only drift and the runtime skips `UpdateProject` when the mutable
   surface already matches the live OCI response.
+- The refreshed lock surface stays explicit. OCI responses can now project
+  `status.locks`, but the reviewed runtime intentionally omits
+  `UpdateProject.isLockOverride` and `DeleteProject.isLockOverride` because the
+  CRD does not expose lock-override intent and the published mutation surface
+  does not model lock lifecycle operations.
 - Create, update, and delete use plain provider helper semantics
   (`tfresource.CreateResource`, `tfresource.UpdateResource`,
   `tfresource.DeleteResource`) with read-after-write follow-up for create and

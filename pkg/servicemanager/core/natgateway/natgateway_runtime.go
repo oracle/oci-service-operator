@@ -166,6 +166,7 @@ func (c *natGatewayRuntimeClient) CreateOrUpdate(ctx context.Context, resource *
 	}
 
 	trackedID := currentNatGatewayID(resource)
+	seedNatGatewayTrackedOCID(resource, trackedID)
 	explicitRecreate := false
 	if trackedID != "" {
 		if c.initErr != nil {
@@ -249,6 +250,7 @@ func (c *natGatewayRuntimeClient) Delete(ctx context.Context, resource *corev1be
 	}
 
 	trackedID := currentNatGatewayID(resource)
+	seedNatGatewayTrackedOCID(resource, trackedID)
 	if trackedID == "" {
 		c.markDeleted(resource, "OCI resource identifier is not recorded")
 		return true, nil
@@ -558,7 +560,20 @@ func currentNatGatewayID(resource *corev1beta1.NatGateway) string {
 	if resource == nil {
 		return ""
 	}
-	return strings.TrimSpace(string(resource.Status.OsokStatus.Ocid))
+	if ocid := strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)); ocid != "" {
+		return ocid
+	}
+	return strings.TrimSpace(resource.Status.Id)
+}
+
+func seedNatGatewayTrackedOCID(resource *corev1beta1.NatGateway, trackedID string) {
+	if resource == nil || strings.TrimSpace(trackedID) == "" {
+		return
+	}
+	if strings.TrimSpace(string(resource.Status.OsokStatus.Ocid)) != "" {
+		return
+	}
+	resource.Status.OsokStatus.Ocid = shared.OCID(trackedID)
 }
 
 func natGatewayLifecycleIsRetryable(state coresdk.NatGatewayLifecycleStateEnum) bool {

@@ -30,6 +30,7 @@ func applyAnalyticsInstanceRuntimeHooks(hooks *AnalyticsInstanceRuntimeHooks) {
 	}
 
 	hooks.Semantics = reviewedAnalyticsInstanceRuntimeSemantics()
+	hooks.ParityHooks.NormalizeDesiredState = normalizeAnalyticsInstanceDesiredState
 	hooks.BuildUpdateBody = func(
 		_ context.Context,
 		resource *analyticsv1beta1.AnalyticsInstance,
@@ -48,12 +49,25 @@ func reviewedAnalyticsInstanceRuntimeSemantics() *generatedruntime.Semantics {
 		ActiveStates:       []string{"ACTIVE", "INACTIVE"},
 	}
 	semantics.Mutation = generatedruntime.MutationSemantics{
-		Mutable:       []string{"definedTags", "description", "emailNotification", "freeformTags", "licenseType"},
+		Mutable:       []string{"definedTags", "description", "emailNotification", "freeformTags", "licenseType", "updateChannel"},
 		ForceNew:      []string{"capacity.capacityType", "featureSet", "name", "networkEndpointDetails.networkEndpointType"},
 		ConflictsWith: map[string][]string{},
 	}
 	semantics.AuxiliaryOperations = nil
 	return semantics
+}
+
+func normalizeAnalyticsInstanceDesiredState(
+	resource *analyticsv1beta1.AnalyticsInstance,
+	currentResponse any,
+) {
+	if resource == nil || currentResponse == nil {
+		return
+	}
+
+	// OCI does not echo these create-time inputs back on AnalyticsInstance.
+	resource.Spec.AdminUser = ""
+	resource.Spec.IdcsAccessToken = ""
 }
 
 func analyticsInstanceCreateFields() []generatedruntime.RequestField {
@@ -131,6 +145,10 @@ func buildAnalyticsInstanceUpdateBody(
 		details.DefinedTags = desired
 		updateNeeded = true
 	}
+	if desired, ok := analyticsDesiredUpdateChannelUpdate(resource.Spec.UpdateChannel, current.UpdateChannel); ok {
+		details.UpdateChannel = desired
+		updateNeeded = true
+	}
 
 	return details, updateNeeded, nil
 }
@@ -157,6 +175,9 @@ func analyticsInstanceRuntimeBody(currentResponse any) (analyticssdk.AnalyticsIn
 			Description:            current.Description,
 			LicenseType:            current.LicenseType,
 			EmailNotification:      current.EmailNotification,
+			DefinedTags:            current.DefinedTags,
+			FreeformTags:           current.FreeformTags,
+			SystemTags:             current.SystemTags,
 			ServiceUrl:             current.ServiceUrl,
 			TimeUpdated:            current.TimeUpdated,
 		}, nil
@@ -213,6 +234,16 @@ func analyticsDesiredLicenseTypeUpdate(
 		return "", false
 	}
 	return analyticssdk.LicenseTypeEnum(spec), true
+}
+
+func analyticsDesiredUpdateChannelUpdate(
+	spec string,
+	current analyticssdk.UpdateChannelEnum,
+) (analyticssdk.UpdateChannelEnum, bool) {
+	if spec == "" || spec == string(current) {
+		return "", false
+	}
+	return analyticssdk.UpdateChannelEnum(spec), true
 }
 
 func analyticsDesiredFreeformTagsUpdate(

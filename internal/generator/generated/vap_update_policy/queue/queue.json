@@ -18,6 +18,7 @@
   },
   "update": {
     "allowInPlacePaths": [
+      "capabilities",
       "channelConsumptionLimit",
       "customEncryptionKeyId",
       "deadLetterQueueDeliveryCount",

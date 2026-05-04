@@ -32,15 +32,15 @@ state "Deleted" as deleted
 state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateDrg
 observe --> resolve_by_lookup : tracked identity missing
-resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nAVAILABLE
+resolve_by_lookup --> retryable : OCI state in PROVISIONING,\nUPDATING, TERMINATING,\nTERMINATED
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
-observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in PROVISIONING,\nUPDATING, DELETING
+observe --> evaluate_ready : OCI state in AVAILABLE
+observe --> retryable : OCI state in PROVISIONING,\nUPDATING, TERMINATING,\nTERMINATED
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndisplay_name
+evaluate_ready --> apply_update : supported mutable drift for\ndefaultDrgRouteTables,\ndefinedTags, displayName (+1\nmore)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -70,22 +70,37 @@ status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create PROVISIONING; update
-UPDATING; delete DELETING
-supported drift: display_name
+UPDATING; delete TERMINATING, TERMINATED
+follow-up: delete=confirm-delete
+supported drift: defaultDrgRouteTables,
+definedTags, displayName, freeformTags
 reject before mutate: force-new fields
-compartment_id
+compartmentId
 create-only fields: none
-list lookup: scaffold_core_drg filters
-compartment_id, state
+list lookup: oci_core_drgs filters
+compartmentId, displayName; tracked OCI ID via
+GetDrg wins; otherwise exact compartmentId plus
+displayName unique match in AVAILABLE,
+PROVISIONING, or UPDATING; blank displayName
+skips reuse and duplicate matches fail
 conflicts: none
 open gaps: none
-Scaffold metadata only; replace with
-controller-specific runtime states before
-promotion.
+Ready state maps to OCI AVAILABLE.
+CreateDrgDetails does not expose
+defaultDrgRouteTables, so requested
+attachment-type defaults reconcile through
+UpdateDrg after the DRG exists.
+Delete completes only after GetDrg returns not
+found; TERMINATING and TERMINATED are accepted
+observed pre-delete states.
+The create-fallback wrapper only recovers
+first-create post-read failures when status
+already carries a created DRG OCID and a
+provisioning-like or AVAILABLE lifecycle state.
 end note
 note right of delete_pending
 delete policy: required
-delete observe: GetDrg or ListDrg
-delete targets: DELETED
+delete observe: GetDrg or ListDrgs
+delete targets: NOT_FOUND
 end note
 @enduml

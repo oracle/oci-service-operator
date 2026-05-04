@@ -26,6 +26,10 @@ gaps: []
   current spec explicitly sets `publicIpId`. When the tracked NatGateway was
   first managed with `publicIpId` omitted and the current spec still omits it,
   OCI-assigned `publicIpId` values are accepted and projected into status.
+- Tracked OCI identity prefers `status.ocid` and falls back to projected `id`,
+  so older NatGateway status records keep the existing `publicIpId`
+  create-intent and delete-confirmation logic on the live OCI resource until
+  `status.ocid` is backfilled.
 - Status projection is authoritative for `id`, `compartmentId`, `vcnId`,
   `blockTraffic`, `natIp`, `timeCreated`, `displayName`, tags, `publicIpId`,
   `routeTableId`, `lifecycleState`, and `status.ocid`, and clears stale optional

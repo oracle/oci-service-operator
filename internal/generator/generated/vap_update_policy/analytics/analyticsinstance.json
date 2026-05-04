@@ -18,13 +18,12 @@
   },
   "update": {
     "allowInPlacePaths": [
-      "capacity.capacityValue",
-      "compartmentId",
       "definedTags",
       "description",
       "emailNotification",
       "freeformTags",
-      "licenseType"
+      "licenseType",
+      "updateChannel"
     ],
     "denyRules": [
       {
@@ -42,20 +41,6 @@
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
       },
       {
-        "fieldPath": "idcsAccessToken",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
-        "fieldPath": "kmsKeyId",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
         "fieldPath": "name",
         "decision": "replacementRequired",
         "mergeCase": "replacementRequired",
@@ -68,55 +53,6 @@
         "mergeCase": "replacementRequired",
         "docsEvidenceState": "notDocumented",
         "detail": "AST forceNew remains authoritative; docs overlay was not applied to this field."
-      },
-      {
-        "fieldPath": "networkEndpointDetails.networkSecurityGroupIds",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
-        "fieldPath": "networkEndpointDetails.subnetId",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
-        "fieldPath": "networkEndpointDetails.vcnId",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
-        "fieldPath": "networkEndpointDetails.whitelistedIps",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
-        "fieldPath": "networkEndpointDetails.whitelistedServices",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
-        "fieldPath": "networkEndpointDetails.whitelistedVcns.id",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
-      },
-      {
-        "fieldPath": "networkEndpointDetails.whitelistedVcns.whitelistedIps",
-        "decision": "unknown",
-        "mergeCase": "unknown",
-        "docsEvidenceState": "unknown",
-        "detail": "Argument Reference documents the field but does not include an explicit update cue."
       }
     ]
   }

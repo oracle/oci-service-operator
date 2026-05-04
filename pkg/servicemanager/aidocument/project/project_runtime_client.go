@@ -34,7 +34,11 @@ func applyProjectRuntimeHooks(hooks *ProjectRuntimeHooks) {
 	}
 
 	hooks.Semantics = reviewedProjectRuntimeSemantics()
+	hooks.Create.Fields = projectCreateFields()
+	hooks.Get.Fields = projectGetFields()
 	hooks.List.Fields = projectListFields()
+	hooks.Update.Fields = projectUpdateFields()
+	hooks.Delete.Fields = projectDeleteFields()
 }
 
 func newProjectServiceClientWithOCIClient(log loggerutil.OSOKLogger, client projectOCIClient) ProjectServiceClient {

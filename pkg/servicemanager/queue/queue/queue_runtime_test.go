@@ -7,6 +7,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -273,6 +274,55 @@ func seedStaleQueueAsyncStatus(resource *queuev1beta1.Queue) {
 	}
 }
 
+func decodeQueueCapabilityPayload(t *testing.T, capability queuesdk.CapabilityDetails) map[string]any {
+	t.Helper()
+
+	rawJSON, err := json.Marshal(capability)
+	if err != nil {
+		t.Fatalf("marshal capability payload: %v", err)
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rawJSON, &payload); err != nil {
+		t.Fatalf("decode capability payload: %v", err)
+	}
+	return payload
+}
+
+func decodeQueueCapabilityJSONData(t *testing.T, rawJSON string) map[string]any {
+	t.Helper()
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(rawJSON), &payload); err != nil {
+		t.Fatalf("decode capability jsonData: %v", err)
+	}
+	return payload
+}
+
+func queueCapabilityStatusTypes(capabilities []queuev1beta1.QueueCapability) []string {
+	if len(capabilities) == 0 {
+		return nil
+	}
+
+	types := make([]string, 0, len(capabilities))
+	for _, capability := range capabilities {
+		types = append(types, capability.Type)
+	}
+	return types
+}
+
+func queueCapabilityStatusByType(
+	capabilities []queuev1beta1.QueueCapability,
+	capabilityType string,
+) (queuev1beta1.QueueCapability, bool) {
+	for _, capability := range capabilities {
+		if capability.Type == capabilityType {
+			return capability, true
+		}
+	}
+	return queuev1beta1.QueueCapability{}, false
+}
+
 func TestQueueWorkRequestAsyncOperationMapsKnownStatusesAndActions(t *testing.T) {
 	t.Parallel()
 
@@ -358,6 +408,68 @@ func TestQueueWorkRequestAsyncOperationRejectsUnmodeledStatus(t *testing.T) {
 	assert.EqualError(t, err, `unmodeled async status "WAITING"`)
 }
 
+func TestBuildQueueCapabilitiesPreservesJsonDataFields(t *testing.T) {
+	t.Parallel()
+
+	capabilities, err := buildQueueCapabilities([]queuev1beta1.QueueCapability{
+		{
+			JsonData: `{"type":"CONSUMER_GROUPS","isPrimaryConsumerGroupEnabled":false,"primaryConsumerGroupFilter":""}`,
+		},
+	})
+
+	assert.NoError(t, err)
+	if assert.Len(t, capabilities, 1) {
+		payload := decodeQueueCapabilityPayload(t, capabilities[0])
+		assert.Equal(t, "CONSUMER_GROUPS", payload["type"])
+		enabled, ok := payload["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.False(t, enabled)
+		}
+		filter, ok := payload["primaryConsumerGroupFilter"].(string)
+		if assert.True(t, ok) {
+			assert.Equal(t, "", filter)
+		}
+	}
+}
+
+func TestDesiredQueueCapabilitiesForUpdateTriggersOnControllerOwnedParityDrift(t *testing.T) {
+	t.Parallel()
+
+	specCapabilities := []queuev1beta1.QueueCapability{
+		{
+			JsonData: `{"type":"CONSUMER_GROUPS","isPrimaryConsumerGroupEnabled":false,"primaryConsumerGroupFilter":"","primaryConsumerGroupDeadLetterQueueDeliveryCount":0}`,
+		},
+	}
+	currentCapabilities := []queuesdk.CapabilityDetails{
+		queuesdk.ConsumerGroupsCapabilityDetails{},
+	}
+	statusCapabilities := []queuev1beta1.QueueCapability{
+		{Type: string(queuesdk.QueueCapabilityConsumerGroups)},
+	}
+
+	desiredCapabilities, updateNeeded, err := desiredQueueCapabilitiesForUpdate(
+		specCapabilities,
+		currentCapabilities,
+		statusCapabilities,
+	)
+
+	assert.NoError(t, err)
+	assert.True(t, updateNeeded)
+	if assert.Len(t, desiredCapabilities, 1) {
+		payload := decodeQueueCapabilityPayload(t, desiredCapabilities[0])
+		assert.Equal(t, "CONSUMER_GROUPS", payload["type"])
+		enabled, ok := payload["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.False(t, enabled)
+		}
+		filter, ok := payload["primaryConsumerGroupFilter"].(string)
+		if assert.True(t, ok) {
+			assert.Equal(t, "", filter)
+		}
+		assert.Equal(t, float64(0), payload["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
+}
+
 func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T) {
 	var captured queuesdk.CreateQueueRequest
 	manager := newQueueTestManager(&fakeQueueOCIClient{
@@ -398,6 +510,59 @@ func TestQueueRuntime_CreateAcceptedPersistsWorkRequestAndRequeues(t *testing.T)
 	assert.Equal(t, "queue-sample", *captured.DisplayName)
 	assert.Equal(t, "ocid1.compartment.oc1..example", *captured.CompartmentId)
 	assert.Equal(t, 1200, *captured.RetentionInSeconds)
+}
+
+func TestQueueRuntime_CreateAcceptedIncludesCapabilitiesPayload(t *testing.T) {
+	t.Parallel()
+
+	var captured queuesdk.CreateQueueRequest
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		createFn: func(_ context.Context, req queuesdk.CreateQueueRequest) (queuesdk.CreateQueueResponse, error) {
+			captured = req
+			return queuesdk.CreateQueueResponse{
+				OpcRequestId:     common.String("opc-create-capabilities"),
+				OpcWorkRequestId: common.String("wr-create-capabilities"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-create-capabilities", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-create-capabilities", queuesdk.OperationStatusAccepted, queuesdk.ActionTypeCreated, ""),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Spec.Capabilities = []queuev1beta1.QueueCapability{
+		{Type: string(queuesdk.QueueCapabilityLargeMessages)},
+		{
+			Type:                            string(queuesdk.QueueCapabilityConsumerGroups),
+			IsPrimaryConsumerGroupEnabled:   true,
+			PrimaryConsumerGroupDisplayName: "Primary Consumer Group",
+			PrimaryConsumerGroupFilter:      "severity = 'ERROR'",
+			PrimaryConsumerGroupDeadLetterQueueDeliveryCount: 7,
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.True(t, resp.ShouldRequeue)
+	if assert.Len(t, captured.Capabilities, 2) {
+		largeMessages := decodeQueueCapabilityPayload(t, captured.Capabilities[0])
+		assert.Equal(t, "LARGE_MESSAGES", largeMessages["type"])
+
+		consumerGroups := decodeQueueCapabilityPayload(t, captured.Capabilities[1])
+		assert.Equal(t, "CONSUMER_GROUPS", consumerGroups["type"])
+		enabled, ok := consumerGroups["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+		assert.Equal(t, "Primary Consumer Group", consumerGroups["primaryConsumerGroupDisplayName"])
+		assert.Equal(t, "severity = 'ERROR'", consumerGroups["primaryConsumerGroupFilter"])
+		assert.Equal(t, float64(7), consumerGroups["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
 }
 
 func TestQueueRuntime_CreateErrorCapturesOpcRequestID(t *testing.T) {
@@ -763,6 +928,94 @@ func TestQueueRuntime_ObserveNoOpWhenStateMatches(t *testing.T) {
 	assert.Equal(t, 0, updateCalls)
 }
 
+func TestQueueRuntime_CapabilityDetailDriftTriggersUpdateAndConverges(t *testing.T) {
+	t.Parallel()
+
+	getCalls := 0
+	updateCalls := 0
+	var captured queuesdk.UpdateQueueRequest
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			current := makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive)
+			current.Capabilities = []queuesdk.CapabilityDetails{
+				queuesdk.ConsumerGroupsCapabilityDetails{},
+			}
+			return queuesdk.GetQueueResponse{Queue: current}, nil
+		},
+		updateFn: func(_ context.Context, req queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+			updateCalls++
+			captured = req
+			return queuesdk.UpdateQueueResponse{
+				OpcWorkRequestId: common.String("wr-update-capability-details"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-capability-details", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest(
+					"wr-update-capability-details",
+					queuesdk.OperationStatusSucceeded,
+					queuesdk.ActionTypeUpdated,
+					"ocid1.queue.oc1..existing",
+				),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Spec.Capabilities = []queuev1beta1.QueueCapability{
+		{
+			Type:                            string(queuesdk.QueueCapabilityConsumerGroups),
+			IsPrimaryConsumerGroupEnabled:   true,
+			PrimaryConsumerGroupDisplayName: "Primary Consumer Group",
+			PrimaryConsumerGroupFilter:      "severity = 'ERROR'",
+			PrimaryConsumerGroupDeadLetterQueueDeliveryCount: 4,
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, 1, updateCalls)
+	if assert.Len(t, captured.Capabilities, 1) {
+		consumerGroups := decodeQueueCapabilityPayload(t, captured.Capabilities[0])
+		assert.Equal(t, "CONSUMER_GROUPS", consumerGroups["type"])
+		enabled, ok := consumerGroups["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+		assert.Equal(t, "Primary Consumer Group", consumerGroups["primaryConsumerGroupDisplayName"])
+		assert.Equal(t, "severity = 'ERROR'", consumerGroups["primaryConsumerGroupFilter"])
+		assert.Equal(t, float64(4), consumerGroups["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
+	statusCapability, ok := queueCapabilityStatusByType(resource.Status.Capabilities, string(queuesdk.QueueCapabilityConsumerGroups))
+	if assert.True(t, ok) {
+		payload := decodeQueueCapabilityJSONData(t, statusCapability.JsonData)
+		assert.Equal(t, "CONSUMER_GROUPS", payload["type"])
+		enabled, ok := payload["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+		assert.Equal(t, "Primary Consumer Group", payload["primaryConsumerGroupDisplayName"])
+		assert.Equal(t, "severity = 'ERROR'", payload["primaryConsumerGroupFilter"])
+		assert.Equal(t, float64(4), payload["primaryConsumerGroupDeadLetterQueueDeliveryCount"])
+	}
+
+	resp, err = manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 3, getCalls)
+	assert.Equal(t, 1, updateCalls)
+}
+
 func TestQueueRuntime_MutableUpdateDriftTriggersWorkRequestAndClearCustomEncryptionKey(t *testing.T) {
 	var captured queuesdk.UpdateQueueRequest
 	getCalls := 0
@@ -811,6 +1064,76 @@ func TestQueueRuntime_MutableUpdateDriftTriggersWorkRequestAndClearCustomEncrypt
 	assert.NotNil(t, captured.CustomEncryptionKeyId)
 	assert.Equal(t, "", *captured.CustomEncryptionKeyId)
 	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
+}
+
+func TestQueueRuntime_CapabilityTypeDriftTriggersUpdate(t *testing.T) {
+	t.Parallel()
+
+	var captured queuesdk.UpdateQueueRequest
+	getCalls := 0
+	manager := newQueueTestManager(&fakeQueueOCIClient{
+		getFn: func(_ context.Context, req queuesdk.GetQueueRequest) (queuesdk.GetQueueResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.queue.oc1..existing", *req.QueueId)
+			current := makeSDKQueue("ocid1.queue.oc1..existing", "queue-sample", queuesdk.QueueLifecycleStateActive)
+			switch getCalls {
+			case 1:
+				current.Capabilities = []queuesdk.CapabilityDetails{
+					queuesdk.LargeMessagesCapabilityDetails{},
+				}
+			default:
+				current.Capabilities = []queuesdk.CapabilityDetails{
+					queuesdk.LargeMessagesCapabilityDetails{},
+					queuesdk.ConsumerGroupsCapabilityDetails{},
+				}
+			}
+			return queuesdk.GetQueueResponse{Queue: current}, nil
+		},
+		updateFn: func(_ context.Context, req queuesdk.UpdateQueueRequest) (queuesdk.UpdateQueueResponse, error) {
+			captured = req
+			return queuesdk.UpdateQueueResponse{
+				OpcWorkRequestId: common.String("wr-update-capabilities"),
+			}, nil
+		},
+		getWorkRequestFn: func(_ context.Context, req queuesdk.GetWorkRequestRequest) (queuesdk.GetWorkRequestResponse, error) {
+			assert.Equal(t, "wr-update-capabilities", *req.WorkRequestId)
+			return queuesdk.GetWorkRequestResponse{
+				WorkRequest: makeWorkRequest("wr-update-capabilities", queuesdk.OperationStatusSucceeded, queuesdk.ActionTypeUpdated, "ocid1.queue.oc1..existing"),
+			}, nil
+		},
+	})
+
+	resource := makeSpecQueue()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.queue.oc1..existing")
+	resource.Spec.Capabilities = []queuev1beta1.QueueCapability{
+		{Type: string(queuesdk.QueueCapabilityLargeMessages)},
+		{
+			Type:                            string(queuesdk.QueueCapabilityConsumerGroups),
+			IsPrimaryConsumerGroupEnabled:   true,
+			PrimaryConsumerGroupDisplayName: "Primary Consumer Group",
+		},
+	}
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 2, getCalls)
+	if assert.Len(t, captured.Capabilities, 2) {
+		largeMessages := decodeQueueCapabilityPayload(t, captured.Capabilities[0])
+		assert.Equal(t, "LARGE_MESSAGES", largeMessages["type"])
+
+		consumerGroups := decodeQueueCapabilityPayload(t, captured.Capabilities[1])
+		assert.Equal(t, "CONSUMER_GROUPS", consumerGroups["type"])
+		assert.Equal(t, "Primary Consumer Group", consumerGroups["primaryConsumerGroupDisplayName"])
+		enabled, ok := consumerGroups["isPrimaryConsumerGroupEnabled"].(bool)
+		if assert.True(t, ok) {
+			assert.True(t, enabled)
+		}
+	}
+	assert.Equal(t, "", resource.Status.UpdateWorkRequestId)
+	assert.ElementsMatch(t, []string{"CONSUMER_GROUPS", "LARGE_MESSAGES"}, queueCapabilityStatusTypes(resource.Status.Capabilities))
 }
 
 func TestQueueRuntime_UpdateAcceptedPersistsLegacyMirrorAndSharedAsyncTracker(t *testing.T) {

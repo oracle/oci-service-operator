@@ -220,6 +220,10 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, "2026-04-01T00:00:00Z", resource.Status.TimeCreated)
 }
 
+func TestValidateNetworkSecurityGroupSDKContract(t *testing.T) {
+	assert.NoError(t, validateNetworkSecurityGroupSDKContract())
+}
+
 func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 	getCalls := 0
 	updateCalls := 0

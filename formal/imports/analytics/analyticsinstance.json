@@ -45,6 +45,16 @@
         "responseType": "analytics.ScaleAnalyticsInstanceResponse"
       },
       {
+        "operation": "SetFeatureBundle",
+        "requestType": "analytics.SetFeatureBundleRequest",
+        "responseType": "analytics.SetFeatureBundleResponse"
+      },
+      {
+        "operation": "SetKmsKey",
+        "requestType": "analytics.SetKmsKeyRequest",
+        "responseType": "analytics.SetKmsKeyResponse"
+      },
+      {
         "operation": "UpdateAnalyticsInstance",
         "requestType": "analytics.UpdateAnalyticsInstanceRequest",
         "responseType": "analytics.UpdateAnalyticsInstanceResponse"
@@ -67,7 +77,15 @@
         "ACTIVE"
       ]
     },
-    "update": {}
+    "update": {
+      "pending": [
+        "UPDATING"
+      ],
+      "target": [
+        "ACTIVE",
+        "INACTIVE"
+      ]
+    }
   },
   "mutation": {
     "mutable": [
@@ -76,8 +94,8 @@
       "defined_tags",
       "description",
       "email_notification",
+      "feature_bundle",
       "freeform_tags",
-      "idcs_access_token",
       "kms_key_id",
       "license_type",
       "network_endpoint_details.network_security_group_ids",
@@ -86,7 +104,8 @@
       "network_endpoint_details.whitelisted_ips",
       "network_endpoint_details.whitelisted_services",
       "network_endpoint_details.whitelisted_vcns.id",
-      "network_endpoint_details.whitelisted_vcns.whitelisted_ips"
+      "network_endpoint_details.whitelisted_vcns.whitelisted_ips",
+      "update_channel"
     ],
     "forceNew": [
       "capacity.capacity_type",
@@ -135,7 +154,9 @@
   },
   "notes": [
     "Pinned OCI SDK contract: AnalyticsInstance lifecycle exposes CREATING, ACTIVE, UPDATING, DELETING, FAILED, INACTIVE, and DELETED. Repo-authored controller success is ACTIVE or INACTIVE, requeue covers CREATING and UPDATING, FAILED is terminal without requeue, and delete confirmation follows DELETING to DELETED or NotFound.",
-    "Pinned OCI SDK contract: UpdateAnalyticsInstanceDetails exposes description, email_notification, license_type, freeform_tags, and defined_tags as in-place update fields. Provider auxiliary mutators ChangeAnalyticsInstanceCompartment, ChangeAnalyticsInstanceNetworkEndpoint, ScaleAnalyticsInstance, and SetKmsKey stay outside the published runtime contract and are treated as explicit drift instead of implicit helper-owned updates.",
+    "Pinned OCI SDK contract: CreateAnalyticsInstanceDetails now carries update_channel, domain_id, admin_user, and feature_bundle. AnalyticsInstance responses now project update_channel, system_tags, feature_bundle, and domain_id, while AnalyticsInstanceSummary projects system_tags but does not echo update_channel, feature_bundle, or domain_id.",
+    "Pinned OCI SDK contract: UpdateAnalyticsInstanceDetails exposes description, email_notification, license_type, freeform_tags, defined_tags, and update_channel as in-place update fields. Auxiliary mutators ChangeAnalyticsInstanceCompartment, ChangeAnalyticsInstanceNetworkEndpoint, ScaleAnalyticsInstance, SetFeatureBundle, and SetKmsKey own the remaining mutable provider surface such as compartment_id, network_endpoint_details.*, capacity.capacity_value, feature_bundle, and kms_key_id.",
+    "Repo-authored runtime contract stays narrower than the imported provider surface: only description, emailNotification, licenseType, freeformTags, definedTags, and updateChannel reconcile in place. DomainId is a create-time input that remains status-projected only, while AdminUser and IdcsAccessToken are create-time inputs OCI does not echo back after create.",
     "CreateAnalyticsInstance and DeleteAnalyticsInstance return opc-work-request-id headers, while UpdateAnalyticsInstance returns only the resource body. The reviewed generatedruntime client records request and work-request breadcrumbs when present and relies on lifecycle projection plus confirm-delete rereads rather than service-local work-request polling.",
     "ListAnalyticsInstancesRequest filters by compartmentId, name, capacityType, featureSet, and lifecycleState and returns Items []AnalyticsInstanceSummary. Safe reusable matching is exact compartment_id plus name plus feature_set plus capacity_type, restricted to reusable ACTIVE, CREATING, UPDATING, or INACTIVE candidates; duplicate exact matches fail instead of guessing."
   ]

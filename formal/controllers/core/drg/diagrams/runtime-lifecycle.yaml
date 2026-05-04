@@ -9,5 +9,34 @@ states:
   - active
   - updating
   - terminating
+  - terminated
+  - deleted
+repoAuthored:
+  providerLifecycle:
+    createPending:
+      - PROVISIONING
+    updatePending:
+      - UPDATING
+    deletePending:
+      - TERMINATING
+      - TERMINATED
+  listLookup:
+    filters:
+      - compartmentId
+      - displayName
+    matchRule: tracked OCI ID via GetDrg wins; otherwise exact compartmentId plus displayName unique match in AVAILABLE, PROVISIONING, or UPDATING; blank displayName skips reuse and duplicate matches fail
+  mutation:
+    mutable:
+      - defaultDrgRouteTables
+      - definedTags
+      - displayName
+      - freeformTags
+    forceNew:
+      - compartmentId
+  followUp:
+    delete: confirm-delete
 notes:
-  - Scaffold metadata only; replace with controller-specific runtime states before promotion.
+  - Ready state maps to OCI AVAILABLE.
+  - CreateDrgDetails does not expose defaultDrgRouteTables, so requested attachment-type defaults reconcile through UpdateDrg after the DRG exists.
+  - Delete completes only after GetDrg returns not found; TERMINATING and TERMINATED are accepted observed pre-delete states.
+  - The create-fallback wrapper only recovers first-create post-read failures when status already carries a created DRG OCID and a provisioning-like or AVAILABLE lifecycle state.

@@ -258,6 +258,76 @@ func TestDrgCreateOrUpdate_DoesNotBindWithoutDisplayName(t *testing.T) {
 	assert.Equal(t, "ocid1.drg.oc1..create", string(resource.Status.OsokStatus.Ocid))
 }
 
+func TestDrgCreateOrUpdate_RejectsAmbiguousDisplayNameReuse(t *testing.T) {
+	createCalls := 0
+	manager := newTestDrgManager(&fakeDrgOCIClient{
+		listFn: func(_ context.Context, req coresdk.ListDrgsRequest) (coresdk.ListDrgsResponse, error) {
+			assert.Equal(t, common.String("ocid1.compartment.oc1..example"), req.CompartmentId)
+			return coresdk.ListDrgsResponse{
+				Items: []coresdk.Drg{
+					makeSDKDrg("ocid1.drg.oc1..first", "test-drg", coresdk.DrgLifecycleStateAvailable),
+					makeSDKDrg("ocid1.drg.oc1..second", "test-drg", coresdk.DrgLifecycleStateProvisioning),
+				},
+			}, nil
+		},
+		createFn: func(_ context.Context, _ coresdk.CreateDrgRequest) (coresdk.CreateDrgResponse, error) {
+			createCalls++
+			return coresdk.CreateDrgResponse{}, nil
+		},
+	})
+
+	resource := makeSpecDrg()
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.Error(t, err)
+	assert.False(t, resp.IsSuccessful)
+	assert.Contains(t, err.Error(), "multiple matching resources")
+	assert.Equal(t, 0, createCalls)
+	assert.Empty(t, resource.Status.Id)
+	assert.Empty(t, string(resource.Status.OsokStatus.Ocid))
+}
+
+func TestProjectDrgStatus_ClearsStaleOptionalFields(t *testing.T) {
+	resource := makeSpecDrg()
+	resource.Status = corev1beta1.DrgStatus{
+		OsokStatus: shared.OSOKStatus{Reason: "kept"},
+		Id:         "ocid1.drg.oc1..stale",
+		DefinedTags: map[string]shared.MapValue{
+			"Operations": {"CostCenter": "42"},
+		},
+		DisplayName:  "stale-name",
+		FreeformTags: map[string]string{"env": "stale"},
+		TimeCreated:  "2026-04-01T00:00:00Z",
+		DefaultDrgRouteTables: corev1beta1.DrgDefaultDrgRouteTables{
+			Vcn:                     "ocid1.drgroutetable.oc1..stale-vcn",
+			IpsecTunnel:             "ocid1.drgroutetable.oc1..stale-ipsec",
+			VirtualCircuit:          "ocid1.drgroutetable.oc1..stale-vc",
+			RemotePeeringConnection: "ocid1.drgroutetable.oc1..stale-rpc",
+		},
+		DefaultExportDrgRouteDistributionId: "ocid1.drgroutedistribution.oc1..stale",
+	}
+
+	err := projectDrgStatus(resource, coresdk.GetDrgResponse{
+		Drg: coresdk.Drg{
+			Id:             common.String("ocid1.drg.oc1..current"),
+			CompartmentId:  common.String("ocid1.compartment.oc1..example"),
+			LifecycleState: coresdk.DrgLifecycleStateAvailable,
+		},
+	})
+
+	assert.NoError(t, err)
+	assert.Equal(t, "kept", resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "ocid1.drg.oc1..current", resource.Status.Id)
+	assert.Equal(t, "ocid1.compartment.oc1..example", resource.Status.CompartmentId)
+	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
+	assert.Nil(t, resource.Status.DefinedTags)
+	assert.Empty(t, resource.Status.DisplayName)
+	assert.Nil(t, resource.Status.FreeformTags)
+	assert.Empty(t, resource.Status.TimeCreated)
+	assert.Empty(t, resource.Status.DefaultDrgRouteTables)
+	assert.Empty(t, resource.Status.DefaultExportDrgRouteDistributionId)
+}
+
 func TestDrgCreateOrUpdate_MutableDriftTriggersUpdate(t *testing.T) {
 	var captured coresdk.UpdateDrgRequest
 	manager := newTestDrgManager(&fakeDrgOCIClient{

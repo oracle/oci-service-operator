@@ -33,8 +33,10 @@ state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateApplication
 observe --> resolve_by_lookup : tracked identity missing
 resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, INACTIVE
+resolve_by_lookup --> retryable : OCI state in DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
 observe --> evaluate_ready : OCI state in ACTIVE,\nINACTIVE
+observe --> retryable : OCI state in DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
@@ -68,7 +70,7 @@ status/finalizer: required /
 retain-until-confirmed-delete
 requeue: terminating
 provider states: create none; update none;
-delete none
+delete DELETING
 supported drift: application_log_config,
 archive_uri, arguments, class_name (+22 more)
 reject before mutate: force-new fields

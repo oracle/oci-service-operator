@@ -40,7 +40,7 @@ observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, freeform_tags,\nimage_policy_config.is_policy_enabled\n(+9 more)
+evaluate_ready --> apply_update : supported mutable drift for\ndefined_tags, freeform_tags,\nimage_policy_config.is_policy_enabled\n(+23 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -73,7 +73,7 @@ provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
 supported drift: defined_tags, freeform_tags,
 image_policy_config.is_policy_enabled,
-image_policy_config.key_details.kms_key_id (+8
+image_policy_config.key_details.kms_key_id (+22
 more)
 reject before mutate: force-new fields
 cluster_pod_network_options.cni_type,

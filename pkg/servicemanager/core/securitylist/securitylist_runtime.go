@@ -801,11 +801,11 @@ func validateSecurityListSDKContract() error {
 			}
 		}
 		if _, ok := updateFields.FieldByName("CompartmentId"); ok {
-			securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json marks compartmentId mutable, but vendored UpdateSecurityListDetails unexpectedly exposes CompartmentId")
+			securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json expects compartmentId to remain create-only, but vendored UpdateSecurityListDetails unexpectedly exposes CompartmentId")
 			return
 		}
 		if _, ok := updateFields.FieldByName("VcnId"); ok {
-			securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json marks vcnId mutable, but vendored UpdateSecurityListDetails unexpectedly exposes VcnId")
+			securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json expects vcnId to remain create-only, but vendored UpdateSecurityListDetails unexpectedly exposes VcnId")
 			return
 		}
 
@@ -813,6 +813,84 @@ func validateSecurityListSDKContract() error {
 		for _, fieldName := range []string{"CompartmentId", "EgressSecurityRules", "IngressSecurityRules", "VcnId"} {
 			if _, ok := createFields.FieldByName(fieldName); !ok {
 				securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json assumes SecurityList create field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+
+		egressRuleFields := reflect.TypeOf(coresdk.EgressSecurityRule{})
+		for _, fieldName := range []string{"Destination", "DestinationType", "Protocol", "IcmpOptions", "IsStateless", "TcpOptions", "UdpOptions", "Description"} {
+			if _, ok := egressRuleFields.FieldByName(fieldName); !ok {
+				securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json assumes EgressSecurityRule field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+
+		ingressRuleFields := reflect.TypeOf(coresdk.IngressSecurityRule{})
+		for _, fieldName := range []string{"Protocol", "Source", "IcmpOptions", "IsStateless", "SourceType", "TcpOptions", "UdpOptions", "Description"} {
+			if _, ok := ingressRuleFields.FieldByName(fieldName); !ok {
+				securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json assumes IngressSecurityRule field %q exists in vendored SDK", fieldName)
+				return
+			}
+		}
+
+		for _, check := range []struct {
+			name       string
+			structType reflect.Type
+			fields     []string
+		}{
+			{
+				name:       "IcmpOptions",
+				structType: reflect.TypeOf(coresdk.IcmpOptions{}),
+				fields:     []string{"Type", "Code"},
+			},
+			{
+				name:       "TcpOptions",
+				structType: reflect.TypeOf(coresdk.TcpOptions{}),
+				fields:     []string{"DestinationPortRange", "SourcePortRange"},
+			},
+			{
+				name:       "UdpOptions",
+				structType: reflect.TypeOf(coresdk.UdpOptions{}),
+				fields:     []string{"DestinationPortRange", "SourcePortRange"},
+			},
+			{
+				name:       "PortRange",
+				structType: reflect.TypeOf(coresdk.PortRange{}),
+				fields:     []string{"Min", "Max"},
+			},
+		} {
+			for _, fieldName := range check.fields {
+				if _, ok := check.structType.FieldByName(fieldName); !ok {
+					securityListSDKContractErr = fmt.Errorf("formal/imports/core/securitylist.json assumes %s field %q exists in vendored SDK", check.name, fieldName)
+					return
+				}
+			}
+		}
+
+		egressDestinationValues := make(map[string]struct{}, len(coresdk.GetEgressSecurityRuleDestinationTypeEnumStringValues()))
+		for _, value := range coresdk.GetEgressSecurityRuleDestinationTypeEnumStringValues() {
+			egressDestinationValues[value] = struct{}{}
+		}
+		for _, value := range []string{
+			string(coresdk.EgressSecurityRuleDestinationTypeCidrBlock),
+			string(coresdk.EgressSecurityRuleDestinationTypeServiceCidrBlock),
+		} {
+			if _, ok := egressDestinationValues[value]; !ok {
+				securityListSDKContractErr = fmt.Errorf("vendored SDK no longer exposes EgressSecurityRule destination type %q", value)
+				return
+			}
+		}
+
+		ingressSourceValues := make(map[string]struct{}, len(coresdk.GetIngressSecurityRuleSourceTypeEnumStringValues()))
+		for _, value := range coresdk.GetIngressSecurityRuleSourceTypeEnumStringValues() {
+			ingressSourceValues[value] = struct{}{}
+		}
+		for _, value := range []string{
+			string(coresdk.IngressSecurityRuleSourceTypeCidrBlock),
+			string(coresdk.IngressSecurityRuleSourceTypeServiceCidrBlock),
+		} {
+			if _, ok := ingressSourceValues[value]; !ok {
+				securityListSDKContractErr = fmt.Errorf("vendored SDK no longer exposes IngressSecurityRule source type %q", value)
 				return
 			}
 		}

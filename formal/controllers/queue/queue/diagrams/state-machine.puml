@@ -42,7 +42,7 @@ observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\nchannel_consumption_limit,\ncustom_encryption_key_id,\ndead_letter_queue_delivery_count\n(+5 more)
+evaluate_ready --> apply_update : supported mutable drift for\ncapabilities,\nchannel_consumption_limit,\ncustom_encryption_key_id (+6\nmore)
 apply_update --> sync_secret : update path completes
 evaluate_ready --> sync_secret : apply secret policy\nready-only
 sync_secret --> secret_blocked : Secret sync fails
@@ -76,10 +76,10 @@ retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
 provider states: create CREATING, UPDATING;
 update UPDATING; delete DELETING
-supported drift: channel_consumption_limit,
+supported drift: capabilities,
+channel_consumption_limit,
 custom_encryption_key_id,
-dead_letter_queue_delivery_count, defined_tags
-(+4 more)
+dead_letter_queue_delivery_count (+5 more)
 reject before mutate: force-new fields
 compartment_id, retention_in_seconds
 create-only fields: none
@@ -110,12 +110,17 @@ best-effort; it only completes after GetQueue
 confirms the tracked Queue is gone or exposes
 lifecycle state DELETED.
 Mutable drift is limited to UpdateQueueDetails
-fields such as displayName, timeout, visibility,
-tags, channelConsumptionLimit,
+fields such as capabilities, displayName,
+timeout, visibility, tags,
+channelConsumptionLimit,
 deadLetterQueueDeliveryCount, and
-customEncryptionKeyId. Create-only inputs like
-compartmentId and retentionInSeconds are
-rejected as force-new drift.
+customEncryptionKeyId. Queue steady-state parity
+treats capabilities as the enabled type set
+because GetQueue does not echo consumer-group
+add-on settings after enablement, even though
+the runtime still forwards repo-authored
+capability payloads on create and update when
+that set changes.
 A package-local companion writes or updates the
 same-name endpoint Secret only after ACTIVE when
 messagesEndpoint is present, adopts only

@@ -622,3 +622,82 @@ func TestDelete_ConflictTransitionsToPendingDeleteAfterConfirmRead(t *testing.T)
 	assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
 	assert.Equal(t, "ACTIVE", resource.Status.OsokStatus.Async.Current.RawStatus)
 }
+
+func TestDelete_ConfirmReadDeletingKeepsPending(t *testing.T) {
+	deleteCalls := 0
+	getCalls := 0
+	manager := newTestManager(&fakeApplicationOCIClient{
+		deleteFn: func(_ context.Context, req dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error) {
+			deleteCalls++
+			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
+			return dataflowsdk.DeleteApplicationResponse{OpcRequestId: common.String("opc-delete-1")}, nil
+		},
+		getFn: func(_ context.Context, req dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			getCalls++
+			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
+			state := dataflowsdk.ApplicationLifecycleStateActive
+			if getCalls > 1 {
+				state = dataflowsdk.ApplicationLifecycleStateDeleting
+			}
+			return dataflowsdk.GetApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..delete", "delete-app", state),
+			}, nil
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, done)
+	assert.Equal(t, 1, deleteCalls)
+	assert.Equal(t, 2, getCalls)
+	assert.Equal(t, "opc-delete-1", resource.Status.OsokStatus.OpcRequestID)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "DELETING", resource.Status.LifecycleState)
+	assert.Equal(t, "Application delete-app is DELETING", resource.Status.OsokStatus.Message)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want lifecycle delete tracker")
+	}
+	assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+	assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+	assert.Equal(t, "DELETING", resource.Status.OsokStatus.Async.Current.RawStatus)
+}
+
+func TestDelete_AlreadyPendingDeletingSkipsDeleteRequest(t *testing.T) {
+	deleteCalled := false
+	manager := newTestManager(&fakeApplicationOCIClient{
+		deleteFn: func(_ context.Context, _ dataflowsdk.DeleteApplicationRequest) (dataflowsdk.DeleteApplicationResponse, error) {
+			deleteCalled = true
+			return dataflowsdk.DeleteApplicationResponse{}, nil
+		},
+		getFn: func(_ context.Context, req dataflowsdk.GetApplicationRequest) (dataflowsdk.GetApplicationResponse, error) {
+			assert.Equal(t, "ocid1.dataflowapplication.oc1..delete", *req.ApplicationId)
+			return dataflowsdk.GetApplicationResponse{
+				Application: makeSDKApplication("ocid1.dataflowapplication.oc1..delete", "delete-app", dataflowsdk.ApplicationLifecycleStateDeleting),
+			}, nil
+		},
+	})
+
+	resource := makeSpecApplication()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.dataflowapplication.oc1..delete")
+
+	done, err := manager.Delete(context.Background(), resource)
+
+	assert.NoError(t, err)
+	assert.False(t, done)
+	assert.False(t, deleteCalled)
+	assert.Equal(t, string(shared.Terminating), resource.Status.OsokStatus.Reason)
+	assert.Equal(t, "DELETING", resource.Status.LifecycleState)
+	assert.Equal(t, "Application delete-app is DELETING", resource.Status.OsokStatus.Message)
+	assert.Nil(t, resource.Status.OsokStatus.DeletedAt)
+	if resource.Status.OsokStatus.Async.Current == nil {
+		t.Fatal("status.async.current = nil, want lifecycle delete tracker")
+	}
+	assert.Equal(t, shared.OSOKAsyncPhaseDelete, resource.Status.OsokStatus.Async.Current.Phase)
+	assert.Equal(t, shared.OSOKAsyncClassPending, resource.Status.OsokStatus.Async.Current.NormalizedClass)
+	assert.Equal(t, "DELETING", resource.Status.OsokStatus.Async.Current.RawStatus)
+}

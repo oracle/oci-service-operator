@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 	"testing"
 
@@ -49,6 +50,24 @@ func TestBuildClusterCreateDetailsPreservesNestedFalseAndPolymorphicOptions(t *t
 					IsKubernetesDashboardEnabled: true,
 					IsTillerEnabled:              false,
 				},
+				ServiceLbConfig: containerenginev1beta1.ClusterOptionsServiceLbConfig{
+					BackendNsgIds: []string{"ocid1.nsg.oc1..backend"},
+				},
+				OpenIdConnectTokenAuthenticationConfig: containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfig{
+					IsOpenIdConnectAuthEnabled: true,
+					IssuerUrl:                  "https://issuer.example.com",
+					ClientId:                   "oke-client",
+					RequiredClaims: []containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim{
+						{
+							Key:   "aud",
+							Value: "oke-admins",
+						},
+					},
+					ConfigurationFile: "b2lkYy1jb25maWc=",
+				},
+				OpenIdConnectDiscovery: containerenginev1beta1.ClusterOptionsOpenIdConnectDiscovery{
+					IsOpenIdConnectDiscoveryEnabled: true,
+				},
 			},
 			ImagePolicyConfig: containerenginev1beta1.ClusterImagePolicyConfig{
 				IsPolicyEnabled: false,
@@ -86,6 +105,11 @@ func TestBuildClusterCreateDetailsPreservesNestedFalseAndPolymorphicOptions(t *t
 		`"isPublicIpEnabled":false`,
 		`"isTillerEnabled":false`,
 		`"isPolicyEnabled":false`,
+		`"backendNsgIds":["ocid1.nsg.oc1..backend"]`,
+		`"isOpenIdConnectAuthEnabled":true`,
+		`"requiredClaims":[{"key":"aud","value":"oke-admins"}]`,
+		`"configurationFile":"b2lkYy1jb25maWc="`,
+		`"isOpenIdConnectDiscoveryEnabled":true`,
 		`"cniType":"OCI_VCN_IP_NATIVE"`,
 		`"cniType":"FLANNEL_OVERLAY"`,
 		`"definedTags":{"Operations":{"CostCenter":"42"}}`,
@@ -98,6 +122,281 @@ func TestBuildClusterCreateDetailsPreservesNestedFalseAndPolymorphicOptions(t *t
 
 	if strings.Contains(got, `"jsonData"`) {
 		t.Fatalf("request body unexpectedly exposes jsonData helper fields: %s", got)
+	}
+}
+
+func TestBuildClusterUpdateDetailsPreservesRefreshedOidcAndServiceLbSurface(t *testing.T) {
+	t.Parallel()
+
+	resource := newExistingClusterTestResource("ocid1.cluster.oc1..existing")
+	resource.Spec.Options = containerenginev1beta1.ClusterOptions{
+		ServiceLbConfig: containerenginev1beta1.ClusterOptionsServiceLbConfig{
+			BackendNsgIds: []string{"ocid1.nsg.oc1..backend"},
+		},
+		OpenIdConnectTokenAuthenticationConfig: containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfig{
+			IsOpenIdConnectAuthEnabled: false,
+			IssuerUrl:                  "https://issuer.example.com",
+			ClientId:                   "oke-client",
+			RequiredClaims: []containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim{
+				{
+					Key:   "aud",
+					Value: "oke-admins",
+				},
+			},
+			SigningAlgorithms: []string{"RS256"},
+			ConfigurationFile: "b2lkYy1jb25maWc=",
+		},
+		OpenIdConnectDiscovery: containerenginev1beta1.ClusterOptionsOpenIdConnectDiscovery{
+			IsOpenIdConnectDiscoveryEnabled: false,
+		},
+	}
+
+	details, err := buildClusterUpdateDetails(context.Background(), nil, resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildClusterUpdateDetails() error = %v", err)
+	}
+
+	request := containerenginesdk.UpdateClusterRequest{
+		ClusterId:            common.String("ocid1.cluster.oc1..existing"),
+		UpdateClusterDetails: details,
+	}
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/clusters/ocid1.cluster.oc1..existing", nil, nil)
+	if err != nil {
+		t.Fatalf("HTTPRequest() error = %v", err)
+	}
+
+	body, err := io.ReadAll(httpRequest.Body)
+	if err != nil {
+		t.Fatalf("ReadAll(request.Body) error = %v", err)
+	}
+	got := string(body)
+
+	wantSnippets := []string{
+		`"backendNsgIds":["ocid1.nsg.oc1..backend"]`,
+		`"isOpenIdConnectAuthEnabled":false`,
+		`"issuerUrl":"https://issuer.example.com"`,
+		`"clientId":"oke-client"`,
+		`"requiredClaims":[{"key":"aud","value":"oke-admins"}]`,
+		`"signingAlgorithms":["RS256"]`,
+		`"configurationFile":"b2lkYy1jb25maWc="`,
+		`"isOpenIdConnectDiscoveryEnabled":false`,
+	}
+	for _, want := range wantSnippets {
+		if !strings.Contains(got, want) {
+			t.Fatalf("update request body %s does not contain %s", got, want)
+		}
+	}
+}
+
+func TestBuildClusterUpdateDetailsPreservesExplicitEmptyRefreshedMutableSlices(t *testing.T) {
+	t.Parallel()
+
+	resource := newExistingClusterTestResource("ocid1.cluster.oc1..existing")
+	resource.Spec.Options = containerenginev1beta1.ClusterOptions{
+		ServiceLbConfig: containerenginev1beta1.ClusterOptionsServiceLbConfig{
+			BackendNsgIds: []string{},
+		},
+		OpenIdConnectTokenAuthenticationConfig: containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfig{
+			IsOpenIdConnectAuthEnabled: false,
+			RequiredClaims:             []containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim{},
+			SigningAlgorithms:          []string{},
+		},
+	}
+
+	details, err := buildClusterUpdateDetails(context.Background(), nil, resource, resource.Namespace)
+	if err != nil {
+		t.Fatalf("buildClusterUpdateDetails() error = %v", err)
+	}
+	if details.Options == nil {
+		t.Fatal("buildClusterUpdateDetails() Options = nil, want updated option blocks")
+	}
+	if details.Options.ServiceLbConfig == nil {
+		t.Fatal("buildClusterUpdateDetails() ServiceLbConfig = nil, want explicit empty backendNsgIds preserved")
+	}
+	if details.Options.ServiceLbConfig.BackendNsgIds == nil || len(details.Options.ServiceLbConfig.BackendNsgIds) != 0 {
+		t.Fatalf("buildClusterUpdateDetails() ServiceLbConfig.BackendNsgIds = %#v, want explicit empty slice", details.Options.ServiceLbConfig.BackendNsgIds)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig == nil {
+		t.Fatal("buildClusterUpdateDetails() OpenIdConnectTokenAuthenticationConfig = nil, want explicit empty OIDC slices preserved")
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims == nil || len(details.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims) != 0 {
+		t.Fatalf("buildClusterUpdateDetails() RequiredClaims = %#v, want explicit empty slice", details.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms == nil || len(details.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms) != 0 {
+		t.Fatalf("buildClusterUpdateDetails() SigningAlgorithms = %#v, want explicit empty slice", details.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms)
+	}
+
+	body := clusterSerializedUpdateRequestBody(t, "ocid1.cluster.oc1..existing", details)
+	for _, want := range []string{
+		`"backendNsgIds":[]`,
+		`"requiredClaims":[]`,
+		`"signingAlgorithms":[]`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("update request body %s does not preserve %s", body, want)
+		}
+	}
+}
+
+func TestBuildClusterUpdateBodyDetectsExplicitEmptyRefreshedMutableDrift(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.cluster.oc1..existing"
+
+	resource := newExistingClusterTestResource(existingID)
+	resource.Spec.Options = containerenginev1beta1.ClusterOptions{
+		ServiceLbConfig: containerenginev1beta1.ClusterOptionsServiceLbConfig{
+			BackendNsgIds: []string{},
+		},
+		OpenIdConnectTokenAuthenticationConfig: containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfig{
+			IsOpenIdConnectAuthEnabled: true,
+			IssuerUrl:                  "",
+			ClientId:                   "",
+			UsernameClaim:              "",
+			UsernamePrefix:             "",
+			GroupsClaim:                "",
+			GroupsPrefix:               "",
+			RequiredClaims:             []containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim{},
+			CaCertificate:              "",
+			SigningAlgorithms:          []string{},
+			ConfigurationFile:          "",
+		},
+	}
+
+	current := observedClusterFromSpec(existingID, newClusterTestResource().Spec, "ACTIVE")
+	current.Options = &containerenginesdk.ClusterCreateOptions{
+		ServiceLbConfig: &containerenginesdk.ServiceLbConfigDetails{
+			BackendNsgIds: []string{"ocid1.nsg.oc1..backend"},
+		},
+		OpenIdConnectTokenAuthenticationConfig: &containerenginesdk.OpenIdConnectTokenAuthenticationConfig{
+			IsOpenIdConnectAuthEnabled: common.Bool(true),
+			IssuerUrl:                  common.String("https://issuer.example.com"),
+			ClientId:                   common.String("oke-client"),
+			UsernameClaim:              common.String("email"),
+			UsernamePrefix:             common.String("oidc:"),
+			GroupsClaim:                common.String("groups"),
+			GroupsPrefix:               common.String("oidc-g:"),
+			RequiredClaims: []containerenginesdk.KeyValue{
+				{
+					Key:   common.String("aud"),
+					Value: common.String("oke-admins"),
+				},
+			},
+			CaCertificate:     common.String("c3RyaWN0LWNlcnQ="),
+			SigningAlgorithms: []string{"RS256"},
+			ConfigurationFile: common.String("b2xkLWNvbmZpZw=="),
+		},
+	}
+
+	details, updateNeeded, err := buildClusterUpdateBody(
+		context.Background(),
+		nil,
+		resource,
+		resource.Namespace,
+		containerenginesdk.GetClusterResponse{Cluster: current},
+	)
+	if err != nil {
+		t.Fatalf("buildClusterUpdateBody() error = %v", err)
+	}
+	if !updateNeeded {
+		t.Fatal("buildClusterUpdateBody() updateNeeded = false, want true for explicit empty refreshed cluster fields")
+	}
+	if details.Options == nil || details.Options.ServiceLbConfig == nil {
+		t.Fatal("buildClusterUpdateBody() ServiceLbConfig = nil, want explicit empty backendNsgIds update")
+	}
+	if details.Options.ServiceLbConfig.BackendNsgIds == nil || len(details.Options.ServiceLbConfig.BackendNsgIds) != 0 {
+		t.Fatalf("buildClusterUpdateBody() BackendNsgIds = %#v, want explicit empty slice", details.Options.ServiceLbConfig.BackendNsgIds)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig == nil {
+		t.Fatal("buildClusterUpdateBody() OpenIdConnectTokenAuthenticationConfig = nil, want clear-to-empty update block")
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig.IssuerUrl == nil || *details.Options.OpenIdConnectTokenAuthenticationConfig.IssuerUrl != "" {
+		t.Fatalf("buildClusterUpdateBody() IssuerUrl = %#v, want explicit empty string", details.Options.OpenIdConnectTokenAuthenticationConfig.IssuerUrl)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig.ClientId == nil || *details.Options.OpenIdConnectTokenAuthenticationConfig.ClientId != "" {
+		t.Fatalf("buildClusterUpdateBody() ClientId = %#v, want explicit empty string", details.Options.OpenIdConnectTokenAuthenticationConfig.ClientId)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims == nil || len(details.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims) != 0 {
+		t.Fatalf("buildClusterUpdateBody() RequiredClaims = %#v, want explicit empty slice", details.Options.OpenIdConnectTokenAuthenticationConfig.RequiredClaims)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms == nil || len(details.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms) != 0 {
+		t.Fatalf("buildClusterUpdateBody() SigningAlgorithms = %#v, want explicit empty slice", details.Options.OpenIdConnectTokenAuthenticationConfig.SigningAlgorithms)
+	}
+	if details.Options.OpenIdConnectTokenAuthenticationConfig.ConfigurationFile == nil || *details.Options.OpenIdConnectTokenAuthenticationConfig.ConfigurationFile != "" {
+		t.Fatalf("buildClusterUpdateBody() ConfigurationFile = %#v, want explicit empty string", details.Options.OpenIdConnectTokenAuthenticationConfig.ConfigurationFile)
+	}
+
+	body := clusterSerializedUpdateRequestBody(t, existingID, details)
+	for _, want := range []string{
+		`"backendNsgIds":[]`,
+		`"issuerUrl":""`,
+		`"clientId":""`,
+		`"requiredClaims":[]`,
+		`"signingAlgorithms":[]`,
+		`"configurationFile":""`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Fatalf("update request body %s does not preserve %s", body, want)
+		}
+	}
+}
+
+func TestBuildClusterUpdateBodySkipsExplicitEmptyRefreshedMutableDriftWhenAlreadyCleared(t *testing.T) {
+	t.Parallel()
+
+	const existingID = "ocid1.cluster.oc1..existing"
+
+	resource := newExistingClusterTestResource(existingID)
+	resource.Spec.Options = containerenginev1beta1.ClusterOptions{
+		ServiceLbConfig: containerenginev1beta1.ClusterOptionsServiceLbConfig{
+			BackendNsgIds: []string{},
+		},
+		OpenIdConnectTokenAuthenticationConfig: containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfig{
+			IsOpenIdConnectAuthEnabled: true,
+			IssuerUrl:                  "",
+			ClientId:                   "",
+			RequiredClaims:             []containerenginev1beta1.ClusterOptionsOpenIdConnectTokenAuthenticationConfigRequiredClaim{},
+			SigningAlgorithms:          []string{},
+			ConfigurationFile:          "",
+		},
+	}
+
+	current := observedClusterFromSpec(existingID, newClusterTestResource().Spec, "ACTIVE")
+	current.Options = &containerenginesdk.ClusterCreateOptions{
+		AdmissionControllerOptions: &containerenginesdk.AdmissionControllerOptions{
+			IsPodSecurityPolicyEnabled: common.Bool(false),
+		},
+		ServiceLbConfig: &containerenginesdk.ServiceLbConfigDetails{
+			BackendNsgIds: []string{},
+		},
+		OpenIdConnectTokenAuthenticationConfig: &containerenginesdk.OpenIdConnectTokenAuthenticationConfig{
+			IsOpenIdConnectAuthEnabled: common.Bool(true),
+			IssuerUrl:                  common.String(""),
+			ClientId:                   common.String(""),
+			RequiredClaims:             []containerenginesdk.KeyValue{},
+			SigningAlgorithms:          []string{},
+			ConfigurationFile:          common.String(""),
+		},
+		OpenIdConnectDiscovery: &containerenginesdk.OpenIdConnectDiscovery{
+			IsOpenIdConnectDiscoveryEnabled: common.Bool(false),
+		},
+	}
+	current.ImagePolicyConfig = &containerenginesdk.ImagePolicyConfig{
+		IsPolicyEnabled: common.Bool(false),
+	}
+
+	_, updateNeeded, err := buildClusterUpdateBody(
+		context.Background(),
+		nil,
+		resource,
+		resource.Namespace,
+		containerenginesdk.GetClusterResponse{Cluster: current},
+	)
+	if err != nil {
+		t.Fatalf("buildClusterUpdateBody() error = %v", err)
+	}
+	if updateNeeded {
+		t.Fatal("buildClusterUpdateBody() updateNeeded = true, want false when the live refreshed cluster fields are already clear")
 	}
 }
 
@@ -115,6 +414,15 @@ func TestApplyClusterRuntimeHooksInstallsCustomBodyBuilders(t *testing.T) {
 	}
 	if hooks.BuildUpdateBody == nil {
 		t.Fatal("hooks.BuildUpdateBody = nil, want custom update builder")
+	}
+	if !slices.EqualFunc(hooks.Get.Fields, reviewedClusterGetFields(), func(left, right generatedruntime.RequestField) bool {
+		return left.FieldName == right.FieldName &&
+			left.RequestName == right.RequestName &&
+			left.Contribution == right.Contribution &&
+			left.PreferResourceID == right.PreferResourceID &&
+			slices.Equal(left.LookupPaths, right.LookupPaths)
+	}) {
+		t.Fatalf("hooks.Get.Fields = %#v, want reviewed get fields %#v", hooks.Get.Fields, reviewedClusterGetFields())
 	}
 
 	createBody, err := hooks.BuildCreateBody(context.Background(), newClusterTestResource(), "default")
@@ -150,6 +458,30 @@ func TestApplyClusterRuntimeHooksInstallsCustomBodyBuilders(t *testing.T) {
 	}
 	if updateDetails.Name == nil || *updateDetails.Name != resource.Spec.Name {
 		t.Fatalf("hooks.BuildUpdateBody() name = %#v, want %q", updateDetails.Name, resource.Spec.Name)
+	}
+}
+
+func TestApplyClusterRuntimeHooksAlwaysIncludesOidcConfigFileInGetRequests(t *testing.T) {
+	t.Parallel()
+
+	var captured containerenginesdk.GetClusterRequest
+	hooks := newClusterDefaultRuntimeHooks(containerenginesdk.ContainerEngineClient{})
+	hooks.Get.Call = func(_ context.Context, request containerenginesdk.GetClusterRequest) (containerenginesdk.GetClusterResponse, error) {
+		captured = request
+		return containerenginesdk.GetClusterResponse{}, nil
+	}
+
+	applyClusterRuntimeHooks(&ClusterServiceManager{}, &hooks)
+
+	_, err := hooks.Get.Call(context.Background(), containerenginesdk.GetClusterRequest{
+		ClusterId: common.String("ocid1.cluster.oc1..existing"),
+	})
+	if err != nil {
+		t.Fatalf("hooks.Get.Call() error = %v", err)
+	}
+	requireClusterIDPointer(t, "get request clusterId", captured.ClusterId, "ocid1.cluster.oc1..existing")
+	if captured.ShouldIncludeOidcConfigFile == nil || !*captured.ShouldIncludeOidcConfigFile {
+		t.Fatalf("get request shouldIncludeOidcConfigFile = %v, want true", captured.ShouldIncludeOidcConfigFile)
 	}
 }
 
@@ -1023,35 +1355,8 @@ func testClusterRuntimeSemantics() *generatedruntime.Semantics {
 			MatchFields:        []string{"compartmentId", "lifecycleState", "name"},
 		},
 		Mutation: generatedruntime.MutationSemantics{
-			Mutable: []string{
-				"definedTags",
-				"freeformTags",
-				"imagePolicyConfig.isPolicyEnabled",
-				"imagePolicyConfig.keyDetails.kmsKeyId",
-				"kubernetesVersion",
-				"name",
-				"options.admissionControllerOptions.isPodSecurityPolicyEnabled",
-				"options.persistentVolumeConfig.definedTags",
-				"options.persistentVolumeConfig.freeformTags",
-				"options.serviceLbConfig.definedTags",
-				"options.serviceLbConfig.freeformTags",
-				"type",
-			},
-			ForceNew: []string{
-				"clusterPodNetworkOptions.cniType",
-				"clusterPodNetworkOptions.jsonData",
-				"compartmentId",
-				"endpointConfig.isPublicIpEnabled",
-				"endpointConfig.nsgIds",
-				"endpointConfig.subnetId",
-				"kmsKeyId",
-				"options.addOns.isKubernetesDashboardEnabled",
-				"options.addOns.isTillerEnabled",
-				"options.kubernetesNetworkConfig.podsCidr",
-				"options.kubernetesNetworkConfig.servicesCidr",
-				"options.serviceLbSubnetIds",
-				"vcnId",
-			},
+			Mutable:       reviewedClusterMutableFields(),
+			ForceNew:      reviewedClusterForceNewFields(),
 			ConflictsWith: map[string][]string{},
 		},
 		CreateFollowUp: generatedruntime.FollowUpSemantics{
@@ -1133,9 +1438,7 @@ func clusterCreateFields() []generatedruntime.RequestField {
 }
 
 func clusterGetFields() []generatedruntime.RequestField {
-	return []generatedruntime.RequestField{
-		{FieldName: "ClusterId", RequestName: "clusterId", Contribution: "path", PreferResourceID: true},
-	}
+	return reviewedClusterGetFields()
 }
 
 func clusterListFields() []generatedruntime.RequestField {
@@ -1184,5 +1487,44 @@ func requireClusterIDPointer(t *testing.T, label string, got *string, want strin
 
 	if got == nil || *got != want {
 		t.Fatalf("%s = %v, want %q", label, got, want)
+	}
+}
+
+func clusterSerializedUpdateRequestBody(
+	t *testing.T,
+	clusterID string,
+	details containerenginesdk.UpdateClusterDetails,
+) string {
+	t.Helper()
+
+	request := containerenginesdk.UpdateClusterRequest{
+		ClusterId:            common.String(clusterID),
+		UpdateClusterDetails: details,
+	}
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/clusters/"+clusterID, nil, nil)
+	if err != nil {
+		t.Fatalf("HTTPRequest() error = %v", err)
+	}
+
+	body, err := io.ReadAll(httpRequest.Body)
+	if err != nil {
+		t.Fatalf("ReadAll(request.Body) error = %v", err)
+	}
+	return string(body)
+}
+
+func TestReviewedClusterRuntimeSemanticsTracksRefreshedMutableSurface(t *testing.T) {
+	t.Parallel()
+
+	semantics := reviewedClusterRuntimeSemantics()
+	for _, want := range []string{
+		"options.serviceLbConfig.backendNsgIds",
+		"options.openIdConnectTokenAuthenticationConfig.isOpenIdConnectAuthEnabled",
+		"options.openIdConnectTokenAuthenticationConfig.configurationFile",
+		"options.openIdConnectDiscovery.isOpenIdConnectDiscoveryEnabled",
+	} {
+		if !slices.Contains(semantics.Mutation.Mutable, want) {
+			t.Fatalf("semantics.Mutation.Mutable = %#v, want %q", semantics.Mutation.Mutable, want)
+		}
 	}
 }

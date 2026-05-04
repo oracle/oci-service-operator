@@ -129,7 +129,7 @@
   "notes": [
     "Pinned OCI SDK contract: ServiceGateway lifecycle exposes PROVISIONING, AVAILABLE, TERMINATING, and TERMINATED; there is no distinct UPDATING, DELETING, or DELETED state in this branch.",
     "Pinned OCI SDK contract: UpdateServiceGatewayDetails exposes block_traffic, defined_tags, display_name, freeform_tags, route_table_id, and services as in-place update fields; the handwritten runtime rejects create-only drift for compartment_id and vcn_id.",
-    "Pinned OCI SDK contract: CreateServiceGatewayDetails does not expose block_traffic, so the handwritten runtime only manages blockTraffic after creation via UpdateServiceGateway.",
+    "Pinned OCI SDK contract: CreateServiceGatewayDetails does not expose block_traffic, so the handwritten runtime treats blockTraffic as update-only on create and reapplies it through UpdateServiceGateway once the tracked gateway reaches a non-retryable lifecycle state if OCI still reports a different value.",
     "Repo-authored delete confirmation requires GetServiceGateway to return not found; observed TERMINATING and TERMINATED remain intermediate finalizer-holding states.",
     "The handwritten runtime observes by tracked OCI identity rather than list-based bind semantics. Services are normalized by serviceId so ordering and response-only fields do not trigger spurious updates."
   ]

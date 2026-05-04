@@ -32,15 +32,15 @@ state "Deleted" as deleted
 state "DeleteCleanupBlocked" as delete_cleanup_blocked
 [*] --> observe : CreateAnalyticsInstance
 observe --> resolve_by_lookup : tracked identity missing
-resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE
-resolve_by_lookup --> retryable : OCI state in CREATING,\nDELETING
+resolve_by_lookup --> evaluate_ready : lookup or create reaches\nACTIVE, INACTIVE
+resolve_by_lookup --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 resolve_by_lookup --> failed : unresolved OCI error or non-success state
-observe --> evaluate_ready : OCI state in ACTIVE
-observe --> retryable : OCI state in CREATING,\nDELETING
+observe --> evaluate_ready : OCI state in ACTIVE,\nINACTIVE
+observe --> retryable : OCI state in CREATING,\nUPDATING, DELETING
 observe --> failed : unresolved OCI error or non-success state
 evaluate_ready --> reject_unsupported_drift : force-new or conflicting\ndrift detected
 reject_unsupported_drift --> ready : wait for spec or live state change
-evaluate_ready --> apply_update : supported mutable drift for\ncapacity.capacity_value,\ncompartment_id, defined_tags\n(+13 more)
+evaluate_ready --> apply_update : supported mutable drift for\ndefinedTags, description,\nemailNotification (+3 more)
 apply_update --> ready : update path completes
 evaluate_ready --> ready : no supported drift remains
 ready --> ready : no supported drift remains
@@ -69,41 +69,50 @@ archetype: generated-service-manager
 status/finalizer: required /
 retain-until-confirmed-delete
 requeue: provisioning, updating, terminating
-provider states: create CREATING; update none;
-delete DELETING
-supported drift: capacity.capacity_value,
-compartment_id, defined_tags, description (+12
-more)
+provider states: create CREATING; update
+UPDATING; delete DELETING
+supported drift: definedTags, description,
+emailNotification, freeformTags (+2 more)
 reject before mutate: force-new fields
-capacity.capacity_type, feature_set, name,
-network_endpoint_details.network_endpoint_type
-create-only fields: none
+capacity.capacityType, featureSet, name,
+networkEndpointDetails.networkEndpointType
+create-only fields: adminUser, domainId,
+idcsAccessToken
 list lookup: oci_analytics_analytics_instances
-filters capacity_type, compartment_id,
-feature_set, name (+1 more)
+filters capacityType, compartmentId, featureSet,
+name; exact compartmentId plus name plus
+featureSet plus capacityType unique match in
+ACTIVE, CREATING, UPDATING, or INACTIVE;
+duplicate matches fail
 conflicts: none
 open gaps: none
-Seeded AnalyticsInstance row covers the
-published API-first surface only; controller,
-service-manager, and registration rollout remain
-disabled until the controller-backed promotion
-story binds formalSpec.
-The provisional lifecycle mapping treats
-CREATING as provisioning, ACTIVE as success,
-UPDATING as updating, and DELETING as
-terminating; FAILED, INACTIVE, and DELETED stay
-explicit runtime states for the later
-controller-backed audit to classify.
+Reviewed lifecycle mapping treats CREATING as
+provisioning, UPDATING as updating, ACTIVE and
+INACTIVE as success, and DELETING as
+terminating; FAILED is terminal and DELETED is
+only a delete-confirmation target.
 Create and delete responses expose work-request
-headers while the pinned provider implementation
-waits on GetWorkRequest; later runtime stories
-must decide whether that remains a lifecycle
-contract with breadcrumbs or becomes an explicit
-work-request adapter.
-PrivateAccessChannel, VanityUrl, and
-WorkRequest* stay out of the initial published
-surface even though the SDK and provider expose
-those auxiliary families.
+headers, while UpdateAnalyticsInstance returns
+only opc-request-id plus the resource body. The
+runtime records shared async breadcrumbs from
+lifecycle projection rather than polling
+GetWorkRequest directly.
+Only description, emailNotification,
+licenseType, freeformTags, definedTags, and
+updateChannel reconcile in place. FeatureBundle
+and KmsKeyId stay in required status projection,
+but supporting SetFeatureBundle or SetKmsKey
+remains out of scope for the published runtime.
+DomainId remains a create-time input that is
+read back into status. AdminUser and
+IdcsAccessToken are create-time inputs OCI does
+not echo back, so they are normalized out of
+post-create parity checks.
+Required status projection keeps
+NetworkEndpointDetails, PrivateAccessChannels,
+VanityUrlDetails, updateChannel, featureBundle,
+domainId, and systemTags on the published kind,
+and the runtime has no secret side effects.
 end note
 note right of delete_pending
 delete policy: required

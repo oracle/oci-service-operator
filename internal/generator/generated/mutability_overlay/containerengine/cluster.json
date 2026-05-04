@@ -520,6 +520,357 @@
       }
     },
     {
+      "astFieldPath": "options.openIdConnectDiscovery.isOpenIdConnectDiscoveryEnabled",
+      "terraformFieldPath": "options.openIdConnectDiscovery.isOpenIdConnectDiscoveryEnabled",
+      "canonicalJoinKey": "options.openIdConnectDiscovery.isOpenIdConnectDiscoveryEnabled",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.caCertificate",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.caCertificate",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.caCertificate",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.clientId",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.clientId",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.clientId",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.configurationFile",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.configurationFile",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.configurationFile",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.groupsClaim",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.groupsClaim",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.groupsClaim",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.groupsPrefix",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.groupsPrefix",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.groupsPrefix",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.isOpenIdConnectAuthEnabled",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.isOpenIdConnectAuthEnabled",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.isOpenIdConnectAuthEnabled",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.issuerUrl",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.issuerUrl",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.issuerUrl",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.requiredClaims.key",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.requiredClaims.key",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.requiredClaims[].key",
+      "pathShape": "listItem",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.requiredClaims.value",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.requiredClaims.value",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.requiredClaims[].value",
+      "pathShape": "listItem",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.signingAlgorithms",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.signingAlgorithms",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.signingAlgorithms",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.usernameClaim",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.usernameClaim",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.usernameClaim",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.openIdConnectTokenAuthenticationConfig.usernamePrefix",
+      "terraformFieldPath": "options.openIdConnectTokenAuthenticationConfig.usernamePrefix",
+      "canonicalJoinKey": "options.openIdConnectTokenAuthenticationConfig.usernamePrefix",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
       "astFieldPath": "options.persistentVolumeConfig.definedTags",
       "terraformFieldPath": "options.persistentVolumeConfig.definedTags",
       "canonicalJoinKey": "options.persistentVolumeConfig.definedTags",
@@ -550,6 +901,33 @@
       "astFieldPath": "options.persistentVolumeConfig.freeformTags",
       "terraformFieldPath": "options.persistentVolumeConfig.freeformTags",
       "canonicalJoinKey": "options.persistentVolumeConfig.freeformTags",
+      "pathShape": "object",
+      "ast": {
+        "updateCandidateState": "updateCandidate",
+        "forceNew": false,
+        "conflictsWith": null
+      },
+      "docs": {
+        "evidenceState": "notDocumented",
+        "detail": "No explicit Terraform docs update signal was found for this AST updateCandidate field."
+      },
+      "merge": {
+        "joinStatus": "matched",
+        "mergeCase": "astOnlyCandidate",
+        "finalPolicy": "unknown"
+      },
+      "provenance": {
+        "formalImportPath": "imports/containerengine/cluster.json",
+        "formalSourceRef": "terraform-provider-oci",
+        "astSourceBucket": "mutation.mutable",
+        "terraformDocsPage": "containerengine_cluster#argument-reference",
+        "terraformDocsSection": "Argument Reference"
+      }
+    },
+    {
+      "astFieldPath": "options.serviceLbConfig.backendNsgIds",
+      "terraformFieldPath": "options.serviceLbConfig.backendNsgIds",
+      "canonicalJoinKey": "options.serviceLbConfig.backendNsgIds",
       "pathShape": "object",
       "ast": {
         "updateCandidateState": "updateCandidate",

@@ -329,6 +329,10 @@ func TestCreateOrUpdate_CreateSuccessAndStatusProjection(t *testing.T) {
 	assert.Equal(t, 53, resource.Status.IngressSecurityRules[0].UdpOptions.DestinationPortRange.Min)
 }
 
+func TestValidateSecurityListSDKContract(t *testing.T) {
+	assert.NoError(t, validateSecurityListSDKContract())
+}
+
 func TestCreateOrUpdate_ObserveByStatusOCID_NoOpWhenStateMatches(t *testing.T) {
 	getCalls := 0
 	updateCalls := 0
@@ -446,6 +450,35 @@ func TestCreateOrUpdate_MutableDriftTriggersUpdateForRulesAndTags(t *testing.T) 
 	assert.Len(t, captured.IngressSecurityRules, 1)
 	assert.Equal(t, "0.0.0.0/0", *captured.EgressSecurityRules[0].Destination)
 	assert.Equal(t, "new-name", resource.Status.DisplayName)
+}
+
+func TestCreateOrUpdate_RuleNormalizationAvoidsSpuriousUpdate(t *testing.T) {
+	updateCalls := 0
+	manager := newSecurityListTestManager(&fakeSecurityListOCIClient{
+		getFn: func(_ context.Context, _ coresdk.GetSecurityListRequest) (coresdk.GetSecurityListResponse, error) {
+			current := makeSDKSecurityList("ocid1.securitylist.oc1..existing", "test-security-list", coresdk.SecurityListLifecycleStateAvailable)
+			current.EgressSecurityRules = []coresdk.EgressSecurityRule{
+				current.EgressSecurityRules[1],
+				current.EgressSecurityRules[0],
+			}
+			return coresdk.GetSecurityListResponse{SecurityList: current}, nil
+		},
+		updateFn: func(_ context.Context, _ coresdk.UpdateSecurityListRequest) (coresdk.UpdateSecurityListResponse, error) {
+			updateCalls++
+			return coresdk.UpdateSecurityListResponse{}, nil
+		},
+	})
+
+	resource := makeSpecSecurityList()
+	resource.Status.OsokStatus.Ocid = shared.OCID("ocid1.securitylist.oc1..existing")
+
+	resp, err := manager.CreateOrUpdate(context.Background(), resource, ctrl.Request{})
+
+	assert.NoError(t, err)
+	assert.True(t, resp.IsSuccessful)
+	assert.False(t, resp.ShouldRequeue)
+	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, "AVAILABLE", resource.Status.LifecycleState)
 }
 
 func TestCreateOrUpdate_ClearingMutableFieldsTriggersUpdate(t *testing.T) {

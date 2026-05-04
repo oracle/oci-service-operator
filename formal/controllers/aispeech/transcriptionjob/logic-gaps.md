@@ -23,7 +23,9 @@ generated-runtime contract.
   rereads `GetTranscriptionJob` until OCI returns not found.
 - Required status projection remains part of the published contract. The
   runtime projects the live OCI `TranscriptionJob` body back into the CR status
-  surface, preserves the tracked OCID in `status.status.ocid`, and treats
+  surface, including
+  `status.modelDetails.transcriptionSettings.additionalSettings` when OCI
+  returns it, preserves the tracked OCID in `status.status.ocid`, and treats
   `SUCCEEDED` as the only steady success lifecycle.
 
 ## Repo-authored semantics
@@ -45,8 +47,11 @@ generated-runtime contract.
   job is absent.
 - Mutation policy is explicit: only `displayName`, `description`,
   `freeformTags`, and `definedTags` reconcile in place. `compartmentId`
-  remains replacement-only drift, and the runtime never calls the SDK's
-  auxiliary `CancelTranscriptionJob` operation as a published mutator.
+  remains replacement-only drift;
+  `modelDetails.transcriptionSettings.additionalSettings` is create-only
+  because `CreateTranscriptionJob` and `GetTranscriptionJob` expose it while
+  `UpdateTranscriptionJobDetails` does not; and the runtime never calls the
+  SDK's auxiliary `CancelTranscriptionJob` operation as a published mutator.
 
 ## Import boundary
 
