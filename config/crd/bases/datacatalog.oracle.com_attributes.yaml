@@ -1,0 +1,487 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: attributes.datacatalog.oracle.com
+spec:
+  group: datacatalog.oracle.com
+  names:
+    kind: Attribute
+    listKind: AttributeList
+    plural: attributes
+    singular: attribute
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Attribute
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Attribute
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Attribute is the Schema for the attributes API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AttributeSpec defines the desired state of Attribute.
+            properties:
+              businessName:
+                description: Optional user friendly business name of the attribute.
+                  If set, this supplements the harvested display name of the object.
+                type: string
+              customPropertyMembers:
+                description: The list of customized properties along with the values
+                  for this object
+                items:
+                  description: AttributeCustomPropertyMember defines nested fields
+                    for Attribute.CustomPropertyMember.
+                  properties:
+                    displayName:
+                      description: Name of the custom property
+                      type: string
+                    key:
+                      description: Unique Identifier of the attribute which is ID
+                      type: string
+                    namespaceName:
+                      description: Namespace name of the custom property
+                      type: string
+                    value:
+                      description: The custom property value
+                      type: string
+                  type: object
+                type: array
+              description:
+                description: Detailed description of the attribute.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly display name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              externalDataType:
+                description: Data type of the attribute as defined in the external
+                  system.
+                type: string
+              externalDatatypeEntityKey:
+                description: External entity key that represents the datatype of this
+                  attribute , applicable if this attribute is a complex type.
+                type: string
+              externalParentAttributeKey:
+                description: External attribute key that represents the parent attribute  of
+                  this attribute , applicable if the parent attribute is of complex
+                  type.
+                type: string
+              isIncrementalData:
+                description: Property that identifies if this attribute can be used
+                  as a watermark to extract incremental data.
+                type: boolean
+              isNullable:
+                description: Property that identifies if this attribute can be assigned
+                  null values.
+                type: boolean
+              length:
+                description: Max allowed length of the attribute value.
+                format: int64
+                type: integer
+              maxCollectionCount:
+                description: |-
+                  The maximum count for the number of instances of a given type stored in this collection type attribute,applicable if this attribute is a complex type.
+                  For type specifications in systems that specify only "capacity" without upper or lower bound , this property can also be used to just mean "capacity".
+                  Some examples are Varray size in Oracle , Occurs Clause in Cobol , capacity in XmlSchemaObjectCollection , maxOccurs in  Xml , maxItems in Json
+                type: integer
+              minCollectionCount:
+                description: The minimum count for the number of instances of a given
+                  type stored in this collection type attribute,applicable if this
+                  attribute is a complex type.
+                type: integer
+              position:
+                description: Position of the attribute in the record definition.
+                type: integer
+              precision:
+                description: Precision of the attribute value usually applies to float
+                  data type.
+                type: integer
+              properties:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  A map of maps that contains the properties which are specific to the attribute type. Each attribute type
+                  definition defines it's set of required and optional properties. The map keys are category names and the
+                  values are maps of property name to property value. Every property is contained inside of a category. Most
+                  attributes have required properties within the "default" category. To determine the set of required and
+                  optional properties for an attribute type, a query can be done on '/types?type=attribute' that returns a
+                  collection of all attribute types. The appropriate attribute type, which will include definitions of all
+                  of it's properties, can be identified from this collection.
+                  Example: `{"properties": { "default": { "key1": "value1"}}}`
+                type: object
+              scale:
+                description: Scale of the attribute value usually applies to float
+                  data type.
+                type: integer
+              timeExternal:
+                description: Last modified timestamp of this object in the external
+                  system.
+                type: string
+              typeKey:
+                description: Type key of the object. Type keys can be found via the
+                  '/types' endpoint.
+                type: string
+            required:
+            - displayName
+            - externalDataType
+            - timeExternal
+            type: object
+          status:
+            description: AttributeStatus defines the observed state of Attribute.
+            properties:
+              associatedRuleTypes:
+                description: Rule types associated with attribute.
+                items:
+                  type: string
+                type: array
+              businessName:
+                description: Optional user friendly business name of the attribute.
+                  If set, this supplements the harvested display name of the object.
+                type: string
+              createdById:
+                description: OCID of the user who created this attribute in the data
+                  catalog.
+                type: string
+              customPropertyMembers:
+                description: The list of customized properties along with the values
+                  for this object
+                items:
+                  description: AttributeCustomPropertyMember defines nested fields
+                    for Attribute.CustomPropertyMember.
+                  properties:
+                    displayName:
+                      description: Name of the custom property
+                      type: string
+                    key:
+                      description: Unique Identifier of the attribute which is ID
+                      type: string
+                    namespaceName:
+                      description: Namespace name of the custom property
+                      type: string
+                    value:
+                      description: The custom property value
+                      type: string
+                  type: object
+                type: array
+              datatypeEntityKey:
+                description: Entity key that represents the datatype of this attribute
+                  , applicable if this attribute is a complex type.
+                type: string
+              description:
+                description: Detailed description of the attribute.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly display name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              entityKey:
+                description: The unique key of the parent entity.
+                type: string
+              externalDataType:
+                description: |-
+                  Data type of the attribute as defined in the external system. Type mapping across systems can be achieved
+                  through term associations across domains in the ontology. The attribute can also be tagged to the datatype in
+                  the domain ontology to resolve any ambiguity arising from type name similarity that can occur with user
+                  defined types.
+                type: string
+              externalDatatypeEntityKey:
+                description: External entity key that represents the datatype of this
+                  attribute , applicable if this attribute is a complex type.
+                type: string
+              externalKey:
+                description: Unique external key of this attribute in the external
+                  source system.
+                type: string
+              externalParentAttributeKey:
+                description: External attribute key that represents the parent attribute  of
+                  this attribute , applicable if the parent attribute is of complex
+                  type.
+                type: string
+              isDerivedAttribute:
+                description: Whether a column is derived or not.
+                type: boolean
+              isIncrementalData:
+                description: Property that identifies if this attribute can be used
+                  as a watermark to extract incremental data.
+                type: boolean
+              isNullable:
+                description: Property that identifies if this attribute can be assigned
+                  null values.
+                type: boolean
+              key:
+                description: Unique attribute key that is immutable.
+                type: string
+              length:
+                description: Max allowed length of the attribute value.
+                format: int64
+                type: integer
+              lifecycleDetails:
+                description: |-
+                  A message describing the current state in more detail. An object not in ACTIVE state may have functional limitations,
+                  see service documentation for details.
+                type: string
+              lifecycleState:
+                description: State of the attribute.
+                type: string
+              maxCollectionCount:
+                description: |-
+                  The maximum count for the number of instances of a given type stored in this collection type attribute,applicable if this attribute is a complex type.
+                  For type specifications in systems that specify only "capacity" without upper or lower bound , this property can also be used to just mean "capacity".
+                  Some examples are Varray size in Oracle , Occurs Clause in Cobol , capacity in XmlSchemaObjectCollection , maxOccurs in  Xml , maxItems in Json
+                type: integer
+              minCollectionCount:
+                description: The minimum count for the number of instances of a given
+                  type stored in this collection type attribute,applicable if this
+                  attribute is a complex type.
+                type: integer
+              objectRelationships:
+                description: List of objects and their relationships to this attribute.
+                items:
+                  description: AttributeObjectRelationship defines nested fields for
+                    Attribute.ObjectRelationship.
+                  properties:
+                    key:
+                      description: Unique id of the object.
+                      type: string
+                    name:
+                      description: Name of the object.
+                      type: string
+                    parentKey:
+                      description: Key of the parent object for the resource.
+                      type: string
+                    parentPath:
+                      description: Full path of the parent object.
+                      type: string
+                    path:
+                      description: Full path of the object.
+                      type: string
+                    relationshipType:
+                      description: Type of relationship with the referencing object.
+                      type: string
+                    timeCreated:
+                      description: |-
+                        The date and time the relationship was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                        Example: `2019-03-25T21:10:29.600Z`
+                      type: string
+                    timeUpdated:
+                      description: The last time a change was made to this reference.
+                        An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted
+                        datetime string.
+                      type: string
+                    typeKey:
+                      description: Type key of the object. Type keys can be found
+                        via the '/types' endpoint.
+                      type: string
+                    typeName:
+                      description: Type name of the object. Type names can be found
+                        via the '/types' endpoint.
+                      type: string
+                  type: object
+                type: array
+              parentAttributeKey:
+                description: Attribute key that represents the parent attribute of
+                  this attribute , applicable if the parent attribute is of complex
+                  datatype.
+                type: string
+              path:
+                description: Full path of the attribute.
+                type: string
+              position:
+                description: Position of the attribute in the record definition.
+                type: integer
+              precision:
+                description: Precision of the attribute value usually applies to float
+                  data type.
+                type: integer
+              properties:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  A map of maps that contains the properties which are specific to the attribute type. Each attribute type
+                  definition defines it's set of required and optional properties. The map keys are category names and the
+                  values are maps of property name to property value. Every property is contained inside of a category. Most
+                  attributes have required properties within the "default" category.
+                  Example: `{"properties": { "default": { "key1": "value1"}}}`
+                type: object
+              scale:
+                description: Scale of the attribute value usually applies to float
+                  data type.
+                type: integer
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the attribute was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2019-03-25T21:10:29.600Z`
+                type: string
+              timeExternal:
+                description: Last modified timestamp of this object in the external
+                  system.
+                type: string
+              timeHarvested:
+                description: The date and time the attribute was harvested, in the
+                  format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                type: string
+              timeUpdated:
+                description: The last time that any change was made to the attribute.
+                  An RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime
+                  string.
+                type: string
+              typeKey:
+                description: The type of the attribute. Type keys can be found via
+                  the '/types' endpoint.
+                type: string
+              updatedById:
+                description: OCID of the user who modified this attribute in the data
+                  catalog.
+                type: string
+              uri:
+                description: URI to the attribute instance in the API.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

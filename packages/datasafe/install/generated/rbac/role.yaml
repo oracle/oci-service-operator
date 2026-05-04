@@ -1,0 +1,126 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - datasafe.oracle.com
+  resources:
+  - alertpolicies
+  - alertpolicyrules
+  - attributesets
+  - auditarchiveretrievals
+  - auditprofiles
+  - datasafeprivateendpoints
+  - discoveryjobs
+  - librarymaskingformats
+  - maskingcolumns
+  - maskingpolicies
+  - onpremconnectors
+  - peertargetdatabases
+  - referentialrelations
+  - reportdefinitions
+  - sdmmaskingpolicydifferences
+  - securityassessments
+  - securitypolicies
+  - securitypolicyconfigs
+  - securitypolicydeployments
+  - sensitivecolumns
+  - sensitivedatamodels
+  - sensitivetypegroups
+  - sensitivetypes
+  - sensitivetypesexports
+  - sqlcollections
+  - targetalertpolicyassociations
+  - targetdatabasegroups
+  - targetdatabases
+  - unifiedauditpolicies
+  - userassessments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - datasafe.oracle.com
+  resources:
+  - alertpolicies/finalizers
+  - alertpolicyrules/finalizers
+  - attributesets/finalizers
+  - auditarchiveretrievals/finalizers
+  - auditprofiles/finalizers
+  - datasafeprivateendpoints/finalizers
+  - discoveryjobs/finalizers
+  - librarymaskingformats/finalizers
+  - maskingcolumns/finalizers
+  - maskingpolicies/finalizers
+  - onpremconnectors/finalizers
+  - peertargetdatabases/finalizers
+  - referentialrelations/finalizers
+  - reportdefinitions/finalizers
+  - sdmmaskingpolicydifferences/finalizers
+  - securityassessments/finalizers
+  - securitypolicies/finalizers
+  - securitypolicyconfigs/finalizers
+  - securitypolicydeployments/finalizers
+  - sensitivecolumns/finalizers
+  - sensitivedatamodels/finalizers
+  - sensitivetypegroups/finalizers
+  - sensitivetypes/finalizers
+  - sensitivetypesexports/finalizers
+  - sqlcollections/finalizers
+  - targetalertpolicyassociations/finalizers
+  - targetdatabasegroups/finalizers
+  - targetdatabases/finalizers
+  - unifiedauditpolicies/finalizers
+  - userassessments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - datasafe.oracle.com
+  resources:
+  - alertpolicies/status
+  - alertpolicyrules/status
+  - attributesets/status
+  - auditarchiveretrievals/status
+  - auditprofiles/status
+  - datasafeprivateendpoints/status
+  - discoveryjobs/status
+  - librarymaskingformats/status
+  - maskingcolumns/status
+  - maskingpolicies/status
+  - onpremconnectors/status
+  - peertargetdatabases/status
+  - referentialrelations/status
+  - reportdefinitions/status
+  - sdmmaskingpolicydifferences/status
+  - securityassessments/status
+  - securitypolicies/status
+  - securitypolicyconfigs/status
+  - securitypolicydeployments/status
+  - sensitivecolumns/status
+  - sensitivedatamodels/status
+  - sensitivetypegroups/status
+  - sensitivetypes/status
+  - sensitivetypesexports/status
+  - sqlcollections/status
+  - targetalertpolicyassociations/status
+  - targetdatabasegroups/status
+  - targetdatabases/status
+  - unifiedauditpolicies/status
+  - userassessments/status
+  verbs:
+  - get
+  - patch
+  - update

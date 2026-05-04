@@ -1,0 +1,459 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: auditprofiles.datasafe.oracle.com
+spec:
+  group: datasafe.oracle.com
+  names:
+    kind: AuditProfile
+    listKind: AuditProfileList
+    plural: auditprofiles
+    singular: auditprofile
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the AuditProfile
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AuditProfile
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AuditProfile is the Schema for the auditprofiles API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AuditProfileSpec defines the desired state of AuditProfile.
+            properties:
+              compartmentId:
+                description: The OCID of the compartment where you want to create
+                  the audit profile.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the audit profile.
+                type: string
+              displayName:
+                description: The display name of the audit profile. The name does
+                  not have to be unique, and it's updatable.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              isOverrideGlobalPaidUsage:
+                description: |-
+                  Indicates whether audit paid usage settings specified at the target database level override both the global and the target database group level paid usage settings.
+                  Enabling paid usage continues the collection of audit records beyond the free limit of one million audit records per month per target database,
+                  potentially incurring additional charges. For more information, see Data Safe Price List (https://www.oracle.com/cloud/price-list/#data-safe).
+                type: boolean
+              isPaidUsageEnabled:
+                description: |-
+                  Indicates if you want to continue collecting audit records beyond the free limit of one million audit records per month per target database,
+                  potentially incurring additional charges. The default value is inherited from the global settings.
+                  You can change at the global level or at the target level.
+                type: boolean
+              offlineMonths:
+                description: |-
+                  Number of months the audit records will be stored offline in the offline archive.
+                  Minimum: 0; Maximum: 72 months.
+                  If you have a requirement to store the audit data even longer in the offline archive, please contact the Oracle Support.
+                type: integer
+              onlineMonths:
+                description: |-
+                  Number of months the audit records will be stored online in the audit repository for immediate reporting and analysis.
+                  Minimum: 1; Maximum: 12 months
+                type: integer
+              targetId:
+                description: The OCID of the target database or target database group
+                  for which the audit profile is created.
+                type: string
+              targetType:
+                description: The resource type that is represented by the audit profile.
+                type: string
+            required:
+            - compartmentId
+            - targetId
+            - targetType
+            type: object
+          status:
+            description: AuditProfileStatus defines the observed state of AuditProfile.
+            properties:
+              auditCollectedVolume:
+                description: |-
+                  Number of audit records collected in the current calendar month.
+                  Audit records for the Data Safe service account are excluded and are not counted towards your monthly free limit.
+                format: int64
+                type: integer
+              auditTrails:
+                description: Contains the list of available audit trails on the target
+                  database.
+                items:
+                  description: AuditProfileAuditTrail defines nested fields for AuditProfile.AuditTrail.
+                  properties:
+                    auditCollectionStartTime:
+                      description: The date from which the audit trail must start
+                        collecting data, in the format defined by RFC3339.
+                      type: string
+                    auditProfileId:
+                      description: The OCID of the  parent audit.
+                      type: string
+                    canUpdateLastArchiveTimeOnTarget:
+                      description: |-
+                        Indicates if the Datasafe updates last archive time on target database. If isAutoPurgeEnabled field
+                        is enabled, this field must be true.
+                      type: boolean
+                    compartmentId:
+                      description: The OCID of the compartment that contains the audit
+                        trail and is the same as the compartment of the audit profile
+                        resource.
+                      type: string
+                    definedTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                        Example: `{"Operations": {"CostCenter": "42"}}`
+                      type: object
+                    description:
+                      description: The description of the audit trail.
+                      type: string
+                    displayName:
+                      description: The display name of the audit trail.
+                      type: string
+                    freeformTags:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                        Example: `{"Department": "Finance"}`
+                      type: object
+                    id:
+                      description: The OCID of the audit trail.
+                      type: string
+                    isAutoPurgeEnabled:
+                      description: |-
+                        Indicates if auto purge is enabled on the target database, which helps delete audit data in the
+                        target database every seven days so that the database's audit trail does not become too large.
+                      type: boolean
+                    lifecycleDetails:
+                      description: Details about the current state of the audit trail
+                        in Data Safe.
+                      type: string
+                    lifecycleState:
+                      description: The current state of the audit trail.
+                      type: string
+                    peerTargetDatabaseKey:
+                      description: The secondary id assigned for the peer database
+                        registered with Data Safe.
+                      type: integer
+                    purgeJobDetails:
+                      description: The details of the audit trail purge job that ran
+                        at the time specified by purgeJobTime".
+                      type: string
+                    purgeJobStatus:
+                      description: The current status of the audit trail purge job.
+                      type: string
+                    purgeJobTime:
+                      description: |-
+                        The date and time of the last purge job. The purge job deletes audit data in the
+                        target database every seven days so that the database's audit trail does not become too large.
+                        In the format defined by RFC3339.
+                      type: string
+                    status:
+                      description: The current sub-state of the audit trail.
+                      type: string
+                    systemTags:
+                      additionalProperties:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      description: |-
+                        System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags.
+                        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                      type: object
+                    targetId:
+                      description: The OCID of the Data Safe target for which the
+                        audit trail is created.
+                      type: string
+                    timeCreated:
+                      description: The date and time the audit trail was created,
+                        in the format defined by RFC3339.
+                      type: string
+                    timeLastCollected:
+                      description: |-
+                        The date and time until when the audit events were collected from the target database by the Data Safe audit trail
+                        collection process, in the format defined by RFC3339.
+                      type: string
+                    timeUpdated:
+                      description: The date and time the audit trail was updated,
+                        in the format defined by RFC3339.
+                      type: string
+                    trailLocation:
+                      description: |-
+                        An audit trail location represents the source of audit records that provides documentary
+                        evidence of the sequence of activities in the target database.
+                      type: string
+                    trailSource:
+                      description: The underlying source of unified audit trail.
+                      type: string
+                    workRequestId:
+                      description: The OCID of the workrequest for audit trail which
+                        collects audit records.
+                      type: string
+                  type: object
+                type: array
+              compartmentId:
+                description: The OCID of the compartment that contains the audit profile.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              description:
+                description: The description of the audit profile.
+                type: string
+              displayName:
+                description: The display name of the audit profile.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm)
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID of the audit profile.
+                type: string
+              isOverrideGlobalPaidUsage:
+                description: |-
+                  Indicates whether audit paid usage settings specified at the target database level override both the global settings and the target group level paid usage settings.
+                  Enabling paid usage continues the collection of audit records beyond the free limit of one million audit records per month per target database,
+                  potentially incurring additional charges. For more information, see Data Safe Price List (https://www.oracle.com/cloud/price-list/#data-safe).
+                type: boolean
+              isOverrideGlobalRetentionSetting:
+                description: |-
+                  Indicates whether audit retention settings like online and offline months set at the
+                  target level override both the global settings and the target group level audit retention settings.
+                type: boolean
+              isPaidUsageEnabled:
+                description: |-
+                  Indicates if you want to continue collecting audit records beyond the free limit of one million audit records per month per target database,
+                  potentially incurring additional charges. The default value is inherited from the global settings.
+                  You can change at the global level or at the target level.
+                type: boolean
+              lifecycleDetails:
+                description: Details about the current state of the audit profile
+                  in Data Safe.
+                type: string
+              lifecycleState:
+                description: The current state of the audit profile.
+                type: string
+              offlineMonths:
+                description: |-
+                  Number of months the audit records will be stored offline in the offline archive.
+                  Minimum: 0; Maximum: 72 months.
+                  If you have a requirement to store the audit data even longer in the offline archive, please contact the Oracle Support.
+                type: integer
+              offlineMonthsSource:
+                description: The name or the OCID of the resource from which the offline
+                  month retention setting is sourced. For example, a global setting
+                  or a target database group OCID.
+                type: string
+              onlineMonths:
+                description: |-
+                  Number of months the audit records will be stored online in the audit repository for immediate reporting and analysis.
+                  Minimum: 1; Maximum: 12 months
+                type: integer
+              onlineMonthsSource:
+                description: The name or the OCID of the resource from which the online
+                  month retention setting is sourced. For example, a global setting
+                  or a target database group OCID.
+                type: string
+              paidUsageSource:
+                description: The name or the OCID of the resource from which the paid
+                  usage setting is sourced. For example, a global setting or a target
+                  database group OCID.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace. For more information, see Resource Tags.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              targetId:
+                description: The OCID of the target database or target database group
+                  for which the audit profile is created.
+                type: string
+              targetType:
+                description: The resource type that is represented by the audit profile.
+                type: string
+              timeCreated:
+                description: The date and time the audit profile was created, in the
+                  format defined by RFC3339.
+                type: string
+              timeUpdated:
+                description: The date and time the audit profile was updated, in the
+                  format defined by RFC3339.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

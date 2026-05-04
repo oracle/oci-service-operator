@@ -1,0 +1,120 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - dataintegration.oracle.com
+  resources:
+  - applicationdetaileddescriptions
+  - applications
+  - connections
+  - connectionvalidations
+  - copyobjectrequests
+  - dataassets
+  - dataflows
+  - dataflowvalidations
+  - disapplicationdetaileddescriptions
+  - disapplications
+  - exportrequests
+  - externalpublications
+  - externalpublicationvalidations
+  - folders
+  - functionlibraries
+  - importrequests
+  - patches
+  - pipelines
+  - pipelinevalidations
+  - projects
+  - schedules
+  - taskruns
+  - tasks
+  - taskschedules
+  - taskvalidations
+  - userdefinedfunctions
+  - userdefinedfunctionvalidations
+  - workspaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dataintegration.oracle.com
+  resources:
+  - applicationdetaileddescriptions/finalizers
+  - applications/finalizers
+  - connections/finalizers
+  - connectionvalidations/finalizers
+  - copyobjectrequests/finalizers
+  - dataassets/finalizers
+  - dataflows/finalizers
+  - dataflowvalidations/finalizers
+  - disapplicationdetaileddescriptions/finalizers
+  - disapplications/finalizers
+  - exportrequests/finalizers
+  - externalpublications/finalizers
+  - externalpublicationvalidations/finalizers
+  - folders/finalizers
+  - functionlibraries/finalizers
+  - importrequests/finalizers
+  - patches/finalizers
+  - pipelines/finalizers
+  - pipelinevalidations/finalizers
+  - projects/finalizers
+  - schedules/finalizers
+  - taskruns/finalizers
+  - tasks/finalizers
+  - taskschedules/finalizers
+  - taskvalidations/finalizers
+  - userdefinedfunctions/finalizers
+  - userdefinedfunctionvalidations/finalizers
+  - workspaces/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dataintegration.oracle.com
+  resources:
+  - applicationdetaileddescriptions/status
+  - applications/status
+  - connections/status
+  - connectionvalidations/status
+  - copyobjectrequests/status
+  - dataassets/status
+  - dataflows/status
+  - dataflowvalidations/status
+  - disapplicationdetaileddescriptions/status
+  - disapplications/status
+  - exportrequests/status
+  - externalpublications/status
+  - externalpublicationvalidations/status
+  - folders/status
+  - functionlibraries/status
+  - importrequests/status
+  - patches/status
+  - pipelines/status
+  - pipelinevalidations/status
+  - projects/status
+  - schedules/status
+  - taskruns/status
+  - tasks/status
+  - taskschedules/status
+  - taskvalidations/status
+  - userdefinedfunctions/status
+  - userdefinedfunctionvalidations/status
+  - workspaces/status
+  verbs:
+  - get
+  - patch
+  - update

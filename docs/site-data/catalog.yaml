@@ -29,6 +29,13 @@ packages:
         kind: KnowledgeBase
         summary: Manage OCI Application Dependency Management knowledge bases.
 
+  - package: aidataplatform
+    displayName: AI Data Platform
+    summary: Manage OCI AI Data Platform resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: aidocument
     displayName: AI Document
     summary: Manage OCI AI Document projects from Kubernetes with an initial controller-backed Project rollout.
@@ -93,6 +100,13 @@ packages:
       - group: analytics
         kind: AnalyticsInstance
         summary: Manage OCI Analytics instances.
+
+  - package: announcementsservice
+    displayName: Announcements
+    summary: Manage OCI Announcements service resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: apiaccesscontrol
     displayName: API Access Control
@@ -210,6 +224,13 @@ packages:
         kind: Repository
         summary: Manage OCI generic artifact repositories.
 
+  - package: autoscaling
+    displayName: Autoscaling
+    summary: Manage OCI Autoscaling resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: bastion
     displayName: Bastion
     summary: Manage OCI Bastion bastions and sessions from Kubernetes.
@@ -224,6 +245,13 @@ packages:
         kind: Session
         summary: Manage OCI Bastion sessions.
 
+  - package: batch
+    displayName: Batch
+    summary: Manage OCI Batch resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: bds
     displayName: Big Data Service
     summary: Manage OCI Big Data Service instances from Kubernetes with an initial controller-backed BdsInstance rollout.
@@ -236,6 +264,13 @@ packages:
       - group: bds
         kind: BdsInstance
         summary: Manage OCI Big Data Service instances.
+
+  - package: blockchain
+    displayName: Blockchain
+    summary: Manage OCI Blockchain resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: budget
     displayName: Budget
@@ -275,6 +310,27 @@ packages:
         kind: CaBundle
         summary: Manage OCI CA bundle resources.
 
+  - package: cloudbridge
+    displayName: Cloud Bridge
+    summary: Manage OCI Cloud Bridge resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: cloudguard
+    displayName: Cloud Guard
+    summary: Manage OCI Cloud Guard resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: cloudmigrations
+    displayName: Cloud Migrations
+    summary: Manage OCI Cloud Migrations resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: clusterplacementgroups
     displayName: Cluster Placement Groups
     summary: Manage OCI Cluster Placement Groups from Kubernetes with an initial controller-backed ClusterPlacementGroup rollout.
@@ -287,6 +343,13 @@ packages:
       - group: clusterplacementgroups
         kind: ClusterPlacementGroup
         summary: Manage OCI Cluster Placement Groups.
+
+  - package: computecloudatcustomer
+    displayName: Compute Cloud@Customer
+    summary: Manage OCI Compute Cloud@Customer resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: containerengine
     displayName: Container Engine for Kubernetes
@@ -389,6 +452,13 @@ packages:
         kind: DatabaseToolsConnection
         summary: Manage OCI Database Tools connections.
 
+  - package: datacatalog
+    displayName: Data Catalog
+    summary: Manage OCI Data Catalog resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: dataflow
     displayName: Data Flow
     summary: Manage OCI Data Flow applications from Kubernetes.
@@ -399,6 +469,13 @@ packages:
       - group: dataflow
         kind: Application
         summary: Manage OCI Data Flow applications.
+
+  - package: dataintegration
+    displayName: Data Integration
+    summary: Manage OCI Data Integration resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: datalabelingservice
     displayName: Data Labeling Service
@@ -414,6 +491,20 @@ packages:
         kind: Dataset
         summary: Manage OCI Data Labeling datasets.
 
+  - package: datalabelingservicedataplane
+    displayName: Data Labeling Service Data Plane
+    summary: Manage OCI Data Labeling Service data plane resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: datasafe
+    displayName: Data Safe
+    summary: Manage OCI Data Safe resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: datascience
     displayName: Data Science
     summary: Manage OCI Data Science projects from Kubernetes with an initial controller-backed Project rollout.
@@ -426,6 +517,13 @@ packages:
       - group: datascience
         kind: Project
         summary: Manage OCI Data Science projects.
+
+  - package: dbmulticloud
+    displayName: Database Multicloud
+    summary: Manage OCI Database Multicloud resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: delegateaccesscontrol
     displayName: Delegate Access Control
@@ -440,6 +538,20 @@ packages:
       - group: delegateaccesscontrol
         kind: DelegationControl
         summary: Manage OCI Delegate Access Control delegation controls.
+
+  - package: demandsignal
+    displayName: Demand Signal
+    summary: Manage OCI Demand Signal resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: desktops
+    displayName: Desktops
+    summary: Manage OCI Desktops resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: devops
     displayName: DevOps
@@ -466,6 +578,13 @@ packages:
       - group: devops
         kind: Trigger
         summary: Manage OCI DevOps triggers.
+
+  - package: dif
+    displayName: Data Integration Platform
+    summary: Manage OCI Data Integration Platform resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: dns
     displayName: DNS
@@ -497,6 +616,13 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: emwarehouse
+    displayName: Enterprise Manager Warehouse
+    summary: Manage OCI Enterprise Manager Warehouse resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: events
     displayName: Events
     summary: Manage OCI Events rules from Kubernetes.
@@ -507,6 +633,27 @@ packages:
       - group: events
         kind: Rule
         summary: Manage OCI Events rules.
+
+  - package: filestorage
+    displayName: File Storage
+    summary: Manage OCI File Storage resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: fleetappsmanagement
+    displayName: Fleet Application Management
+    summary: Manage OCI Fleet Application Management resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: fleetsoftwareupdate
+    displayName: Fleet Software Update
+    summary: Manage OCI Fleet Software Update resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
 
   - package: functions
     displayName: Functions
@@ -522,9 +669,23 @@ packages:
         kind: Function
         summary: Manage OCI Functions function definitions and images.
 
+  - package: fusionapps
+    displayName: Fusion Applications
+    summary: Manage OCI Fusion Applications resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: generativeai
     displayName: Generative AI
     summary: Manage OCI Generative AI resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: goldengate
+    displayName: GoldenGate
+    summary: Manage OCI GoldenGate resources from Kubernetes with a generatedruntime staging baseline.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md
@@ -714,6 +875,13 @@ packages:
         kind: DbSystem
         summary: Manage OCI MySQL DB Systems.
 
+  - package: networkfirewall
+    displayName: Network Firewall
+    summary: Manage OCI Network Firewall resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: networkloadbalancer
     displayName: Network Load Balancer
     summary: Manage OCI Network Load Balancer resources from Kubernetes.
@@ -883,6 +1051,13 @@ packages:
     customerVisible: false
     guidePath: docs/installation.md
 
+  - package: resourcemanager
+    displayName: Resource Manager
+    summary: Manage OCI Resource Manager resources from Kubernetes with a generatedruntime staging baseline.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
   - package: resourcescheduler
     displayName: Resource Scheduler
     summary: Manage OCI Resource Scheduler resources from Kubernetes.
@@ -945,6 +1120,13 @@ packages:
   - package: usageapi
     displayName: Usage API
     summary: Manage OCI Usage API resources from Kubernetes.
+    supportStatus: preview
+    customerVisible: false
+    guidePath: docs/installation.md
+
+  - package: vulnerabilityscanning
+    displayName: Vulnerability Scanning
+    summary: Manage OCI Vulnerability Scanning resources from Kubernetes with a generatedruntime staging baseline.
     supportStatus: preview
     customerVisible: false
     guidePath: docs/installation.md

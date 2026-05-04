@@ -1,0 +1,667 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: fsudiscoveries.fleetsoftwareupdate.oracle.com
+spec:
+  group: fleetsoftwareupdate.oracle.com
+  names:
+    kind: FsuDiscovery
+    listKind: FsuDiscoveryList
+    plural: fsudiscoveries
+    singular: fsudiscovery
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the FsuDiscovery
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the FsuDiscovery
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: FsuDiscovery is the Schema for the fsudiscoveries API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FsuDiscoverySpec defines the desired state of FsuDiscovery.
+            properties:
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              details:
+                description: FsuDiscoveryDetails defines nested fields for FsuDiscovery.Details.
+                properties:
+                  components:
+                    description: Discovery filter details of components in an Exadata
+                      software stack.
+                    items:
+                      description: FsuDiscoveryDetailsComponent defines nested fields
+                        for FsuDiscovery.Details.Component.
+                      properties:
+                        componentType:
+                          type: string
+                        criteria:
+                          description: FsuDiscoveryDetailsComponentCriteria defines
+                            nested fields for FsuDiscovery.Details.Component.Criteria.
+                          properties:
+                            filters:
+                              description: Filters to use for search.
+                              items:
+                                description: FsuDiscoveryDetailsComponentCriteriaFilter
+                                  defines nested fields for FsuDiscovery.Details.Component.Criteria.Filter.
+                                properties:
+                                  entityType:
+                                    description: Type of associated resource.
+                                    type: string
+                                  exadataReleases:
+                                    description: List of Exadata Release versions
+                                      to include when discovering Exadata VM Cluster
+                                      targets for a 'GUEST_OS' collection.
+                                    items:
+                                      type: string
+                                    type: array
+                                  identifiers:
+                                    description: List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                      of Compartments to include when discovering
+                                      Exadata VM Cluster targets for a 'GUEST_OS'
+                                      collection.
+                                    items:
+                                      type: string
+                                    type: array
+                                  jsonData:
+                                    type: string
+                                  mode:
+                                    description: |-
+                                      INCLUDE or EXCLUDE the filter results when discovering Exadata VM Cluster targets for a 'GUEST_OS' collection.
+                                      Supported only for RESOURCE_ID filter.
+                                    type: string
+                                  operator:
+                                    description: Type of join for each element in
+                                      this filter.
+                                    type: string
+                                  tags:
+                                    description: Free-form tags (https://docs.oracle.com/iaas/Content/Tagging/Concepts/understandingfreeformtags.htm)
+                                      to include when discovering Exadata VM Cluster
+                                      targets for a 'GUEST_OS' collection.
+                                    items:
+                                      description: FsuDiscoveryDetailsComponentCriteriaFilterTag
+                                        defines nested fields for FsuDiscovery.Details.Component.Criteria.Filter.Tag.
+                                      properties:
+                                        key:
+                                          description: Freeform tag key.
+                                          type: string
+                                        value:
+                                          description: Freeform tag value.
+                                          type: string
+                                      required:
+                                      - key
+                                      - value
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                                  versions:
+                                    description: List of Exadata Image (Guest OS)
+                                      version strings to include when discovering
+                                      Exadata VM Cluster targets for a 'GUEST_OS'
+                                      collection.
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              type: array
+                            fsuDiscoveryId:
+                              description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                of the Exadata Fleet Update Discovery.
+                              type: string
+                            jsonData:
+                              type: string
+                            query:
+                              description: OCI Search Service (https://docs.oracle.com/iaas/Content/Search/Concepts/queryoverview.htm)
+                                query string.
+                              type: string
+                            strategy:
+                              type: string
+                            targets:
+                              description: |-
+                                The OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of Exadata VM Cluster targets.
+                                Only Exadata VM Cluster targets associated with the specified 'serviceType' are allowed.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        jsonData:
+                          type: string
+                        sourceMajorVersion:
+                          description: |-
+                            Major version of Exadata Image (Guest OS) release for Exadata VM Cluster targets to be included in the results for an Exadata Fleet Update Discovery.
+                            Major Versions of Exadata Software are demarcated by the underlying Oracle Linux OS version.
+                            For more details, refer to Oracle document 2075007.1 (https://support.oracle.com/knowledge/Oracle%20Database%20Products/2075007_1.html)
+                          type: string
+                      type: object
+                    type: array
+                  criteria:
+                    description: FsuDiscoveryDetailsCriteria defines nested fields
+                      for FsuDiscovery.Details.Criteria.
+                    properties:
+                      filters:
+                        description: Filters to perform the target discovery.
+                        items:
+                          description: FsuDiscoveryDetailsCriteriaFilter defines nested
+                            fields for FsuDiscovery.Details.Criteria.Filter.
+                          properties:
+                            entityType:
+                              description: Type of resource to match in the discovery.
+                              type: string
+                            identifiers:
+                              description: List of Compartments OCIDs to include in
+                                the discovery.
+                              items:
+                                type: string
+                              type: array
+                            jsonData:
+                              type: string
+                            mode:
+                              description: |-
+                                INCLUDE or EXCLUDE the filter results in the discovery for GI targets.
+                                Supported for 'FSUCOLLECTION' RESOURCE_ID filter only.
+                              type: string
+                            operator:
+                              description: Type of join for each element in this filter.
+                              type: string
+                            tags:
+                              description: Defined tags to include in the discovery.
+                              items:
+                                description: FsuDiscoveryDetailsCriteriaFilterTag
+                                  defines nested fields for FsuDiscovery.Details.Criteria.Filter.Tag.
+                                properties:
+                                  key:
+                                    description: Defined tag key.
+                                    type: string
+                                  namespace:
+                                    description: Defined tag namespace.
+                                    type: string
+                                  value:
+                                    description: Defined tag value.
+                                    type: string
+                                required:
+                                - key
+                                - namespace
+                                - value
+                                type: object
+                              type: array
+                            type:
+                              type: string
+                            versions:
+                              description: List of Versions strings to include in
+                                the discovery.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                      fsuDiscoveryId:
+                        description: OCIDs of Fleet Software Update Discovery.
+                        type: string
+                      jsonData:
+                        type: string
+                      query:
+                        description: OCI Search Service query string.
+                        type: string
+                      strategy:
+                        type: string
+                      targets:
+                        description: |-
+                          OCIDs of target resources to include.
+                          For EXACC service type Collections only VMClusters are allowed.
+                          For EXACS service type Collections only CloudVMClusters are allowed.
+                          For EXA-DB-XS service type Collections only ExaDBVMClusters are allowed.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  jsonData:
+                    type: string
+                  serviceType:
+                    description: Exadata service type for the target resource members.
+                    type: string
+                  sourceMajorVersion:
+                    description: |-
+                      Grid Infrastructure Major Version of targets to be included in the Exadata Fleet Update Discovery results.
+                      Only GI targets that match the version specified in this value would be added to the Exadata Fleet Update Discovery results.
+                    type: string
+                  type:
+                    type: string
+                required:
+                - serviceType
+                type: object
+              displayName:
+                description: Exadata Fleet Update Collection display name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+            required:
+            - compartmentId
+            - details
+            type: object
+          status:
+            description: FsuDiscoveryStatus defines the observed state of FsuDiscovery.
+            properties:
+              compartmentId:
+                description: Compartment Identifier.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              details:
+                description: FsuDiscoveryDetails defines nested fields for FsuDiscovery.Details.
+                properties:
+                  components:
+                    description: Discovery filter details of components in an Exadata
+                      software stack.
+                    items:
+                      description: FsuDiscoveryDetailsComponent defines nested fields
+                        for FsuDiscovery.Details.Component.
+                      properties:
+                        componentType:
+                          type: string
+                        criteria:
+                          description: FsuDiscoveryDetailsComponentCriteria defines
+                            nested fields for FsuDiscovery.Details.Component.Criteria.
+                          properties:
+                            filters:
+                              description: Filters to use for search.
+                              items:
+                                description: FsuDiscoveryDetailsComponentCriteriaFilter
+                                  defines nested fields for FsuDiscovery.Details.Component.Criteria.Filter.
+                                properties:
+                                  entityType:
+                                    description: Type of associated resource.
+                                    type: string
+                                  exadataReleases:
+                                    description: List of Exadata Release versions
+                                      to include when discovering Exadata VM Cluster
+                                      targets for a 'GUEST_OS' collection.
+                                    items:
+                                      type: string
+                                    type: array
+                                  identifiers:
+                                    description: List of OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                      of Compartments to include when discovering
+                                      Exadata VM Cluster targets for a 'GUEST_OS'
+                                      collection.
+                                    items:
+                                      type: string
+                                    type: array
+                                  jsonData:
+                                    type: string
+                                  mode:
+                                    description: |-
+                                      INCLUDE or EXCLUDE the filter results when discovering Exadata VM Cluster targets for a 'GUEST_OS' collection.
+                                      Supported only for RESOURCE_ID filter.
+                                    type: string
+                                  operator:
+                                    description: Type of join for each element in
+                                      this filter.
+                                    type: string
+                                  tags:
+                                    description: Free-form tags (https://docs.oracle.com/iaas/Content/Tagging/Concepts/understandingfreeformtags.htm)
+                                      to include when discovering Exadata VM Cluster
+                                      targets for a 'GUEST_OS' collection.
+                                    items:
+                                      description: FsuDiscoveryDetailsComponentCriteriaFilterTag
+                                        defines nested fields for FsuDiscovery.Details.Component.Criteria.Filter.Tag.
+                                      properties:
+                                        key:
+                                          description: Freeform tag key.
+                                          type: string
+                                        value:
+                                          description: Freeform tag value.
+                                          type: string
+                                      required:
+                                      - key
+                                      - value
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                                  versions:
+                                    description: List of Exadata Image (Guest OS)
+                                      version strings to include when discovering
+                                      Exadata VM Cluster targets for a 'GUEST_OS'
+                                      collection.
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              type: array
+                            fsuDiscoveryId:
+                              description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                                of the Exadata Fleet Update Discovery.
+                              type: string
+                            jsonData:
+                              type: string
+                            query:
+                              description: OCI Search Service (https://docs.oracle.com/iaas/Content/Search/Concepts/queryoverview.htm)
+                                query string.
+                              type: string
+                            strategy:
+                              type: string
+                            targets:
+                              description: |-
+                                The OCIDs (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of Exadata VM Cluster targets.
+                                Only Exadata VM Cluster targets associated with the specified 'serviceType' are allowed.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        jsonData:
+                          type: string
+                        sourceMajorVersion:
+                          description: |-
+                            Major version of Exadata Image (Guest OS) release for Exadata VM Cluster targets to be included in the results for an Exadata Fleet Update Discovery.
+                            Major Versions of Exadata Software are demarcated by the underlying Oracle Linux OS version.
+                            For more details, refer to Oracle document 2075007.1 (https://support.oracle.com/knowledge/Oracle%20Database%20Products/2075007_1.html)
+                          type: string
+                      type: object
+                    type: array
+                  criteria:
+                    description: FsuDiscoveryDetailsCriteria defines nested fields
+                      for FsuDiscovery.Details.Criteria.
+                    properties:
+                      filters:
+                        description: Filters to perform the target discovery.
+                        items:
+                          description: FsuDiscoveryDetailsCriteriaFilter defines nested
+                            fields for FsuDiscovery.Details.Criteria.Filter.
+                          properties:
+                            entityType:
+                              description: Type of resource to match in the discovery.
+                              type: string
+                            identifiers:
+                              description: List of Compartments OCIDs to include in
+                                the discovery.
+                              items:
+                                type: string
+                              type: array
+                            jsonData:
+                              type: string
+                            mode:
+                              description: |-
+                                INCLUDE or EXCLUDE the filter results in the discovery for GI targets.
+                                Supported for 'FSUCOLLECTION' RESOURCE_ID filter only.
+                              type: string
+                            operator:
+                              description: Type of join for each element in this filter.
+                              type: string
+                            tags:
+                              description: Defined tags to include in the discovery.
+                              items:
+                                description: FsuDiscoveryDetailsCriteriaFilterTag
+                                  defines nested fields for FsuDiscovery.Details.Criteria.Filter.Tag.
+                                properties:
+                                  key:
+                                    description: Defined tag key.
+                                    type: string
+                                  namespace:
+                                    description: Defined tag namespace.
+                                    type: string
+                                  value:
+                                    description: Defined tag value.
+                                    type: string
+                                required:
+                                - key
+                                - namespace
+                                - value
+                                type: object
+                              type: array
+                            type:
+                              type: string
+                            versions:
+                              description: List of Versions strings to include in
+                                the discovery.
+                              items:
+                                type: string
+                              type: array
+                          type: object
+                        type: array
+                      fsuDiscoveryId:
+                        description: OCIDs of Fleet Software Update Discovery.
+                        type: string
+                      jsonData:
+                        type: string
+                      query:
+                        description: OCI Search Service query string.
+                        type: string
+                      strategy:
+                        type: string
+                      targets:
+                        description: |-
+                          OCIDs of target resources to include.
+                          For EXACC service type Collections only VMClusters are allowed.
+                          For EXACS service type Collections only CloudVMClusters are allowed.
+                          For EXA-DB-XS service type Collections only ExaDBVMClusters are allowed.
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  jsonData:
+                    type: string
+                  serviceType:
+                    description: Exadata service type for the target resource members.
+                    type: string
+                  sourceMajorVersion:
+                    description: |-
+                      Grid Infrastructure Major Version of targets to be included in the Exadata Fleet Update Discovery results.
+                      Only GI targets that match the version specified in this value would be added to the Exadata Fleet Update Discovery results.
+                    type: string
+                  type:
+                    type: string
+                required:
+                - serviceType
+                type: object
+              displayName:
+                description: Exadata Fleet Update Discovery display name.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: OCID identifier for the Exadata Fleet Update Discovery.
+                type: string
+              lifecycleDetails:
+                description: |-
+                  A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Exadata Fleet Update Discovery.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Usage of system tag keys. These predefined keys are scoped to namespaces.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the Exadata Fleet Update Discovery was created, as described in
+                  RFC 3339 (https://tools.ietf.org/rfc/rfc3339), section 14.29.
+                type: string
+              timeFinished:
+                description: |-
+                  The date and time the Exadata Fleet Update Discovery was finished,
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
+                type: string
+              timeUpdated:
+                description: |-
+                  The date and time the Exadata Fleet Update Discovery was updated,
+                  as described in RFC 3339 (https://tools.ietf.org/rfc/rfc3339),
+                  section 14.29.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

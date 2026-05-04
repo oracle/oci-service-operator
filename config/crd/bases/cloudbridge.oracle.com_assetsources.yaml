@@ -1,0 +1,435 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: assetsources.cloudbridge.oracle.com
+spec:
+  group: cloudbridge.oracle.com
+  names:
+    kind: AssetSource
+    listKind: AssetSourceList
+    plural: assetsources
+    singular: assetsource
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the AssetSource
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the AssetSource
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: AssetSource is the Schema for the assetsources API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AssetSourceSpec defines the desired state of AssetSource.
+            properties:
+              areHistoricalMetricsCollected:
+                description: Flag indicating whether historical metrics are collected
+                  for assets, originating from this asset source.
+                type: boolean
+              areRealtimeMetricsCollected:
+                description: Flag indicating whether real-time metrics are collected
+                  for assets, originating from this asset source.
+                type: boolean
+              assetsCompartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that is going to be used to create assets.
+                type: string
+              awsAccountKey:
+                description: The key of customer's aws account to be discovered/migrated.
+                type: string
+              awsRegion:
+                description: AWS region information, from where the resources are
+                  discovered.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment for the resource.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              discoveryCredentials:
+                description: AssetSourceDiscoveryCredentials defines nested fields
+                  for AssetSource.DiscoveryCredentials.
+                properties:
+                  secretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret in a vault.
+                      If the type of the credentials is `BASIC`, the secret must contain the username and
+                      password in JSON format, which is in the form of `{ "username": "<User>", "password": "example-password" }`.
+                      If the type of the credentials is `API_KEY`, the secret must contain the accessKeyId and
+                      secretAccessKey in JSON format,
+                      which is in the form of `{ "accessKeyId": "<AccessKey>", "secretAccessKey": "<AccessKeyValue>" }`.
+                    type: string
+                  type:
+                    description: Authentication type
+                    type: string
+                required:
+                - secretId
+                - type
+                type: object
+              discoveryScheduleId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the discovery schedule that is going to be attached to the created
+                  asset.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name for the asset source. Does not have to be unique, and it's mutable.
+                  Avoid entering confidential information. The name is generated by the service if it is not
+                  explicitly provided.
+                type: string
+              environmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the environment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace/scope. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              inventoryId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the inventory that will contain created assets.
+                type: string
+              isCostInformationCollected:
+                description: Flag indicating whether cost data collection is enabled
+                  for assets, originating from this asset source.
+                type: boolean
+              jsonData:
+                type: string
+              replicationCredentials:
+                description: AssetSourceReplicationCredentials defines nested fields
+                  for AssetSource.ReplicationCredentials.
+                properties:
+                  secretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret in a vault.
+                      If the type of the credentials is `BASIC`, the secret must contain the username and
+                      password in JSON format, which is in the form of `{ "username": "<User>", "password": "example-password" }`.
+                      If the type of the credentials is `API_KEY`, the secret must contain the accessKeyId and
+                      secretAccessKey in JSON format,
+                      which is in the form of `{ "accessKeyId": "<AccessKey>", "secretAccessKey": "<AccessKeyValue>" }`.
+                    type: string
+                  type:
+                    description: Authentication type
+                    type: string
+                required:
+                - secretId
+                - type
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
+              type:
+                type: string
+              vcenterEndpoint:
+                description: Endpoint for VMware asset discovery and replication in
+                  the form of ```https://<host>:<port>/sdk```
+                type: string
+            required:
+            - assetsCompartmentId
+            - compartmentId
+            - environmentId
+            - inventoryId
+            type: object
+          status:
+            description: AssetSourceStatus defines the observed state of AssetSource.
+            properties:
+              areHistoricalMetricsCollected:
+                description: Flag indicating whether historical metrics are collected
+                  for assets, originating from this asset source.
+                type: boolean
+              areRealtimeMetricsCollected:
+                description: Flag indicating whether real-time metrics are collected
+                  for assets, originating from this asset source.
+                type: boolean
+              assetsCompartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment that is going to be used to create assets.
+                type: string
+              awsAccountKey:
+                description: The key of customer's aws account to be discovered/migrated.
+                type: string
+              awsRegion:
+                description: AWS region information, from where the resources are
+                  discovered.
+                type: string
+              compartmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the compartment for the resource.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Operations": {"CostCenter": "42"}}`
+                type: object
+              discoveryCredentials:
+                description: AssetSourceDiscoveryCredentials defines nested fields
+                  for AssetSource.DiscoveryCredentials.
+                properties:
+                  secretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret in a vault.
+                      If the type of the credentials is `BASIC`, the secret must contain the username and
+                      password in JSON format, which is in the form of `{ "username": "<User>", "password": "example-password" }`.
+                      If the type of the credentials is `API_KEY`, the secret must contain the accessKeyId and
+                      secretAccessKey in JSON format,
+                      which is in the form of `{ "accessKeyId": "<AccessKey>", "secretAccessKey": "<AccessKeyValue>" }`.
+                    type: string
+                  type:
+                    description: Authentication type
+                    type: string
+                required:
+                - secretId
+                - type
+                type: object
+              discoveryScheduleId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of an attached discovery schedule.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly name for the asset source. Does not have to be unique, and it's mutable.
+                  Avoid entering confidential information.
+                type: string
+              environmentId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the environment.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+                  predefined name, type, or namespace/scope. For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{"Department": "Finance"}`
+                type: object
+              id:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the resource.
+                type: string
+              inventoryId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the inventory that will contain created assets.
+                type: string
+              isCostInformationCollected:
+                description: Flag indicating whether cost data collection is enabled
+                  for assets, originating from this asset source.
+                type: boolean
+              jsonData:
+                type: string
+              lifecycleDetails:
+                description: The detailed state of the asset source.
+                type: string
+              lifecycleState:
+                description: The current state of the asset source.
+                type: string
+              replicationCredentials:
+                description: AssetSourceReplicationCredentials defines nested fields
+                  for AssetSource.ReplicationCredentials.
+                properties:
+                  secretId:
+                    description: |-
+                      The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the secret in a vault.
+                      If the type of the credentials is `BASIC`, the secret must contain the username and
+                      password in JSON format, which is in the form of `{ "username": "<User>", "password": "example-password" }`.
+                      If the type of the credentials is `API_KEY`, the secret must contain the accessKeyId and
+                      secretAccessKey in JSON format,
+                      which is in the form of `{ "accessKeyId": "<AccessKey>", "secretAccessKey": "<AccessKeyValue>" }`.
+                    type: string
+                  type:
+                    description: Authentication type
+                    type: string
+                required:
+                - secretId
+                - type
+                type: object
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+                  For more information, see Resource Tags (https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+                  Example: `{orcl-cloud: {free-tier-retain: true}}`
+                type: object
+              timeCreated:
+                description: The time when the asset source was created in the RFC3339
+                  format.
+                type: string
+              timeUpdated:
+                description: The point in time that the asset source was last updated
+                  in the RFC3339 format.
+                type: string
+              type:
+                type: string
+              vcenterEndpoint:
+                description: Endpoint for VMware asset discovery and replication in
+                  the form of ```https://<host>:<port>/sdk```
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -148,6 +148,7 @@ type ResourceModel struct {
 	StatusFields        []FieldModel
 	PrintColumns        []PrintColumnModel
 	ObjectComments      []string
+	ListTypeName        string
 	ListComments        []string
 	Sample              SampleModel
 	PrimaryDisplayField string

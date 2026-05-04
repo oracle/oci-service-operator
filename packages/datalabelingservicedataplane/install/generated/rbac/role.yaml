@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - datalabelingservicedataplane.oracle.com
+  resources:
+  - annotations
+  - records
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - datalabelingservicedataplane.oracle.com
+  resources:
+  - annotations/finalizers
+  - records/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - datalabelingservicedataplane.oracle.com
+  resources:
+  - annotations/status
+  - records/status
+  verbs:
+  - get
+  - patch
+  - update

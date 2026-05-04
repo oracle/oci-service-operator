@@ -1,0 +1,311 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: terms.datacatalog.oracle.com
+spec:
+  group: datacatalog.oracle.com
+  names:
+    kind: Term
+    listKind: TermList
+    plural: terms
+    singular: term
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Term
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Term
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Term is the Schema for the terms API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TermSpec defines the desired state of Term.
+            properties:
+              customPropertyMembers:
+                description: The list of customized properties along with the values
+                  for this object
+                items:
+                  description: TermCustomPropertyMember defines nested fields for
+                    Term.CustomPropertyMember.
+                  properties:
+                    displayName:
+                      description: Name of the custom property
+                      type: string
+                    key:
+                      description: Unique Identifier of the attribute which is ID
+                      type: string
+                    namespaceName:
+                      description: Namespace name of the custom property
+                      type: string
+                    value:
+                      description: The custom property value
+                      type: string
+                  type: object
+                type: array
+              description:
+                description: Detailed description of the term.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly display name. Is changeable. The combination of 'displayName' and 'parentTermKey'
+                  must be unique. Avoid entering confidential information.
+                type: string
+              isAllowedToHaveChildTerms:
+                description: Indicates whether a term may contain child terms.
+                type: boolean
+              owner:
+                description: OCID of the user who is the owner of this business terminology.
+                type: string
+              parentTermKey:
+                description: The parent key of the term. In the case of a root-level
+                  category only, the term would have no parent and this should be
+                  left unset.
+                type: string
+              workflowStatus:
+                description: Status of the approval process workflow for this business
+                  term in the glossary.
+                type: string
+            required:
+            - displayName
+            type: object
+          status:
+            description: TermStatus defines the observed state of Term.
+            properties:
+              associatedObjectCount:
+                description: The number of objects tagged with this term
+                type: integer
+              associatedObjects:
+                description: Array of objects associated to a term.
+                items:
+                  description: TermAssociatedObject defines nested fields for Term.AssociatedObject.
+                  properties:
+                    key:
+                      description: Immutable key used to uniquely identify the associated
+                        object.
+                      type: string
+                    name:
+                      description: Name of the associated object.
+                      type: string
+                    uri:
+                      description: URI of the associated object within the data catalog
+                        API.
+                      type: string
+                  type: object
+                type: array
+              createdById:
+                description: OCID of the user who created the term.
+                type: string
+              customPropertyMembers:
+                description: The list of customized properties along with the values
+                  for this object
+                items:
+                  description: TermCustomPropertyMember defines nested fields for
+                    Term.CustomPropertyMember.
+                  properties:
+                    displayName:
+                      description: Name of the custom property
+                      type: string
+                    key:
+                      description: Unique Identifier of the attribute which is ID
+                      type: string
+                    namespaceName:
+                      description: Namespace name of the custom property
+                      type: string
+                    value:
+                      description: The custom property value
+                      type: string
+                  type: object
+                type: array
+              description:
+                description: Detailed description of the term.
+                type: string
+              displayName:
+                description: |-
+                  A user-friendly display name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                type: string
+              glossaryKey:
+                description: Unique id of the parent glossary.
+                type: string
+              isAllowedToHaveChildTerms:
+                description: Indicates whether a term may contain child terms.
+                type: boolean
+              key:
+                description: Unique term key that is immutable.
+                type: string
+              lifecycleState:
+                description: The current state of the term.
+                type: string
+              owner:
+                description: OCID of the user who is the owner of this business terminology.
+                type: string
+              parentTermKey:
+                description: This terms parent term key. Will be null if the term
+                  has no parent term.
+                type: string
+              path:
+                description: Absolute path of the term.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeCreated:
+                description: |-
+                  The date and time the term was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
+                  Example: `2019-03-25T21:10:29.600Z`
+                type: string
+              timeUpdated:
+                description: The last time that any change was made to the term. An
+                  RFC3339 (https://tools.ietf.org/html/rfc3339) formatted datetime
+                  string.
+                type: string
+              updatedById:
+                description: OCID of the user who modified the term.
+                type: string
+              uri:
+                description: URI to the term instance in the API.
+                type: string
+              workflowStatus:
+                description: Status of the approval process workflow for this business
+                  term in the glossary.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

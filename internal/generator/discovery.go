@@ -132,9 +132,14 @@ func resourceModels(index *ocisdk.Package, service ServiceConfig) ([]ResourceMod
 		return nil, err
 	}
 
+	kindNames := make(map[string]struct{}, len(candidates))
+	for _, candidate := range candidates {
+		kindNames[candidate.rawName] = struct{}{}
+	}
+
 	resources := make([]ResourceModel, 0, len(candidates))
 	for _, entry := range candidates {
-		resource, buildErr := buildResourceModel(index, service, entry)
+		resource, buildErr := buildResourceModelForKinds(index, service, entry, kindNames)
 		if buildErr != nil {
 			return nil, buildErr
 		}
@@ -234,6 +239,10 @@ func operationTypeParts(typeName string) (operation string, rawName string, requ
 }
 
 func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry resourceCandidate) (ResourceModel, error) {
+	return buildResourceModelForKinds(index, service, entry, map[string]struct{}{entry.rawName: struct{}{}})
+}
+
+func buildResourceModelForKinds(index *ocisdk.Package, service ServiceConfig, entry resourceCandidate, kindNames map[string]struct{}) (ResourceModel, error) {
 	operations := sortedOperations(entry.operations)
 	runtimeModel, err := buildRuntimeModel(index, entry.rawName, operations, index.ResourceOperations(entry.rawName))
 	if err != nil {
@@ -245,6 +254,7 @@ func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry reso
 	displayField := primaryDisplayField(fieldSet.SpecFields)
 	kindPlural := strings.ToLower(pluralize(kind))
 	statusTypeName := defaultStatusTypeName(kind)
+	listTypeName := apiObjectListTypeName(kind, kindNames)
 
 	return ResourceModel{
 		SDKName:             entry.rawName,
@@ -261,9 +271,31 @@ func buildResourceModel(index *ocisdk.Package, service ServiceConfig, entry reso
 		StatusFields:        fieldSet.StatusFields,
 		PrintColumns:        defaultPrintColumns(kind, displayField),
 		ObjectComments:      []string{fmt.Sprintf("%s is the Schema for the %s API.", kind, kindPlural)},
-		ListComments:        []string{fmt.Sprintf("%sList contains a list of %s.", kind, kind)},
+		ListTypeName:        listTypeName,
+		ListComments:        []string{fmt.Sprintf("%s contains a list of %s.", listTypeName, kind)},
 		PrimaryDisplayField: displayField,
 	}, nil
+}
+
+func apiObjectListTypeName(kind string, kindNames map[string]struct{}) string {
+	defaultName := kind + "List"
+	if _, collides := kindNames[defaultName]; !collides {
+		return defaultName
+	}
+
+	for _, suffix := range []string{"ObjectList", "ItemsList", "Collection"} {
+		candidate := kind + suffix
+		if _, collides := kindNames[candidate]; !collides {
+			return candidate
+		}
+	}
+
+	for i := 2; ; i++ {
+		candidate := fmt.Sprintf("%sObjectList%d", kind, i)
+		if _, collides := kindNames[candidate]; !collides {
+			return candidate
+		}
+	}
 }
 
 func sortedOperations(operations map[string]struct{}) []string {

@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bases/fleetsoftwareupdate.oracle.com_fsuactions.yaml
+- bases/fleetsoftwareupdate.oracle.com_fsucollections.yaml
+- bases/fleetsoftwareupdate.oracle.com_fsucycles.yaml
+- bases/fleetsoftwareupdate.oracle.com_fsudiscoveries.yaml
+- bases/fleetsoftwareupdate.oracle.com_fsureadinesschecks.yaml

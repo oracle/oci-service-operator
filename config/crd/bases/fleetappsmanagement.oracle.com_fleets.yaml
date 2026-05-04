@@ -1,0 +1,938 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: fleets.fleetappsmanagement.oracle.com
+spec:
+  group: fleetappsmanagement.oracle.com
+  names:
+    kind: Fleet
+    listKind: FleetList
+    plural: fleets
+    singular: fleet
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the Fleet
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the Fleet
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Fleet is the Schema for the fleets API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FleetSpec defines the desired state of Fleet.
+            properties:
+              compartmentId:
+                description: compartment OCID
+                type: string
+              credentials:
+                description: Credentials associated with the Fleet.
+                items:
+                  description: FleetCredentialFields defines nested fields for Fleet.Credential.
+                  properties:
+                    compartmentId:
+                      description: Compartment OCID
+                      type: string
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                        Example: `My new resource`
+                      type: string
+                    entitySpecifics:
+                      description: FleetCredentialEntitySpecifics defines nested fields
+                        for Fleet.Credential.EntitySpecifics.
+                      properties:
+                        credentialLevel:
+                          type: string
+                        jsonData:
+                          type: string
+                        resourceId:
+                          description: OCID of the resource associated with the target
+                            for which the credential is created.
+                          type: string
+                        target:
+                          description: Target name for which the credential is provided.
+                          type: string
+                        variables:
+                          description: List of fleet credential variables.
+                          items:
+                            description: FleetCredentialEntitySpecificsVariable defines
+                              nested fields for Fleet.Credential.EntitySpecifics.Variable.
+                            properties:
+                              name:
+                                description: Name of the variable.
+                                type: string
+                              value:
+                                description: The value corresponding to the variable
+                                  name.
+                                type: string
+                            type: object
+                          type: array
+                      type: object
+                    password:
+                      description: FleetCredentialPassword defines nested fields for
+                        Fleet.Credential.Password.
+                      properties:
+                        credentialType:
+                          type: string
+                        jsonData:
+                          type: string
+                        keyId:
+                          description: OCID for the Vault Key that will be used to
+                            encrypt/decrypt the value given.
+                          type: string
+                        keyVersion:
+                          description: The Vault Key version.
+                          type: string
+                        secretId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the secret.
+                          type: string
+                        secretVersion:
+                          description: The secret version.
+                          type: string
+                        value:
+                          description: The value corresponding to the credential.
+                          type: string
+                        vaultId:
+                          description: OCID for the Vault that will be used to fetch
+                            the key to encrypt/decrypt the value given.
+                          type: string
+                      type: object
+                    user:
+                      description: FleetCredentialUser defines nested fields for Fleet.Credential.User.
+                      properties:
+                        credentialType:
+                          type: string
+                        jsonData:
+                          type: string
+                        keyId:
+                          description: OCID for the Vault Key that will be used to
+                            encrypt/decrypt the value given.
+                          type: string
+                        keyVersion:
+                          description: The Vault Key version.
+                          type: string
+                        secretId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the secret.
+                          type: string
+                        secretVersion:
+                          description: The secret version.
+                          type: string
+                        value:
+                          description: The value corresponding to the credential.
+                          type: string
+                        vaultId:
+                          description: OCID for the Vault that will be used to fetch
+                            the key to encrypt/decrypt the value given.
+                          type: string
+                      type: object
+                  required:
+                  - compartmentId
+                  - displayName
+                  - entitySpecifics
+                  - password
+                  - user
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              details:
+                description: FleetDetails defines nested fields for Fleet.Details.
+                properties:
+                  fleetType:
+                    type: string
+                  jsonData:
+                    type: string
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              environmentType:
+                description: |-
+                  Environment Type associated with the Fleet.
+                  Applicable for ENVIRONMENT fleet types.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              isTargetAutoConfirm:
+                description: |-
+                  A value that represents if auto-confirming of the targets can be enabled.
+                  This will allow targets to be auto-confirmed in the fleet without manual intervention.
+                type: boolean
+              notificationPreferences:
+                description: Notification Preferences associated with the Fleet.
+                items:
+                  description: FleetNotificationPreference defines nested fields for
+                    Fleet.NotificationPreference.
+                  properties:
+                    compartmentId:
+                      description: Compartment ID the topic belongs to.
+                      type: string
+                    preferences:
+                      description: FleetNotificationPreferencePreferences defines
+                        nested fields for Fleet.NotificationPreference.Preferences.
+                      properties:
+                        onJobCanceled:
+                          description: Enables or disables notification on job canceled.
+                          type: boolean
+                        onJobFailure:
+                          description: Enables or disables notification on Job Failures.
+                          type: boolean
+                        onJobScheduleChange:
+                          description: Enables or disables notification on job schedule
+                            change.
+                          type: boolean
+                        onJobStart:
+                          description: Enables or disables notification on job start.
+                          type: boolean
+                        onJobSuccess:
+                          description: Enables or disables notification on job success.
+                          type: boolean
+                        onResourceNonCompliance:
+                          description: Enables or disables notification when fleet
+                            resource becomes non compliant.
+                          type: boolean
+                        onRunbookNewerVersion:
+                          description: Enables or disables notification when a newer
+                            version of runbook associated with a fleet is available
+                          type: boolean
+                        onTaskFailure:
+                          description: Enables or disables notification on task failure.
+                          type: boolean
+                        onTaskPause:
+                          description: Enables or disables notification when a task
+                            is paused.
+                          type: boolean
+                        onTaskSuccess:
+                          description: Enables or disables notification on task success.
+                          type: boolean
+                        onTopologyModification:
+                          description: Enables or disables notification on Environment
+                            Fleet Topology Modification.
+                          type: boolean
+                        upcomingSchedule:
+                          description: FleetNotificationPreferencePreferencesUpcomingSchedule
+                            defines nested fields for Fleet.NotificationPreference.Preferences.UpcomingSchedule.
+                          properties:
+                            notifyBefore:
+                              description: Specify when the notification should be
+                                sent.
+                              type: string
+                            onUpcomingSchedule:
+                              description: Enables notification on upcoming schedule.
+                              type: boolean
+                          type: object
+                      type: object
+                    topicId:
+                      description: |-
+                        Topic Id where the notifications will be directed.
+                        A topic is a communication channel for sending messages on chosen events to subscriptions.
+                      type: string
+                  required:
+                  - compartmentId
+                  - topicId
+                  type: object
+                type: array
+              parentFleetId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the fleet that would be the parent for this fleet.
+                type: string
+              products:
+                description: |-
+                  Products associated with the Fleet.
+                  Provide PlatformConfiguration Ids corresponding to all the Products that need to be managed.
+                items:
+                  type: string
+                type: array
+              properties:
+                description: Properties associated with the Fleet.
+                items:
+                  description: FleetPropertyFields defines nested fields for Fleet.Property.
+                  properties:
+                    compartmentId:
+                      description: compartment OCID
+                      type: string
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                        Example: `My new resource`
+                      type: string
+                    fleetPropertyType:
+                      description: Type of the FleetProperty.
+                      type: string
+                    isRequired:
+                      description: Property is required or not.
+                      type: boolean
+                    value:
+                      description: Value of the Property.
+                      type: string
+                  required:
+                  - compartmentId
+                  - fleetPropertyType
+                  type: object
+                type: array
+              resourceSelection:
+                description: FleetResourceSelection defines nested fields for Fleet.ResourceSelection.
+                properties:
+                  jsonData:
+                    type: string
+                  resourceSelectionType:
+                    type: string
+                  ruleSelectionCriteria:
+                    description: FleetResourceSelectionRuleSelectionCriteria defines
+                      nested fields for Fleet.ResourceSelection.RuleSelectionCriteria.
+                    properties:
+                      matchCondition:
+                        description: |-
+                          Match condition for the rule selection.
+                          Include resources that match all rules or any of the rules.
+                        type: string
+                      rules:
+                        description: Rules.
+                        items:
+                          description: FleetResourceSelectionRuleSelectionCriteriaRule
+                            defines nested fields for Fleet.ResourceSelection.RuleSelectionCriteria.Rule.
+                          properties:
+                            basis:
+                              description: |-
+                                Based on what the rule is created.
+                                It can be based on a resourceProperty or a tag.
+                                If based on a tag, basis will be 'definedTagEquals'
+                                If based on a resource property, basis will be 'inventoryProperties'
+                              type: string
+                            compartmentId:
+                              description: Compartment Id for which the rule is created.
+                              type: string
+                            compartmentIdInSubtree:
+                              description: |-
+                                If set to true, resources will be returned for not only the provided compartment, but all compartments which
+                                descend from it. Which resources are returned and their field contents depends on the value of accessLevel.
+                                Default value for `compartmentIdInSubtree` is false
+                              type: boolean
+                            conditions:
+                              description: Rule Conditions
+                              items:
+                                description: FleetResourceSelectionRuleSelectionCriteriaRuleCondition
+                                  defines nested fields for Fleet.ResourceSelection.RuleSelectionCriteria.Rule.Condition.
+                                properties:
+                                  attrGroup:
+                                    description: |-
+                                      Attribute Group. Provide a Tag namespace if the rule is based on a tag.
+                                      Provide resource type if the rule is based on a resource property.
+                                    type: string
+                                  attrKey:
+                                    description: |-
+                                      Attribute Key.Provide Tag key if the rule is based on a tag.
+                                      Provide resource property name if the rule is based on a resource property.
+                                    type: string
+                                  attrValue:
+                                    description: |-
+                                      Attribute Value.Provide Tag value if the rule is based on a tag.
+                                      Provide resource property value if the rule is based on a resource property.
+                                    type: string
+                                required:
+                                - attrGroup
+                                - attrKey
+                                - attrValue
+                                type: object
+                              type: array
+                            matchCondition:
+                              description: |-
+                                Match condition for the rule selection.
+                                Include resources that match all rules or any of the rules.
+                                Default value for `matchCondition` is ANY
+                              type: string
+                            resourceCompartmentId:
+                              description: |-
+                                The Compartment ID to dynamically search resources.
+                                Provide the compartment ID to which the rule is applicable.
+                              type: string
+                          required:
+                          - compartmentId
+                          - conditions
+                          - resourceCompartmentId
+                          type: object
+                        type: array
+                    required:
+                    - matchCondition
+                    - rules
+                    type: object
+                type: object
+              resources:
+                description: Resources associated with the Fleet if resourceSelectionType
+                  is MANUAL.
+                items:
+                  description: FleetResourceFields defines nested fields for Fleet.Resource.
+                  properties:
+                    compartmentId:
+                      description: Compartment Identifier[OCID].
+                      type: string
+                    fleetResourceType:
+                      description: Type of the FleetResource.
+                      type: string
+                    resourceId:
+                      description: OCID of the resource.
+                      type: string
+                    tenancyId:
+                      description: Tenancy Identifier[OCID].
+                      type: string
+                  required:
+                  - compartmentId
+                  - resourceId
+                  - tenancyId
+                  type: object
+                type: array
+            required:
+            - compartmentId
+            - displayName
+            - resourceSelection
+            type: object
+          status:
+            description: FleetStatus defines the observed state of Fleet.
+            properties:
+              compartmentId:
+                description: Compartment OCID
+                type: string
+              credentials:
+                description: Credentials associated with the Fleet.
+                items:
+                  description: FleetCredentialObservedState defines nested fields
+                    for Fleet.Credential.
+                  properties:
+                    compartmentId:
+                      description: Compartment OCID
+                      type: string
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                        Example: `My new resource`
+                      type: string
+                    entitySpecifics:
+                      description: FleetCredentialEntitySpecifics defines nested fields
+                        for Fleet.Credential.EntitySpecifics.
+                      properties:
+                        credentialLevel:
+                          type: string
+                        jsonData:
+                          type: string
+                        resourceId:
+                          description: OCID of the resource associated with the target
+                            for which the credential is created.
+                          type: string
+                        target:
+                          description: Target name for which the credential is provided.
+                          type: string
+                        variables:
+                          description: List of fleet credential variables.
+                          items:
+                            description: FleetCredentialEntitySpecificsVariable defines
+                              nested fields for Fleet.Credential.EntitySpecifics.Variable.
+                            properties:
+                              name:
+                                description: Name of the variable.
+                                type: string
+                              value:
+                                description: The value corresponding to the variable
+                                  name.
+                                type: string
+                            type: object
+                          type: array
+                      type: object
+                    user:
+                      description: FleetCredentialUser defines nested fields for Fleet.Credential.User.
+                      properties:
+                        credentialType:
+                          type: string
+                        jsonData:
+                          type: string
+                        keyId:
+                          description: OCID for the Vault Key that will be used to
+                            encrypt/decrypt the value given.
+                          type: string
+                        keyVersion:
+                          description: The Vault Key version.
+                          type: string
+                        secretId:
+                          description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                            of the secret.
+                          type: string
+                        secretVersion:
+                          description: The secret version.
+                          type: string
+                        value:
+                          description: The value corresponding to the credential.
+                          type: string
+                        vaultId:
+                          description: OCID for the Vault that will be used to fetch
+                            the key to encrypt/decrypt the value given.
+                          type: string
+                      type: object
+                  type: object
+                type: array
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A user-friendly description. To provide some insight about the resource.
+                  Avoid entering confidential information.
+                type: string
+              details:
+                description: FleetDetails defines nested fields for Fleet.Details.
+                properties:
+                  fleetType:
+                    type: string
+                  jsonData:
+                    type: string
+                type: object
+              displayName:
+                description: |-
+                  A user-friendly name. Does not have to be unique, and it's changeable.
+                  Avoid entering confidential information.
+                  Example: `My new resource`
+                type: string
+              environmentType:
+                description: |-
+                  Environment Type associated with the Fleet.
+                  Applicable for ENVIRONMENT fleet types.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: The OCID of the resource.
+                type: string
+              isTargetAutoConfirm:
+                description: |-
+                  A value that represents if auto-confirming of the targets can be enabled.
+                  This will allow targets to be auto-confirmed in the fleet without manual intervention.
+                type: boolean
+              lifecycleDetails:
+                description: A message describing the current state in more detail.
+                  For example, can be used to provide actionable information for a
+                  resource in Failed state.
+                type: string
+              lifecycleState:
+                description: The lifecycle state of the Fleet.
+                type: string
+              notificationPreferences:
+                description: Notification Preferences associated with the Fleet.
+                items:
+                  description: FleetNotificationPreference defines nested fields for
+                    Fleet.NotificationPreference.
+                  properties:
+                    compartmentId:
+                      description: Compartment ID the topic belongs to.
+                      type: string
+                    preferences:
+                      description: FleetNotificationPreferencePreferences defines
+                        nested fields for Fleet.NotificationPreference.Preferences.
+                      properties:
+                        onJobCanceled:
+                          description: Enables or disables notification on job canceled.
+                          type: boolean
+                        onJobFailure:
+                          description: Enables or disables notification on Job Failures.
+                          type: boolean
+                        onJobScheduleChange:
+                          description: Enables or disables notification on job schedule
+                            change.
+                          type: boolean
+                        onJobStart:
+                          description: Enables or disables notification on job start.
+                          type: boolean
+                        onJobSuccess:
+                          description: Enables or disables notification on job success.
+                          type: boolean
+                        onResourceNonCompliance:
+                          description: Enables or disables notification when fleet
+                            resource becomes non compliant.
+                          type: boolean
+                        onRunbookNewerVersion:
+                          description: Enables or disables notification when a newer
+                            version of runbook associated with a fleet is available
+                          type: boolean
+                        onTaskFailure:
+                          description: Enables or disables notification on task failure.
+                          type: boolean
+                        onTaskPause:
+                          description: Enables or disables notification when a task
+                            is paused.
+                          type: boolean
+                        onTaskSuccess:
+                          description: Enables or disables notification on task success.
+                          type: boolean
+                        onTopologyModification:
+                          description: Enables or disables notification on Environment
+                            Fleet Topology Modification.
+                          type: boolean
+                        upcomingSchedule:
+                          description: FleetNotificationPreferencePreferencesUpcomingSchedule
+                            defines nested fields for Fleet.NotificationPreference.Preferences.UpcomingSchedule.
+                          properties:
+                            notifyBefore:
+                              description: Specify when the notification should be
+                                sent.
+                              type: string
+                            onUpcomingSchedule:
+                              description: Enables notification on upcoming schedule.
+                              type: boolean
+                          type: object
+                      type: object
+                    topicId:
+                      description: |-
+                        Topic Id where the notifications will be directed.
+                        A topic is a communication channel for sending messages on chosen events to subscriptions.
+                      type: string
+                  required:
+                  - compartmentId
+                  - topicId
+                  type: object
+                type: array
+              parentFleetId:
+                description: The OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm)
+                  of the fleet that would be the parent for this fleet.
+                type: string
+              products:
+                description: |-
+                  Products associated with the Fleet.
+                  PlatformConfiguration Ids corresponding to the Products.
+                items:
+                  type: string
+                type: array
+              properties:
+                description: Properties associated with the Fleet.
+                items:
+                  description: FleetPropertyFields defines nested fields for Fleet.Property.
+                  properties:
+                    compartmentId:
+                      description: compartment OCID
+                      type: string
+                    displayName:
+                      description: |-
+                        A user-friendly name. Does not have to be unique, and it's changeable.
+                        Avoid entering confidential information.
+                        Example: `My new resource`
+                      type: string
+                    fleetPropertyType:
+                      description: Type of the FleetProperty.
+                      type: string
+                    isRequired:
+                      description: Property is required or not.
+                      type: boolean
+                    value:
+                      description: Value of the Property.
+                      type: string
+                  required:
+                  - compartmentId
+                  - fleetPropertyType
+                  type: object
+                type: array
+              resourceRegion:
+                description: Associated region
+                type: string
+              resourceSelection:
+                description: FleetResourceSelection defines nested fields for Fleet.ResourceSelection.
+                properties:
+                  jsonData:
+                    type: string
+                  resourceSelectionType:
+                    type: string
+                  ruleSelectionCriteria:
+                    description: FleetResourceSelectionRuleSelectionCriteria defines
+                      nested fields for Fleet.ResourceSelection.RuleSelectionCriteria.
+                    properties:
+                      matchCondition:
+                        description: |-
+                          Match condition for the rule selection.
+                          Include resources that match all rules or any of the rules.
+                        type: string
+                      rules:
+                        description: Rules.
+                        items:
+                          description: FleetResourceSelectionRuleSelectionCriteriaRule
+                            defines nested fields for Fleet.ResourceSelection.RuleSelectionCriteria.Rule.
+                          properties:
+                            basis:
+                              description: |-
+                                Based on what the rule is created.
+                                It can be based on a resourceProperty or a tag.
+                                If based on a tag, basis will be 'definedTagEquals'
+                                If based on a resource property, basis will be 'inventoryProperties'
+                              type: string
+                            compartmentId:
+                              description: Compartment Id for which the rule is created.
+                              type: string
+                            compartmentIdInSubtree:
+                              description: |-
+                                If set to true, resources will be returned for not only the provided compartment, but all compartments which
+                                descend from it. Which resources are returned and their field contents depends on the value of accessLevel.
+                                Default value for `compartmentIdInSubtree` is false
+                              type: boolean
+                            conditions:
+                              description: Rule Conditions
+                              items:
+                                description: FleetResourceSelectionRuleSelectionCriteriaRuleCondition
+                                  defines nested fields for Fleet.ResourceSelection.RuleSelectionCriteria.Rule.Condition.
+                                properties:
+                                  attrGroup:
+                                    description: |-
+                                      Attribute Group. Provide a Tag namespace if the rule is based on a tag.
+                                      Provide resource type if the rule is based on a resource property.
+                                    type: string
+                                  attrKey:
+                                    description: |-
+                                      Attribute Key.Provide Tag key if the rule is based on a tag.
+                                      Provide resource property name if the rule is based on a resource property.
+                                    type: string
+                                  attrValue:
+                                    description: |-
+                                      Attribute Value.Provide Tag value if the rule is based on a tag.
+                                      Provide resource property value if the rule is based on a resource property.
+                                    type: string
+                                required:
+                                - attrGroup
+                                - attrKey
+                                - attrValue
+                                type: object
+                              type: array
+                            matchCondition:
+                              description: |-
+                                Match condition for the rule selection.
+                                Include resources that match all rules or any of the rules.
+                                Default value for `matchCondition` is ANY
+                              type: string
+                            resourceCompartmentId:
+                              description: |-
+                                The Compartment ID to dynamically search resources.
+                                Provide the compartment ID to which the rule is applicable.
+                              type: string
+                          required:
+                          - compartmentId
+                          - conditions
+                          - resourceCompartmentId
+                          type: object
+                        type: array
+                    required:
+                    - matchCondition
+                    - rules
+                    type: object
+                type: object
+              resources:
+                description: Resources associated with the Fleet if resourceSelectionType
+                  is MANUAL.
+                items:
+                  description: FleetResourceFields defines nested fields for Fleet.Resource.
+                  properties:
+                    compartmentId:
+                      description: Compartment Identifier[OCID].
+                      type: string
+                    fleetResourceType:
+                      description: Type of the FleetResource.
+                      type: string
+                    resourceId:
+                      description: OCID of the resource.
+                      type: string
+                    tenancyId:
+                      description: Tenancy Identifier[OCID].
+                      type: string
+                  required:
+                  - compartmentId
+                  - resourceId
+                  - tenancyId
+                  type: object
+                type: array
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: The time this resource was created. An RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: The time this resource was last updated. An RFC3339 formatted
+                  datetime string.
+                type: string
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

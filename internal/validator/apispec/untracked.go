@@ -5,7 +5,15 @@ import "strings"
 const intentionalUntrackedPrefix = "Intentionally untracked: "
 
 var reviewedUntrackedReasons = map[string]string{
-	"ManagementagentDataSource": intentionalUntrackedPrefix + "DataSource uses polymorphic create, update, and response body payloads; generated runtime still exposes the concrete CRD fields, but APISpec coverage needs resource-local review before mapping one concrete SDK shape.",
+	"DataintegrationApplicationDetailedDescription":    intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
+	"DataintegrationConnection":                        intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
+	"DataintegrationDataAsset":                         intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
+	"DataintegrationDisApplicationDetailedDescription": intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
+	"DataintegrationTask":                              intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
+	"FleetsoftwareupdateFsuAction":                     intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
+	"ManagementagentDataSource":                        intentionalUntrackedPrefix + "DataSource uses polymorphic create, update, and response body payloads; generated runtime still exposes the concrete CRD fields, but APISpec coverage needs resource-local review before mapping one concrete SDK shape.",
+	"NetworkfirewallApplication":                       intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
+	"NetworkfirewallTunnelInspectionRule":              intentionalUntrackedPrefix + "selected generated staging kind has no reusable desired-state SDK payload in the current SDK discovery; runtime implementation needs resource-local API coverage review.",
 }
 
 func reviewedUntrackedReason(targetName string) string {

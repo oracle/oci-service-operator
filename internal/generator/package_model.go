@@ -457,12 +457,59 @@ func applyResourceGenerationOverrides(service ServiceConfig, version string, res
 		if ok {
 			resource.SpecFields = mergeFieldOverrides(resource.SpecFields, override.SpecFields)
 			resource.StatusFields = mergeFieldOverrides(resource.StatusFields, override.StatusFields)
+			if len(override.SpecFields) > 0 || len(override.StatusFields) > 0 {
+				resource.HelperTypes = reachableHelperTypes(resource)
+			}
 			resource.Sample = mergeSampleOverride(service, version, resource.FileStem, resource.Sample, override.Sample)
 		}
 		updated = append(updated, resource)
 	}
 	return updated
 }
+
+func reachableHelperTypes(resource ResourceModel) []TypeModel {
+	if len(resource.HelperTypes) == 0 {
+		return nil
+	}
+
+	helperIndex := make(map[string]TypeModel, len(resource.HelperTypes))
+	for _, helperType := range resource.HelperTypes {
+		helperIndex[helperType.Name] = helperType
+	}
+
+	reachable := make(map[string]struct{}, len(resource.HelperTypes))
+	var markFields func([]FieldModel)
+	var markType func(string)
+	markType = func(typeExpr string) {
+		typeName := underlyingTypeName(typeExpr)
+		helperType, ok := helperIndex[typeName]
+		if !ok {
+			return
+		}
+		if _, seen := reachable[typeName]; seen {
+			return
+		}
+		reachable[typeName] = struct{}{}
+		markFields(helperType.Fields)
+	}
+	markFields = func(fields []FieldModel) {
+		for _, field := range fields {
+			markType(field.Type)
+		}
+	}
+
+	markFields(resource.SpecFields)
+	markFields(resource.StatusFields)
+
+	pruned := make([]TypeModel, 0, len(reachable))
+	for _, helperType := range resource.HelperTypes {
+		if _, ok := reachable[helperType.Name]; ok {
+			pruned = append(pruned, helperType)
+		}
+	}
+	return pruned
+}
+
 func resourceUsesCredentialClient(resource ResourceModel) bool {
 	helperIndex := make(map[string]TypeModel, len(resource.HelperTypes))
 	for _, helper := range resource.HelperTypes {

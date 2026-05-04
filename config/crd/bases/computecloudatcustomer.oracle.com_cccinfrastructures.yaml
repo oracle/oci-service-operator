@@ -1,0 +1,509 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: cccinfrastructures.computecloudatcustomer.oracle.com
+spec:
+  group: computecloudatcustomer.oracle.com
+  names:
+    kind: CccInfrastructure
+    listKind: CccInfrastructureList
+    plural: cccinfrastructures
+    singular: cccinfrastructure
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.displayName
+      name: DisplayName
+      priority: 1
+      type: string
+    - description: status of the CccInfrastructure
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the CccInfrastructure
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CccInfrastructure is the Schema for the cccinfrastructures API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CccInfrastructureSpec defines the desired state of CccInfrastructure.
+            properties:
+              cccUpgradeScheduleId:
+                description: |-
+                  Schedule used for upgrades. If no schedule is associated with the infrastructure,
+                  it can be upgraded at any time.
+                type: string
+              compartmentId:
+                description: |-
+                  The compartment OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) associated with
+                  the infrastructure.
+                type: string
+              connectionDetails:
+                description: A message describing the current connection state in
+                  more detail.
+                type: string
+              connectionState:
+                description: |-
+                  The current connection state of the Compute Cloud@Customer infrastructure. This value
+                  will default to REJECT if the value is not provided. The only valid value at creation
+                  time is REJECT.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A mutable client-meaningful text description of the Compute Cloud@Customer infrastructure.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  The name that will be used to display the Compute Cloud@Customer infrastructure
+                  in the Oracle Cloud Infrastructure console. Does not have to be unique and can be changed.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              subnetId:
+                description: Identifier for network subnet that will be used to communicate
+                  with Compute Cloud@Customer infrastructure.
+                type: string
+            required:
+            - compartmentId
+            - displayName
+            - subnetId
+            type: object
+          status:
+            description: CccInfrastructureStatus defines the observed state of CccInfrastructure.
+            properties:
+              cccUpgradeScheduleId:
+                description: |-
+                  Schedule used for upgrades. If no schedule is associated with the infrastructure,
+                  it can be updated at any time.
+                type: string
+              compartmentId:
+                description: The infrastructure compartment OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                type: string
+              connectionDetails:
+                description: A message describing the current connection state in
+                  more detail.
+                type: string
+              connectionState:
+                description: |-
+                  The current connection state of the infrastructure. A user can only update
+                  it from REQUEST to READY or from any state back to REJECT. The system automatically
+                  handles the REJECT to REQUEST, READY to CONNECTED, or CONNECTED to DISCONNECTED transitions.
+                type: string
+              definedTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  Defined tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"foo-namespace": {"bar-key": "value"}}`
+                type: object
+              description:
+                description: |-
+                  A mutable client-meaningful text description of the Compute Cloud@Customer infrastructure.
+                  Avoid entering confidential information.
+                type: string
+              displayName:
+                description: |-
+                  The name that will be used to display the Compute Cloud@Customer infrastructure
+                  in the Oracle Cloud Infrastructure console. Does not have to be unique and can be changed.
+                  Avoid entering confidential information.
+                type: string
+              freeformTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+                  Example: `{"bar-key": "value"}`
+                type: object
+              id:
+                description: |-
+                  The Compute Cloud@Customer infrastructure OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm).
+                  This cannot be changed once created.
+                type: string
+              infrastructureInventory:
+                description: CccInfrastructureInfrastructureInventory defines nested
+                  fields for CccInfrastructure.InfrastructureInventory.
+                properties:
+                  capacityStorageTrayCount:
+                    description: The number of storage trays in the Compute Cloud@Customer
+                      infrastructure rack that are designated for capacity storage.
+                    type: integer
+                  computeNodeCount:
+                    description: |-
+                      The number of compute nodes that are available and usable
+                      on the Compute Cloud@Customer infrastructure rack. There is no distinction
+                      of compute node type in this information.
+                    type: integer
+                  managementNodeCount:
+                    description: |-
+                      The number of management nodes that are available and in active use
+                      on the Compute Cloud@Customer infrastructure rack.
+                    type: integer
+                  performanceStorageTrayCount:
+                    description: The number of storage trays in the Compute Cloud@Customer
+                      infrastructure rack that are designated for performance storage.
+                    type: integer
+                  serialNumber:
+                    description: The serial number of the Compute Cloud@Customer infrastructure
+                      rack.
+                    type: string
+                type: object
+              infrastructureNetworkConfiguration:
+                description: CccInfrastructureInfrastructureNetworkConfiguration defines
+                  nested fields for CccInfrastructure.InfrastructureNetworkConfiguration.
+                properties:
+                  dnsIps:
+                    description: |-
+                      The domain name system (DNS) addresses that the Compute Cloud@Customer infrastructure
+                      uses for the data center network.
+                    items:
+                      type: string
+                    type: array
+                  infrastructureRoutingDynamic:
+                    description: CccInfrastructureInfrastructureNetworkConfigurationInfrastructureRoutingDynamic
+                      defines nested fields for CccInfrastructure.InfrastructureNetworkConfiguration.InfrastructureRoutingDynamic.
+                    properties:
+                      bgpTopology:
+                        description: The topology in use for the Border Gateway Protocol
+                          (BGP) configuration.
+                        type: string
+                      oracleAsn:
+                        description: |-
+                          The Oracle Autonomous System Number (ASN) to control routing and exchange information
+                          within the dynamic routing configuration.
+                        type: integer
+                      peerInformation:
+                        description: The list of peer devices in the dynamic routing
+                          configuration.
+                        items:
+                          description: CccInfrastructureInfrastructureNetworkConfigurationInfrastructureRoutingDynamicPeerInformation
+                            defines nested fields for CccInfrastructure.InfrastructureNetworkConfiguration.InfrastructureRoutingDynamic.PeerInformation.
+                          properties:
+                            asn:
+                              description: The Autonomous System Number (ASN) of the
+                                peer network.
+                              type: integer
+                            ip:
+                              description: |-
+                                Neighbor Border Gateway Protocal (BGP) IP address.
+                                The IP address usually refers to the customer data center router.
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  infrastructureRoutingStatic:
+                    description: CccInfrastructureInfrastructureNetworkConfigurationInfrastructureRoutingStatic
+                      defines nested fields for CccInfrastructure.InfrastructureNetworkConfiguration.InfrastructureRoutingStatic.
+                    properties:
+                      uplinkHsrpGroup:
+                        description: |-
+                          The uplink Hot Standby Router Protocol (HSRP) group value for the switch in the
+                          Compute Cloud@Customer infrastructure.
+                        type: integer
+                      uplinkVlan:
+                        description: |-
+                          The virtual local area network (VLAN) identifier used to connect to the uplink
+                          (only access mode is supported).
+                        type: integer
+                    type: object
+                  managementNodes:
+                    description: |-
+                      Information about the management nodes that are provisioned in the Compute Cloud@Customer
+                      infrastructure.
+                    items:
+                      description: CccInfrastructureInfrastructureNetworkConfigurationManagementNode
+                        defines nested fields for CccInfrastructure.InfrastructureNetworkConfiguration.ManagementNode.
+                      properties:
+                        hostname:
+                          description: Hostname for interface to the management node.
+                          type: string
+                        ip:
+                          description: Address of the management node.
+                          type: string
+                      type: object
+                    type: array
+                  mgmtVipHostname:
+                    description: The hostname corresponding to the virtual IP (VIP)
+                      address of the management nodes.
+                    type: string
+                  mgmtVipIp:
+                    description: The IP address used as the virtual IP (VIP) address
+                      of the management nodes.
+                    type: string
+                  spineIps:
+                    description: Addresses of the network spine switches.
+                    items:
+                      type: string
+                    type: array
+                  spineVip:
+                    description: |-
+                      The spine switch public virtual IP (VIP). Traffic routed to the
+                      Compute Cloud@Customer infrastructure and
+                      and virtual cloud networks (VCNs) should have this address as next hop.
+                    type: string
+                  uplinkDomain:
+                    description: |-
+                      Domain name to be used as the base domain for the internal network and by
+                      public facing services.
+                    type: string
+                  uplinkGatewayIp:
+                    description: |-
+                      Uplink gateway in the datacenter network that the Compute Cloud@Customer
+                      connects to.
+                    type: string
+                  uplinkNetmask:
+                    description: |-
+                      Netmask of the subnet that the Compute Cloud@Customer infrastructure is
+                      connected to.
+                    type: string
+                  uplinkPortCount:
+                    description: |-
+                      Number of uplink ports per spine switch. Connectivity is identical on both spine switches.
+                      For example, if input is two 100 gigabyte ports; then port-1 and port-2 on both spines will be configured.
+                    type: integer
+                  uplinkPortForwardErrorCorrection:
+                    description: |-
+                      The port forward error correction (FEC) setting for the uplink port on the
+                      Compute Cloud@Customer infrastructure.
+                    type: string
+                  uplinkPortSpeedInGbps:
+                    description: |-
+                      Uplink port speed defined in gigabytes per second.
+                      All uplink ports must have identical speed.
+                    type: integer
+                  uplinkVlanMtu:
+                    description: |-
+                      The virtual local area network (VLAN) maximum transmission unit (MTU) size
+                      for the uplink ports.
+                    type: integer
+                type: object
+              lifecycleDetails:
+                description: |-
+                  A message describing the current lifecycle state in more detail.
+                  For example, this can be used to provide actionable information for a resource that is in
+                  a Failed state.
+                type: string
+              lifecycleState:
+                description: The current state of the Compute Cloud@Customer infrastructure.
+                type: string
+              provisioningFingerprint:
+                description: |-
+                  Fingerprint of a Compute Cloud@Customer infrastructure in a data center generated
+                  during the initial connection to this resource. The fingerprint should be verified
+                  by the administrator when changing the connectionState from REQUEST to READY.
+                type: string
+              provisioningPin:
+                description: |-
+                  Code that is required for service personnel to connect a
+                  Compute Cloud@Customer infrastructure in a data center to this resource.
+                  This code will only be available when the connectionState is REJECT (usually
+                  at create time of the Compute Cloud@Customer infrastructure).
+                type: string
+              shortName:
+                description: |-
+                  The Compute Cloud@Customer infrastructure short name.
+                  This cannot be changed once created. The
+                  short name is used to refer to the infrastructure in several contexts and is unique.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              subnetId:
+                description: |-
+                  OCID (https://docs.oracle.com/iaas/Content/General/Concepts/identifiers.htm) for the network subnet that is
+                  used to communicate with Compute Cloud@Customer infrastructure.
+                type: string
+              systemTags:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                description: |-
+                  System tags for this resource. Each key is predefined and scoped to a namespace.
+                  Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+                type: object
+              timeCreated:
+                description: |-
+                  Compute Cloud@Customer infrastructure creation date and time, using an RFC3339 formatted
+                  datetime string.
+                type: string
+              timeUpdated:
+                description: |-
+                  Compute Cloud@Customer infrastructure updated date and time, using an RFC3339 formatted
+                  datetime string.
+                type: string
+              upgradeInformation:
+                description: CccInfrastructureUpgradeInformation defines nested fields
+                  for CccInfrastructure.UpgradeInformation.
+                properties:
+                  currentVersion:
+                    description: The current version of software installed on the
+                      Compute Cloud@Customer infrastructure.
+                    type: string
+                  isActive:
+                    description: |-
+                      Indication that the Compute Cloud@Customer infrastructure is in the process of
+                      an upgrade or an upgrade activity (such as preloading upgrade images).
+                    type: boolean
+                  scheduledUpgradeDuration:
+                    description: |-
+                      Expected duration of Compute Cloud@Customer infrastructure scheduled upgrade. The actual
+                      upgrade time might be longer or shorter than this duration depending on rack activity, this
+                      is only an estimate.
+                    type: string
+                  timeOfScheduledUpgrade:
+                    description: |-
+                      Compute Cloud@Customer infrastructure next upgrade time. The rack might have performance
+                      impacts during this time.
+                    type: string
+                type: object
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

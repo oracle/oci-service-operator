@@ -1,0 +1,323 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: importrequests.dataintegration.oracle.com
+spec:
+  group: dataintegration.oracle.com
+  names:
+    kind: ImportRequest
+    listKind: ImportRequestList
+    plural: importrequests
+    singular: importrequest
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: status of the ImportRequest
+      jsonPath: .status.status.conditions[-1].type
+      name: Status
+      type: string
+    - description: Ocid of the ImportRequest
+      jsonPath: .status.status.ocid
+      name: Ocid
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ImportRequest is the Schema for the importrequests API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ImportRequestSpec defines the desired state of ImportRequest.
+            properties:
+              areDataAssetReferencesIncluded:
+                description: This field controls if the data asset references will
+                  be included during import.
+                type: boolean
+              bucketName:
+                description: Name of the Object Storage bucket where the object will
+                  be imported from.
+                type: string
+              fileName:
+                description: Name of the zip file to be imported.
+                type: string
+              importConflictResolution:
+                description: ImportRequestImportConflictResolution defines nested
+                  fields for ImportRequest.ImportConflictResolution.
+                properties:
+                  duplicatePrefix:
+                    description: In case of DUPLICATE mode, prefix will be used to
+                      disambiguate the object.
+                    type: string
+                  duplicateSuffix:
+                    description: In case of DUPLICATE mode, suffix will be used to
+                      disambiguate the object.
+                    type: string
+                  importConflictResolutionType:
+                    description: Import Objects Conflict resolution Type (RETAIN/DUPLICATE/REPLACE).
+                    type: string
+                required:
+                - importConflictResolutionType
+                type: object
+              objectKeyForImport:
+                description: Key of the object inside which all the objects will be
+                  imported
+                type: string
+              objectStorageRegion:
+                description: Region of the object storage (if using object storage
+                  of different region)
+                type: string
+              objectStorageTenancyId:
+                description: Optional parameter to point to object storage tenancy
+                  (if using Object Storage of different tenancy)
+                type: string
+              status:
+                description: The status of the object.
+                type: string
+            required:
+            - bucketName
+            - fileName
+            type: object
+          status:
+            description: ImportRequestStatus defines the observed state of ImportRequest.
+            properties:
+              areDataAssetReferencesIncluded:
+                description: This field controls if the data asset references will
+                  be included during import.
+                type: boolean
+              bucketName:
+                description: The name of the Object Storage Bucket where the objects
+                  will be imported from
+                type: string
+              createdBy:
+                description: Name of the user who initiated import request.
+                type: string
+              errorMessages:
+                additionalProperties:
+                  type: string
+                description: Contains key of the error
+                type: object
+              fileName:
+                description: Name of the zip file from which objects will be imported.
+                type: string
+              importConflictResolution:
+                description: ImportRequestImportConflictResolution defines nested
+                  fields for ImportRequest.ImportConflictResolution.
+                properties:
+                  duplicatePrefix:
+                    description: In case of DUPLICATE mode, prefix will be used to
+                      disambiguate the object.
+                    type: string
+                  duplicateSuffix:
+                    description: In case of DUPLICATE mode, suffix will be used to
+                      disambiguate the object.
+                    type: string
+                  importConflictResolutionType:
+                    description: Import Objects Conflict resolution Type (RETAIN/DUPLICATE/REPLACE).
+                    type: string
+                required:
+                - importConflictResolutionType
+                type: object
+              importedObjects:
+                description: The array of imported object details.
+                items:
+                  description: ImportRequestImportedObject defines nested fields for
+                    ImportRequest.ImportedObject.
+                  properties:
+                    aggregatorKey:
+                      description: Aggregator key
+                      type: string
+                    identifier:
+                      description: Object identifier
+                      type: string
+                    name:
+                      description: Name of the object
+                      type: string
+                    namePath:
+                      description: Object name path
+                      type: string
+                    newKey:
+                      description: New key of the object
+                      type: string
+                    objectType:
+                      description: Object type
+                      type: string
+                    objectVersion:
+                      description: Object version
+                      type: string
+                    oldKey:
+                      description: Old key of the object
+                      type: string
+                    resolutionAction:
+                      description: Object resolution action
+                      type: string
+                    timeUpdatedInMillis:
+                      description: time at which this object was last updated.
+                      format: int64
+                      type: integer
+                  type: object
+                type: array
+              key:
+                description: Import object request key
+                type: string
+              name:
+                description: Name of the import request.
+                type: string
+              objectKeyForImport:
+                description: Key of the object inside which all the objects will be
+                  imported
+                type: string
+              objectStorageRegion:
+                description: Region of the object storage (if using object storage
+                  of different region)
+                type: string
+              objectStorageTenancyId:
+                description: Optional parameter to point to object storage tenancy
+                  (if using Object Storage of different tenancy)
+                type: string
+              sdkStatus:
+                description: |-
+                  Import Objects request status.
+                  This uses a distinct JSON name so it can coexist with the OSOK status envelope.
+                type: string
+              status:
+                properties:
+                  async:
+                    description: |-
+                      Async is the canonical controller-owned async contract. Resource-local
+                      legacy work-request fields may remain as compatibility mirrors while
+                      follow-on migrations land, but new async state should project here first.
+                    properties:
+                      current:
+                        properties:
+                          message:
+                            type: string
+                          normalizedClass:
+                            enum:
+                            - pending
+                            - succeeded
+                            - failed
+                            - canceled
+                            - attention
+                            - unknown
+                            type: string
+                          percentComplete:
+                            maximum: 100
+                            minimum: 0
+                            type: number
+                          phase:
+                            enum:
+                            - create
+                            - update
+                            - delete
+                            type: string
+                          rawOperationType:
+                            type: string
+                          rawStatus:
+                            type: string
+                          source:
+                            enum:
+                            - none
+                            - lifecycle
+                            - workrequest
+                            type: string
+                          updatedAt:
+                            format: date-time
+                            type: string
+                          workRequestId:
+                            type: string
+                        required:
+                        - normalizedClass
+                        - phase
+                        - source
+                        - updatedAt
+                        type: object
+                    type: object
+                  conditions:
+                    items:
+                      properties:
+                        lastTransitionTime:
+                          format: date-time
+                          type: string
+                        message:
+                          type: string
+                        reason:
+                          type: string
+                        status:
+                          type: string
+                        type:
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  createdAt:
+                    format: date-time
+                    type: string
+                  deletedAt:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  ocid:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  opcRequestId:
+                    description: |-
+                      OpcRequestID is the latest non-empty OCI request ID from a mutating OCI
+                      response or surfaced OCI service error that materially contributed to the
+                      current shared status projection. Headerless follow-up observations keep
+                      the last non-empty value intact.
+                    type: string
+                  reason:
+                    type: string
+                  requestedAt:
+                    format: date-time
+                    type: string
+                  updatedAt:
+                    format: date-time
+                    type: string
+                type: object
+              timeEndedInMillis:
+                description: Time at which the request was completely processed.
+                format: int64
+                type: integer
+              timeStartedInMillis:
+                description: Time at which the request started getting processed.
+                format: int64
+                type: integer
+              totalImportedObjectCount:
+                description: Number of objects that are imported.
+                type: integer
+            required:
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

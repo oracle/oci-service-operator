@@ -1,0 +1,39 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - aidataplatform.oracle.com
+  resources:
+  - aidataplatforms
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - aidataplatform.oracle.com
+  resources:
+  - aidataplatforms/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - aidataplatform.oracle.com
+  resources:
+  - aidataplatforms/status
+  verbs:
+  - get
+  - patch
+  - update
